@@ -121,3 +121,55 @@ fun randomShuffle(samples : DoubleArray): DoubleArray {
     permutedIndex.shuffle(Random)
     return DoubleArray(n) { samples[permutedIndex[it]] }
 }
+
+interface SampleFn {
+    fun sample(): Double
+    fun reset()
+    fun sampleMean(): Double
+    fun N(): Int
+}
+
+class SampleFromArrayWithoutReplacement(val samples : DoubleArray): SampleFn {
+    val selectedIndices = mutableSetOf<Int>()
+    val N = samples.size
+
+    override fun sample(): Double {
+        while (true) {
+            val idx = Random.nextInt(N) // withoutReplacement
+            if (!selectedIndices.contains(idx)) {
+                selectedIndices.add(idx)
+                return samples[idx]
+            }
+            require(selectedIndices.size < samples.size)
+        }
+    }
+    override fun reset() {
+        selectedIndices.clear()
+    }
+
+    override fun sampleMean() = samples.average()
+    override fun N() = N
+}
+
+class Welford() {
+    var count = 0
+    var mean = 0.0 // mean accumulates the mean of the entire dataset
+    var M2 = 0.0 // M2 aggregates the squared distance from the mean
+
+    // For a new value new_value, compute the new count, new mean, the new M2.
+    fun update(new_value: Double) {
+        count++
+        val delta = new_value - mean
+        mean += delta / count
+        val delta2 = new_value - mean
+        M2 += delta * delta2
+    }
+
+    // Retrieve the mean, variance and sample variance from an aggregate
+    fun result() : Triple<Double, Double, Double> {
+        if (count < 2) return Triple(mean, Double.NaN, Double.NaN)
+        val variance = M2 / count
+        val sample_variance = M2 / (count - 1)
+        return Triple(mean, variance, sample_variance)
+    }
+}

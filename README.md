@@ -34,13 +34,15 @@ It might be drawn from the population as a whole (unstratified sampling), or the
 It might be drawn using Bernoulli sampling, where each item is included independently, with some common probability.
 Or batches of ballot cards might be sampled instead of individual cards (cluster sampling), with equal or unequal probabilities.
 
-* N 	 	    the number of ballot cards validly cast in the contest
-* risk		We want to confirm or reject the null hypothesis with risk limit α.
-* assorter 	assigns a number between 0 and upper to each ballot, chosen to make assertions "half average".
-* assertion	the mean of assorter values is > 1/2: "half-average assertions"
-* estimator   estimates the true population mean from the sampled assorter values.
-* test        is the statistical method to test if the assertion is true. aka "risk function".
-* audit       iterative process of picking ballots and checking if all the assertions are true.
+|           | definition                                                                                     |
+|-----------|------------------------------------------------------------------------------------------------|
+| N 	     | the number of ballot cards validly cast in the contest                                         |
+| risk	     | we want to confirm or reject the null hypothesis with risk limit α.                            |
+| assorter  | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
+| assertion | the mean of assorter values is > 1/2: "half-average assertions"                                |
+| estimator | estimates the true population mean from the sampled assorter values.                           |
+| test      | is the statistical method to test if the assertion is true. aka "risk function".               |
+| audit     | iterative process of picking ballots and checking if all the assertions are true.              |
 
 ### Comparison audits vs polling audits
 
@@ -53,18 +55,18 @@ The overstatement error for the ith ballot is
     ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper.
       bi is the manual voting record (MVR) for the ith ballot
       ci is the cast-vote record for the ith ballot
-````
 
 Let
-*     Ā = Sum(A(ci))/N be the average CVR assort value
-*     ω̄ = Sum(A(ci) − A(bi))/N be the average overstatement error
-*     τi ≡ 1 − ωi /upper ≥ 0
-*     v ≡ 2Ā − 1, the reported assorter margin, aka the _diluted margin_.
-*     B(bi, c) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper)
+     Ā = Sum(A(ci))/N be the average CVR assort value
+     ω̄ = Sum(A(ci) − A(bi))/N be the average overstatement error
+     τi ≡ 1 − ωi /upper ≥ 0
+     v ≡ 2Ā − 1, the reported assorter margin, aka the _diluted margin_.
+     B(bi, c) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper)
 
 Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
-`    B̄ ≡ Sum(B(bi, c)) / N > 1/2`
+    B̄ ≡ Sum(B(bi, c)) / N > 1/2
 and B is an assorter.
+````
 
 See SHANGRLA Section 3.2. 
 
@@ -83,9 +85,6 @@ For the ith ballot, define A_wk,ℓj(bi) as
     assign the value “0” if it has a mark for ℓj but not for wk;
     assign the value 1/2, otherwise.
  ````
-This is the assorter used if its a polling audit. 
-
-For a comparisian audit, the assorter function is B(bi, c) as defined above.
 
 
 #### PLURALITY
@@ -96,6 +95,8 @@ For a two candidate election, there is only one assertion to test.
 For polling, the assorter function is A_wk,ℓj(MVR) as defined above
 
 For comparision audits, the assorter function is A_wk,ℓj(CVR) − A_wk,ℓj(MVR), as defined above.
+
+For a comparisian audit, the assorter function is B(bi, c) as defined above.
 
 
 #### APPROVAL
@@ -116,6 +117,8 @@ For the ith ballot, define A_wk,ℓj(bi) as
     assign the value 1/2, otherwise.
 ````
 If multiple winners are allowed, each reported winner generates one assertions.
+
+For a comparisian audit, the assorter function is B(bi, c) as defined above.
 
 
 #### IRV

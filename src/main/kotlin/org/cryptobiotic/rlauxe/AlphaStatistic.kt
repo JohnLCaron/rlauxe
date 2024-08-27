@@ -4,8 +4,6 @@ private val showDetail = false
 
 // estimate the population mean for the jth sample from the previous j-1 samples
 interface EstimFn {
-    // return eta estimate
-    // dont pass the empty list, start with j = 2 with prevSamples.size = 1
     fun eta(prevSamples: List<Double>): Double
 }
 

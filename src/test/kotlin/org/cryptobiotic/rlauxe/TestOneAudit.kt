@@ -7,6 +7,7 @@ import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// match output of python OneAudit oa-batch.ipynb
 class TestOneAudit {
 
     // Numerical example
@@ -22,7 +23,7 @@ class TestOneAudit {
     fun TestSyntheticAvB_deterministic() {
         val (resultsInf, resultsD) = testSyntheticAvB(1)
 
-        // expect
+        // expect from python
         // aa=0.5641025641025642 ba=0.05128205128205127 ab=0.9743589743589743 bb=0.46153846153846156 wtf=4500 19999 0.5128435908974937
         //results_inf={'rej_N': np.float64(117.0), 'not_rej_N': np.float64(0.0)}
         //results_d={
@@ -152,8 +153,6 @@ class TestOneAudit {
     }
 
 }
-
-// port code from ONEAudit python repo
 
 interface EstimArrayFn {
     fun eta(prevSamples: DoubleArray): DoubleArray
@@ -486,10 +485,6 @@ fun oneaudit(
     return Pair(resultsInf, resultsD)
 }
 
-////////
-
-
-
 fun B(c: Double, b: Double, v: Double, u: Double = 1.0): Double {
     /*
     overstatement assorter
@@ -506,15 +501,4 @@ fun B(c: Double, b: Double, v: Double, u: Double = 1.0): Double {
     overstatement assorter value
     */
     return (u + b - c) / (2 * u - v)
-}
-
-fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
-    var firstIdx = -1
-    for (idx in 0 until x.size) {
-        if (pred(x[idx])) {
-            firstIdx = idx
-            break
-        }
-    }
-    return firstIdx
 }

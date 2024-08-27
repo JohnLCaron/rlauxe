@@ -3,15 +3,15 @@ package org.cryptobiotic.rlauxe
 import kotlin.random.Random
 import kotlin.test.Test
 
-// Test Alpha running BRAVO. Compare against UnifiedEvaluation (with replacement only)
+// Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
+// A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
 class TestBravo  {
 
     @Test
     fun testBravo() {
         val N = 20_000
         val m = 100
-        val withoutReplacement = true
-        runBravo(N, m, .55, .55, withoutReplacement)
+        runBravo(N, m, .55, .55, withoutReplacement = true)
     }
 
     @Test

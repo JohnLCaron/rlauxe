@@ -1,7 +1,10 @@
 package org.cryptobiotic.rlauxe
 
 import kotlin.math.abs
+import kotlin.math.ln
 import kotlin.random.Random
+
+//// covers for numpy: will be replaced
 
 // def arange(start=None, *args, **kwargs):
 // arange([start,] stop[, step,], dtype=None, *, like=None)
@@ -115,6 +118,19 @@ fun numpy_quantile2(data: IntArray, quantile: Double): Int {
     return sortedData[i]
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
+    var firstIdx = -1
+    for (idx in 0 until x.size) {
+        if (pred(x[idx])) {
+            firstIdx = idx
+            break
+        }
+    }
+    return firstIdx
+}
+
 fun randomShuffle(samples : DoubleArray): DoubleArray {
     val n = samples.size
     val permutedIndex = MutableList(n) { it }
@@ -167,9 +183,41 @@ class Welford() {
 
     // Retrieve the mean, variance and sample variance from an aggregate
     fun result() : Triple<Double, Double, Double> {
-        if (count < 2) return Triple(mean, Double.NaN, Double.NaN)
+        if (count < 2) return Triple(mean, 0.0, 0.0)
         val variance = M2 / count
         val sample_variance = M2 / (count - 1)
         return Triple(mean, variance, sample_variance)
     }
+}
+
+class Bernoulli(p: Double) {
+    val log_q = ln(1.0 - p)
+    val n = 1.0
+
+    fun get(): Double {
+        var x = 0.0
+        var sum = 0.0
+        while (true) {
+            val wtf = ln( Math.random()) / (n - x)
+            sum += wtf
+            if (sum < log_q) {
+                return x
+            }
+            x++
+        }
+    }
+}
+
+
+fun sample(theta: Double): Double {
+    val random = Random.nextDouble(1.0)
+    val vote =  if (random < theta) 1 else 0
+    return assort(vote)
+}
+
+fun assort(vote: Int): Double {
+    val w = if (vote == 1) 1.0 else 0.0
+    val l = if (vote == 0) 1.0 else 0.0
+    val a =  (w - l + 1) * 0.5 // eq 1.
+    return a
 }

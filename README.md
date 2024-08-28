@@ -1,23 +1,12 @@
 # rlauxe
-last update: 11/27/2024
+last update: 11/28/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
 WORK IN PROGRESS
 
-## Papers
-
-    SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA	Stark; 24 Mar 2020
-        https://github.com/pbstark/SHANGRLA
-
-    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots	Stark; Jan 7, 2022
-        https://github.com/pbstark/alpha.
-
-    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit	Stark, P.B., 6 Mar 2023.
-        https://github.com/pbstark/ONEAudit
-
-Contents
+Table of Contents
 <!-- TOC -->
 * [rlauxe](#rlauxe)
   * [Papers](#papers)
@@ -36,50 +25,63 @@ Contents
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
 <!-- TOC -->
 
+## Papers
+
+    SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA	Stark; 24 Mar 2020
+        https://github.com/pbstark/SHANGRLA
+
+    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots	Stark; Jan 7, 2022
+        https://github.com/pbstark/alpha.
+
+    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit	Stark, P.B., 6 Mar 2023.
+        https://github.com/pbstark/ONEAudit
+
+
+
 ## SHANGRLA framework
 
-SHANGRLA checks outcomes by testing half-average assertions, each of which claims that the mean of a finite list of numbers between 0 and upper is greater than 1/2.
-Each list of numbers results from applying an _assorter_ to the ballot cards. The assorter uses the votes and possibly other information 
-(e.g., how the voting system interpreted the ballot) to assign a number between to each ballot.
+SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
+It uses an _assorter_ to assign a number to each ballot, and a _statistical test function_ that allows an audit to statistically
+prove that an election outcome is correct (or not) to within a _risk level_, for example within 95% probability.
 
-SHANGRLA tests the negation of each assertion, the complementary null hypothesis that each assorter mean is not greater than 1/2.
+It checks outcomes by testing _half-average assertions_, each of which claims that the mean of a finite list of numbers 
+between 0 and upper is greater than 1/2. The complementary _null hypothesis_ is that each assorter mean is not greater than 1/2.
 If that hypothesis is rejected for every assertion, the audit concludes that the outcome is correct.
-Otherwise, the audit expands, potentially to a full hand count. If every null is tested at level α, this results in a risk-limiting audit with risk limit α:
-if the outcome is not correct, the chance the audit will stop shy of a full hand count is at most α.
-The test must be valid for the composite hypothesis θ ≤ µ.
+Otherwise, the audit expands, potentially to a full hand count. If every null is tested at risl level α, this results 
+in a risk-limiting audit with risk limit α:
+**_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
-This formulation unifies polling audits and comparison audits, with or without replacement.
-It might be drawn from the population as a whole (unstratified sampling), or the population might be divided into strata, each of which is sampled independently (stratified sampling).
-It might be drawn using Bernoulli sampling, where each item is included independently, with some common probability.
-Or batches of ballot cards might be sampled instead of individual cards (cluster sampling), with equal or unequal probabilities.
+This formulation unifies polling audits and comparison audits, with or without replacement. It allows for the ballots to
+be divided into _strata_, each of which is sampled independently (_stratified sampling_), or to use
+batches of ballot cards instead of individual cards (_cluster sampling_).
 
-|           | definition                                                                                     |
-|-----------|------------------------------------------------------------------------------------------------|
-| N 	     | the number of ballot cards validly cast in the contest                                         |
-| risk	     | we want to confirm or reject the null hypothesis with risk limit α.                            |
+| term      | definition                                                                                    |
+|-----------|-----------------------------------------------------------------------------------------------|
+| N 	       | the number of ballot cards validly cast in the contest                                        |
+| risk	     | we want to confirm or reject the null hypothesis with risk level α.                           |
 | assorter  | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
-| assertion | the mean of assorter values is > 1/2: "half-average assertions"                                |
-| estimator | estimates the true population mean from the sampled assorter values.                           |
-| test      | is the statistical method to test if the assertion is true. aka "risk function".               |
-| audit     | iterative process of picking ballots and checking if all the assertions are true.              |
+| assertion | the mean of assorter values is > 1/2: "half-average assertion"                                |
+| estimator | estimates the true population mean from the sampled assorter values.                          |
+| test      | is the statistical method to test if the assertion is true. aka "risk function".              |
+| audit     | iterative process of picking ballots and checking if all the assertions are true.             |
 
 ### Comparison audits vs polling audits
 
-A polling audit retrieves a physical ballot and the auditors manually agree on what it should be, creating a MVR (manual voting record) for it.
-The assorter assigns an arrort value to it assort: (Cvr) -> Double in [0, upper], which is used in the testing statistic algorithm.
+A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
+The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
 
-For comparision audits, the system has already created a CVR (cast vote record) for each ballot which is compared to the MVR.
+For comparison audits, the system has already created a CVR (cast vote record) for each ballot which is compared to the MVR.
 The overstatement error for the ith ballot is
 ````
     ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper.
       bi is the manual voting record (MVR) for the ith ballot
       ci is the cast-vote record for the ith ballot
-
+      A() is the assorter function
 Let
-     Ā = Sum(A(ci))/N be the average CVR assort value
-     ω̄ = Sum(A(ci) − A(bi))/N be the average overstatement error
-     τi ≡ 1 − ωi /upper ≥ 0
+     Ā ≡ Sum(A(ci))/N be the average CVR assort value
+     ω̄ ≡ Sum(ωi)/N = Sum(A(ci) − A(bi))/N be the average overstatement error
      v ≡ 2Ā − 1, the reported _assorter margin_, aka the _diluted margin_.
+     τi ≡ (1 − ωi /upper) ≥ 0
      B(bi, c) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper)
 
 Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
@@ -89,7 +91,7 @@ and B is an assorter.
 
 See SHANGRLA Section 3.2. 
 
-So polling vs comparision is all in the assorter function. 
+Note that polling vs comparison audits differ only in the assorter function. 
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))

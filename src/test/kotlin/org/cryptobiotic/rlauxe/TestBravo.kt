@@ -3,6 +3,21 @@ package org.cryptobiotic.rlauxe
 import kotlin.random.Random
 import kotlin.test.Test
 
+data class BravoResult(val eta0: Double,
+                       val trueMean: Double,
+                       val sampleCount: Double,
+                       val sampleMean: Double,
+                       val failPct : Double,
+                       val hist: Histogram? = null,
+                       val status: Histogram? = null,
+) {
+    override fun toString() = buildString {
+        appendLine("BravoResult(eta0=$eta0, trueMean=$trueMean, sampleCount=$sampleCount, sampleMean=$sampleMean, failPct=$failPct")
+        if (hist != null) appendLine("  hist=${hist.toStringBinned()}")
+        if (status != null) appendLine("  status=${status.toString(listOf("RejectNull","SampleSum","LimitReached"))}")
+    }
+}
+
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
 // A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
 class TestBravo  {
@@ -148,15 +163,6 @@ class TestBravo  {
 val ff = "%5.2f"
 val df = "%5d"
 
-data class BravoResult(val eta0: Double,
-                       val trueMean: Double,
-                       val sampleCount: Double,
-                       val sampleMean: Double,
-                       val failPct : Double,
-                       val hist: Histogram? = null,
-                       val status: Histogram? = null,
-    )
-
 fun show(title: String, eta0s: List<Double>, trueMeans: List<Double>, results: List<BravoResult>) {
     println(title)
 
@@ -238,29 +244,4 @@ class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
     }
     override fun sampleMean() = samples.average()
     override fun N() = N
-}
-
-class Histogram(val incr: Int) {
-    val hist = mutableMapOf<Int, Int>() // upper bound,count
-
-    fun add(q: Int) {
-        var bin = 0
-        while (q > bin * incr) bin++
-        val currVal = hist.getOrPut(bin) { 0 }
-        hist[bin] = (currVal + 1)
-    }
-
-    override fun toString() = buildString {
-        val shist = hist.toSortedMap()
-        shist.forEach { append("${it.key}:${it.value} ") }
-    }
-
-    fun cumul() = buildString {
-        val smhist = hist.toSortedMap().toMutableMap()
-        var cumul = 0
-        smhist.forEach {
-            cumul += it.value
-            append("${it.key}:${cumul} ")
-        }
-    }
 }

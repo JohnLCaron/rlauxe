@@ -145,6 +145,11 @@ interface SampleFn {
     fun N(): Int
 }
 
+interface SampleCvrFn {
+    fun sample(ass: AssorterFunction): Double
+    fun reset()
+}
+
 class SampleFromArrayWithoutReplacement(val samples : DoubleArray): SampleFn {
     val selectedIndices = mutableSetOf<Int>()
     val N = samples.size
@@ -164,6 +169,30 @@ class SampleFromArrayWithoutReplacement(val samples : DoubleArray): SampleFn {
     }
 
     override fun sampleMean() = samples.average()
+    override fun N() = N
+}
+
+class SampleCvrWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
+    val N = cvrs.size
+    val permutedIndex = MutableList(N) { it }
+    val sampleMean: Double
+    var idx = 0
+    init {
+        reset()
+        sampleMean = cvrs.map { ass.assort(it)}.average()
+    }
+
+    override fun sample(): Double {
+        val curr = cvrs[permutedIndex[idx++]]
+        return ass.assort(curr)
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    override fun sampleMean() = sampleMean
     override fun N() = N
 }
 
@@ -220,4 +249,43 @@ fun assort(vote: Int): Double {
     val l = if (vote == 0) 1.0 else 0.0
     val a =  (w - l + 1) * 0.5 // eq 1.
     return a
+}
+
+
+class Histogram(val incr: Int) {
+    val hist = mutableMapOf<Int, Int>() // upper bound,count
+
+    fun add(q: Int) {
+        var bin = 0
+        while (q > bin * incr) bin++
+        val currVal = hist.getOrPut(bin) { 0 }
+        hist[bin] = (currVal + 1)
+    }
+
+    override fun toString() = buildString {
+        val shist = hist.toSortedMap()
+        shist.forEach { append("${it.key}:${it.value} ") }
+    }
+
+    fun toString(keys:List<String>) = buildString {
+        hist.forEach { append("${keys[it.key]}:${it.value} ") }
+    }
+
+    fun toStringBinned() = buildString {
+        val shist = hist.toSortedMap()
+        shist.forEach {
+            val binNo = it.key
+            val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
+            append("$binDesc:${it.value}; ")
+        }
+    }
+
+    fun cumul() = buildString {
+        val smhist = hist.toSortedMap().toMutableMap()
+        var cumul = 0
+        smhist.forEach {
+            cumul += it.value
+            append("${it.key}:${cumul} ")
+        }
+    }
 }

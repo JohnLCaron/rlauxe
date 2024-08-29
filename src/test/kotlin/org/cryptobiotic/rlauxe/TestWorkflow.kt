@@ -1,15 +1,14 @@
 package org.cryptobiotic.rlauxe
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TestWorkflow {
 
     @Test
-    fun testWorkflow() {
+    fun testPollingWorkflow() {
 
         // simulated CVRs
-        val margin = .005
+        val margin = .05
         val N = 10000
         val cvrs = makeCvrsByMargin(N, margin)
         println("ncvrs = ${cvrs.size} margin=$margin")
@@ -26,53 +25,69 @@ class TestWorkflow {
         println("Contests")
         contests.forEach { println("  ${it}") }
 
-        val audit = Audit(auditType = AuditType.CARD_COMPARISON, contests = contests)
+        val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
 
-        // Create CVRs for phantom cards
-        // skip for now, no phantoms
-
-        // sets margins on the assertions
-        // audit.set_all_margins_from_cvrs(contests, cvrs)
-        // println("minimum assorter margin = ${min_margin}")
-
-        // this has to be run separately for each assorter
+        // this has to be run separately for each assorter, but we want to combine them in practice
         audit.assertions.map { (contest, assertions) ->
             println("Assertions for Contest ${contest.id}")
             assertions.forEach {
                 println("  ${it}")
 
-                val cvrSampler = SampleCvrWithoutReplacement(cvrs, it.assorter)
+                val cvrSampler = PollWithoutReplacement(cvrs, it.assorter)
                 val result = runAlphaGen(
                     drawSample = cvrSampler,
                     maxSamples = N,
                     genRatio = .5 + margin,
                     d = 100,
-                    nrepeat = 1000,
+                    nrepeat = 100,
                 )
                 println("result:  ${result}")
             }
         }
+    }
 
+    @Test
+    fun testComparisonWorkflow() {
 
+        // simulated CVRs
+        val margin = .05
+        val N = 10000
+        val cvrs = makeCvrsByMargin(N, margin)
+        println("ncvrs = ${cvrs.size} margin=$margin")
 
-        /* Set up for sampling
-        val sample_size = audit.find_sample_size(contests, cvrs=cvrs)
-        println("sample_size = ${sample_size}")
-
-        val samples = audit.assign_sample_nums(cvrs, sample_size).toList()
-
-        // Tst 1. suppose there are no errors, so that mvr == cvr
-        // Compute the p values
-        val p_max = Assertion.set_p_values(contests=contests, mvr_sample=samples, cvr_sample=samples)
-        println("p_max = ${p_max}")
-
-        contests.map { contest ->
-            println("Assertions for Contest ${contest.id}")
-            contest.assertions.forEach { println("  ${it}") }
+        // count actual votes
+        val votes: Map<String, Map<String, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
+        votes.forEach { key, cands ->
+            println("contest ${key} ")
+            cands.forEach { println("  ${it} ${it.value.toDouble()/cvrs.size}") }
         }
 
-        assertEquals(29, sample_size)
+        // make contests from cvrs
+        val contests: List<AuditContest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+        println("Contests")
+        contests.forEach { println("  ${it}") }
 
-         */
+        // Create CVRs for phantom cards
+        // skip for now, no phantoms
+
+        val audit = ComparisonAudit(auditType = AuditType.CARD_COMPARISON, contests = contests, cvrs = cvrs)
+
+        // this has to be run separately for each assorter, but we want to combine them in practice
+        audit.assertions.map { (contest, assertions) ->
+            println("Assertions for Contest ${contest.id}")
+            assertions.forEach { it : ComparisonAssertion ->
+                println("  ${it}")
+
+                val cvrSampler = CompareWithoutReplacement(cvrs, it.assorter)
+                val result = runAlphaGen(
+                    drawSample = cvrSampler,
+                    maxSamples = N,
+                    genRatio = .5 + margin,
+                    d = 100,
+                    nrepeat = 100,
+                )
+                println("result:  ${result}")
+            }
+        }
     }
 }

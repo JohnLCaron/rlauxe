@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // match output of python OneAudit oa-batch.ipynb
-class TestOneAudit {
+class TestOnePollingAudit {
 
     // Numerical example
     // Suppose there were 20,000 cards cast in the Alice v. Bob contest.

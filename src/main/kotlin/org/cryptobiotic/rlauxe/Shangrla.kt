@@ -4,53 +4,12 @@ enum class SocialChoiceFunction{ PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 
 enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
 
-// TODO really just for Polling, since compare needs assort(cvr: Cvr, mvr: Cvr)
 interface AssorterFunction {
-    fun assort(cvr: Cvr) : Double
+    fun assort(mvr: Mvr) : Double
 }
 
-data class Assertion(
-    val contest: AuditContest,
-    val winner: String,
-    val loser: String,
-) {
-    val assorter = makeAssorter()
-
-    fun makeAssorter() : AssorterFunction {
-        return when (contest.choiceFunction) {
-            SocialChoiceFunction.SUPERMAJORITY -> SupermajorityAssorter(contest, winner, loser)
-            SocialChoiceFunction.IRV -> throw RuntimeException("IRV Not supported")
-            SocialChoiceFunction.PLURALITY,
-            SocialChoiceFunction.APPROVAL -> PluralityAssorter(contest, winner, loser)
-        }
-    }
-
-    override fun toString() = buildString {
-        appendLine("Assertion")
-        appendLine("   $contest)")
-        appendLine("   assorter=$assorter)")
-    }
-
-}
-
-data class Audit(
-    val auditType: AuditType,
-    val riskLimit: Double = 0.05,
-    val contests: List<AuditContest>,
-) {
-    // TODO put in Contest?
-    val assertions = contests.associate { makeAssertions(it) } // map of AuditContest -> List<Assertion>
-
-    fun makeAssertions(contest: AuditContest): Pair<AuditContest, List<Assertion>> {
-        val assertions = mutableListOf<Assertion>()
-        contest.winners.forEach { winner ->
-            contest.losers.forEach { loser ->
-                assertions.add(Assertion(contest, winner, loser))
-            }
-        }
-        return Pair(contest, assertions)
-    }
-
+interface ComparisonAssorterFunction {
+    fun assort(mvr: Mvr, cvr: Cvr) : Double
 }
 
 data class AuditContest (
@@ -59,8 +18,11 @@ data class AuditContest (
     var candidates: List<String>,
     val ncards: Int,                // maximum number of valid cards
     val winners: List<String>,
-    val minFraction: Double? = null,
+    val minFraction: Double? = null, // supermajority
 ) {
+    init {
+        require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
+    }
     val losers = candidates.filter { !winners.contains(it) }
 
     init {
@@ -69,10 +31,9 @@ data class AuditContest (
     }
 }
 
-data class Cvr(
+open class Mvr(
     val id: String,
     val votes: Map<String, Map<String, Int>>, // contest : candidate : vote
-    val phantom: Boolean = false
 ) {
     fun hasContest(contest_id: String): Boolean = votes[contest_id] != null
 
@@ -89,3 +50,11 @@ data class Cvr(
         return (totalVotes == 1)
     }
 }
+
+class Cvr(
+    id: String,
+    votes: Map<String, Map<String, Int>>, // contest : candidate : vote
+    val phantom: Boolean = false
+): Mvr(id, votes)
+
+

@@ -145,34 +145,29 @@ interface SampleFn {
     fun N(): Int
 }
 
-interface SampleCvrFn {
-    fun sample(ass: AssorterFunction): Double
-    fun reset()
-}
-
-class SampleFromArrayWithoutReplacement(val samples : DoubleArray): SampleFn {
+class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleFn {
     val selectedIndices = mutableSetOf<Int>()
-    val N = samples.size
+    val N = assortValues.size
 
     override fun sample(): Double {
         while (true) {
             val idx = Random.nextInt(N) // withoutReplacement
             if (!selectedIndices.contains(idx)) {
                 selectedIndices.add(idx)
-                return samples[idx]
+                return assortValues[idx]
             }
-            require(selectedIndices.size < samples.size)
+            require(selectedIndices.size < assortValues.size)
         }
     }
     override fun reset() {
         selectedIndices.clear()
     }
 
-    override fun sampleMean() = samples.average()
+    override fun sampleMean() = assortValues.average()
     override fun N() = N
 }
 
-class SampleCvrWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
+class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -196,12 +191,42 @@ class SampleCvrWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunctio
     override fun N() = N
 }
 
-class Welford() {
-    var count = 0
-    var mean = 0.0 // mean accumulates the mean of the entire dataset
-    var M2 = 0.0 // M2 aggregates the squared distance from the mean
+class CompareWithoutReplacement(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
+    val N = cvrs.size
+    val permutedIndex = MutableList(N) { it }
+    val sampleMean: Double
+    var idx = 0
 
-    // For a new value new_value, compute the new count, new mean, the new M2.
+    init {
+        reset()
+        sampleMean = cvrs.map { cass.assort(it, it)}.average() // TODO seems wrong?
+        // sampleMean = cvrs.map { cass.assorter.assort(it, it)}.average() // ??
+    }
+
+    override fun sample(): Double {
+        val curr = cvrs[permutedIndex[idx++]]
+        return cass.assort(curr, curr) // TODO currently identical
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    override fun sampleMean() = sampleMean
+    override fun N() = N
+}
+
+/**
+ * Welford's algorithm for running mean and variance.
+ * see https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
+ */
+class Welford(
+    var count: Int = 0,      // number of samples
+    var mean: Double = 0.0,  // mean accumulates the mean of the entire dataset
+    var M2: Double = 0.0,    // M2 aggregates the squared distance from the mean
+) {
+    // Update with new value
     fun update(new_value: Double) {
         count++
         val delta = new_value - mean
@@ -210,7 +235,7 @@ class Welford() {
         M2 += delta * delta2
     }
 
-    // Retrieve the mean, variance and sample variance from an aggregate
+    /** Retrieve the current mean, variance and sample variance */
     fun result() : Triple<Double, Double, Double> {
         if (count < 2) return Triple(mean, 0.0, 0.0)
         val variance = M2 / count
@@ -236,21 +261,6 @@ class Bernoulli(p: Double) {
         }
     }
 }
-
-
-fun sample(theta: Double): Double {
-    val random = Random.nextDouble(1.0)
-    val vote =  if (random < theta) 1 else 0
-    return assort(vote)
-}
-
-fun assort(vote: Int): Double {
-    val w = if (vote == 1) 1.0 else 0.0
-    val l = if (vote == 0) 1.0 else 0.0
-    val a =  (w - l + 1) * 0.5 // eq 1.
-    return a
-}
-
 
 class Histogram(val incr: Int) {
     val hist = mutableMapOf<Int, Int>() // upper bound,count

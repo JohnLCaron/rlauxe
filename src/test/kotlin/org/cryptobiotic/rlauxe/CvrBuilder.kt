@@ -56,7 +56,8 @@ fun cardsPerContest(cvrs: List<Cvr>): Map<String, Int> {
 fun makeContestsFromCvrs(
     votes: Map<String, Map<String, Int>>,  // contestId -> candidate -> votes
     cards: Map<String, Int>, // contestId -> ncards
-): List<AuditContest> {
+    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
+    ): List<AuditContest> {
 
     val contests = mutableListOf<AuditContest>()
 
@@ -66,6 +67,7 @@ fun makeContestsFromCvrs(
         contests.add(
             AuditContest(
                 id = contestId,
+                choiceFunction = choiceFunction,
                 ncards = cards[contestId]!!,
                 candidates = candidateMap.keys.toList(),
                 winners = listOf(winner),

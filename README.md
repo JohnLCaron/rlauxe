@@ -47,7 +47,7 @@ prove that an election outcome is correct (or not) to within a _risk level_, for
 It checks outcomes by testing _half-average assertions_, each of which claims that the mean of a finite list of numbers 
 between 0 and upper is greater than 1/2. The complementary _null hypothesis_ is that each assorter mean is not greater than 1/2.
 If that hypothesis is rejected for every assertion, the audit concludes that the outcome is correct.
-Otherwise, the audit expands, potentially to a full hand count. If every null is tested at risl level α, this results 
+Otherwise, the audit expands, potentially to a full hand count. If every null is tested at risk level α, this results 
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
@@ -73,20 +73,20 @@ The assorter assigns an assort value in [0, upper] to the ballot, which is used 
 For comparison audits, the system has already created a CVR (cast vote record) for each ballot which is compared to the MVR.
 The overstatement error for the ith ballot is
 ````
-    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper.
+    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper                 overstatement error (SHANGRLA eq 2, p 9)
       bi is the manual voting record (MVR) for the ith ballot
       ci is the cast-vote record for the ith ballot
       A() is the assorter function
 Let
-     Ā ≡ Sum(A(ci))/N be the average CVR assort value
+     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
      ω̄ ≡ Sum(ωi)/N = Sum(A(ci) − A(bi))/N be the average overstatement error
-     v ≡ 2Ā − 1, the reported _assorter margin_, aka the _diluted margin_.
+     v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 c ondidate plurality, the _diluted margin_.
      τi ≡ (1 − ωi /upper) ≥ 0
-     B(bi, c) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper)
+     B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper)
 
 Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
-    B̄ ≡ Sum(B(bi, c)) / N > 1/2
-and B is an assorter.
+    B̄ ≡ Sum(B(bi, ci)) / N > 1/2
+and so B is an half-average assorter.
 ````
 
 See SHANGRLA Section 3.2. 
@@ -100,21 +100,21 @@ Note that polling vs comparison audits differ only in the assorter function.
 
 To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
 
-Let NC denote an upper bound on the number of ballot cards that contain the contest. Suppose that n ≤ NC
-CVRs contain the contest and that each of those CVRs is associated with a unique,
+Let NC denote an upper bound on the number of ballot cards that contain the contest. 
+Suppose that n ≤ NC CVRs contain the contest and that each of those CVRs is associated with a unique,
 identifiable physical ballot card that can be retrieved if that CVR is selected for audit.
 
-If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the
-assorter mean for all the CVRs—including the phantoms—treating the phantom CVRs
-as if they contain no valid vote in the contest contest (i.e., the assorter assigns the value
-1/2 to phantom CVRs). Find the corresponding assorter margin (v ≡ 2Ā − 1).
+If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
+including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest contest 
+(i.e., the assorter assigns the value 1/2 to phantom CVRs). 
+Find the corresponding assorter margin (v ≡ 2Ā − 1).
 
 To conduct the audit, sample integers between 1 and NC.
 
 1. If the resulting integer is between 1 and n, retrieve and inspect the ballot card associated with the corresponding CVR.
-    1. If the associated ballot contains the contest, calculate the overstatement error as in equation {eq. 2}.
-    2. If the associated ballot does not contain the contest, calculate the overstatement error using the value the assorter assigned to the CVR,
-       but as if the value the assorter assigns to the physical ballot is zero
+    1. If the associated ballot contains the contest, calculate the overstatement error as in (SHANGRLA eq 2, above).
+    2. If the associated ballot does not contain the contest, calculate the overstatement error using the value the 
+       assorter assigned to the CVR, but as if the value the assorter assigns to the physical ballot is zero
        (that is, the overstatement error is equal to the value the assorter assigned to the CVR).
 2. If the resulting integer is between n + 1 and NC , we have drawn a phantom CVR and a phantom ballot. Calculate the
    overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
@@ -122,15 +122,37 @@ To conduct the audit, sample integers between 1 and NC.
 
 See note in SHANGRLA Section 3.4 on Colorado redacted ballots.
 
-See SHANGRLA section 3.4
+Also theres "use_styles" which gets a tighter bound when you know what ballots have which contests.
 
+    use_style: is the sample drawn only from ballots that should contain the contest?
+
+see overstatement_assorter() in core/Assertion
+
+    assorter that corresponds to normalized overstatement error for an assertion
+
+    If `use_style == true`, then if the CVR contains the contest but the MVR does not,
+    that is considered to be an overstatement, because the ballot is presumed to contain
+    the contest .
+
+    If `use_style == False`, then if the CVR contains the contest but the MVR does not,
+    the MVR is considered to be a non -vote in the contest .
+
+See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies"
+
+    What if the ballot manifest is not accurate?
+    it suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
+    requires only an upper bound on the total number of ballots cast
+    This ensures that the true risk limit remains smaller than the nominal risk limit.
+
+    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
+    designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
 
 ### Assorters and supported SocialChoice Functions
 
 A contest has K ≥ 1 winners and C > K candidates. Let wk be the kth winner, and ℓj be the jth loser.
 For each pair of winner and loser, let H_wk,ℓj be the assertion that wk is really the winner over ℓj.
-There are K(C − K) hypotheses. The contest can be audited to risk limit α by testing all hypotheses at significance level α.
-Each assertion is tested that the mean of the assorter values is > 1/2 (or not).
+There are K(C − K) assertions. The contest can be audited to risk limit α by testing all assertions at significance level α.
+Each assertion is tested that the mean of the assorter values is > 1/2 (or not). 
 
 
 #### PLURALITY
@@ -147,7 +169,7 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
 
 For polling, the assorter function is A_wk,ℓj(MVR).
 
-For a comparisian audit, the assorter function is B(bi, c) as defined above.
+For a comparisian audit, the assorter function is B(bi, ci) as defined above, using this A_wk,ℓj.
 
 
 #### APPROVAL
@@ -169,7 +191,9 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
     assign the value 1/2, otherwise.
 ````
 
-For a comparisian audit, the assorter function is B(bi, c) as defined above.
+For polling, the assorter function is A_wk,ℓj(MVR).
+
+For a comparisian audit, the assorter function is B(bi, ci) as defined above, using this A_wk,ℓj.
 
 
 #### IRV
@@ -189,9 +213,9 @@ and possibly
 
 ## ALPHA testing statistic
 
-ALPHA is a risk-measuring function, that adapts to the drawn sample as it is made.
+ALPHA is a risk-measuring function that adapts to the drawn sample as it is made.
 ALPHA estimates the reported winner’s share of the vote before the jth card is drawn from the j-1 cards already in the sample.
-The estimator can be any measurable function of the first j − 1 draws, for example a simple truncated shrinkage estimate.
+The estimator can be any measurable function of the first j − 1 draws, for example a simple truncated shrinkage estimate, described below.
 ALPHA generalizes BRAVO to situations where the population {xj} is not necessarily binary, but merely nonnegative and bounded.
 ALPHA works for sampling with or without replacement, with or without weights, while BRAVO is specifically for IID sampling with replacement.
 ````
@@ -271,6 +295,26 @@ and 1
 * µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement
 * ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
 Nℓ is the number of votes reported for candidate ℓ: η is not updated as data are collected
+
+### Questions
+
+Is ALPHA dependent on the ordering of the sample? Maybe no, since multiplication is commutative ?? Depends on estimFn?
+    "The draws must be in random order, or the sequence is not a supermartingale under the null"
+
+Is ALPHA dependent on N? Only to test sampleSum > N * t ??
+
+Is sampling without replacement more efficient than with replacement? Should be.
+
+Can we really replicate BRAVO results?
+
+Options
+* ContestType: PLURALITY, APPROVAL, SUPERMAJORITY, IRV
+* AuditType: POLLING, CARD_COMPARISON, ONEAUDIT 
+* SamplingType: withReplacement, withoutReplacement
+*
+* use_styles: do we know what ballots have which contests? Can sample from just those??
+* do we have CVRs for all ballots? with/without phantom ballots
+* use batches (cluster sampling)
 
 
 ## Stratified audits using OneAudit

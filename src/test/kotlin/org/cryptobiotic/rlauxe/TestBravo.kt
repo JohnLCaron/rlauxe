@@ -71,7 +71,7 @@ class TestBravo  {
         //println("runBravo N=$N eta0=$eta0 trueMean=$trueMean repeat=$nrepeat")
         val estimFn = FixedMean(eta0)
 
-        val alpha = AlphaStatistic(estimFn=estimFn, N=N, upperBound=1.0, withoutReplacement=withoutReplacement)
+        val alpha = AlphaAlgorithm(estimFn=estimFn, N=N, upperBound=1.0, withoutReplacement=withoutReplacement)
         val sampler = GenerateAssorterValue(trueMean)
 
         var sampleCountSum = 0
@@ -129,7 +129,7 @@ class TestBravo  {
 
         val eta0 = drawSample.sampleMean()
         val estimFn = FixedMean(eta0)
-        val alpha = AlphaStatistic(
+        val alpha = AlphaAlgorithm(
             estimFn = estimFn,
             N = drawSample.N(),
             upperBound = 1.0,

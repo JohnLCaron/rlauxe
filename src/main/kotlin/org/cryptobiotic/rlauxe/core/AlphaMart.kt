@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
 import kotlin.math.max
 import kotlin.math.min

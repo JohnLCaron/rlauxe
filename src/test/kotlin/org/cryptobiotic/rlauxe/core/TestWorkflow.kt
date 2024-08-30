@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
 import kotlin.test.Test
 
@@ -48,7 +48,6 @@ class TestWorkflow {
 
     @Test
     fun testComparisonWorkflow() {
-
         // simulated CVRs
         val margin = .05
         val N = 10000

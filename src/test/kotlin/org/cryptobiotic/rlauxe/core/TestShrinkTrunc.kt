@@ -1,5 +1,7 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.doubleIsClose
+import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -21,7 +23,7 @@ class TestShrinkTrunc {
         val c = (eta0 - t) / 2
 
         val N = x.size
-        val estimFn = TruncShrinkage(N=N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val assortValues = mutableListOf<Double>()
         val etaValues = mutableListOf<Double>()
         x.forEach {
@@ -46,7 +48,7 @@ class TestShrinkTrunc {
         val c = (eta0 - t) / 2
 
         val N = x.size
-        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val assortValues = mutableListOf<Double>()
         val etaValues = mutableListOf<Double>()
         x.forEach {
@@ -72,7 +74,7 @@ class TestShrinkTrunc {
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
 
         val assortValues = mutableListOf<Double>()
         val etaValues = mutableListOf<Double>()
@@ -106,7 +108,16 @@ class TestShrinkTrunc {
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, withoutReplacement = false, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val estimFn = TruncShrinkage(
+            N = N,
+            withoutReplacement = false,
+            upperBound = u,
+            minsd = minsd,
+            d = d,
+            eta0 = eta0,
+            f = f,
+            c = c
+        )
 
         val assortValues = mutableListOf<Double>()
         val etaValues = mutableListOf<Double>()

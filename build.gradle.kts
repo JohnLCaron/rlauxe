@@ -10,6 +10,12 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.bull.result)
+    implementation(libs.bundles.xmlutil)
+    implementation(libs.ktor.serialization.kotlinx.json.jvm )
+    implementation(libs.kotlinx.cli)
+    implementation(libs.bundles.logging)
+
     testImplementation(kotlin("test"))
 }
 

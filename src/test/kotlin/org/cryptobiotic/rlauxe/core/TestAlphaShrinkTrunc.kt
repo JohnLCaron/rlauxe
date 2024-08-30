@@ -1,11 +1,14 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.SampleFromList
+import org.cryptobiotic.rlauxe.doublePrecision
+import kotlin.collections.get
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-// Compare AlphaAlgorithm with output from SHANGRLA TestNonnegMean
+// Compare AlphaAlgorithm with output from SHANGRLA 6949
 class TestAlphaShrinkTrunc {
 
     //     def test_alpha_mart(self):
@@ -112,8 +115,8 @@ class TestAlphaShrinkTrunc {
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val sampler = SampleFromList(x.toDoubleArray())
 
         val result = alpha.testH0(x.size, false) { sampler.sample() }
@@ -145,8 +148,17 @@ class TestAlphaShrinkTrunc {
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, withoutReplacement = false, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val alpha = AlphaMart(estimFn=estimFn, N=N, withoutReplacement = false, upperBound=u)
+        val estimFn = TruncShrinkage(
+            N = N,
+            withoutReplacement = false,
+            upperBound = u,
+            minsd = minsd,
+            d = d,
+            eta0 = eta0,
+            f = f,
+            c = c
+        )
+        val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
         val sampler = SampleFromList(x.toDoubleArray())
 
         val result = alpha.testH0(x.size, false) { sampler.sample() }
@@ -217,8 +229,8 @@ class TestAlphaShrinkTrunc {
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
         val sampler = SampleFromList(x.toDoubleArray())
         return alpha.testH0(x.size, true) { sampler.sample() }
@@ -234,8 +246,8 @@ class TestAlphaShrinkTrunc {
         val c = max(eps, (eta0 - t) / 2)
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
         val sampler = SampleFromList(x.toDoubleArray())
         return alpha.testH0(x.size, false) { sampler.sample() }

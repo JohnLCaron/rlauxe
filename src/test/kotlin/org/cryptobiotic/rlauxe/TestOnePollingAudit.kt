@@ -224,7 +224,7 @@ class ShrinkTrunc(
     override fun eta(x: DoubleArray): DoubleArray {
 
         //    S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
-        val cum_sum = numpy_cumsum(x)
+        val cum_sum = np_cumsum(x)
         val S = DoubleArray(x.size + 1) { if (it == 0) 0.0 else cum_sum[it - 1] }   // 0, x_1, x_1+x_2, ...,
         // val Sp = DoubleArray(x.size) { S[it] } // same length as the data.
 
@@ -307,7 +307,7 @@ fun alpha_mart(
     x: DoubleArray, N: Int, mu: Double = .5, eta: Double = 1.0, u: Double = 1.0, estim: EstimArrayFn,
     withReplacement: Boolean = false
 ): DoubleArray {
-    val cum_sum = numpy_cumsum(x)
+    val cum_sum = np_cumsum(x)
     val S = DoubleArray(x.size + 1) { if (it == 0) 0.0 else cum_sum[it - 1] }   // 0, x_1, x_1+x_2, ...,
     val Sp = DoubleArray(x.size) { S[it] } // same length as the data. LOOK
 
@@ -337,7 +337,7 @@ fun alpha_mart(
 
     val term = x.mapIndexed { idx, it -> (it * etaj[idx] / M[idx] + (u - it) * (u - etaj[idx]) / (u - M[idx])) / u }
         .toDoubleArray()
-    val cum_prod = numpy_cumprod(term)
+    val cum_prod = np_cumprod(term)
     return cum_prod
 }
 
@@ -389,7 +389,7 @@ fun sprt_mart(
     //        S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
     //        j = np.arange(1,len(x)+1)              # 1, 2, 3, ..., len(x)
     //        m = (N*mu-S)/(N-j+1)
-    val cum_sum = numpy_cumsum(x)
+    val cum_sum = np_cumsum(x)
     val S = DoubleArray(x.size + 1) { if (it == 0) 0.0 else cum_sum[it - 1] }   // 0, x_1, x_1+x_2, ...,
     val Sp = DoubleArray(x.size) { S[it] } // same length as the data. LOOK
 
@@ -404,7 +404,7 @@ fun sprt_mart(
         (xe * eta / M[idx] + (upper - xe) * (upper - eta) / (upper - M[idx])) / upper
     }.toDoubleArray()
 
-    val terms = numpy_cumprod(xp) //  generalization of Bernoulli SPRT
+    val terms = np_cumprod(xp) //  generalization of Bernoulli SPRT
 
     //    terms[m<0] = np.inf                        # the null is surely false
     return terms
@@ -452,7 +452,7 @@ fun oneaudit(
     var randx = x
     repeat(reps) {
         if (reps > 1) {
-            randx = randomShuffle(randx)
+            randx = randomPermute(randx)
         }
 
         //        np.random.shuffle(x)

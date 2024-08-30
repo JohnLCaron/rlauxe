@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe
 
-import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -52,7 +51,7 @@ class TestAlphaShrinkTrunc {
         val x = DoubleArray(5) { .5 }
         val eta0 = 0.5
 
-        val allHalf = testAlphaWithShrinkTrunc(eta0, x.toList())
+        val allHalf = testAlphaMartBatch(eta0, x.toList())
         println(" allHalf = ${allHalf.pvalues}")
         allHalf.pvalues.forEach {
             assertEquals(1.0, it)
@@ -64,14 +63,15 @@ class TestAlphaShrinkTrunc {
         //         s1 = [1, 0, 1, 1, 0, 0, 1]
         val x2 = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
 
-        val alpha2 = testAlphaMartWithShrinkTrunc(x2.average(), x2.toList())
+        val alpha2 = testAlphaMartBatch(x2.average(), x2.toList())
         println(" alpha2 = ${alpha2}")
 
-        // alpha_mart1=array([ 0.66666667,  1.        ,  0.78431373,  0.36199095,  1.        ,-7.239819  ,  0.        ])
-        val expected = listOf(0.875,      1.0,         1.0,        0.68906946, 1.0,        1.0, 1.0        )
+        val expected = listOf(0.875, 1.0, 1.0, 0.73981759, 1.0, 1.0, 1.0)
         println(" expected = ${expected}")
         expected.forEachIndexed { idx, it ->
-            assertTrue( it == 1.0 || numpy_isclose(it, alpha2.pvalues[idx]) )
+            if (it != 1.0) {
+                assertEquals(it, alpha2.pvalues[idx], doublePrecision)
+            }
         }
         assertTrue(alpha2.status == TestH0Status.SampleSum)
         assertEquals(alpha2.sampleCount, x2.size)
@@ -80,21 +80,21 @@ class TestAlphaShrinkTrunc {
 
     @Test
     fun test_alpha_mart2() {
-        //         s1 = [1, 0, 1, 1, 0, 0, 1]
-        val x2 = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+        val x2 = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0)
 
-        val alpha2 = testAlphaMartWithShrinkTrunc(x2.average(), x2.toList())
+        val alpha2 = testAlphaMartBatch(.51, x2.toList())
         println(" alpha2 = ${alpha2}")
 
-        // alpha_mart1=array([ 0.66666667,  1.        ,  0.78431373,  0.36199095,  1.        ,-7.239819  ,  0.        ])
-        val expected = listOf(0.875,      1.0,         1.0,        0.68906946, 1.0,        1.0, 1.0        )
+        val expected = listOf(0.98039216, 1.0 , 1.0 , 0.86706352, 1.0, 1.0 , 1.0)
         println(" expected = ${expected}")
         expected.forEachIndexed { idx, it ->
-            assertTrue( it == 1.0 || numpy_isclose(it, alpha2.pvalues[idx]) )
+            if (it != 1.0) {
+                assertEquals(it, alpha2.pvalues[idx], doublePrecision)
+            }
         }
-        assertTrue(alpha2.status == TestH0Status.SampleSum)
+        assertTrue(alpha2.status == TestH0Status.LimitReached)
         assertEquals(alpha2.sampleCount, x2.size)
-        assertEquals(alpha2.sampleMean, 0.5714285714285714)
+        assertEquals(alpha2.sampleMean, 0.42857142857142855)
     }
 
     @Test
@@ -115,49 +115,35 @@ class TestAlphaShrinkTrunc {
                     eta,
                     x)
             }
+            println()
         }
     }
 
     fun compareAlphaWithShrinkTrunc(eta0: Double, x: List<Double>) {
-        val algoValues = testAlphaWithShrinkTrunc(
+        val algoValues: TestH0Result = testAlphaMartWithTermination(
             eta0,
             x
         )
 
-        val expectedPhistory = testAlphaMartWithAlphaMart(
+        val martValues: TestH0Result = testAlphaMartBatch(
             eta0,
             x
         )
 
-        /*
-        algoValues.phistory.forEachIndexed { idx, it ->
-            assertEquals(expectedPhistory[idx], it, "$idx: ${expectedPhistory[idx]} != ${it}")
+        // both failed or both succeeded
+        val limit1 = algoValues.status == TestH0Status.LimitReached
+        val limit2 = martValues.status == TestH0Status.LimitReached
+        assertEquals(limit1, limit2)
+
+        algoValues.pvalues.forEachIndexed { idx, it ->
+            assertEquals(it, martValues.pvalues[idx])
         }
-
-         */
     }
 
-    fun testAlphaWithShrinkTrunc(eta0: Double, x: List<Double>): TestH0Result {
-        println("testAlphaWithShrinkTrunc $eta0 x=$x")
+    fun testAlphaMartWithTermination(eta0: Double, x: List<Double>): TestH0Result {
+        println("testAlphaMartWithTermination $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val f = 0.0
-        val minsd = 1.0e-6
-        val t= 0.5
-        val c = (eta0 - t) / 2
-        val N = x.size
-
-        val estimFn = TruncShrinkage(N = N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val alpha = AlphaAlgorithm(estimFn=estimFn, N=N, upperBound=u)
-
-        val sampler = SampleFromList(x.toDoubleArray())
-        return alpha.testH0(x.size) { sampler.sample() }
-    }
-
-    fun testAlphaMartWithShrinkTrunc(eta0: Double, x: List<Double>): TestH0Result {
-        println("testAlphaWithShrinkTrunc $eta0 x=$x")
-        val u = 1.0
-        val d = 100
         val f = 0.0
         val minsd = 1.0e-6
         val t= 0.5
@@ -168,53 +154,46 @@ class TestAlphaShrinkTrunc {
         val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
 
         val sampler = SampleFromList(x.toDoubleArray())
-        return alpha.testH0(x.size) { sampler.sample() }
+        return alpha.testH0(x.size, true) { sampler.sample() }
     }
 
-    // see start/NonnegMean
-    fun testAlphaMartWithAlphaMart(eta0: Double, x: List<Double>): DoubleArray {
-        println("testAlphaMartWithAlphaMart $eta0 x=$x")
-        val t = .5
+    fun testAlphaMartBatch(eta0: Double, x: List<Double>): TestH0Result {
+        println("testAlphaMartBatch $eta0 x=$x")
         val u = 1.0
         val d = 10
         val f = 0.0
-        val c = (eta0 - t) / 2
-
         val minsd = 1.0e-6
+        val t= 0.5
+        val c = (eta0 - t) / 2
         val N = x.size
 
-        return DoubleArray(0)
-        //val estimFn = ShrinkTrunc(N = N, withReplacement = false, t = t, u = u, minsd=minsd, d = d, eta=eta0, f=f, c=c, eps=eps)
-        //val alphamart = AlphaMart(N = N, withReplacement = false, t = t, u = u, estimFnType = EstimFnType.SHRINK_TRUNC, estimFn)
-        //return alphamart.test(x.toDoubleArray()).second
+        val estimFn = TruncShrinkage(N = N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
+
+        val sampler = SampleFromList(x.toDoubleArray())
+        return alpha.testH0(x.size, false) { sampler.sample() }
     }
 
-    fun epsj(c: Double, d: Int, j:Int): Double =  c/ sqrt(d+j-1.0)
-    fun Sj(x: List<Double>, j:Int): Double = if (j == 1) 0.0 else x.subList(0,j-1).sum()
-    fun tj(N:Int, t: Double, x: List<Double>, j:Int) =  (N*t-Sj(x, j))/(N-j+1)
-
     @Test
-    fun testAlphaWithShrinkTruncProblem() {
-        val x = listOf(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        val eta0 = .51
-        val algoValues = testAlphaWithShrinkTrunc(
+    fun testAlphaAlgoWithShrinkTruncProblem() {
+        val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+        val eta0 = x.average()
+        val algoValues = testAlphaMartWithTermination(
             eta0,
             x
         )
-
-        println("testAlphaWithShrinkTruncProblem = $algoValues")
+        println("testAlphaAlgoWithShrinkTruncProblem = $algoValues")
     }
 
     @Test
     fun testAlphaMartWithShrinkTruncProblem() {
-        val x = listOf(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        val eta0 = .51
+        val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+        val eta0 = x.average()
 
-        val expectedPhistory = testAlphaMartWithAlphaMart(
+        val martValues = testAlphaMartBatch(
             eta0,
             x
         )
-
-        println("testAlphaMartWithShrinkTruncProblem = ${expectedPhistory.contentToString()}")
+        println("testAlphaMartWithShrinkTruncProblem = ${martValues}")
     }
 }

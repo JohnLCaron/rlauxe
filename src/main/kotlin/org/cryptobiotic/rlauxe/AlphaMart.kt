@@ -25,12 +25,14 @@ class AlphaMart(
     val estimFn : EstimFn,
     val N: Int, // number of ballot cards in the population of cards from which the sample is drawn
     val withoutReplacement: Boolean = true,
-    risk_limit: Double = 0.05, // α ∈ (0, 1)
+    val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
 ) {
-    val Tthreshold = 1.0 / risk_limit
 
-    fun testH0(maxSample: Int, drawSample : () -> Double) : TestH0Result {
+    // run until sampleNumber == maxSample or terminateOnNullReject
+    fun testH0(maxSample: Int, terminateOnNullReject: Boolean, drawSample : () -> Double) : TestH0Result {
+        require(maxSample <= N)
+
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = 1.0     // – T ← 1: test statistic
         var sampleSum = 0.0        // – S ← 0: sample sum
@@ -49,18 +51,26 @@ class AlphaMart(
             sampleNumber++ // j <- j + 1
 
             val etaj = estimFn.eta(sampleAssortValues)
-            etajs.add(etaj
-            )
+            etajs.add(etaj)
             sampleAssortValues.add(xj)
 
             populationMeanIfH0 = this.populationMeanIfH0(sampleNumber, sampleSum)
             m.add(populationMeanIfH0)
 
-            val tj =
+            // This is eq 4 of ALPHA, p.5 :
+            //      T_j = T_j-1 / u * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j))
+            //      terms[np.isclose(0, m, atol=atol)] = 1  # ignore
+            //      terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
+            val tj = if (doubleIsClose(0.0, populationMeanIfH0) || doubleIsClose(upperBound, populationMeanIfH0)) 1.0 else {
                 (xj * etaj / populationMeanIfH0 + (upperBound - xj) * (upperBound - etaj) / (upperBound - populationMeanIfH0)) / upperBound
+            }
             testStatistic *= tj // Tj ← Tj-1 & tj
             testStatistics.add(testStatistic)
-            if (showDetail) println("    $sampleNumber = $xj etaj = $etaj tj=$tj, Tj = $testStatistic")
+
+            // – S ← S + Xj
+            sampleSum += xj
+            sampleSums.add(sampleSum)
+            if (showDetail) println("    $sampleNumber = $xj sum= $sampleSum, etaj = $etaj tj=$tj, Tj = $testStatistic")
 
             // TODO why ??
             //        terms[m > u] = 0  # true mean is certainly less than hypothesized
@@ -73,14 +83,13 @@ class AlphaMart(
             //        terms[-1] = (
             //            np.inf if Stot > N * t else terms[-1]
             //        )  # final sample makes the total greater than the null
-            //        iterms = 1 / terms
-            //        miterms = np.minimum(1, iterms)
             //        return np.minimum(1, 1 / terms) // WHY?
-            pvalues.add(1.0 / testStatistic)
+            val pvalue = 1.0 / testStatistic
+            pvalues.add(pvalue)
 
-            // – S ← S + Xj
-            sampleSum += xj
-            sampleSums.add(sampleSum)
+            if (terminateOnNullReject && (pvalue < riskLimit || (sampleSum > N * 0.5))) {
+                break
+            }
         }
 
         val sampleMean = sampleSum / sampleNumber
@@ -99,8 +108,7 @@ class AlphaMart(
     }
 }
 
-// ALPHA paper, "ALPHA: AUDIT THAT LEARNS FROM PREVIOUSLY HAND-AUDITED BALLOTS" 12 Aug 2022
-class AlphaAlgorithm(
+class AlphaAlgorithmOld(
     val estimFn : EstimFn,
     val N: Int, // number of ballot cards in the population of cards from which the sample is drawn
     val withoutReplacement: Boolean = true,
@@ -133,10 +141,11 @@ class AlphaAlgorithm(
         //	     η(i, X i−1 ) ∈ (µi , u), where µi := E(Xi |X i−1 ) is computed under the null.
     }
 
+    // run samples until pvalue > 1.0 / risk_limit, or sampleNumber = maxSample.
     // drawSample() returns the assorter value
     // return the number of ballots sampled. if equal to maxSample, then the rla failed and must do a hand recount.
-    // for debugging, we want to know the sample mean.
     fun testH0(maxSample: Int, drawSample : () -> Double) : TestH0Result {
+        require(maxSample <= N)
 
         // • Initialize variables
         var sampleNumber = 0        // – j ← 0: sample number
@@ -180,13 +189,16 @@ class AlphaAlgorithm(
             //    already tested for m < 0
             //    tj = ( Xj * η(j,S)/m + (u - Xj) * (u−η(j,S))/(u-m)) / u
             //    Tj ← Tj-1 * tj
-            val tj = (xj * etaj / populationMeanIfH0 + (upperBound - xj) * (upperBound - etaj) / (upperBound - populationMeanIfH0)) / upperBound
+            val tj = if (doubleIsClose(0.0, populationMeanIfH0) || doubleIsClose(upperBound, populationMeanIfH0)) 1.0 else {
+                (xj * etaj / populationMeanIfH0 + (upperBound - xj) * (upperBound - etaj) / (upperBound - populationMeanIfH0)) / upperBound
+            }
             testStatistic *= tj // Tj ← Tj-1 & tj
-            if (showDetail) println("    $sampleNumber = $xj etaj = $etaj tj=$tj, Tj = $testStatistic")
-            pvalues.add(min(1.0, 1.0 / tj))
+            // pvalues.add(min(1.0, 1.0 / tj))
+            pvalues.add(1.0 / testStatistic)
 
             // – S ← S + Xj
             sampleSum += xj
+            if (showDetail) println("    $sampleNumber = $xj sum= $sampleSum, etaj = $etaj tj=$tj, Tj = $testStatistic")
         }
 
         if (sampleNumber == maxSample) status = TestH0Status.LimitReached
@@ -200,6 +212,46 @@ class AlphaAlgorithm(
         return if (withoutReplacement) (N * 0.5 - sampleSumMinusOne) / (N - sampleNum + 1) else 0.5
     }
 }
+
+//  ONEAUDIT - simple version of alpha_mart
+// def alpha_mart(x: np.array, N: int, mu: float=1/2, eta: float=1-np.finfo(float).eps, u: float=1,
+//               estim: callable=shrink_trunc) -> np.array :
+//    '''
+//    Finds the ALPHA martingale for the hypothesis that the population
+//    mean is less than or equal to t using a martingale method,
+//    for a population of size N, based on a series of draws x.
+//
+//    The draws must be in random order, or the sequence is not a martingale under the null
+//
+//    If N is finite, assumes the sample is drawn without replacement
+//    If N is infinite, assumes the sample is with replacement
+//
+//    Parameters
+//    ----------
+//    x : list corresponding to the data
+//    N : int
+//        population size for sampling without replacement, or np.infinity for sampling with replacement
+//    mu : float in (0,1)
+//        hypothesized fraction of ones in the population
+//    eta : float in (t,1)
+//        alternative hypothesized population mean
+//    estim : callable
+//        estim(x, N, mu, eta, u) -> np.array of length len(x), the sequence of values of eta_j for ALPHA
+//
+//    Returns
+//    -------
+//    terms : array
+//        sequence of terms that would be a nonnegative supermartingale under the null
+//    '''
+//    S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
+//    j = np.arange(1,len(x)+1)              # 1, 2, 3, ..., len(x)
+//    m = (N*mu-S)/(N-j+1) if np.isfinite(N) else mu   # mean of population after (j-1)st draw, if null is true
+//    etaj = estim(x, N, mu, eta, u)
+//    with np.errstate(divide='ignore',invalid='ignore'):
+//        term = (x*etaj/m + (u-x)*(u-etaj)/(u-m))/u
+//        terms = np.cumprod((x*etaj/m + (u-x)*(u-etaj)/(u-m))/u)
+//    terms[m<0] = np.inf
+//    return terms
 
 class TruncShrinkage(
     val N: Int,
@@ -230,7 +282,7 @@ class TruncShrinkage(
         // (2.5.2, eq 14, "truncated shrinkage")
         // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
         val est = ((d * eta0 + sampleSum) / dj1 + u * f / sdj3) / (1 + f / sdj3)
-        println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj")
+        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj")
         // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
         val e_j = c / sqrt(dj1)
@@ -239,12 +291,12 @@ class TruncShrinkage(
         // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , 1), where ǫi → 0 as the sample size grows.
 
         //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
-        val mean = meanUnderNull(N, 0.5, prevSamples)
+        val mean = meanUnderNull(N, 0.5, prevSamples) // only used in capBelow
         val capAbove = u * (1 - eps)
         val capBelow = mean + e_j
         val boundedEst =  min(capAbove, max(est, capBelow))
-
-
+        return boundedEst
+/*
         //        return np.minimum(
         //            u * (1 - np.finfo(float).eps),
         //            np.maximum(weighted, m + c / np.sqrt(d + j - 1)),
@@ -252,16 +304,20 @@ class TruncShrinkage(
         val npmax = max(est, mean + c / sqrt((d + lastj - 1).toDouble()))  // 2.5.2 "choosing ǫi"
         val eta = min(u * (1 - eps), npmax)
 
+        if (!numpy_isclose(boundedEst, eta)) {
+            println("WTF")
+        }
         // println("   TruncShrinkage ${welford.count} sampleSum= $sampleSum eta=$eta")
-        require(boundedEst == eta)
+        require(numpy_isclose(boundedEst, eta))
         return eta
+*/
     }
 
     fun meanUnderNull(N: Int, t: Double, x: List<Double>): Double {
         if (x.size == 0) return t
-        val sum = x.subList(0, x.size - 1).sum()
+        val sum = x.sum()
         val m1 = (N * t - sum)
-        val m2 = (N - x.size + 1)
+        val m2 = (N - x.size)
         val m3 = m1 / m2
         return m3
     }

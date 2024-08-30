@@ -163,41 +163,6 @@ class TestAlphaAlternativeFixedMean  {
      */
 }
 
-class SampleFromList(val list: DoubleArray) {
-    var index = 0
-    fun sample() = list[index++]
-}
-
-fun doublesAreClose(a: List<Double>, b: List<Double>, rtol: Double=1.0e-5, atol:Double=1.0e-8) {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-
-    assertEquals(a.size, b.size, "size differs")
-    repeat(a.size) { assertTrue(numpy_isclose(a[it], b[it], rtol, atol), "$it: ${a[it]} !~ ${b[it]}") }
-}
-
-fun doublesAreClose(a: DoubleArray, b: DoubleArray, rtol: Double=1.0e-5, atol:Double=1.0e-8) {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-
-    assertEquals(a.size, b.size, "size differs")
-    repeat(a.size) { assertTrue(numpy_isclose(a[it], b[it], rtol, atol), "$it: ${a[it]} !~ ${b[it]}") }
-}
-
-fun doublesAreEqual(a: List<Double>, b: List<Double>) {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-
-    assertEquals(a.size, b.size, "size differs")
-    repeat(a.size) { assertEquals(a[it], b[it], "$it: ${a[it]} != ${b[it]}") }
-}
-
 // testAlphaAllHalf
 //    1 = 0.5 etaj = 0.75 tj=1.0, T = 1.0
 //    2 = 0.5 etaj = 0.75000025000025 tj=1.0, T = 1.0

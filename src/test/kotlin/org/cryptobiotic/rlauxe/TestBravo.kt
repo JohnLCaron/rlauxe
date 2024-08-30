@@ -71,7 +71,7 @@ class TestBravo  {
         //println("runBravo N=$N eta0=$eta0 trueMean=$trueMean repeat=$nrepeat")
         val estimFn = FixedMean(eta0)
 
-        val alpha = AlphaAlgorithm(estimFn=estimFn, N=N, upperBound=1.0, withoutReplacement=withoutReplacement)
+        val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=1.0, withoutReplacement=withoutReplacement)
         val sampler = GenerateAssorterValue(trueMean)
 
         var sampleCountSum = 0
@@ -79,7 +79,7 @@ class TestBravo  {
         var fail = 0
         var nsuccess = 0
         repeat(nrepeat) {
-            val testH0Result = alpha.testH0(m) { sampler.sample() }
+            val testH0Result = alpha.testH0(m, true) { sampler.sample() }
             sampleMeanSum += testH0Result.sampleMean
             if (testH0Result.status == TestH0Status.LimitReached) {
                 fail++
@@ -129,7 +129,7 @@ class TestBravo  {
 
         val eta0 = drawSample.sampleMean()
         val estimFn = FixedMean(eta0)
-        val alpha = AlphaAlgorithm(
+        val alpha = AlphaMart(
             estimFn = estimFn,
             N = drawSample.N(),
             upperBound = 1.0,
@@ -140,7 +140,7 @@ class TestBravo  {
 
         repeat(nrepeat) {
             drawSample.reset()
-            val testH0Result = alpha.testH0(m) { drawSample.sample() }
+            val testH0Result = alpha.testH0(m, true) { drawSample.sample() }
             status.add(testH0Result.status.ordinal)
             sampleMeanSum += testH0Result.sampleMean
             if (testH0Result.status == TestH0Status.LimitReached) {

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
 import kotlin.random.Random
 
@@ -11,7 +11,7 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
         val random = Random.nextDouble(1.0)
         val cand = if (random < .5 + margin) "A" else "B"
         votes["AB"] = mapOf(cand to 1)
-        result.add(Cvr("card-$it", votes) )
+        result.add(Cvr("card-$it", votes))
     }
     return result
 }
@@ -22,7 +22,7 @@ fun makeCvrsByCount(ncards: Int, count: Int) : List<Cvr> {
         val votes = mutableMapOf<String, Map<String, Int>>()
         val cand = if (it < count) "A" else "B"
         votes["AB"] = mapOf(cand to 1)
-        result.add(Cvr("card-$it", votes) )
+        result.add(Cvr("card-$it", votes))
     }
     return result
 }

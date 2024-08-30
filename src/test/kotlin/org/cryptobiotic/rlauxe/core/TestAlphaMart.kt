@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
+import kotlin.math.max
 import kotlin.test.Test
 
 val showDetail = false
@@ -40,18 +41,17 @@ fun runAlphaMart(
     eta0: Double = drawSample.sampleMean(),
     withoutReplacement: Boolean = true,
     nrepeat: Int = 1,
-): BravoResult {
+): RepeatedResult {
     val N = drawSample.N()
     val f = 0.0
     val t = 0.5
     val upperBound = 1.0
-    val eps = 0.0001  // Generic small value
     val minsd = 1.0e-6
-    val c = (eta0 - t) / 2
+    val c = max(eps, ((eta0 - t) / 2))
 
     // class TruncShrinkage(val N: Int, val u: Double, val t: Double, val minsd : Double, val d: Int, val eta0: Double,
     //                     val f: Double, val c: Double, val eps: Double): EstimFn {
-    val estimFn = TruncShrinkage(N, upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+    val estimFn = TruncShrinkage(N, true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
 
     val alpha = AlphaMart(
         estimFn = estimFn,
@@ -85,5 +85,5 @@ fun runAlphaMart(
     val sampleNumberAvg = sampleCountSum.toDouble() / nsuccess
     val failAvg = fail.toDouble() / nrepeat
     val sampleMeanAvg = sampleMeanSum / nrepeat
-    return BravoResult(eta0, genRatio, sampleNumberAvg, sampleMeanAvg, failAvg, hist, status)
+    return RepeatedResult(eta0, genRatio, sampleNumberAvg, sampleMeanAvg, failAvg, hist, status)
 }

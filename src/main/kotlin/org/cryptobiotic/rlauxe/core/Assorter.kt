@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
 abstract class Assorter(
     val contest: AuditContest,

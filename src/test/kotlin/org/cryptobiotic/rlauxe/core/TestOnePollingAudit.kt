@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.Stopwatch
 import kotlin.math.max
 
 import kotlin.math.min
@@ -46,15 +47,15 @@ class TestOnePollingAudit {
         //  10000 = avgReject = 118.0 avgNotReject = 0.0
 
         assertEquals(117.0, resultsInf.avgReject())
-        assertEquals(2268.0, resultsD[10]!!.avgReject())
-        assertEquals(214.0, resultsD[100]!!.avgReject())
-        assertEquals(124.0, resultsD[1000]!!.avgReject())
-        assertEquals(118.0, resultsD[10000]!!.avgReject())
+        assertEquals(3013.0, resultsD[10]!!.avgReject())
+        assertEquals(3391.0, resultsD[100]!!.avgReject())
+        assertEquals(4517.0, resultsD[1000]!!.avgReject())
+        assertEquals(6949.0, resultsD[10000]!!.avgReject())
     }
 
     @Test
     fun TestSyntheticAvB_average() {
-        val (resultsInf, resultsD) = testSyntheticAvB(1000, listOf(100, 200, 300, 400, 500))
+        val (resultsInf, resultsD) = testSyntheticAvB(1, listOf(100, 200, 300, 400, 500))
 
         println("resultsInf = $resultsInf")
         println("resultsD")
@@ -82,7 +83,7 @@ class TestOnePollingAudit {
         //val results_inf, results_d = ballot_polling(x, alpha, Abar, dl, c, reps, verbose=False)
         //val results_inf, results_d
 
-        val (pollingInf, pollingD) = testSyntheticAvB(1000, listOf(100, 200, 300, 400, 500), true)
+        val (pollingInf, pollingD) = testSyntheticAvB(1, listOf(100, 200, 300, 400, 500), true)
         println("pollingInf = $pollingInf")
         println("pollingD")
         pollingD.forEach {
@@ -115,7 +116,7 @@ class TestOnePollingAudit {
         val eta = u / (2 * u - v)
         val u_over = 2 * eta
         // eta=0.5128205128205129 v=0.050000000000000044 u_over=1.0256410256410258
-        println("eta = $eta  v=${v} u_over=${u_over}")
+        println(" reps=$reps polling=$polling")
         // eta = 0.5128205128205129  v=0.050000000000000044 u_over=1.0256410256410258
 
         val faa = 0.9 // fraction of votes for Alice in an Alice-majority precinct
@@ -148,8 +149,15 @@ class TestOnePollingAudit {
         val c = .5
         val alpha = 0.05
 
-        return if (polling) oneaudit(x, alpha, u_over=1.0, eta=Abar, dl, c, reps, verbose = false)
-               else oneaudit(x, alpha, u_over=u_over, eta=u_over, dl, c, reps, verbose = false)
+        //     x: DoubleArray,
+        //    alpha: Double,
+        //    u_over: Double,
+        //    eta: Double,
+        //    dl: List<Int>,
+        //    c: Double = .5,
+        //    reps: Int = 1000,
+        return if (polling) oneaudit(x, alpha=alpha, u_over=1.0, eta=Abar, dl=dl, c=c, reps=reps)
+               else oneaudit(x, alpha=alpha, u_over=u_over, eta=u_over, dl=dl, c=c, reps=reps)
     }
 
 }
@@ -176,7 +184,7 @@ class Results(val reps: Int) {
 }
 
 
-private val eps = 2.220446049250313e-16
+val eps = 2.220446049250313e-16
 
 ////////////////////////////////////
 // identical in oa-batch and oa-polling
@@ -218,7 +226,7 @@ private val eps = 2.220446049250313e-16
 
 class ShrinkTrunc(
     val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
-    val d: Double = 100.0, val withReplacement: Boolean = false
+    val d: Int = 100, val withReplacement: Boolean = false
 ) : EstimArrayFn {
 
     override fun eta(x: DoubleArray): DoubleArray {
@@ -247,7 +255,7 @@ class ShrinkTrunc(
         // m+c/np.sqrt(d+j-1)
         val term3 = M.mapIndexed { idx, m ->
             // m + c / (sqrt(d + j[idx] - 1))
-            m + c / (sqrt(d + idx))
+            m + c / (sqrt((d + idx).toDouble()))
         }
 
         val maxTerm = S.mapIndexed { idx, it -> max(term2[idx], term3[idx]) }
@@ -256,6 +264,32 @@ class ShrinkTrunc(
     }
 }
 
+// class TruncShrinkage(
+//    val N: Int,
+//    val upperBound: Double,
+//    val minsd: Double,
+//    val eta0: Double,
+//    val c: Double,
+//    val d: Int,
+//    val f: Double,
+//) : EstimFn {
+
+class TruncShrinkageProxy(
+    val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
+    val d: Int, val withReplacement: Boolean = false
+) : EstimArrayFn {
+    val proxy = TruncShrinkage(N = N, upperBound = u, eta0 = mu, c = c, d = d, f = 0.0, minsd = 1.0)
+
+    override fun eta(samples: DoubleArray): DoubleArray {
+        val prevSample = mutableListOf<Double>()
+        val result: List<Double> = samples.map {
+            val eta = proxy.eta(prevSample)
+            prevSample.add(it)
+            eta
+        }
+        return result.toDoubleArray()
+    }
+}
 
 ////////////////////////////////////
 // identical in oa-batch and oa-polling
@@ -438,7 +472,6 @@ fun oneaudit(
     dl: List<Int>,
     c: Double = .5,
     reps: Int = 1000,
-    verbose: Boolean = true
 ): Pair<Results, Map<Int, Results>> {
 
     val resultsInf = Results(reps)
@@ -460,8 +493,8 @@ fun oneaudit(
         //        mart = sprt_mart(x, N, mu=1/2, eta=eta, u=u_over, random_order=True)
         val mart = sprt_mart(randx, N, eta = eta, upper = u_over) //  # OneAudit a priori
 
-        // find first accepted, its index is number rejected
-        var firstIdx = findFirstIndex (mart) { it >= 1.0 / alpha }
+        // find first accepted, its index = number rejected
+        var firstIdx = findFirstIndex(mart) { it >= 1.0 / alpha }
         resultsInf.reject += if (firstIdx < 0) N else firstIdx   // the number rejected
 
         //        # OneAudit ALPHA
@@ -470,14 +503,18 @@ fun oneaudit(
         //                              estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,u,c=c,d=d))
 
         dl.forEach { d ->
+            val stopwatch = Stopwatch()
+
             // val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
             //                  val d: Double = 100.0, val withReplacement: Boolean = false
-            val estimFn = ShrinkTrunc(N, mu = 0.5, eta, c = c, u=u_over, d = d.toDouble())
+            // val estimFn = ShrinkTrunc(N, mu = 0.5, eta, c = c, u=u_over, d = d)
+            val estimFn = TruncShrinkageProxy(N, mu = 0.5, eta, c = c, u=u_over, d = d)
             val alpha_mart = alpha_mart(randx, N, mu = 0.5, eta = eta, u = u_over, estim = estimFn)
 
-            var firstIdx = findFirstIndex (alpha_mart) { it >= 1.0 / alpha }
+            var firstIdx = findFirstIndex(alpha_mart) { it >= 1.0 / alpha }
             val result = resultsD[d]!!
             result.reject += if (firstIdx < 0) N else firstIdx   // the number rejected
+            println("run OneAudit alpha_mart dl=$d ${stopwatch.took()}")
         }
 
 

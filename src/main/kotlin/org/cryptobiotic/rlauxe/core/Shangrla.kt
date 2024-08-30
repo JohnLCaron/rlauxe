@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.rlauxe.core
 
 enum class SocialChoiceFunction{ PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 

@@ -1,11 +1,7 @@
 package org.cryptobiotic.rlauxe
 
-import org.junit.jupiter.api.Assertions.assertTrue
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sqrt
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 // Direct compare TruncShrinkage with output from SHANGRLA TestNonnegMean output
@@ -15,7 +11,7 @@ class TestShrinkTrunc {
     fun testTruncShrinkageLeadingZeroes() {
         val eta0 = .51
         val x = listOf(0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, )
-        val expected = listOf(0.51, 0.5570631122784444, 0.626443375672974, 0.7156724647762773, 0.8346696395428955, 0.9999999999999998, 0.9999999999999998, 0.9999999999999998, 0.9999999999999998, 0.9999999999999998)
+        val expected = listOf(0.51, 0.55706311, 0.62644338, 0.71567246, 0.83466964,  1.0, 1.0 , 1.0 , 1.0, 1.0)
 
         val t = .5
         val u = 1.0
@@ -23,24 +19,25 @@ class TestShrinkTrunc {
         val f = 0.0
         val minsd = 1.0e-6
         val c = (eta0 - t) / 2
-        val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val result = mutableListOf<Double>()
-        repeat(x.size) {
-            val sublist = x.subList(0, it+1)
-            val estim = estimFn.eta(sublist)
-            println("estim = $estim")
-            result.add(estim)
+        val N = x.size
+        val estimFn = TruncShrinkage(N=N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val assortValues = mutableListOf<Double>()
+        val etaValues = mutableListOf<Double>()
+        x.forEach {
+            val eta = estimFn.eta(assortValues)
+            etaValues.add(eta)
+            assortValues.add(it)
         }
-        doublesAreEqual(expected, result)
+        println("testTruncShrinkageLeadingZeroes= $etaValues")
+        doublesAreClose(expected, etaValues)
     }
 
     @Test
     fun testTruncShrinkageLeadingOnes() {
         val eta0 = .51
         val x = listOf(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        val expected = listOf(0.51, 0.5545454545454546, 0.5916666666666667, 0.6230769230769231, 0.65, 0.6733333333333333, 0.63125, 0.5941176470588235, 0.5611111111111111, 0.531578947368421)
+        val expected = listOf(0.51, 0.55454545, 0.59166667, 0.62307692, 0.65, 0.67333333, 0.63125, 0.59411765, 0.56111111, 0.53157895)
         val t = .5
         val u = 1.0
         val d = 10
@@ -49,16 +46,16 @@ class TestShrinkTrunc {
         val c = (eta0 - t) / 2
 
         val N = x.size
-
         val estimFn = TruncShrinkage(N = N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
-        val result = mutableListOf<Double>()
-        repeat(x.size) {
-            val sublist = x.subList(0, it+1)
-            val estim = estimFn.eta(sublist)
-            // println(" $it sublist = ${sublist} estim = $estim")
-            result.add(estim)
+        val assortValues = mutableListOf<Double>()
+        val etaValues = mutableListOf<Double>()
+        x.forEach {
+            val eta = estimFn.eta(assortValues)
+            etaValues.add(eta)
+            assortValues.add(it)
         }
-        doublesAreEqual(expected, result)
+        println("testTruncShrinkageLeadingOnes= $etaValues")
+        doublesAreClose(expected, etaValues)
     }
 
     // direct test with SHANGRLA test_shrink_trunc_problem
@@ -115,10 +112,10 @@ class TestShrinkTrunc {
         val assortValues = mutableListOf<Double>()
         val etaValues = mutableListOf<Double>()
         x.forEach {
-            assortValues.add(it)
             val eta = estimFn.eta(assortValues)
             println(" eta = $eta")
             etaValues.add(eta)
+            assortValues.add(it)
         }
 
         val expected = listOf(0.51, 0.55454545, 0.59166667, 0.62307692, 0.65, 0.67333333, 0.69375, 0.65294118, 0.61666667, 0.58421053)
@@ -126,7 +123,7 @@ class TestShrinkTrunc {
         println("actual = $etaValues")
 
         expected.forEachIndexed { idx, it ->
-            assertTrue(numpy_isclose(it, etaValues[idx]))
+            assertTrue(doubleIsClose(it, etaValues[idx]))
         }
     }
 }

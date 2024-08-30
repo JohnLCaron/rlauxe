@@ -34,7 +34,7 @@ class TestWorkflow {
                 println("  ${it}")
 
                 val cvrSampler = PollWithoutReplacement(cvrs, it.assorter)
-                val result = runAlphaGen(
+                val result = runAlphaMart(
                     drawSample = cvrSampler,
                     maxSamples = N,
                     genRatio = .5 + margin,
@@ -79,7 +79,7 @@ class TestWorkflow {
                 println("  ${it}")
 
                 val cvrSampler = CompareWithoutReplacement(cvrs, it.assorter)
-                val result = runAlphaGen(
+                val result = runAlphaMart(
                     drawSample = cvrSampler,
                     maxSamples = N,
                     genRatio = .5 + margin,

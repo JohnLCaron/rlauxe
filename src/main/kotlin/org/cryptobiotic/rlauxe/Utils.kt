@@ -16,7 +16,7 @@ fun numpy_arange(start: Int, stop: Int, step: Int): IntArray {
 }
 
 // Return the cumulative product of elements
-fun numpy_cumprod(a: DoubleArray) : DoubleArray {
+fun np_cumprod(a: DoubleArray) : DoubleArray {
     val result = DoubleArray(a.size)
     result[0] = a[0]
     for (i in 1 until a.size) {
@@ -26,22 +26,13 @@ fun numpy_cumprod(a: DoubleArray) : DoubleArray {
 }
 
 // Return the cumulative product of elements
-fun numpy_cumsum(a: DoubleArray) : DoubleArray {
+fun np_cumsum(a: DoubleArray) : DoubleArray {
     val result = DoubleArray(a.size)
     result[0] = a[0]
     for (i in 1 until a.size) {
         result[i] = result[i-1] + a[i]
     }
     return result
-}
-
-// def isclose(a, b, rtol=1.e-5, atol=1.e-8, equal_nan=False):
-fun numpy_isclose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-    return abs(a - b) <= atol + rtol * abs(b)
 }
 
 // Return an array of ones with the same shape and type as a given array.
@@ -120,6 +111,14 @@ fun numpy_quantile2(data: IntArray, quantile: Double): Int {
 
 /////////////////////////////////////////////////////////////////////////////////
 
+fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
+    //    For finite values, isclose uses the following equation to test whether
+    //    two floating point values are equivalent.
+    //
+    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
+    return abs(a - b) <= atol + rtol * abs(b)
+}
+
 fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
     var firstIdx = -1
     for (idx in 0 until x.size) {
@@ -131,7 +130,7 @@ fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
     return firstIdx
 }
 
-fun randomShuffle(samples : DoubleArray): DoubleArray {
+fun randomPermute(samples : DoubleArray): DoubleArray {
     val n = samples.size
     val permutedIndex = MutableList(n) { it }
     permutedIndex.shuffle(Random)

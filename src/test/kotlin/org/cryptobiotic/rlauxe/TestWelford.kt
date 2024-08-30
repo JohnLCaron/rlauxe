@@ -79,8 +79,8 @@ fun w2(x: DoubleArray): Pair<DoubleArray, DoubleArray> {
     println("variance = ${x.variance()}")
 
     val last = x.size - 1
-    assertEquals(x.average(), mj[last])
-    assertEquals(x.variance(), sdj2[last])
+    assertEquals(x.average(), mj[last], doublePrecision)
+    assertEquals(x.variance(), sdj2[last], doublePrecision)
     return Pair(mj.toDoubleArray(), sdj2.toDoubleArray())
 }
 

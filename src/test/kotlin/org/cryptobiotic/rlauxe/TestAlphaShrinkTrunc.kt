@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe
 
+import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -98,6 +99,72 @@ class TestAlphaShrinkTrunc {
     }
 
     @Test
+    fun test_shrink_trunk_f1() {
+        val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 )
+        val eta0 = .51
+
+        println("test_shrink_trunk_f1 $eta0 x=$x")
+        val u = 1.0
+        val d = 10
+        val f = 0.5
+        val minsd = 1.0e-6
+        val t= 0.5
+        val c = (eta0 - t) / 2
+        val N = x.size
+
+        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
+        val sampler = SampleFromList(x.toDoubleArray())
+
+        val result = alpha.testH0(x.size, false) { sampler.sample() }
+        println(" test_shrink_trunk_f1 = ${result}")
+
+        val expected = listOf(0.74257426, 1.0, 0.96704619, 0.46507099, 1.0, 1.0, 1.0)
+        println(" expected = ${expected}")
+        expected.forEachIndexed { idx, it ->
+            if (it != 1.0) {
+                assertEquals(it, result.pvalues[idx], doublePrecision)
+            }
+        }
+        assertTrue(result.status == TestH0Status.SampleSum)
+        assertEquals(result.sampleCount, x.size)
+        assertEquals(result.sampleMean, 0.5714285714285714)
+    }
+
+    @Test
+    fun test_shrink_trunk_f1_wreplacement() {
+        val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 )
+        val eta0 = .51
+
+        println("test_shrink_trunk_f1 $eta0 x=$x")
+        val u = 1.0
+        val d = 10
+        val f = 0.5
+        val minsd = 1.0e-6
+        val t= 0.5
+        val c = (eta0 - t) / 2
+        val N = x.size
+
+        val estimFn = TruncShrinkage(N = N, withoutReplacement = false, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val alpha = AlphaMart(estimFn=estimFn, N=N, withoutReplacement = false, upperBound=u)
+        val sampler = SampleFromList(x.toDoubleArray())
+
+        val result = alpha.testH0(x.size, false) { sampler.sample() }
+        println(" test_shrink_trunk_f1_wreplacement = ${result}")
+
+        val expected = listOf(0.74257426, 1.0, 0.82889674, 0.53150971, 1.0, 1.0, 1.0)
+        println(" expected = ${expected}")
+        expected.forEachIndexed { idx, it ->
+            if (it != 1.0) {
+                assertEquals(it, result.pvalues[idx], doublePrecision)
+            }
+        }
+        assertTrue(result.status == TestH0Status.SampleSum)
+        assertEquals(result.sampleCount, x.size)
+        assertEquals(result.sampleMean, 0.5714285714285714)
+    }
+
+    @Test
     fun compareAlphaWithShrinkTrunc() {
         val bernoulliDist = Bernoulli(.5)
         val bernoulliList = DoubleArray(20) { bernoulliDist.get() }.toList()
@@ -150,7 +217,7 @@ class TestAlphaShrinkTrunc {
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
         val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
 
         val sampler = SampleFromList(x.toDoubleArray())
@@ -163,11 +230,11 @@ class TestAlphaShrinkTrunc {
         val d = 10
         val f = 0.0
         val minsd = 1.0e-6
-        val t= 0.5
-        val c = (eta0 - t) / 2
+        val t = 0.5
+        val c = max(eps, (eta0 - t) / 2)
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, u=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
+        val estimFn = TruncShrinkage(N = N, upperBound=u, minsd=minsd, d=d, eta0=eta0, f=f, c=c)
         val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=u)
 
         val sampler = SampleFromList(x.toDoubleArray())

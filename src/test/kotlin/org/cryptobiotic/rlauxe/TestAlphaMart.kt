@@ -51,7 +51,7 @@ fun runAlphaMart(
 
     // class TruncShrinkage(val N: Int, val u: Double, val t: Double, val minsd : Double, val d: Int, val eta0: Double,
     //                     val f: Double, val c: Double, val eps: Double): EstimFn {
-    val estimFn = TruncShrinkage(N, upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+    val estimFn = TruncShrinkage(N, true, upperBound=upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
 
     val alpha = AlphaMart(
         estimFn = estimFn,

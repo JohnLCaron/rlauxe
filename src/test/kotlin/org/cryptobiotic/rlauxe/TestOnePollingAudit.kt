@@ -176,7 +176,7 @@ class Results(val reps: Int) {
 }
 
 
-private val eps = 2.220446049250313e-16
+val eps = 2.220446049250313e-16
 
 ////////////////////////////////////
 // identical in oa-batch and oa-polling
@@ -218,7 +218,7 @@ private val eps = 2.220446049250313e-16
 
 class ShrinkTrunc(
     val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
-    val d: Double = 100.0, val withReplacement: Boolean = false
+    val d: Int = 100, val withReplacement: Boolean = false
 ) : EstimArrayFn {
 
     override fun eta(x: DoubleArray): DoubleArray {
@@ -247,7 +247,7 @@ class ShrinkTrunc(
         // m+c/np.sqrt(d+j-1)
         val term3 = M.mapIndexed { idx, m ->
             // m + c / (sqrt(d + j[idx] - 1))
-            m + c / (sqrt(d + idx))
+            m + c / (sqrt((d + idx).toDouble()))
         }
 
         val maxTerm = S.mapIndexed { idx, it -> max(term2[idx], term3[idx]) }
@@ -256,6 +256,29 @@ class ShrinkTrunc(
     }
 }
 
+// class TruncShrinkage(
+//    val N: Int,
+//    val upperBound: Double,
+//    val minsd: Double,
+//    val eta0: Double,
+//    val c: Double,
+//    val d: Int,
+//    val f: Double,
+//) : EstimFn {
+
+class TruncShrinkageProxy(
+    val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
+    val d: Int, val withReplacement: Boolean = false
+) : EstimArrayFn {
+    val proxy = TruncShrinkage(N=N, upperBound = u, eta0=mu, c=c, d=d, f=0.0, minsd=1.0)
+
+    override fun eta(prevSamples: DoubleArray): DoubleArray {
+        val result: List<Double> = prevSamples.mapIndexed { idx, _ ->
+            proxy.eta(prevSamples.take(idx))
+        }
+        return result.toDoubleArray()
+    }
+}
 
 ////////////////////////////////////
 // identical in oa-batch and oa-polling
@@ -472,7 +495,8 @@ fun oneaudit(
         dl.forEach { d ->
             // val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
             //                  val d: Double = 100.0, val withReplacement: Boolean = false
-            val estimFn = ShrinkTrunc(N, mu = 0.5, eta, c = c, u=u_over, d = d.toDouble())
+            // val estimFn = ShrinkTrunc(N, mu = 0.5, eta, c = c, u=u_over, d = d)
+            val estimFn = TruncShrinkageProxy(N, mu = 0.5, eta, c = c, u=u_over, d = d)
             val alpha_mart = alpha_mart(randx, N, mu = 0.5, eta = eta, u = u_over, estim = estimFn)
 
             var firstIdx = findFirstIndex (alpha_mart) { it >= 1.0 / alpha }

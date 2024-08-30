@@ -70,7 +70,6 @@ class TestBravo  {
     fun runBravo(N : Int, m: Int, eta0 : Double, trueMean: Double, withoutReplacement: Boolean, nrepeat:Int = 1): BravoResult  {
         //println("runBravo N=$N eta0=$eta0 trueMean=$trueMean repeat=$nrepeat")
         val estimFn = FixedMean(eta0)
-
         val alpha = AlphaMart(estimFn=estimFn, N=N, upperBound=1.0, withoutReplacement=withoutReplacement)
         val sampler = GenerateAssorterValue(trueMean)
 
@@ -217,6 +216,28 @@ class FixedMean(val eta0: Double): EstimFn {
     override fun eta(prevSamples: List<Double>): Double {
         return eta0
     }
+}
+
+// TODO
+class FixedAlternativeMean(val N: Int, val eta0:Double): EstimFn {
+
+    //         val m = DoubleArray(x.size) {
+    //            val m1 = (N * t - Sp[it])
+    //            val m2 = (N - j[it] + 1)
+    //            val m3 = m1 / m2
+    //            if (isFinite) (N * t - Sp[it]) / (N - j[it] + 1) else t
+    //        }
+
+    override fun eta(prevSamples: List<Double>): Double {
+        val j = prevSamples.size + 1
+        val sampleSum = prevSamples.sum()
+        val m1 = (N * eta0 - sampleSum)
+        val m2 = (N - j + 1)
+        val m3 = m1 / m2
+        val result = (N * eta0 - sampleSum) / (N - j + 1)
+        return result
+    }
+
 }
 
 class GenerateAssorterValue(val ratio: Double) {

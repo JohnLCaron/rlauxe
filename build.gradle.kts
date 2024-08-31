@@ -1,5 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.0.20"
+    alias(libs.plugins.serialization)
 }
 
 group = "org.cryptobiotic.rlauxe"
@@ -7,6 +8,9 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+//    maven {
+//        url ("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+//    }
 }
 
 dependencies {

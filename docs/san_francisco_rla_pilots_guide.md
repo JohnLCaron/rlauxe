@@ -4,18 +4,15 @@ You can recompute for yourself every step of the San Francsicso 2019 RLA pilot a
 
 1. Download the latest cvr export zip file from 
 https://sfelections.sfgov.org/november-5-2019-election-results-detailed-reports
-
-Unzip it.
+and Unzip it.
 
 2. Open  https://github.com/pbstark/SHANGRLA/blob/master/ConvertCVRToRAIRE.html
 in your web browser, enter the files you just unzipped, set:
 - Check 'Suppress any marks with IsAmbiguous=true'
 - Check 'Suppress any marks with a write in with no other mark at same rank'
 - Do not check ''Include all pieces of paper in the RAIRE output'
-
 - Do not check 'Election Day'
 - Check 'Vote by Mail'
-
 - Check only the DA's race (Contest 339).
 
 Scroll to the bottom of the screen and click on 'Download RAIRE format' (give it a little while to run – it's a big file).

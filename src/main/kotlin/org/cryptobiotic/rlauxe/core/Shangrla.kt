@@ -31,6 +31,7 @@ data class AuditContest (
     }
 }
 
+// TODO make this memory efficient
 open class Mvr(
     val id: String,
     val votes: Map<String, Map<String, Int>>, // contest : candidate : vote

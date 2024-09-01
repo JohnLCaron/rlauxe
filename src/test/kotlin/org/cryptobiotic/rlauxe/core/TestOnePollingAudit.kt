@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.Stopwatch
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.max
 
 import kotlin.math.min

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.random.Random
+import kotlin.text.appendLine
 
 //// covers for numpy: will be replaced
 
@@ -140,7 +141,7 @@ fun randomPermute(samples : DoubleArray): DoubleArray {
 interface SampleFn {
     fun sample(): Double
     fun reset()
-    fun sampleMean(): Double
+    fun popMean(): Double
     fun N(): Int
 }
 
@@ -162,18 +163,34 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleF
         selectedIndices.clear()
     }
 
-    override fun sampleMean() = assortValues.average()
+    override fun popMean() = assortValues.average()
+    override fun N() = N
+}
+
+class PollWithReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
+    val N = cvrs.size
+    val sampleMean = cvrs.map{ ass.assort(it) }.average()
+
+    override fun sample(): Double {
+        val idx = Random.nextInt(N) // withoutReplacement
+        return ass.assort(cvrs[idx])
+    }
+
+    override fun reset() {
+    }
+
+    override fun popMean() = sampleMean
     override fun N() = N
 }
 
 class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
-    val sampleMean: Double
+    val sampleMean = cvrs.map{ ass.assort(it) }.average()
     var idx = 0
+
     init {
         reset()
-        sampleMean = cvrs.map { ass.assort(it)}.average()
     }
 
     override fun sample(): Double {
@@ -186,7 +203,7 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
         idx = 0
     }
 
-    override fun sampleMean() = sampleMean
+    override fun popMean() = sampleMean
     override fun N() = N
 }
 
@@ -212,7 +229,7 @@ class CompareWithoutReplacement(val cvrs : List<Cvr>, val cass: ComparisonAssort
         idx = 0
     }
 
-    override fun sampleMean() = sampleMean
+    override fun popMean() = sampleMean
     override fun N() = N
 }
 

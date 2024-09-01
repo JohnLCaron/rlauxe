@@ -22,7 +22,7 @@ class TestAlphaMart {
                 " testWithSampleMean ratio=${"%5.4f".format(ratio)} " +
                         "eta0=${"%5.4f".format(result.eta0)} " +
                         "voteDiff=${"%4d".format(voteDiff.toInt())} " +
-                        "sampleCount=${df.format(result.sampleCount.toInt())} " +
+                        "sampleCount=${df.format(result.sampleCountAvg())} " +
                         // "sampleMean=${"%5.4f".format(result.sampleMean)} " +
                         "cumulhist=${result.hist!!.cumul()}" +
                         // "fail=${(result.failPct * nrepeat).toInt()} " +
@@ -37,13 +37,13 @@ fun runAlphaMart(
     drawSample: SampleFn,
     maxSamples: Int,
     d: Int = 500,
+    f: Double = 0.0,
     genRatio: Double,
-    eta0: Double = drawSample.sampleMean(),
+    eta0: Double = drawSample.popMean(),
     withoutReplacement: Boolean = true,
     nrepeat: Int = 1,
 ): RepeatedResult {
     val N = drawSample.N()
-    val f = 0.0
     val t = 0.5
     val upperBound = 1.0
     val minsd = 1.0e-6
@@ -60,12 +60,12 @@ fun runAlphaMart(
         withoutReplacement = withoutReplacement
     )
 
-    var sampleCountSum = 0
     var sampleMeanSum = 0.0
     var fail = 0
     var nsuccess = 0
     val hist = Histogram(1000) // bins of 1000
     val status = Histogram(1) // ordinal value of
+    val welford = Welford()
 
     repeat(nrepeat) {
         drawSample.reset()
@@ -74,16 +74,25 @@ fun runAlphaMart(
         sampleMeanSum += testH0Result.sampleMean
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
+            welford.update(N.toDouble())
+            hist.add(N)
         } else {
             nsuccess++
-            sampleCountSum += testH0Result.sampleCount
+            welford.update(testH0Result.sampleCount.toDouble())
             hist.add(testH0Result.sampleCount)
         }
         if (showDetail) println(" $it $testH0Result")
     }
 
-    val sampleNumberAvg = sampleCountSum.toDouble() / nsuccess
     val failAvg = fail.toDouble() / nrepeat
     val sampleMeanAvg = sampleMeanSum / nrepeat
-    return RepeatedResult(eta0, genRatio, sampleNumberAvg, sampleMeanAvg, failAvg, hist, status)
+    // val eta0: Double,
+    //                          val trueMean: Double,
+    //                          val reps: Int,
+    //                          val popMean: Double,
+    //                          val sampleCountAvg: Double,
+    //                          val failPct : Double,
+    //                          val hist: Histogram? = null,
+    //                          val status
+    return RepeatedResult(eta0=eta0, genRatio, nrepeat, sampleMean=sampleMeanAvg, welford, failAvg, hist, status)
 }

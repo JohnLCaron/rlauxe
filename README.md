@@ -1,10 +1,10 @@
 # rlauxe
-last update: 11/30/2024
+last update: 09/01/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
-WORK IN PROGRESS
+**WORK IN PROGRESS**
 
 Table of Contents
 <!-- TOC -->
@@ -22,7 +22,9 @@ Table of Contents
     * [Sampling with or without replacement](#sampling-with-or-without-replacement)
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [BRAVO testing statistic](#bravo-testing-statistic)
+    * [Questions](#questions)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
+  * [Sample size simulations](#sample-size-simulations)
 <!-- TOC -->
 
 ## Papers
@@ -55,15 +57,15 @@ This formulation unifies polling audits and comparison audits, with or without r
 be divided into _strata_, each of which is sampled independently (_stratified sampling_), or to use
 batches of ballot cards instead of individual cards (_cluster sampling_).
 
-| term      | definition                                                                                    |
-|-----------|-----------------------------------------------------------------------------------------------|
-| N 	       | the number of ballot cards validly cast in the contest                                        |
-| risk	     | we want to confirm or reject the null hypothesis with risk level α.                           |
+| term      | definition                                                                                     |
+|-----------|------------------------------------------------------------------------------------------------|
+| N         | the number of ballot cards validly cast in the contest                                         |
+| risk	     | we want to confirm or reject the null hypothesis with risk level α.                            |
 | assorter  | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
-| assertion | the mean of assorter values is > 1/2: "half-average assertion"                                |
-| estimator | estimates the true population mean from the sampled assorter values.                          |
-| test      | is the statistical method to test if the assertion is true. aka "risk function".              |
-| audit     | iterative process of picking ballots and checking if all the assertions are true.             |
+| assertion | the mean of assorter values is > 1/2: "half-average assertion"                                 |
+| estimator | estimates the true population mean from the sampled assorter values.                           |
+| test      | is the statistical method to test if the assertion is true. aka "risk function".               |
+| audit     | iterative process of picking ballots and checking if all the assertions are true.              |
 
 ### Comparison audits vs polling audits
 
@@ -252,37 +254,45 @@ Sampling with replacement means that this value is always µ == 1/2.
 
 For sampling without replacement from a population with mean µ, after draw j - 1, the mean of
 the remaining numbers is 
-`    (N * µ − Sum(X^j-1)/(N − j + 1).
-`
+`(N * µ − Sum(X^j-1)/(N − j + 1).`
 If this ever becomes less than zero, the null hypothesis is certainly false. When allowed to sample all N
 values without replacement, eventually this value becomes less than zero.
 
 ### Truncated shrinkage estimate of the population mean
 
-This estimate function can be anything, but it highly affects the efficiency.
+The estimate function can be anything, but it strongly affects the efficiency.
 
 See section 2.5.2 of ALPHA for a function with parameters eta0, c and d.
 
 See SHANGRLA shrink_trunc() in NonnegMean.py for an updated version with additional parameter f.
 
 ````
-        sample mean is shrunk towards eta, with relative weight d compared to a single observation,
-        then that combination is shrunk towards u, with relative weight f/(stdev(x)).
+sample mean is shrunk towards eta, with relative weight d compared to a single observation,
+then that combination is shrunk towards u, with relative weight f/(stdev(x)).
 
-        The result is truncated above at u*(1-eps) and below at m_j+etaj(c,j)
-        Shrinking towards eta stabilizes the sample mean as an estimate of the population mean.
-        Shrinking towards u takes advantage of low-variance samples to grow the test statistic more rapidly.
+The result is truncated above at u*(1-eps) and below at m_j+etaj(c,j)
+Shrinking towards eta stabilizes the sample mean as an estimate of the population mean.
+Shrinking towards u takes advantage of low-variance samples to grow the test statistic more rapidly.
 
-        // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
-        // (if the sample mean approaches µi or less), we shall take epsi := c/sqrt(d + i − 1) for a nonnegative constant c,
-        // for instance c = (η0 − µ)/2.
-        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , 1), where ǫi → 0 as the sample size grows.
+// Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
+// (if the sample mean approaches µi or less), we shall take epsi := c/sqrt(d + i − 1) for a nonnegative constant c,
+// for instance c = (η0 − µ)/2.
+// The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , 1), where ǫi → 0 as the sample size grows.
 
-        val weighted = ((d * eta0 + sampleSum) / (d + lastj - 1) + u * f / sdj3) / (1 + f / sdj3)
-        val npmax = max( weighted, mean2 + c / sqrt((d + lastj - 1).toDouble()))  // 2.5.2 "choosing ǫi"
-        return min(u * (1 - eps), npmax)
+val weighted = ((d * eta0 + sampleSum) / (d + lastj - 1) + u * f / sdj3) / (1 + f / sdj3)
+val npmax = max( weighted, mean2 + c / sqrt((d + lastj - 1).toDouble()))  // 2.5.2 "choosing ǫi"
+return min(u * (1 - eps), npmax)
 ````
 
+````
+Choosing d. As d → ∞, the sample size for ALPHA approaches that of BRAVO, for
+binary data. The larger d is, the more strongly anchored the estimate is to the reported vote
+shares, and the smaller the penalty ALPHA pays when the reported results are exactly correct.
+Using a small value of d is particularly helpful when the true population mean is far from the
+reported results. The smaller d is, the faster the method adapts to the true population mean,
+but the higher the variance is. Whatever d is, the relative weight of the reported vote shares
+decreases as the sample size increases.
+````
 ### BRAVO testing statistic
 
 BRAVO is ALPHA with the following restrictions:
@@ -298,10 +308,12 @@ Nℓ is the number of votes reported for candidate ℓ: η is not updated as dat
 
 ### Questions
 
-Is ALPHA dependent on the ordering of the sample? Maybe no, since multiplication is commutative ?? Depends on estimFn?
-    "The draws must be in random order, or the sequence is not a supermartingale under the null"
+Is ALPHA dependent on the ordering of the sample? YES
+_"The draws must be in random order, or the sequence is not a supermartingale under the null"_
 
-Is ALPHA dependent on N? Only to test sampleSum > N * t ??
+Is ALPHA dependent on N? Only to test sampleSum > N * t ?? 
+I think this means that one needs the same number of samples for 100, 1000, 1000000 etc. 
+So its highly effective (as percentage of sampling) as N increases.
 
 Is sampling without replacement more efficient than with replacement? Should be.
 
@@ -311,16 +323,16 @@ Options
 * ContestType: PLURALITY, APPROVAL, SUPERMAJORITY, IRV
 * AuditType: POLLING, CARD_COMPARISON, ONEAUDIT 
 * SamplingType: withReplacement, withoutReplacement
-*
 * use_styles: do we know what ballots have which contests? Can sample from just those??
-* do we have CVRs for all ballots? with/without phantom ballots
-* use batches (cluster sampling)
+* do we have CVRs for all ballots? with/without phantom ballots?
+* are we using batches (cluster sampling)?
 
 
 ## Stratified audits using OneAudit
 
-Deal for now with one contest at a time.
+Deal with one contest at a time for now .
 
+````
 Let bi denote the true votes on the ith ballot card; there are N ballots in all. 
 Let ci denote the voting system’s interpretation of the ith card. Suppose we
 have a CVR ci for every ballot card whose index i is in C. The cardinality of C is
@@ -328,7 +340,6 @@ have a CVR ci for every ballot card whose index i is in C. The cardinality of C 
 which reported assorter subtotals are available. For instance Gg might comprise
 all ballots for which no CVR is available or all ballots cast in a particular precinct.
 
-````
 A(bi) is the assort value of the ith ballot, Ā(b) its average value = Sum(A(bi))/N over all ballots
 A(ci) is the assort value of the ith CVR, Ā(c) its average value = Sum(A(ci))/N over all ballots (note using N) 
 With subscript its just over that set Ā_Gg(c) = Sum(A(ci)) / |Gg|, ci in Gg.
@@ -349,26 +360,45 @@ Following SHANGRLA Section 3.2 define
     and Ā(b) > 1/2 iff B̄(b) > 1/2
 
     see OneAudit section 2.3
-
 ````
 
 See "Algorithm for a CLCA using ONE CVRs from batch subtotals" in Section 3.
-
-This algorithm be made more efficient statistically and logistically in a variety
+````
+This algorithm can be made more efficient statistically and logistically in a variety
 of ways, for instance, by making an affine translation of the data so that the
 minimum possible value is 0 (by subtracting the minimum of the possible over-
 statement assorters across batches and re-scaling so that the null mean is still
 1/2) and by starting with a sample size that is expected to be large enough to
 confirm the contest outcome if the reported results are correct.
-
+````
 See "Auditing heterogenous voting systems" Section 4 for comparision to SUITE
-
-the statistical tests used in RLAs are not affine equivariant because
+````
+The statistical tests used in RLAs are not affine equivariant because
 they rely on a priori bounds on the assorter values. The original assorter values
 will generally be closer to the endpoints of [0, u] than the transformed values
 are to the endpoints of [0, 2u/(2u − v)]
 
-An affine transformation of the over-
-statement assorter values can move them back to the endpoints of the support
+An affine transformation of the overstatement assorter values can move them back to the endpoints of the support
 constraint by subtracting the minimum possible value then re-scaling so that the
-null mean is 1/2 once again, which reproduces the original assorter
+null mean is 1/2 once again, which reproduces the original assorter.
+````
+
+## Sample size simulations
+
+See [N-theta plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1922862363#gid=1922862363)
+
+minimum winning % for RLA to be useful (Plot 3)
+
+| N      | max sample = 20% | max sample = 10% |
+|--------|------------------|------------------|
+| 1000   | 60               | 63?              |
+| 5000   | 54               | 56?              |
+| 10000  | 53               | 54               |
+| 20000  | 52               | 53               |
+| 100000 | 51               | 51.5?            |
+
+* RLA cant help for close elections unless N is large
+* seems like this is because sample size is approx. independent of N (Plot 1)
+* sample size approx 1/margin as N -> inf. Something more complicated as margin -> 0. (Plot 2b)
+* variance is quite large (Plot 4)
+

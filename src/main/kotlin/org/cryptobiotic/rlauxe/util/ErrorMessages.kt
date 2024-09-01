@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.reader
+package org.cryptobiotic.rlauxe.util
 
 import com.github.michaelbull.result.Err
 

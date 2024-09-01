@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.reader
 
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.*
 
 class TestDominion {
@@ -15,5 +17,14 @@ class TestDominion {
     @Test
     fun test_read_cvrs_old_format() {
         readDominionJsonFromFileOld(dataDir + "test_5.2.18.2.Dominion.json")
+    }
+}
+
+fun showVotes(cvrs: List<Cvr>) {
+    // count actual votes
+    val votes: Map<String, Map<String, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
+    votes.forEach { key, cands ->
+        println("contest ${key} ")
+        cands.forEach { println("  ${it} ${it.value.toDouble()/cvrs.size}") }
     }
 }

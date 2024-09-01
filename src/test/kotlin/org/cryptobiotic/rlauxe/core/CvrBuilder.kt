@@ -9,11 +9,54 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     repeat(ncards) {
         val votes = mutableMapOf<String, Map<String, Int>>()
         val random = Random.nextDouble(1.0)
-        val cand = if (random < .5 + margin) "A" else "B"
+        val cand = if (random < .5 + margin/2.0) "A" else "B"
         votes["AB"] = mapOf(cand to 1)
         result.add(Cvr("card-$it", votes))
     }
     return result
+}
+
+fun makeCvrsByExactMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
+    val randomCvrs = mutableListOf<Cvr>()
+    repeat(ncards) {
+        val votes = mutableMapOf<String, Map<String, Int>>()
+        val random = Random.nextDouble(1.0)
+        val cand = if (random < .5 + margin/2.0) "A" else "B"
+        votes["AB"] = mapOf(cand to 1)
+        randomCvrs.add(Cvr("card-$it", votes))
+    }
+    val expectedAVotes = (ncards * (.5 + margin/2)).toInt()
+    val actualAvotes = randomCvrs.map {  it.hasMarkFor("AB", "A")}.sum()
+    val needToChangeVotesToA = expectedAVotes - actualAvotes
+    var changed = 0
+    // we need more A votes, needToChangeVotesToA > 0
+    if (needToChangeVotesToA > 0) {
+        while (changed < needToChangeVotesToA) {
+            val cvrIdx = Random.nextInt(ncards)
+            val cvr = randomCvrs[cvrIdx]
+            if (cvr.hasMarkFor("AB", "B") == 1) {
+                val votes = mutableMapOf<String, Map<String, Int>>()
+                votes["AB"] = mapOf("A" to 1)
+                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx",  votes)
+                changed++
+            }
+        }
+    } else {
+        // we need more B votes, needToChangeVotesToA < 0
+        while (changed > needToChangeVotesToA) {
+            val cvrIdx = Random.nextInt(ncards)
+            val cvr = randomCvrs[cvrIdx]
+            if (cvr.hasMarkFor("AB", "A") == 1) {
+                val votes = mutableMapOf<String, Map<String, Int>>()
+                votes["AB"] = mapOf("B" to 1)
+                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx",  votes)
+                changed--
+            }
+        }
+    }
+    val checkAvotes = randomCvrs.map {  it.hasMarkFor("AB", "A")}.sum()
+    require(checkAvotes == expectedAVotes)
+    return randomCvrs
 }
 
 fun makeCvrsByCount(ncards: Int, count: Int) : List<Cvr> {

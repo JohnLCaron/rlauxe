@@ -19,6 +19,30 @@ enum class TestH0Status {
 
 data class TestH0Result(val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>)
 
+data class RepeatedResult(val eta0: Double,
+                          val genRatio: Double,
+                          val reps: Int,
+                          val sampleMean: Double,
+                          val sampleCount: Welford,
+                          val failPct : Double,
+                          val hist: Histogram? = null,
+                          val status: Histogram? = null,
+) {
+
+    fun sampleCountAvg(): Int {
+        val (avg, _, _) = sampleCount.result()
+        return avg.toInt()
+    }
+
+    override fun toString() = buildString {
+        appendLine("RepeatedResult(eta0=$eta0, sampleMean=$sampleMean,failPct=$failPct")
+        val (avg, v, _) = sampleCount.result()
+        appendLine(" nsample avg=${avg.toInt()} stddev = ${sqrt(v)} over ${reps} reps")
+        if (hist != null) appendLine("  hist=${hist.toStringBinned()}")
+        if (status != null) appendLine("  status=${status.toString(listOf("RejectNull","SampleSum","LimitReached"))}")
+    }
+}
+
 private val eps = 2.220446049250313e-16
 
 class AlphaMart(

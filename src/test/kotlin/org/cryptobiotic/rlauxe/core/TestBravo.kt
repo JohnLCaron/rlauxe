@@ -3,21 +3,6 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.random.Random
 import kotlin.test.Test
 
-data class RepeatedResult(val eta0: Double,
-                          val trueMean: Double,
-                          val sampleCount: Double,
-                          val sampleMean: Double,
-                          val failPct : Double,
-                          val hist: Histogram? = null,
-                          val status: Histogram? = null,
-) {
-    override fun toString() = buildString {
-        appendLine("RepeatedResult(eta0=$eta0, trueMean=$trueMean, sampleCount=$sampleCount, sampleMean=$sampleMean, failPct=$failPct")
-        if (hist != null) appendLine("  hist=${hist.toStringBinned()}")
-        if (status != null) appendLine("  status=${status.toString(listOf("RejectNull","SampleSum","LimitReached"))}")
-    }
-}
-
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
 // A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
 class TestBravo  {
@@ -37,7 +22,7 @@ class TestBravo  {
         val results = mutableListOf<RepeatedResult> ()
         etas.forEach { results.addAll(runBravoRepeat(it, trueMeans, false)) }
 
-        show("sampleCount", etas, trueMeans, results)
+        show("sampleCountAvg", etas, trueMeans, results)
         // show("sampleMean", etas, trueMeans, results)
         show("failAvg", etas, trueMeans, results)
     }
@@ -51,7 +36,7 @@ class TestBravo  {
         val results = mutableListOf<RepeatedResult> ()
         etas.forEach { results.addAll(runBravoRepeat(it, trueMeans, true)) }
 
-        show("sampleCount", etas, trueMeans, results)
+        show("sampleCountAvg", etas, trueMeans, results)
         // show("sampleMean", etas, trueMeans, results)
         show("failPct", etas, trueMeans, results)
     }
@@ -73,7 +58,7 @@ class TestBravo  {
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement)
         val sampler = GenerateAssorterValue(trueMean)
 
-        var sampleCountSum = 0
+        val welford = Welford()
         var sampleMeanSum = 0.0
         var fail = 0
         var nsuccess = 0
@@ -84,13 +69,12 @@ class TestBravo  {
                 fail++
             } else {
                 nsuccess++
-                sampleCountSum += testH0Result.sampleCount
+                welford.update(testH0Result.sampleCount.toDouble())
             }
         }
-        val sampleNumberAvg = sampleCountSum.toDouble() / nsuccess
         val failAvg = fail.toDouble() / nrepeat
         val sampleMeanAvg = sampleMeanSum / nrepeat
-        return RepeatedResult(eta0, trueMean, sampleNumberAvg, sampleMeanAvg, failAvg)
+        return RepeatedResult(eta0, trueMean, nrepeat, sampleMeanAvg, welford, failAvg)
     }
 
 
@@ -109,7 +93,7 @@ class TestBravo  {
             println(" testWithSampleMean ratio=${"%5.4f".format(ratio)} "+
                     "eta0=${"%5.4f".format(result.eta0)} " +
                     "voteDiff=${"%4d".format(voteDiff.toInt())} " +
-                    "sampleCount=${df.format(result.sampleCount.toInt())} " +
+                    "sampleCount=${df.format(result.sampleCountAvg())} " +
                     // "sampleMean=${"%5.4f".format(result.sampleMean)} " +
                     "cumulhist=${result.hist!!.cumul()}" +
                     // "fail=${(result.failPct * nrepeat).toInt()} " +
@@ -126,7 +110,7 @@ class TestBravo  {
         var fail = 0
         var nsuccess = 0
 
-        val eta0 = drawSample.sampleMean()
+        val eta0 = drawSample.popMean()
         val estimFn = FixedMean(eta0)
         val alpha = AlphaMart(
             estimFn = estimFn,
@@ -136,6 +120,7 @@ class TestBravo  {
         )
         val hist = Histogram(1000)
         val status = Histogram(1)
+        val welford = Welford()
 
         repeat(nrepeat) {
             drawSample.reset()
@@ -146,7 +131,7 @@ class TestBravo  {
                 fail++
             } else {
                 nsuccess++
-                sampleCountSum += testH0Result.sampleCount
+                welford.update(testH0Result.sampleCount.toDouble())
                 hist.add(testH0Result.sampleCount)
             }
         }
@@ -154,7 +139,7 @@ class TestBravo  {
         val sampleNumberAvg = sampleCountSum.toDouble() / nsuccess
         val failAvg = fail.toDouble() / nrepeat
         val sampleMeanAvg = sampleMeanSum / nrepeat
-        return RepeatedResult(eta0, trueMean, sampleNumberAvg, sampleMeanAvg, failAvg, hist, status)
+        return RepeatedResult(eta0, trueMean, nrepeat, sampleMeanAvg, welford, failAvg, hist, status)
     }
 
 }
@@ -168,8 +153,8 @@ fun show(title: String, eta0s: List<Double>, trueMeans: List<Double>, results: L
     val eta0Map = mutableMapOf<Double, MutableMap<Double, Double>>()
     results.forEach { result ->
         val mlist = eta0Map.getOrPut(result.eta0) { mutableMapOf() }
-        mlist[result.trueMean] =  when (title) {
-            "sampleCount" -> result.sampleCount
+        mlist[result.genRatio] =  when (title) {
+            "sampleCountAvg" -> result.sampleCountAvg().toDouble()
             "sampleMean" -> result.sampleMean
             else -> result.failPct
         }
@@ -263,6 +248,6 @@ class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
     override fun reset() {
        // noop
     }
-    override fun sampleMean() = samples.average()
+    override fun popMean() = samples.average()
     override fun N() = N
 }

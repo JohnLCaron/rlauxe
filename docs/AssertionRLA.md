@@ -22,10 +22,19 @@ The tool requires as input:
 + json files of assertions for IRV contests (one file per IRV contest)
 + human reading of voter intent from the paper cards selected for audit
 
-`use_style` controls whether the sample is drawn from all cards (`use_style == False`) or card style information is used
+The tool helps select cards for audit, and reports when the audit has found sufficiently strong evidence to stop.
+
+The tool exports a log of all the audit inputs except the CVR file, but including the auditors' manually determined voter intent from the audited cards.
+
+
+### phantoms-to-evil-zombies
+
+The `use_style` parameter controls whether the sample is drawn from all cards (`use_style == False`) or card style information is used
 to target the cards that purport to contain each contest (`use_style == True`).
-In the current implementation, card style information is inferred from cast-vote records, with additional 'phantom' CVRs if there could be more cards that contain a contest than is accounted for in the CVRs.
-Errors in the card style information are treated conservatively using the  "phantoms-to-evil-zombies" (~2EZ) approach ([Banuelos & Stark, 2012](https://arxiv.org/abs/1207.3413)) so that the risk limit remains valid, even if the CVRs misrepresent
+In the current implementation, card style information is inferred from cast-vote records, with additional 'phantom' CVRs 
+if there could be more cards that contain a contest than is accounted for in the CVRs.
+Errors in the card style information are treated conservatively using the  "phantoms-to-evil-zombies" (~2EZ) approach 
+([Banuelos & Stark, 2012](https://arxiv.org/abs/1207.3413)) so that the risk limit remains valid, even if the CVRs misrepresent
 which cards contain which contests.
 
 The two ways of sampling are treated differently.
@@ -35,27 +44,27 @@ It is assumed that every CVR corresponds to a card in the manifest, but there mi
 be cards cast in the contest for which there is no corresponding CVR. In that case,
 phantom CVRs are created to ensure that the audit is still truly risk-limiting.
 
-Given an independent (i.e., not relying on the voting system) upper bound on the number of cards that contain the contest, if the number of CVRs that contain the contest does not exceed that bound, we can sample from paper purported to contain the contest and use the ~2EZ approach to deal with missing CVRs. This can greatly increase the efficiency of the audit if
+Given an independent (i.e., not relying on the voting system) upper bound on the number of cards that contain the contest, 
+if the number of CVRs that contain the contest does not exceed that bound, we can sample from paper purported to contain 
+the contest and use the ~2EZ approach to deal with missing CVRs. This can greatly increase the efficiency of the audit if
 some contests appear on only a small percentage of the cast cards ([Glazer, Spertus, and Stark, 2021](https://dl.acm.org/doi/10.1145/3457907)).
 If there are more CVRs than the upper bound on the number of cards, extra CVRs can be deleted provided
 that deletion does not change any contest outcome. See [Stark, 2022](https://arxiv.org/abs/2207.01362).
 (However, if there more CVRs than cards, that is evidence of a process failure.)
 
-Any sampled phantom card (i.e., a card for which there is no CVR) is treated as if its CVR is a non-vote (which it is), and as if its MVR was least favorable (an "evil zombie" producing the greatest doubt in every assertion, separately). Any sampled card for which there is a CVR is compared to its corresponding CVR.
-If the card turns out not to contain the contest (despite the fact that the CVR says it does), the MVR is treated in the least favorable way for each assertion (i.e., as a zombie rather than as a non-vote).
+Any sampled phantom card (i.e., a card for which there is no CVR) is treated as if its CVR is a non-vote (which it is), 
+and as if its MVR was least favorable (an "evil zombie" producing the greatest doubt in every assertion, separately). 
+Any sampled card for which there is a CVR is compared to its corresponding CVR.
+If the card turns out not to contain the contest (despite the fact that the CVR says it does), 
+the MVR is treated in the least favorable way for each assertion (i.e., as a zombie rather than as a non-vote).
 
-The tool helps select cards for audit, and reports when the audit has found sufficiently strong evidence to stop.
-
-The tool exports a log of all the audit inputs except the CVR file, but including the auditors' manually determined voter intent from the audited cards.
-
-The pre-10/2021 version used a single sample to audit all contests. 
 
 ### Internal workflow
 
 + Read overall audit information (including the seed) and contest information
 + Read assertions for IRV contests and construct assertions for all other contests
 + Read ballot manifest
-+ Read cvrs. Every CVR should have a corresponding manifest entry.
++ Read cvrs; Every CVR should have a corresponding manifest entry.
 + Prepare ~2EZ:
     - `N_phantoms = max_cards - cards_in_manifest`
     - If `N_phantoms < 0`, complain
@@ -97,10 +106,11 @@ The pre-10/2021 version used a single sample to audit all contests.
 + Report
 + Estimate incremental sample size if any assorter nulls have not been rejected
 + Draw incremental sample; etc
+
+
 # Audit parameters.
 
-The overall audit involves information that is the same across contests, encapsulated in
-a dict called `audit`:
+The overall audit involves information that is the same across contests:
 
 * `seed`: the numeric seed for the pseudo-random number generator used to draw sample (for SHA256 PRNG)
 * `sim_seed`: seed for simulations to estimate sample sizes (for Mersenne Twister PRNG)
@@ -111,9 +121,10 @@ a dict called `audit`:
 * `sample_file`: filename for sampled card identifiers (output)
 * `mvr_file`: filename for manually ascertained votes from sampled cards (input)
 * `log_file`: filename for audit log (output)
-* `error_rate_1`: expected rate of 1-vote overstatements. Recommended value $\ge$ 0.001 if there are hand-marked ballots. Larger values increase the initial sample size, but make it more likely that the audit will conclude after a single round even if the audit finds errors
+* `error_rate_1`: expected rate of 1-vote overstatements. Recommended value $\ge$ 0.001 if there are hand-marked ballots. 
+      Larger values increase the initial sample size, but make it more likely that the audit will conclude after a single round even if the audit finds errors
 * `error_rate_2`: expected rate of 2-vote overstatements. 2-vote overstatements should be extremely rare.
-  Recommended value: 0. Larger values increase the initial sample size, but make it more likely that the audit will conclude after a single round even if the audit finds errors
+      Recommended value: 0. Larger values increase the initial sample size, but make it more likely that the audit will conclude after a single round even if the audit finds errors
 * `reps`: number of replications to use to estimate sample sizes. If `reps is None`, uses a deterministic method
 * `quantile`: quantile of sample size to estimate. Not used if `reps is None`
 * `strata`: a dict describing the strata. Keys are stratum identifiers; values are dicts containing:
@@ -122,7 +133,7 @@ a dict called `audit`:
     + `use_style`: True if the sample in that stratum uses card-style information.
     + `audit_type` one of Contest.POLLING, Contest.CARD_COMPARISON, Contest.BATCH_COMPARISON but only POLLING and CARD_COMPARISON are currently implemented.
     + `test`: the name of the function to be used to measure risk. Options are `kaplan_markov`,`kaplan_wald`,`kaplan_kolmogorov`,`wald_sprt`,`kaplan_mart`, `alpha_mart`, `betting_mart`.
-      Not all risk functions work with every social choice function or every sampling method.
+        Not all risk functions work with every social choice function or every sampling method.
     + `estim`: the estimator to be used by the `alpha_mart` risk function. Options:
         - `fixed_alternative_mean` (default)
         - `shrink_trunc`
@@ -139,23 +150,24 @@ a dict called `audit`:
     + the values are Contest objects with attributes:
         - `risk_limit`: the risk limit for the audit of this contest
         - `cards`: an upper bound on the number of cast cards that contain the contest
-        - `choice_function`: `Audit.SOCIAL_CHOICE_FUNCTION.PLURALITY`,
-          `Audit.SOCIAL_CHOICE_FUNCTION.SUPERMAJORITY`, or `Audit.SOCIAL_CHOICE_FUNCTION.IRV`
+        - `choice_function`: `PLURALITY`, `SUPERMAJORITY`, or `IRV`
         - `n_winners`: number of winners for majority contests. (Multi-winner IRV, aka STV, is not supported)
         - `share_to_win`: for super-majority contests, the fraction of valid votes required to win, e.g., 2/3.
-          (share_to_win*n_winners must be less than 100%)
+             (share_to_win*n_winners must be less than 100%)
         - `candidates`: list of names or identifiers of candidates
-        - `reported_winners` : list of identifier(s) of candidate(s) reported to have won.
-          Length should equal `n_winners`.
-        - `assertion_file`: filename for a set of json descriptors of Assertions (see technical documentation) that collectively imply the reported outcome of the contest is correct. Required for IRV; ignored for other social choice functions
-        - `audit_type`: the audit strategy. Currently `Audit.AUDIT_TYPE.POLLING (ballot-polling)`,
-          `Audit.AUDIT_TYPE.CARD_COMPARISON` (ballot-level comparison audits), and `Audit.AUDIT_TYPE.ONEAUDIT`
-          are implemented. HYBRID and STRATIFIED are planned.
+        - `reported_winners` : list of identifier(s) of candidate(s) reported to have won. Length should equal `n_winners`.
+        - `assertion_file`: filename for a set of json descriptors of Assertions (see technical documentation) that 
+              collectively imply the reported outcome of the contest is correct. Required for IRV; ignored for other social choice functions
+        - `audit_type`: the audit strategy. Currently `POLLING (ballot-polling)`, `CARD_COMPARISON` (ballot-level comparison audits), and `ONEAUDIT`
+               are implemented. HYBRID and STRATIFIED are planned.
         - `test`: the risk function for the audit. Default is `NonnegMean.alpha_mart`, the alpha supermartingale test
         - `estim`: estimator for the alternative hypothesis for the test. Default is `NonnegMean.shrink_trunc`
         - `use_style`: True to use style information from CVRs to target the sample. False for polling audits or for sampling from all ballots for every contest.
-        - other keys and values are added by the software, including `cvrs`, the number of CVRs that contain the contest, and `p`, the sampling fraction expected to be required to confirm the contest
-    - # How many more cards should be audited?
+        - other keys and values are added by the software, including `cvrs`, the number of CVRs that contain the contest, 
+           and `p`, the sampling fraction expected to be required to confirm the contest
+      
+
+# How many more cards should be audited?
 
 Estimate how many more cards will need to be audited to confirm any remaining contests. The enlarged sample size is based on:
 

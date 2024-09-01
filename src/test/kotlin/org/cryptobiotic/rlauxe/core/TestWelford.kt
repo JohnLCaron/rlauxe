@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -20,6 +21,12 @@ class TestWelford {
             assertEquals(pm[idx], wm)
             assertEquals(pv[idx], wv)
         }
+
+        val (wm, wv, swv) = welford.result()
+        println("mean = ${wm}")
+        println("variance = ${wv}")
+        println("sample variance = ${swv}")
+        println("stddev = ${sqrt(wv)}")
     }
 
     @Test
@@ -78,6 +85,7 @@ fun w2(x: DoubleArray): Pair<DoubleArray, DoubleArray> {
 
     println("mean = ${x.average()}")
     println("variance = ${x.variance()}")
+    println("stddev = ${sqrt(x.variance())}")
 
     val last = x.size - 1
     assertEquals(x.average(), mj[last], doublePrecision)

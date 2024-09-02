@@ -281,10 +281,10 @@ class TruncShrinkageProxy(
     val proxy = TruncShrinkage(N = N, upperBound = u, eta0 = mu, c = c, d = d, f = 0.0, minsd = 1.0)
 
     override fun eta(samples: DoubleArray): DoubleArray {
-        val prevSample = mutableListOf<Double>()
+        val prevSample = PrevSamples()
         val result: List<Double> = samples.map {
             val eta = proxy.eta(prevSample)
-            prevSample.add(it)
+            prevSample.addSample(it)
             eta
         }
         return result.toDoubleArray()

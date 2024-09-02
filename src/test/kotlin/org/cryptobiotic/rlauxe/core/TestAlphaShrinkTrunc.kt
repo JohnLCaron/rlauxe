@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.SampleFromList
 import org.cryptobiotic.rlauxe.doublePrecision
-import kotlin.collections.get
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals

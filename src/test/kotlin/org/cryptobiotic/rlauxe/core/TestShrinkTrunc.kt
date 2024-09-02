@@ -24,12 +24,12 @@ class TestShrinkTrunc {
 
         val N = x.size
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
-        val assortValues = mutableListOf<Double>()
+        val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
             etaValues.add(eta)
-            assortValues.add(it)
+            assortValues.addSample(it)
         }
         println("testTruncShrinkageLeadingZeroes= $etaValues")
         doublesAreClose(expected, etaValues)
@@ -49,12 +49,12 @@ class TestShrinkTrunc {
 
         val N = x.size
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
-        val assortValues = mutableListOf<Double>()
+        val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
             etaValues.add(eta)
-            assortValues.add(it)
+            assortValues.addSample(it)
         }
         println("testTruncShrinkageLeadingOnes= $etaValues")
         doublesAreClose(expected, etaValues)
@@ -76,13 +76,13 @@ class TestShrinkTrunc {
 
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
 
-        val assortValues = mutableListOf<Double>()
+        val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
             println(" eta = $eta")
             etaValues.add(eta)
-            assortValues.add(it)
+            assortValues.addSample(it)
         }
 
         val expected = listOf(0.51, 0.55454545, 0.59166667, 0.62307692, 0.65, 0.67333333, 0.69375, 0.65294118, 0.61666667, 0.58421053)
@@ -119,13 +119,13 @@ class TestShrinkTrunc {
             c = c
         )
 
-        val assortValues = mutableListOf<Double>()
+        val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
             println(" eta = $eta")
             etaValues.add(eta)
-            assortValues.add(it)
+            assortValues.addSample(it)
         }
 
         // test_leading_zeros_wreplace=alpha_mart=array([0.51      , 0.50150756, 0.50144338, 0.50138675, 0.50133631,

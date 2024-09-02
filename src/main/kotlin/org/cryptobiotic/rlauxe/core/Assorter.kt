@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.core
 abstract class Assorter(
     val contest: AuditContest,
     val upperBound: Double, // a priori upper bound on the value the assorter can take
-    val winner: String,
-    val loser: String
+    val winner: Int,
+    val loser: Int
 ): AssorterFunction {
     abstract override fun assort(mvr: Mvr): Double
 
@@ -13,22 +13,22 @@ abstract class Assorter(
     }
 }
 
-class PluralityAssorter(contest: AuditContest, winner: String, loser: String): Assorter(contest, 1.0, winner, loser) {
+class PluralityAssorter(contest: AuditContest, winner: Int, loser: Int): Assorter(contest, 1.0, winner, loser) {
     // SHANGRLA section 2, p 4.
     override fun assort(mvr: Mvr): Double {
-        val w = mvr.hasMarkFor(contest.id, winner)
-        val l = mvr.hasMarkFor(contest.id, loser)
+        val w = mvr.hasMarkFor(contest.idx, winner)
+        val l = mvr.hasMarkFor(contest.idx, loser)
         return (w - l + 1) * 0.5
     }
 }
 
-class SupermajorityAssorter(contest: AuditContest, winner: String, loser: String):
+class SupermajorityAssorter(contest: AuditContest, winner: Int, loser: Int):
         Assorter(contest, 1.0 / (2 * contest.minFraction!!), winner, loser) {
 
     // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: Mvr): Double {
-        val w = mvr.hasMarkFor(contest.id, winner)
-        return if (mvr.hasOneVote(contest.id, contest.candidates)) (w / (2 * contest.minFraction!!)) else .5
+        val w = mvr.hasMarkFor(contest.idx, winner)
+        return if (mvr.hasOneVote(contest.idx)) (w / (2 * contest.minFraction!!)) else .5
     }
 }
 
@@ -53,7 +53,7 @@ class ComparisonAssorter(
         return tau / (2 - v/this.assorter.upperBound)
     }
 
-    // Compute the arithmetic mean of the assort value over the cvrs that have this contest, // eq 2
+    /* Compute the arithmetic mean of the assort value over the cvrs that have this contest, // eq 2
     fun mean(mvrs: List<Mvr>, use_style: Boolean = true): Double {
         //           val result = cvr_list.filter { cvr -> if (use_style) cvr.has_contest(this.contest.id) else true }
         return mvrs.filter { mvr ->  if (use_style) mvr.hasContest(this.assorter.contest.id) else true }
@@ -86,6 +86,8 @@ class ComparisonAssorter(
 
         return cvr_assort - mvr_assort
     }
+
+     */
 
     //     ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper                 overstatement error (SHANGRLA eq 2, p 9)
     //      bi is the manual voting record (MVR) for the ith ballot

@@ -14,47 +14,56 @@ interface ComparisonAssorterFunction {
 
 data class AuditContest (
     val id: String,
+    val idx: Int,
     val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
     var candidates: List<String>,
     val ncards: Int,                // maximum number of valid cards
     val winners: List<String>,
     val minFraction: Double? = null, // supermajority
 ) {
+    val winnersIdx : List<Int>
+    val losersIdx : List<Int>
+
     init {
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
-    }
-    val losers = candidates.filter { !winners.contains(it) }
+        val winnersi = mutableListOf<Int>()
+        val losersi = mutableListOf<Int>()
+        candidates.forEachIndexed { idx, cand ->
+            if (winners.contains(cand)) winnersi.add(idx) else losersi.add(idx)
+        }
+        require(winnersi.isNotEmpty())
+        require(losersi.isNotEmpty())
 
-    init {
-        require(winners.isNotEmpty())
-        require(losers.isNotEmpty())
+        winnersIdx = winnersi.toList()
+        losersIdx = losersi.toList()
     }
+   //  val candidatesIdx = List<Int>(candidates.size) { it }
 }
 
-// TODO make this memory efficient
 open class Mvr(
     val id: String,
-    val votes: Map<String, Map<String, Int>>, // contest : candidate : vote
+    val votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
 ) {
-    fun hasContest(contest_id: String): Boolean = votes[contest_id] != null
+    fun hasContest(contestIdx: Int): Boolean = votes[contestIdx] != null
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
-    fun hasMarkFor(contestId: String, candidate: String): Int {
-        val contestVotes = votes[contestId]
-        return if (contestVotes == null) 0 else contestVotes[candidate] ?: 0
+    fun hasMarkFor(contestIdx: Int, candidateIdx: Int): Int {
+        val contestVotes = votes[contestIdx]
+        return if (contestVotes == null) 0 else contestVotes[candidateIdx] ?: 0
     }
 
     // Is there exactly one vote among the candidates in the contest `contest_id`?
-    fun hasOneVote(contest_id: String, candidates: List<String>): Boolean {
-        val contestVotes = this.votes[contest_id] ?: return false
-        val totalVotes = candidates.map{ contestVotes[it] ?: 0 }.sum() // assumes >= 0
+    // note this always looks at all the votes, differencent from SHANGRLA code
+    fun hasOneVote(contestIdx: Int): Boolean {
+        val contestVotes = this.votes[contestIdx] ?: return false
+        val totalVotes = contestVotes.values.sum() // assumes >= 0
         return (totalVotes == 1)
     }
 }
 
 class Cvr(
     id: String,
-    votes: Map<String, Map<String, Int>>, // contest : candidate : vote
+    votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
     val phantom: Boolean = false
 ): Mvr(id, votes)
 

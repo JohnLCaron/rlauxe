@@ -6,9 +6,31 @@ import kotlin.math.sqrt
 
 private val showDetail = false
 
+interface Samples {
+    fun last(): Double
+    fun size(): Int
+    fun sum(): Double
+}
+
+class PrevSamples() : Samples {
+    private var last = 0.0
+    private var size = 0
+    private var sum = 0.0
+
+    override fun sum() = sum
+    override fun last() = last
+    override fun size() = size
+
+    fun addSample(sample : Double) {
+        sum += sample
+        size++
+        last = sample
+    }
+}
+
 // estimate the population mean for the jth sample from the previous j-1 samples
 interface EstimFn {
-    fun eta(prevSamples: List<Double>): Double
+    fun eta(prevSamples: Samples): Double
 }
 
 enum class TestH0Status {
@@ -66,7 +88,7 @@ class AlphaMart(
         var sampleSum = 0.0        // – S ← 0: sample sum
         var populationMeanIfH0 = 0.5 // – m = µ_j = 1/2: population mean under the null hypothesis = H0
 
-        val sampleAssortValues = mutableListOf<Double>()
+        val sampleAssortValues = PrevSamples()
 
         val m = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
@@ -80,7 +102,7 @@ class AlphaMart(
 
             val etaj = estimFn.eta(sampleAssortValues)
             etajs.add(etaj)
-            sampleAssortValues.add(xj)
+            sampleAssortValues.addSample(xj)
 
             populationMeanIfH0 = this.populationMeanIfH0(sampleNumber, sampleSum)
             m.add(populationMeanIfH0)
@@ -219,13 +241,13 @@ class TruncShrinkage(
     val welford = Welford()
 
     // estimate population mean from previous samples
-    override fun eta(prevSamples: List<Double>): Double {
-        val lastj = prevSamples.size
+    override fun eta(prevSamples: Samples): Double {
+        val lastj = prevSamples.size()
         val dj1 = (d + lastj).toDouble()
 
-        val sampleSum = if (prevSamples.size == 0) 0.0 else {
+        val sampleSum = if (lastj == 0) 0.0 else {
             welford.update(prevSamples.last())
-            prevSamples.subList(0, lastj).sum()
+            prevSamples.sum()  // TODO taking 7/60 of the time
         }
 
         // note stdev not used if f = 0, except as capBelow
@@ -252,14 +274,13 @@ class TruncShrinkage(
         return boundedEst
     }
 
-    // TODO dont we need withReplacement ?
-    fun meanUnderNull(N: Int, t: Double, x: List<Double>): Double {
+    fun meanUnderNull(N: Int, t: Double, x: Samples): Double {
         if (!withoutReplacement) return t  // with replacement
-        if (x.isEmpty()) return t
+        if (x.size() == 0) return t
 
         val sum = x.sum()
         val m1 = (N * t - sum)
-        val m2 = (N - x.size)
+        val m2 = (N - x.size())
         val m3 = m1 / m2
         return m3
     }

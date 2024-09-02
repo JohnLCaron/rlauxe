@@ -22,7 +22,7 @@ class TestDominion {
 
 fun showVotes(cvrs: List<Cvr>) {
     // count actual votes
-    val votes: Map<String, Map<String, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
+    val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
     votes.forEach { key, cands ->
         println("contest ${key} ")
         cands.forEach { println("  ${it} ${it.value.toDouble()/cvrs.size}") }

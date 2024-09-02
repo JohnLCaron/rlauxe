@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.core
 
 data class Assertion(
     val contest: AuditContest,
-    val winner: String,
-    val loser: String,
+    val winner: Int,
+    val loser: Int,
 ) {
     val assorter: AssorterFunction = makeAssorter()
 
@@ -34,8 +34,8 @@ data class PollingAudit(
 
     fun makeAssertions(contest: AuditContest): Pair<AuditContest, List<Assertion>> {
         val assertions = mutableListOf<Assertion>()
-        contest.winners.forEach { winner ->
-            contest.losers.forEach { loser ->
+        contest.winnersIdx.forEach { winner ->
+            contest.losersIdx.forEach { loser ->
                 assertions.add(Assertion(contest, winner, loser))
             }
         }
@@ -47,8 +47,8 @@ data class PollingAudit(
 
 class ComparisonAssertion(
     val contest: AuditContest,
-    val winner: String,
-    val loser: String,
+    val winner: Int,
+    val loser: Int,
     cvrs: Iterable<Cvr>,
 ) {
     val assorter: ComparisonAssorter = makeAssorter(cvrs)
@@ -82,8 +82,8 @@ data class ComparisonAudit(
 
     fun makeAssertions(contest: AuditContest): Pair<AuditContest, List<ComparisonAssertion>> {
         val assertions = mutableListOf<ComparisonAssertion>()
-        contest.winners.forEach { winner ->
-            contest.losers.forEach { loser ->
+        contest.winnersIdx.forEach { winner ->
+            contest.losersIdx.forEach { loser ->
                 assertions.add(ComparisonAssertion(contest, winner, loser, cvrs))
             }
         }

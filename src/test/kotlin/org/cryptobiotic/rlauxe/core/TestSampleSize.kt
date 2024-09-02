@@ -24,7 +24,6 @@ class TestSampleSize {
     val showCalculation = true
     val showContests = false
 
-    //
     fun showSRSnVt(srs: List<SR>, margins: List<Double>) {
         println()
         println("nvotes sampled vs theta = winning percent")
@@ -82,10 +81,8 @@ class TestSampleSize {
 
     @Test
     fun testSampleSizeConcurrent() {
-        // val margins = listOf(.4, .3, .2, .15, .1, .08, .06, .04, .02, .01) // winning percent: 70, 65, 60, 57.5, 55, 54, 53, 52, 51, 50.5
         val margins = listOf(.02, .04, .06, .08, .1, .15, .2, .3, .4) // winning percent: 70, 65, 60, 57.5, 55, 54, 53, 52, 51, 50.5
-        // val Nlist = listOf(1000, 5000, 10000, 20000, 50000) // , 100000)
-        val Nlist = listOf(50000, 20000, 10000, 5000, 1000) // , 100000)
+        val Nlist = listOf(50000, 20000, 10000, 5000, 1000)
         val tasks = mutableListOf<CalcTask>()
 
         var taskIdx = 0
@@ -155,7 +152,7 @@ class TestSampleSize {
         if (!silent) println(" N=${cvrs.size} margin=$margin withoutReplacement")
 
         // count actual votes
-        val votes: Map<String, Map<String, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
         if (!silent && showContests) {
             votes.forEach { key, cands ->
                 println("contest ${key} ")
@@ -185,7 +182,7 @@ class TestSampleSize {
                     maxSamples = N,
                     genRatio = .5 + margin / 2,
                     d = 1000,
-                    nrepeat = 1000,
+                    nrepeat = 10,
                     withoutReplacement = true,
                 )
                 if (!silent) println(result)
@@ -224,13 +221,20 @@ class TestSampleSize {
 
 // 9/01/2024
 // compares well with table 3 of ALPHA
-// eta0 = theta, no divergence of sample from true. 100 repetitions
+// eta0 = theta, no divergence of sample from true. 1000 repetitions
 //
 // nvotes sampled vs theta = winning percent
-//     N,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-//  1000,    960,    897,    739,    597,    477,    396,    221,    121,     61,     36,
-//  5000,   4448,   3470,   2034,   1271,    905,    602,    286,    155,     65,     41,
-// 10000,   8512,   5793,   3056,   1628,    963,    651,    287,    144,     67,     39,
-// 20000,  14431,   8801,   3551,   1747,   1021,    642,    278,    189,     78,     36,
-// 50000,  28287,  13850,   4412,   1916,   1272,    675,    248,    152,     61,     42,
-//100000,  39056,  15671,   4796,   2194,   1088,    647,    291,    164,     68,     44,
+//     N,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+//  1000,    897,    726,    569,    446,    340,    201,    128,     60,     36,
+//  5000,   3447,   1948,   1223,    799,    527,    256,    145,     68,     38,
+// 10000,   5665,   2737,   1430,    871,    549,    266,    152,     68,     38,
+// 20000,   8456,   3306,   1546,    926,    590,    261,    154,     65,     38,
+// 50000,  12225,   3688,   1686,    994,    617,    263,    155,     67,     37,
+//
+// stddev sampled vs theta = winning percent
+//     N,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+//  1000, 119.444, 176.939, 195.837, 176.534, 153.460, 110.204, 78.946, 40.537, 24.501,
+//  5000, 1008.455, 893.249, 669.987, 478.499, 347.139, 176.844, 101.661, 52.668, 28.712,
+// 10000, 2056.201, 1425.911, 891.215, 583.694, 381.797, 199.165, 113.188, 52.029, 27.933,
+// 20000, 3751.976, 2124.064, 1051.194, 656.632, 449.989, 190.791, 123.333, 47.084, 28.173,
+// 50000, 6873.319, 2708.147, 1274.291, 740.712, 475.265, 194.538, 130.865, 51.086, 26.439,

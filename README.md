@@ -25,6 +25,7 @@ Table of Contents
     * [Questions](#questions)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Sample size simulations](#sample-size-simulations)
+    * [compares table 3 of ALPHA](#compares-table-3-of-alpha)
 <!-- TOC -->
 
 ## Papers
@@ -402,3 +403,30 @@ minimum winning % for RLA to be useful (Plot 3)
 * sample size approx 1/margin as N -> inf. Something more complicated as margin -> 0. (Plot 2b)
 * variance is quite large (Plot 4)
 
+### compare table 3 of ALPHA for Polling Audit with replacement
+
+* eta0 = theta (no divergence of sample from true). 
+* 1000 repetitions
+
+nvotes sampled vs theta = winning percent
+
+| N      | 0.510    | 0.520    | 0.530    | 0.540 | 0.550 | 0.575 | 0.600 | 0.650 | 0.7 |
+|--------|----------|----------|----------|-------|------|-------|-------|-------|-----|
+| 1000   |      897 |      726 |      569 | 446   |  340 | 201   | 128   | 60    | 36  |
+| 5000   |     3447 |     1948 |     1223 | 799   |  527 | 256   | 145   | 68    | 38  |
+| 10000  |     5665 |     2737 |     1430 | 871   |  549 | 266   | 152   | 68    | 38  |
+| 20000  |     8456 |     3306 |     1546 | 926   |  590 | 261   | 154   | 65    | 38  |
+| 50000  |    12225 |     3688 |     1686 | 994   |  617 | 263   | 155   | 67    | 37  |
+
+
+stddev samples vs theta 
+
+| N      | 0.510    | 0.520    | 0.530    | 0.540   | 0.550   | 0.575   | 0.600   | 0.650  | 0.700  |
+|--------|----------|----------|----------|---------|---------|---------|---------|--------|--------|
+| 1000   | 119.444  | 176.939  | 195.837  | 176.534 | 153.460 | 110.204 | 78.946  | 40.537 | 24.501 |  
+| 5000   | 1008.455 | 893.249  | 669.987  | 478.499 | 347.139 | 176.844 | 101.661 | 52.668 | 28.712 |  
+| 10000  | 2056.201 | 1425.911 | 891.215  | 583.694 | 381.797 | 199.165 | 113.188 | 52.029 | 27.933 |  
+| 20000  | 3751.976 | 2124.064 | 1051.194 | 656.632 | 449.989 | 190.791 | 123.333 | 47.084 | 28.173 |  
+| 50000  | 6873.319 | 2708.147 | 1274.291 | 740.712 | 475.265 | 194.538 | 130.865 | 51.086 | 26.439 |
+
+* no use for the parameter d in this case. Likely thats us used only for when eta0 != theta

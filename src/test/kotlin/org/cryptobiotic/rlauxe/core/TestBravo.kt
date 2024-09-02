@@ -81,7 +81,6 @@ class TestBravo  {
     @Test
     fun testWithSampleMean() { // Seems stupid not to use the sample mean for et0:
         val randomMeans = listOf(.505, .51, .52, .53, .55, .60)
-        val randomMeans1 = listOf(.505)
         val N = 20_000
         val m = 4000
         val nrepeat = 1000
@@ -198,7 +197,7 @@ fun show(title: String, eta0s: List<Double>, trueMeans: List<Double>, results: L
 // ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
 // Nℓ is the number of votes reported for candidate ℓ: η is not updated as data are collected
 class FixedMean(val eta0: Double): EstimFn {
-    override fun eta(prevSamples: List<Double>): Double {
+    override fun eta(prevSamples: Samples): Double {
         return eta0
     }
 }
@@ -213,8 +212,8 @@ class FixedAlternativeMean(val N: Int, val eta0:Double): EstimFn {
     //            if (isFinite) (N * t - Sp[it]) / (N - j[it] + 1) else t
     //        }
 
-    override fun eta(prevSamples: List<Double>): Double {
-        val j = prevSamples.size + 1
+    override fun eta(prevSamples: Samples): Double {
+        val j = prevSamples.size() + 1
         val sampleSum = prevSamples.sum()
         val m1 = (N * eta0 - sampleSum)
         val m2 = (N - j + 1)

@@ -40,6 +40,7 @@ class TestSampleSize {
 
         mmap.toSortedMap().forEach { dkey, dmap ->
             print("${"%6d".format(dkey)}, ")
+            val sdmap = dmap.toSortedMap()
             dmap.toSortedMap().forEach { nkey, nmap ->
                 print("${"%6d".format(nmap)}, ")
             }
@@ -70,23 +71,50 @@ class TestSampleSize {
         }
     }
 
-    data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
-    data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double)
+    fun showSuccesses(srs: List<SR>, margins: List<Double>, sampleMaxPct: Int, nrepeat : Int) {
+        println()
+        println("% successRLA, for sampleMaxPct = $sampleMaxPct nrepeat=$nrepeat")
+        print("     N, ")
+        val theta = margins.sorted().map { .5 + it * .5 }
+        theta.forEach { print("${"%6.3f".format(it)}, ") }
+        println()
 
-    fun makeSR(N: Int, margin:Double, rr: RepeatedResult): SR {
-        val (sampleCountAvg, sampleCountVar, _)  = rr.sampleCount.result()
+        val mmap = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> success
+        srs.forEach {
+            val dmap = mmap.getOrPut(it.N) { mutableMapOf() }
+            val cumul = it.hist!!.cumul(sampleMaxPct)
+            val pct = (100.0 * cumul) / nrepeat
+            dmap[it.margin] =  pct
+        }
+
+        val smmap = mmap.toSortedMap()
+        smmap.forEach { dkey, dmap ->
+            print("${"%6d".format(dkey)}, ")
+            val sdmap = dmap.toSortedMap()
+            sdmap.forEach { nkey, nmap ->
+                print("${"%6d".format(nmap.toInt())}, ")
+            }
+            println()
+        }
+    }
+
+    data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
+    data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
+
+    fun makeSR(N: Int, margin:Double, rr: AlphaMartRepeatedResult): SR {
+        val (sampleCountAvg, sampleCountVar, _)  = rr.nsamplesNeeded.result()
         val pct = (100.0 * sampleCountAvg / N)
-        return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar))
+        return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar), rr.hist)
     }
 
     @Test
     fun testSampleSizeConcurrent() {
-        val margins = listOf(.02, .04, .06, .08, .1, .15, .2, .3, .4) // winning percent: 70, 65, 60, 57.5, 55, 54, 53, 52, 51, 50.5
-        val Nlist = listOf(50000, 20000, 10000, 5000, 1000)
+        val margins = listOf(.01, .02, .04, .06, .08, .1, .15, .2, .3, .4) // winning percent: 70, 65, 60, 57.5, 55, 54, 53, 52, 51, 50.5
+        val nlist = listOf(50000, 20000, 10000, 5000, 1000)
         val tasks = mutableListOf<CalcTask>()
 
         var taskIdx = 0
-        Nlist.forEach { N ->
+        nlist.forEach { N ->
             margins.forEach { margin ->
                 val cvrs = makeCvrsByExactMargin(N, margin)
                 tasks.add(CalcTask(taskIdx++, N, margin, cvrs))
@@ -95,14 +123,14 @@ class TestSampleSize {
 
         val stopwatch = Stopwatch()
         val nthreads = 20
+        val nrepeat = 10000
 
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val verifierJobs = mutableListOf<Job>()
             repeat(nthreads) {
                 verifierJobs.add(
-                    launchVerifier(taskProducer) {
-                        task -> calculate(task)
+                    launchVerifier(taskProducer) { task -> calculate(task, nrepeat)
                     })
             }
 
@@ -113,10 +141,13 @@ class TestSampleSize {
         println( "did $count tasks ${stopwatch.tookPer(count, "task")}")
         showSRSnVt(calculations, margins)
         showStddevSnVt(calculations, margins)
+        showSuccesses(calculations, margins, 10, nrepeat)
+        showSuccesses(calculations, margins, 20, nrepeat)
+        showSuccesses(calculations, margins, 30, nrepeat)
     }
 
-    fun calculate(task: CalcTask): SR {
-        val rr = testSampleSize(task.margin, task.cvrs, silent = true).first()
+    fun calculate(task: CalcTask, nrepeat: Int): SR {
+        val rr = testSampleSize(task.margin, task.cvrs, nrepeat=nrepeat, silent = true).first()
         val sr = makeSR(task.N, task.margin, rr)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.margin}, ${rr.eta0}, $sr")
         return sr
@@ -147,7 +178,7 @@ class TestSampleSize {
         }
     }
 
-    fun testSampleSize(margin: Double, cvrs: List<Cvr>, silent: Boolean = true): List<RepeatedResult> {
+    fun testSampleSize(margin: Double, cvrs: List<Cvr>, d: Int = 100, nrepeat: Int, silent: Boolean = true): List<AlphaMartRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} margin=$margin withoutReplacement")
 
@@ -170,22 +201,27 @@ class TestSampleSize {
         // Polling Audit
         val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
 
-        val results = mutableListOf<RepeatedResult>()
+        val results = mutableListOf<AlphaMartRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
                 val cvrSampler = PollWithoutReplacement(cvrs, it.assorter)
-                val result = runAlphaMart(
+
+                val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    genRatio = .5 + margin / 2,
-                    d = 1000,
-                    nrepeat = 10,
+                    reportedRatio = .5 + margin / 2,
+                    eta0 = .5 + margin / 2,
+                    d = d,
+                    nrepeat = nrepeat,
                     withoutReplacement = true,
                 )
-                if (!silent) println(result)
+                if (!silent) {
+                    println(result)
+                    println("truePopulationCount=${ff.format(cvrSampler.truePopulationCount())} truePopulationMean=${ff.format(cvrSampler.truePopulationMean())} failPct=${result.failPct} status=${result.status}")
+                }
                 results.add(result)
             }
         }

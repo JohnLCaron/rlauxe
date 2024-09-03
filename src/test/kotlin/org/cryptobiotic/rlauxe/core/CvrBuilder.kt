@@ -16,6 +16,9 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     return result
 }
 
+fun margin2theta(margin: Double) = (.5 + margin/2)
+fun theta2margin(theta: Double) = (2.0 * (theta - .5))
+
 fun makeCvrsByExactMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
@@ -113,8 +116,8 @@ fun makeContestsFromCvrs(
                 idx = contestId,
                 choiceFunction = choiceFunction,
                 ncards = cards[contestId]!!,
-                candidates = candidateMap.keys.map { "cand$it" },
-                winners = listOf("cand$winner"),
+                candidates = candidateMap.keys.map { it },
+                winners = listOf(winner),
             )
         )
     }

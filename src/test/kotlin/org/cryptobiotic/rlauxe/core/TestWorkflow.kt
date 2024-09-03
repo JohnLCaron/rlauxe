@@ -10,7 +10,7 @@ class TestWorkflow {
                   val sampleCountAvg:Double, val speedup:Double, val pctVotes: Double) {
     }
 
-    fun makeSR(d: Int, N: Int, margin:Double, speedup: Double, rr: RepeatedResult): SR {
+    fun makeSR(d: Int, N: Int, margin:Double, speedup: Double, rr: AlphaMartRepeatedResult): SR {
         val pctVotes = (100.0 * rr.sampleCountAvg() / N)
         return SR(d, N, margin, rr.sampleCountAvg().toDouble(), speedup, pctVotes)
     }
@@ -115,8 +115,7 @@ class TestWorkflow {
                     val pct = (100.0 * resultWithout.sampleCountAvg().toDouble() / N).toInt()
 
                     if (show) print("${resultWithout.sampleCountAvg().toDouble()}, ${resultWith.sampleCountAvg().toDouble()}, ${"%5.2f".format(speedup)}, ")
-                    val sampleSumOver = resultWithout.status!!.hist[1] ?: 0
-                    if (show) println("${pct}, ${resultWith.failPct}, ${sampleSumOver}")
+                    if (show) println("${pct}, ${resultWith.failPct}, ${resultWithout.status}")
                     srs.add(makeSR(d, N, margin, speedup, resultWithout))
                 }
                 if (show) println()
@@ -126,7 +125,7 @@ class TestWorkflow {
         // showSRSbyNBallots(srs, Nlist, margins)
     }
 
-    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<RepeatedResult> {
+    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<AlphaMartRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 
@@ -150,17 +149,18 @@ class TestWorkflow {
         val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
-        val results = mutableListOf<RepeatedResult>()
+        val results = mutableListOf<AlphaMartRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
                 val cvrSampler = if (withoutReplacement) PollWithoutReplacement(cvrs, it.assorter) else PollWithReplacement(cvrs, it.assorter)
-                val result = runAlphaMart(
+                val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    genRatio = .5 + margin/2,
+                    reportedRatio = .5 + margin/2,
+                    eta0 = .5 + margin/2,
                     d = d,
                     nrepeat = 10,
                     withoutReplacement = withoutReplacement,

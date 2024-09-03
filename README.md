@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/01/2024
+last update: 09/02/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -25,7 +25,7 @@ Table of Contents
     * [Questions](#questions)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Sample size simulations](#sample-size-simulations)
-    * [compares table 3 of ALPHA](#compares-table-3-of-alpha)
+    * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
 <!-- TOC -->
 
 ## Papers
@@ -388,15 +388,7 @@ null mean is 1/2 once again, which reproduces the original assorter.
 
 See [N-theta plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1922862363#gid=1922862363)
 
-minimum winning % for RLA to be useful (Plot 3)
-
-| N      | max sample = 20% | max sample = 10% |
-|--------|------------------|------------------|
-| 1000   | 60               | 63?              |
-| 5000   | 54               | 56?              |
-| 10000  | 53               | 54               |
-| 20000  | 52               | 53               |
-| 100000 | 51               | 51.5?            |
+See "%successRLA" tab for success rates at maxSample = 10, 20, 30 %.
 
 * RLA cant help for close elections unless N is large
 * seems like this is because sample size is approx. independent of N (Plot 1)
@@ -429,4 +421,4 @@ stddev samples vs theta
 | 20000  | 3751.976 | 2124.064 | 1051.194 | 656.632 | 449.989 | 190.791 | 123.333 | 47.084 | 28.173 |  
 | 50000  | 6873.319 | 2708.147 | 1274.291 | 740.712 | 475.265 | 194.538 | 130.865 | 51.086 | 26.439 |
 
-* no use for the parameter d in this case. Likely thats us used only for when eta0 != theta
+* no use for the parameter d in this case. Likely thats is used only for when eta0 != theta

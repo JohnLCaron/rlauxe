@@ -1,11 +1,29 @@
 package org.cryptobiotic.rlauxe.core
 
 import kotlin.math.abs
-import kotlin.math.ln
-import kotlin.random.Random
-import kotlin.text.appendLine
 
-//// covers for numpy: will be replaced
+
+fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
+    //    For finite values, isclose uses the following equation to test whether
+    //    two floating point values are equivalent.
+    //
+    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
+    return abs(a - b) <= atol + rtol * abs(b)
+}
+
+fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
+    var firstIdx = -1
+    for (idx in 0 until x.size) {
+        if (pred(x[idx])) {
+            firstIdx = idx
+            break
+        }
+    }
+    return firstIdx
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// covers for numpy: will be replaced
 
 // def arange(start=None, *args, **kwargs):
 // arange([start,] stop[, step,], dtype=None, *, like=None)
@@ -110,208 +128,9 @@ fun numpy_quantile2(data: IntArray, quantile: Double): Int {
     return sortedData[i]
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-
-fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-    return abs(a - b) <= atol + rtol * abs(b)
-}
-
-fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
-    var firstIdx = -1
-    for (idx in 0 until x.size) {
-        if (pred(x[idx])) {
-            firstIdx = idx
-            break
-        }
-    }
-    return firstIdx
-}
-
-fun randomPermute(samples : DoubleArray): DoubleArray {
-    val n = samples.size
-    val permutedIndex = MutableList(n) { it }
-    permutedIndex.shuffle(Random)
-    return DoubleArray(n) { samples[permutedIndex[it]] }
-}
-
-interface SampleFn {
-    fun sample(): Double
-    fun reset()
-    fun popMean(): Double
-    fun N(): Int
-}
-
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleFn {
-    val selectedIndices = mutableSetOf<Int>()
-    val N = assortValues.size
-
-    override fun sample(): Double {
-        while (true) {
-            val idx = Random.nextInt(N) // withoutReplacement
-            if (!selectedIndices.contains(idx)) {
-                selectedIndices.add(idx)
-                return assortValues[idx]
-            }
-            require(selectedIndices.size < assortValues.size)
-        }
-    }
-    override fun reset() {
-        selectedIndices.clear()
-    }
-
-    override fun popMean() = assortValues.average()
-    override fun N() = N
-}
-
-class PollWithReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
-    val N = cvrs.size
-    val sampleMean = cvrs.map{ ass.assort(it) }.average()
-
-    override fun sample(): Double {
-        val idx = Random.nextInt(N) // withoutReplacement
-        return ass.assort(cvrs[idx])
-    }
-
-    override fun reset() {
-    }
-
-    override fun popMean() = sampleMean
-    override fun N() = N
-}
-
-class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
-    val N = cvrs.size
-    val permutedIndex = MutableList(N) { it }
-    val sampleMean = cvrs.map{ ass.assort(it) }.average()
-    var idx = 0
-
-    init {
-        reset()
-    }
-
-    override fun sample(): Double {
-        val curr = cvrs[permutedIndex[idx++]]
-        return ass.assort(curr)
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(Random)
-        idx = 0
-    }
-
-    override fun popMean() = sampleMean
-    override fun N() = N
-}
-
-class CompareWithoutReplacement(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
-    val N = cvrs.size
-    val permutedIndex = MutableList(N) { it }
-    val sampleMean: Double
-    var idx = 0
-
-    init {
-        reset()
-        sampleMean = cvrs.map { cass.assort(it, it)}.average() // TODO seems wrong?
-        // sampleMean = cvrs.map { cass.assorter.assort(it, it)}.average() // ??
-    }
-
-    override fun sample(): Double {
-        val curr = cvrs[permutedIndex[idx++]]
-        return cass.assort(curr, curr) // TODO currently identical
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(Random)
-        idx = 0
-    }
-
-    override fun popMean() = sampleMean
-    override fun N() = N
-}
-
-/**
- * Welford's algorithm for running mean and variance.
- * see https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
- */
-class Welford(
-    var count: Int = 0,      // number of samples
-    var mean: Double = 0.0,  // mean accumulates the mean of the entire dataset
-    var M2: Double = 0.0,    // M2 aggregates the squared distance from the mean
-) {
-    // Update with new value
-    fun update(new_value: Double) {
-        count++
-        val delta = new_value - mean
-        mean += delta / count
-        val delta2 = new_value - mean
-        M2 += delta * delta2
-    }
-
-    /** Retrieve the current mean, variance and sample variance */
-    fun result() : Triple<Double, Double, Double> {
-        if (count < 2) return Triple(mean, 0.0, 0.0)
-        val variance = M2 / count
-        val sample_variance = M2 / (count - 1)
-        return Triple(mean, variance, sample_variance)
-    }
-}
-
-class Bernoulli(p: Double) {
-    val log_q = ln(1.0 - p)
-    val n = 1.0
-
-    fun get(): Double {
-        var x = 0.0
-        var sum = 0.0
-        while (true) {
-            val wtf = ln( Math.random()) / (n - x)
-            sum += wtf
-            if (sum < log_q) {
-                return x
-            }
-            x++
-        }
-    }
-}
-
-class Histogram(val incr: Int) {
-    val hist = mutableMapOf<Int, Int>() // upper bound,count
-
-    fun add(q: Int) {
-        var bin = 0
-        while (q > bin * incr) bin++
-        val currVal = hist.getOrPut(bin) { 0 }
-        hist[bin] = (currVal + 1)
-    }
-
-    override fun toString() = buildString {
-        val shist = hist.toSortedMap()
-        shist.forEach { append("${it.key}:${it.value} ") }
-    }
-
-    fun toString(keys:List<String>) = buildString {
-        hist.forEach { append("${keys[it.key]}:${it.value} ") }
-    }
-
-    fun toStringBinned() = buildString {
-        val shist = hist.toSortedMap()
-        shist.forEach {
-            val binNo = it.key
-            val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
-            append("$binDesc:${it.value}; ")
-        }
-    }
-
-    fun cumul() = buildString {
-        val smhist = hist.toSortedMap().toMutableMap()
-        var cumul = 0
-        smhist.forEach {
-            cumul += it.value
-            append("${it.key}:${cumul} ")
-        }
-    }
+fun ceilDiv(numerator: Int, denominator: Int): Int {
+    val frac = numerator.toDouble() / denominator
+    val fracFloor = frac.toInt()
+    val fracCeil = if (frac == fracFloor.toDouble()) fracFloor else fracFloor + 1
+    return fracCeil
 }

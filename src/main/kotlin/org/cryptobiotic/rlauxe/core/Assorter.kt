@@ -9,7 +9,7 @@ abstract class Assorter(
     abstract override fun assort(mvr: Mvr): Double
 
     override fun toString(): String {
-        return "(upperBound=$upperBound, winner='$winner', loser='$loser')"
+        return "${this.javaClass.name}: (upperBound=$upperBound, winner='$winner', loser='$loser')"
     }
 }
 

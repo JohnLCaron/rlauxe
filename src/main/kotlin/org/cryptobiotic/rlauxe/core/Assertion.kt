@@ -34,8 +34,8 @@ data class PollingAudit(
 
     fun makeAssertions(contest: AuditContest): Pair<AuditContest, List<Assertion>> {
         val assertions = mutableListOf<Assertion>()
-        contest.winnersIdx.forEach { winner ->
-            contest.losersIdx.forEach { loser ->
+        contest.winners.forEach { winner ->
+            contest.losers.forEach { loser ->
                 assertions.add(Assertion(contest, winner, loser))
             }
         }
@@ -82,8 +82,8 @@ data class ComparisonAudit(
 
     fun makeAssertions(contest: AuditContest): Pair<AuditContest, List<ComparisonAssertion>> {
         val assertions = mutableListOf<ComparisonAssertion>()
-        contest.winnersIdx.forEach { winner ->
-            contest.losersIdx.forEach { loser ->
+        contest.winners.forEach { winner ->
+            contest.losers.forEach { loser ->
                 assertions.add(ComparisonAssertion(contest, winner, loser, cvrs))
             }
         }

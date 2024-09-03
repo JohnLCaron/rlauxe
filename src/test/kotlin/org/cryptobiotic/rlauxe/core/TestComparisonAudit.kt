@@ -38,10 +38,11 @@ class TestComparisonAudit {
                 println("  ${it}")
 
                 val cvrSampler = CompareWithoutReplacement(cvrs, it.assorter)
-                val result = runAlphaMart(
+                val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    genRatio = .5 + margin,
+                    reportedRatio = .5 + margin / 2,
+                    eta0 = .5 + margin / 2,
                     d = 100,
                     nrepeat = 100,
                 )

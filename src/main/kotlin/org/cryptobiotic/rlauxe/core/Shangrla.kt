@@ -16,26 +16,19 @@ data class AuditContest (
     val id: String,
     val idx: Int,
     val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-    var candidates: List<String>,
+    var candidates: List<Int>,
     val ncards: Int,                // maximum number of valid cards
-    val winners: List<String>,
+    val winners: List<Int>,
     val minFraction: Double? = null, // supermajority
 ) {
-    val winnersIdx : List<Int>
-    val losersIdx : List<Int>
-
+    val losers = mutableListOf<Int>()
     init {
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
-        val winnersi = mutableListOf<Int>()
-        val losersi = mutableListOf<Int>()
-        candidates.forEachIndexed { idx, cand ->
-            if (winners.contains(cand)) winnersi.add(idx) else losersi.add(idx)
+        candidates.forEach { cand ->
+            if (!winners.contains(cand)) losers.add(cand)
         }
-        require(winnersi.isNotEmpty())
-        require(losersi.isNotEmpty())
-
-        winnersIdx = winnersi.toList()
-        losersIdx = losersi.toList()
+        require(winners.isNotEmpty())
+        require(losers.isNotEmpty())
     }
    //  val candidatesIdx = List<Int>(candidates.size) { it }
 }
@@ -58,6 +51,10 @@ open class Mvr(
         val contestVotes = this.votes[contestIdx] ?: return false
         val totalVotes = contestVotes.values.sum() // assumes >= 0
         return (totalVotes == 1)
+    }
+
+    override fun toString(): String {
+        return "$id: $votes"
     }
 }
 

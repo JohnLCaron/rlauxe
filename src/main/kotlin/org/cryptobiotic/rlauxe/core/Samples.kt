@@ -19,6 +19,32 @@ interface SampleFn {
     fun N(): Int  // population size
 }
 
+class SampleFnFromArray(val assortValues : DoubleArray): SampleFn {
+    var index = 0
+
+    override fun sample(): Double {
+        return assortValues[index++]
+    }
+
+    override fun reset() {
+        index = 0
+    }
+
+    override fun truePopulationMean(): Double {
+        return assortValues.toList().average()
+    }
+
+    override fun truePopulationCount(): Double {
+        return assortValues.toList().sum()
+    }
+
+    override fun N(): Int {
+        return assortValues.size
+    }
+
+}
+
+
 class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleFn {
     val selectedIndices = mutableSetOf<Int>()
     val N = assortValues.size

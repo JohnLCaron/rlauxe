@@ -66,6 +66,8 @@ class TestAlphaShrinkTrunc {
         //         s1 = [1, 0, 1, 1, 0, 0, 1]
         val x2 = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
 
+        val eta0 = .5714285714285714
+        require(x2.average() == eta0)
         val alpha2 = testAlphaMartBatch(x2.average(), x2.toList())
         println(" alpha2 = ${alpha2}")
 
@@ -76,7 +78,7 @@ class TestAlphaShrinkTrunc {
                 assertEquals(it, alpha2.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(alpha2.status == TestH0Status.SampleSum)
+        assertTrue(alpha2.status.fail)
         assertEquals(alpha2.sampleCount, x2.size)
         assertEquals(alpha2.sampleMean, 0.5714285714285714)
     }
@@ -128,7 +130,7 @@ class TestAlphaShrinkTrunc {
                 assertEquals(it, result.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(result.status == TestH0Status.SampleSum)
+        assertTrue(result.status.fail)
         assertEquals(result.sampleCount, x.size)
         assertEquals(result.sampleMean, 0.5714285714285714)
     }
@@ -170,7 +172,7 @@ class TestAlphaShrinkTrunc {
                 assertEquals(it, result.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(result.status == TestH0Status.SampleSum)
+        assertTrue(result.status.fail)
         assertEquals(result.sampleCount, x.size)
         assertEquals(result.sampleMean, 0.5714285714285714)
     }

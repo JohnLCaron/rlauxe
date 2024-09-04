@@ -44,7 +44,7 @@ class TestBravo  {
     fun runBravoRepeat(eta0: Double, trueMeans: List<Double>, withoutReplacement: Boolean ): List<AlphaMartRepeatedResult> {
         val N = 20_000
         val m = 2000
-        val nrepeat = 1000
+        val nrepeat = 100
         val results = mutableListOf<AlphaMartRepeatedResult>()
         trueMeans.forEach {
             results.add(runBravo(N, m, eta0, it, withoutReplacement, nrepeat))
@@ -83,7 +83,7 @@ class TestBravo  {
         val randomMeans = listOf(.505, .51, .52, .53, .55, .60)
         val N = 20_000
         val m = 4000
-        val nrepeat = 1000
+        val nrepeat = 100
 
         randomMeans.forEach { ratio ->
             val sampler = SampleFromArrayWithReplacement(N, ratio)

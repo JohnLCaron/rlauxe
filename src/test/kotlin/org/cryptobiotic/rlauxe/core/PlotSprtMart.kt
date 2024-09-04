@@ -36,7 +36,7 @@ class PlotSprtMart {
 
         val stopwatch = Stopwatch()
         val nthreads = 20
-        val nrepeat = 1000
+        val nrepeat = 100
 
         runBlocking {
             val taskProducer = produceTasks(tasks)
@@ -53,11 +53,11 @@ class PlotSprtMart {
         }
         val count = calculations.size
         println("did $count tasks ${stopwatch.tookPer(count, "task")}")
-        showSRSnVt(calculations, margins)
-        showStddevSnVt(calculations, margins)
-        showSuccesses(calculations, margins, 10, nrepeat)
-        showSuccesses(calculations, margins, 20, nrepeat)
-        showSuccesses(calculations, margins, 30, nrepeat)
+        plotSRSnVt(calculations, margins, nlist)
+        plotStddevSnVt(calculations, margins, nlist)
+        plotSuccesses(calculations, margins, nlist, 10, nrepeat)
+        plotSuccesses(calculations, margins, nlist, 20, nrepeat)
+        plotSuccesses(calculations, margins, nlist, 30, nrepeat)
     }
 
     fun calculate(task: CalcTask, nrepeat: Int): SR {

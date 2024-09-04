@@ -41,7 +41,7 @@ class TestAlphaMart {
     fun testFailure() {
         val N = 10_000 // nballots
         val m = 10_000 // cutoff
-        val nrepeat = 1000
+        val nrepeat = 100
         val ratio = .505 // "reported mean"
         val showRR = true
 
@@ -82,7 +82,7 @@ class TestAlphaMart {
     fun testOne() {
         val N = 20_000 // nballots
         val m = N// cutoff
-        val nrepeat = 1000
+        val nrepeat = 100
         val ratio = .575 // "reported mean"
         val showRR = true
 

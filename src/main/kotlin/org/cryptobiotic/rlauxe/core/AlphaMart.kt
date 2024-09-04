@@ -10,18 +10,22 @@ interface Samples {
     fun last(): Double
     fun size(): Int
     fun sum(): Double
+    fun prevSum(): Double
 }
 
 class PrevSamples() : Samples {
     private var last = 0.0
     private var size = 0
     private var sum = 0.0
+    private var prevSum = 0.0
 
     override fun sum() = sum
     override fun last() = last
     override fun size() = size
+    override fun prevSum() = prevSum
 
     fun addSample(sample : Double) {
+        prevSum = sum
         sum += sample
         size++
         last = sample
@@ -66,7 +70,7 @@ class AlphaMart(
         var sampleSum = 0.0        // – S ← 0: sample sum
         var m = 0.5                 // – m = µ_j = 1/2: population mean under the null hypothesis = H0
 
-        val sampleAssortValues = PrevSamples()
+        val prevSamples = PrevSamples()
 
         // keep series for debugging, remove for production
         val ms = mutableListOf<Double>()
@@ -80,12 +84,11 @@ class AlphaMart(
         while (sampleNumber < maxSample) {
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
-            sampleAssortValues.addSample(xj)
 
-            val etaj = estimFn.eta(sampleAssortValues)
+            val etaj = estimFn.eta(prevSamples)
             etajs.add(etaj)
 
-            m = this.populationMeanIfH0(sampleNumber, sampleSum)
+            m = populationMeanIfH0(N, withoutReplacement, prevSamples)
             ms.add(m)
 
             // terms[m > u] = 0       # true mean is certainly less than hypothesized
@@ -125,6 +128,7 @@ class AlphaMart(
             // – S ← S + Xj
             sampleSum += xj
             sampleSums.add(sampleSum)
+            prevSamples.addSample(xj)
 
             // TODO why ??
             //        terms[np.isclose(0, m, atol=atol)] = 1  # ignore
@@ -156,9 +160,31 @@ class AlphaMart(
     }
 
     // sampleSum doesnt include the current sample
-    fun populationMeanIfH0(sampleNum: Int, sampleSumMinusCurrent: Double): Double {
-        return if (!withoutReplacement) 0.5 else (N * 0.5 - sampleSumMinusCurrent) / (N - sampleNum + 1)
+    fun populationMeanIfH0old(sampleNum: Int, sampleSumMinusCurrent: Double): Double {
+        val r = if (!withoutReplacement) 0.5 else (N * 0.5 - sampleSumMinusCurrent) / (N - sampleNum + 1)
+        println(" $sampleNum: alpha sum=$sampleSumMinusCurrent result = $r\n")
+        return r
     }
+}
+
+fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
+    val sampleNum = prevSamples.size()
+    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
+}
+
+fun howAbout2(N: Int, withoutReplacement: Boolean, x: Samples): Double {
+    val t = .5
+    if (!withoutReplacement) return t  // with replacement
+    if (x.size() == 0) {
+        println(" ${x.size()}: howAbout2 $t")
+        return t
+    }
+    val sum = x.sum()
+    val m1 = (N * t - sum)
+    val m2 = (N - x.size())
+    val m3 = m1 / m2
+    println(" ${x.size()}: howAbout2 sum=$sum result = $m3")
+    return m3
 }
 
 // 3. Pseudo-algorithm for ballot-level comparison and ballot-polling audits
@@ -234,10 +260,12 @@ class TruncShrinkage(
     val d: Int,
     val f: Double = 0.0,
 ) : EstimFn {
+    val capAbove = upperBound * (1 - eps)
+    val wterm = d * eta0  // eta0 given weight of d. eta is weighted average of eta0 and samples
 
     init {
         require(upperBound > 0.0)
-        require(eta0 >= 0.5) // ??
+//        require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)
     }
@@ -251,43 +279,48 @@ class TruncShrinkage(
 
         val sampleSum = if (lastj == 0) 0.0 else {
             welford.update(prevSamples.last())
-            prevSamples.sum()  // TODO taking 7/60 of the time
+            prevSamples.sum()
         }
-
-        // note stdev not used if f = 0, except as capBelow
-        val (_, variance, _) = welford.result()
-        val stdev = Math.sqrt(variance) // stddev of sample
-        val sdj3 = if (lastj < 2) 1.0 else max(stdev, minsd) // LOOK
 
         // (2.5.2, eq 14, "truncated shrinkage")
         // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
-        val est = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj")
+        // val est = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
+        val est = if (f == 0.0) (d * eta0 + sampleSum) / dj1 else {
+            // note stdev not used if f = 0, except in capBelow
+            val (_, variance, _) = welford.result()
+            val stdev = Math.sqrt(variance) // stddev of sample
+            val sdj3 = if (lastj < 2) 1.0 else max(stdev, minsd) // LOOK
+            ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
+        }
 
         // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
-        val e_j = c / sqrt(dj1)
-
         // for instance c = (η0 − µ)/2.
+        val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        val meanUnderNull = meanUnderNull(N, withoutReplacement, prevSamples)
+        val e_j = c / sqrt(dj1)
+        val capBelow = mean + e_j
+
+        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj, capBelow=${capBelow}(${est < capBelow})")
+        // println("  meanOld=$meanUnderNull mean = $mean e_j=$e_j capBelow=${capBelow}(${est < capBelow})")
+
         // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , 1), where ǫi → 0 as the sample size grows.
         //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
-        val mean = meanUnderNull(N, 0.5, prevSamples) // only used in capBelow
-        val capAbove = upperBound * (1 - eps)
-        val capBelow = mean + e_j
-        val boundedEst =  min(capAbove, max(est, capBelow))
+        val boundedEst = min(max(capBelow, est), capAbove)
         return boundedEst
     }
+}
 
-    fun meanUnderNull(N: Int, t: Double, x: Samples): Double {
-        if (!withoutReplacement) return t  // with replacement
-        if (x.size() == 0) return t
+fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
+    val t = 0.5
+    if (!withoutReplacement) return t  // with replacement
+    if (x.size() == 0) return t
 
-        val sum = x.sum()
-        val m1 = (N * t - sum)
-        val m2 = (N - x.size())
-        val m3 = m1 / m2
-        return m3
-    }
+    val sum = x.sum()
+    val m1 = (N * t - sum)
+    val m2 = (N - x.size())
+    val m3 = m1 / m2
+    return m3
 }
 
 // SHANGRLA NonnegMean

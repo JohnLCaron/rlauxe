@@ -34,7 +34,7 @@ interface EstimFn {
 }
 
 enum class TestH0Status(val fail: Boolean) {
-    RejectNull(false), // statistical rejection of H0
+    StatRejectNull(false), // statistical rejection of H0
     LimitReached(true), // cant tell from the number of samples allowed
     //// only when sampling without replacement all the way to N, in practice, this never happens I think
     SampleSum(false), // SampleSum > N * t, so we know H0 is false
@@ -72,21 +72,25 @@ class AlphaMart(
         val ms = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
         val etajs = mutableListOf<Double>()
+        val tjs = mutableListOf<Double>()
         val testStatistics = mutableListOf<Double>()
         val sampleSums = mutableListOf<Double>()
+        sampleSums.add(sampleSum)
 
         while (sampleNumber < maxSample) {
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
+            sampleAssortValues.addSample(xj)
 
             val etaj = estimFn.eta(sampleAssortValues)
             etajs.add(etaj)
-            sampleAssortValues.addSample(xj)
 
             m = this.populationMeanIfH0(sampleNumber, sampleSum)
             ms.add(m)
 
-            if (m > 1.0) {
+            // terms[m > u] = 0       # true mean is certainly less than hypothesized
+            // terms[m < 0] = np.inf  # true mean certainly greater than hypothesized
+            if (m > 1.0 || m < 0.0) {
                 break
             }
 
@@ -99,11 +103,13 @@ class AlphaMart(
             } else {
                 (xj * etaj / m + (upperBound - xj) * (upperBound - etaj) / (upperBound - m)) / upperBound
             }
+            tjs.add(tj)
             testStatistic *= tj // Tj ← Tj-1 & tj
             testStatistics.add(testStatistic)
 
             if (showDetail) println("    $sampleNumber = $xj sum= $sampleSum, m=$m etaj = $etaj tj=$tj, Tj = $testStatistic")
 
+            /*
             if (m < 1.0) {
                 val term1 = etaj / m // is etaj > populationMeanIfH0 always ?
                 if (term1 < 1.0 || tj <= 0) {
@@ -114,36 +120,35 @@ class AlphaMart(
                     require(term4 == tj)
                 }
             }
+             */
 
             // – S ← S + Xj
             sampleSum += xj
             sampleSums.add(sampleSum)
 
             // TODO why ??
-            //        terms[m > u] = 0  # true mean is certainly less than hypothesized
             //        terms[np.isclose(0, m, atol=atol)] = 1  # ignore
             //        terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
             //        terms[np.isclose(0, terms, atol=atol)] = (
             //            1  # martingale effectively vanishes; p-value 1
             //        )
-            //        terms[m < 0] = np.inf  # true mean certainly greater than hypothesized
             //        terms[-1] = (
             //            np.inf if Stot > N * t else terms[-1]
             //        )  # final sample makes the total greater than the null
-            //        return np.minimum(1, 1 / terms) // WHY?
+            //        return np.minimum(1, 1 / terms) // WHY maximum value is 1 ??
             val pvalue = 1.0 / testStatistic
             pvalues.add(pvalue)
 
-            if (terminateOnNullReject && (pvalue < riskLimit || (sampleSum > N * 0.5))) { // m < 0
+            if (terminateOnNullReject && (pvalue < riskLimit)) {
                 break
             }
         }
 
         val status = when {
             (sampleNumber == maxSample) -> TestH0Status.LimitReached
-            (sampleSum > N * 0.5) -> TestH0Status.SampleSum
+            (m < 0.0) -> TestH0Status.SampleSum // same as m < 0
             (m > 1.0) -> TestH0Status.AcceptNull
-            else -> TestH0Status.RejectNull
+            else -> TestH0Status.StatRejectNull
         }
 
         val sampleMean = sampleSum / sampleNumber
@@ -152,18 +157,7 @@ class AlphaMart(
 
     // sampleSum doesnt include the current sample
     fun populationMeanIfH0(sampleNum: Int, sampleSumMinusCurrent: Double): Double {
-        // LOOK detect if it goes negetive. sampleNum < N. Neg if (N * t < sampleSum)
-        return if (withoutReplacement) {
-            (N * 0.5 - sampleSumMinusCurrent) / (N - sampleNum + 1)
-        } else 0.5
-        /* if (result <= 0 || result >= 1) {
-            val num = (N * 0.5 - sampleSumMinusCurrent) // how many votes are needed to get to average .5
-            val den = (N - sampleNum + 1) // how many samples are left
-            println("WTF?")
-        }
-        return result
-
-         */
+        return if (!withoutReplacement) 0.5 else (N * 0.5 - sampleSumMinusCurrent) / (N - sampleNum + 1)
     }
 }
 
@@ -238,14 +232,14 @@ class TruncShrinkage(
     val eta0: Double,
     val c: Double,
     val d: Int,
-    val f: Double,
+    val f: Double = 0.0,
 ) : EstimFn {
 
     init {
         require(upperBound > 0.0)
         require(eta0 >= 0.5) // ??
         require(c > 0.0)
-        require(d > 0)
+        require(d >= 0)
     }
 
     val welford = Welford()

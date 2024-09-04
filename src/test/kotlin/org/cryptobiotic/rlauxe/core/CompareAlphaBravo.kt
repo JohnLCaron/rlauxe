@@ -17,9 +17,7 @@ import kotlinx.coroutines.yield
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import kotlin.math.abs
 import kotlin.math.max
-import kotlin.test.assertEquals
 
 // compare Alpha to Bravo (Alpha with fixed mean)
 class CompareAlphaBravo {
@@ -69,7 +67,7 @@ class CompareAlphaBravo {
                     joinAll(*calcJobs.toTypedArray())
                 }
 
-                showSamplePctnVt(calculations, margins, ": diff bravo - alpha; reportedMeanDiff = $reportedMeanDiff, d = $d")
+                plotSamplePctnVt(calculations, margins, nlist, ": diff bravo - alpha; reportedMeanDiff = $reportedMeanDiff, d = $d")
             }
         }
     }

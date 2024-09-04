@@ -17,9 +17,6 @@ import kotlinx.coroutines.yield
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.test.assertEquals
 
 // plot Bravo (with replacement) compare to ALPHA table 2
 class PlotBravo {
@@ -67,7 +64,7 @@ class PlotBravo {
                 // wait for all verifications to be done
                 joinAll(*calcJobs.toTypedArray())
             }
-            showSRSnVt(calculations, margins, "reportedMeanDiffs = $reportedMeanDiff")
+            plotSRSnVt(calculations, margins, nlist, "reportedMeanDiffs = $reportedMeanDiff")
             // showSamplePctnVt(calculations, margins, "reportedMeanDiffs = $reportedMeanDiff")
         }
     }

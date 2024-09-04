@@ -16,41 +16,41 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import kotlin.test.Test
 
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.getOrPut
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
 val showCalculation = false
 val showContests = false
 val showAllPlots = false
-val showGeoMean = false
+val showGeoMeanPlots = true
 
-fun showSRSnVt(srs: List<SR>, margins: List<Double>, title: String = "") {
+data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
+
+fun plotSRSnVt(srs: List<SR>, margins: List<Double>, ns: List<Int>, title: String = "") {
     val utitle = "number votes sampled: " + title
-    showSRS(srs, margins, utitle, true) { it.nsamples }
+    plotSRS(srs, margins, ns, utitle, true) { it.nsamples }
 }
 
-fun showSamplePctnVt(srs: List<SR>, margins: List<Double>, title: String = "", isInt:Boolean=true) {
+fun plotSamplePctnVt(srs: List<SR>, margins: List<Double>, ns: List<Int>, title: String = "", isInt:Boolean=true) {
     val utitle = "pct votes sampled: " + title
-    showSRS(srs, margins, utitle, isInt) { it.pct }
+    plotSRS(srs, margins, ns, utitle, isInt) { it.pct }
 }
 
-fun showStddevSnVt(srs: List<SR>, margins: List<Double>, title: String = "") {
+fun plotStddevSnVt(srs: List<SR>, margins: List<Double>, ns: List<Int>, title: String = "") {
     val utitle = "stddev votes sampled: " + title
-    showSRS(srs, margins, utitle, true) { it.stddev }
+    plotSRS(srs, margins, ns, utitle, true) { it.stddev }
 }
 
-fun showSuccesses(srs: List<SR>, margins: List<Double>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
+fun plotSuccesses(srs: List<SR>, margins: List<Double>, ns: List<Int>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
     val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-    showSRS(srs, margins, utitle, true) {
+    plotSRS(srs, margins, ns, utitle, true) {
         val cumul = it.hist!!.cumul(sampleMaxPct)
         (100.0 * cumul) / nrepeat
     }
 }
 
-fun showSRS(srs: List<SR>, margins: List<Double>, title: String, isInt: Boolean, extract: (SR) -> Double) {
+fun plotSRS(srs: List<SR>, margins: List<Double>, ns: List<Int>, title: String, isInt: Boolean, extract: (SR) -> Double) {
     println()
     println(title)
     print("     N, ")
@@ -58,7 +58,7 @@ fun showSRS(srs: List<SR>, margins: List<Double>, title: String, isInt: Boolean,
     theta.forEach { print("${"%6.3f".format(it)}, ") }
     println()
 
-    val mmap = makeSRmap(srs, extract)
+    val mmap = makeMapFromSRs(srs, margins, ns, extract)
 
     mmap.forEach { dkey, dmap ->
         print("${"%6d".format(dkey)}, ")
@@ -72,18 +72,25 @@ fun showSRS(srs: List<SR>, margins: List<Double>, title: String, isInt: Boolean,
     }
 }
 
-fun makeSRmap(srs: List<SR>, extract: (SR) -> Double): Map<Int, Map<Double, Double>> {
+fun makeMapFromSRs(srs: List<SR>, margins: List<Double>, ns: List<Int>, extract: (SR) -> Double): Map<Int, Map<Double, Double>> {
     val mmap = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> fld
+
+    // fill with all the maps initialized to -1
+    ns.forEach { N ->
+        mmap[N] = mutableMapOf()
+        val nmap = mmap[N]!!
+        margins.forEach { margin ->
+            nmap[margin] = -1.0
+        }
+    }
+
     srs.forEach {
         val dmap = mmap.getOrPut(it.N) { mutableMapOf() }
-        val fld = extract(it)
-        dmap[it.margin] = fld
+        dmap[it.margin] = extract(it)
     }
+
     return mmap.toSortedMap()
 }
-
-data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
-data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
 
 fun makeSR(N: Int, margin: Double, rr: AlphaMartRepeatedResult): SR {
     val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
@@ -91,12 +98,14 @@ fun makeSR(N: Int, margin: Double, rr: AlphaMartRepeatedResult): SR {
     return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar), rr.hist)
 }
 
+data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
+
 class PlotSampleSizes {
 
     @Test
     fun plotSampleSizeConcurrent() {
-        val theta = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
-        //val theta = listOf(.505, .52, .6, .65)
+        // val theta = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val theta = listOf(.505, .55, .7)
         val margins = theta.map{ theta2margin(it) }
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
         val tasks = mutableListOf<CalcTask>()
@@ -112,8 +121,9 @@ class PlotSampleSizes {
         val nthreads = 20
         val nrepeat = 100
 
-        val reportedMeanDiffs = listOf(0.0, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
-        val dl = listOf(0) // , 1, 10, 100, 500, 1000)
+        // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
+        val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
+        val dl = listOf(10, 100, 500, 1000)
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->
             val dlcalcs = mutableMapOf<Int, List<SR>>()
@@ -128,29 +138,31 @@ class PlotSampleSizes {
                             })
                     }
 
-                    // wait for all verifications to be done
+                    // wait for all calculations to be done
                     joinAll(*calcJobs.toTypedArray())
                 }
                 dlcalcs[d] = calculations.toList()
-                showSamplePctnVt(calculations, margins, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                plotSamplePctnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
 
                 if (showAllPlots) {
-                    showSRSnVt(calculations, margins, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    showSamplePctnVt(calculations, margins, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    showStddevSnVt(calculations, margins, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    showSuccesses(calculations, margins, 10, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    showSuccesses(calculations, margins, 20, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    showSuccesses(calculations, margins, 30, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    plotSRSnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    plotSamplePctnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    plotStddevSnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    plotSuccesses(calculations, margins, nlist, 10, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    plotSuccesses(calculations, margins, nlist, 20, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    plotSuccesses(calculations, margins, nlist, 30, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
                 }
 
                 calculations = mutableListOf<SR>()
             }
-            if (showGeoMean) {
+
+            if (showGeoMeanPlots) {
                 val newdlc = creatSRpctRatio(dlcalcs, margins, nlist)
                 newdlc.forEach { dl, sps ->
-                    showSamplePctnVt(
+                    plotSamplePctnVt(
                         sps,
                         margins,
+                        nlist,
                         "pct/pctMin d=$dl, reportedMeanDiff=$reportedMeanDiff",
                         isInt = false
                     )
@@ -166,19 +178,21 @@ class PlotSampleSizes {
     fun creatSRpctRatio(dlcalcs: Map<Int, List<SR>>, margins: List<Double>, ns: List<Int>): Map<Int, List<SR>> {
         val newdlc = mutableMapOf<Int, MutableList<SR>>() // N, m -> fld
         // val newsrs = mutableListOf<SR>()
-        val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeSRmap(entry.value) { it.pct} }.toMap() // dl -> N, m -> pct
+        val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRs(entry.value, margins, ns) { it.pct} }.toMap() // dl -> N, m -> pct
         // makeSRmap(srs: List<SR>, extract: (SR) -> Double): Map<Int, Map<Double, Double>>
         margins.forEach { margin ->
             ns.forEach { N ->
                 var pctMin = 100.0
                 dlmapPct.forEach { entry ->
                     val (_, mmap: Map<Int, Map<Double, Double>>) = entry.value
-                    val pct = mmap[N]!![margin]!!
+                    val dmap = mmap[N]
+                    val pct = if (dmap != null) dmap[margin] ?: 100.0 else 100.0
                     pctMin = min(pct, pctMin)
                 }
                 dlmapPct.forEach { entry ->
                     val (d, mmap) = entry.value
-                    val pct = mmap[N]!![margin]!!
+                    val dmap = mmap[N]
+                    val pct = if (dmap != null) extractPct(dmap[margin]) else 100.0
                     val ratio = pct / pctMin
                     // data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
                     val sr = SR(N, margin, 0.0, ratio, 0.0, null)
@@ -190,7 +204,14 @@ class PlotSampleSizes {
         return newdlc
     }
 
-    fun calculate(task: CalcTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): SR {
+    fun extractPct(pct: Double?): Double {
+        if (pct == null) return 100.0
+        if (pct < 0) return 100.0
+        return pct
+    }
+
+    fun calculate(task: CalcTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): SR? {
+        if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runAlphaMartWithMeanDifference(task.margin, task.cvrs, nrepeat = nrepeat, d = d, reportedMeanDiff=reportedMeanDiff, silent = true).first()
         val sr = makeSR(task.N, task.margin, rr)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.margin}, ${rr.eta0}, $sr")
@@ -211,12 +232,14 @@ class PlotSampleSizes {
 
     private fun CoroutineScope.launchCalculations(
         input: ReceiveChannel<CalcTask>,
-        calculate: (CalcTask) -> SR,
+        calculate: (CalcTask) -> SR?,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val calculation = calculate(task) // not inside the mutex!!
-            mutex.withLock {
-                calculations.add(calculation)
+            if (calculation != null) {
+                mutex.withLock {
+                    calculations.add(calculation)
+                }
             }
             yield()
         }

@@ -139,7 +139,7 @@ fun ceilDiv(numerator: Int, denominator: Int): Int {
 }
 
 fun geometricMean(x: List<Double>): Double {
-    val lnsum = x.map{ ln(it) }.sum()
+    val lnsum = x.filter{it > 0}.map{ ln(it) }.sum()
     return exp( lnsum / x.size )
     // {\displaystyle \exp {\left({{\frac {1}{n}}\sum \limits _{i=1}^{n}\ln a_{i}}\right)}}
 }

@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.math.max
 import kotlin.math.sqrt
 
-data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of the population mean
-                                   val reportedRatio: Double,   // reported vote ratio
-                                   val sampleMean: Double, // actual sample mean
-                                   val N: Int, // population size (eg number of ballots)
+data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of the population mean = reported vote ratio
+                                   val N: Int,              // population size (eg number of ballots)
+                                   val theta: Double,      // true mean ( over N)
+                                   val sampleMean: Double,      // actual sample mean ( over samples, not over N)
                                    val ntrials: Int,       // repeat this many times
                                    val nsamplesNeeded: Welford, // avg, variance over ntrials of samples needed
                                    val failPct : Double,     // percent failures over ntrials
@@ -20,7 +20,7 @@ data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of
     }
 
     override fun toString() = buildString {
-        appendLine("AlphaMartRepeatedResult: reportedRatio=$reportedRatio eta0=$eta0 sampleMean=$sampleMean N=$N failPct=$failPct")
+        appendLine("AlphaMartRepeatedResult: theta=$theta eta0=$eta0 sampleMean=$sampleMean N=$N failPct=$failPct")
         val (avg, v, _) = nsamplesNeeded.result()
         appendLine("  nsample avg=${avg.toInt()} stddev = ${sqrt(v)} over ${ntrials} trials")
         if (hist != null) appendLine("  samplePct:${hist.toStringBinned()}")
@@ -31,10 +31,10 @@ data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of
 fun runAlphaMartRepeated(
     drawSample: SampleFn,
     maxSamples: Int,
+    theta: Double,
+    eta0: Double,
     d: Int = 500,
     f: Double = 0.0,
-    reportedRatio: Double,
-    eta0: Double,
     withoutReplacement: Boolean = true,
     nrepeat: Int = 1,
     showDetail: Boolean = false
@@ -85,5 +85,5 @@ fun runAlphaMartRepeated(
 
     val failAvg = fail.toDouble() / nrepeat
     val sampleMeanAvg = sampleMeanSum / nrepeat
-    return AlphaMartRepeatedResult(eta0=eta0, reportedRatio, sampleMean=sampleMeanAvg, N, nrepeat, welford, failAvg, hist, status)
+    return AlphaMartRepeatedResult(eta0=eta0, N=N, theta=theta, sampleMean=sampleMeanAvg, ntrials=nrepeat, welford, failAvg, hist, status)
 }

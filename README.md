@@ -26,6 +26,7 @@ Table of Contents
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Sample size simulations](#sample-size-simulations)
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
+    * [how to set the parameter d?](#how-to-set-the-parameter-d)
 <!-- TOC -->
 
 ## Papers
@@ -386,9 +387,9 @@ null mean is 1/2 once again, which reproduces the original assorter.
 
 ## Sample size simulations
 
-See [N-theta plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1922862363#gid=1922862363)
+Plots are updated here, to fix bug in shrink_trunk estimator function: 
 
-See "%successRLA" tab for success rates at maxSample = 10, 20, 30 %.
+See [9/4/24 plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=662624429#gid=662624429)
 
 * RLA cant help for close elections unless N is large
 * seems like this is because sample size is approx. independent of N (Plot 1)
@@ -422,3 +423,34 @@ stddev samples vs theta
 | 50000  | 6873.319 | 2708.147 | 1274.291 | 740.712 | 475.265 | 194.538 | 130.865 | 51.086 | 26.439 |
 
 * no use for the parameter d in this case. Likely thats is used only for when eta0 != theta
+
+### how to set the parameter d?
+
+From ALPHA (p 9)
+
+````
+Choosing d. As d → ∞, the sample size for ALPHA approaches that of BRAVO, for
+binary data. The larger d is, the more strongly anchored the estimate is to the reported vote
+shares, and the smaller the penalty ALPHA pays when the reported results are exactly correct.
+Using a small value of d is particularly helpful when the true population mean is far from the
+reported results. The smaller d is, the faster the method adapts to the true population mean,
+but the higher the variance is. Whatever d is, the relative weight of the reported vote shares
+decreases as the sample size increases.
+````
+
+See [output](docs/DiffMeanOutput.txt) of DiffMeans.kt and PlotDiffMeans.kt. This is done for each value of
+N and theta.
+
+* samples size when reported mean != theta (true mean)
+* show tables of mean difference = (reported mean - theta) columns vs values of d parameter (rows)
+* ntrials = 1000
+
+A few representative plots are at See [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
+
+Notes:
+
+* For many values of N and theta, we cant help (margin too small; N too small); or it doesnt matter much (margin large, N large).
+* Ive chosen a few plots where values of N and theta have pct samples 10 - 30%, since thats where improvements might matter for having a successful RLA vs a full hand recount.
+* High values of d work well when reported mean ~= theta. 
+* Low values of d work better as mean difference = (reported mean - theta) grows.
+* The question is, how much weight to give "outliers", at the expense of improving success rate for "common case" of reported mean ~= theta ?

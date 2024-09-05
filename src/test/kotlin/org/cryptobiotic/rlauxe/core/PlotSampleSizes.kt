@@ -22,7 +22,7 @@ import kotlin.math.sqrt
 
 val showCalculation = false
 val showContests = false
-val showAllPlots = false
+val showAllPlots = true
 val showGeoMeanPlots = true
 
 data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
@@ -100,12 +100,13 @@ fun makeSR(N: Int, margin: Double, rr: AlphaMartRepeatedResult): SR {
 
 data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
 
+
 class PlotSampleSizes {
 
     @Test
     fun plotSampleSizeConcurrent() {
-        // val theta = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
-        val theta = listOf(.505, .55, .7)
+        val theta = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        // val theta = listOf(.505, .55, .7)
         val margins = theta.map{ theta2margin(it) }
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
         val tasks = mutableListOf<CalcTask>()
@@ -119,11 +120,12 @@ class PlotSampleSizes {
         }
 
         val nthreads = 20
-        val nrepeat = 100
+        val nrepeat = 10
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
-        val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
-        val dl = listOf(10, 100, 500, 1000)
+        // val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
+        val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0) // , -.005, -.01, -.025, -.05, -0.1, -0.2)
+        val dl = listOf(500)
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->
             val dlcalcs = mutableMapOf<Int, List<SR>>()
@@ -142,7 +144,7 @@ class PlotSampleSizes {
                     joinAll(*calcJobs.toTypedArray())
                 }
                 dlcalcs[d] = calculations.toList()
-                plotSamplePctnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                // plotSamplePctnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
 
                 if (showAllPlots) {
                     plotSRSnVt(calculations, margins, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
@@ -255,6 +257,7 @@ class PlotSampleSizes {
     ): List<AlphaMartRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} margin=$margin withoutReplacement")
+        val theta = margin2theta(margin)
 
         // count actual votes
         val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
@@ -283,17 +286,18 @@ class PlotSampleSizes {
 
                 val assortValues = cvrs.map { cvr -> assert.assorter.assort(cvr) }
                 val assortMean = assortValues.average()
-                val reportedMean = assortMean + reportedMeanDiff // reportedMean != true mean
+                val reportedMean = theta + reportedMeanDiff // reportedMean != true mean
+                // require(assortMean == theta)
 
                 val cvrSampler = PollWithoutReplacement(cvrs, assert.assorter)
 
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
+                    theta = theta,
                     eta0 = reportedMean,       // use the reportedMean for the initial guess
                     d = d,
                     nrepeat = nrepeat,
-                    reportedRatio = reportedMean,
                     withoutReplacement = true,
                 )
                 if (!silent) {

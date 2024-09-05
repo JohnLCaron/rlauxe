@@ -74,7 +74,7 @@ class TestBravo  {
         }
         val failAvg = fail.toDouble() / nrepeat
         val sampleMeanAvg = sampleMeanSum / nrepeat
-        return AlphaMartRepeatedResult(eta0, trueMean, sampleMeanAvg, nrepeat, N, welford, failAvg)
+        return AlphaMartRepeatedResult(eta0=eta0, N=N, theta=trueMean, sampleMeanAvg, nrepeat, welford, failAvg)
     }
 
 
@@ -136,7 +136,7 @@ class TestBravo  {
 
         val failAvg = fail.toDouble() / nrepeat
         val sampleMeanAvg = sampleMeanSum / nrepeat
-        return AlphaMartRepeatedResult(eta0, trueMean, sampleMeanAvg, nrepeat, N, welford, failAvg, hist, null)
+        return AlphaMartRepeatedResult(eta0, N=N, theta=trueMean, sampleMeanAvg, nrepeat, welford, failAvg, hist, null)
     }
 
 }
@@ -150,7 +150,7 @@ fun show(title: String, eta0s: List<Double>, trueMeans: List<Double>, results: L
     val eta0Map = mutableMapOf<Double, MutableMap<Double, Double>>()
     results.forEach { result ->
         val mlist = eta0Map.getOrPut(result.eta0) { mutableMapOf() }
-        mlist[result.reportedRatio] =  when (title) {
+        mlist[result.theta] =  when (title) {
             "sampleCountAvg" -> result.sampleCountAvg().toDouble()
             "sampleMean" -> result.sampleMean
             else -> result.failPct
@@ -229,6 +229,7 @@ class GenerateAssorterValue(val ratio: Double) {
     }
 }
 
+// generate a sample thats approximately mean = theta
 fun generateSample(N: Int, ratio: Double) : DoubleArray {
     return DoubleArray(N) {
         val r = Random.nextDouble(1.0)

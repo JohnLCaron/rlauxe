@@ -15,10 +15,9 @@ interface ComparisonAssorterFunction {
 data class AuditContest (
     val id: String,
     val idx: Int,
-    val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
     var candidates: List<Int>,
-    val ncards: Int,                // maximum number of valid cards
     val winners: List<Int>,
+    val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
     val minFraction: Double? = null, // supermajority
 ) {
     val losers = mutableListOf<Int>()

@@ -16,9 +16,9 @@ class TestAlphaMart {
             val sampler = SampleFromArrayWithoutReplacement(generateSample(N, ratio))
             val result = runAlphaMartRepeated(
                 sampler,
-                m,
-                reportedRatio = ratio,
-                eta0 = sampler.truePopulationMean(),
+                maxSamples=m,
+                theta = sampler.truePopulationMean(),
+                eta0 = ratio,
                 nrepeat = nrepeat
             )
             val voteDiff = N * (result.eta0 - ratio)
@@ -51,7 +51,7 @@ class TestAlphaMart {
             val sampler = SampleFromArrayWithoutReplacement(generateSample(N, ratio))
             val actualMean = sampler.truePopulationMean()
             if (actualMean <= 0.5) {
-                val result = runAlphaMartRepeated(sampler, m, reportedRatio = ratio, eta0 = ratio, nrepeat = nrepeat)
+                val result = runAlphaMartRepeated(sampler, m, theta = actualMean, eta0 = ratio, nrepeat = nrepeat)
                 if (showRR) {
                     println(result)
                     println(
@@ -89,7 +89,7 @@ class TestAlphaMart {
         repeat(20) {
             val sampler = SampleFromArrayWithoutReplacement(generateSample(N, ratio))
             val actualMean = sampler.truePopulationMean()
-            val result = runAlphaMartRepeated(sampler, m, reportedRatio = ratio, eta0 = ratio, nrepeat = nrepeat)
+            val result = runAlphaMartRepeated(sampler, m, theta = actualMean, eta0 = ratio, nrepeat = nrepeat)
             if (showRR) {
                 println(result)
                 println(

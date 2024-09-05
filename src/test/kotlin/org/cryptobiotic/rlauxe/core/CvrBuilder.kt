@@ -20,15 +20,19 @@ fun margin2theta(margin: Double) = (.5 + margin/2)
 fun theta2margin(theta: Double) = (2.0 * (theta - .5))
 
 fun makeCvrsByExactMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
+    return makeCvrsByExactTheta(ncards, margin2theta(margin))
+}
+
+fun makeCvrsByExactTheta(ncards: Int, theta: Double = 0.0) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
         val votes = mutableMapOf<Int, Map<Int, Int>>()
         val random = Random.nextDouble(1.0)
-        val cand = if (random < .5 + margin/2.0) 0 else 1
+        val cand = if (random < theta) 0 else 1
         votes[0] = mapOf(cand to 1)
         randomCvrs.add(Cvr("card-$it", votes))
     }
-    val expectedAVotes = (ncards * (.5 + margin/2)).toInt()
+    val expectedAVotes = (ncards * theta).toInt()
     val actualAvotes = randomCvrs.map {  it.hasMarkFor(0, 0)}.sum()
     val needToChangeVotesToA = expectedAVotes - actualAvotes
     var changed = 0
@@ -115,7 +119,7 @@ fun makeContestsFromCvrs(
                 id = "contest$contestId",
                 idx = contestId,
                 choiceFunction = choiceFunction,
-                ncards = cards[contestId]!!,
+                // ncards = cards[contestId]!!,
                 candidates = candidateMap.keys.map { it },
                 winners = listOf(winner),
             )

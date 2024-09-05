@@ -159,8 +159,8 @@ class TestWorkflow {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    reportedRatio = .5 + margin/2,
-                    eta0 = .5 + margin/2,
+                    theta = cvrSampler.truePopulationMean(),
+                    eta0 = margin2theta(margin),
                     d = d,
                     nrepeat = 10,
                     withoutReplacement = withoutReplacement,

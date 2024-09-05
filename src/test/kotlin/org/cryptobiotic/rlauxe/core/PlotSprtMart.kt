@@ -127,7 +127,7 @@ fun testSprtMart(margin: Double, cvrs: List<Cvr>, nrepeat: Int, silent: Boolean 
 
             val result = runSprtMartRepeated(
                 assortValues = assortValues,
-                reportedRatio = .5 + margin / 2,
+                theta = margin2theta(margin),
                 eta0 = assortSum/N, // use the true value
                 nrepeat = nrepeat,
                 withoutReplacement = true,
@@ -144,7 +144,7 @@ fun testSprtMart(margin: Double, cvrs: List<Cvr>, nrepeat: Int, silent: Boolean 
 
 fun runSprtMartRepeated(
     assortValues: DoubleArray,
-    reportedRatio: Double,
+    theta: Double,
     eta0: Double,
     withoutReplacement: Boolean = true,
     nrepeat: Int = 1,
@@ -187,5 +187,5 @@ fun runSprtMartRepeated(
 
     val failAvg = fail.toDouble() / nrepeat
     val sampleMeanAvg = sampleMeanSum / nrepeat
-    return AlphaMartRepeatedResult(eta0=eta0, reportedRatio, sampleMean=sampleMeanAvg, N, nrepeat, welford, failAvg, hist, status)
+    return AlphaMartRepeatedResult(eta0=eta0, N=N, theta=theta, sampleMean=sampleMeanAvg, nrepeat, welford, failAvg, hist, status)
 }

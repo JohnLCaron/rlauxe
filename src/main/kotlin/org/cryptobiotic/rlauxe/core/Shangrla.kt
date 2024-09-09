@@ -1,37 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-enum class SocialChoiceFunction{ PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
-
-enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
-
-interface AssorterFunction {
-    fun assort(mvr: Mvr) : Double
-}
-
-interface ComparisonAssorterFunction {
-    fun assort(mvr: Mvr, cvr: Cvr) : Double
-}
-
-data class AuditContest (
-    val id: String,
-    val idx: Int,
-    var candidates: List<Int>,
-    val winners: List<Int>,
-    val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-    val minFraction: Double? = null, // supermajority
-) {
-    val losers = mutableListOf<Int>()
-    init {
-        require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
-        candidates.forEach { cand ->
-            if (!winners.contains(cand)) losers.add(cand)
-        }
-        require(winners.isNotEmpty())
-        require(losers.isNotEmpty())
-    }
-   //  val candidatesIdx = List<Int>(candidates.size) { it }
-}
-
+// If we knew the contests and candidate indices, we could just use a 2dim array: votes[contest][candidate]
+// or we could pass in the Map, but create the index array.
+// perhaps the audit contains the string -> index map?
 open class Mvr(
     val id: String,
     val votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
@@ -45,7 +16,7 @@ open class Mvr(
     }
 
     // Is there exactly one vote among the candidates in the contest `contest_id`?
-    // note this always looks at all the votes, differencent from SHANGRLA code
+    // note this always looks at all the votes, different from SHANGRLA API
     fun hasOneVote(contestIdx: Int): Boolean {
         val contestVotes = this.votes[contestIdx] ?: return false
         val totalVotes = contestVotes.values.sum() // assumes >= 0
@@ -62,5 +33,3 @@ class Cvr(
     votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
     val phantom: Boolean = false
 ): Mvr(id, votes)
-
-

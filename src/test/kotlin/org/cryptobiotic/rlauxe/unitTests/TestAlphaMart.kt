@@ -1,6 +1,12 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.unitTests
 
 import org.cryptobiotic.rlauxe.SampleFromList
+import org.cryptobiotic.rlauxe.core.AlphaMart
+import org.cryptobiotic.rlauxe.core.Bernoulli
+import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.math.max
 import kotlin.test.Test
@@ -8,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 // Compare AlphaAlgorithm with output from SHANGRLA 6949
-class TestAlphaShrinkTrunc {
+class TestAlphaMart {
 
     //     def test_alpha_mart(self):
     //        eps = 0.0001  # Generic small value

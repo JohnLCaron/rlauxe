@@ -17,7 +17,6 @@ import kotlinx.coroutines.yield
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import kotlin.math.abs
 import kotlin.test.assertEquals
 
 // is SprtMart equal to Alpha with fixed mean ?
@@ -114,7 +113,7 @@ class CompareSprtMart {
         }
 
         // Polling Audit
-        val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
+        val audit = makePollingAudit(contests = contests)
 
         val results = mutableListOf<Double>()
         audit.assertions.map { (contest, assertions) ->

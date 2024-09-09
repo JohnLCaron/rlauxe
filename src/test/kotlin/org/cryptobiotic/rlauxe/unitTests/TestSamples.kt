@@ -1,5 +1,14 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.unitTests
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.PluralityAssorter
+import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.core.tabulateVotes
+import org.cryptobiotic.rlauxe.core.theta2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -40,11 +49,11 @@ class TestSamples {
 
 
         // Polling Audit
-        val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
+        val audit = makePollingAudit(contests = contests)
 
         audit.assertions.map { (contest, assertions) ->
             assertions.forEach { ass ->
-                assertEquals(0, ass.winner)
+                assertEquals(0, (ass.assorter as PluralityAssorter).winner)
             }
 
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")

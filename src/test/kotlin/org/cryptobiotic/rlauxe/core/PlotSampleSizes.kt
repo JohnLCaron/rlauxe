@@ -105,7 +105,7 @@ class PlotSampleSizes {
 
     @Test
     fun plotSampleSizeConcurrent() {
-        val theta = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val theta = listOf(.55) // .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         // val theta = listOf(.505, .55, .7)
         val margins = theta.map{ theta2margin(it) }
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
@@ -120,7 +120,7 @@ class PlotSampleSizes {
         }
 
         val nthreads = 20
-        val nrepeat = 10
+        val nrepeat = 100
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
         // val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
@@ -276,7 +276,7 @@ class PlotSampleSizes {
         }
 
         // Polling Audit
-        val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
+        val audit = makePollingAudit(contests = contests)
 
         val results = mutableListOf<AlphaMartRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->

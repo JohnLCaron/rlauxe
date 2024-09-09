@@ -11,20 +11,20 @@ Table of Contents
 * [rlauxe](#rlauxe)
   * [Papers](#papers)
   * [SHANGRLA framework](#shangrla-framework)
-    * [Comparison audits vs polling audits](#comparison-audits-vs-polling-audits)
-    * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
-    * [Assorters and supported SocialChoice Functions](#assorters-and-supported-socialchoice-functions)
+    * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
       * [PLURALITY](#plurality)
       * [APPROVAL](#approval)
-      * [SUPERMAJORITY](#supermajority-)
+      * [SUPERMAJORITY](#supermajority)
       * [IRV](#irv)
+    * [Comparison audits vs polling audits](#comparison-audits-vs-polling-audits)
+    * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [ALPHA testing statistic](#alpha-testing-statistic)
     * [Sampling with or without replacement](#sampling-with-or-without-replacement)
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [BRAVO testing statistic](#bravo-testing-statistic)
     * [Questions](#questions)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
-  * [Sample size simulations](#sample-size-simulations)
+  * [Sample size simulations (Polling)](#sample-size-simulations-polling)
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
 <!-- TOC -->
@@ -69,7 +69,99 @@ batches of ballot cards instead of individual cards (_cluster sampling_).
 | test      | is the statistical method to test if the assertion is true. aka "risk function".               |
 | audit     | iterative process of picking ballots and checking if all the assertions are true.              |
 
+
+### Assorters and supported SocialChoices
+
+TODO elucidate the supported SocialChoices. Test for allowing multiple winners.
+
+#### PLURALITY
+
+"Top k candidates are elected."
+The rules may allow the voter to vote for one candidate, k candidates or some other number, including n (see approval).
+
+See SHANGRLA, section 2.1.
+
+A contest has K ≥ 1 winners and C > K candidates. Let wk be the kth winner, and ℓj be the jth loser.
+For each pair of winner and loser, let H_wk,ℓj be the assertion that wk is really the winner over ℓj.
+
+There are K(C − K) assertions. The contest can be audited to risk limit α by testing all assertions at significance level α.
+Each assertion is tested that the mean of the assorter values is > 1/2 (or not).
+
+For the case when there is only one winner, there are C - 1 assertions, pairing the winner with each loser.
+For a two candidate election, there is only one assertion.
+
+For the ith ballot, define `A_wk,ℓj(bi)` as
+````
+    assign the value “1” if it has a mark for wk but not for ℓj; 
+    assign the value “0” if it has a mark for ℓj but not for wk;
+    assign the value 1/2, otherwise.
+ ````
+
+For polling, the assorter function is A_wk,ℓj(MVR).
+
+For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
+
+Notes
+* The candidates, winners and losers are kept in the AuditContest.
+* The ?? creates the assertions. Each assertion has a unique assorter.
+* Someone has to enforce that each CVR has <= number of allowed votes.
+
+
+#### APPROVAL
+
+See SHANGRLA, section 2.2.
+
+In approval voting, voters may vote for as many candidates as they like.
+The top k candidates are elected.
+
+The same algorithm works for approval voting as for plurality voting.
+
+Notes
+* Someone has to enforce that each CVR has <= number of allowed votes.
+
+
+#### SUPERMAJORITY
+
+See SHANGRLA, section 2.3.
+
+A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win.
+If multiple winners are allowed, each reported winner generates one assertions.
+
+For the ith ballot, define `A_wk,ℓj(bi)` as
+````
+    assign the value “1/(2*f)” if it has a mark for wk but no one else; 
+    assign the value “0” if it has a mark for exactly one candidate and not Alice
+    assign the value 1/2, otherwise.
+````
+For polling, the assorter function is A_wk,ℓj(MVR).
+
+For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
+
+One only needs one assorter for each winner, not one for each winner/loser pair.
+
+Note that the third condition means "ignore ballots with multiple votes." 
+So multiple winners can only happen when f < 0.5 / multiple.
+TODO: allow multiple votes.
+
+
+#### IRV
+
+Not implemented yet.
+
+See
+````
+    Blom, M., Stuckey, P.J., Teague, V.: Risk-limiting audits for irv elections. 
+    arXiv:1903.08804 (2019), https://arxiv.org/abs/1903.08804
+````
+and possibly
+````
+    Ek, Stark, Stuckey, Vukcevic: Adaptively Weighted Audits of Instant-Runoff Voting Elections: AWAIRE
+    5 Oct 2023
+````
+
 ### Comparison audits vs polling audits
+
+See SHANGRLA Section 3.2.
 
 A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
 The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
@@ -84,18 +176,17 @@ The overstatement error for the ith ballot is
 Let
      Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
      ω̄ ≡ Sum(ωi)/N = Sum(A(ci) − A(bi))/N be the average overstatement error
-     v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 c ondidate plurality, the _diluted margin_.
+     v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, the _diluted margin_).
      τi ≡ (1 − ωi /upper) ≥ 0
-     B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper)
+     B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper) ≡ "comparison assorter" ≡ B(MVR, CVR)
 
 Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
     B̄ ≡ Sum(B(bi, ci)) / N > 1/2
 and so B is an half-average assorter.
 ````
 
-See SHANGRLA Section 3.2. 
-
-Note that polling vs comparison audits differ only in the assorter function. 
+Note that polling vs comparison audits differ only in the assorter function.
+The comparison assorter B needs Ā(c) ≡ the average CVR assort value
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
@@ -150,70 +241,6 @@ See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies"
 
     A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
     designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
-
-### Assorters and supported SocialChoice Functions
-
-A contest has K ≥ 1 winners and C > K candidates. Let wk be the kth winner, and ℓj be the jth loser.
-For each pair of winner and loser, let H_wk,ℓj be the assertion that wk is really the winner over ℓj.
-There are K(C − K) assertions. The contest can be audited to risk limit α by testing all assertions at significance level α.
-Each assertion is tested that the mean of the assorter values is > 1/2 (or not). 
-
-
-#### PLURALITY
-
-There are K(C − K) assertions. For the case when there is only one winner, there are C - 1 assertions, pairing the winner with each loser. 
-For a two candidate election, there is only one assertion to test.
-
-For the ith ballot, define `A_wk,ℓj(bi)` as
-````
-    assign the value “1” if it has a mark for wk but not for ℓj; 
-    assign the value “0” if it has a mark for ℓj but not for wk;
-    assign the value 1/2, otherwise.
- ````
-
-For polling, the assorter function is A_wk,ℓj(MVR).
-
-For a comparisian audit, the assorter function is B(bi, ci) as defined above, using this A_wk,ℓj.
-
-
-#### APPROVAL
-
-In approval voting, voters may vote for as many candidates as they like.
-
-The same algorithm works for approval voting as for plurality voting.
-
-
-#### SUPERMAJORITY 
-
-A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win.
-If multiple winners are allowed, each reported winner generates one assertions.
-
-For the ith ballot, define `A_wk,ℓj(bi)` as
-````
-    assign the value “1/(2*f)” if it has a mark for wk but no one else; 
-    assign the value “0” if it has a mark for exactly one candidate and not Alice
-    assign the value 1/2, otherwise.
-````
-
-For polling, the assorter function is A_wk,ℓj(MVR).
-
-For a comparisian audit, the assorter function is B(bi, ci) as defined above, using this A_wk,ℓj.
-
-
-#### IRV
-
-Not implemented yet.
-
-See 
-````
-    Blom, M., Stuckey, P.J., Teague, V.: Risk-limiting audits for irv elections. 
-    arXiv:1903.08804 (2019), https://arxiv.org/abs/1903.08804
-````
-and possibly
-````
-    Ek, Stark, Stuckey, Vukcevic: Adaptively Weighted Audits of Instant-Runoff Voting Elections: AWAIRE
-    5 Oct 2023
-````
 
 ## ALPHA testing statistic
 
@@ -385,7 +412,7 @@ constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
 
-## Sample size simulations
+## Sample size simulations (Polling)
 
 Plots are updated here, to fix bug in shrink_trunk estimator function: 
 
@@ -454,3 +481,8 @@ Notes:
 * High values of d work well when reported mean ~= theta. 
 * Low values of d work better as mean difference = (reported mean - theta) grows.
 * The question is, how much weight to give "outliers", at the expense of improving success rate for "common case" of reported mean ~= theta ?
+
+To Investigate
+* Does it makes sense to use small values of d for large values of reported mean? because it will only matter if (reported mean - theta) is large.
+* Sample percents get higher as theta -> 0. Can we characterize that?
+* Number of samples is independent of N as N -> inf.

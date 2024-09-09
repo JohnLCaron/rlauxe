@@ -23,11 +23,12 @@ data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of
         appendLine("AlphaMartRepeatedResult: theta=$theta eta0=$eta0 sampleMean=$sampleMean N=$N failPct=$failPct")
         val (avg, v, _) = nsamplesNeeded.result()
         appendLine("  nsample avg=${avg.toInt()} stddev = ${sqrt(v)} over ${ntrials} trials")
-        if (hist != null) appendLine("  samplePct:${hist.toStringBinned()}")
+        if (hist != null) appendLine("  cumulPct:${hist.cumulPct(ntrials)}")
         if (status != null) appendLine("  status:${status}")
     }
 }
 
+// run AlphaMart with TrunkShrinkage in repeated trials
 fun runAlphaMartRepeated(
     drawSample: SampleFn,
     maxSamples: Int,

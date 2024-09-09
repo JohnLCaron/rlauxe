@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.junit.jupiter.api.Test
 
-class TestComparisonAudit {
+class TestWorkflowComparison {
 
     @Test
     fun testComparisonWorkflow() {
@@ -29,7 +29,7 @@ class TestComparisonAudit {
         // skip for now, no phantoms
 
         // Comparison Audit
-        val audit = ComparisonAudit(auditType = AuditType.CARD_COMPARISON, contests = contests, cvrs = cvrs)
+        val audit = makeComparisonAudit(contests = contests, cvrs = cvrs)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         audit.assertions.map { (contest, assertions) ->

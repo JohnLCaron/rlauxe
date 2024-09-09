@@ -31,12 +31,14 @@ data class Histogram(val incr: Int) {
         }
     }
 
-    fun cumul() = buildString {
+    fun cumulPct(ntrials: Int) = buildString {
         val smhist = hist.toSortedMap().toMutableMap()
         var cumul = 0
         smhist.forEach {
             cumul += it.value
-            append("${it.key}:${cumul} ")
+            val binNo = it.key
+            val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
+            append("$binDesc:${((100.0 * cumul)/ntrials).toInt()}; ")
         }
     }
 

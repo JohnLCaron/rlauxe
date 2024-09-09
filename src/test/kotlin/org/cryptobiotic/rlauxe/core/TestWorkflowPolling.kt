@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import kotlin.test.Test
 
-class TestWorkflow {
+class TestWorkflowPolling {
 
     val showContests = false
 
@@ -146,7 +146,7 @@ class TestWorkflow {
         }
 
         // Polling Audit
-        val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
+        val audit = makePollingAudit(contests = contests)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<AlphaMartRepeatedResult>()

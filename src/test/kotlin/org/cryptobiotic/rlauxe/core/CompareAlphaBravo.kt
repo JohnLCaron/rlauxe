@@ -125,7 +125,7 @@ class CompareAlphaBravo {
         }
 
         // Polling Audit
-        val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
+        val audit = makePollingAudit(contests = contests)
 
         val results = mutableListOf<SR>()
         audit.assertions.map { (contest, assertions) ->

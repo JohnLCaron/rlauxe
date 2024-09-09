@@ -114,7 +114,7 @@ fun testSprtMart(margin: Double, cvrs: List<Cvr>, nrepeat: Int, silent: Boolean 
     }
 
     // Polling Audit
-    val audit = PollingAudit(auditType = AuditType.POLLING, contests = contests)
+    val audit = makePollingAudit(contests = contests)
 
     val results = mutableListOf<AlphaMartRepeatedResult>()
     audit.assertions.map { (contest, assertions) ->

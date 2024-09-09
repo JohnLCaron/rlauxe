@@ -4,11 +4,42 @@ import kotlin.math.ln
 import kotlin.random.Random
 
 
+interface Samples {
+    fun last(): Double
+    fun size(): Int
+    fun sum(): Double
+    fun prevSum(): Double
+}
+
+class PrevSamples() : Samples {
+    private var last = 0.0
+    private var size = 0
+    private var sum = 0.0
+    private var prevSum = 0.0
+
+    override fun sum() = sum
+    override fun last() = last
+    override fun size() = size
+    override fun prevSum() = prevSum
+
+    fun addSample(sample : Double) {
+        prevSum = sum
+        sum += sample
+        size++
+        last = sample
+    }
+}
+
 fun randomPermute(samples : DoubleArray): DoubleArray {
     val n = samples.size
     val permutedIndex = MutableList(n) { it }
     permutedIndex.shuffle(Random)
     return DoubleArray(n) { samples[permutedIndex[it]] }
+}
+
+fun randomPermute(samples : MutableList<Cvr>): List<Cvr> {
+    samples.shuffle(Random)
+    return samples
 }
 
 interface SampleFn {

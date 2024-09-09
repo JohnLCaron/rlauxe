@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.unitTests
 
+import org.cryptobiotic.rlauxe.core.Histogram
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -41,7 +42,7 @@ class TestHistogram {
 
         println("hist = ${hist}")
         println("hist binned = ${hist.toStringBinned()}")
-        println("hist cumul = ${hist.cumul()}")
+        println("hist cumulPct = ${hist.cumulPct(100)}")
         println("cumul 10 = ${hist.cumul(10)}")
         println("cumul 20 = ${hist.cumul(20)}")
         println("cumul 30= ${hist.cumul(30)}")
@@ -60,7 +61,7 @@ class TestHistogram {
 
         println("hist = ${hist}")
         println("hist binned = ${hist.toStringBinned()}")
-        println("hist cumul = ${hist.cumul()}")
+        println("hist cumulPct = ${hist.cumulPct(1)}")
 
         repeat(8) {
             println("hist ${it*10}= ${hist.cumul(it*10)}")

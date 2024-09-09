@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 
-class TestAlphaMart {
+class TestAlphaMartRepeated {
 
     @Test
     fun testWithPopulationMean() { // use the true population mean for eta0:
@@ -29,7 +28,7 @@ class TestAlphaMart {
                         "voteDiff=${"%4d".format(voteDiff.toInt())} " +
                         "sampleCount=${df.format(result.sampleCountAvg())} " +
                         // "sampleMean=${"%5.4f".format(result.sampleMean)} " +
-                        "cumulhist=${result.hist!!.cumul()}" +
+                        "cumulPct=${result.hist!!.cumulPct(nrepeat)}" +
                         // "fail=${(result.failPct * nrepeat).toInt()} " +
                         "status=${result.status} "
             )
@@ -60,7 +59,7 @@ class TestAlphaMart {
                                 "truePopulationCount=${ff.format(sampler.truePopulationCount())} " +
                                 "sampleCount=${df.format(result.sampleCountAvg())} " +
                                 // "sampleMean=${"%5.4f".format(result.sampleMean)} " +
-                                "cumulhist=${result.hist!!.cumul()}" +
+                                "cumulPct=${result.hist!!.cumulPct(nrepeat)}" +
                                 // "fail=${(result.failPct * nrepeat).toInt()} " +
                                 "status=${result.status} "
                     )
@@ -80,20 +79,22 @@ class TestAlphaMart {
 
     @Test
     fun testOne() {
-        val N = 20_000 // nballots
-        val m = N// cutoff
-        val nrepeat = 100
-        val ratio = .575 // "reported mean"
+        val N = 10000 // nballots
+        val m = N // cutoff
+        val nrepeat = 10000
+        val theta = .55 // "reported mean"
         val showRR = true
 
-        repeat(20) {
-            val sampler = SampleFromArrayWithoutReplacement(generateSample(N, ratio))
+            val cvrs = makeCvrsByExactTheta(N, theta)
+            val contest = AuditContest("contest0", 0, listOf(0,1), listOf(0))
+            val assort = PluralityAssorter(contest, 0, 1)
+            val sampler = PollWithoutReplacement(cvrs, assort)
             val actualMean = sampler.truePopulationMean()
-            val result = runAlphaMartRepeated(sampler, m, theta = actualMean, eta0 = ratio, nrepeat = nrepeat)
+            val result = runAlphaMartRepeated(sampler, m, theta = actualMean, eta0 = theta, nrepeat = nrepeat, withoutReplacement = true)
             if (showRR) {
                 println(result)
-                println(
-                    "testOne actualMean=${actualMean} reportedMean=${"%5.4f".format(ratio)} " +
+                /* println(
+                    "testOne N=$N " + // actualMean=${actualMean} reportedMean=${"%5.4f".format(theta)} " +
                             "eta0=${"%5.4f".format(result.eta0)} " +
                             "truePopulationCount=${ff.format(sampler.truePopulationCount())} " +
                             "truePopulationMean=${"%5.4f".format(sampler.truePopulationMean())} " +
@@ -103,8 +104,9 @@ class TestAlphaMart {
                             // "fail=${(result.failPct * nrepeat).toInt()} " +
                             "status=${result.status} "
                 )
+
+                 */
             }
-        }
     }
 
 }

@@ -2,6 +2,27 @@ package org.cryptobiotic.rlauxe.core
 
 import kotlin.random.Random
 
+fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
+    val cvrs = mutableListOf<Cvr>()
+    var total = 0
+    counts.forEachIndexed { idx, it ->
+        repeat(it) {
+            val votes = mutableMapOf<Int, Map<Int, Int>>()
+            votes[0] = mapOf(idx to 1)
+            cvrs.add(Cvr("card-$total", votes))
+            total++
+        }
+    }
+    cvrs.shuffle( Random)
+    return cvrs
+}
+
+fun makeCvr(idx: Int): Cvr {
+    val votes = mutableMapOf<Int, Map<Int, Int>>()
+    votes[0] = mapOf(idx to 1)
+    return Cvr("card", votes)
+}
+
 // default one contest, two candidates ("A" and "B"), no phantoms, plurality
 // margin = percent margin of victory of A over B (between += .5)
 fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {

@@ -250,7 +250,7 @@ class DiffMeans {
         val reportedWinnerMean = if (reportedMean > .5) reportedMean else (1.0 - (theta + reportedMeanDiff))
 
         val contest = AuditContest("contest0", 0, listOf(0,1), listOf(0))
-        val audit = PollingAudit(auditType = AuditType.POLLING, contests = listOf(contest))
+        val audit = makePollingAudit(contests = listOf(contest))
 
         val results = mutableListOf<AlphaMartRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->

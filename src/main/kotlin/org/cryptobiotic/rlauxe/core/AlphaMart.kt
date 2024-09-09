@@ -6,32 +6,6 @@ import kotlin.math.sqrt
 
 private val showDetail = false
 
-interface Samples {
-    fun last(): Double
-    fun size(): Int
-    fun sum(): Double
-    fun prevSum(): Double
-}
-
-class PrevSamples() : Samples {
-    private var last = 0.0
-    private var size = 0
-    private var sum = 0.0
-    private var prevSum = 0.0
-
-    override fun sum() = sum
-    override fun last() = last
-    override fun size() = size
-    override fun prevSum() = prevSum
-
-    fun addSample(sample : Double) {
-        prevSum = sum
-        sum += sample
-        size++
-        last = sample
-    }
-}
-
 // estimate the population mean for the jth sample from the previous j-1 samples
 interface EstimFn {
     fun eta(prevSamples: Samples): Double
@@ -158,33 +132,11 @@ class AlphaMart(
         val sampleMean = sampleSum / sampleNumber
         return TestH0Result(status, sampleNumber, sampleMean, pvalues)
     }
-
-    // sampleSum doesnt include the current sample
-    fun populationMeanIfH0old(sampleNum: Int, sampleSumMinusCurrent: Double): Double {
-        val r = if (!withoutReplacement) 0.5 else (N * 0.5 - sampleSumMinusCurrent) / (N - sampleNum + 1)
-        println(" $sampleNum: alpha sum=$sampleSumMinusCurrent result = $r\n")
-        return r
-    }
 }
 
 fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
     val sampleNum = prevSamples.size()
     return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
-}
-
-fun howAbout2(N: Int, withoutReplacement: Boolean, x: Samples): Double {
-    val t = .5
-    if (!withoutReplacement) return t  // with replacement
-    if (x.size() == 0) {
-        println(" ${x.size()}: howAbout2 $t")
-        return t
-    }
-    val sum = x.sum()
-    val m1 = (N * t - sum)
-    val m2 = (N - x.size())
-    val m3 = m1 / m2
-    println(" ${x.size()}: howAbout2 sum=$sum result = $m3")
-    return m3
 }
 
 // 3. Pseudo-algorithm for ballot-level comparison and ballot-polling audits
@@ -297,7 +249,6 @@ class TruncShrinkage(
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
         // for instance c = (η0 − µ)/2.
         val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
-        val meanUnderNull = meanUnderNull(N, withoutReplacement, prevSamples)
         val e_j = c / sqrt(dj1)
         val capBelow = mean + e_j
 
@@ -311,6 +262,7 @@ class TruncShrinkage(
     }
 }
 
+// old way
 fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
     val t = 0.5
     if (!withoutReplacement) return t  // with replacement

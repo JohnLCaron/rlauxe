@@ -25,6 +25,18 @@ fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
     return firstIdx
 }
 
+fun ceilDiv(numerator: Int, denominator: Int): Int {
+    val frac = numerator.toDouble() / denominator
+    val fracFloor = frac.toInt()
+    val fracCeil = if (frac == fracFloor.toDouble()) fracFloor else fracFloor + 1
+    return fracCeil
+}
+
+fun geometricMean(x: List<Double>): Double {
+    val lnsum = x.filter{it > 0}.map{ ln(it) }.sum()
+    return exp( lnsum / x.size )
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // covers for numpy: will be replaced
 
@@ -129,17 +141,4 @@ fun numpy_quantile2(data: IntArray, quantile: Double): Int {
         runningTotal += sortedData[i++]
     }
     return sortedData[i]
-}
-
-fun ceilDiv(numerator: Int, denominator: Int): Int {
-    val frac = numerator.toDouble() / denominator
-    val fracFloor = frac.toInt()
-    val fracCeil = if (frac == fracFloor.toDouble()) fracFloor else fracFloor + 1
-    return fracCeil
-}
-
-fun geometricMean(x: List<Double>): Double {
-    val lnsum = x.filter{it > 0}.map{ ln(it) }.sum()
-    return exp( lnsum / x.size )
-    // {\displaystyle \exp {\left({{\frac {1}{n}}\sum \limits _{i=1}^{n}\ln a_{i}}\right)}}
 }

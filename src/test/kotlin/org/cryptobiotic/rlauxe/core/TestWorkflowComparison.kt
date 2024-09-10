@@ -7,29 +7,27 @@ class TestWorkflowComparison {
     @Test
     fun testComparisonWorkflow() {
         // simulated CVRs
-        val margin = .05
+        val theta = .51
         val N = 10000
 
-        val cvrs = makeCvrsByMargin(N, margin)
-        println("ncvrs = ${cvrs.size} margin=$margin")
+        val cvrs = makeCvrsByExactTheta(N, theta)
+        println("ncvrs = ${cvrs.size} theta=$theta")
 
-        // count actual votes
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
-        votes.forEach { key, cands ->
-            println("contest ${key} ")
-            cands.forEach { println("  ${it} ${it.value.toDouble() / cvrs.size}") }
-        }
+        val contest = AuditContest(
+            id = "AvB",
+            idx = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidates = listOf(0, 1),
+            winners = listOf(0),
+        )
 
-        // make contests from cvrs
-        val contests: List<AuditContest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
-        println("Contests")
-        contests.forEach { println("  ${it}") }
-
-        // Create CVRs for phantom cards
-        // skip for now, no phantoms
+        val assort = PluralityAssorter(contest, 0, 1)
+        val assortAvg = cvrs.map { assort.assort(it) }.average()
+        val cwinner = ComparisonAssorter(contest, assort, assortAvg)
+        val cwinnerAvg = cvrs.map { cwinner.assort(it, it) }.average()
 
         // Comparison Audit
-        val audit = makeComparisonAudit(contests = contests, cvrs = cvrs)
+        val audit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         audit.assertions.map { (contest, assertions) ->
@@ -42,7 +40,7 @@ class TestWorkflowComparison {
                     drawSample = cvrSampler,
                     maxSamples = N,
                     theta = cvrSampler.truePopulationMean(),
-                    eta0 = .5 + margin / 2,
+                    eta0 = cvrSampler.truePopulationMean(),
                     d = 100,
                     nrepeat = 100,
                 )
@@ -52,15 +50,3 @@ class TestWorkflowComparison {
     }
 
 }
-
-// from SHANGRLA OC_example.ipyn
-// CVR.prep_comparison_sample(mvr_sample, cvr_sample, sample_order)  # for comparison audit
-//# CVR.prep_polling_sample(mvr_sample, sample_order)  # for polling audit
-//#%%
-//%%time
-//p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
-//print(f'maximum assertion p-value {p_max}')
-//done = audit.summarize_status(contests)
-//#%%
-//# Log the status of the audit
-//audit.write_audit_parameters(contests)

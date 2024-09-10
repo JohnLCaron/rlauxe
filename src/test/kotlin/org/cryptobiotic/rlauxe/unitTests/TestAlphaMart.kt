@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-// Compare AlphaAlgorithm with output from SHANGRLA 6949
+// Compare AlphaMart with output from SHANGRLA 6949
 class TestAlphaMart {
 
     //     def test_alpha_mart(self):

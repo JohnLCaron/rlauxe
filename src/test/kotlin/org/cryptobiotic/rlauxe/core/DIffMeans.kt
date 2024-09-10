@@ -23,6 +23,9 @@ import kotlin.collections.getOrPut
 import kotlin.math.min
 import kotlin.text.format
 
+// PlotSampleSizes
+// DiffMeans, PlotDiffMeans
+
 class DiffMeans {
     val showCalculation = false
     val showContests = false
@@ -246,8 +249,8 @@ class DiffMeans {
 
         // ignore the "reported winner". just focus on d vs reportedMeanDiff
         val reportedMean = theta + reportedMeanDiff
-        val reportedWinner = if (reportedMean > .5) 0 else 1 // TODO tie ??
-        val reportedWinnerMean = if (reportedMean > .5) reportedMean else (1.0 - (theta + reportedMeanDiff))
+        // val reportedWinner = if (reportedMean > .5) 0 else 1 // TODO tie ??
+        // val reportedWinnerMean = if (reportedMean > .5) reportedMean else (1.0 - (theta + reportedMeanDiff))
 
         val contest = AuditContest("contest0", 0, listOf(0,1), listOf(0))
         val audit = makePollingAudit(contests = listOf(contest))
@@ -257,10 +260,6 @@ class DiffMeans {
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")
             assertions.forEach { assert ->
                 if (!silent && showContests) println("  ${assert}")
-
-                // val assortValues = cvrs.map { cvr -> assert.assorter.assort(cvr) } // "true values" for the winner
-                //val assortMean = assortValues.average()
-                //if (assortMean != theta) println(" assortMean=$assortMean theta=$theta")
 
                 val cvrSampler = PollWithoutReplacement(cvrs, assert.assorter)
 

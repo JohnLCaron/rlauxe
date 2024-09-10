@@ -3,12 +3,12 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.math.ln
 import kotlin.random.Random
 
-
+// keeps track of the latest sample and the current and previous sample sum.
 interface Samples {
-    fun last(): Double
-    fun size(): Int
-    fun sum(): Double
-    fun prevSum(): Double
+    fun last(): Double // latest sample
+    fun size(): Int    // total number of samples so far
+    fun sum(): Double   // sum of samples so far
+    fun prevSum(): Double // sum os samples excluding latest
 }
 
 class PrevSamples() : Samples {
@@ -144,6 +144,7 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
     override fun N() = N
 }
 
+
 class CompareWithoutReplacement(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
@@ -155,12 +156,11 @@ class CompareWithoutReplacement(val cvrs : List<Cvr>, val cass: ComparisonAssort
         reset()
         sampleMean = cvrs.map { cass.assort(it, it)}.average()
         sampleCount = cvrs.map { cass.assort(it, it)}.sum()
-        // sampleMean = cvrs.map { cass.assorter.assort(it, it)}.average() // ??
     }
 
     override fun sample(): Double {
         val curr = cvrs[permutedIndex[idx++]]
-        return cass.assort(curr, curr) // TODO currently identical
+        return cass.assort(curr, curr) // TODO mcr == cvr, no errors
     }
 
     override fun reset() {

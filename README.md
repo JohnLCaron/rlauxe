@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/09/2024
+last update: 09/10/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -99,7 +99,7 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
 
 For polling, the assorter function is A_wk,ℓj(MVR).
 
-For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
+For a comparison audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
 
 Notes
 * The candidates, winners and losers are kept in the AuditContest.
@@ -130,7 +130,7 @@ If multiple winners are allowed, each reported winner generates one assertions.
 For the ith ballot, define `A_wk,ℓj(bi)` as
 ````
     assign the value “1/(2*f)” if it has a mark for wk but no one else; 
-    assign the value “0” if it has a mark for exactly one candidate and not Alice
+    assign the value “0” if it has a mark for exactly one candidate and not wk
     assign the value 1/2, otherwise.
 ````
 For polling, the assorter function is A_wk,ℓj(MVR).
@@ -169,13 +169,12 @@ The assorter assigns an assort value in [0, upper] to the ballot, which is used 
 For comparison audits, the system has already created a CVR (cast vote record) for each ballot which is compared to the MVR.
 The overstatement error for the ith ballot is
 ````
-    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper                 overstatement error (SHANGRLA eq 2, p 9)
+    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper    overstatement error (SHANGRLA eq 2, p 9)
       bi is the manual voting record (MVR) for the ith ballot
       ci is the cast-vote record for the ith ballot
       A() is the assorter function
 Let
      Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-     ω̄ ≡ Sum(ωi)/N = Sum(A(ci) − A(bi))/N be the average overstatement error
      v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, the _diluted margin_).
      τi ≡ (1 − ωi /upper) ≥ 0
      B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper) ≡ "comparison assorter" ≡ B(MVR, CVR)
@@ -185,8 +184,34 @@ Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
 and so B is an half-average assorter.
 ````
 
-Note that polling vs comparison audits differ only in the assorter function.
-The comparison assorter B needs Ā(c) ≡ the average CVR assort value
+Notes 
+* polling vs comparison audits differ only in the assorter function.
+* The comparison assorter B needs Ā(c) ≡ the average CVR assort value.
+* Ā(c) should have the diluted margin as the denominator.
+(Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
+Diluted refers to the fact that the denominator is the number of ballot cards, which is
+greater than or equal to the number of valid votes.)
+
+This algorithm seems to be less efficient than polling. The margins are approximately half, so take much longer.
+
+For example, for theta = .51, and the CVRs agree exactly with the MVRs (all overstatements == 0),
+the avg number of samples went from 12443 to 16064 (N=50000), and 5968 to 7044 (N=10000).
+
+This is because the SHANGRLA comparison assorter reduces the margin by approx half: 
+
+theta    margin    B       Bmargin  Bmargin/margin
+0.5050   0.0100   0.5025   0.0050   0.5025
+0.5100   0.0200   0.5051   0.0101   0.5051
+0.5200   0.0400   0.5102   0.0204   0.5102
+0.5300   0.0600   0.5155   0.0309   0.5155
+0.5400   0.0800   0.5208   0.0417   0.5208
+0.5500   0.1000   0.5263   0.0526   0.5263
+0.5750   0.1500   0.5405   0.0811   0.5405
+0.6000   0.2000   0.5556   0.1111   0.5556
+0.6500   0.3000   0.5882   0.1765   0.5882
+0.7000   0.4000   0.6250   0.2500   0.6250
+
+Tables 7 and 8 in ALPHA, showing comparison ballot results, switch ftom using theta to using "mass at 1". So hard to compare.
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))

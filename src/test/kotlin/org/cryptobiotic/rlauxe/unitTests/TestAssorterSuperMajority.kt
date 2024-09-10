@@ -92,7 +92,7 @@ class TestAssorterSuperMajority {
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2, 3, 4),
+            candidates = listOf(0, 1, 2, 3, 4, 5, 6),
             winners = listOf(0,1,3),
             minFraction = 0.25,
         )

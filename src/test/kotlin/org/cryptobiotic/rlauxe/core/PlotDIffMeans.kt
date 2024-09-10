@@ -132,43 +132,6 @@ class PlotDiffMeans {
         }
         return mmap.toSortedMap(nthetaComparator)
     }
-
-    // construct new dlcalcs replacing pct with ratio = pct/pctMin
-    fun creatSRpctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {
-        val newdlc = mutableMapOf<Int, MutableList<SRT>>() // N, m -> fld
-        // val newsrs = mutableListOf<SRT>()
-        val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { it.pct } }
-            .toMap() // dl -> N, m -> pct
-        // makeSRmap(srs: List<SRT>, extract: (SRT) -> Double): Map<Int, Map<Double, Double>>
-        thetas.forEach { margin ->
-            ns.forEach { N ->
-                var pctMin = 100.0
-                var dMin = 0
-                dlmapPct.forEach { entry ->
-                    val (_, mmap: Map<Int, Map<Double, Double>>) = entry.value
-                    val dmap = mmap[N]
-                    val pct = if (dmap != null) dmap[margin] ?: 100.0 else 100.0
-                    pctMin = min(pct, pctMin)
-                }
-                dlmapPct.forEach { entry ->
-                    val (d, mmap) = entry.value
-                    val dmap = mmap[N]
-                    val pct = if (dmap != null) extractPct(dmap[margin]) else 100.0
-                    val ratio = pct / pctMin
-                    val sr = SRT(N, margin, 0.0, ratio, 0.0, null, 0.0, dMin)
-                    val newsrs = newdlc.getOrPut(d) { mutableListOf() }
-                    newsrs.add(sr)
-                }
-            }
-        }
-        return newdlc
-    }
-
-    fun extractPct(pct: Double?): Double {
-        if (pct == null) return 100.0
-        if (pct < 0) return 100.0
-        return pct
-    }
 }
 
 class SRTreader(filename: String) {
@@ -201,6 +164,6 @@ class SRTreader(filename: String) {
         val stddev = trim[3].toDouble()
         val reportedMeanDiff = trim[4].toDouble()
         val d = trim[5].toInt()
-        return SRT(N, theta, nsamples, 0.0, stddev, null, reportedMeanDiff, d)
+        return SRT(N, theta, nsamples, 0.0, stddev, null, reportedMeanDiff, d, 0.0)
     }
 }

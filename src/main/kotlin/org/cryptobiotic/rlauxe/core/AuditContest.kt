@@ -18,7 +18,5 @@ data class AuditContest (
         candidates.forEach { cand ->
             if (!winners.contains(cand)) losers.add(cand)
         }
-//        require(winners.isNotEmpty())
-//        require(losers.isNotEmpty())
     }
 }

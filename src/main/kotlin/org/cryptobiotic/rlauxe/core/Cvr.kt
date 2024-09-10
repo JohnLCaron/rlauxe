@@ -16,10 +16,9 @@ open class Mvr(
     }
 
     // Is there exactly one vote among the candidates in the contest `contest_id`?
-    // note this always looks at all the votes, different from SHANGRLA API
-    fun hasOneVote(contestIdx: Int): Boolean {
+    fun hasOneVote(contestIdx: Int, candidates: List<Int>): Boolean {
         val contestVotes = this.votes[contestIdx] ?: return false
-        val totalVotes = contestVotes.values.sum() // assumes >= 0
+        val totalVotes = contestVotes.filter{ candidates.contains(it.key) }.map { it.value }.sum()
         return (totalVotes == 1)
     }
 
@@ -32,4 +31,8 @@ class Cvr(
     id: String,
     votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
     val phantom: Boolean = false
-): Mvr(id, votes)
+): Mvr(id, votes) {
+    override fun toString(): String {
+        return "$id: $votes $phantom"
+    }
+}

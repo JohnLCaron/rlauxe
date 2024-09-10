@@ -38,12 +38,13 @@ fun runAlphaMartRepeated(
     f: Double = 0.0,
     withoutReplacement: Boolean = true,
     nrepeat: Int = 1,
+    u: Double = 1.0,
     showDetail: Boolean = false
 
 ): AlphaMartRepeatedResult {
     val N = drawSample.N()
     val t = 0.5
-    val upperBound = 1.0
+    val upperBound = u
     val minsd = 1.0e-6
     val c = max(eps, ((eta0 - t) / 2))
 
@@ -55,7 +56,7 @@ fun runAlphaMartRepeated(
         estimFn = estimFn,
         N = N,
         upperBound = upperBound,
-        withoutReplacement = withoutReplacement
+        withoutReplacement = withoutReplacement,
     )
 
     var sampleMeanSum = 0.0

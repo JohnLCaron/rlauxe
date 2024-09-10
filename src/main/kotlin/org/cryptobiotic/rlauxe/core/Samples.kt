@@ -75,7 +75,6 @@ class SampleFnFromArray(val assortValues : DoubleArray): SampleFn {
 
 }
 
-
 class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleFn {
     val selectedIndices = mutableSetOf<Int>()
     val N = assortValues.size

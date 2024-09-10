@@ -186,7 +186,7 @@ class DiffMeans {
                     val pct = if (dmap != null) extractPct(dmap[margin]) else 100.0
                     val ratio = pct / pctMin
                     // data class SRT(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
-                    val sr = SRT(N, margin, 0.0, ratio, 0.0, null, 0.0, dMin)
+                    val sr = SRT(N, margin, 0.0, ratio, 0.0, null, 0.0, dMin, 0.0)
                     val newsrs = newdlc.getOrPut(d) { mutableListOf() }
                     newsrs.add(sr)
                 }

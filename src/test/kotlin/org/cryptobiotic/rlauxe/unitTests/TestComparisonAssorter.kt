@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.SuperMajorityAssorter
 import org.cryptobiotic.rlauxe.core.makeCvr
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactTheta
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.core.theta2margin
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -189,5 +190,18 @@ class TestComparisonAssorter {
 
         println(" ($winner)= $cwinnerAvg")
         return cwinnerAvg
+    }
+
+    @Test
+    fun testBvsV() {
+        val thetas = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val ff = "%8.4f"
+        println("  theta    margin    B       Bmargin  Bmargin/margin")
+        for (theta in thetas) {
+            val margin = theta2margin(theta)
+            val B = 1.0/(2-margin)
+            val marginB = theta2margin(B)
+            println("${ff.format(theta)} ${ff.format(margin)} ${ff.format(B)} ${ff.format(marginB)} ${ff.format(marginB/margin)}")
+        }
     }
 }

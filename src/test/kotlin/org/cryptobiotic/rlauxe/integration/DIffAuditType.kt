@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,13 +15,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.CompareWithoutReplacement
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.plots.SRT
 import kotlin.test.Test
-
-import kotlin.collections.getOrPut
-import kotlin.math.min
-import kotlin.text.format
 
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans

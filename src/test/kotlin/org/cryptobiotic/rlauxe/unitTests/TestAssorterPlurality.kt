@@ -4,9 +4,9 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.makeCvr
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactTheta
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.integration.makeCvr
+import org.cryptobiotic.rlauxe.integration.makeCvrsByExactTheta
+import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals

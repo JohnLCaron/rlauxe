@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.plots
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +14,21 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.integration.Histogram
+import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.integration.cardsPerContest
+import org.cryptobiotic.rlauxe.integration.ff
+import org.cryptobiotic.rlauxe.core.geometricMean
+import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.integration.margin2theta
+import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.integration.tabulateVotes
+import org.cryptobiotic.rlauxe.integration.theta2margin
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut

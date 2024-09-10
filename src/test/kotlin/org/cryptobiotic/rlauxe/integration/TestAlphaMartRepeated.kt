@@ -1,5 +1,10 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.PluralityAssorter
+import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.core.Welford
 import kotlin.test.Test
 
 class TestAlphaMartRepeated {
@@ -86,7 +91,7 @@ class TestAlphaMartRepeated {
         val showRR = true
 
             val cvrs = makeCvrsByExactTheta(N, theta)
-            val contest = AuditContest("contest0", 0, listOf(0,1), listOf(0))
+            val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
             val assort = PluralityAssorter(contest, 0, 1)
             val sampler = PollWithoutReplacement(cvrs, assort)
             val actualMean = sampler.truePopulationMean()

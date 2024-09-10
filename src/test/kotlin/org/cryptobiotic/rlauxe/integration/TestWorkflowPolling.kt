@@ -1,5 +1,10 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.PollWithReplacement
+import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.makePollingAudit
 import kotlin.test.Test
 
 class TestWorkflowPolling {
@@ -155,7 +160,10 @@ class TestWorkflowPolling {
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(cvrs, it.assorter) else PollWithReplacement(cvrs, it.assorter)
+                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(
+                    cvrs,
+                    it.assorter
+                ) else PollWithReplacement(cvrs, it.assorter)
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,

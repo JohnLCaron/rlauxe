@@ -1,6 +1,4 @@
-package org.cryptobiotic.rlauxe.core
-
-import kotlin.math.max
+package org.cryptobiotic.rlauxe.integration
 
 data class Histogram(val incr: Int) {
     val hist = mutableMapOf<Int, Int>() // upper bound,count

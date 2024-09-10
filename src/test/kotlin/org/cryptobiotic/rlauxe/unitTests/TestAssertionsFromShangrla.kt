@@ -1,10 +1,9 @@
 package org.cryptobiotic.rlauxe.unitTests
 
 import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.CvrBuilder
-import org.cryptobiotic.rlauxe.core.CvrBuilders
+import org.cryptobiotic.rlauxe.integration.CvrBuilders
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.makeCvr
+import org.cryptobiotic.rlauxe.integration.makeCvr
 import org.cryptobiotic.rlauxe.core.makePluralityAssertions
 import org.cryptobiotic.rlauxe.core.makeSuperMajorityAssertions
 import kotlin.test.Test

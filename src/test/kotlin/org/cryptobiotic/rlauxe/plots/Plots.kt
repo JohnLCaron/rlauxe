@@ -1,5 +1,7 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.plots
 
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.integration.Histogram
 import kotlin.math.sqrt
 
 data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?,

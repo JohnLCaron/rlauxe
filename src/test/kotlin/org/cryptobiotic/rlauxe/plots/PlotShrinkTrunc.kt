@@ -1,12 +1,13 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.plots
 
-import org.cryptobiotic.rlauxe.doubleIsClose
-import org.cryptobiotic.rlauxe.doublesAreClose
+import org.cryptobiotic.rlauxe.core.PrevSamples
+import org.cryptobiotic.rlauxe.core.Samples
+import org.cryptobiotic.rlauxe.core.Welford
+import org.cryptobiotic.rlauxe.integration.eps
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 
 // Direct compare TruncShrinkage with output from SHANGRLA TestNonnegMean output

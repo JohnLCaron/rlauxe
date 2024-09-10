@@ -1,5 +1,12 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.CompareWithoutReplacement
+import org.cryptobiotic.rlauxe.core.ComparisonAssertion
+import org.cryptobiotic.rlauxe.core.ComparisonAssorter
+import org.cryptobiotic.rlauxe.core.PluralityAssorter
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.junit.jupiter.api.Test
 
 class TestWorkflowComparison {

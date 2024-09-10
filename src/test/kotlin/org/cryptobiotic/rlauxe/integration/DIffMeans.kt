@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +15,18 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.geometricMean
+import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.plots.SRT
+import org.cryptobiotic.rlauxe.plots.makeMapFromSRTs
+import org.cryptobiotic.rlauxe.plots.makeSRT
+import org.cryptobiotic.rlauxe.plots.plotSRTpct
+import org.cryptobiotic.rlauxe.plots.plotSRTsamples
+import org.cryptobiotic.rlauxe.plots.plotSRTstdev
+import org.cryptobiotic.rlauxe.plots.plotSRTsuccess
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.test.Test
@@ -168,7 +180,7 @@ class DiffMeans {
     fun creatSRpctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {
         val newdlc = mutableMapOf<Int, MutableList<SRT>>() // N, m -> fld
         // val newsrs = mutableListOf<SRT>()
-        val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { it.pct} }.toMap() // dl -> N, m -> pct
+        val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { it.pct } }.toMap() // dl -> N, m -> pct
         // makeSRmap(srs: List<SRT>, extract: (SRT) -> Double): Map<Int, Map<Double, Double>>
         thetas.forEach { margin ->
             ns.forEach { N ->
@@ -252,7 +264,7 @@ class DiffMeans {
         // val reportedWinner = if (reportedMean > .5) 0 else 1 // TODO tie ??
         // val reportedWinnerMean = if (reportedMean > .5) reportedMean else (1.0 - (theta + reportedMeanDiff))
 
-        val contest = AuditContest("contest0", 0, listOf(0,1), listOf(0))
+        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
         val audit = makePollingAudit(contests = listOf(contest))
 
         val results = mutableListOf<AlphaMartRepeatedResult>()

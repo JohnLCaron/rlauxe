@@ -11,9 +11,8 @@ import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.SuperMajorityAssorter
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

@@ -1,11 +1,11 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.plots
 
+import org.cryptobiotic.rlauxe.integration.Histogram
 import java.io.BufferedReader
 import java.io.File
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
-import kotlin.math.min
 import kotlin.text.format
 
 class PlotDiffMeans {

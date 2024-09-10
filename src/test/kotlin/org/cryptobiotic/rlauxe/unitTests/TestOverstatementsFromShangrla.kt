@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.unitTests
 
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.CvrBuilders
+import org.cryptobiotic.rlauxe.integration.CvrBuilders
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.makeCvr
+import org.cryptobiotic.rlauxe.integration.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

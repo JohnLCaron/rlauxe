@@ -1,6 +1,13 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.CompareWithoutReplacement
+import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.plots.SRT
+import org.cryptobiotic.rlauxe.plots.makeSRT
+import org.cryptobiotic.rlauxe.plots.plotSRS
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -205,9 +212,9 @@ class TestComparisonFromAlpha {
 
         val title = " nsamples, ballot comparison, theta = $theta, assortTheta=$assorter_mean, N=$N, error-free\n d (col) vs eta0 (row)"
         plotSRS(srs, title, true,
-            colFld = { srt:SRT -> srt.d.toDouble() },
-            rowFld = { srt:SRT -> srt.eta0 },
-            fld =    { srt:SRT -> srt.nsamples.toDouble() }
+            colFld = { srt: SRT -> srt.d.toDouble() },
+            rowFld = { srt: SRT -> srt.eta0 },
+            fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
         /*
@@ -358,7 +365,7 @@ class TestComparisonFromAlpha {
         }
 
         val title = " nsamples, ballot comparison, N=$N, d = $d, error-free\n theta (col) vs eta0 (row)"
-        plotSRS(srs, title, true, colf="%6.3f",
+        plotSRS(srs, title, true, colf = "%6.3f",
             colFld = { srt: SRT -> srt.theta },
             rowFld = { srt: SRT -> srt.eta0 },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
@@ -407,14 +414,14 @@ class TestComparisonFromAlpha {
         }
 
         val title = " nsamples, ballot comparison, eta0=$eta0, d = $d, error-free\n theta (col) vs N (row)"
-        plotSRS(srs, title, true, colf="%6.3f", rowf="%6.0f",
+        plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",
             colFld = { srt: SRT -> srt.theta },
             rowFld = { srt: SRT -> srt.N.toDouble() },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
         val titlePct = " pct nsamples, ballot comparison, eta0=$eta0, d = $d, error-free\n theta (col) vs N (row)"
-        plotSRS(srs, titlePct, false, colf="%6.3f", rowf="%6.0f",
+        plotSRS(srs, titlePct, false, colf = "%6.3f", rowf = "%6.0f",
             colFld = { srt: SRT -> srt.theta },
             rowFld = { srt: SRT -> srt.N.toDouble() },
             fld = { srt: SRT -> srt.pct.toDouble() }

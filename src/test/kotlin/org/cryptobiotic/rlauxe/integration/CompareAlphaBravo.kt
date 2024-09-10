@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +14,19 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.core.AlphaMart
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SampleFnFromArray
+import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.Welford
+import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.core.randomPermute
+import org.cryptobiotic.rlauxe.plots.CalcTask
+import org.cryptobiotic.rlauxe.plots.SR
+import org.cryptobiotic.rlauxe.plots.plotSamplePctnVt
+import org.cryptobiotic.rlauxe.plots.showContests
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -67,7 +80,12 @@ class CompareAlphaBravo {
                     joinAll(*calcJobs.toTypedArray())
                 }
 
-                plotSamplePctnVt(calculations, margins, nlist, ": diff bravo - alpha; reportedMeanDiff = $reportedMeanDiff, d = $d")
+                plotSamplePctnVt(
+                    calculations,
+                    margins,
+                    nlist,
+                    ": diff bravo - alpha; reportedMeanDiff = $reportedMeanDiff, d = $d"
+                )
             }
         }
     }

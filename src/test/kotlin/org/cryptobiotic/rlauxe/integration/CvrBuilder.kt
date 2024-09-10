@@ -1,5 +1,8 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.integration
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import kotlin.random.Random
 
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
@@ -65,7 +68,7 @@ fun makeCvrsByExactTheta(ncards: Int, theta: Double = 0.0) : List<Cvr> {
             if (cvr.hasMarkFor(0, 1) == 1) {
                 val votes = mutableMapOf<Int, Map<Int, Int>>()
                 votes[0] = mapOf(0 to 1)
-                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx",  votes)
+                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
                 changed++
             }
         }
@@ -77,7 +80,7 @@ fun makeCvrsByExactTheta(ncards: Int, theta: Double = 0.0) : List<Cvr> {
             if (cvr.hasMarkFor(0, 0) == 1) {
                 val votes = mutableMapOf<Int, Map<Int, Int>>()
                 votes[0] = mapOf(1 to 1)
-                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx",  votes)
+                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
                 changed--
             }
         }

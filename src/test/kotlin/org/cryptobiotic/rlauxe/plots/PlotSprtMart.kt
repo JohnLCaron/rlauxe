@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.plots
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +14,22 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.integration.Histogram
+import org.cryptobiotic.rlauxe.core.SprtMart
+import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.core.Welford
+import org.cryptobiotic.rlauxe.integration.cardsPerContest
+import org.cryptobiotic.rlauxe.core.ceilDiv
+import org.cryptobiotic.rlauxe.integration.ff
+import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.integration.margin2theta
+import org.cryptobiotic.rlauxe.core.randomPermute
+import org.cryptobiotic.rlauxe.integration.tabulateVotes
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -168,7 +184,7 @@ fun runSprtMartRepeated(
     val welford = Welford()
 
     repeat(nrepeat) {
-        val testH0Result = sprt.testH0( randomPermute(assortValues) )
+        val testH0Result = sprt.testH0(randomPermute(assortValues))
         val currCount = status.getOrPut(testH0Result.status) { 0 }
         status[testH0Result.status] = currCount + 1
         sampleMeanSum += testH0Result.sampleMean
@@ -187,5 +203,15 @@ fun runSprtMartRepeated(
 
     val failAvg = fail.toDouble() / nrepeat
     val sampleMeanAvg = sampleMeanSum / nrepeat
-    return AlphaMartRepeatedResult(eta0=eta0, N=N, theta=theta, sampleMean=sampleMeanAvg, nrepeat, welford, failAvg, hist, status)
+    return AlphaMartRepeatedResult(
+        eta0 = eta0,
+        N = N,
+        theta = theta,
+        sampleMean = sampleMeanAvg,
+        nrepeat,
+        welford,
+        failAvg,
+        hist,
+        status
+    )
 }

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.integration
 
 import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.CompareWithoutReplacement
+import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonAssertion
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.junit.jupiter.api.Test
 
-class TestWorkflowComparison {
+class TestAuditComparison {
 
     @Test
     fun testComparisonWorkflow() {
@@ -42,7 +42,7 @@ class TestWorkflowComparison {
             assertions.forEach { it: ComparisonAssertion ->
                 println("  ${it}")
 
-                val cvrSampler = CompareWithoutReplacement(cvrs, it.assorter)
+                val cvrSampler = ComparisonNoErrors(cvrs, it.assorter)
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,

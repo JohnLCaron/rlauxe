@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.unitTests
+package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.integration.Histogram
 import kotlin.test.Test

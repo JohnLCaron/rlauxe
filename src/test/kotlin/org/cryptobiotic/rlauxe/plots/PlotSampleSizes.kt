@@ -40,6 +40,8 @@ val showContests = false
 val showAllPlots = true
 val showGeoMeanPlots = true
 
+// TODO use Plots
+
 data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
 
 fun plotSRSnVt(srs: List<SR>, margins: List<Double>, ns: List<Int>, title: String = "") {

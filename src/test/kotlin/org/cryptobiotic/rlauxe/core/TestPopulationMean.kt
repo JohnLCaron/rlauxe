@@ -1,13 +1,6 @@
-package org.cryptobiotic.rlauxe.unitTests
+package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.SampleFromList
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.PrevSamples
-import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TruncShrinkage
-import org.cryptobiotic.rlauxe.core.doubleIsClose
-import org.cryptobiotic.rlauxe.core.meanUnderNull
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test
 import kotlin.test.assertEquals

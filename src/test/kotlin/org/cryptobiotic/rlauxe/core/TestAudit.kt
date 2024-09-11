@@ -1,18 +1,6 @@
-package org.cryptobiotic.rlauxe.unitTests
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.Assertion
-import org.cryptobiotic.rlauxe.core.AuditComparison
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.AuditPolling
-import org.cryptobiotic.rlauxe.core.ComparisonAssertion
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.SuperMajorityAssorter
-import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
-import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

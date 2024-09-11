@@ -2,7 +2,33 @@ package org.cryptobiotic.rlauxe.plots
 
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.integration.Histogram
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import kotlin.math.sqrt
+
+class SRTwriter(filename: String) {
+    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
+
+    init {
+        writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d\n")
+    }
+
+    fun writeCalculations(calculations: List<SRT>) {
+        calculations.forEach {
+            writer.write(toCSV(it))
+        }
+    }
+
+    // data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
+    // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
+    fun toCSV(srt: SRT) = buildString {
+        append("${srt.N}, ${srt.theta}, ${srt.nsamples}, ${srt.stddev}, ${srt.reportedMeanDiff}, ${srt.d}\n")
+    }
+
+    fun close() {
+        writer.close()
+    }
+}
 
 data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?,
                val reportedMeanDiff: Double, val d: Int, val eta0: Double)

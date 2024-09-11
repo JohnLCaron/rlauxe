@@ -1,9 +1,5 @@
-package org.cryptobiotic.rlauxe.unitTests
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.SuperMajorityAssorter
 import org.cryptobiotic.rlauxe.integration.makeCvr
 import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.doublePrecision

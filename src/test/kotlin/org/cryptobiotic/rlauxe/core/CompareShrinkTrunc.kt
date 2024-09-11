@@ -1,8 +1,5 @@
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.PrevSamples
-import org.cryptobiotic.rlauxe.core.Samples
-import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.integration.eps
 import kotlin.math.max
 import kotlin.math.min
@@ -12,71 +9,6 @@ import kotlin.test.Test
 
 // Direct compare TruncShrinkage with output from SHANGRLA TestNonnegMean output
 class PlotShrinkTrunc {
-
-    /*
-    data class SR(val N: Int, val margin: Double, val eta: Double)
-
-    fun plotSRSnVt(srs: List<SR>, margins: List<Double>, title: String = "") {
-        val utitle = "number votes sampled: " + title
-        plotSRS(srs, margins, utitle, true) { it.nsamples }
-    }
-
-    fun plotSamplePctnVt(srs: List<SR>, margins: List<Double>, title: String = "", isInt:Boolean=true) {
-        val utitle = "pct votes sampled: " + title
-        plotSRS(srs, margins, utitle, isInt) { it.pct }
-    }
-
-    fun plotStddevSnVt(srs: List<SR>, margins: List<Double>, title: String = "") {
-        val utitle = "stddev votes sampled: " + title
-        plotSRS(srs, margins, utitle, true) { it.stddev }
-    }
-
-    fun plotSuccesses(srs: List<SR>, margins: List<Double>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
-        val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-        plotSRS(srs, margins, utitle, true) {
-            val cumul = it.hist!!.cumul(sampleMaxPct)
-            (100.0 * cumul) / nrepeat
-        }
-    }
-
-    fun plotSRS(srs: List<SR>, margins: List<Double>, title: String, isInt: Boolean, extract: (SR) -> Double) {
-        println()
-        println(title)
-        print("     N, ")
-        val theta = margins.sorted().map { .5 + it * .5 }
-        theta.forEach { print("${"%6.3f".format(it)}, ") }
-        println()
-
-        val mmap = makeMapFromSRs(srs, extract)
-
-        mmap.forEach { dkey, dmap ->
-            print("${"%6d".format(dkey)}, ")
-            dmap.toSortedMap().forEach { nkey, fld ->
-                if (isInt)
-                    print("${"%6d".format(fld.toInt())}, ")
-                else
-                    print("${"%6.3f".format(fld)}, ")
-            }
-            println()
-        }
-    }
-
-    fun makeMapFromSRs(srs: List<SR>, extract: (SR) -> Double): Map<Int, Map<Double, Double>> {
-        val mmap = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> fld
-        srs.forEach {
-            val dmap = mmap.getOrPut(it.N) { mutableMapOf() }
-            dmap[it.margin] = extract(it)
-        }
-        return mmap.toSortedMap()
-    }
-
-    fun makeSR(N: Int, margin: Double, rr: AlphaMartRepeatedResult): SR {
-        val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
-        val pct = (100.0 * sampleCountAvg / N)
-        return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar), rr.hist)
-    }
-
-     */
 
     @Test
     fun testTruncShrinkageResult() {

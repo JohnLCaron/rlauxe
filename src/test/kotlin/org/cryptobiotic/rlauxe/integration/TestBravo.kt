@@ -84,7 +84,7 @@ class TestBravo  {
 
 
     @Test
-    fun testWithSampleMean() { // Seems stupid not to use the sample mean for et0:
+    fun testWithSampleMean() {
         val randomMeans = listOf(.505, .51, .52, .53, .55, .60)
         val N = 20_000
         val m = 4000
@@ -145,6 +145,9 @@ class TestBravo  {
     }
 
 }
+
+
+// TODO use Plots
 
 val ff = "%5.2f"
 val df = "%5d"

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.plots
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,17 +23,19 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
-import org.cryptobiotic.rlauxe.plots.CalcTask
-import org.cryptobiotic.rlauxe.plots.SR
-import org.cryptobiotic.rlauxe.plots.plotSamplePctnVt
-import org.cryptobiotic.rlauxe.plots.showContests
+import org.cryptobiotic.rlauxe.integration.FixedMean
+import org.cryptobiotic.rlauxe.integration.cardsPerContest
+import org.cryptobiotic.rlauxe.integration.eps
+import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.integration.tabulateVotes
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.max
 
 // compare Alpha to Bravo (Alpha with fixed mean)
-class CompareAlphaBravo {
+class PlotAlphaBravo {
 
     @Test
     fun testAlphaBravoConcurrent() {

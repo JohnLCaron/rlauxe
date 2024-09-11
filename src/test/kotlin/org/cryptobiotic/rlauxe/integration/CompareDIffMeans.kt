@@ -21,14 +21,13 @@ import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.geometricMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.plots.SRT
+import org.cryptobiotic.rlauxe.plots.SRTwriter
 import org.cryptobiotic.rlauxe.plots.makeMapFromSRTs
 import org.cryptobiotic.rlauxe.plots.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotSRTpct
 import org.cryptobiotic.rlauxe.plots.plotSRTsamples
 import org.cryptobiotic.rlauxe.plots.plotSRTstdev
 import org.cryptobiotic.rlauxe.plots.plotSRTsuccess
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
@@ -38,7 +37,7 @@ import kotlin.text.format
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans
 
-class DiffMeans {
+class CompareDiffMeans {
     val showCalculation = false
     val showContests = false
     val showAllPlots = false
@@ -296,29 +295,5 @@ class DiffMeans {
             }
         }
         return results
-    }
-}
-
-class SRTwriter(filename: String) {
-    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-
-    init {
-        writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d\n")
-    }
-
-    fun writeCalculations(calculations: List<SRT>) {
-        calculations.forEach {
-            writer.write(toCSV(it))
-        }
-    }
-
-    // data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
-    // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
-    fun toCSV(srt: SRT) = buildString {
-        append("${srt.N}, ${srt.theta}, ${srt.nsamples}, ${srt.stddev}, ${srt.reportedMeanDiff}, ${srt.d}\n")
-    }
-
-    fun close() {
-        writer.close()
     }
 }

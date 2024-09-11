@@ -1,12 +1,8 @@
-package org.cryptobiotic.rlauxe.unitTests
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.integration.cardsPerContest
 import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
-import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.integration.tabulateVotes
 import org.cryptobiotic.rlauxe.integration.theta2margin
 import kotlin.test.Test

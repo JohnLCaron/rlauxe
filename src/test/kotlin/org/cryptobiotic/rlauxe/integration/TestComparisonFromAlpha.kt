@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.integration
 
 import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.CompareWithoutReplacement
+import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.doublePrecision
@@ -249,7 +249,7 @@ class TestComparisonFromAlpha {
         // 2.000,   9889,    9846,    325,    325,    325  \\
         // 2.018,   9889,    9846,    325,    325,    325  \\
 
-        // fix bug
+        // fix bug in python code
 
         //         10,    100,   1000,  10000, 100000,
         // 0.900 & 7225  & 3000  & 506  & 420  & 413  \\
@@ -352,7 +352,7 @@ class TestComparisonFromAlpha {
 
             for (eta in etas) {
                 val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
-                    drawSample = CompareWithoutReplacement(cvrs, compareAssertion.assorter),
+                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
                     maxSamples = N,
                     theta = theta,
                     eta0 = eta,
@@ -396,18 +396,19 @@ class TestComparisonFromAlpha {
             for (N in nlist) {
                 val cvrs = makeCvrsByExactTheta(N, theta)
                 val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-                val compareAssertions = compareAudit.assertions[contest]
-                require(compareAssertions!!.size == 1)
-                val compareAssertion = compareAssertions.first()
+                val compareAssertion = compareAudit.assertions[contest]!!.first()
+
+                val margin = compareAssertion.assorter.margin
+                val compareUpper = 2.0/(2-margin) // TODO does this matter ? doesnt seem to
 
                 val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
-                    drawSample = CompareWithoutReplacement(cvrs, compareAssertion.assorter),
+                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
                     maxSamples = N,
                     theta = theta,
                     eta0 = eta0,
                     d = d,
                     nrepeat = reps,
-                    // u = u,
+                    u = compareUpper,
                 )
                 srs.add(makeSRT(N, theta, mart, 0.0, d))
             }
@@ -427,4 +428,21 @@ class TestComparisonFromAlpha {
             fld = { srt: SRT -> srt.pct.toDouble() }
         )
     }
+    //  nsamples, ballot comparison, eta0=20.0, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,    951,    777,    631,    527,    450,    258,    138,     94,     71,     57,     38,     29,     19,     14,
+    //  5000,   2253,   1294,    904,    695,    564,    290,    147,     98,     73,     59,     39,     29,     19,     14,
+    // 10000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+    // 20000,   2781,   1442,    973,    734,    589,    296,    148,     99,     74,     59,     39,     29,     19,     14,
+    // 50000,   2907,   1475,    988,    742,    595,    298,    149,     99,     74,     59,     39,     29,     19,     14,
+    //
+    // pct nsamples, ballot comparison, eta0=20.0, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,  95.10,  77.70,  63.10,  52.70,  45.00,  25.80,  13.80,   9.40,   7.10,   5.70,   3.80,   2.90,   1.90,   1.40,
+    //  5000,  45.06,  25.88,  18.08,  13.90,  11.28,   5.80,   2.94,   1.96,   1.46,   1.18,   0.78,   0.58,   0.38,   0.28,
+    // 10000,  25.88,  13.90,   9.49,   7.21,   5.81,   2.94,   1.48,   0.98,   0.74,   0.59,   0.39,   0.29,   0.19,   0.14,
+    // 20000,  13.91,   7.21,   4.87,   3.67,   2.95,   1.48,   0.74,   0.50,   0.37,   0.30,   0.20,   0.15,   0.10,   0.07,
+    // 50000,   5.81,   2.95,   1.98,   1.48,   1.19,   0.60,   0.30,   0.20,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
 }

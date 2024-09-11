@@ -1,10 +1,4 @@
-package org.cryptobiotic.rlauxe.unitTests
-
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import java.lang.Math.log
-import kotlin.math.ceil
-import kotlin.test.*
+package org.cryptobiotic.rlauxe.core
 
 // TODO test_rcv_assorter
 

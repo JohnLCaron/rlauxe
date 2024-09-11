@@ -7,9 +7,11 @@ import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import kotlin.test.Test
 
-class TestWorkflowPolling {
+class TestAuditPolling {
 
     val showContests = false
+
+    // TODO use Plots
 
     data class SR(val d: Int, val N: Int, val margin:Double,
                   val sampleCountAvg:Double, val speedup:Double, val pctVotes: Double) {

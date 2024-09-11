@@ -1,11 +1,5 @@
-package org.cryptobiotic.rlauxe.unitTests
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.SuperMajorityAssorter
 import org.cryptobiotic.rlauxe.integration.makeCvrsByExactTheta
 import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.integration.theta2margin

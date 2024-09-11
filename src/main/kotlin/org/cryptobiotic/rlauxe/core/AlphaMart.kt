@@ -19,7 +19,13 @@ enum class TestH0Status(val fail: Boolean) {
     AcceptNull(true), // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
 }
 
-data class TestH0Result(val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>)
+data class TestH0Result(val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>) {
+    override fun toString() = buildString {
+        append("TestH0Result status=$status")
+        append("  sampleCount=$sampleCount")
+        append("  sampleMean=$sampleMean")
+    }
+}
 
 private val eps = 2.220446049250313e-16
 
@@ -36,7 +42,7 @@ class AlphaMart(
     }
 
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
-    fun testH0(maxSample: Int, terminateOnNullReject: Boolean, drawSample : () -> Double) : TestH0Result {
+    fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean = false, drawSample : () -> Double) : TestH0Result {
         require(maxSample <= N)
 
         var sampleNumber = 0        // – j ← 0: sample number
@@ -120,6 +126,12 @@ class AlphaMart(
             if (terminateOnNullReject && (pvalue < riskLimit)) {
                 break
             }
+        }
+
+        if (showDetails) {
+            println("etaj = ${etajs}")
+            println("tjs = ${tjs}")
+            println("Tjs = ${testStatistics}")
         }
 
         val status = when {

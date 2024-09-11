@@ -144,7 +144,7 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
 }
 
 
-class CompareWithoutReplacement(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
+class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double

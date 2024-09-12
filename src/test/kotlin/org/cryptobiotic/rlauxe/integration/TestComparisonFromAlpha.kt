@@ -4,10 +4,11 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactTheta
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
+import org.cryptobiotic.rlauxe.plots.makeSRT
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

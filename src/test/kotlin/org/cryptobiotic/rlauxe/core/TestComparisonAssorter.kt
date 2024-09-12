@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactTheta
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
-import org.cryptobiotic.rlauxe.integration.theta2margin
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,14 +21,14 @@ class TestComparisonAssorter {
         val awinner = PluralityAssorter(contest, winner = 0, loser = 1)
         val awinnerAvg = cvrs.map { awinner.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, awinner, awinnerAvg)
-        val cwinnerAvg = cvrs.map { cwinner.assort(it, it) }.average()
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
         println("cwinnerAvg=$cwinnerAvg <= awinnerAvg=$awinnerAvg")
         assertTrue(cwinnerAvg <= awinnerAvg)
 
         val aloser = PluralityAssorter(contest, winner = 1, loser = 0)
         val aloserAvg = cvrs.map { aloser.assort(it) }.average()
         val closer = ComparisonAssorter(contest, aloser, aloserAvg)
-        val closerAvg = cvrs.map { closer.assort(it, it) }.average()
+        val closerAvg = cvrs.map { closer.bassort(it, it) }.average()
         println("closerAvg=$closerAvg <= aloserAvg=$aloserAvg")
     }
 
@@ -94,7 +91,7 @@ class TestComparisonAssorter {
         val assort = PluralityAssorter(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, assort, assortAvg)
-        val cwinnerAvg = cvrs.map { cwinner.assort(it, it) }.average()
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
 
         println(" ($winner, $loser)= $cwinnerAvg")
         return cwinnerAvg
@@ -179,7 +176,7 @@ class TestComparisonAssorter {
         val assort = SuperMajorityAssorter(contest, winner, contest.minFraction!!)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, assort, assortAvg)
-        val cwinnerAvg = cvrs.map { cwinner.assort(it, it) }.average()
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
 
         println(" ($winner)= $cwinnerAvg")
         return cwinnerAvg

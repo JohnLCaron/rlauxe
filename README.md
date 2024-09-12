@@ -27,6 +27,7 @@ Table of Contents
   * [Sample size simulations (Polling)](#sample-size-simulations-polling)
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
+  * [Sample size simulations (Ballot Comparison)](#sample-size-simulations-ballot-comparison)
 <!-- TOC -->
 
 ## Papers
@@ -72,12 +73,11 @@ batches of ballot cards instead of individual cards (_cluster sampling_).
 
 ### Assorters and supported SocialChoices
 
-TODO elucidate the supported SocialChoices. Test for allowing multiple winners.
-
 #### PLURALITY
 
 "Top k candidates are elected."
-The rules may allow the voter to vote for one candidate, k candidates or some other number, including n (see approval).
+The rules may allow the voter to vote for one candidate, k candidates or some other number, including n, which
+makes it approval voting.
 
 See SHANGRLA, section 2.1.
 
@@ -102,8 +102,6 @@ For polling, the assorter function is A_wk,ℓj(MVR).
 For a comparison audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
 
 Notes
-* The candidates, winners and losers are kept in the AuditContest.
-* The ?? creates the assertions. Each assertion has a unique assorter.
 * Someone has to enforce that each CVR has <= number of allowed votes.
 
 
@@ -114,18 +112,17 @@ See SHANGRLA, section 2.2.
 In approval voting, voters may vote for as many candidates as they like.
 The top k candidates are elected.
 
-The same algorithm works for approval voting as for plurality voting.
-
-Notes
-* Someone has to enforce that each CVR has <= number of allowed votes.
+The plurality voting algorithm is used plurality voting.
 
 
 #### SUPERMAJORITY
 
+"Top k candidates are elected, whose percent vote is above a fraction, f."
+
 See SHANGRLA, section 2.3.
 
 A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win.
-If multiple winners are allowed, each reported winner generates one assertions.
+If multiple winners are allowed, each reported winner generates one assertion.
 
 For the ith ballot, define `A_wk,ℓj(bi)` as
 ````
@@ -139,9 +136,10 @@ For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, 
 
 One only needs one assorter for each winner, not one for each winner/loser pair.
 
-Note that the third condition means "ignore ballots with multiple votes." 
-So multiple winners can only happen when f < 0.5 / multiple.
-TODO: allow multiple votes.
+Notes
+* Someone has to enforce that each CVR has <= number of allowed votes.
+* multiple winners are allowed
+* TODO check if upperBounds is set correctly.
 
 
 #### IRV
@@ -192,69 +190,6 @@ Notes
 Diluted refers to the fact that the denominator is the number of ballot cards, which is
 greater than or equal to the number of valid votes.)
 
-This algorithm seems to be less efficient than polling. The margins are approximately half, so take much longer.
-
-For example, for theta = .51, and the CVRs agree exactly with the MVRs (all overstatements == 0),
-the avg number of samples went from 12443 to 16064 (N=50000), and 5968 to 7044 (N=10000).
-
-This is because the SHANGRLA comparison assorter reduces the margin by approx half: 
-
-theta    margin    B       Bmargin  Bmargin/margin
-0.5050   0.0100   0.5025   0.0050   0.5025
-0.5100   0.0200   0.5051   0.0101   0.5051
-0.5200   0.0400   0.5102   0.0204   0.5102
-0.5300   0.0600   0.5155   0.0309   0.5155
-0.5400   0.0800   0.5208   0.0417   0.5208
-0.5500   0.1000   0.5263   0.0526   0.5263
-0.5750   0.1500   0.5405   0.0811   0.5405
-0.6000   0.2000   0.5556   0.1111   0.5556
-0.6500   0.3000   0.5882   0.1765   0.5882
-0.7000   0.4000   0.6250   0.2500   0.6250
-
-Tables 7 and 8 in ALPHA, showing comparison ballot results, switch from using theta to using "mass at 1". So hard to compare.
-
-However, see TestComparisonFromAlpha.kt; setting eta0 very high brings the numbers down such that comparison is much better
-than polling, and can deal even with very small margins:
-
-````
-    //  nsamples, ballot comparison, N=10000, d = 100, error-free
-    // theta (col) vs eta0 (row)
-    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-    // 0.900,   9955,   9766,   9336,   8571,   7461,   2257,    464,    221,    140,    101,     59,     41,     25,     18,
-    // 1.000,   9951,   9718,   9115,   7957,   6336,   1400,    314,    159,    104,     77,     46,     32,     20,     14,
-    // 1.500,   9916,   9014,   5954,   3189,   1827,    418,    153,     98,     74,     59,     39,     29,     19,     14,
-    // 2.000,   9825,   6722,   2923,   1498,    937,    309,    148,     98,     74,     59,     39,     29,     19,     14,
-    // 5.000,   5173,   1620,    962,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-    // 7.500,   3310,   1393,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-    //10.000,   2765,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-    //15.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-    //20.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-````
-````
-nsamples, ballot comparison, eta0=20.0, d = 100, error-free
-theta (col) vs N (row)
-,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-1000,    951,    777,    631,    527,    450,    258,    138,     94,     71,     57,     38,     29,     19,     14,
-5000,   2253,   1294,    904,    695,    564,    290,    147,     98,     73,     59,     39,     29,     19,     14,
-10000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-20000,   2781,   1442,    973,    734,    589,    296,    148,     99,     74,     59,     39,     29,     19,     14,
-50000,   2907,   1475,    988,    742,    595,    298,    149,     99,     74,     59,     39,     29,     19,     14,
-
-pct nsamples, ballot comparison, eta0=20.0, d = 100, error-free
-theta (col) vs N (row)
-,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-1000,  95.10,  77.70,  63.10,  52.70,  45.00,  25.80,  13.80,   9.40,   7.10,   5.70,   3.80,   2.90,   1.90,   1.40,
-5000,  45.06,  25.88,  18.08,  13.90,  11.28,   5.80,   2.94,   1.96,   1.46,   1.18,   0.78,   0.58,   0.38,   0.28,
-10000,  25.88,  13.90,   9.49,   7.21,   5.81,   2.94,   1.48,   0.98,   0.74,   0.59,   0.39,   0.29,   0.19,   0.14,
-20000,  13.91,   7.21,   4.87,   3.67,   2.95,   1.48,   0.74,   0.50,   0.37,   0.30,   0.20,   0.15,   0.10,   0.07,
-50000,   5.81,   2.95,   1.98,   1.48,   1.19,   0.60,   0.30,   0.20,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
-````
-
-* why does setting eta0 high improve this?
-* Need to test this when there are errors in the CRVs.
-* Also, may need to adjust upper for comparison audits. 
-* Note bug in ALPHA python code for alpha mart.
-
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
@@ -284,7 +219,11 @@ To conduct the audit, sample integers between 1 and NC.
 
 See note in SHANGRLA Section 3.4 on Colorado redacted ballots.
 
-Also theres "use_styles" which gets a tighter bound when you know what ballots have which contests.
+## Use Styles
+
+See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
+
+This gets a tighter bound when you know what ballots have which contests.
 
     use_style: is the sample drawn only from ballots that should contain the contest?
 
@@ -299,7 +238,9 @@ see overstatement_assorter() in core/Assertion
     If `use_style == False`, then if the CVR contains the contest but the MVR does not,
     the MVR is considered to be a non -vote in the contest .
 
-See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies"
+## Phantom Ballots
+
+See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
 
     What if the ballot manifest is not accurate?
     it suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
@@ -316,6 +257,7 @@ ALPHA estimates the reported winner’s share of the vote before the jth card is
 The estimator can be any measurable function of the first j − 1 draws, for example a simple truncated shrinkage estimate, described below.
 ALPHA generalizes BRAVO to situations where the population {xj} is not necessarily binary, but merely nonnegative and bounded.
 ALPHA works for sampling with or without replacement, with or without weights, while BRAVO is specifically for IID sampling with replacement.
+
 ````
 θ 	        true population mean
 Xk 	        the kth random sample drawn from the population.
@@ -389,6 +331,7 @@ reported results. The smaller d is, the faster the method adapts to the true pop
 but the higher the variance is. Whatever d is, the relative weight of the reported vote shares
 decreases as the sample size increases.
 ````
+
 ### BRAVO testing statistic
 
 BRAVO is ALPHA with the following restrictions:
@@ -413,7 +356,7 @@ So its highly effective (as percentage of sampling) as N increases.
 
 Is sampling without replacement more efficient than with replacement? Should be.
 
-Can we really replicate BRAVO results?
+Can we really replicate BRAVO results? YES
 
 Options
 * ContestType: PLURALITY, APPROVAL, SUPERMAJORITY, IRV
@@ -424,7 +367,7 @@ Options
 * are we using batches (cluster sampling)?
 
 
-## Stratified audits using OneAudit
+## Stratified audits using OneAudit (not done)
 
 Deal with one contest at a time for now .
 
@@ -553,3 +496,79 @@ To Investigate
 * Does it makes sense to use small values of d for large values of reported mean? because it will only matter if (reported mean - theta) is large.
 * Sample percents get higher as theta -> 0. Can we characterize that?
 * Number of samples is independent of N as N -> inf.
+
+## Sample size simulations (Ballot Comparison)
+
+This algorithm seems to be less efficient than polling. The margins are approximately half, so take much longer.
+
+For example, for theta = .51, and the CVRs agree exactly with the MVRs (all overstatements == 0),
+the avg number of samples went from 12443 to 16064 (N=50000), and 5968 to 7044 (N=10000).
+
+This is because the SHANGRLA comparison assorter reduces the margin by approx half:
+
+theta    margin    B       Bmargin  Bmargin/margin
+0.5050   0.0100   0.5025   0.0050   0.5025
+0.5100   0.0200   0.5051   0.0101   0.5051
+0.5200   0.0400   0.5102   0.0204   0.5102
+0.5300   0.0600   0.5155   0.0309   0.5155
+0.5400   0.0800   0.5208   0.0417   0.5208
+0.5500   0.1000   0.5263   0.0526   0.5263
+0.5750   0.1500   0.5405   0.0811   0.5405
+0.6000   0.2000   0.5556   0.1111   0.5556
+0.6500   0.3000   0.5882   0.1765   0.5882
+0.7000   0.4000   0.6250   0.2500   0.6250
+
+Tables 7 and 8 in ALPHA, showing comparison ballot results, switch from using theta to using "mass at 1". So hard to compare.
+
+However, see TestComparisonFromAlpha.kt; setting eta0 very high brings the numbers down such that comparison is much better
+than polling, and can deal even with very small margins:
+
+````
+    //  nsamples, ballot comparison, N=10000, d = 100, error-free
+    // theta (col) vs eta0 (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    // 0.900,   9955,   9766,   9336,   8571,   7461,   2257,    464,    221,    140,    101,     59,     41,     25,     18,
+    // 1.000,   9951,   9718,   9115,   7957,   6336,   1400,    314,    159,    104,     77,     46,     32,     20,     14,
+    // 1.500,   9916,   9014,   5954,   3189,   1827,    418,    153,     98,     74,     59,     39,     29,     19,     14,
+    // 2.000,   9825,   6722,   2923,   1498,    937,    309,    148,     98,     74,     59,     39,     29,     19,     14,
+    // 5.000,   5173,   1620,    962,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+    // 7.500,   3310,   1393,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+    //10.000,   2765,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+    //15.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+    //20.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+````
+
+See TestComparisonFromAlpha.comparisonNvsTheta()
+
+Choose eta0=20, d = 100
+
+See [Plots in the comparison tab](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=216356100#gid=216356100)
+
+Sample size is proportional to 1/theta, no N dependence for N > 1000. This makes RLA feasible down to theta = .501.
+
+
+````
+nsamples, ballot comparison, eta0=20.0, d = 100, error-free
+theta (col) vs N (row)
+    ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+1000,    951,    777,    631,    527,    450,    258,    138,     94,     71,     57,     38,     29,     19,     14,
+5000,   2253,   1294,    904,    695,    564,    290,    147,     98,     73,     59,     39,     29,     19,     14,
+10000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+20000,   2781,   1442,    973,    734,    589,    296,    148,     99,     74,     59,     39,     29,     19,     14,
+50000,   2907,   1475,    988,    742,    595,    298,    149,     99,     74,     59,     39,     29,     19,     14,
+
+pct nsamples, ballot comparison, eta0=20.0, d = 100, error-free
+theta (col) vs N (row)
+    ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+1000,  95.10,  77.70,  63.10,  52.70,  45.00,  25.80,  13.80,   9.40,   7.10,   5.70,   3.80,   2.90,   1.90,   1.40,
+5000,  45.06,  25.88,  18.08,  13.90,  11.28,   5.80,   2.94,   1.96,   1.46,   1.18,   0.78,   0.58,   0.38,   0.28,
+10000,  25.88,  13.90,   9.49,   7.21,   5.81,   2.94,   1.48,   0.98,   0.74,   0.59,   0.39,   0.29,   0.19,   0.14,
+20000,  13.91,   7.21,   4.87,   3.67,   2.95,   1.48,   0.74,   0.50,   0.37,   0.30,   0.20,   0.15,   0.10,   0.07,
+50000,   5.81,   2.95,   1.98,   1.48,   1.19,   0.60,   0.30,   0.20,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
+````
+
+* why does setting eta0 high improve this?
+* Need to test this when there are errors in the CRVs.
+* Also, may need to adjust upper for comparison audits.
+* Note bug in ALPHA python code for alpha mart.
+

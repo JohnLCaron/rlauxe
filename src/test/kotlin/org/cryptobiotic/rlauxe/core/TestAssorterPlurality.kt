@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.makeCvr
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactTheta
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals

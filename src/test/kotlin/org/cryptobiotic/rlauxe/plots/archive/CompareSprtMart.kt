@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.plots.archive
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,28 +18,28 @@ import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SampleFnFromArray
+import org.cryptobiotic.rlauxe.core.SprtMart
 import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
 import org.cryptobiotic.rlauxe.integration.FixedMean
-import org.cryptobiotic.rlauxe.integration.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.eps
-import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
-import org.cryptobiotic.rlauxe.integration.tabulateVotes
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import kotlin.math.max
+import kotlin.test.assertEquals
 
-// compare Alpha to Bravo (Alpha with fixed mean)
-class PlotAlphaBravo {
+// is SprtMart equal to Alpha with fixed mean ?
+class CompareSprtMart {
 
     @Test
-    fun testAlphaBravoConcurrent() {
-        val margins = listOf(.01, .02, .04, .06, .08, .1, .15, .2, .3, .4)
+    fun testSprtMartConcurrent() {
+        val margins =
+            listOf(.02, .04, .06, .08, .1, .15, .2, .3, .4) // winning percent: 70, 65, 60, 57.5, 55, 54, 53, 52, 51, 50.5
         val nlist = listOf(1000, 5000, 10000, 20000, 50000)
         val tasks = mutableListOf<CalcTask>()
 
@@ -55,41 +55,25 @@ class PlotAlphaBravo {
         val nthreads = 20
         val nrepeat = 100
 
-        val dl = listOf(10, 100, 500)
-        val reportedMeanDiffs = listOf(0.0, 0.005, 0.01, 0.02, 0.05, 0.1)   // % greater than actual mean
-
-        reportedMeanDiffs.forEach { reportedMeanDiff ->
-            dl.forEach { d ->
-                calculations.clear()
-
-                runBlocking {
-                    val taskProducer = produceTasks(tasks)
-                    val calcJobs = mutableListOf<Job>()
-                    repeat(nthreads) {
-                        calcJobs.add(
-                            launchCalculations(taskProducer) { task ->
-                                compareAlphaBravo(
-                                    task.margin,
-                                    task.cvrs,
-                                    nrepeat = nrepeat,
-                                    reportedMeanDiff = reportedMeanDiff,
-                                    d = d
-                                )
-                            })
-                    }
-
-                    // wait for all verifications to be done
-                    joinAll(*calcJobs.toTypedArray())
-                }
-
-                plotSamplePctnVt(
-                    calculations,
-                    margins,
-                    nlist,
-                    ": diff bravo - alpha; reportedMeanDiff = $reportedMeanDiff, d = $d"
-                )
+        runBlocking {
+            val taskProducer = produceTasks(tasks)
+            val calcJobs = mutableListOf<Job>()
+            repeat(nthreads) {
+                calcJobs.add(
+                    launchCalculations(taskProducer) { task ->
+                        compareSprt(task, nrepeat)
+                    })
             }
+
+            // wait for all verifications to be done
+            joinAll(*calcJobs.toTypedArray())
         }
+        val count = calculations.size
+        println("did $count tasks ${stopwatch.tookPer(count, "task")}")
+    }
+
+    fun compareSprt(task: CalcTask, nrepeat: Int): List<Double> {
+        return compareSprtMart(task.margin, task.cvrs, nrepeat = nrepeat, silent = true)
     }
 
     private fun CoroutineScope.produceTasks(producer: Iterable<CalcTask>): ReceiveChannel<CalcTask> =
@@ -101,12 +85,12 @@ class PlotAlphaBravo {
             channel.close()
         }
 
-    private val calculations = mutableListOf<SR>()
+    private val calculations = mutableListOf<Double>()
     private val mutex = Mutex()
 
     private fun CoroutineScope.launchCalculations(
         input: ReceiveChannel<CalcTask>,
-        calculate: (CalcTask) -> List<SR>,
+        calculate: (CalcTask) -> List<Double>,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val calculation = calculate(task) // not inside the mutex!!
@@ -117,14 +101,12 @@ class PlotAlphaBravo {
         }
     }
 
-    fun compareAlphaBravo(
+    fun compareSprtMart(
         margin: Double,
         cvrs: List<Cvr>,
         nrepeat: Int,
-        reportedMeanDiff: Double,
-        d: Int,
         silent: Boolean = true
-    ): List<SR> {
+    ): List<Double> {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} margin=$margin withoutReplacement")
 
@@ -147,25 +129,22 @@ class PlotAlphaBravo {
         // Polling Audit
         val audit = makePollingAudit(contests = contests)
 
-        val results = mutableListOf<SR>()
+        val results = mutableListOf<Double>()
         audit.assertions.map { (contest, assertions) ->
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")
             assertions.forEach { assert ->
                 if (!silent && showContests) println("  ${assert}")
 
-                // the cvrs have exactly the right number of votes for the stated margin
-                // but the "reported mean is going to now diverge
                 val assortValues = cvrs.map { cvr -> assert.assorter.assort(cvr) }
+                val assortSum = assortValues.sum()
                 val assortMean = assortValues.average()
-                val reportedMean = assortMean + reportedMeanDiff // reportedMean != true mean
 
-                val result = runCompareAlphaBravoRepeated(
+                val result = runCompareSprtMartRepeated(
                     assortValues = assortValues,
-                    eta0 = reportedMean,       // use the reportedMean for the initial guess
-                    withoutReplacement = true,
-                    margin = margin,
+                    reportedRatio = .5 + margin / 2,
+                    eta0 = assortSum / N, // use the true value
                     nrepeat = nrepeat,
-                    d = d,
+                    withoutReplacement = true,
                 )
                 results.add(result)
             }
@@ -173,53 +152,49 @@ class PlotAlphaBravo {
         return results
     }
 
-    fun runCompareAlphaBravoRepeated(
+    fun runCompareSprtMartRepeated(
         assortValues: List<Double>,
+        reportedRatio: Double,
         eta0: Double,
-        margin: Double,
         withoutReplacement: Boolean = true,
         nrepeat: Int = 1,
-        d: Int = 500,
-    ): SR {
+        showDetail: Boolean = false,
+    ): Double {
         val N = assortValues.size
         val upperBound = 1.0
-        val t = 0.5
-        val minsd = 1.0e-6
-        val c = max(eps, ((eta0 - t) / 2))
-        val d: Int = d
 
-        val alpha = AlphaMart(
-            estimFn = TruncShrinkage(N, true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, c = c),
+        val sprt = SprtMart(
             N = N,
-            upperBound = upperBound,
-            withoutReplacement = true
+            eta = eta0,
+            upper = upperBound,
+            withoutReplacement = withoutReplacement
         )
 
-        // run alpha with fixed mean, which is the same as Bravo
-        val bravo = AlphaMart(
-            estimFn = FixedMean(eta0),
+        // run alpha with fixed mean, to simulate sprtMart == Bravo?
+        val estimFn = FixedMean(eta0)
+        val alpha = AlphaMart(
+            estimFn = estimFn,
             N = N,
             upperBound = upperBound,
-            withoutReplacement = true
+            withoutReplacement = withoutReplacement
         )
 
         val welford = Welford()
 
         repeat(nrepeat) {
-            // each repetition gets different permutation
             val permuteValues = randomPermute(assortValues.toDoubleArray())
+            val sprtResult: TestH0Result = sprt.testH0(permuteValues)
+
             val sampleFn = SampleFnFromArray(permuteValues)
-
-            // both alpha and bravo get the exact same sample
             val alphaResult: TestH0Result = alpha.testH0(N, terminateOnNullReject=true) { sampleFn.sample() }
-            sampleFn.reset()
-            val bravoResult: TestH0Result = bravo.testH0(N, terminateOnNullReject=true) { sampleFn.sample() }
-            // check success ??
 
-            welford.update((bravoResult.sampleCount - alphaResult.sampleCount).toDouble())
+            // TestH0Result val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>
+            assertEquals(sprtResult.status, alphaResult.status)
+            assertEquals(sprtResult.sampleCount, alphaResult.sampleCount)
+            welford.update((sprtResult.sampleCount - alphaResult.sampleCount).toDouble()/N)
         }
 
-        val (nsamplesDiff, stddevDiff, _) = welford.result()
-        return SR(N, margin, nsamplesDiff, 100.0 * nsamplesDiff / N, stddevDiff, null)
+        val (avg, _, _) = welford.result()
+        return avg
     }
 }

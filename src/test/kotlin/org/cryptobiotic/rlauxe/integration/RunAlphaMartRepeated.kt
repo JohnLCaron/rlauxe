@@ -13,7 +13,7 @@ import kotlin.math.sqrt
 fun runAlphaMartRepeated(
     drawSample: SampleFn,
     maxSamples: Int,
-    theta: Double,
+    theta: Double, // true mean
     eta0: Double,
     d: Int = 500,
     f: Double = 0.0,

@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactTheta
 import org.junit.jupiter.api.Test
 
 class TestAuditComparison {
@@ -31,7 +32,7 @@ class TestAuditComparison {
         val assort = PluralityAssorter(contest, 0, 1)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, assort, assortAvg)
-        val cwinnerAvg = cvrs.map { cwinner.assort(it, it) }.average()
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
 
         // Comparison Audit
         val audit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)

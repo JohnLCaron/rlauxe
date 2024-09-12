@@ -4,7 +4,12 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithReplacement
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
 import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.core.margin2theta
+import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.Test
 
 class TestAuditPolling {

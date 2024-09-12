@@ -2,15 +2,29 @@ package org.cryptobiotic.rlauxe.plots
 
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.integration.Histogram
+import java.io.BufferedReader
+import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.math.sqrt
 
+
+data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
+               val reportedMeanDiff: Double, val d: Int, val eta0: Double, val hist: Histogram?)
+
+fun makeSRT(N: Int, theta: Double, rr: AlphaMartRepeatedResult, reportedMeanDiff: Double, d: Int): SRT {
+    val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
+    val pct = (100.0 * sampleCountAvg / N)
+    return SRT(N, theta, sampleCountAvg, pct, sqrt(sampleCountVar),
+        reportedMeanDiff, d, rr.eta0, rr.hist)
+}
+
+// simple serialization to csv files
 class SRTwriter(filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
 
     init {
-        writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d\n")
+        writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d, eta0, hist\n")
     }
 
     fun writeCalculations(calculations: List<SRT>) {
@@ -22,7 +36,9 @@ class SRTwriter(filename: String) {
     // data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
     // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
     fun toCSV(srt: SRT) = buildString {
-        append("${srt.N}, ${srt.theta}, ${srt.nsamples}, ${srt.stddev}, ${srt.reportedMeanDiff}, ${srt.d}\n")
+        append("${srt.N}, ${srt.theta}, ${srt.nsamples}, ${srt.stddev}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ")
+        // append(" ${srt.hist}")
+        appendLine()
     }
 
     fun close() {
@@ -30,8 +46,43 @@ class SRTwriter(filename: String) {
     }
 }
 
-data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?,
-               val reportedMeanDiff: Double, val d: Int, val eta0: Double)
+class SRTreader(filename: String) {
+    val reader: BufferedReader = File(filename).bufferedReader()
+
+    init {
+        println("firstLine = ${reader.readLine()}")
+    }
+
+    fun readCalculations(): List<SRT> {
+        val srts = mutableListOf<SRT>()
+        while (true) {
+            val line = reader.readLine() ?: break
+            srts.add(fromCSV(line))
+        }
+        reader.close()
+        return srts
+    }
+
+    //         writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d\n")
+    // data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
+    // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
+    fun fromCSV(line: String): SRT {
+        val tokens = line.split(",")
+        require(tokens.size >= 7) { "Expected >= 7 tokens but got ${tokens.size}" }
+        val trim = tokens.map { it.trim() }
+        val N = trim[0].toInt()
+        val theta = trim[1].toDouble()
+        val nsamples = trim[2].toDouble()
+        val stddev = trim[3].toDouble()
+        val reportedMeanDiff = trim[4].toDouble()
+        val d = trim[5].toInt()
+        val eta= trim[6].toDouble()
+        val pct = (100.0 * nsamples / N)
+        return SRT(N, theta, nsamples, pct, stddev, reportedMeanDiff, d, eta, null)
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 fun plotSRTsamples(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, title: String = "") {
     val utitle = "number votes sampled: " + title
@@ -98,11 +149,8 @@ fun makeMapFromSRTs(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, extract
     return mmap.toSortedMap()
 }
 
-fun makeSRT(N: Int, theta: Double, rr: AlphaMartRepeatedResult, reportedMeanDiff: Double, d: Int): SRT {
-    val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
-    val pct = (100.0 * sampleCountAvg / N)
-    return SRT(N, theta, sampleCountAvg, pct, sqrt(sampleCountVar), rr.hist, reportedMeanDiff, d, rr.eta0)
-}
+////
+// general
 
 fun plotSRS(srs: List<SRT>, title: String, isInt: Boolean, colf: String = "%6.0f", rowf: String = "%6.3f", ff: String = "%6.2f",
             colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double) {

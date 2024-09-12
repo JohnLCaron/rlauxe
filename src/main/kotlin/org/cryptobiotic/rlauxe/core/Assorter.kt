@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 interface AssorterFunction {
-    fun assort(mvr: Mvr) : Double
+    fun assort(mvr: Cvr) : Double
     fun upperBound(): Double
     fun desc(): String
 }
@@ -9,7 +9,7 @@ interface AssorterFunction {
 /** See SHANGRLA, section 2.1. */
 data class PluralityAssorter(val contest: AuditContest, val winner: Int, val loser: Int): AssorterFunction {
     // SHANGRLA section 2, p 4.
-    override fun assort(mvr: Mvr): Double {
+    override fun assort(mvr: Cvr): Double {
         val w = mvr.hasMarkFor(contest.idx, winner)
         val l = mvr.hasMarkFor(contest.idx, loser)
         return (w - l + 1) * 0.5
@@ -23,7 +23,7 @@ data class SuperMajorityAssorter(val contest: AuditContest, val winner: Int, val
         val upperBound = 1.0 / (2 * minFraction)
 
     // SHANGRLA eq (1), section 2.3, p 5.
-    override fun assort(mvr: Mvr): Double {
+    override fun assort(mvr: Cvr): Double {
         val w = mvr.hasMarkFor(contest.idx, winner)
         return if (mvr.hasOneVote(contest.idx, contest.candidates)) (w / (2 * minFraction)) else .5
     }
@@ -43,7 +43,7 @@ data class Assertion(
 
 
 interface ComparisonAssorterFunction {
-    fun assort(mvr: Cvr, cvr: Cvr) : Double // TODO should it be Mvr, Cvr??
+    fun bassort(mvr: Cvr, cvr: Cvr) : Double
 }
 
 /** See SHANGRLA Section 3.2 */
@@ -56,14 +56,17 @@ data class ComparisonAssorter(
     val Bzero = 1.0 / (2.0 - margin)
 
     // B(bi, ci)
-    override fun assort(mvr: Cvr, cvr:Cvr): Double {
+    override fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
         //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, the _diluted margin_).
         //
         //     ωi ≡ A(ci) − A(bi)   overstatementError
         //     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-        //     B(bi, ci) ≡ τi /(2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
+        //     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
+        //
+        //     B assigns nonnegative numbers to ballots, and the outcome is correct iff Bavg > 1/2
+        //     So, B is an assorter.
 
         val overstatement = overstatementError(mvr, cvr) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
@@ -71,23 +74,19 @@ data class ComparisonAssorter(
         return tau / denom
     }
 
-    //        overstatement error for a CVR compared to the human reading of the ballot
+    //    overstatement error for a CVR compared to the human reading of the ballot.
+    //    the overstatement error ωi for CVR i is at most the value the assorter assigned to CVR i.
     //
-    //        If use_style, then if the CVR contains the contest but the MVR does
-    //        not, treat the MVR as having a vote for the loser (assort()=0)
-    //
-    //        If not use_style, then if the CVR contains the contest but the MVR does not,
-    //        the MVR is considered to be a non-vote in the contest (assort()=1/2).
+    //     ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ upper              ≡   overstatement error (SHANGRLA eq 2, p 9)
+    //      bi is the manual voting record (MVR) for the ith ballot
+    //      ci is the cast-vote record for the ith ballot
+    //      A() is the assorter function
     //
     //        Phantom CVRs and MVRs are treated specially:
     //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
-    //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every
-    //            contest.
+    //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
     fun overstatementError(mvr: Cvr, cvr: Cvr, useStyle: Boolean = true): Double {
-        //     ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ upper                 overstatement error (SHANGRLA eq 2, p 9)
-        //      bi is the manual voting record (MVR) for the ith ballot
-        //      ci is the cast-vote record for the ith ballot
-        //      A() is the assorter function
+
 
         //        # sanity check
         //        if use_style and not cvr.has_contest(self.contest.id):
@@ -98,21 +97,25 @@ data class ComparisonAssorter(
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.id}")
         }
 
+        //        If use_style, then if the CVR contains the contest but the MVR does
+        //        not, treat the MVR as having a vote for the loser (assort()=0)
+        //
         //        mvr_assort = (
         //            0
         //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
         //            else self.assort(mvr)
-        // TODO how can mvr be a phantom?
         val mvr_assort = if (mvr.phantom || (useStyle && !mvr.hasContest(contest.idx))) 0.0
                          else this.assorter.assort(mvr)
 
+        //        If not use_style, then if the CVR contains the contest but the MVR does not,
+        //        the MVR is considered to be a non-vote in the contest (assort()=1/2).
+        //
         //        # assort the CVR
         //        cvr_assort = (
-        //            self.tally_pool_means[cvr.tally_pool]
+        //            self.tally_pool_means[cvr.tally_pool] // TODO what is cvr.pool ?
         //            if cvr.pool and self.tally_pool_means is not None
         //            else int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )
-        // TODO what is cvr.pool ?
 
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr)
         return cvr_assort - mvr_assort

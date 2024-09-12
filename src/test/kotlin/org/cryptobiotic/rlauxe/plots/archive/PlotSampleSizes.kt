@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.plots.archive
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,21 +14,21 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.integration.Histogram
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.integration.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.ff
-import org.cryptobiotic.rlauxe.core.geometricMean
-import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.integration.margin2theta
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.integration.Histogram
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.integration.ff
+import org.cryptobiotic.rlauxe.integration.geometricMean
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
-import org.cryptobiotic.rlauxe.integration.tabulateVotes
-import org.cryptobiotic.rlauxe.integration.theta2margin
+import org.cryptobiotic.rlauxe.core.tabulateVotes
+import org.cryptobiotic.rlauxe.core.theta2margin
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
@@ -40,7 +40,7 @@ val showContests = false
 val showAllPlots = true
 val showGeoMeanPlots = true
 
-// TODO use Plots
+// these are early plots, superceded by Create/PlotDiffMeans
 
 data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
 

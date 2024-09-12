@@ -13,7 +13,9 @@ data class Histogram(val incr: Int) {
 
     override fun toString() = buildString {
         val shist = hist.toSortedMap()
+        append("[")
         shist.forEach { append("${it.key}:${it.value} ") }
+        append("]")
     }
 
     fun toString(keys:List<String>) = buildString {

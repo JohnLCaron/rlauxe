@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
-import org.cryptobiotic.rlauxe.integration.tabulateVotes
-import org.cryptobiotic.rlauxe.integration.theta2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.plots.archive
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,17 +17,17 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.integration.FixedMean
 import org.cryptobiotic.rlauxe.core.SampleFnFromArray
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.Welford
-import org.cryptobiotic.rlauxe.integration.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
-import org.cryptobiotic.rlauxe.integration.tabulateVotes
-import org.cryptobiotic.rlauxe.integration.theta2margin
+import org.cryptobiotic.rlauxe.integration.FixedMean
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.tabulateVotes
+import org.cryptobiotic.rlauxe.core.theta2margin
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -194,6 +194,6 @@ class PlotBravo {
         }
 
         val (avg, std, _) = welford.result()
-        return SR(N, margin, avg, 100.0 * avg / N,std, null)
+        return SR(N, margin, avg, 100.0 * avg / N, std, null)
     }
 }

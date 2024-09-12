@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.plots.archive
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,22 +14,22 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.integration.Histogram
 import org.cryptobiotic.rlauxe.core.SprtMart
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.Welford
-import org.cryptobiotic.rlauxe.integration.cardsPerContest
 import org.cryptobiotic.rlauxe.core.ceilDiv
-import org.cryptobiotic.rlauxe.integration.ff
-import org.cryptobiotic.rlauxe.integration.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactMargin
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.integration.margin2theta
 import org.cryptobiotic.rlauxe.core.randomPermute
-import org.cryptobiotic.rlauxe.integration.tabulateVotes
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.integration.Histogram
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.integration.ff
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.margin2theta
+import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch

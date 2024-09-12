@@ -20,11 +20,12 @@ import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactTheta
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.plots.SRT
 import org.cryptobiotic.rlauxe.plots.SRTwriter
-import org.cryptobiotic.rlauxe.plots.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
+import org.cryptobiotic.rlauxe.plots.makeSRT
 import kotlin.test.Test
 
 // PlotSampleSizes
@@ -242,7 +243,7 @@ class CompareAuditType {
         val compareAssertions = compareAudit.assertions[contest]
         require(compareAssertions!!.size == 1)
         val compareAssertion = compareAssertions.first()
-        val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+        // val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
         // println("compareSampler mean=${compareSampler.truePopulationMean()} count=${compareSampler.truePopulationCount()}")
 
         val compareResult = runAlphaMartRepeated(

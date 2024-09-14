@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.reader
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.integration.tabulateVotes
+import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.*
 
 class TestDominion {

@@ -32,11 +32,6 @@ fun ceilDiv(numerator: Int, denominator: Int): Int {
     return fracCeil
 }
 
-fun geometricMean(x: List<Double>): Double {
-    val lnsum = x.filter{it > 0}.map{ ln(it) }.sum()
-    return exp( lnsum / x.size )
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // covers for numpy: will be replaced
 

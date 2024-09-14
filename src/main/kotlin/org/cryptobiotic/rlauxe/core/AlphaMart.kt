@@ -19,7 +19,12 @@ enum class TestH0Status(val fail: Boolean) {
     AcceptNull(true), // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
 }
 
-data class TestH0Result(val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>) {
+data class TestH0Result(
+    val status: TestH0Status,  // how did the test conclude?
+    val sampleCount: Int,   // number of samples needed to decide (or maximum allowed)
+    val sampleMean: Double, // average of the assort values in the sample
+    val pvalues: List<Double>) { // set of pvalues (only need for testing)
+
     override fun toString() = buildString {
         append("TestH0Result status=$status")
         append("  sampleCount=$sampleCount")
@@ -48,11 +53,12 @@ class AlphaMart(
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = 1.0     // – T ← 1: test statistic
         var sampleSum = 0.0        // – S ← 0: sample sum
-        var m = 0.5                 // – m = µ_j = 1/2: population mean under the null hypothesis = H0
+        var mj = 0.5                 // – m = µ_j = 1/2: population mean under the null hypothesis = H0
 
         val prevSamples = PrevSamples()
 
         // keep series for debugging, remove for production
+        val xs = mutableListOf<Double>()
         val ms = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
         val etajs = mutableListOf<Double>()
@@ -64,16 +70,17 @@ class AlphaMart(
         while (sampleNumber < maxSample) {
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
+            xs.add(xj)
 
             val etaj = estimFn.eta(prevSamples)
             etajs.add(etaj)
 
-            m = populationMeanIfH0(N, withoutReplacement, prevSamples)
-            ms.add(m)
+            mj = populationMeanIfH0(N, withoutReplacement, prevSamples)
+            ms.add(mj)
 
             // terms[m > u] = 0       # true mean is certainly less than hypothesized
             // terms[m < 0] = np.inf  # true mean certainly greater than hypothesized
-            if (m > 1.0 || m < 0.0) {
+            if (mj > 1.0 || mj < 0.0) {
                 break
             }
 
@@ -81,29 +88,31 @@ class AlphaMart(
             //      T_j = T_j-1 / u * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j))
             //      terms[np.isclose(0, m, atol=atol)] = 1  # ignore
             //      terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
-            val tj = if (doubleIsClose(0.0, m) || doubleIsClose(upperBound, m)) {
-                1.0
+            val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) {
+                1.0 // TODO
             } else {
-                (xj * etaj / m + (upperBound - xj) * (upperBound - etaj) / (upperBound - m)) / upperBound
+                val p1 = etaj / mj
+                val term1 = xj * p1
+                val p2 = (upperBound - etaj) / (upperBound - mj)
+                val term2 = (upperBound - xj) * p2
+                val term = (term1 + term2) / upperBound
+                val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound
+                require( doubleIsClose(term, ttj))
+                //        terms[np.isclose(0, terms, atol=atol)] = (
+                //            1  # martingale effectively vanishes; p-value 1
+                //        )
+                // TODO or should this be a test on testStatistic ?
+                if (doubleIsClose(ttj, 0.0)) 1.0 else ttj
             }
             tjs.add(tj)
             testStatistic *= tj // Tj ← Tj-1 & tj
+
             testStatistics.add(testStatistic)
-
-            if (showDetail) println("    $sampleNumber = $xj sum= $sampleSum, m=$m etaj = $etaj tj=$tj, Tj = $testStatistic")
-
-            /*
-            if (m < 1.0) {
-                val term1 = etaj / m // is etaj > populationMeanIfH0 always ?
-                if (term1 < 1.0 || tj <= 0) {
-                    //      (X_j * eta_j / µ_j) ; (u - X_j) ; (u - eta_j) / ( u - µ_j))
-                    val term2 = (upperBound - xj)
-                    val term3 = (upperBound - etaj) / (upperBound - m)
-                    val term4 = (xj * term1 + term2 * term3)
-                    require(term4 == tj)
-                }
+            if (testStatistic == 0.0) {
+               //  println("testStatistic == 0.0")
             }
-             */
+
+            if (showDetail) println("    $sampleNumber = $xj sum= $sampleSum, m=$mj etaj = $etaj tj=$tj, Tj = $testStatistic")
 
             // – S ← S + Xj
             sampleSum += xj
@@ -135,10 +144,27 @@ class AlphaMart(
         }
 
         val status = when {
-            (sampleNumber == maxSample) -> TestH0Status.LimitReached
-            (m < 0.0) -> TestH0Status.SampleSum // same as m < 0
-            (m > 1.0) -> TestH0Status.AcceptNull
-            else -> TestH0Status.StatRejectNull
+            (sampleNumber == maxSample) -> {
+                TestH0Status.LimitReached
+            }
+            (mj < 0.0) -> {
+                val rm = ms.reversed()
+                val retajs = etajs.reversed()
+                val rtjs = tjs.reversed()
+                val rTjs = testStatistics.reversed()
+                TestH0Status.SampleSum
+            } // same as m < 0
+            (mj > 1.0) -> {
+                TestH0Status.AcceptNull
+            }
+            else -> {
+                val rx = xs.reversed()
+                val rm = ms.reversed()
+                val retajs = etajs.reversed()
+                val rtjs = tjs.reversed()
+                val rTjs = testStatistics.reversed()
+                TestH0Status.StatRejectNull
+            }
         }
 
         val sampleMean = sampleSum / sampleNumber
@@ -229,7 +255,11 @@ class TruncShrinkage(
 
     init {
         require(upperBound > 0.0)
-//        require(eta0 >= 0.5) // ??
+//        if (eta0 < 0.5 || eta0 > upperBound) {
+//            println("wtf")
+//        }
+//        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
+        require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)
     }
@@ -267,7 +297,8 @@ class TruncShrinkage(
         // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj, capBelow=${capBelow}(${est < capBelow})")
         // println("  meanOld=$meanUnderNull mean = $mean e_j=$e_j capBelow=${capBelow}(${est < capBelow})")
 
-        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , 1), where ǫi → 0 as the sample size grows.
+        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , upper),
+        //    where ǫi → 0 as the sample size grows.
         //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
         val boundedEst = min(max(capBelow, est), capAbove)
         return boundedEst

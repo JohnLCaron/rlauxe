@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.junit.jupiter.api.Test
 
 class TestAuditComparison {
@@ -17,7 +18,7 @@ class TestAuditComparison {
         val theta = .51
         val N = 10000
 
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
         println("ncvrs = ${cvrs.size} theta=$theta")
 
         val contest = AuditContest(
@@ -31,7 +32,7 @@ class TestAuditComparison {
         val assort = PluralityAssorter(contest, 0, 1)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, assort, assortAvg)
-        val cwinnerAvg = cvrs.map { cwinner.assort(it, it) }.average()
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
 
         // Comparison Audit
         val audit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
@@ -46,10 +47,10 @@ class TestAuditComparison {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    theta = cvrSampler.truePopulationMean(),
                     eta0 = cvrSampler.truePopulationMean(),
                     d = 100,
-                    nrepeat = 100,
+                    ntrials = 100,
+                    upperBound = it.assorter.upperBound()
                 )
                 println(result)
             }

@@ -4,7 +4,12 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithReplacement
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
+import org.cryptobiotic.rlauxe.core.margin2theta
+import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.Test
 
 class TestAuditPolling {
@@ -112,17 +117,15 @@ class TestAuditPolling {
         dl.forEach { d ->
             Nlist.forEach { N ->
                 margins.forEach { margin ->
-                    val cvrs = makeCvrsByExactMargin(N, margin)
-                    val resultWithout =
-                        testPollingWorkflow(margin, withoutReplacement = true, cvrs, d, silent = true).first()
-                    val resultWith =
-                        testPollingWorkflow(margin, withoutReplacement = false, cvrs, d, silent = true).first()
+                    val cvrs = makeCvrsByExactMean(N, margin2theta(margin))
+                    val resultWithout = testPollingWorkflow(margin, withoutReplacement = true, cvrs, d, silent = true).first()
+                    val resultWith = testPollingWorkflow(margin, withoutReplacement = false, cvrs, d, silent = true).first()
                     if (show) print("$d, ${cvrs.size}, $margin, ${resultWithout.eta0}, ")
                     val speedup = resultWith.sampleCountAvg().toDouble() / resultWithout.sampleCountAvg().toDouble()
                     val pct = (100.0 * resultWithout.sampleCountAvg().toDouble() / N).toInt()
 
                     if (show) print("${resultWithout.sampleCountAvg().toDouble()}, ${resultWith.sampleCountAvg().toDouble()}, ${"%5.2f".format(speedup)}, ")
-                    if (show) println("${pct}, ${resultWith.failPct}, ${resultWithout.status}")
+                    if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
                     srs.add(makeSR(d, N, margin, speedup, resultWithout))
                 }
                 if (show) println()
@@ -169,11 +172,11 @@ class TestAuditPolling {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    theta = cvrSampler.truePopulationMean(),
                     eta0 = margin2theta(margin),
                     d = d,
-                    nrepeat = 10,
+                    ntrials = 10,
                     withoutReplacement = withoutReplacement,
+                    upperBound = it.assorter.upperBound()
                 )
                 if (!silent) println(result)
                 results.add(result)

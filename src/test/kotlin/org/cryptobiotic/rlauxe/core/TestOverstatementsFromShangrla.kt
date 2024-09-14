@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.CvrBuilders
-import org.cryptobiotic.rlauxe.integration.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -352,7 +350,7 @@ class TestOverstatementsFromShangrla {
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[0], use_style=False) == 1/1.8
         var margin = 0.2
         var aVb = ComparisonAssorter(contest, assort, (margin + 1) / 2)
-        var have = aVb.assort(mvrs[0], cvrs[0])
+        var have = aVb.bassort(mvrs[0], cvrs[0])
         assertEquals(1.0 / 1.8, have)
 
 
@@ -365,7 +363,7 @@ class TestOverstatementsFromShangrla {
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=False) == 2/1.7
         margin = 0.3
         aVb = ComparisonAssorter(contest, assort, (margin + 1) / 2)
-        have = aVb.assort(mvrs[0], cvrs[1])
+        have = aVb.bassort(mvrs[0], cvrs[1])
         assertEquals(2.0 / 1.7, have)
 
         //
@@ -374,7 +372,7 @@ class TestOverstatementsFromShangrla {
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=False) == 0.5/1.9
         margin = 0.1
         aVb = ComparisonAssorter(contest, assort, (margin + 1) / 2)
-        have = aVb.assort(mvrs[2], cvrs[0])
+        have = aVb.bassort(mvrs[2], cvrs[0])
         assertEquals(0.5 / 1.9, have)
     }
 

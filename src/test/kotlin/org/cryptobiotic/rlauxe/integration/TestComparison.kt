@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.SampleFn
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import kotlin.collections.first
 import kotlin.math.max
 import kotlin.test.Test
@@ -18,7 +19,7 @@ class TestComparison {
         val N = 10000
         val m = N
         val theta = .509
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
         val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.plots
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,26 +18,23 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.core.geometricMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.SRTwriter
-import org.cryptobiotic.rlauxe.plots.makeMapFromSRTs
-import org.cryptobiotic.rlauxe.plots.makeSRT
-import org.cryptobiotic.rlauxe.plots.plotSRTpct
-import org.cryptobiotic.rlauxe.plots.plotSRTsamples
-import org.cryptobiotic.rlauxe.plots.plotSRTstdev
-import org.cryptobiotic.rlauxe.plots.plotSRTsuccess
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.integration.createPctRatio
+import org.cryptobiotic.rlauxe.integration.ff
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.integration.plotPctRatio
+import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import kotlin.test.Test
 
-import kotlin.collections.getOrPut
-import kotlin.math.min
 import kotlin.text.format
 
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans
 
-class CompareDiffMeans {
+// create the raw data for showing plots of polling with theta != eta0
+// these are 4 dimensional: N, theta, d, diffMean
+class CreateDiffMeans {
     val showCalculation = false
     val showContests = false
     val showAllPlots = false
@@ -46,12 +43,13 @@ class CompareDiffMeans {
 
     val N = 50000
 
+    // theta is the true mean
     data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<Cvr>)
 
     @Test
     fun plotOver() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrOver = runAlphaMartWithMeanDiff(
             theta,
@@ -66,7 +64,7 @@ class CompareDiffMeans {
     @Test
     fun plotUnder() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrUnder = runAlphaMartWithMeanDiff(
             theta,
@@ -81,7 +79,7 @@ class CompareDiffMeans {
     @Test
     fun plotEven() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrEven = runAlphaMartWithMeanDiff(
             theta,
@@ -94,7 +92,7 @@ class CompareDiffMeans {
     }
 
     @Test
-    fun plotDiffMeansConcurrent() {
+    fun createDiffMeansConcurrent() {
         val thetas = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         // val theta = listOf(.505, .55, .7)
         // val thetas = theta.map{ theta2margin(it) }
@@ -104,20 +102,20 @@ class CompareDiffMeans {
         var taskIdx = 0
         nlist.forEach { N ->
             thetas.forEach { theta ->
-                val cvrs = makeCvrsByExactTheta(N, theta)
+                val cvrs = makeCvrsByExactMean(N, theta)
                 tasks.add(AlphaMartTask(taskIdx++, N, theta, cvrs))
             }
         }
 
         val nthreads = 20
-        val nrepeat = 1000
+        val nrepeat = 10000
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
         // val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(10, 50, 250, 1250)
 
-        val writer = SRTwriter("/home/stormy/temp/DiffMeans/SRT$nrepeat.csv")
+        val writer = SRTwriter("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
         var totalCalculations = 0
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->
@@ -145,9 +143,9 @@ class CompareDiffMeans {
                     plotSRTsamples(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
                     plotSRTpct(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
                     plotSRTstdev(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    plotSRTsuccess(calculations, thetas, nlist, 10, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    plotSRTsuccess(calculations, thetas, nlist, 20, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    plotSRTsuccess(calculations, thetas, nlist, 30, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    //plotSRTsuccess(calculations, thetas, nlist, 10, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    //plotSRTsuccess(calculations, thetas, nlist, 20, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    //plotSRTsuccess(calculations, thetas, nlist, 30, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
                 } else if (showPctPlots) {
                     plotSRTpct(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
                 }
@@ -156,66 +154,19 @@ class CompareDiffMeans {
             }
 
             if (showGeoMeanPlots) {
-                val newdlc = creatSRpctRatio(dlcalcs, thetas, nlist)
-                newdlc.forEach { dl, sps ->
-                    plotSRTpct(
-                        sps,
-                        thetas,
-                        nlist,
-                        "pct/pctMin d=$dl, reportedMeanDiff=$reportedMeanDiff",
-                        isInt = false
-                    )
-                    val x = sps.map { it.pct }
-                    println("geometric mean = ${geometricMean(x)}")
-                }
-                println("===============================================")
+                val newdlc = createPctRatio(dlcalcs, thetas, nlist)
+                plotPctRatio(newdlc, thetas, nlist, reportedMeanDiff)
             }
         }
         writer.close()
         println("totalCalculations = $totalCalculations")
     }
 
-    // construct new dlcalcs replacing pct with ratio = pct/pctMin
-    fun creatSRpctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {
-        val newdlc = mutableMapOf<Int, MutableList<SRT>>() // N, m -> fld
-        // val newsrs = mutableListOf<SRT>()
-        val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { it.pct } }.toMap() // dl -> N, m -> pct
-        // makeSRmap(srs: List<SRT>, extract: (SRT) -> Double): Map<Int, Map<Double, Double>>
-        thetas.forEach { margin ->
-            ns.forEach { N ->
-                var pctMin = 100.0
-                var dMin = 0
-                dlmapPct.forEach { entry ->
-                    val (_, mmap: Map<Int, Map<Double, Double>>) = entry.value
-                    val dmap = mmap[N]
-                    val pct = if (dmap != null) dmap[margin] ?: 100.0 else 100.0
-                    pctMin = min(pct, pctMin)
-                }
-                dlmapPct.forEach { entry ->
-                    val (d, mmap) = entry.value
-                    val dmap = mmap[N]
-                    val pct = if (dmap != null) extractPct(dmap[margin]) else 100.0
-                    val ratio = pct / pctMin
-                    // data class SRT(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
-                    val sr = SRT(N, margin, 0.0, ratio, 0.0, null, 0.0, dMin, 0.0)
-                    val newsrs = newdlc.getOrPut(d) { mutableListOf() }
-                    newsrs.add(sr)
-                }
-            }
-        }
-        return newdlc
-    }
-
-    fun extractPct(pct: Double?): Double {
-        if (pct == null) return 100.0
-        if (pct < 0) return 100.0
-        return pct
-    }
-
     fun calculate(task: AlphaMartTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): SRT {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runAlphaMartWithMeanDiff(task.theta, task.cvrs, reportedMeanDiff=reportedMeanDiff, nrepeat = nrepeat, d = d, silent = true).first()
-        val sr = makeSRT(task.N, task.theta, rr, reportedMeanDiff, d)
+        val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
+        val sr = makeSRT(task.N, reportedMean, reportedMeanDiff, d, rr=rr)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, ${rr.eta0}, $sr")
         return sr
     }
@@ -258,10 +209,7 @@ class CompareDiffMeans {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
-        // ignore the "reported winner". just focus on d vs reportedMeanDiff
         val reportedMean = theta + reportedMeanDiff
-        // val reportedWinner = if (reportedMean > .5) 0 else 1 // TODO tie ??
-        // val reportedWinnerMean = if (reportedMean > .5) reportedMean else (1.0 - (theta + reportedMeanDiff))
 
         val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
         val audit = makePollingAudit(contests = listOf(contest))
@@ -277,18 +225,18 @@ class CompareDiffMeans {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    theta=theta,
                     eta0 = reportedMean, // use the reportedMean for the initial guess
                     d = d,
-                    nrepeat = nrepeat,
+                    ntrials = nrepeat,
                     withoutReplacement = true,
+                    upperBound = assert.assorter.upperBound()
                 )
                 if (!silent) {
                     println(result)
                     println(
                         "truePopulationCount=${ff.format(cvrSampler.truePopulationCount())} truePopulationMean=${
                             ff.format(cvrSampler.truePopulationMean())
-                        } failPct=${result.failPct} status=${result.status}"
+                        } failPct=${result.failPct()} status=${result.status}"
                     )
                 }
                 results.add(result)

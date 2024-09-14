@@ -4,16 +4,19 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
+import org.cryptobiotic.rlauxe.plots.makeSRT
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // from https://github.com/pbstark/alpha/blob/main/Code/alpha.ipynb
 class TestComparisonFromAlpha {
 
+    // see # set up simulations
     fun setupSimulations() {
         // # set up simulations
         //# first set: uniform mixed with a pointmass at 1
@@ -22,6 +25,11 @@ class TestComparisonFromAlpha {
         //alpha = 0.05
         //mixtures = [.99, .9, .75, .5, .25, .1, .01]  # mass at 1
         //zero_mass = [0, 0.001] # mass at 0
+        val reps = 10000
+        val alpha = .05
+        val mixtures = listOf(.99, .9, .75, .5, .25, .1, .01) // mass at 1
+        val zero_mass = listOf(0, 0.001) // mass at 0
+
         //
         //al = {}  # alpha martingale
         //kw = {}  # Kaplan-Wald
@@ -34,6 +42,9 @@ class TestComparisonFromAlpha {
         //
         //g_kol = [0.01, 0.1, 0.2]  # for the Kaplan-Kolmogorov method
         //g_wald = 1 - np.array(g_kol) # for Kaplan-Wald method
+        val g_kol = listOf(0.01, 0.1, 0.2) // for the Kaplan-Kolmogorov method
+        val g_wald = g_kol.map { 1.0 - it } // or Kaplan-Wald method
+
         //
         //D = 10 # for APK
         //beta = 1
@@ -41,6 +52,13 @@ class TestComparisonFromAlpha {
         //c_base = 0.5          # for alpha. larger c since there is no particular expectation about error rates
         //etal = [.99, .9, .75, .55]
         //Nl = [10000, 100000, 500000]
+        val D = 10
+        val beta = 1
+        val dl = listOf(10, 100) // for alpha
+        val c_base = 0.5 // for alpha. larger c since there is no particular expectation about error rates
+        val etal = listOf(.99, .9, .75, .55)
+        val Nl = listOf(0, 100)
+
         //
         //
         //for m in mixtures:
@@ -50,6 +68,7 @@ class TestComparisonFromAlpha {
         //            meth[m][N] = {}
         //
         //zm = zero_mass[1]
+
         //for m in mixtures:
         //    print(f'{m=}')
         //    for N in Nl:
@@ -92,6 +111,26 @@ class TestComparisonFromAlpha {
         //                                estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
         //                    al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
 
+        /* TODO
+        val sqk = mutableMapOf<>()
+        val thetas = mutableMapOf<>()
+
+        mixtures.forEach { m ->
+            println("m=$m")
+            Nl.forEach { N ->
+                println("N=$N")
+
+                var t = 0.0
+                while (t < 0.5) {
+                    val x = sp.stats.uniform.rvs(size=N)
+                    val y = sp.stats.uniform.rvs(size=N)
+                    x[y<=m] = 1
+                    x[y>=(1-zm)] = 0
+                    t = np.mean(x)
+            }
+        }
+
+         */
         // for m in mixtures:
         //    for N in Nl:
         //        sqk[m][N] = sqk[m][N]/reps + 1
@@ -133,6 +172,7 @@ class TestComparisonFromAlpha {
         //      'for each combination of $m$ and $N$ is in bold font.}')
     }
 
+    // See ## Simulation of a comparison audit
     @Test
     fun comparisonSimulation() {
         // overstatement_assorter = lambda overstatement_in_votes, assorter_margin :\
@@ -164,7 +204,7 @@ class TestComparisonFromAlpha {
         val u = 2.0/(2-assorter_margin)
         assertEquals(1.009081735, u, doublePrecision)
         val dl = listOf(10, 100, 1000, 10000)
-        val etal = listOf(0.9, 1.0, u, 2.5, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
+        val etal = listOf(0.9, 1.0, u, 2.0, 2.0 * u) // should be .9, 1, 1.009, 2, 2.018
 
         // TODO check you get same result
         //x = np.full(N, overstatement_assorter(0, assorter_margin))  # error-free in this simulation, wi = 0
@@ -200,20 +240,19 @@ class TestComparisonFromAlpha {
                 val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
                     drawSample = SampleFromArrayWithoutReplacement(x),
                     maxSamples = N,
-                    theta = theta,
                     eta0 = eta,
                     d = d,
-                    nrepeat = reps,
-                    u = u,
+                    ntrials = reps,
+                    upperBound = u,
                 )
-                srs.add(makeSRT(N, theta, mart, 0.0, d))
+                srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
             }
         }
 
-        val title = " nsamples, ballot comparison, theta = $theta, assortTheta=$assorter_mean, N=$N, error-free\n d (col) vs eta0 (row)"
+        val title = " nsamples, ballot comparison, theta = $theta, assortTheta=$assorter_mean, N=$N, error-free\n d (col) vs eta0Factor (row)"
         plotSRS(srs, title, true,
             colFld = { srt: SRT -> srt.d.toDouble() },
-            rowFld = { srt: SRT -> srt.eta0 },
+            rowFld = { srt: SRT -> srt.eta0Factor },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
@@ -344,30 +383,31 @@ class TestComparisonFromAlpha {
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
-            val cvrs = makeCvrsByExactTheta(N, theta)
+            val cvrs = makeCvrsByExactMean(N, theta)
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
             val compareAssertions = compareAudit.assertions[contest]
             require(compareAssertions!!.size == 1)
             val compareAssertion = compareAssertions.first()
+            val compareAssorter = compareAssertion.assorter
+            println("compareAssertion.upperBound() = ${compareAssorter.upperBound()}")
 
             for (eta in etas) {
                 val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
                     drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
                     maxSamples = N,
-                    theta = theta,
                     eta0 = eta,
                     d = d,
-                    nrepeat = reps,
-                    // u = u,
+                    ntrials = reps,
+                    upperBound = compareAssorter.upperBound(),
                 )
-                srs.add(makeSRT(N, theta, mart, 0.0, d))
+                srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
             }
         }
 
-        val title = " nsamples, ballot comparison, N=$N, d = $d, error-free\n theta (col) vs eta0 (row)"
+        val title = " nsamples, ballot comparison, N=$N, d = $d, error-free\n theta (col) vs eta0Factor (row)"
         plotSRS(srs, title, true, colf = "%6.3f",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0 },
+            colFld = { srt: SRT -> srt.reportedMean },
+            rowFld = { srt: SRT -> srt.eta0Factor },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
     }
@@ -377,8 +417,9 @@ class TestComparisonFromAlpha {
         val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
 
-        val d = 100
-        val reps = 100
+        val d = 10000
+        val ntrials = 100
+        // val eta0 = 1.0
 
         /* what to make of this ??
         val assorter_mean = (9000 * thetas.last() + 1000 * .5) / N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
@@ -386,46 +427,47 @@ class TestComparisonFromAlpha {
         val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
         assertEquals(1.009081735, u, doublePrecision)
          */
-
-        val eta0 = 20.0
-
         val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
             for (N in nlist) {
-                val cvrs = makeCvrsByExactTheta(N, theta)
+                val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
                 val compareAssertion = compareAudit.assertions[contest]!!.first()
 
                 val margin = compareAssertion.assorter.margin
                 val compareUpper = 2.0/(2-margin) // TODO does this matter ? doesnt seem to
+                val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+                val etaActual = drawSample.truePopulationMean()
+                val etaExpect =  1.0/(2-margin)
+                val same = doubleIsClose(etaActual, etaExpect, doublePrecision)
+                // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
 
                 val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
+                    drawSample = drawSample,
                     maxSamples = N,
-                    theta = theta,
-                    eta0 = eta0,
+                    eta0 = etaExpect,
                     d = d,
-                    nrepeat = reps,
-                    u = compareUpper,
+                    ntrials = ntrials,
+                    upperBound = compareUpper,
                 )
-                srs.add(makeSRT(N, theta, mart, 0.0, d))
+                srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
             }
         }
 
-        val title = " nsamples, ballot comparison, eta0=$eta0, d = $d, error-free\n theta (col) vs N (row)"
+        val title = " nsamples, ballot comparison, eta0=etaExpect, d = $d, error-free\n theta (col) vs N (row)"
         plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",
-            colFld = { srt: SRT -> srt.theta },
+            colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.N.toDouble() },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
-        val titlePct = " pct nsamples, ballot comparison, eta0=$eta0, d = $d, error-free\n theta (col) vs N (row)"
+        val titlePct = " pct nsamples, ballot comparison, eta0=etaExpect, d = $d, error-free\n theta (col) vs N (row)"
         plotSRS(srs, titlePct, false, colf = "%6.3f", rowf = "%6.0f",
-            colFld = { srt: SRT -> srt.theta },
+            colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.N.toDouble() },
-            fld = { srt: SRT -> srt.pct.toDouble() }
+            fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
         )
     }
     //  nsamples, ballot comparison, eta0=20.0, d = 100, error-free
@@ -445,4 +487,206 @@ class TestComparisonFromAlpha {
     // 10000,  25.88,  13.90,   9.49,   7.21,   5.81,   2.94,   1.48,   0.98,   0.74,   0.59,   0.39,   0.29,   0.19,   0.14,
     // 20000,  13.91,   7.21,   4.87,   3.67,   2.95,   1.48,   0.74,   0.50,   0.37,   0.30,   0.20,   0.15,   0.10,   0.07,
     // 50000,   5.81,   2.95,   1.98,   1.48,   1.19,   0.60,   0.30,   0.20,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
+
+    //
+    // eta0=1.0, d = 100
+    // nsamples, ballot comparison, eta0=1.0, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,   1000,    998,    992,    980,    956,    668,    274,    157,    108,     83,     53,     39,     27,     21,
+    //  5000,   4988,   4930,   4775,   4453,   3925,   1297,    328,    172,    115,     86,     54,     40,     27,     21,
+    // 10000,   9951,   9720,   9127,   7994,   6410,   1468,    336,    174,    116,     87,     54,     40,     27,     21,
+    // 20000,  19804,  18904,  16766,  13274,   9377,   1571,    341,    175,    116,     87,     54,     40,     27,     21,
+    // 50000,  48786,  43654,  33681,  21985,  12982,   1640,    343,    175,    116,     87,     54,     40,     27,     21,
+    //
+    // pct nsamples, ballot comparison, eta0=1.0, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000, 100.00,  99.80,  99.20,  98.00,  95.60,  66.80,  27.40,  15.70,  10.80,   8.30,   5.30,   3.90,   2.70,   2.10,
+    //  5000,  99.76,  98.60,  95.50,  89.06,  78.50,  25.94,   6.56,   3.44,   2.30,   1.72,   1.08,   0.80,   0.54,   0.42,
+    // 10000,  99.51,  97.20,  91.27,  79.94,  64.10,  14.68,   3.36,   1.74,   1.16,   0.87,   0.54,   0.40,   0.27,   0.21,
+    // 20000,  99.02,  94.52,  83.83,  66.37,  46.89,   7.86,   1.71,   0.88,   0.58,   0.44,   0.27,   0.20,   0.14,   0.11,
+    // 50000,  97.57,  87.31,  67.36,  43.97,  25.96,   3.28,   0.69,   0.35,   0.23,   0.17,   0.11,   0.08,   0.05,   0.04,
+    //
+    // eta0=1.0, d = 1000
+    // nsamples, ballot comparison, eta0=1.0, d = 1000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,    995,    904,    761,    636,    538,    295,    153,    104,     79,     65,     45,     35,     25,     20,
+    //  5000,   4259,   2279,   1394,    980,    751,    341,    164,    109,     82,     66,     46,     35,     25,     20,
+    // 10000,   6986,   2758,   1541,   1046,    787,    348,    165,    110,     83,     67,     46,     35,     25,     20,
+    // 20000,  10205,   3076,   1626,   1082,    806,    351,    166,    110,     83,     67,     46,     35,     25,     20,
+    // 50000,  14057,   3301,   1681,   1105,    818,    353,    167,    110,     83,     67,     46,     35,     25,     20,
+    //
+    // pct nsamples, ballot comparison, eta0=1.0, d = 1000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,  99.50,  90.40,  76.10,  63.60,  53.80,  29.50,  15.30,  10.40,   7.90,   6.50,   4.50,   3.50,   2.50,   2.00,
+    //  5000,  85.18,  45.58,  27.88,  19.60,  15.02,   6.82,   3.28,   2.18,   1.64,   1.32,   0.92,   0.70,   0.50,   0.40,
+    // 10000,  69.86,  27.58,  15.41,  10.46,   7.87,   3.48,   1.65,   1.10,   0.83,   0.67,   0.46,   0.35,   0.25,   0.20,
+    // 20000,  51.03,  15.38,   8.13,   5.41,   4.03,   1.76,   0.83,   0.55,   0.42,   0.34,   0.23,   0.18,   0.13,   0.10,
+    // 50000,  28.11,   6.60,   3.36,   2.21,   1.64,   0.71,   0.33,   0.22,   0.17,   0.13,   0.09,   0.07,   0.05,   0.04,
+    //
+    //
+    // eta0=1.0, d = 10000
+    //  nsamples, ballot comparison, eta0=1.0, d = 10000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,    960,    794,    647,    540,    462,    266,    144,    100,     77,     63,     44,     34,     25,     20,
+    //  5000,   2466,   1376,    949,    723,    585,    300,    154,    104,     80,     65,     45,     35,     25,     20,
+    // 10000,   2913,   1491,   1000,    752,    603,    304,    155,    105,     80,     65,     45,     35,     25,     20,
+    // 20000,   3185,   1554,   1027,    767,    613,    307,    155,    105,     80,     65,     45,     35,     25,     20,
+    // 50000,   3368,   1594,   1044,    777,    619,    308,    156,    105,     80,     65,     45,     35,     25,     20,
+    //
+    // pct nsamples, ballot comparison, eta0=1.0, d = 10000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,  96.00,  79.40,  64.70,  54.00,  46.20,  26.60,  14.40,  10.00,   7.70,   6.30,   4.40,   3.40,   2.50,   2.00,
+    //  5000,  49.32,  27.52,  18.98,  14.46,  11.70,   6.00,   3.08,   2.08,   1.60,   1.30,   0.90,   0.70,   0.50,   0.40,
+    // 10000,  29.13,  14.91,  10.00,   7.52,   6.03,   3.04,   1.55,   1.05,   0.80,   0.65,   0.45,   0.35,   0.25,   0.20,
+    // 20000,  15.93,   7.77,   5.14,   3.84,   3.07,   1.54,   0.78,   0.53,   0.40,   0.33,   0.23,   0.18,   0.13,   0.10,
+    // 50000,   6.74,   3.19,   2.09,   1.55,   1.24,   0.62,   0.31,   0.21,   0.16,   0.13,   0.09,   0.07,   0.05,   0.04,
+    //
+    //  nsamples, ballot comparison, eta0=etaExpect, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,   1000,   1000,    998,    995,    992,    968,    883,    769,    652,    545,    347,    230,    117,     69,
+    //  5000,   4992,   4967,   4926,   4870,   4800,   4285,   2998,   1998,   1362,    966,    481,    282,    129,     73,
+    // 10000,   9967,   9869,   9709,   9493,   9230,   7498,   4282,   2497,   1576,   1069,    505,    290,    130,     73,
+    // 20000,  19868,  19480,  18867,  18070,  17140,  11993,   5449,   2853,   1711,   1130,    518,    294,    131,     74,
+    // 50000,  49180,  46871,  43471,  39462,  35280,  18733,   6513,   3120,   1804,   1169,    526,    297,    132,     74,
+    //
+    // pct nsamples, ballot comparison, eta0=etaExpect, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000, 100.00, 100.00,  99.80,  99.50,  99.20,  96.80,  88.30,  76.90,  65.20,  54.50,  34.70,  23.00,  11.70,   6.90,
+    //  5000,  99.84,  99.34,  98.52,  97.40,  96.00,  85.70,  59.96,  39.96,  27.24,  19.32,   9.62,   5.64,   2.58,   1.46,
+    // 10000,  99.67,  98.69,  97.09,  94.93,  92.30,  74.98,  42.82,  24.97,  15.76,  10.69,   5.05,   2.90,   1.30,   0.73,
+    // 20000,  99.34,  97.40,  94.34,  90.35,  85.70,  59.97,  27.25,  14.27,   8.56,   5.65,   2.59,   1.47,   0.66,   0.37,
+    // 50000,  98.36,  93.74,  86.94,  78.92,  70.56,  37.47,  13.03,   6.24,   3.61,   2.34,   1.05,   0.59,   0.26,   0.15,
+    //
+    //  nsamples, ballot comparison, eta0=compareUpper, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,   1000,    998,    992,    980,    955,    656,    259,    145,     98,     74,     45,     32,     20,     14,
+    //  5000,   4988,   4930,   4773,   4444,   3902,   1247,    307,    157,    103,     76,     46,     32,     20,     15,
+    // 10000,   9951,   9719,   9119,   7965,   6346,   1403,    314,    159,    104,     77,     46,     32,     20,     15,
+    // 20000,  19804,  18900,  16738,  13190,   9239,   1497,    318,    160,    105,     77,     46,     32,     20,     15,
+    // 50000,  48785,  43631,  33569,  21754,  12716,   1560,    320,    160,    105,     77,     46,     33,     20,     15,
+    //
+    // pct nsamples, ballot comparison, eta0=compareUpper, d = 100, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000, 100.00,  99.80,  99.20,  98.00,  95.50,  65.60,  25.90,  14.50,   9.80,   7.40,   4.50,   3.20,   2.00,   1.40,
+    //  5000,  99.76,  98.60,  95.46,  88.88,  78.04,  24.94,   6.14,   3.14,   2.06,   1.52,   0.92,   0.64,   0.40,   0.30,
+    // 10000,  99.51,  97.19,  91.19,  79.65,  63.46,  14.03,   3.14,   1.59,   1.04,   0.77,   0.46,   0.32,   0.20,   0.15,
+    // 20000,  99.02,  94.50,  83.69,  65.95,  46.20,   7.49,   1.59,   0.80,   0.53,   0.39,   0.23,   0.16,   0.10,   0.08,
+    // 50000,  97.57,  87.26,  67.14,  43.51,  25.43,   3.12,   0.64,   0.32,   0.21,   0.15,   0.09,   0.07,   0.04,   0.03,
+    //
+    //  nsamples, ballot comparison, eta0=compareUpper, d = 1000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,    994,    903,    759,    632,    534,    289,    147,     98,     74,     59,     39,     29,     19,     14,
+    //  5000,   4255,   2268,   1384,    971,    742,    334,    157,    102,     76,     60,     39,     29,     19,     14,
+    // 10000,   6972,   2742,   1529,   1035,    777,    340,    159,    103,     76,     60,     39,     29,     19,     14,
+    // 20000,  10173,   3055,   1611,   1070,    796,    343,    159,    103,     76,     60,     40,     29,     19,     14,
+    // 50000,  13993,   3278,   1665,   1092,    807,    345,    160,    103,     76,     60,     40,     29,     19,     14,
+    //
+    // pct nsamples, ballot comparison, eta0=compareUpper, d = 1000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,  99.40,  90.30,  75.90,  63.20,  53.40,  28.90,  14.70,   9.80,   7.40,   5.90,   3.90,   2.90,   1.90,   1.40,
+    //  5000,  85.10,  45.36,  27.68,  19.42,  14.84,   6.68,   3.14,   2.04,   1.52,   1.20,   0.78,   0.58,   0.38,   0.28,
+    // 10000,  69.72,  27.42,  15.29,  10.35,   7.77,   3.40,   1.59,   1.03,   0.76,   0.60,   0.39,   0.29,   0.19,   0.14,
+    // 20000,  50.87,  15.28,   8.06,   5.35,   3.98,   1.72,   0.80,   0.52,   0.38,   0.30,   0.20,   0.15,   0.10,   0.07,
+    // 50000,  27.99,   6.56,   3.33,   2.18,   1.61,   0.69,   0.32,   0.21,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
+    //
+    //  nsamples, ballot comparison, eta0=compareUpper, d = 10000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,    960,    792,    645,    537,    458,    261,    139,     95,     71,     57,     38,     29,     19,     14,
+    //  5000,   2462,   1371,    943,    718,    579,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+    // 10000,   2907,   1485,    994,    746,    597,    298,    149,     99,     74,     59,     39,     29,     19,     14,
+    // 20000,   3178,   1548,   1021,    761,    607,    301,    149,     99,     74,     59,     39,     29,     19,     14,
+    // 50000,   3360,   1587,   1037,    770,    612,    302,    150,     99,     74,     59,     39,     29,     19,     14,
+    //
+    // pct nsamples, ballot comparison, eta0=compareUpper, d = 10000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,  96.00,  79.20,  64.50,  53.70,  45.80,  26.10,  13.90,   9.50,   7.10,   5.70,   3.80,   2.90,   1.90,   1.40,
+    //  5000,  49.24,  27.42,  18.86,  14.36,  11.58,   5.88,   2.96,   1.96,   1.48,   1.18,   0.78,   0.58,   0.38,   0.28,
+    // 10000,  29.07,  14.85,   9.94,   7.46,   5.97,   2.98,   1.49,   0.99,   0.74,   0.59,   0.39,   0.29,   0.19,   0.14,
+    // 20000,  15.89,   7.74,   5.11,   3.81,   3.04,   1.51,   0.75,   0.50,   0.37,   0.30,   0.20,   0.15,   0.10,   0.07,
+    // 50000,   6.72,   3.17,   2.07,   1.54,   1.22,   0.60,   0.30,   0.20,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
+    //
+    //  nsamples, ballot comparison, eta0=etaExpect, d = 10000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000,   1000,   1000,    998,    995,    992,    968,    883,    769,    652,    545,    347,    230,    117,     69,
+    //  5000,   4992,   4967,   4926,   4870,   4800,   4285,   2998,   1998,   1362,    966,    481,    282,    129,     73,
+    // 10000,   9967,   9869,   9709,   9493,   9230,   7498,   4282,   2497,   1576,   1069,    505,    290,    130,     73,
+    // 20000,  19868,  19480,  18867,  18070,  17140,  11993,   5449,   2853,   1711,   1130,    518,    294,    131,     74,
+    // 50000,  49180,  46871,  43471,  39462,  35280,  18733,   6513,   3120,   1804,   1169,    526,    297,    132,     74,
+    //
+    // pct nsamples, ballot comparison, eta0=etaExpect, d = 10000, error-free
+    // theta (col) vs N (row)
+    //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+    //  1000, 100.00, 100.00,  99.80,  99.50,  99.20,  96.80,  88.30,  76.90,  65.20,  54.50,  34.70,  23.00,  11.70,   6.90,
+    //  5000,  99.84,  99.34,  98.52,  97.40,  96.00,  85.70,  59.96,  39.96,  27.24,  19.32,   9.62,   5.64,   2.58,   1.46,
+    // 10000,  99.67,  98.69,  97.09,  94.93,  92.30,  74.98,  42.82,  24.97,  15.76,  10.69,   5.05,   2.90,   1.30,   0.73,
+    // 20000,  99.34,  97.40,  94.34,  90.35,  85.70,  59.97,  27.25,  14.27,   8.56,   5.65,   2.59,   1.47,   0.66,   0.37,
+    // 50000,  98.36,  93.74,  86.94,  78.92,  70.56,  37.47,  13.03,   6.24,   3.61,   2.34,   1.05,   0.59,   0.26,   0.15,
+
+    @Test
+    fun testNvsTheta() {
+        val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val nlist = listOf(50000, 20000, 10000, 5000, 1000)
+        val theta = .510
+        val N = 10000
+        val factors = listOf(1.0, 2.0)
+
+        val d = 10000
+        val ntrials = 1
+
+        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+
+        for (factor in factors) {
+            val srs = mutableListOf<SRT>()
+            val cvrs = makeCvrsByExactMean(N, theta)
+            val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
+            val compareAssertion = compareAudit.assertions[contest]!!.first()
+
+            val margin = compareAssertion.assorter.margin
+            val compareUpper = 2.0 / (2 - margin) // TODO does this matter ? doesnt seem to
+            val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+            val etaActual = drawSample.truePopulationMean()
+            val eta0 = factor / (2 - margin)
+            println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
+
+            val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
+                drawSample = drawSample,
+                maxSamples = N,
+                eta0 = eta0,
+                d = d,
+                ntrials = ntrials,
+                upperBound = compareUpper,
+            )
+            srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
+
+            val title = " nsamples, ballot comparison, eta0=eta0, d = $d, error-free\n theta (col) vs N (row)"
+            plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",
+                colFld = { srt: SRT -> srt.reportedMean },
+                rowFld = { srt: SRT -> srt.N.toDouble() },
+                fld = { srt: SRT -> srt.nsamples.toDouble() }
+            )
+
+            val titlePct =
+                " pct nsamples, ballot comparison, eta0=eta0, d = $d, error-free\n theta (col) vs N (row)"
+            plotSRS(srs, titlePct, false, colf = "%6.3f", rowf = "%6.0f",
+                colFld = { srt: SRT -> srt.reportedMean },
+                rowFld = { srt: SRT -> srt.N.toDouble() },
+                fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+            )
+        }
+    }
 }

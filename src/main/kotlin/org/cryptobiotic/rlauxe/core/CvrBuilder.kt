@@ -1,8 +1,5 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import kotlin.random.Random
 
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
@@ -43,32 +40,39 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
 fun margin2theta(margin: Double) = (margin + 1.0) / 2.0
 fun theta2margin(theta: Double) = 2.0 * theta - 1.0
 
-fun makeCvrsByExactMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
-    return makeCvrsByExactTheta(ncards, margin2theta(margin))
-}
+//fun makeCvrsByExactMean(ncards: Int, margin: Double = 0.0) : List<Cvr> {
+//    return makeCvrsByExactMean(ncards, margin2theta(margin))
+//}
 
-fun makeCvrsByExactTheta(ncards: Int, theta: Double = 0.0) : List<Cvr> {
+fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
         val votes = mutableMapOf<Int, Map<Int, Int>>()
         val random = Random.nextDouble(1.0)
-        val cand = if (random < theta) 0 else 1
+        val cand = if (random < mean) 0 else 1
         votes[0] = mapOf(cand to 1)
         randomCvrs.add(Cvr("card-$it", votes))
     }
+    flipExactVotes(randomCvrs, mean)
+    return randomCvrs
+}
+
+// change cvrs to have the exact number of votes for avg = theta
+fun flipExactVotes(cvrs: MutableList<Cvr>, theta: Double): Int {
+    val ncards = cvrs.size
     val expectedAVotes = (ncards * theta).toInt()
-    val actualAvotes = randomCvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    val actualAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
     val needToChangeVotesToA = expectedAVotes - actualAvotes
     var changed = 0
     // we need more A votes, needToChangeVotesToA > 0
     if (needToChangeVotesToA > 0) {
         while (changed < needToChangeVotesToA) {
             val cvrIdx = Random.nextInt(ncards)
-            val cvr = randomCvrs[cvrIdx]
+            val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 1) == 1) {
                 val votes = mutableMapOf<Int, Map<Int, Int>>()
                 votes[0] = mapOf(0 to 1)
-                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
                 changed++
             }
         }
@@ -76,18 +80,18 @@ fun makeCvrsByExactTheta(ncards: Int, theta: Double = 0.0) : List<Cvr> {
         // we need more B votes, needToChangeVotesToA < 0
         while (changed > needToChangeVotesToA) {
             val cvrIdx = Random.nextInt(ncards)
-            val cvr = randomCvrs[cvrIdx]
+            val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 0) == 1) {
                 val votes = mutableMapOf<Int, Map<Int, Int>>()
                 votes[0] = mapOf(1 to 1)
-                randomCvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
                 changed--
             }
         }
     }
-    val checkAvotes = randomCvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
     require(checkAvotes == expectedAVotes)
-    return randomCvrs
+    return changed
 }
 
 fun makeCvrsByCount(ncards: Int, count: Int) : List<Cvr> {

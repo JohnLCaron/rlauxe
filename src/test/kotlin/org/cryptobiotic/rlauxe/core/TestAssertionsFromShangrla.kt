@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.CvrBuilders
-import org.cryptobiotic.rlauxe.integration.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

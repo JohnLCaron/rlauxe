@@ -1,14 +1,33 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.makeCvr
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactTheta
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // See SHANGRLA 2.1
 class TestAssorterPlurality {
+
+    @Test
+    fun testBasics() {
+        val contest = AuditContest(
+            id = "AvB",
+            idx = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidates = listOf(0, 1, 2),
+            winners = listOf(0),
+        )
+        val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
+        val cvr0 = makeCvr(0)
+        val cvr1 = makeCvr(1)
+        val cvr2 = makeCvr(2)
+
+        val avalue0 = assorter.assort(cvr0)
+        val avalue1 = assorter.assort(cvr1)
+        val avalue2 = assorter.assort(cvr2)
+        assertEquals(1.0, avalue0)
+        assertEquals(0.0, avalue1)
+        assertEquals(0.5, avalue2)
+    }
 
     @Test
     fun testTwoCandidatePlurality() {
@@ -19,7 +38,7 @@ class TestAssorterPlurality {
             candidates = listOf(0, 1),
             winners = listOf(0),
         )
-        val cvrs: List<Cvr> = makeCvrsByExactTheta(ncards = 100, theta = .55)
+        val cvrs: List<Cvr> = makeCvrsByExactMean(ncards = 100, mean = .55)
 
         val winner = PluralityAssorter(contest, winner = 0, loser = 1)
         val winnerAvg = cvrs.map { winner.assort(it) }.average()

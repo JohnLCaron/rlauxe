@@ -3,9 +3,11 @@ package org.cryptobiotic.rlauxe.core
 // If we knew the contests and candidate indices, we could just use a 2dim array: votes[contest][candidate]
 // or we could pass in the Map, but create the index array.
 // perhaps the audit contains the string -> index map?
-open class Mvr(
+
+class Cvr(
     val id: String,
     val votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
+    val phantom: Boolean = false
 ) {
     fun hasContest(contestIdx: Int): Boolean = votes[contestIdx] != null
 
@@ -15,23 +17,13 @@ open class Mvr(
         return if (contestVotes == null) 0 else contestVotes[candidateIdx] ?: 0
     }
 
-    // Is there exactly one vote among the candidates in the contest `contest_id`?
+    // Is there exactly one vote in the contestIdx among the given candidates?
     fun hasOneVote(contestIdx: Int, candidates: List<Int>): Boolean {
         val contestVotes = this.votes[contestIdx] ?: return false
         val totalVotes = contestVotes.filter{ candidates.contains(it.key) }.map { it.value }.sum()
         return (totalVotes == 1)
     }
 
-    override fun toString(): String {
-        return "$id: $votes"
-    }
-}
-
-class Cvr(
-    id: String,
-    votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
-    val phantom: Boolean = false
-): Mvr(id, votes) {
     override fun toString(): String {
         return "$id: $votes $phantom"
     }

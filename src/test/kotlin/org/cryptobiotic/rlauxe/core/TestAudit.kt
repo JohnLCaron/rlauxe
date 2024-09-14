@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.makeCvrsByExactCount
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

@@ -20,11 +20,12 @@ import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.plots.SRT
 import org.cryptobiotic.rlauxe.plots.SRTwriter
-import org.cryptobiotic.rlauxe.plots.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
+import org.cryptobiotic.rlauxe.plots.makeSRT
 import kotlin.test.Test
 
 // PlotSampleSizes
@@ -46,7 +47,7 @@ class CompareAuditType {
     @Test
     fun plotOver() {
         val theta = .505
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrOver = runDiffAuditTypes(
             theta,
@@ -63,7 +64,7 @@ class CompareAuditType {
     @Test
     fun plotUnder() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrUnder = runDiffAuditTypes(
             theta,
@@ -80,7 +81,7 @@ class CompareAuditType {
     @Test
     fun plotEven() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrEven = runDiffAuditTypes(
             theta,
@@ -105,7 +106,7 @@ class CompareAuditType {
         var taskIdx = 0
         nlist.forEach { N ->
             thetas.forEach { theta ->
-                val cvrs = makeCvrsByExactTheta(N, theta)
+                val cvrs = makeCvrsByExactMean(N, theta)
                 tasks.add(AlphaMartTask(taskIdx++, N, theta, cvrs))
             }
         }
@@ -230,11 +231,11 @@ class CompareAuditType {
         val pollingResult = runAlphaMartRepeated(
             drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
             maxSamples = N,
-            theta = theta,
             eta0 = reportedMean, // use the reportedMean for the initial guess
             d = d,
-            nrepeat = nrepeat,
+            ntrials = nrepeat,
             withoutReplacement = true,
+            upperBound = pollingAssertion.assorter.upperBound()
         )
 
         // comparison
@@ -242,17 +243,17 @@ class CompareAuditType {
         val compareAssertions = compareAudit.assertions[contest]
         require(compareAssertions!!.size == 1)
         val compareAssertion = compareAssertions.first()
-        val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+        // val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
         // println("compareSampler mean=${compareSampler.truePopulationMean()} count=${compareSampler.truePopulationCount()}")
 
         val compareResult = runAlphaMartRepeated(
             drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
             maxSamples = N,
-            theta = theta,
             eta0 = reportedMean, // use the reportedMean for the initial guess
             d = d,
-            nrepeat = nrepeat,
+            ntrials = nrepeat,
             withoutReplacement = true,
+            upperBound = compareAssertion.assorter.upperBound()
         )
 
         return Pair(pollingResult, compareResult)
@@ -273,7 +274,7 @@ class CompareAuditType {
         val pollingSrs = mutableListOf<SRT>()
         val compareSrs = mutableListOf<SRT>()
         for (theta in thetas) {
-            val cvrs = makeCvrsByExactTheta(N, theta)
+            val cvrs = makeCvrsByExactMean(N, theta)
 
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
             val compareAssertion = compareAudit.assertions[contest]!!.first()
@@ -288,38 +289,37 @@ class CompareAuditType {
                 val compareResult: AlphaMartRepeatedResult = runAlphaMartRepeated(
                     drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
                     maxSamples = N,
-                    theta = theta,
                     eta0 = eta,
                     d = d,
-                    nrepeat = reps,
-                    u = compareUpper,
+                    ntrials = reps,
+                    upperBound = compareUpper,
                 )
-                compareSrs.add(makeSRT(N, theta, compareResult, 0.0, d))
+                compareSrs.add(makeSRT(N, theta, 0.0, d, rr=compareResult))
 
                 val pollingResult = runAlphaMartRepeated(
                     drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
                     maxSamples = N,
-                    theta = theta,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,
-                    nrepeat = reps,
+                    ntrials = reps,
                     withoutReplacement = true,
+                    upperBound = pollingAssertion.assorter.upperBound()
                 )
-                pollingSrs.add(makeSRT(N, theta, pollingResult, 0.0, d))
+                pollingSrs.add(makeSRT(N, theta, 0.0, d, rr=pollingResult))
             }
         }
 
-        val ctitle = " nsamples, ballot comparison, N=$N, d = $d, error-free\n theta (col) vs eta0 (row)"
+        val ctitle = " nsamples, ballot comparison, N=$N, d = $d, error-free\n theta (col) vs eta0Factor (row)"
         plotSRS(compareSrs, ctitle, true, colf = "%6.3f",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0 },
+            colFld = { srt: SRT -> srt.reportedMean },
+            rowFld = { srt: SRT -> srt.eta0Factor },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
-        val ptitle = " nsamples, ballot polling, N=$N, d = $d, error-free\n theta (col) vs eta0 (row)"
+        val ptitle = " nsamples, ballot polling, N=$N, d = $d, error-free\n theta (col) vs eta0Factor (row)"
         plotSRS(pollingSrs, ptitle, true, colf = "%6.3f",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0 },
+            colFld = { srt: SRT -> srt.reportedMean },
+            rowFld = { srt: SRT -> srt.eta0Factor },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
     }

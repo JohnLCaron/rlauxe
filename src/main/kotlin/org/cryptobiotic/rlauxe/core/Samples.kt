@@ -42,7 +42,7 @@ fun randomPermute(samples : MutableList<Cvr>): List<Cvr> {
     return samples
 }
 
-interface SampleFn {
+interface SampleFn { // TODO could be an Iterator
     fun sample(): Double // get next in sample
     fun reset()          // start over again with different permutation
     fun truePopulationMean(): Double // for simulations
@@ -143,7 +143,8 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
     override fun N() = N
 }
 
-
+///////////////////////////////////////////////////////////////
+// the values produced here are the B assort values, SHANGRLA section 3.2.
 class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
@@ -153,13 +154,13 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): Sa
 
     init {
         reset()
-        sampleMean = cvrs.map { cass.assort(it, it)}.average()
-        sampleCount = cvrs.map { cass.assort(it, it)}.sum()
+        sampleMean = cvrs.map { cass.bassort(it, it)}.average()
+        sampleCount = cvrs.map { cass.bassort(it, it)}.sum()
     }
 
     override fun sample(): Double {
         val curr = cvrs[permutedIndex[idx++]]
-        return cass.assort(curr, curr) // TODO mcr == cvr, no errors
+        return cass.bassort(curr, curr) // mvr == cvr, no errors
     }
 
     override fun reset() {
@@ -172,6 +173,46 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): Sa
     override fun N() = N
 }
 
+data class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter, val mvrMean: Double): SampleFn {
+    val N = cvrs.size
+    val mvrs : List<Cvr>
+    val permutedIndex = MutableList(N) { it }
+    val sampleMean: Double
+    val sampleCount: Double
+    val flippedVotes: Int
+    var idx = 0
+
+    init {
+        reset()
+
+        // we want to flip the exact number of votes, for reproducibility
+        val mmvrs: MutableList<Cvr> = mutableListOf<Cvr>()
+        mmvrs.addAll(cvrs)
+        flippedVotes = flipExactVotes(mmvrs, mvrMean)
+        mvrs = mmvrs.toList()
+
+        sampleCount = cvrs.mapIndexed { idx, it -> cass.bassort(mvrs[idx], it)}.sum()
+        sampleMean = sampleCount / N
+    }
+
+    override fun sample(): Double {
+        val cvr = cvrs[permutedIndex[idx]]
+        val mvr = mvrs[permutedIndex[idx]]
+        idx++
+        return cass.bassort(mvr, cvr)
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    override fun truePopulationMean() = sampleMean
+    override fun truePopulationCount() = sampleCount
+    override fun N() = N
+}
+
+///////////////////////////////////////////////////////////////
 /**
  * Welford's algorithm for running mean and variance.
  * see https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm

@@ -13,19 +13,17 @@ import kotlin.math.sqrt
 fun runAlphaMartRepeated(
     drawSample: SampleFn,
     maxSamples: Int,
-    theta: Double,
     eta0: Double,
     d: Int = 500,
     f: Double = 0.0,
     withoutReplacement: Boolean = true,
-    nrepeat: Int = 1,
-    u: Double = 1.0,
+    ntrials: Int = 1,
+    upperBound: Double = 1.0,
     showDetail: Boolean = false
 
 ): AlphaMartRepeatedResult {
     val N = drawSample.N()
     val t = 0.5
-    val upperBound = u
     val minsd = 1.0e-6
     val c = max(eps, ((eta0 - t) / 2))
 
@@ -40,47 +38,47 @@ fun runAlphaMartRepeated(
         withoutReplacement = withoutReplacement,
     )
 
-    var sampleMeanSum = 0.0
+    var totalSamplesNeeded = 0
     var fail = 0
     var nsuccess = 0
-    val hist = Histogram(10) // bins of 10%
+    val percentHist = Histogram(10) // bins of 10%
     val status = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
 
-    repeat(nrepeat) {
+    repeat(ntrials) {
         drawSample.reset()
         val testH0Result = alpha.testH0(maxSamples, terminateOnNullReject=true) { drawSample.sample() }
         val currCount = status.getOrPut(testH0Result.status) { 0 }
         status[testH0Result.status] = currCount + 1
-        sampleMeanSum += testH0Result.sampleMean
         if (testH0Result.status.fail) {
             fail++
         } else {
             nsuccess++
-        }
-        welford.update(testH0Result.sampleCount.toDouble())
-        if (!testH0Result.status.fail) {
+
+            totalSamplesNeeded += testH0Result.sampleCount
+            welford.update(testH0Result.sampleCount.toDouble()) // just to keep the stddev
+
+            // sampleCount was what percent of N? keep 10% histogram bins.
             val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
-            hist.add(percent)
+            percentHist.add(percent)
         }
         if (showDetail) println(" $it $testH0Result")
     }
 
-    val failAvg = fail.toDouble() / nrepeat
-    val sampleMeanAvg = sampleMeanSum / nrepeat
-    return AlphaMartRepeatedResult(eta0=eta0, N=N, theta=theta, sampleMean=sampleMeanAvg, ntrials=nrepeat, welford, failAvg, hist, status)
+    return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
+        ntrials=ntrials, welford, percentHist, status)
 }
 
-data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of the population mean = reported vote ratio
-                                   val N: Int,              // population size (eg number of ballots)
-                                   val theta: Double,      // true mean ( over N)
-                                   val sampleMean: Double,      // actual sample mean ( over samples, not over N)
-                                   val ntrials: Int,       // repeat this many times
+data class AlphaMartRepeatedResult(val eta0: Double,            // initial estimate of the population mean, eg reported vote ratio
+                                   val N: Int,                  // population size (eg number of ballots)
+                                   val totalSamplesNeeded: Int, // total number of samples needed in nsuccess trials
+                                   val nsuccess: Int,           // number of successful trials
+                                   val ntrials: Int,            // total number of trials
                                    val nsamplesNeeded: Welford, // avg, variance over ntrials of samples needed
-                                   val failPct : Double,     // percent failures over ntrials
-                                   val hist: Histogram? = null, // histogram of sample size as percentage of N, count trials in 10% bins
+                                   val percentHist: Histogram? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
                                    val status: Map<TestH0Status, Int>? = null, // count of the trial status
 ) {
+    fun failPct() = 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
 
     fun sampleCountAvg(): Int {
         val (avg, _, _) = nsamplesNeeded.result()
@@ -88,10 +86,11 @@ data class AlphaMartRepeatedResult(val eta0: Double,      // initial estimate of
     }
 
     override fun toString() = buildString {
-        appendLine("AlphaMartRepeatedResult: theta=$theta eta0=$eta0 sampleMean=$sampleMean N=$N failPct=$failPct")
+        appendLine("AlphaMartRepeatedResult: eta0=$eta0 N=$N successPct=${nsuccess.toDouble()/ntrials} in ntrials=$ntrials")
         val (avg, v, _) = nsamplesNeeded.result()
-        appendLine("  nsample avg=${avg.toInt()} stddev = ${sqrt(v)} over ${ntrials} trials")
-        if (hist != null) appendLine("  cumulPct:${hist.cumulPct(ntrials)}")
+        val ns = if (nsuccess == 0) 1 else nsuccess
+        append("  $nsuccess successful trials: avgSamplesNeeded=${totalSamplesNeeded/ns} avg=${avg.toInt()} stddev=${sqrt(v)}")
+        if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct(ntrials)}") else appendLine()
         if (status != null) appendLine("  status:${status}")
     }
 }

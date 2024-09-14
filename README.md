@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/12/2024
+last update: 09/14/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -30,6 +30,7 @@ Table of Contents
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
   * [Sample size simulations (Ballot Comparison)](#sample-size-simulations-ballot-comparison)
+  * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
 <!-- TOC -->
 
 ## Papers

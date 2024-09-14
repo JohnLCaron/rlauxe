@@ -22,6 +22,7 @@ class TestAssorterSuperMajority {
         val cvr1 = makeCvr(1)
         val cvr2 = makeCvr(2)
         val winner12 = SuperMajorityAssorter(contest, winner = 1, contest.minFraction!!)
+        assertEquals(1.0 / (2 * winner12.minFraction), winner12.upperBound)
         assertEquals(0.0, winner12.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
         assertEquals(0.5 / contest.minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
         assertEquals(0.0, winner12.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
@@ -108,6 +109,7 @@ class TestAssorterSuperMajority {
 
     fun testNway(contest: AuditContest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
         val assort = SuperMajorityAssorter(contest, winner, contest.minFraction!!)
+        assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val n = counts.sum().toDouble()
         val p = counts[winner] / n

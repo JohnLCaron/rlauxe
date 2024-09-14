@@ -20,7 +20,7 @@ data class PluralityAssorter(val contest: AuditContest, val winner: Int, val los
 
 /** See SHANGRLA, section 2.3. */
 data class SuperMajorityAssorter(val contest: AuditContest, val winner: Int, val minFraction: Double): AssorterFunction {
-        val upperBound = 1.0 / (2 * minFraction)
+    val upperBound = 0.5 / minFraction
 
     // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: Cvr): Double {
@@ -46,6 +46,14 @@ interface ComparisonAssorterFunction {
     fun bassort(mvr: Cvr, cvr: Cvr) : Double
 }
 
+fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
+    val margin = 2.0 * assortAvgValue - 1.0 // reported assorter margin
+    val noerror = 1.0 / (2.0 - margin / assortUpperBound)  // assort value when there's no error
+    val upperBound = 2.0 * noerror  // maximum assort value
+    return Triple(margin, noerror, upperBound)
+}
+
+
 /** See SHANGRLA Section 3.2 */
 data class ComparisonAssorter(
     val contest: AuditContest,
@@ -53,7 +61,10 @@ data class ComparisonAssorter(
     val avgCvrAssortValue: Double // Ā(c) = average CVR assort value
 ): ComparisonAssorterFunction {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
-    val Bzero = 1.0 / (2.0 - margin)
+    val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
+    val upperBound = 2.0 * noerror  // maximum assort value
+
+    fun upperBound() = upperBound
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr:Cvr): Double {

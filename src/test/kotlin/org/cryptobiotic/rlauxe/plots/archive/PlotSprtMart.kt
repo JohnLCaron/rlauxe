@@ -27,7 +27,7 @@ import org.cryptobiotic.rlauxe.integration.Histogram
 import org.cryptobiotic.rlauxe.core.cardsPerContest
 import org.cryptobiotic.rlauxe.integration.ff
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.Test
@@ -45,7 +45,7 @@ class PlotSprtMart {
         var taskIdx = 0
         nlist.forEach { N ->
             margins.forEach { margin ->
-                val cvrs = makeCvrsByExactMargin(N, margin)
+                val cvrs = makeCvrsByExactMean(N, margin2theta(margin))
                 tasks.add(CalcTask(taskIdx++, N, margin, cvrs))
             }
         }
@@ -145,12 +145,12 @@ fun testSprtMart(margin: Double, cvrs: List<Cvr>, nrepeat: Int, silent: Boolean 
                 assortValues = assortValues,
                 theta = margin2theta(margin),
                 eta0 = assortSum/N, // use the true value
-                nrepeat = nrepeat,
+                ntrials = nrepeat,
                 withoutReplacement = true,
             )
             if (!silent) {
                 println(result)
-                println("truePopulationCount=${ff.format(assortSum)} truePopulationMean=${ff.format(assortSum/N)} failPct=${result.failPct} status=${result.status}")
+                println("truePopulationCount=${ff.format(assortSum)} truePopulationMean=${ff.format(assortSum/N)} failPct=${result.failPct()} status=${result.status}")
             }
             results.add(result)
         }
@@ -163,7 +163,7 @@ fun runSprtMartRepeated(
     theta: Double,
     eta0: Double,
     withoutReplacement: Boolean = true,
-    nrepeat: Int = 1,
+    ntrials: Int = 1,
     showDetail: Boolean = false,
 ): AlphaMartRepeatedResult {
     val N = assortValues.size
@@ -176,41 +176,40 @@ fun runSprtMartRepeated(
         withoutReplacement = withoutReplacement
     )
 
-    var sampleMeanSum = 0.0
+    var totalSamples = 0
     var fail = 0
     var nsuccess = 0
     val hist = Histogram(10) // bins of 10%
     val status = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
 
-    repeat(nrepeat) {
+    repeat(ntrials) {
         val testH0Result = sprt.testH0(randomPermute(assortValues))
         val currCount = status.getOrPut(testH0Result.status) { 0 }
         status[testH0Result.status] = currCount + 1
-        sampleMeanSum += testH0Result.sampleMean
         if (testH0Result.status.fail) {
             fail++
         } else {
             nsuccess++
+            totalSamples += testH0Result.sampleCount
+            val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
+            hist.add(percent)
+
         }
         welford.update(testH0Result.sampleCount.toDouble())
         if (!testH0Result.status.fail) {
-            val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
-            hist.add(percent)
+
         }
         if (showDetail) println(" $it $testH0Result")
     }
 
-    val failAvg = fail.toDouble() / nrepeat
-    val sampleMeanAvg = sampleMeanSum / nrepeat
     return AlphaMartRepeatedResult(
         eta0 = eta0,
         N = N,
-        theta = theta,
-        sampleMean = sampleMeanAvg,
-        nrepeat,
+        totalSamples,
+        nsuccess,
+        ntrials,
         welford,
-        failAvg,
         hist,
         status
     )

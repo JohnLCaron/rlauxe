@@ -40,25 +40,25 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
 fun margin2theta(margin: Double) = (margin + 1.0) / 2.0
 fun theta2margin(theta: Double) = 2.0 * theta - 1.0
 
-fun makeCvrsByExactMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
-    return makeCvrsByExactTheta(ncards, margin2theta(margin))
-}
+//fun makeCvrsByExactMean(ncards: Int, margin: Double = 0.0) : List<Cvr> {
+//    return makeCvrsByExactMean(ncards, margin2theta(margin))
+//}
 
-fun makeCvrsByExactTheta(ncards: Int, theta: Double) : List<Cvr> {
+fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
         val votes = mutableMapOf<Int, Map<Int, Int>>()
         val random = Random.nextDouble(1.0)
-        val cand = if (random < theta) 0 else 1
+        val cand = if (random < mean) 0 else 1
         votes[0] = mapOf(cand to 1)
         randomCvrs.add(Cvr("card-$it", votes))
     }
-    flipExactVotes(randomCvrs, theta)
+    flipExactVotes(randomCvrs, mean)
     return randomCvrs
 }
 
 // change cvrs to have the exact number of votes for avg = theta
-fun flipExactVotes(cvrs: MutableList<Cvr>, theta: Double) {
+fun flipExactVotes(cvrs: MutableList<Cvr>, theta: Double): Int {
     val ncards = cvrs.size
     val expectedAVotes = (ncards * theta).toInt()
     val actualAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
@@ -91,6 +91,7 @@ fun flipExactVotes(cvrs: MutableList<Cvr>, theta: Double) {
     }
     val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
     require(checkAvotes == expectedAVotes)
+    return changed
 }
 
 fun makeCvrsByCount(ncards: Int, count: Int) : List<Cvr> {

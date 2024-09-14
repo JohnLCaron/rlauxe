@@ -42,7 +42,7 @@ fun randomPermute(samples : MutableList<Cvr>): List<Cvr> {
     return samples
 }
 
-interface SampleFn {
+interface SampleFn { // TODO could be an Iterator
     fun sample(): Double // get next in sample
     fun reset()          // start over again with different permutation
     fun truePopulationMean(): Double // for simulations
@@ -173,24 +173,26 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): Sa
     override fun N() = N
 }
 
-class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter, val mvrTheta: Double): SampleFn {
+data class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter, val mvrMean: Double): SampleFn {
     val N = cvrs.size
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
     val sampleCount: Double
+    val flippedVotes: Int
     var idx = 0
 
     init {
         reset()
-        sampleMean = cvrs.map { cass.bassort(it, it)}.average()
-        sampleCount = cvrs.map { cass.bassort(it, it)}.sum()
 
         // we want to flip the exact number of votes, for reproducibility
         val mmvrs: MutableList<Cvr> = mutableListOf<Cvr>()
         mmvrs.addAll(cvrs)
-        flipExactVotes(mmvrs, mvrTheta)
+        flippedVotes = flipExactVotes(mmvrs, mvrMean)
         mvrs = mmvrs.toList()
+
+        sampleCount = cvrs.mapIndexed { idx, it -> cass.bassort(mvrs[idx], it)}.sum()
+        sampleMean = sampleCount / N
     }
 
     override fun sample(): Double {

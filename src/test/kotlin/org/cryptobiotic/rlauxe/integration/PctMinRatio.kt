@@ -11,7 +11,7 @@ import kotlin.math.min
 fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {
     val newdlc = mutableMapOf<Int, MutableList<SRT>>() // N, m -> fld
     // val newsrs = mutableListOf<SRT>()
-    val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { it.pct } }.toMap() // dl -> N, m -> pct
+    val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { 100.0 * it.nsamples / it.N } }.toMap() // dl -> N, m -> pct
     // makeSRmap(srs: List<SRT>, extract: (SRT) -> Double): Map<Int, Map<Double, Double>>
     thetas.forEach { margin ->
         ns.forEach { N ->
@@ -30,7 +30,12 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
                 val ratio = pct / pctMin
                 // (val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
                 //               val reportedMeanDiff: Double, val d: Int, val eta0: Double, val hist: Histogram?)
-                val sr = SRT(N, margin, 0.0, ratio, 0.0, 0.0, dMin, 0.0, null)
+                // data class SRT(val N: Int, val theta: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double,
+                //               val failPct: Double, val nsamples: Double, val stddev: Double)
+                val sr = SRT(
+                    N, margin, 0.0, 0, 0.0, 0.0, 0, 0, 0,
+                    stddev = TODO()
+                ) // TODO
                 val newsrs = newdlc.getOrPut(d) { mutableListOf() }
                 newsrs.add(sr)
             }
@@ -54,7 +59,7 @@ fun plotPctRatio(newdlc: Map<Int, List<SRT>>, thetas: List<Double>, nlist: List<
             "pct/pctMin d=$dl, reportedMeanDiff=$reportedMeanDiff",
             isInt = false
         )
-        val x = sps.map { it.pct }
+        val x = sps.map { it.failPct } // TODO
         println("geometric mean = ${geometricMean(x)}")
     }
     println("===============================================")

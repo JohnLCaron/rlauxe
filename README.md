@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/10/2024
+last update: 09/12/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -18,12 +18,14 @@ Table of Contents
       * [IRV](#irv)
     * [Comparison audits vs polling audits](#comparison-audits-vs-polling-audits)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
+  * [Use Styles](#use-styles)
+  * [Phantom Ballots](#phantom-ballots)
   * [ALPHA testing statistic](#alpha-testing-statistic)
     * [Sampling with or without replacement](#sampling-with-or-without-replacement)
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [BRAVO testing statistic](#bravo-testing-statistic)
     * [Questions](#questions)
-  * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
+  * [Stratified audits using OneAudit (not done)](#stratified-audits-using-oneaudit-not-done)
   * [Sample size simulations (Polling)](#sample-size-simulations-polling)
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
@@ -189,7 +191,7 @@ Notes
 (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
 Diluted refers to the fact that the denominator is the number of ballot cards, which is
 greater than or equal to the number of valid votes.)
-
+* If overstatement error is always zero (no errors in CRV), the assort value is 1 / (2.0 - margin/this.assorter.upperBound())
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
@@ -519,6 +521,7 @@ theta    margin    B       Bmargin  Bmargin/margin
 0.7000   0.4000   0.6250   0.2500   0.6250
 
 Tables 7 and 8 in ALPHA, showing comparison ballot results, switch from using theta to using "mass at 1". So hard to compare.
+Also all the very small smaple sizes in Table 7 of ALPHA are surprising. 5 ballots to reject the null hypothosis?
 
 However, see TestComparisonFromAlpha.kt; setting eta0 very high brings the numbers down such that comparison is much better
 than polling, and can deal even with very small margins:
@@ -537,6 +540,164 @@ than polling, and can deal even with very small margins:
     //15.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
     //20.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
 ````
+
+The idea of setting eta0 very high seems suspect. Examining the number of success vs failures shows that you cant set eta0 higher
+than the upper limit of the comparison assorter, or else you dont detect when theta <= .5 (the null hypothosis is true), as the following shows:
+
+In the plots below, we simulate the reported mean of the cvrs as exactly 10%, 5% and 1% higher than theta (the true mean). 
+So for example when theta = .0401, the reported cvr mean assort (aka Āc in SHANGRLA section 3.2) is 0.401 + .10 = 0.501.
+The number of successes when theta <= .5 are all false positives. By contract they must be < 5% = risk factor. 
+The rows are the values of the "eta0Factor", such that eta0 = eta0Factor * noerrors, where _noerrors_ is the comparison 
+assort value when the cvrs and the mvrs agree exactly (all overstatement errors are 0). 
+noerrors is a simple function of Āc: _noerrors = 1.0 / (3 - 2 * Āc)_.
+In the table below, the row marked 1.0 has eta0 = 1.0 * noerrors. It is the obvious value to use for eta0. 
+The upper bounds of the comparison assorter is 2 * noerrors, represented by the row with etaFactor = 2.0.
+As you see, once eta0 > 2.0 * noerrors, the algorithm no longer stays within the risk limit. 
+This is also what you would expect from the formula for the alpha martingale.
+
+````
+ Comparison ntrials=1000, N=10000, d=100 cvrMeanDiff=-0.1
+ theta (col) vs etaFactor (row)
+ 
+cvrMean, 0.501,   .502,   .503,   .504,   .505,   .510,   .520,   .530,   .540,   .550,   .575,   .600,   .650,   .700
+ theta,  0.401,  0.402,  0.403,  0.404,  0.405,  0.410,  0.420,  0.430,  0.440,  0.450,  0.475,  0.500,  0.550,  0.600, 
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    1.2,  100.0,  100.0, 
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    1.3,  100.0,  100.0, 
+  1.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    3.8,  100.0,  100.0, 
+  1.99,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    1.3,    5.3,  100.0,  100.0, 
+  2.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    1.1,    5.3,  100.0,  100.0, 
+  2.10,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.1,    4.0,   14.8,  100.0,  100.0, 
+  2.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.2,    2.8,   17.6,   95.4,  100.0,  100.0,  100.0, 
+  3.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   18.2,   98.4,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  3.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    5.4,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  4.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   96.4,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  5.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 10.00,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 20.00,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+
+ Comparison ntrials=1000, N=10000, d=100 cvrMeanDiff=-0.05
+cvrMean,  0.501,   .502,   .503,   .504,   .505,   .510,   .520,   .530,   .540,   .550,   .575,   .600,   .650,   .700
+theta,    0.451,  0.452,  0.453,  0.454,  0.455,  0.460,  0.470,  0.480,  0.490,  0.500,  0.525,  0.550,  0.600,  0.650, 
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0, 
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0, 
+  1.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.9,  100.0,  100.0,  100.0,  100.0, 
+  1.99,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.6,    4.6,  100.0,  100.0,  100.0,  100.0, 
+  2.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.7,    4.1,  100.0,  100.0,  100.0,  100.0, 
+  2.10,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.2,    1.7,    6.6,  100.0,  100.0,  100.0,  100.0, 
+  2.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    4.1,   20.3,   54.3,  100.0,  100.0,  100.0,  100.0, 
+  3.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    3.0,   66.4,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  3.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   53.4,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  4.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  5.00,    0.0,    0.0,    0.0,    0.0,    0.0,   10.7,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 10.00,    0.0,    0.0,    0.0,    0.0,    1.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 20.00,    0.0,    0.0,    0.0,    0.0,   12.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 
+  Comparison ntrials=1000, N=10000, d=100 cvrMeanDiff=-0.01
+cvrMean, 0.501,   .502,   .503,   .504,   .505,   .510,   .520,   .530,   .540,   .550,   .575,   .600,   .650,   .700
+ theta,  0.491,  0.492,  0.493,  0.494,  0.495,  0.500,  0.510,  0.520,  0.530,  0.540,  0.565,  0.590,  0.640,  0.690, 
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.99,    0.0,    0.0,    0.0,    0.0,    0.0,    0.1,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  2.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  2.10,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  2.50,    0.0,    0.0,    0.0,    0.0,    0.0,    1.2,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  3.00,    0.0,    0.0,    0.0,    0.0,    0.0,    6.4,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  3.50,    0.0,    0.0,    0.0,    0.0,    0.0,   15.8,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  4.00,    0.0,    0.0,    0.0,    0.0,    0.0,   35.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  5.00,    0.0,    0.0,    0.0,    0.0,    1.1,   95.9,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 10.00,    0.0,    0.0,    2.4,   79.5,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ 20.00,    0.0,    3.0,   98.7,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+ ````
+
+
+We need the most tuning when theta is close to .5, so we'll explore cvrMeanDiff=-0.005.
+Heres the avg number of samples needed for successes (remember these are false successes when theta < 0.5)
+Once we restrict eta0 < upperBound, the false positives mostly disappear.
+
+
+````
+Comparison ntrials=1000, N=10000, d=100 cvrMeanDiff=-0.005
+ theta (col) vs etaFactor (row)
+ successes
+      ,  0.496,  0.497,  0.498,  0.499,  0.500,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570,  0.595,  0.645,  0.695, 
+ 1.000,      0,      0,      0,      0,      0,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000, 
+ 1.250,      0,      0,      0,      0,      0,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000, 
+ 1.500,      0,      0,      0,      0,      0,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000, 
+ 1.750,      0,      0,      0,      0,      0,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000, 
+ 1.990,      0,      0,      0,      0,      0,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000, 
+ 2.000,      0,      0,      0,      0,      0,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000,   1000, 
+
+ successPct
+      ,  0.496,  0.497,  0.498,  0.499,  0.500,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570,  0.595,  0.645,  0.695, 
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.50,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.75,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  1.99,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+  2.00,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
+
+ nsamples
+      ,  0.496,  0.497,  0.498,  0.499,  0.500,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570,  0.595,  0.645,  0.695, 
+ 1.000,      0,      0,      0,      0,      0,   9224,   5692,   3214,   1942,   1276,    577,    324,    146,     83, 
+ 1.250,      0,      0,      0,      0,      0,   8952,   3862,   1562,    790,    477,    208,    123,     62,     39, 
+ 1.500,      0,      0,      0,      0,      0,   8482,   2132,    693,    355,    219,    108,     68,     37,     25, 
+ 1.750,      0,      0,      0,      0,      0,   7639,   1153,    393,    210,    138,     72,     47,     27,     19, 
+ 1.990,      0,      0,      0,      0,      0,   6496,    894,    288,    163,    106,     56,     38,     22,     16, 
+ 2.000,      0,      0,      0,      0,      0,   6471,    860,    291,    160,    107,     57,     37,     22,     16, 
+
+ pct nsamples
+      ,  0.496,  0.497,  0.498,  0.499,  0.500,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570,  0.595,  0.645,  0.695, 
+ 1.000,   0.00,   0.00,   0.00,   0.00,   0.00,  92.25,  56.93,  32.15,  19.42,  12.77,   5.78,   3.25,   1.46,   0.84, 
+ 1.250,   0.00,   0.00,   0.00,   0.00,   0.00,  89.53,  38.63,  15.63,   7.90,   4.78,   2.09,   1.24,   0.63,   0.39, 
+ 1.500,   0.00,   0.00,   0.00,   0.00,   0.00,  84.82,  21.32,   6.94,   3.55,   2.19,   1.09,   0.69,   0.38,   0.26, 
+ 1.750,   0.00,   0.00,   0.00,   0.00,   0.00,  76.40,  11.53,   3.93,   2.10,   1.38,   0.73,   0.47,   0.28,   0.19, 
+ 1.990,   0.00,   0.00,   0.00,   0.00,   0.00,  64.96,   8.94,   2.89,   1.63,   1.07,   0.56,   0.39,   0.23,   0.16, 
+ 2.000,   0.00,   0.00,   0.00,   0.00,   0.00,  64.72,   8.60,   2.91,   1.60,   1.07,   0.57,   0.37,   0.22,   0.16, 
+````
+
+TODO: need similar for rejections. Or combine?
+
+The larger values of eta0 do better. It seems that the eta0Factor acts as an accelerant, making each sampled value count
+towards accepting or rejecting the null hypotheses.
+
+TODO: quantify the accelerant value. See AlphaMart formula. 
+
+TODO: vary by d.
+
+## AlphaMart formula as generalization of Wald SPRT:
+
+Bravo: Probability of drawing yk if theta=nu over probability of drawing yk if theta=mu:
+
+    yk*(nu/mu) + (1-yk)*(1-nu)/(1-mu)
+
+makes sense where yk is 0 or 1, so one term or the other vanishes.
+
+Alpha:
+
+Step 1: Replace discrete yk with continuous X_j:
+
+    X_k*(nu/mu) + (1-X_k)*(1-nu)/(1-mu)
+
+Its not obvious what this is now. Still the probability ratio??
+
+Step 2: Generalize range [0,1] to [0,upper]
+
+    (X_k*(nu/mu) + (upper-X_k)*(upper-nu)/(upper-mu))/upper
+
+Step 3: Use estimated nu instead of fixed nu, and calculated mu when sampling without replacement. Switch notation yk -> X_j:
+
+    (X_j * (nu_j/mu_j) + (upper-X_j) * (upper-nu_j)/(upper-mu_j))/upper
+
+looks like a weighted average now:
+
+    w * (nu_j/mu_j) + (1-w) * (upper-nu_j)/(upper-mu_j)
+
+    where 
+        w = X_j/upper, the normalized value of Xj.
+        nu_j/mu_j = ratio of hypothesised means
+        (upper-nu_j)/(upper-mu_j) 
+
 
 See TestComparisonFromAlpha.comparisonNvsTheta()
 

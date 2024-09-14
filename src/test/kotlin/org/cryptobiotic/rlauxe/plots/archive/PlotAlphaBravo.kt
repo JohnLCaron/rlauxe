@@ -27,7 +27,8 @@ import org.cryptobiotic.rlauxe.integration.FixedMean
 import org.cryptobiotic.rlauxe.core.cardsPerContest
 import org.cryptobiotic.rlauxe.integration.eps
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.core.tabulateVotes
 import kotlin.test.Test
 
@@ -46,7 +47,7 @@ class PlotAlphaBravo {
         var taskIdx = 0
         nlist.forEach { N ->
             margins.forEach { margin ->
-                val cvrs = makeCvrsByExactMargin(N, margin)
+                val cvrs = makeCvrsByExactMean(N, margin2theta(margin))
                 tasks.add(CalcTask(taskIdx++, N, margin, cvrs))
             }
         }

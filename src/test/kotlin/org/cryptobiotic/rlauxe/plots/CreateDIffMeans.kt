@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.integration.createPctRatio
 import org.cryptobiotic.rlauxe.integration.ff
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactTheta
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.integration.plotPctRatio
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import kotlin.test.Test
@@ -43,12 +43,13 @@ class CreateDiffMeans {
 
     val N = 50000
 
+    // theta is the true mean
     data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<Cvr>)
 
     @Test
     fun plotOver() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrOver = runAlphaMartWithMeanDiff(
             theta,
@@ -63,7 +64,7 @@ class CreateDiffMeans {
     @Test
     fun plotUnder() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrUnder = runAlphaMartWithMeanDiff(
             theta,
@@ -78,7 +79,7 @@ class CreateDiffMeans {
     @Test
     fun plotEven() {
         val theta = .51
-        val cvrs = makeCvrsByExactTheta(N, theta)
+        val cvrs = makeCvrsByExactMean(N, theta)
 
         val rrEven = runAlphaMartWithMeanDiff(
             theta,
@@ -101,7 +102,7 @@ class CreateDiffMeans {
         var taskIdx = 0
         nlist.forEach { N ->
             thetas.forEach { theta ->
-                val cvrs = makeCvrsByExactTheta(N, theta)
+                val cvrs = makeCvrsByExactMean(N, theta)
                 tasks.add(AlphaMartTask(taskIdx++, N, theta, cvrs))
             }
         }
@@ -142,9 +143,9 @@ class CreateDiffMeans {
                     plotSRTsamples(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
                     plotSRTpct(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
                     plotSRTstdev(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    plotSRTsuccess(calculations, thetas, nlist, 10, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    plotSRTsuccess(calculations, thetas, nlist, 20, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
-                    plotSRTsuccess(calculations, thetas, nlist, 30, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    //plotSRTsuccess(calculations, thetas, nlist, 10, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    //plotSRTsuccess(calculations, thetas, nlist, 20, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
+                    //plotSRTsuccess(calculations, thetas, nlist, 30, nrepeat, "d=$d reportedMeanDiff=$reportedMeanDiff")
                 } else if (showPctPlots) {
                     plotSRTpct(calculations, thetas, nlist, "d=$d reportedMeanDiff=$reportedMeanDiff")
                 }
@@ -164,7 +165,8 @@ class CreateDiffMeans {
     fun calculate(task: AlphaMartTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): SRT {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runAlphaMartWithMeanDiff(task.theta, task.cvrs, reportedMeanDiff=reportedMeanDiff, nrepeat = nrepeat, d = d, silent = true).first()
-        val sr = makeSRT(task.N, task.theta, rr, reportedMeanDiff, d)
+        val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
+        val sr = makeSRT(task.N, reportedMean, reportedMeanDiff, d, rr=rr)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, ${rr.eta0}, $sr")
         return sr
     }
@@ -207,10 +209,7 @@ class CreateDiffMeans {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
-        // ignore the "reported winner". just focus on d vs reportedMeanDiff
         val reportedMean = theta + reportedMeanDiff
-        // val reportedWinner = if (reportedMean > .5) 0 else 1 // TODO tie ??
-        // val reportedWinnerMean = if (reportedMean > .5) reportedMean else (1.0 - (theta + reportedMeanDiff))
 
         val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
         val audit = makePollingAudit(contests = listOf(contest))
@@ -226,18 +225,18 @@ class CreateDiffMeans {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    theta = theta,
                     eta0 = reportedMean, // use the reportedMean for the initial guess
                     d = d,
-                    nrepeat = nrepeat,
+                    ntrials = nrepeat,
                     withoutReplacement = true,
+                    upperBound = assert.assorter.upperBound()
                 )
                 if (!silent) {
                     println(result)
                     println(
                         "truePopulationCount=${ff.format(cvrSampler.truePopulationCount())} truePopulationMean=${
                             ff.format(cvrSampler.truePopulationMean())
-                        } failPct=${result.failPct} status=${result.status}"
+                        } failPct=${result.failPct()} status=${result.status}"
                     )
                 }
                 results.add(result)

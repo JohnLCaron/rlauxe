@@ -1,22 +1,32 @@
 package org.cryptobiotic.rlauxe.plots
 
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.integration.Histogram
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.math.sqrt
 
+// TODO Histogram of successes
+data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
+               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double) {
 
-data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
-               val reportedMeanDiff: Double, val d: Int, val eta0: Double, val hist: Histogram?)
+    val theta = reportedMean + reportedMeanDiff // the true mean
+    val failPct = (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
+    val nsamples = totalSamplesNeeded.toDouble() / (if (nsuccess == 0) 1 else nsuccess) // avg number of samples for successes
+}
 
-fun makeSRT(N: Int, theta: Double, rr: AlphaMartRepeatedResult, reportedMeanDiff: Double, d: Int): SRT {
+// val eta0: Double,            // initial estimate of the population mean, eg reported vote ratio
+//                                   val N: Int,                  // population size (eg number of ballots)
+//                                   val totalSamplesNeeded: Double, // total number of samples needed in nsuccess trials
+//                                   val nsuccess: Int,           // number of successful trials
+//                                   val ntrials: Int,            // total number of trials
+//                                   val nsamplesNeeded: Welford, // avg, variance over ntrials of samples needed
+//                                   val percentHist: Histogram? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
+//                                   val status: Map<TestH0Status,
+fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
     val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
-    val pct = (100.0 * sampleCountAvg / N)
-    return SRT(N, theta, sampleCountAvg, pct, sqrt(sampleCountVar),
-        reportedMeanDiff, d, rr.eta0, rr.hist)
+    return SRT(N, reportedMean, reportedMeanDiff, d, rr.eta0, eta0Factor, rr.nsuccess, rr.ntrials, rr.totalSamplesNeeded, sqrt(sampleCountVar))
 }
 
 // simple serialization to csv files
@@ -24,7 +34,7 @@ class SRTwriter(filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
 
     init {
-        writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d, eta0, hist\n")
+        writer.write("N, reportedMean, reportedMeanDiff, d, eta0, eta0Factor, nsuccess, ntrials, totalSamples, stddev\n")
     }
 
     fun writeCalculations(calculations: List<SRT>) {
@@ -36,7 +46,10 @@ class SRTwriter(filename: String) {
     // data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
     // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
     fun toCSV(srt: SRT) = buildString {
-        append("${srt.N}, ${srt.theta}, ${srt.nsamples}, ${srt.stddev}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ")
+        append(
+            "${srt.N}, ${srt.reportedMean}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ${srt.eta0Factor}, " +
+                "${srt.nsuccess}, ${srt.ntrials}, ${srt.totalSamplesNeeded}, ${srt.stddev} "
+        )
         // append(" ${srt.hist}")
         appendLine()
     }
@@ -63,26 +76,212 @@ class SRTreader(filename: String) {
         return srts
     }
 
-    //         writer.write("N, theta, nsamples, stddev, reportedMeanDiff, d\n")
-    // data class SRT(val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
-    // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
+    // writer.write("N, theta, reportedMeanDiff, d, eta0, failPct, nsamples, stddev\n")
+    // SRT(val N: Int, val theta: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double,
+    //               val failPct: Double, val nsamples: Double, val stddev: Double)
     fun fromCSV(line: String): SRT {
         val tokens = line.split(",")
         require(tokens.size >= 7) { "Expected >= 7 tokens but got ${tokens.size}" }
-        val trim = tokens.map { it.trim() }
-        val N = trim[0].toInt()
-        val theta = trim[1].toDouble()
-        val nsamples = trim[2].toDouble()
-        val stddev = trim[3].toDouble()
-        val reportedMeanDiff = trim[4].toDouble()
-        val d = trim[5].toInt()
-        val eta= trim[6].toDouble()
-        val pct = (100.0 * nsamples / N)
-        return SRT(N, theta, nsamples, pct, stddev, reportedMeanDiff, d, eta, null)
+        val ttokens = tokens.map { it.trim() }
+        var idx = 0
+        val N = ttokens[idx++].toInt()
+        val reportedMean = ttokens[idx++].toDouble()
+        val reportedMeanDiff = ttokens[idx++].toDouble()
+        val d = ttokens[idx++].toInt()
+        val eta0 = ttokens[idx++].toDouble()
+        val eta0Factor = ttokens[idx++].toDouble()
+        val nsuccess = ttokens[idx++].toInt()
+        val ntrials = ttokens[idx++].toInt()
+        val nsamples = ttokens[idx++].toInt()
+        val stddev = ttokens[idx++].toDouble()
+        return SRT(N, reportedMean, reportedMeanDiff, d, eta0, eta0Factor, nsuccess, ntrials, nsamples, stddev)
     }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+fun plotSRTfail(srs: List<SRT>, title: String = "") {
+    val utitle = "number votes sampled: " + title
+    plotSRS(srs, utitle, false, thetas, ns) { it.failPct }
+}
+
+fun plotSRTsamples(srs: List<SRT>, title: String = "") {
+    val utitle = "number votes sampled: " + title
+    plotSRS(srs, utitle, true, thetas, ns) { it.nsamples }
+}
+
+fun plotSRTpct(srs: List<SRT>, title: String = "", isInt:Boolean=true) {
+    val utitle = "pct votes sampled: " + title
+    plotSRS(srs, utitle, isInt, thetas, ns, utitle, isInt) { 100.0 * it.nsamples / it.N }
+}
+
+fun plotSRTstdev(srs: List<SRT>, title: String) {
+    val utitle = "stddev votes sampled: " + title
+    plotSRS(srs, utitle, true, thetas, ns, utitle, true) { it.stddev }
+}
+
+ */
+
+//// plots for crtMean by meanDiff
+fun plotMeanFailPct(srs: List<SRT>, title: String) {
+    val utitle = "pct failed cvrMean (row) vs meanDiff (col): " + title
+    plotSRS(srs, utitle, true, ff = "%6.3f", rowf = "%6.3f",
+        colFld = { srt: SRT -> srt.reportedMeanDiff },
+        rowFld = { srt: SRT -> srt.reportedMean },
+        fld = { srt: SRT -> 100.0 * srt.failPct }
+    )
+}
+
+fun plotMeanSamples(srs: List<SRT>, title: String) {
+    val utitle = "nsamples, cvrMean (row) vs meanDiff (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.0f", rowf = "%6.3f",
+        colFld = { srt: SRT -> srt.reportedMeanDiff },
+        rowFld = { srt: SRT -> srt.reportedMean },
+        fld = { srt: SRT -> srt.nsamples }
+    )
+}
+
+fun plotMeanPct(srs: List<SRT>, title: String) {
+    val utitle = "pct samples, cvrMean (row) vs meanDiff (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f", rowf = "%6.3f",
+        colFld = { srt: SRT -> srt.reportedMeanDiff },
+        rowFld = { srt: SRT -> srt.reportedMean },
+        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+    )
+}
+
+
+//// plots for N vs theta
+fun plotNTfailPct(srs: List<SRT>, title: String) {
+    val utitle = "pct failed N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, true, ff = "%6.3f",
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> 100.0 * srt.failPct }
+    )
+}
+
+fun plotNTsamples(srs: List<SRT>, title: String) {
+    val utitle = "nsamples, N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.0f",
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> srt.nsamples }
+    )
+}
+
+fun plotNTpct(srs: List<SRT>, title: String) {
+    val utitle = "pct samples, N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f",
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+    )
+}
+
+// plot for d vs meanDiff
+fun plotDDfailPct(srs: List<SRT>, title: String) {
+    val utitle = "pct failed, d (row) vs theta (col): " + title
+    plotSRS(srs, utitle, true,
+        colFld = { srt: SRT -> srt.theta },
+        rowFld = { srt: SRT -> srt.d.toDouble() },
+        fld = { srt: SRT -> 100.0 * srt.failPct }
+    )
+}
+
+fun plotDDsample(srs: List<SRT>, title: String) {
+    val utitle = "nsamples, d (row) vs theta (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.0f", colf = "%6.3f",
+        colFld = { srt: SRT -> srt.theta },
+        rowFld = { srt: SRT -> srt.d.toDouble() },
+        fld = { srt: SRT -> srt.nsamples }
+    )
+}
+
+fun plotDDpct(srs: List<SRT>, title: String) {
+    val utitle = "pct samples, d (row) vs theta (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f",
+        colFld = { srt: SRT -> srt.theta },
+        rowFld = { srt: SRT -> srt.d.toDouble() },
+        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+    )
+}
+
+////
+// general
+
+fun plotSRS(srs: List<SRT>, title: String, isInt: Boolean, colf: String = "%6.3f", rowf: String = "%6.0f", ff: String = "%6.2f",
+            colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double) {
+    println(title)
+    print("      , ")
+    val df = "%6d"
+
+    val cols = findValuesFromSRT(srs, colFld)
+    cols.forEach { print("${colf.format(it)}, ") }
+    println()
+
+    val mmap = makeMapFromSRTs(srs, colFld, rowFld, fld)
+
+    mmap.forEach { dkey, dmap ->
+        print("${rowf.format(dkey)}, ")
+        dmap.toSortedMap().forEach { nkey, fld ->
+            if (isInt)
+                print("${df.format(fld.toInt())}, ")
+            else
+                print("${ff.format(fld)}, ")
+        }
+        println()
+    }
+    println()
+}
+
+fun makeMapFromSRTs(srs: List<SRT>, colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double): Map<Double, Map<Double, Double>> {
+    val mmap = mutableMapOf<Double, MutableMap<Double, Double>>() // N, m -> fld
+
+    val cols = findValuesFromSRT(srs, colFld)
+    val rows = findValuesFromSRT(srs, rowFld)
+
+    // fill with all the maps initialized to -1
+    rows.forEach { rowFld ->
+        val innerMap = mutableMapOf<Double, Double>()
+        mmap[rowFld] = innerMap
+        cols.forEach { colField ->
+            innerMap[colField] = -1.0 // or null ?
+        }
+    }
+
+    srs.forEach {
+        val colFld = colFld(it)
+        val rowFld = rowFld(it)
+        val dmap = mmap.getOrPut(rowFld) { mutableMapOf() }
+        dmap[colFld] = fld(it)
+    }
+
+    return mmap.toSortedMap()
+}
+
+fun findValuesFromSRT(srs: List<SRT>, extract: (SRT) -> Double): List<Double> {
+    val mmap = mutableSetOf<Double>()
+    srs.forEach {
+        mmap.add(extract(it))
+    }
+    return mmap.sorted().toList()
+}
+
+////
+// Old ways
+
+/*
+fun plotSRTsuccess(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
+    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
+    plotSRS(srs, thetas, ns, utitle, true) {
+        val cumul = it.hist!!.cumul(sampleMaxPct)
+        (100.0 * cumul) / nrepeat
+    }
+}
+
+ */
 
 fun plotSRTsamples(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, title: String = "") {
     val utitle = "number votes sampled: " + title
@@ -91,20 +290,12 @@ fun plotSRTsamples(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, title: S
 
 fun plotSRTpct(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, title: String = "", isInt:Boolean=true) {
     val utitle = "pct votes sampled: " + title
-    plotSRS(srs, thetas, ns, utitle, isInt) { it.pct }
+    plotSRS(srs, thetas, ns, utitle, isInt) { 100.0 * it.nsamples / it.N }
 }
 
 fun plotSRTstdev(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, title: String = "") {
     val utitle = "stddev votes sampled: " + title
     plotSRS(srs, thetas, ns, utitle, true) { it.stddev }
-}
-
-fun plotSRTsuccess(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
-    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-    plotSRS(srs, thetas, ns, utitle, true) {
-        val cumul = it.hist!!.cumul(sampleMaxPct)
-        (100.0 * cumul) / nrepeat
-    }
 }
 
 fun plotSRS(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, title: String, isInt: Boolean, extract: (SRT) -> Double) {
@@ -143,72 +334,10 @@ fun makeMapFromSRTs(srs: List<SRT>, thetas: List<Double>, ns: List<Int>, extract
 
     srs.forEach {
         val dmap = mmap.getOrPut(it.N) { mutableMapOf() }
-        dmap[it.theta] = extract(it)
+        dmap[it.reportedMean] = extract(it)
     }
 
     return mmap.toSortedMap()
 }
 
-////
-// general
-
-fun plotSRS(srs: List<SRT>, title: String, isInt: Boolean, colf: String = "%6.0f", rowf: String = "%6.3f", ff: String = "%6.2f",
-            colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double) {
-    println()
-    println(title)
-    print("      , ")
-    val df = "%6d"
-
-    val cols = findValuesFromSRT(srs, colFld)
-    cols.forEach { print("${colf.format(it)}, ") }
-    println()
-
-    val mmap = makeMapFromSRTs(srs, colFld, rowFld, fld)
-
-    mmap.forEach { dkey, dmap ->
-        print("${rowf.format(dkey)}, ")
-        dmap.toSortedMap().forEach { nkey, fld ->
-            if (isInt)
-                print("${df.format(fld.toInt())}, ")
-            else
-                print("${ff.format(fld)}, ")
-        }
-        println()
-    }
-}
-
-fun makeMapFromSRTs(srs: List<SRT>, colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double): Map<Double, Map<Double, Double>> {
-    val mmap = mutableMapOf<Double, MutableMap<Double, Double>>() // N, m -> fld
-
-    val cols = findValuesFromSRT(srs, colFld)
-    val rows = findValuesFromSRT(srs, rowFld)
-
-    // fill with all the maps initialized to -1
-    rows.forEach { rowFld ->
-        val innerMap = mutableMapOf<Double, Double>()
-        mmap[rowFld] = innerMap
-        cols.forEach { colField ->
-            innerMap[colField] = -1.0 // or null ?
-        }
-    }
-
-    srs.forEach {
-        val colFld = colFld(it)
-        val rowFld = rowFld(it)
-        val dmap = mmap.getOrPut(rowFld) { mutableMapOf() }
-        dmap[colFld] = fld(it)
-    }
-
-    return mmap.toSortedMap()
-}
-
-fun findValuesFromSRT(srs: List<SRT>, extract: (SRT) -> Double): List<Double> {
-    val mmap = mutableSetOf<Double>()
-
-    srs.forEach {
-        mmap.add(extract(it))
-    }
-
-    return mmap.sorted().toList()
-}
 

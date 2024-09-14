@@ -99,7 +99,7 @@ class PlotDiffMeans {
     fun makeNthetaMap(srs: List<SRT>): Map<Ntheta, List<SRT>> {
         val mmap = mutableMapOf<Ntheta, MutableList<SRT>>()
         srs.forEach {
-            val DD = Ntheta(it.N, it.theta)
+            val DD = Ntheta(it.N, it.reportedMean)
             val dmap : MutableList<SRT> = mmap.getOrPut(DD) { mutableListOf() }
             dmap.add(it)
         }
@@ -117,7 +117,7 @@ class PlotDiffMeans {
         val utitle = "pct votes sampled: " + title
         plotNT(srs, meanDiffs, ds, utitle, false) { 100.0 * it.nsamples / it.N }
     }
-
+/*
     fun plotNTsuccess(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
         val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
         plotSRS(srs, meanDiffs, ds, utitle, true) {
@@ -125,7 +125,7 @@ class PlotDiffMeans {
             (100.0 * cumul) / nrepeat
         }
     }
-
+*/
     fun plotNT(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, title: String, isInt: Boolean, extract: (SRT) -> Double) {
         println()
         println(title)

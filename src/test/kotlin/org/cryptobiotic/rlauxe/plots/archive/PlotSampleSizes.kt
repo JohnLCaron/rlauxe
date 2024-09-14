@@ -24,7 +24,7 @@ import org.cryptobiotic.rlauxe.core.cardsPerContest
 import org.cryptobiotic.rlauxe.integration.ff
 import org.cryptobiotic.rlauxe.integration.geometricMean
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMargin
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.core.tabulateVotes
@@ -112,8 +112,9 @@ fun makeMapFromSRs(srs: List<SR>, margins: List<Double>, ns: List<Int>, extract:
 fun makeSR(N: Int, margin: Double, rr: AlphaMartRepeatedResult): SR {
     val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
     val pct = (100.0 * sampleCountAvg / N)
-    return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar), rr.hist)
+    return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar), rr.percentHist)
 }
+
 
 data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
 
@@ -131,7 +132,7 @@ class PlotSampleSizes {
         var taskIdx = 0
         nlist.forEach { N ->
             margins.forEach { margin ->
-                val cvrs = makeCvrsByExactMargin(N, margin)
+                val cvrs = makeCvrsByExactMean(N, margin2theta(margin))
                 tasks.add(CalcTask(taskIdx++, N, margin, cvrs))
             }
         }
@@ -311,18 +312,18 @@ class PlotSampleSizes {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    theta = theta,
                     eta0 = reportedMean,       // use the reportedMean for the initial guess
                     d = d,
-                    nrepeat = nrepeat,
+                    ntrials = nrepeat,
                     withoutReplacement = true,
+                    upperBound = assert.assorter.upperBound()
                 )
                 if (!silent) {
                     println(result)
                     println(
                         "truePopulationCount=${ff.format(cvrSampler.truePopulationCount())} truePopulationMean=${
                             ff.format(cvrSampler.truePopulationMean())
-                        } failPct=${result.failPct} status=${result.status}"
+                        } failPct=${result.failPct()} status=${result.status}"
                     )
                 }
                 results.add(result)
@@ -343,7 +344,7 @@ class PlotSampleSizes {
 
         Nlist.forEach { N ->
             margins.forEach { margin ->
-                val cvrs = makeCvrsByExactMargin(N, margin)
+                val cvrs = makeCvrsByExactMean(N, margin)
                 val resultWithout = testSampleSize(margin, cvrs, silent = true).first()
 
                 val pct = (100.0 * resultWithout.sampleCountAvg / N)

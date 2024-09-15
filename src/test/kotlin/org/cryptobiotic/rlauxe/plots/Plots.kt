@@ -12,8 +12,10 @@ data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Doubl
                val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double) {
 
     val theta = reportedMean + reportedMeanDiff // the true mean
+    val successPct = nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val failPct = (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val nsamples = totalSamplesNeeded.toDouble() / (if (nsuccess == 0) 1 else nsuccess) // avg number of samples for successes
+    val pctSamples = 100.0 * nsamples / (if (N == 0) 1 else N)
 }
 
 // val eta0: Double,            // initial estimate of the population mean, eg reported vote ratio
@@ -210,16 +212,27 @@ fun plotDDpct(srs: List<SRT>, title: String) {
 
 ////
 // general
+val df = "%6d"
+val sf = "%8s"
 
-fun plotSRS(srs: List<SRT>, title: String, isInt: Boolean, colf: String = "%6.3f", rowf: String = "%6.0f", ff: String = "%6.2f",
-            colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double) {
-    println(title)
-    print("      , ")
-    val df = "%6d"
-
+fun colHeader(srs: List<SRT>, colTitle: String, colf: String = "%6.3f", colFld: (SRT) -> Double) {
+    print(sf.format(colTitle+":"))
     val cols = findValuesFromSRT(srs, colFld)
     cols.forEach { print("${colf.format(it)}, ") }
     println()
+}
+
+fun colHeader(cols: List<Double>, colTitle: String, colf: String = "%6.3f") {
+    print(sf.format(colTitle+":"))
+    cols.forEach { print("${colf.format(it)}, ") }
+    println()
+}
+
+fun plotSRS(srs: List<SRT>, title: String?, isInt: Boolean, colf: String = "%6.3f", rowf: String = "%6.0f", ff: String = "%6.2f", colTitle: String="",
+            colFld: (SRT) -> Double, rowFld: (SRT) -> Double, fld: (SRT) -> Double) {
+    if (title != null) println(title)
+
+    colHeader(srs, colTitle, colf, colFld)
 
     val mmap = makeMapFromSRTs(srs, colFld, rowFld, fld)
 

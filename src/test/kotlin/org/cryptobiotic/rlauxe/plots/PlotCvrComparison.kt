@@ -8,13 +8,13 @@ import kotlin.collections.getOrPut
 class PlotCvrComparison {
     val nrepeat = 100
     // val reader = SRTreader("src/test/data/plots/CvrComparison/SRT$nrepeat.csv")
-    val reader = SRTreader("/home/stormy/temp/CvrComparison/SRT$nrepeat.csv")
+    val reader = SRTreader("/home/stormy/temp/CvrComparison/Full$nrepeat.csv")
 
     // These are N vs theta plots for various values of d and MeanDiff
     @Test
     fun plotNTheta() {
         val srts = reader.readCalculations()
-        val title = "N=10000 d=10 eta0=1"
+        val title = "N=10000 d=100 eta0=noerror"
         plotMeanFailPct(srts, title)
         plotMeanSamples(srts, title)
         plotMeanPct(srts, title)

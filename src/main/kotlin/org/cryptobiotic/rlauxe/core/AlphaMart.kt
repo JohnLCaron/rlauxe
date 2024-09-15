@@ -84,6 +84,11 @@ class AlphaMart(
                 break
             }
 
+            // same as "wald_sprt" in SHANGRLA NonnegMean.py
+            //        Generalizes Wald's SPRT for the Bernoulli to sampling without replacement and to
+            //        nonnegative bounded values rather than binary values (for which it is a valid test, but not the SPRT).
+            //        See Stark, 2022. ALPHA: Audit that Learns from Previous Hand-Audited Ballots
+
             // This is eq 4 of ALPHA, p.5 :
             //      T_j = T_j-1 / u * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j))
             //      terms[np.isclose(0, m, atol=atol)] = 1  # ignore
@@ -259,6 +264,9 @@ class TruncShrinkage(
 //            println("wtf")
 //        }
 //        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
+        if (eta0 < 0.5) {
+            println("eta0 >= 0.5")
+        }
         require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)

@@ -549,18 +549,18 @@ The idea of setting eta0 very high seems suspect. Examining the number of succes
 than the upper limit of the comparison assorter, or else you dont detect when theta <= .5 (the null hypothosis is true), as the following shows.
 
 In the theta vs N plots below, we simulate the reported mean of the cvrs as exactly 0.5% higher than theta (the true mean). 
-So for example when theta = .0496, the reported cvr mean assort (aka Āc in SHANGRLA section 3.2) is 0.496 + .05 = 0.501.
+So for example when theta = .0496, the reported cvr mean assort (aka Āc in SHANGRLA section 3.2) is 0.496 + .005 = 0.501.
 The number of successes when theta <= .5 are all false positives. By contract they must be < 5% = risk factor. 
-We show several values of eta0Factor=1.0, 1.5, 2.0 and 2.1, where eta0 = eta0Factor * noerrors, and _noerrors_ is the comparison 
+We show various values of _eta0Factor_, where eta0 = eta0Factor * noerrors, and _noerrors_ is the comparison 
 assort value when the cvrs and the mvrs agree exactly (all overstatement errors are 0). 
 The value noerrors is a simple function of Āc: _noerrors = 1.0 / (3 - 2 * Āc)_.
 
-In the table below, the tables use eta0 = eta0Factor * noerrors. 
+In the table below, the tables use eta0 = eta0Factor * noerrors. The vallues are ratios = nsuccess / ntrials (despite saying successPct).
 The upper bounds of the comparison assorter is 2 * noerrors, represented by the row with etaFactor = 2.0.
 
 Using eta0 == noerrors, there are no false positives. When eta0Factor is between 1.0 and 2.0, the false positives are
-(almost) all with 5%. When eta0 > 2.0 * noerrors, the algorithm no longer stays within the risk limit.
-This is what you would expect from the formula for the alpha martingale.
+(almost) all less than 5%. When eta0 > 2.0 * noerrors, the algorithm no longer stays within the risk limit (which is
+what you would expect from the formula for the alpha martingale).
 
 ````
 ballot comparison, ntrials=1000, eta0Factor=1.0, d = 10000, cvrMeanDiff=-0.005, theta(col) vs N(row)
@@ -801,25 +801,22 @@ geometric mean = 1.3339424034953913
 ````
 
 The larger values of eta0 do better, and eta0Factor=1 is sometimes 20x worse than the smallest amount,
-which in these settings is best for close elections (where we need the most help) at eta0Factor around 1.5. More studies are needed varying across d, cvrMeanDiff, etc.
+which in these settings is best around eta0Factor = 1.5 for close elections (where we need the most help). 
+More studies are needed varying across d, cvrMeanDiff, etc.
 
 It seems that the eta0Factor acts as an accelerant, making each sampled value count
-more towards accepting or rejecting the null hypotheses. 
+more towards accepting or rejecting the null hypotheses. Not clear if thats a fair thing to do.
 
-(TODO: quantify the accelerant value.
-See AlphaMart, trunk_shrink formula. Weights earlier values more, depending on d. Not clear if thats fair.)
-
-The above shows average number of samples needed and that percentage of N. This ignores the large variance in the distribution.
+The above results show average number of samples needed and as a percentage of N. This ignores the large variance in the distribution.
 What we really want to know is what percentage of trials succeed at various cut-off values (where a full hand count will be more
 efficient than sampling a large percentage of the ballots.)
 
-A more exact simulation is to keep a histogram of the percentage needed.  
+A more appropriate simulation is to keep a histogram of the percentage needed, say as deciles. (NEXT TODO)
 
-
-````
-````
 
 Notes/thoughts
+
+TODO: quantify the accelerant value. See AlphaMart, trunk_shrink formula. Weights earlier values more, depending on d.
 
 TODO: need similar for rejections. Or combine?
 
@@ -843,7 +840,10 @@ Step 1: Replace discrete yk with continuous X_j:
 
     X_j*(nu/mu) + (1-X_j)*(1-nu)/(1-mu)
 
-Its not obvious what this is now. Still the probability ratio??
+Its not obvious what this is now. Still the probability ratio?? Could you just use
+
+    ( X_j*nu + (1-X_j)*(1-nu) ) / ( X_j*mu + (1-X_j)*(1-mu) )
+
 
 Step 2: Generalize range [0,1] to [0,upper]
 

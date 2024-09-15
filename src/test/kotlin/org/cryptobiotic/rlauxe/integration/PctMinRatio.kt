@@ -1,11 +1,84 @@
 package org.cryptobiotic.rlauxe.integration
 
 import org.cryptobiotic.rlauxe.plots.SRT
+import org.cryptobiotic.rlauxe.plots.colHeader
+import org.cryptobiotic.rlauxe.plots.findValuesFromSRT
 import org.cryptobiotic.rlauxe.plots.makeMapFromSRTs
 import org.cryptobiotic.rlauxe.plots.plotSRTpct
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.min
+
+fun plotRatio(results: Map<Double, List<SRT>>) {
+
+    // assume all sets have same N/theta values
+    val fistSet: List<SRT> = results.values.first()
+    val cvrMeans = findValuesFromSRT(fistSet) { it.reportedMean }
+    val ns = findValuesFromSRT(fistSet) { it.N.toDouble() }
+    val nsi = ns.map { it.toInt() }
+
+    // get maps for all results
+    val mmaps: Map<Double, Map<Int, Map<Double, Double>>> =
+        results.map { entry ->
+            val mmap: Map<Int, Map<Double, Double>> =
+                makeMapFromSRTs(entry.value, cvrMeans, nsi) { it.pctSamples}
+            Pair(entry.key, mmap)
+        }.toMap()
+
+    // Now find the smallest value
+    val nsamplesMinMapOld = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> fld
+    nsi.forEach { N ->
+        cvrMeans.forEach { theta ->
+            val dmap = nsamplesMinMapOld.getOrPut(N) { mutableMapOf() }
+            dmap[theta] = findSmallest(mmaps, N, theta)
+        }
+    }
+
+    // Now make the ratio with the smallest value
+    val nsamplesRatio = mutableMapOf<Double, MutableMap<Int, MutableMap<Double, Double>>>() // N, theta -> fld
+    mmaps.forEach { entry ->
+        nsamplesRatio[entry.key] = mutableMapOf()
+        val kmap = nsamplesRatio[entry.key]!!
+        nsi.forEach { N ->
+            cvrMeans.forEach { theta ->
+                val nmap = kmap.getOrPut(N) { mutableMapOf() }
+                val thisValue = entry.value[N]!![theta]!!
+                val wtf = thisValue / findSmallest(mmaps, N, theta)
+                nmap[theta] = wtf
+            }
+        }
+    }
+
+    // print it
+
+    val rowf = "%6.0f"
+    val ff = "%6.3f"
+    val sf = "%6s"
+
+    println()
+    nsamplesRatio.forEach { (eta0Factor, kmap) ->
+        println("ratio eta0Factor=$eta0Factor,  theta(col) vs N(row)")
+        colHeader(cvrMeans, "cvrMean", colf = "%6.3f")
+
+        val allValues = mutableListOf<Double>()
+        kmap.forEach { nkey, nmap ->
+            print("${sf.format(nkey)}, ")
+            nmap.toSortedMap().forEach { nkey, fld ->
+                print("${ff.format(fld)}, ")
+                allValues.add(fld)
+            }
+            println()
+        }
+        println("geometric mean = ${geometricMean(allValues)}")
+        println()
+    }
+}
+
+fun findSmallest(mmaps: Map<Double, Map<Int, Map<Double, Double>>>, N: Int, theta: Double): Double {
+    return mmaps.map { entry -> entry.value[N]!![theta]!!}.min()
+}
 
 // construct new dlcalcs replacing pct with ratio = pct/pctMin
 fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {

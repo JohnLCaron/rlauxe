@@ -10,106 +10,23 @@ import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.core.tabulateVotes
+import org.cryptobiotic.rlauxe.plots.SRT
+import org.cryptobiotic.rlauxe.plots.makeSRT
+import org.cryptobiotic.rlauxe.plots.plotDDpct
+import org.cryptobiotic.rlauxe.plots.plotDDsample
+import org.cryptobiotic.rlauxe.plots.plotNTpct
 import kotlin.test.Test
 
 class TestAuditPolling {
 
     val showContests = false
 
-    // TODO use Plots
-
-    data class SR(val d: Int, val N: Int, val margin:Double,
-                  val sampleCountAvg:Double, val speedup:Double, val pctVotes: Double) {
-    }
-
-    fun makeSR(d: Int, N: Int, margin:Double, speedup: Double, rr: AlphaMartRepeatedResult): SR {
-        val pctVotes = (100.0 * rr.sampleCountAvg() / N)
-        return SR(d, N, margin, rr.sampleCountAvg().toDouble(), speedup, pctVotes)
-    }
-
-    fun showSRSbyMargins(srs: List<SR>, ns: List<Int>, margins:List<Double>) {
-        margins.forEach{ showSRSmargin(srs, ns, it) }
-    }
-
-    fun showSRSmargin(srs: List<SR>, ns: List<Int>, margin : Double) {
-        println()
-        println("pctVotes sampled for margin = ${(100*margin).toInt()}% and d (row) vs total votes (col)")
-        print("     d, ")
-        ns.forEach{ print("${"%6d".format(it)}, ")}
-        println()
-
-        val mmap = mutableMapOf<Int, MutableMap<Int, Double>>() // d, n -> pct
-        srs.filter { it.margin == margin }.forEach {
-            val dmap = mmap.getOrPut(it.d) { mutableMapOf() }
-            dmap[it.N] = it.pctVotes
-        }
-
-        mmap.toSortedMap().forEach { dkey, dmap ->
-            print("${"%6d".format(dkey)}, ")
-            dmap.toSortedMap().forEach { nkey, nmap ->
-                print("${"%6.2f".format(nmap)}, ")
-            }
-            println()
-        }
-    }
-
-    fun showSRSbyNBallots(srs: List<SR>, ns: List<Int>, margins:List<Double>) {
-        ns.forEach{ showSRSnballots(srs, it, margins) }
-    }
-
-    fun showSRSnballots(srs: List<SR>, ns: Int, margins : List<Double>) {
-        println()
-        println("nVotes sampled for population size = ${ns} and d (row) vs theta (col)")
-        print("     d, ")
-        val theta = margins.sorted().map { .5 + it * .5 }
-        theta.forEach{ print("${"%6.3f".format(it)}, ")}
-        println()
-
-        val mmap = mutableMapOf<Int, MutableMap<Double, Int>>() // d, m -> pct
-        srs.filter { it.N == ns }.forEach {
-            val dmap = mmap.getOrPut(it.d) { mutableMapOf() }
-            dmap[it.margin] = (it.pctVotes * ns / 100).toInt()
-        }
-
-        mmap.toSortedMap().forEach { dkey, dmap ->
-            print("${"%6d".format(dkey)}, ")
-            dmap.toSortedMap().forEach { nkey, nmap ->
-                print("${"%6d".format(nmap)}, ")
-            }
-            println()
-        }
-    }
-
-    //
-    fun showSRSnVt(srs: List<SR>, ns: List<Int>, margins : List<Double>) {
-        println()
-        println("nvotes sampled vs N; various theta = winning percent")
-        print("     N, ")
-        val theta = margins.sorted().map { .5 + it * .5 }
-        theta.forEach{ print("${"%6.3f".format(it)}, ")}
-        println()
-
-        val mmap = mutableMapOf<Int, MutableMap<Double, Int>>() // N, m -> pct
-        srs.forEach {
-            val dmap = mmap.getOrPut(it.N) { mutableMapOf() }
-            dmap[it.margin] = (it.pctVotes * it.N / 100).toInt()
-        }
-
-        mmap.toSortedMap().forEach { dkey, dmap ->
-            print("${"%6d".format(dkey)}, ")
-            dmap.toSortedMap().forEach { nkey, nmap ->
-                print("${"%6d".format(nmap)}, ")
-            }
-            println()
-        }
-    }
-
     @Test
     fun testPollingWorkflow() {
-        val dl = listOf(100) // 10, 100, 500, 1000, 2000)
+        val dl = listOf(10, 100, 500, 1000, 2000)
         val margins = listOf(.4, .2, .1, .08, .06, .04, .02, .01) // winning percent: 70, 60, 55, 54, 53, 52, 51, 50.5
-        val Nlist = listOf(1000, 5000, 10000, 20000, 50000)
-        val srs = mutableListOf<SR>()
+        val Nlist = listOf(20000) // listOf(1000, 5000, 10000, 20000, 50000)
+        val srs = mutableListOf<SRT>()
         val show = false
 
         if (show) println("d, N, margin, eta0, without, with, speedup, pctVotes, failWith, sampleSumOver")
@@ -121,18 +38,19 @@ class TestAuditPolling {
                     val resultWithout = testPollingWorkflow(margin, withoutReplacement = true, cvrs, d, silent = true).first()
                     val resultWith = testPollingWorkflow(margin, withoutReplacement = false, cvrs, d, silent = true).first()
                     if (show) print("$d, ${cvrs.size}, $margin, ${resultWithout.eta0}, ")
-                    val speedup = resultWith.sampleCountAvg().toDouble() / resultWithout.sampleCountAvg().toDouble()
-                    val pct = (100.0 * resultWithout.sampleCountAvg().toDouble() / N).toInt()
+                    val speedup = resultWith.avgSamplesNeeded().toDouble() / resultWithout.avgSamplesNeeded().toDouble()
+                    val pct = (100.0 * resultWithout.avgSamplesNeeded().toDouble() / N).toInt()
 
-                    if (show) print("${resultWithout.sampleCountAvg().toDouble()}, ${resultWith.sampleCountAvg().toDouble()}, ${"%5.2f".format(speedup)}, ")
+                    if (show) print("${resultWithout.avgSamplesNeeded().toDouble()}, ${resultWith.avgSamplesNeeded().toDouble()}, ${"%5.2f".format(speedup)}, ")
                     if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
-                    srs.add(makeSR(d, N, margin, speedup, resultWithout))
+                    // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
+                    srs.add(makeSRT(N, margin2theta(margin), 0.0, d=d, 1.0, resultWithout))
                 }
                 if (show) println()
             }
         }
-        showSRSnVt(srs, Nlist, margins)
-        // showSRSbyNBallots(srs, Nlist, margins)
+        // plotNTpct(srs, "PollingWithoutNT")
+        plotDDsample(srs, "PollingWithoutDD")
     }
 
     fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<AlphaMartRepeatedResult> {
@@ -198,3 +116,12 @@ class TestAuditPolling {
 //   500,  14356,   8336,   3359,    557,    154,     37,
 //  1000,  13308,   8573,   3126,    553,    154,     37,
 //  2000,  14750,   8216,   3251,    600,    138,     45,
+
+// 9/16/2024 with upperBound, N=20000
+// nsamples, d (row) vs theta (col): PollingWithoutDD
+//       : 0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.600,  0.700,
+//    10,  14494,  12252,   3183,   2089,    906,    702,    284,     55,
+//   100,  15347,   9312,   3275,   1413,    670,    690,    132,     48,
+//   500,  10340,   9219,   4144,   1733,    527,    609,    138,     30,
+//  1000,  14077,   7972,   3180,   1840,    657,    380,    124,     35,
+//  2000,  11381,   8237,   2959,   1677,    953,    436,    170,     26,

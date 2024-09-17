@@ -1,10 +1,5 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.plots
 
-import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.colHeader
-import org.cryptobiotic.rlauxe.plots.findValuesFromSRT
-import org.cryptobiotic.rlauxe.plots.makeMapFromSRTs
-import org.cryptobiotic.rlauxe.plots.plotSRTpct
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.exp
@@ -32,7 +27,7 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
     nsi.forEach { N ->
         cvrMeans.forEach { theta ->
             val dmap = nsamplesMinMapOld.getOrPut(N) { mutableMapOf() }
-            dmap[theta] = findSmallest(mmaps, N, theta)
+            dmap[theta] = findSmallestNotZero(mmaps, N, theta)
         }
     }
 
@@ -45,7 +40,7 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
             cvrMeans.forEach { theta ->
                 val nmap = kmap.getOrPut(N) { mutableMapOf() }
                 val thisValue = entry.value[N]!![theta]!!
-                val wtf = thisValue / findSmallest(mmaps, N, theta)
+                val wtf = thisValue / findSmallestNotZero(mmaps, N, theta)
                 nmap[theta] = wtf
             }
         }
@@ -76,8 +71,11 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
     }
 }
 
-fun findSmallest(mmaps: Map<Double, Map<Int, Map<Double, Double>>>, N: Int, theta: Double): Double {
-    return mmaps.map { entry -> entry.value[N]!![theta]!!}.min()
+fun findSmallestNotZero(mmaps: Map<Double, Map<Int, Map<Double, Double>>>, N: Int, theta: Double): Double {
+    val llist = mmaps.map { entry -> entry.value[N]?.get(theta) ?: 0.0 }
+    val llistf = llist.filter{ it == 0.0 }
+    val result =  if (llistf.isEmpty()) -1.0 else llist.min()
+    return result
 }
 
 // construct new dlcalcs replacing pct with ratio = pct/pctMin
@@ -107,7 +105,8 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
                 //               val failPct: Double, val nsamples: Double, val stddev: Double)
                 val sr = SRT(
                     N, margin, 0.0, 0, 0.0, 0.0, 0, 0, 0,
-                    stddev = TODO()
+                    stddev = TODO(),
+                    percentHist = null
                 ) // TODO
                 val newsrs = newdlc.getOrPut(d) { mutableListOf() }
                 newsrs.add(sr)
@@ -139,6 +138,7 @@ fun plotPctRatio(newdlc: Map<Int, List<SRT>>, thetas: List<Double>, nlist: List<
 }
 
 fun geometricMean(x: List<Double>): Double {
+    if (x.size == 0) return 0.0
     val lnsum = x.filter{it > 0}.map{ ln(it) }.sum()
     return exp( lnsum / x.size )
 }

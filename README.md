@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/15/2024
+last update: 09/16/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -24,13 +24,13 @@ Table of Contents
     * [Sampling with or without replacement](#sampling-with-or-without-replacement)
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [BRAVO testing statistic](#bravo-testing-statistic)
+    * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
     * [Questions](#questions)
   * [Stratified audits using OneAudit (not done)](#stratified-audits-using-oneaudit-not-done)
   * [Sample size simulations (Polling)](#sample-size-simulations-polling)
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
   * [Sample size simulations (Ballot Comparison)](#sample-size-simulations-ballot-comparison)
-  * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
   * [Old stuff](#old-stuff)
 <!-- TOC -->
 
@@ -347,7 +347,44 @@ reported winner or for the reported loser; u = 1 and the only possible values of
 and 1
 * µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement
 * ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
-Nℓ is the number of votes reported for candidate ℓ: η is not updated as data are collected
+Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected
+
+### AlphaMart formula as generalization of Wald SPRT:
+
+Bravo: Probability of drawing yk if theta=nu over probability of drawing yk if theta=mu:
+
+    yk*(nu/mu) + (1-yk)*(1-nu)/(1-mu)
+
+makes sense where yk is 0 or 1, so one term or the other vanishes.
+
+Alpha:
+
+Step 1: Replace discrete yk with continuous X_j:
+
+    X_j*(nu/mu) + (1-X_j)*(1-nu)/(1-mu)
+
+Its not obvious what this is now. Still the probability ratio?? Could you just use
+
+    ( X_j*nu + (1-X_j)*(1-nu) ) / ( X_j*mu + (1-X_j)*(1-mu) )
+
+
+Step 2: Generalize range [0,1] to [0,upper]
+
+    (X_j*(nu/mu) + (upper-X_j)*(upper-nu)/(upper-mu))/upper
+
+Step 3: Use estimated nu instead of fixed nu, and calculated mu when sampling without replacement.
+
+    (X_j * (nu_j/mu_j) + (upper-X_j) * (upper-nu_j)/(upper-mu_j))/upper
+
+looks like a weighted average now:
+
+    w * (nu_j/mu_j) + (1-w) * (upper-nu_j)/(upper-mu_j)
+
+    where 
+        w = X_j/upper, the normalized value of Xj.
+        nu_j/mu_j = ratio of hypothesised means
+        (upper - nu_j)/(upper - mu_j) = (1 - nu_j/upper) / (1 - mu_j/upper)
+
 
 ### Questions
 
@@ -358,7 +395,7 @@ Is ALPHA dependent on N? Only to test sampleSum > N * t ??
 I think this means that one needs the same number of samples for 100, 1000, 1000000 etc. 
 So its highly effective (as percentage of sampling) as N increases.
 
-Is sampling without replacement more efficient than with replacement? Should be.
+Is sampling without replacement more efficient than with replacement? YES
 
 Can we really replicate BRAVO results? YES
 
@@ -825,42 +862,6 @@ more towards accepting or rejecting the null hypotheses. TODO: quantify the acce
 See AlphaMart, trunk_shrink formula. Weights earlier values more, depending on d. Not clear if thats fair.
 
 TODO: vary by d. meanDiff
-
-## AlphaMart formula as generalization of Wald SPRT:
-
-Bravo: Probability of drawing yk if theta=nu over probability of drawing yk if theta=mu:
-
-    yk*(nu/mu) + (1-yk)*(1-nu)/(1-mu)
-
-makes sense where yk is 0 or 1, so one term or the other vanishes.
-
-Alpha:
-
-Step 1: Replace discrete yk with continuous X_j:
-
-    X_j*(nu/mu) + (1-X_j)*(1-nu)/(1-mu)
-
-Its not obvious what this is now. Still the probability ratio?? Could you just use
-
-    ( X_j*nu + (1-X_j)*(1-nu) ) / ( X_j*mu + (1-X_j)*(1-mu) )
-
-
-Step 2: Generalize range [0,1] to [0,upper]
-
-    (X_j*(nu/mu) + (upper-X_j)*(upper-nu)/(upper-mu))/upper
-
-Step 3: Use estimated nu instead of fixed nu, and calculated mu when sampling without replacement. 
-
-    (X_j * (nu_j/mu_j) + (upper-X_j) * (upper-nu_j)/(upper-mu_j))/upper
-
-looks like a weighted average now:
-
-    w * (nu_j/mu_j) + (1-w) * (upper-nu_j)/(upper-mu_j)
-
-    where 
-        w = X_j/upper, the normalized value of Xj.
-        nu_j/mu_j = ratio of hypothesised means
-        (upper - nu_j)/(upper - mu_j) = (1 - nu_j/upper) / (1 - mu_j/upper)
 
 
 ## Old stuff

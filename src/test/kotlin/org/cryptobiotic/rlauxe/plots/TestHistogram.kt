@@ -1,6 +1,5 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.plots
 
-import org.cryptobiotic.rlauxe.integration.Histogram
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

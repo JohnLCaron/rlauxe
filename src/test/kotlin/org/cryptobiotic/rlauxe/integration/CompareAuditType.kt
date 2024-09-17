@@ -111,7 +111,7 @@ class CompareAuditType {
             }
         }
 
-        val nthreads = 20
+        val nthreads = 30
         val nrepeat = 1000
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
@@ -119,7 +119,7 @@ class CompareAuditType {
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(10, 50, 250, 1250)
 
-        val writer = SRTwriter("/home/stormy/temp/DiffMeans/SRT$nrepeat.csv")
+        val writer = SRTwriter("/home/stormy/temp/AuditTypes/SRT$nrepeat.csv")
         var totalCalculations = 0
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->
@@ -174,7 +174,7 @@ class CompareAuditType {
             d = d,
             silent = true
         )
-        println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, \npolling=${rr.first} \ncomparison=${rr.second}")
+        // println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, \npolling=${rr.first} \ncomparison=${rr.second}")
         return rr
     }
 
@@ -279,9 +279,6 @@ class CompareAuditType {
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
             val compareAssertion = compareAudit.assertions[contest]!!.first()
 
-            val margin = compareAssertion.assorter.margin
-            val compareUpper = 2.0/(2-margin) // TODO does this matter ?
-
             val pollingAudit = makePollingAudit(contests = listOf(contest))
             val pollingAssertion = pollingAudit.assertions[contest]!!.first()
 
@@ -292,7 +289,7 @@ class CompareAuditType {
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareUpper,
+                    upperBound = compareAssertion.assorter.upperBound,
                 )
                 compareSrs.add(makeSRT(N, theta, 0.0, d, rr=compareResult))
 

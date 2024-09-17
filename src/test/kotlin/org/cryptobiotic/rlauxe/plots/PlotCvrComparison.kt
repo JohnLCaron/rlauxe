@@ -30,7 +30,7 @@ class PlotCvrComparison {
         ddiffMap.forEach { (ddiff, srts) ->
             println("d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
 
-            plotNTfailPct(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
+            plotNTsuccessPct(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
             plotNTsamples(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
             plotNTpct(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
             println("-----------------------------------------------")
@@ -107,16 +107,4 @@ class PlotCvrComparison {
         }
         return mmap.toSortedMap(nthetaComparator)
     }
-
-    // TODO all below replace with Plots
-
-/*
-    fun plotNTsuccess(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
-        val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-        plotSRS(srs, meanDiffs, ds, utitle, true) {
-            val cumul = it.hist!!.cumul(sampleMaxPct)
-            (100.0 * cumul) / nrepeat
-        }
-    }
- */
 }

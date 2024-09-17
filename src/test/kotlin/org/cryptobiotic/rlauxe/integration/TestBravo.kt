@@ -5,12 +5,19 @@ import org.cryptobiotic.rlauxe.core.EstimFn
 import org.cryptobiotic.rlauxe.core.SampleFn
 import org.cryptobiotic.rlauxe.core.Samples
 import org.cryptobiotic.rlauxe.core.Welford
+import org.cryptobiotic.rlauxe.plots.Histogram
+import org.cryptobiotic.rlauxe.plots.SRT
+import org.cryptobiotic.rlauxe.plots.makeSRT
+import org.cryptobiotic.rlauxe.plots.plotNTpct
+import org.cryptobiotic.rlauxe.plots.plotNTsamples
+import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import kotlin.random.Random
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
 // A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
 class TestBravo  {
+    val df = "%5d"
 
     @Test
     fun testBravo() {
@@ -21,38 +28,40 @@ class TestBravo  {
 
     @Test
     fun testAgainstUnifiedWithReplacement() {
-        val etas = listOf(.7, .55, .51)
+        val eta0 = listOf(.7, .55, .51)
         val trueMeans = listOf(.52, .55, .60, .64, .70)
 
-        val results = mutableListOf<AlphaMartRepeatedResult> ()
-        etas.forEach { results.addAll(runBravoRepeat(it, trueMeans, false)) }
+        val results = mutableListOf<SRT> ()
+        eta0.forEach { results.addAll( runBravoRepeat(it, trueMeans, false)) }
 
-        show("sampleCountAvg", etas, trueMeans, results)
-        // show("sampleMean", etas, trueMeans, results)
-        show("failAvg", etas, trueMeans, results)
+        plotNTsuccessPct(results, "BravoWith")
+        plotNTsamples(results, "BravoWith")
+        plotNTpct(results, "BravoWith")
     }
 
     @Test
     fun testAgainstUnifiedWithoutReplacement() {
-        val etas = listOf(.7, .55, .51)
+        val eta0 = listOf(.7, .55, .51)
         val trueMeans = listOf(.52, .55, .60, .64, .70)
         println("testAgainstUnifiedWithoutReplacement")
 
-        val results = mutableListOf<AlphaMartRepeatedResult> ()
-        etas.forEach { results.addAll(runBravoRepeat(it, trueMeans, true)) }
+        val results = mutableListOf<SRT> ()
+        eta0.forEach { results.addAll(runBravoRepeat(it, trueMeans, true)) }
 
-        show("sampleCountAvg", etas, trueMeans, results)
-        // show("sampleMean", etas, trueMeans, results)
-        show("failPct", etas, trueMeans, results)
+        plotNTsuccessPct(results, "BravoWithout")
+        plotNTsamples(results, "BravoWithout")
+        plotNTpct(results, "BravoWithout")
     }
 
-    fun runBravoRepeat(eta0: Double, trueMeans: List<Double>, withoutReplacement: Boolean ): List<AlphaMartRepeatedResult> {
+    fun runBravoRepeat(eta0: Double, trueMeans: List<Double>, withoutReplacement: Boolean ): List<SRT> {
         val N = 20_000
         val m = 2000
         val nrepeat = 100
-        val results = mutableListOf<AlphaMartRepeatedResult>()
+        val results = mutableListOf<SRT>()
         trueMeans.forEach {
-            results.add(runBravo(N, m, eta0, it, withoutReplacement, nrepeat))
+            val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
+            // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult
+            results.add(makeSRT(N, eta0, 0.0, d=0, eta0Factor=1.0, rr))
         }
         return results
     }
@@ -77,7 +86,7 @@ class TestBravo  {
                 totalSamples += testH0Result.sampleCount
             }
         }
-        return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamples, nsuccess, ntrials, welford)
+        return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamples, nsuccess, ntrials, welford.result().second)
     }
 
 
@@ -95,7 +104,7 @@ class TestBravo  {
             println(" testWithSampleMean ratio=${"%5.4f".format(ratio)} "+
                     "eta0=${"%5.4f".format(result.eta0)} " +
                     "voteDiff=${"%4d".format(voteDiff.toInt())} " +
-                    "sampleCount=${df.format(result.sampleCountAvg())} " +
+                    "sampleCount=${df.format(result.avgSamplesNeeded())} " +
                     // "sampleMean=${"%5.4f".format(result.sampleMean)} " +
                     "nrepeat=${result.percentHist!!.cumulPct(nrepeat)}" +
                     // "fail=${(result.failPct * nrepeat).toInt()} " +
@@ -138,48 +147,9 @@ class TestBravo  {
             }
         }
 
-        return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamples, nsuccess, ntrials, welford)
+        return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamples, nsuccess, ntrials, welford.result().second, percentHist=hist)
     }
 
-}
-
-
-// TODO use Plots
-
-val ff = "%5.2f"
-val df = "%5d"
-
-fun show(title: String, eta0s: List<Double>, trueMeans: List<Double>, results: List<AlphaMartRepeatedResult>) {
-    println(title)
-
-    val eta0Map = mutableMapOf<Double, MutableMap<Double, Double>>()
-    results.forEach { result ->
-        val mlist = eta0Map.getOrPut(result.eta0) { mutableMapOf() }
-        mlist[result.eta0] =  when (title) { // TODO WRONG
-            "sampleCountAvg" -> result.sampleCountAvg().toDouble()
-            "sampleMean" -> 0.0
-            else -> result.failPct()
-        }
-    }
-
-    print("   eta0       ")
-    trueMeans.forEach{ print("${ff.format(it)}  ") }
-    println()
-
-    eta0s.forEach{ eta0 ->
-        print("   ${ff.format(eta0)}       ")
-        val meanMap = eta0Map[eta0]!!
-        trueMeans.forEach{ trueMean ->
-            val fld = meanMap[trueMean]!!
-            val fldAsString = when (title) {
-                "sampleCount" -> df.format(fld.toInt())
-                "sampleMean" -> ff.format(fld)
-                else -> ff.format(fld)
-            }
-            print("$fldAsString  ")
-        }
-        println()
-    }
 }
 
 // – Set η0
@@ -205,27 +175,6 @@ class FixedMean(val eta0: Double): EstimFn {
     }
 }
 
-// TODO
-class FixedAlternativeMean(val N: Int, val eta0:Double): EstimFn {
-
-    //         val m = DoubleArray(x.size) {
-    //            val m1 = (N * t - Sp[it])
-    //            val m2 = (N - j[it] + 1)
-    //            val m3 = m1 / m2
-    //            if (isFinite) (N * t - Sp[it]) / (N - j[it] + 1) else t
-    //        }
-
-    override fun eta(prevSamples: Samples): Double {
-        val j = prevSamples.size() + 1
-        val sampleSum = prevSamples.sum()
-        val m1 = (N * eta0 - sampleSum)
-        val m2 = (N - j + 1)
-        val m3 = m1 / m2
-        val result = (N * eta0 - sampleSum) / (N - j + 1)
-        return result
-    }
-
-}
 
 class GenerateAssorterValue(val ratio: Double) {
     fun sample() : Double {

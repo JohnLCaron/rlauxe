@@ -177,11 +177,6 @@ class AlphaMart(
     }
 }
 
-fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
-    val sampleNum = prevSamples.size()
-    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
-}
-
 // 3. Pseudo-algorithm for ballot-level comparison and ballot-polling audits
 // • Set audit parameters:
 //  – Select the risk limit α ∈ (0, 1)
@@ -265,9 +260,9 @@ class TruncShrinkage(
 //        }
 //        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
         if (eta0 < 0.5) {
-            println("eta0 >= 0.5")
+            println("eta0 < 0.5")
         }
-        require(eta0 >= 0.5) // ??
+//         require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)
     }
@@ -324,6 +319,39 @@ fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
     val m2 = (N - x.size())
     val m3 = m1 / m2
     return m3
+}
+
+fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
+    val sampleNum = prevSamples.size()
+    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
+}
+
+class FixedEstimFn(
+    val eta0: Double,
+) : EstimFn {
+    override fun eta(prevSamples: Samples) = eta0
+}
+
+// TODO compare to FixedEstimFn
+class FixedAlternativeMean(val N: Int, val eta0:Double): EstimFn {
+
+    //         val m = DoubleArray(x.size) {
+    //            val m1 = (N * t - Sp[it])
+    //            val m2 = (N - j[it] + 1)
+    //            val m3 = m1 / m2
+    //            if (isFinite) (N * t - Sp[it]) / (N - j[it] + 1) else t
+    //        }
+
+    override fun eta(prevSamples: Samples): Double {
+        val j = prevSamples.size() + 1
+        val sampleSum = prevSamples.sum()
+        val m1 = (N * eta0 - sampleSum)
+        val m2 = (N - j + 1)
+        val m3 = m1 / m2
+        val result = (N * eta0 - sampleSum) / (N - j + 1)
+        return result
+    }
+
 }
 
 // SHANGRLA NonnegMean

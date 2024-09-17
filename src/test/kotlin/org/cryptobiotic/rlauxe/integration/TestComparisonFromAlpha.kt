@@ -451,7 +451,7 @@ class TestComparisonFromAlpha {
                 val compareAssertion = compareAudit.assertions[contest]!!.first()
 
                 val margin = compareAssertion.assorter.margin
-                val compareUpper = 2.0/(2-margin) // TODO does this matter ? doesnt seem to
+                val compareUpper = 2.0/(2-margin)
                 val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
                 val etaActual = drawSample.truePopulationMean()
                 val etaExpect =  1.0/(2-margin)
@@ -541,7 +541,6 @@ class TestComparisonFromAlpha {
             val compareAssertion = compareAudit.assertions[contest]!!.first()
 
             val margin = compareAssertion.assorter.margin
-            val compareUpper = 2.0 / (2 - margin) // TODO does this matter ? doesnt seem to
             val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
             val etaActual = drawSample.truePopulationMean()
             val eta0 = factor / (2 - margin)
@@ -553,7 +552,7 @@ class TestComparisonFromAlpha {
                 eta0 = eta0,
                 d = d,
                 ntrials = ntrials,
-                upperBound = compareUpper,
+                upperBound = compareAssertion.assorter.upperBound,
             )
             srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
 

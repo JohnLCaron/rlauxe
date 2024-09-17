@@ -19,16 +19,16 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.integration.Histogram
+import org.cryptobiotic.rlauxe.plots.Histogram
 import org.cryptobiotic.rlauxe.core.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.ff
-import org.cryptobiotic.rlauxe.integration.geometricMean
+import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.core.tabulateVotes
 import org.cryptobiotic.rlauxe.core.theta2margin
+import org.cryptobiotic.rlauxe.plots.ff
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
@@ -110,11 +110,8 @@ fun makeMapFromSRs(srs: List<SR>, margins: List<Double>, ns: List<Int>, extract:
 }
 
 fun makeSR(N: Int, margin: Double, rr: AlphaMartRepeatedResult): SR {
-    val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
-    val pct = (100.0 * sampleCountAvg / N)
-    return SR(N, margin, sampleCountAvg, pct, sqrt(sampleCountVar), rr.percentHist)
+    return SR(N, margin, rr.avgSamplesNeeded().toDouble(), rr.avgSamplesNeeded().toDouble() / rr.N, sqrt(rr.variance), rr.percentHist)
 }
-
 
 data class CalcTask(val idx: Int, val N: Int, val margin: Double, val cvrs: List<Cvr>)
 

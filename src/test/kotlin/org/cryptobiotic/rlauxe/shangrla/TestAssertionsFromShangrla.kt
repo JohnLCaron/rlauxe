@@ -1,5 +1,11 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.CvrBuilders
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.makeCvr
+import org.cryptobiotic.rlauxe.core.makePluralityAssertions
+import org.cryptobiotic.rlauxe.core.makeSuperMajorityAssertions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -118,7 +124,7 @@ class TestAssertionsFromShangrla {
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidates = listOf(0, 1, 2),
             winners = listOf(0),
-            minFraction = 2.0/3.0,
+            minFraction = 2.0 / 3.0,
         )
 
         val target = makeSuperMajorityAssertions(contest = contest).first()

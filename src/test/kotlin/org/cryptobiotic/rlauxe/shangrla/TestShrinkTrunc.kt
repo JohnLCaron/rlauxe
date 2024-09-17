@@ -1,5 +1,8 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
+import org.cryptobiotic.rlauxe.core.PrevSamples
+import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test

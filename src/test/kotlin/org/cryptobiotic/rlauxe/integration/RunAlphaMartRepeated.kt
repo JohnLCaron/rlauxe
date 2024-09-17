@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.ceilDiv
 import org.cryptobiotic.rlauxe.plots.Histogram
+import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.math.max
 import kotlin.math.sqrt
 
@@ -68,6 +69,7 @@ fun runAlphaMartRepeated(
         if (showDetail) println(" $it $testH0Result")
     }
     val (_, variance, _) = welford.result()
+    percentHist.ntrials = ntrials
     return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
         ntrials=ntrials, variance, percentHist, status)
 }
@@ -113,6 +115,7 @@ fun runAlphaMartRepeated(
     }
 
     val (_, variance, _) = welford.result()
+    percentHist.ntrials = ntrials
     return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
         ntrials=ntrials, variance, percentHist, status)
 }
@@ -135,9 +138,8 @@ data class AlphaMartRepeatedResult(val eta0: Double,            // initial estim
 
     override fun toString() = buildString {
         appendLine("AlphaMartRepeatedResult: eta0=$eta0 N=$N successPct=${successPct()} in ntrials=$ntrials")
-        val ns = if (nsuccess == 0) 1 else nsuccess
         append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
-        if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct(ntrials)}") else appendLine()
+        if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
         if (status != null) appendLine("  status:${status}")
     }
 }

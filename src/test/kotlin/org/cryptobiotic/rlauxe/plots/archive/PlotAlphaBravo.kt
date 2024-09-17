@@ -25,7 +25,7 @@ import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
 import org.cryptobiotic.rlauxe.integration.FixedMean
 import org.cryptobiotic.rlauxe.core.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.eps
+import org.cryptobiotic.rlauxe.shangrla.eps
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta

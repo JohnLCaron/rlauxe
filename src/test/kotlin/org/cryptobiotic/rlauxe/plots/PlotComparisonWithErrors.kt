@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.collections.getOrPut
 
 // read raw data and make csv plots of polling with theta != eta0
-class PlotCvrComparison {
+class PlotComparisonWithErrors {
     val nrepeat = 100
     // val reader = SRTreader("src/test/data/plots/CvrComparison/SRT$nrepeat.csv")
     val reader = SRTreader("/home/stormy/temp/CvrComparison/Full$nrepeat.csv")

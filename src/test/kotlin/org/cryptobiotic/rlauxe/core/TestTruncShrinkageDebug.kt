@@ -1,12 +1,12 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.integration.eps
+import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.test.Test
 
-// Direct compare TruncShrinkage with output from SHANGRLA TestNonnegMean output
+// instrumented version of TruncShrinkage in AlphaMart. Keep them synchonized.
 class TestTruncShrinkageDebug {
 
     @Test

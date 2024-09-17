@@ -1,10 +1,12 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromList
-import org.cryptobiotic.rlauxe.integration.eps
+import org.cryptobiotic.rlauxe.core.AlphaMart
+import org.cryptobiotic.rlauxe.core.Bernoulli
+import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals

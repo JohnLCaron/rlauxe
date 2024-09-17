@@ -20,10 +20,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.integration.createPctRatio
-import org.cryptobiotic.rlauxe.integration.ff
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.integration.plotPctRatio
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import kotlin.test.Test
 
@@ -32,9 +29,12 @@ import kotlin.text.format
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans
 
+val ff = "%5.2f"
+
 // create the raw data for showing plots of polling with theta != eta0
 // these are 4 dimensional: N, theta, d, diffMean
 class CreateDiffMeans {
+
     val showCalculation = false
     val showContests = false
     val showAllPlots = false
@@ -108,7 +108,7 @@ class CreateDiffMeans {
         }
 
         val nthreads = 20
-        val nrepeat = 10000
+        val nrepeat = 100
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
         // val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean

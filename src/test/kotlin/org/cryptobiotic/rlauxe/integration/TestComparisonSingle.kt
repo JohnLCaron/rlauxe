@@ -12,10 +12,10 @@ import kotlin.collections.first
 import kotlin.math.max
 import kotlin.test.Test
 
-class TestComparison {
+class TestComparisonSingle {
 
     @Test
-    fun testOne() {
+    fun testComparisonSingle() {
         val N = 10000
         val m = N
         val theta = .509
@@ -28,15 +28,12 @@ class TestComparison {
         val sampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
         val assorterMean = sampler.truePopulationMean()
 
-        val margin = compareAssertion.assorter.margin
-        val compareUpper = 2.0/(2-margin) // TODO does this matter ?
-
         val eta0 = 20.0
         val d = 100
 
-        println("N=$N theta=$theta assorterMean=$assorterMean eta0=$eta0, d=$d u=$compareUpper")
+        println("N=$N theta=$theta assorterMean=$assorterMean eta0=$eta0, d=$d u=${compareAssertion.assorter.upperBound}")
 
-        val result = doOne(sampler, m, eta0=eta0, d=d, u=compareUpper)
+        val result = doOne(sampler, m, eta0=eta0, d=d, u=compareAssertion.assorter.upperBound)
         println(result)
     }
 

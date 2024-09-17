@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.plots
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
-import kotlin.text.format
 
 // read raw data and make csv plots of polling with theta != eta0
 class PlotDiffMeans {
@@ -14,7 +13,7 @@ class PlotDiffMeans {
     fun plotNTheta() {
         val thetas = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
-        val nrepeat = 10
+        val nrepeat = 100
 
         val reader = SRTreader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
         val allSrts = reader.readCalculations()
@@ -63,7 +62,7 @@ class PlotDiffMeans {
     fun plotDvsMeanDiff() {
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dlist = listOf(10, 50, 250, 1250)
-        val nrepeat = 10
+        val nrepeat = 100
 
         val reader = SRTreader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
         val allSrts = reader.readCalculations()
@@ -72,9 +71,9 @@ class PlotDiffMeans {
         println(" number of nthetas = ${nThetaMap.size}")
 
         nThetaMap.forEach { (ntheta, srts) ->
-            plotNTsample(srts, reportedMeanDiffs, dlist, "N=${ntheta.N} theta=${ntheta.theta} ")
-            plotNTpct(srts, reportedMeanDiffs, dlist, "N=${ntheta.N} theta=${ntheta.theta} ")
-            // plotNTsuccess(srts, reportedMeanDiffs, dlist, 30, nrepeat, "N=${ntheta.N} theta=${ntheta.theta} ")
+            plotDDpct(srts, "N=${ntheta.N} theta=${ntheta.theta} ")
+            plotDDfailPct(srts, "N=${ntheta.N} theta=${ntheta.theta} ")
+            plotDDsuccess(srts, "N=${ntheta.N} theta=${ntheta.theta} ", 30)
             println()
         }
 
@@ -104,58 +103,5 @@ class PlotDiffMeans {
             dmap.add(it)
         }
         return mmap.toSortedMap(nthetaComparator)
-    }
-
-    // TODO all below replace with Plots
-
-    fun plotNTsample(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, title: String = "") {
-        val utitle = "votes sampled: " + title
-        plotNT(srs, meanDiffs, ds, utitle, true) { it.nsamples }
-    }
-
-    fun plotNTpct(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, title: String = "") {
-        val utitle = "pct votes sampled: " + title
-        plotNT(srs, meanDiffs, ds, utitle, false) { 100.0 * it.nsamples / it.N }
-    }
-/*
-    fun plotNTsuccess(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, sampleMaxPct: Int, nrepeat: Int, title: String = "") {
-        val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-        plotSRS(srs, meanDiffs, ds, utitle, true) {
-            val cumul = it.hist!!.cumul(sampleMaxPct)
-            (100.0 * cumul) / nrepeat
-        }
-    }
-*/
-    fun plotNT(srs: List<SRT>, meanDiffs: List<Double>, ds: List<Int>, title: String, isInt: Boolean, extract: (SRT) -> Double) {
-        println()
-        println(title)
-        print("     d, ")
-        val meanDiff = meanDiffs.sorted()
-        meanDiff.forEach { print("${"%6.3f".format(it)}, ") }
-        println()
-
-        val mmap = makeMapFromNTs(srs, extract)
-
-        mmap.forEach { dkey, dmap ->
-            print("${"%6d".format(dkey)}, ")
-            dmap.toSortedMap().forEach { nkey, fld ->
-                if (isInt)
-                    print("${"%6d".format(fld.toInt())}, ")
-                else
-                    print("${"%6.3f".format(fld)}, ")
-            }
-            println()
-        }
-    }
-
-    fun makeMapFromNTs(srs: List<SRT>, extract: (SRT) -> Double): Map<Int, Map<Double, Double>> {
-        val mmap = mutableMapOf<Int, MutableMap<Double, Double>>() // d, meanDiff -> fld
-
-        srs.forEach {
-            val dmap = mmap.getOrPut(it.d) { mutableMapOf() }
-            dmap[it.reportedMeanDiff] = extract(it)
-        }
-
-        return mmap.toSortedMap()
     }
 }

@@ -23,13 +23,13 @@ import org.cryptobiotic.rlauxe.core.ceilDiv
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.integration.Histogram
+import org.cryptobiotic.rlauxe.plots.Histogram
 import org.cryptobiotic.rlauxe.core.cardsPerContest
-import org.cryptobiotic.rlauxe.integration.ff
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.core.tabulateVotes
+import org.cryptobiotic.rlauxe.plots.ff
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -209,7 +209,7 @@ fun runSprtMartRepeated(
         totalSamples,
         nsuccess,
         ntrials,
-        welford,
+        welford.result().second,
         hist,
         status
     )

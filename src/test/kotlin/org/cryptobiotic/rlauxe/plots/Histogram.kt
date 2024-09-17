@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.plots
 
 data class Histogram(val incr: Int) {
     val hist = mutableMapOf<Int, Int>() // upper bound,count

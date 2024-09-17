@@ -23,9 +23,7 @@ import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.theta2margin
-import org.cryptobiotic.rlauxe.integration.createPctRatio
 import org.cryptobiotic.rlauxe.integration.eps
-import org.cryptobiotic.rlauxe.integration.plotRatio
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import kotlin.collections.first
 import kotlin.collections.set
@@ -42,11 +40,11 @@ class CreateCvrComparison {
     // recreate TestComparisonsFromAlpha.comparisonNvsTheta, with cvrMeanDiff != 0
     @Test
     fun comparisonNvsTheta() {
-        val cvrMeans = listOf(.51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val cvrMeans = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .6, .7)
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
 
         val d = 10000
-        val ntrials = 1000
+        val ntrials = 10
         val cvrMeanDiff = -.005
         val eta0Factors = listOf(1.0, 1.25, 1.5, 1.75, 2.0 - eps)
         val nthreads = 30
@@ -82,11 +80,115 @@ class CreateCvrComparison {
 
             results[eta0Factor] = calculations
 
+            println()
+            println("ballot comparison, ntrials=$ntrials, eta0Factor=$eta0Factor, d = $d, cvrMeanDiff=$cvrMeanDiff, theta(col) vs N(row)")
+            colHeader(calculations, "theta", colf = "%6.3f") { it.theta }
+            println()
+
+            plotNTsuccessPct(calculations, "plotNTsuccessPct", colTitle = "cvrMean")
+            plotNTsamples(calculations, "plotNTsamples", colTitle = "cvrMean")
+            plotNTpct(calculations, "plotNTpct", colTitle = "cvrMean")
+
             /*
+               plotSRS(calculations, "successPct", false, colf = "%6.3f", rowf = "%6.0f", ff = "%6.3f", colTitle = "theta",
+               colFld = { srt: SRT -> srt.theta },
+               rowFld = { srt: SRT -> srt.N.toDouble() },
+               fld = { srt: SRT -> srt.successPct }
+           )
+
+           plotSRS(calculations, "nsamples", true, colf = "%6.3f", rowf = "%6.0f", colTitle = "theta",
+               colFld = { srt: SRT -> srt.theta },
+               rowFld = { srt: SRT -> srt.N.toDouble() },
+               fld = { srt: SRT -> srt.nsamples.toDouble() }
+           )
+
+           plotSRS(calculations, "pct nsamples", false, colf = "%6.3f", rowf = "%6.0f", colTitle = "theta",
+               colFld = { srt: SRT -> srt.theta },
+               rowFld = { srt: SRT -> srt.N.toDouble() },
+               fld = { srt: SRT -> srt.pctSamples }
+           )
+
+            */
+        }
+
+        println("samplePct ratios across cvrMeanDiff: ntrials=$ntrials, d = $d, cvrMeanDiff=$cvrMeanDiff, theta(col) vs N(row)")
+        plotRatio(results)
+    }
+
+    @Test
+    fun comparisonNSampleHistogram() {
+        val cvrMeans = listOf(.51, .52) //, .53, .54, .55, .575, .6, .65, .7)
+        val nlist = listOf(10000, 20000) // listOf(50000, 20000, 10000, 5000, 1000)
+
+        val d = 10000
+        val ntrials = 100
+        val cvrMeanDiff = -.005
+        val eta0Factors = listOf(1.5) // 1.0, 1.25, 1.5, 1.75, 2.0 - eps)
+        val nthreads = 30
+        val results = mutableMapOf<Double, List<SRT>>() // eta0Factor vs list<SRT>
+
+        eta0Factors.forEach { eta0Factor ->
+            val tasks = mutableListOf<ComparisonTask>()
+            var taskIdx = 0
+            cvrMeans.forEach { cvrMean ->
+                nlist.forEach { N ->
+                    val cvrs = makeCvrsByExactMean(N, cvrMean)
+                    tasks.add(ComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff=cvrMeanDiff, eta0Factor=eta0Factor, cvrs))
+                }
+            }
+            // val writer = SRTwriter("/home/stormy/temp/CvrComparison/comparisonNvsTheta$eta0Factor.csv")
+
+            calculations = mutableListOf<SRT>()
+            runBlocking {
+                val taskProducer = produceTasks(tasks)
+                val calcJobs = mutableListOf<Job>()
+                repeat(nthreads) {
+                    calcJobs.add(
+                        launchCalculations(taskProducer) { task ->
+                            calculate(task, ntrials, d = d, cvrMeanDiff = task.cvrMeanDiff)
+                        })
+                }
+
+                // wait for all calculations to be done
+                joinAll(*calcJobs.toTypedArray())
+            }
+            //writer.writeCalculations(calculations)
+            //writer.close()
+
+            results[eta0Factor] = calculations
+
             println()
             println("ballot comparison, ntrials=$ntrials, eta0Factor=$eta0Factor, d = $d, cvrMeanDiff=$cvrMeanDiff, theta(col) vs N(row)")
             println()
-            colHeader(calculations, "cvrMean", colf = "%6.3f") { it.reportedMean }
+            colHeader(calculations, "theta", colf = "%6.3f") { it.theta }
+
+            /*
+            fun plotNTfailPct(srs: List<SRT>, title: String) {
+    val utitle = "pct failed N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, true, ff = "%6.3f",
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> srt.failPct }
+    )
+}
+
+fun plotNTsamples(srs: List<SRT>, title: String) {
+    val utitle = "nsamples, N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.0f",
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> srt.nsamples }
+    )
+}
+
+fun plotNTpct(srs: List<SRT>, title: String) {
+    val utitle = "pct samples, N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f",
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> srt.pctSamples }
+    )
+}
 
             plotSRS(calculations, "successPct", false, colf = "%6.3f", rowf = "%6.0f", ff = "%6.3f", colTitle = "theta",
                 colFld = { srt: SRT -> srt.theta },
@@ -94,62 +196,27 @@ class CreateCvrComparison {
                 fld = { srt: SRT -> srt.successPct }
             )
 
-            plotSRS(calculations, "nsamples", true, colf = "%6.3f", rowf = "%6.0f", colTitle = "theta",
+            plotSRS(calculations, "plotSRS", true, colf = "%6.3f", rowf = "%6.0f", colTitle = "theta",
                 colFld = { srt: SRT -> srt.theta },
                 rowFld = { srt: SRT -> srt.N.toDouble() },
                 fld = { srt: SRT -> srt.nsamples.toDouble() }
             )
+*/
+            plotNTsamples(calculations, "plotNTsamples", colTitle = "cvrMean")
 
+/*
             plotSRS(calculations, "pct nsamples", false, colf = "%6.3f", rowf = "%6.0f", colTitle = "theta",
                 colFld = { srt: SRT -> srt.theta },
                 rowFld = { srt: SRT -> srt.N.toDouble() },
                 fld = { srt: SRT -> srt.pctSamples }
             )
-             */
+
+ */
+            plotNTpct(calculations, "plotNTpct", colTitle = "cvrMean")
         }
 
         println("samplePct ratios across cvrMeanDiff: ntrials=$ntrials, d = $d, cvrMeanDiff=$cvrMeanDiff, theta(col) vs N(row)")
         plotRatio(results)
-
-        /*
-        // last one is the minimum
-        val nsamplesMin: List<SRT> = results[eta0Factors.last()]!!
-        val nsamplesMinMap = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> fld
-        nsamplesMin.forEach {
-            val dmap = nsamplesMinMap.getOrPut(it.N) { mutableMapOf() }
-            dmap[it.theta] = it.pctSamples
-        }
-
-        val thetas = findValuesFromSRT(nsamplesMin) { it.theta }
-        val ns = findValuesFromSRT(nsamplesMin) { it.N.toDouble() }
-        val rowf = "%6.0f"
-        val ff = "%6.3f"
-        val sf = "%6s"
-
-        results.forEach { (eta0Factor, srs) ->
-            println("ratio nsamples/nsamples@2.0, ntrials=$ntrials, eta0Factor=$eta0Factor, d = $d, cvrMeanDiff=$cvrMeanDiff, theta(col) vs N(row)")
-            println()
-            colHeader(srs, "cvrMean", colf = "%6.3f") { it.reportedMean }
-
-            val ratioMap = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> fld
-            srs.forEach {
-                val minValue = nsamplesMinMap[it.N]!![it.theta]!!
-                val dmap = ratioMap.getOrPut(it.N) { mutableMapOf() }
-                dmap[it.theta] = it.pctSamples / minValue
-            }
-
-            ratioMap.forEach { dkey, dmap ->
-                print("${sf.format(dkey)}, ")
-                dmap.toSortedMap().forEach { nkey, fld ->
-                    print("${ff.format(fld)}, ")
-                }
-                println()
-            }
-            println()
-        }
-
-         */
-
     }
 
     @Test
@@ -206,7 +273,7 @@ class CreateCvrComparison {
         plotSRS(calculations, titleFail, true, colf = "%6.3f", rowf = "%6.2f",
             colFld = { srt: SRT -> cvrMean + srt.reportedMeanDiff },
             rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> 100.0 * srt.failPct }
+            fld = { srt: SRT -> srt.failPct }
         )
 
         val title = " nsamples, ballot comparison, cvrMean=$cvrMean, d = $d, error-free\n theta (col) vs eta0Factor (row)"
@@ -367,7 +434,7 @@ class CreateCvrComparison {
         plotSRS(calculations, " successPct", false, colf = "%6.3f", rowf = "%6.2f", ff = "%6.1f",
             colFld = { srt: SRT -> srt.reportedMean + srt.reportedMeanDiff },
             rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> 100.0 * srt.nsuccess.toDouble() / srt.ntrials }
+            fld = { srt: SRT -> srt.successPct }
         )
 
         plotSRS(calculations, " nsamples", true, colf = "%6.3f", rowf = "%6.2f",

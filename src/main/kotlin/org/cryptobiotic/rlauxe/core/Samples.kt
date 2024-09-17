@@ -126,6 +126,12 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
     }
 
     override fun sample(): Double {
+        if (idx >= cvrs.size) {
+            println("wtf")
+        }
+        if (permutedIndex[idx] >= cvrs.size) {
+            println("wtf")
+        }
         val curr = cvrs[permutedIndex[idx++]]
         return ass.assort(curr)
     }
@@ -244,6 +250,7 @@ class Welford(
     }
 }
 
+// generate Bernoulli with probability p
 class Bernoulli(p: Double) {
     val log_q = ln(1.0 - p)
     val n = 1.0

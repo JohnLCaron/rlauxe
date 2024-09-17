@@ -9,11 +9,11 @@ import kotlin.math.sqrt
 
 // TODO Histogram of successes
 data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
-               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double) {
+               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Histogram?) {
 
     val theta = reportedMean + reportedMeanDiff // the true mean
-    val successPct = nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
-    val failPct = (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
+    val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
+    val failPct = 100.0 * (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val nsamples = totalSamplesNeeded.toDouble() / (if (nsuccess == 0) 1 else nsuccess) // avg number of samples for successes
     val pctSamples = 100.0 * nsamples / (if (N == 0) 1 else N)
 }
@@ -27,8 +27,8 @@ data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Doubl
 //                                   val percentHist: Histogram? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
 //                                   val status: Map<TestH0Status,
 fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
-    val (sampleCountAvg, sampleCountVar, _) = rr.nsamplesNeeded.result()
-    return SRT(N, reportedMean, reportedMeanDiff, d, rr.eta0, eta0Factor, rr.nsuccess, rr.ntrials, rr.totalSamplesNeeded, sqrt(sampleCountVar))
+    return SRT(N, reportedMean, reportedMeanDiff, d, rr.eta0, eta0Factor, rr.nsuccess, rr.ntrials, rr.totalSamplesNeeded,
+        sqrt(rr.variance), rr.percentHist)
 }
 
 // simple serialization to csv files
@@ -52,6 +52,7 @@ class SRTwriter(filename: String) {
             "${srt.N}, ${srt.reportedMean}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ${srt.eta0Factor}, " +
                 "${srt.nsuccess}, ${srt.ntrials}, ${srt.totalSamplesNeeded}, ${srt.stddev} "
         )
+        // append(" ${srt.hist}")
         // append(" ${srt.hist}")
         appendLine()
     }
@@ -96,34 +97,11 @@ class SRTreader(filename: String) {
         val ntrials = ttokens[idx++].toInt()
         val nsamples = ttokens[idx++].toInt()
         val stddev = ttokens[idx++].toDouble()
-        return SRT(N, reportedMean, reportedMeanDiff, d, eta0, eta0Factor, nsuccess, ntrials, nsamples, stddev)
+        return SRT(N, reportedMean, reportedMeanDiff, d, eta0, eta0Factor, nsuccess, ntrials, nsamples, stddev, null)
     }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-fun plotSRTfail(srs: List<SRT>, title: String = "") {
-    val utitle = "number votes sampled: " + title
-    plotSRS(srs, utitle, false, thetas, ns) { it.failPct }
-}
-
-fun plotSRTsamples(srs: List<SRT>, title: String = "") {
-    val utitle = "number votes sampled: " + title
-    plotSRS(srs, utitle, true, thetas, ns) { it.nsamples }
-}
-
-fun plotSRTpct(srs: List<SRT>, title: String = "", isInt:Boolean=true) {
-    val utitle = "pct votes sampled: " + title
-    plotSRS(srs, utitle, isInt, thetas, ns, utitle, isInt) { 100.0 * it.nsamples / it.N }
-}
-
-fun plotSRTstdev(srs: List<SRT>, title: String) {
-    val utitle = "stddev votes sampled: " + title
-    plotSRS(srs, utitle, true, thetas, ns, utitle, true) { it.stddev }
-}
-
- */
 
 //// plots for crtMean by meanDiff
 fun plotMeanFailPct(srs: List<SRT>, title: String) {
@@ -131,7 +109,7 @@ fun plotMeanFailPct(srs: List<SRT>, title: String) {
     plotSRS(srs, utitle, true, ff = "%6.3f", rowf = "%6.3f",
         colFld = { srt: SRT -> srt.reportedMeanDiff },
         rowFld = { srt: SRT -> srt.reportedMean },
-        fld = { srt: SRT -> 100.0 * srt.failPct }
+        fld = { srt: SRT -> srt.failPct }
     )
 }
 
@@ -149,36 +127,45 @@ fun plotMeanPct(srs: List<SRT>, title: String) {
     plotSRS(srs, utitle, false, ff = "%6.1f", rowf = "%6.3f",
         colFld = { srt: SRT -> srt.reportedMeanDiff },
         rowFld = { srt: SRT -> srt.reportedMean },
-        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+        fld = { srt: SRT -> srt.pctSamples}
     )
 }
 
 
 //// plots for N vs theta
-fun plotNTfailPct(srs: List<SRT>, title: String) {
-    val utitle = "pct failed N (row) vs cvrMean (col): " + title
-    plotSRS(srs, utitle, true, ff = "%6.3f",
+fun plotNTsuccessPct(srs: List<SRT>, title: String, colTitle: String= "") {
+    val utitle = "successPct N (row) vs cvrMean (col): " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
         rowFld = { srt: SRT -> srt.N.toDouble() },
-        fld = { srt: SRT -> 100.0 * srt.failPct }
+        fld = { srt: SRT -> srt.successPct }
     )
 }
 
-fun plotNTsamples(srs: List<SRT>, title: String) {
+fun plotNTsamples(srs: List<SRT>, title: String, colTitle: String = "") {
     val utitle = "nsamples, N (row) vs cvrMean (col): " + title
-    plotSRS(srs, utitle, false, ff = "%6.0f",
+    plotSRS(srs, utitle, false, ff = "%6.0f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
         rowFld = { srt: SRT -> srt.N.toDouble() },
         fld = { srt: SRT -> srt.nsamples }
     )
 }
 
-fun plotNTpct(srs: List<SRT>, title: String) {
+fun plotNTpct(srs: List<SRT>, title: String, colTitle: String= "") {
     val utitle = "pct samples, N (row) vs cvrMean (col): " + title
-    plotSRS(srs, utitle, false, ff = "%6.1f",
+    plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
         rowFld = { srt: SRT -> srt.N.toDouble() },
-        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+        fld = { srt: SRT -> srt.pctSamples }
+    )
+}
+
+fun plotNTsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
+    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
+        colFld = { srt: SRT -> srt.reportedMean },
+        rowFld = { srt: SRT -> srt.N.toDouble() },
+        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct)?.toDouble() ?: -1.0  }
     )
 }
 
@@ -188,7 +175,7 @@ fun plotDDfailPct(srs: List<SRT>, title: String) {
     plotSRS(srs, utitle, true,
         colFld = { srt: SRT -> srt.theta },
         rowFld = { srt: SRT -> srt.d.toDouble() },
-        fld = { srt: SRT -> 100.0 * srt.failPct }
+        fld = { srt: SRT -> srt.failPct }
     )
 }
 
@@ -207,6 +194,15 @@ fun plotDDpct(srs: List<SRT>, title: String) {
         colFld = { srt: SRT -> srt.theta },
         rowFld = { srt: SRT -> srt.d.toDouble() },
         fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+    )
+}
+
+fun plotDDsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
+    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
+    plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
+        colFld = { srt: SRT -> srt.theta },
+        rowFld = { srt: SRT -> srt.d.toDouble() },
+        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct)?.toDouble() ?: -1.0  }
     )
 }
 

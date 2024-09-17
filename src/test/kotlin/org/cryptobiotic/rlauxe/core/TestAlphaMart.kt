@@ -3,12 +3,14 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.SampleFromList
 import org.cryptobiotic.rlauxe.integration.eps
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-// Compare AlphaMart with output from SHANGRLA 6949
+// Compare AlphaMart with output from SHANGRLA
 class TestAlphaMart {
 
     //     def test_alpha_mart(self):
@@ -222,12 +224,12 @@ class TestAlphaMart {
     }
 
     fun testAlphaMartWithTermination(eta0: Double, x: List<Double>): TestH0Result {
-        println("testAlphaMartWithTermination $eta0 x=$x")
+        // println("testAlphaMartWithTermination $eta0 x=$x")
         val u = 1.0
         val d = 10
         val f = 0.0
         val minsd = 1.0e-6
-        val t= 0.5
+        val t = 0.5
         val c = (eta0 - t) / 2
         val N = x.size
 
@@ -271,10 +273,7 @@ class TestAlphaMart {
         val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
         val eta0 = x.average()
 
-        val martValues = testAlphaMartBatch(
-            eta0,
-            x
-        )
+        val martValues = testAlphaMartBatch(eta0, x)
         println("testAlphaMartWithShrinkTruncProblem = ${martValues}")
     }
 }

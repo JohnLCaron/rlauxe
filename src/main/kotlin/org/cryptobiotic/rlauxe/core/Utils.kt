@@ -81,7 +81,7 @@ fun numpy_repeat(a: DoubleArray, nrepeat: Int) : DoubleArray {
 }
 
 // Returns the indices of the maximum values along an axis.
-// TODO what happens if theres a tie? Should return a list
+// TODO what happens if theres a tie? Should return a list?
 fun numpy_argmax(a: List<Double>) : Int {
     var max = Double.MIN_VALUE
     var maxIdx = -1

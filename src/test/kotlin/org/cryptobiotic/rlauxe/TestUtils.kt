@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import kotlin.math.abs
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -49,3 +51,6 @@ class SampleFromList(val list: DoubleArray) {
     var index = 0
     fun sample() = list[index++]
 }
+
+fun makeStandardContest() = AuditContest("standard", 0, listOf(0,1), listOf(0))
+fun makeStandardAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)

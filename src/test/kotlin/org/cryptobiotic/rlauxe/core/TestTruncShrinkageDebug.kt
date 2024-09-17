@@ -6,12 +6,11 @@ import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.test.Test
 
-
 // Direct compare TruncShrinkage with output from SHANGRLA TestNonnegMean output
-class PlotShrinkTrunc {
+class TestTruncShrinkageDebug {
 
     @Test
-    fun testTruncShrinkageResult() {
+    fun testTruncShrinkageDebug() {
         val x = listOf(0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0)
         val eta0 = x.average()
         println("x= $x")

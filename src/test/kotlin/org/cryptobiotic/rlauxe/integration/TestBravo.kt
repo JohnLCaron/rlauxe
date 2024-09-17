@@ -106,7 +106,7 @@ class TestBravo  {
                     "voteDiff=${"%4d".format(voteDiff.toInt())} " +
                     "sampleCount=${df.format(result.avgSamplesNeeded())} " +
                     // "sampleMean=${"%5.4f".format(result.sampleMean)} " +
-                    "nrepeat=${result.percentHist!!.cumulPct(nrepeat)}" +
+                    "nrepeat=${result.percentHist!!.cumulPct()}" +
                     // "fail=${(result.failPct * nrepeat).toInt()} " +
                     "status=${result.status} "
             )

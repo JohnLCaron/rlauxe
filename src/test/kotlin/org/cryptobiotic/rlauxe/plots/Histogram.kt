@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.plots
 
 data class Histogram(val incr: Int) {
     val hist = mutableMapOf<Int, Int>() // upper bound,count
+    var ntrials = 0
 
     // bin[key] goes from [(key-1)*incr, key*incr - 1]
     fun add(q: Int) {
@@ -31,28 +32,30 @@ data class Histogram(val incr: Int) {
         }
     }
 
-    fun cumulPct(ntrials: Int) = buildString {
+    fun cumulPct() = buildString {
+        val untrials = if (ntrials == 0) 1 else ntrials
         val smhist = hist.toSortedMap().toMutableMap()
         var cumul = 0
         smhist.forEach {
             cumul += it.value
             val binNo = it.key
             val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
-            append("$binDesc:${((100.0 * cumul)/ntrials).toInt()}; ")
+            append("$binDesc:${"%5.2f".format(((100.0 * cumul)/untrials))}; ")
         }
     }
 
     // bin[key] goes from [(key-1)*incr, key*incr - 1]
     // max must be n * incr
-    fun cumul(max: Int) : Int {
+    fun cumul(max: Int) : Double {
+        val untrials = if (ntrials == 0) 1 else ntrials
         val smhist = hist.toSortedMap()
         var cumul = 0
         for (entry:Map.Entry<Int,Int> in smhist) {
             if (max < entry.key*incr) {
-                return cumul
+                return 100.0 * cumul / untrials
             }
             cumul += entry.value
         }
-        return cumul
+        return 100.0 * cumul / untrials
     }
 }

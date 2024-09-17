@@ -33,7 +33,7 @@ val ff = "%5.2f"
 
 // create the raw data for showing plots of polling with theta != eta0
 // these are 4 dimensional: N, theta, d, diffMean
-class CreateDiffMeans {
+class CreatePollingDiffMeans {
 
     val showCalculation = false
     val showContests = false
@@ -92,7 +92,7 @@ class CreateDiffMeans {
     }
 
     @Test
-    fun createDiffMeansConcurrent() {
+    fun createPollingDiffMeansConcurrent() {
         val thetas = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         // val theta = listOf(.505, .55, .7)
         // val thetas = theta.map{ theta2margin(it) }

@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.collections.getOrPut
 
 // read raw data and make csv plots of polling with theta != eta0
-class PlotDiffMeans {
+class PlotPollingDiffMeans {
     val showAllPlots = true
 
     // These are N vs theta plots for various values of d and MeanDiff

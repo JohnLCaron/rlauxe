@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardAssorter
+import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.math.max
 import kotlin.test.Test
 
@@ -75,11 +76,11 @@ class CompareShrinkTrunkWithFixed {
         }
 
         calcMean(" pctSamplesNeeded", fixResults, truncResults) { it.pctSamplesNeeded() }
-        calcMean(" success10percent", fixResults, truncResults) { it.percentHist!!.cumul(10).toDouble() }
-        calcMean(" success20percent", fixResults, truncResults) { it.percentHist!!.cumul(20).toDouble() }
-        calcMean(" success30percent", fixResults, truncResults) { it.percentHist!!.cumul(30).toDouble() }
-        calcMean(" success40percent", fixResults, truncResults) { it.percentHist!!.cumul(40).toDouble() }
-        calcMean(" success50percent", fixResults, truncResults) { it.percentHist!!.cumul(50).toDouble() }
+        calcMean(" success10percent", fixResults, truncResults) { it.percentHist!!.cumul(10) }
+        calcMean(" success20percent", fixResults, truncResults) { it.percentHist!!.cumul(20) }
+        calcMean(" success30percent", fixResults, truncResults) { it.percentHist!!.cumul(30) }
+        calcMean(" success40percent", fixResults, truncResults) { it.percentHist!!.cumul(40) }
+        calcMean(" success50percent", fixResults, truncResults) { it.percentHist!!.cumul(50) }
     }
 
     fun calcMean(title: String, fixResults : List<AlphaMartRepeatedResult>, truncResults : List<AlphaMartRepeatedResult>,

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.plots
 
+import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -36,39 +37,61 @@ class TestHistogram {
     @Test
     fun testCumul() {
         val hist = Histogram(10)
-
-        repeat(100) { hist.add(it+1) }
+        val ntrials = 100
+        repeat(ntrials) { hist.add(it+1) }
 
         println("hist = ${hist}")
         println("hist binned = ${hist.toStringBinned()}")
-        println("hist cumulPct = ${hist.cumulPct(100)}")
+        println("hist cumulPct = ${hist.cumulPct()}")
         println("cumul 10 = ${hist.cumul(10)}")
         println("cumul 20 = ${hist.cumul(20)}")
         println("cumul 30= ${hist.cumul(30)}")
 
-        assertEquals(9, hist.cumul(10))
-        assertEquals(19, hist.cumul(20))
-        assertEquals(29, hist.cumul(30))
-        assertEquals(100, hist.cumul(110))
+        assertEquals(9.0, hist.cumul(10))
+        assertEquals(19.0, hist.cumul(20))
+        assertEquals(29.0, hist.cumul(30))
+        assertEquals(99.0, hist.cumul(100))
+        assertEquals(100.0, hist.cumul(110))
+    }
+
+    @Test
+    fun testCumulNot100() {
+        val hist = Histogram(10)
+        val ntrials = 111
+        repeat(ntrials) { hist.add(it+1) }
+
+        println("hist = ${hist}")
+        println("hist binned = ${hist.toStringBinned()}")
+        println("hist cumulPct = ${hist.cumulPct()}")
+        println("cumul 10 = ${hist.cumul(10)}")
+        println("cumul 20 = ${hist.cumul(20)}")
+        println("cumul 30= ${hist.cumul(30)}")
+
+        assertEquals(9.0/1.11, hist.cumul(10), doublePrecision)
+        assertEquals(19.0/1.11, hist.cumul(20), doublePrecision)
+        assertEquals(29.0/1.11, hist.cumul(30), doublePrecision)
+        assertEquals(99.0/1.11, hist.cumul(100), doublePrecision)
+        assertEquals(100.0, hist.cumul(120), doublePrecision)
     }
 
     @Test
     fun testHistogramSparse() {
         val hist = Histogram(10)
-
-        repeat(87) { hist.add(77) }
+        val ntrials = 87
+        repeat(ntrials) { hist.add(77) }
+        hist.ntrials = 100
 
         println("hist = ${hist}")
         println("hist binned = ${hist.toStringBinned()}")
-        println("hist cumulPct = ${hist.cumulPct(1)}")
+        println("hist cumulPct = ${hist.cumulPct()}")
 
         repeat(8) {
-            println("hist ${it*10}= ${hist.cumul(it*10)}")
-            assertEquals(hist.cumul(it*10), 0)
+            // println("hist ${it*10}= ${hist.cumul(it*10, ntrials)}")
+            assertEquals(0.0, hist.cumul(it*10))
         }
-        assertEquals(hist.cumul(70), 0)
-        assertEquals(hist.cumul(80), 87)
-        assertEquals(hist.cumul(90), 87)
-        assertEquals(hist.cumul(1200), 87)
+        assertEquals(0.0, hist.cumul(70))
+        assertEquals(87.0, hist.cumul(80))
+        assertEquals(87.0, hist.cumul(90))
+        assertEquals(87.0, hist.cumul(1200))
     }
 }

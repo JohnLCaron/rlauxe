@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.collections.first
 import kotlin.math.max
 import kotlin.test.Test

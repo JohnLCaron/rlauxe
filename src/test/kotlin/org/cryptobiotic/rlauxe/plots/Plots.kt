@@ -165,11 +165,11 @@ fun plotNTsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: St
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
         rowFld = { srt: SRT -> srt.N.toDouble() },
-        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct)?.toDouble() ?: -1.0  }
+        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct) ?: -1.0  }
     )
 }
 
-// plot for d vs meanDiff
+//// plots for d vs meanDiff
 fun plotDDfailPct(srs: List<SRT>, title: String) {
     val utitle = "pct failed, d (row) vs theta (col): " + title
     plotSRS(srs, utitle, true,
@@ -202,7 +202,25 @@ fun plotDDsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: St
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.theta },
         rowFld = { srt: SRT -> srt.d.toDouble() },
-        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct)?.toDouble() ?: -1.0  }
+        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct) ?: -1.0 }
+    )
+}
+
+//// plots for theta vs eta0Factor
+fun plotTFsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
+    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
+    plotSRS(srs, utitle, false, rowf = "%6.2f", ff = "%6.1f", colTitle = colTitle,
+        colFld = { srt: SRT -> srt.theta },
+        rowFld = { srt: SRT -> srt.eta0Factor },
+        fld = { srt: SRT ->
+            if (srt.theta <= .5) {
+                if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
+                    -1.0 * srt.percentHist.cumul(sampleMaxPct)
+                }
+            } else {
+                srt.percentHist?.cumul(sampleMaxPct) ?: -1.0
+            }
+        }
     )
 }
 

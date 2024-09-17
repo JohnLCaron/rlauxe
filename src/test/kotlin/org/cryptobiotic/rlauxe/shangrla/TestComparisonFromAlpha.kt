@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.plots.makeSRT

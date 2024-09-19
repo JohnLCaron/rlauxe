@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.integration
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.EstimFn
 import org.cryptobiotic.rlauxe.core.SampleFn
+import org.cryptobiotic.rlauxe.core.SampleFromArrayWithReplacement
 import org.cryptobiotic.rlauxe.core.Samples
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.plots.Histogram
@@ -175,32 +176,9 @@ class FixedMean(val eta0: Double): EstimFn {
     }
 }
 
-
 class GenerateAssorterValue(val ratio: Double) {
     fun sample() : Double {
         val r = Random.nextDouble(1.0)
         return if (r < ratio) 1.0 else 0.0
     }
-}
-
-// generate a sample thats approximately mean = theta
-fun generateSample(N: Int, ratio: Double) : DoubleArray {
-    return DoubleArray(N) {
-        val r = Random.nextDouble(1.0)
-        if (r < ratio) 1.0 else 0.0
-    }
-}
-
-class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
-    val samples = generateSample(N, ratio)
-    override fun sample(): Double {
-        val idx = Random.nextInt(N) // withoutReplacement
-        return samples[idx]
-    }
-    override fun reset() {
-       // noop
-    }
-    override fun truePopulationMean() = samples.average()
-    override fun truePopulationCount() = samples.sum()
-    override fun N() = N
 }

@@ -268,3 +268,32 @@ class Bernoulli(p: Double) {
         }
     }
 }
+
+// generate a sample thats approximately mean = theta
+fun generateUniformSample(N: Int) : DoubleArray {
+    return DoubleArray(N) {
+        Random.nextDouble(1.0)
+    }
+}
+
+// generate a sample thats approximately mean = theta
+fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
+    return DoubleArray(N) {
+        val r = Random.nextDouble(1.0)
+        if (r < ratio) 1.0 else 0.0
+    }
+}
+
+class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
+    val samples = generateSampleWithMean(N, ratio)
+    override fun sample(): Double {
+        val idx = Random.nextInt(N) // withoutReplacement
+        return samples[idx]
+    }
+    override fun reset() {
+        // noop
+    }
+    override fun truePopulationMean() = samples.average()
+    override fun truePopulationCount() = samples.sum()
+    override fun N() = N
+}

@@ -71,6 +71,6 @@ class SprtMart(val N: Int, val eta: Double, val mu: Double = .5, val upper: Doub
          */
 
         // data class TestH0Result(val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>)
-        return TestH0Result(status, firstIdx + 1, 0.0, emptyList()) // one based index
+        return TestH0Result(status, firstIdx + 1, 0.0, emptyList(), emptyList(), emptyList()) // one based index
     }
 }

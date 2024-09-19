@@ -5,6 +5,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/*
+Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
+    0   = flipped vote from loser to winner
+    1/2 = flipped vote from loser to other, or other to winner
+    1 = no error
+    3/2 = flipped vote from other to loser, or winner to other
+    2   = flipped vote from winner to loser
+
+    noerror = 1.0 / (2.0 - margin) == 1.0 / (3 - 2 * awinnerAvg), which ranges from .5 to 1.0.
+    If you normalize the assorter valeus by noassort:
+    bassort in [0, 1/4, 1/2, 3/4, 1]
+ */
+
 // See SHANGRLA 3.2
 class TestComparisonAssorter {
 
@@ -65,6 +78,8 @@ class TestComparisonAssorter {
         assertEquals(noerror, bassorter.bassort(otherCvr, otherCvr))           // no error
         // so bassort in [0, 2 / (2 - margin)] = [0, 2 / (3 - 2 * Aavg)] in {0, .5, 1, 1.5, 2} * noerror
         // so bassort in [0, 2*noerror], where noerror > .5. since margin > 0, since awinnerAvg > .5.
+        val assortValues = listOf(0.0, .5, 1.0, 1.5, 2.0).map { it * noerror }
+        println(" bassort in $assortValues where margin = $margin noerror=$noerror")
     }
 
     @Test

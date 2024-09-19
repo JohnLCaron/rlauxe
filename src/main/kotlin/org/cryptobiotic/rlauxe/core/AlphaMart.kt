@@ -23,7 +23,10 @@ data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,   // number of samples needed to decide (or maximum allowed)
     val sampleMean: Double, // average of the assort values in the sample
-    val pvalues: List<Double>) { // set of pvalues (only need for testing)
+    val pvalues: List<Double>,  // set of pvalues (only need for testing)
+    val etajs: List<Double>,  // ni
+    val mujs: List<Double>,  // mi
+) {
 
     override fun toString() = buildString {
         append("TestH0Result status=$status")
@@ -59,7 +62,7 @@ class AlphaMart(
 
         // keep series for debugging, remove for production
         val xs = mutableListOf<Double>()
-        val ms = mutableListOf<Double>()
+        val mjs = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
         val etajs = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
@@ -76,7 +79,7 @@ class AlphaMart(
             etajs.add(etaj)
 
             mj = populationMeanIfH0(N, withoutReplacement, prevSamples)
-            ms.add(mj)
+            mjs.add(mj)
 
             // terms[m > u] = 0       # true mean is certainly less than hypothesized
             // terms[m < 0] = np.inf  # true mean certainly greater than hypothesized
@@ -143,6 +146,7 @@ class AlphaMart(
         }
 
         if (showDetails) {
+            println("mujs = ${mjs}")
             println("etaj = ${etajs}")
             println("tjs = ${tjs}")
             println("Tjs = ${testStatistics}")
@@ -153,7 +157,7 @@ class AlphaMart(
                 TestH0Status.LimitReached
             }
             (mj < 0.0) -> {
-                val rm = ms.reversed()
+                val rmj = mjs.reversed()
                 val retajs = etajs.reversed()
                 val rtjs = tjs.reversed()
                 val rTjs = testStatistics.reversed()
@@ -164,7 +168,7 @@ class AlphaMart(
             }
             else -> {
                 val rx = xs.reversed()
-                val rm = ms.reversed()
+                val rmj = mjs.reversed()
                 val retajs = etajs.reversed()
                 val rtjs = tjs.reversed()
                 val rTjs = testStatistics.reversed()
@@ -173,7 +177,7 @@ class AlphaMart(
         }
 
         val sampleMean = sampleSum / sampleNumber
-        return TestH0Result(status, sampleNumber, sampleMean, pvalues)
+        return TestH0Result(status, sampleNumber, sampleMean, pvalues, etajs, mjs)
     }
 }
 
@@ -244,7 +248,7 @@ class TruncShrinkage(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
-    val minsd: Double,
+    val minsd: Double, // only used if f > 0
     val eta0: Double,
     val c: Double,
     val d: Int,

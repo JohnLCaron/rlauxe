@@ -1,8 +1,11 @@
 package org.cryptobiotic.rlauxe.shangrla
 
+import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.generateUniformSample
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doubleIsClose
@@ -16,22 +19,21 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // from https://github.com/pbstark/alpha/blob/main/Code/alpha.ipynb
-// all using exact (no errors in crvs)
 class TestComparisonFromAlpha {
 
     // see # set up simulations
-    fun setupSimulations() {
-        // # set up simulations
+    @Test
+    fun testSetupSimulations() {
         //# first set: uniform mixed with a pointmass at 1
         //
         //reps = int(10**4)
         //alpha = 0.05
         //mixtures = [.99, .9, .75, .5, .25, .1, .01]  # mass at 1
         //zero_mass = [0, 0.001] # mass at 0
-        val reps = 10000
+        val reps = 100
         val alpha = .05
         val mixtures = listOf(.99, .9, .75, .5, .25, .1, .01) // mass at 1
-        val zero_mass = listOf(0, 0.001) // mass at 0
+        val zero_mass = listOf(0.0, 0.001) // mass at 0
 
         //
         //al = {}  # alpha martingale
@@ -40,13 +42,15 @@ class TestComparisonFromAlpha {
         //apk = {} # a priori Kelly
         //sqk = {} # square Kelly
         //thetas = {}
+        val al = mutableListOf<SRT>()
+
         //
         //methods = [al, kw, kk, apk, sqk, thetas]
         //
         //g_kol = [0.01, 0.1, 0.2]  # for the Kaplan-Kolmogorov method
         //g_wald = 1 - np.array(g_kol) # for Kaplan-Wald method
-        val g_kol = listOf(0.01, 0.1, 0.2) // for the Kaplan-Kolmogorov method
-        val g_wald = g_kol.map { 1.0 - it } // or Kaplan-Wald method
+        val g_kol = listOf(0.01, 0.1, 0.2) // for Kaplan-Kolmogorov method
+        val g_wald = g_kol.map { 1.0 - it } // for Kaplan-Wald method
 
         //
         //D = 10 # for APK
@@ -60,7 +64,7 @@ class TestComparisonFromAlpha {
         val dl = listOf(10, 100) // for alpha
         val c_base = 0.5 // for alpha. larger c since there is no particular expectation about error rates
         val etal = listOf(.99, .9, .75, .55)
-        val Nl = listOf(0, 100)
+        val Nl = listOf(10000)
 
         //
         //
@@ -71,48 +75,96 @@ class TestComparisonFromAlpha {
         //            meth[m][N] = {}
         //
         //zm = zero_mass[1]
+        val zm = zero_mass[1]
+        val zm1 = 1.0 - zm
+        mixtures.forEach { m ->
+            Nl.forEach { N ->
+                etal.forEach { eta ->
+                }
 
-        //for m in mixtures:
-        //    print(f'{m=}')
-        //    for N in Nl:
-        //        print(f'\t{N=}')
-        //        sqk[m][N]=0
-        //        thetas[m][N]=0
-        //        for eta in etal:
-        //            apk[m][N][eta] = 0
-        //            al[m][N][eta] = {}
-        //            for d in dl:
-        //                al[m][N][eta][d] = 0
-        //        for g in g_kol:
-        //            kk[m][N][g] = 0
-        //        for g in g_wald:
-        //            kw[m][N][g] = 0
-        //        t = 0
-        //        while t <= 0.5:
-        //            x = sp.stats.uniform.rvs(size=N)
-        //            y = sp.stats.uniform.rvs(size=N)
-        //            x[y<=m] = 1
-        //            x[y>=(1-zm)] = 0
-        //            t = np.mean(x)
-        //        thetas[m][N] = t
-        //        for i in range(reps):
-        //            np.random.shuffle(x)
-        //            mart = sqKelly_martingale(x, m=1/2, N=N, D=D, beta=beta)
-        //            sqk[m][N] += np.argmax(mart >= 1/alpha)
-        //            for g in g_kol:
-        //                mart = kaplan_kolmogorov(x, N, t=1/2, g=g)
-        //                kk[m][N][g] += np.argmax(mart >= 1/alpha)
-        //            for g in g_wald:
-        //                mart = kaplan_wald(x, N, t=1/2, g=g)
-        //                kw[m][N][g] += np.argmax(mart >= 1/alpha)
-        //            for eta in etal:
-        //                mart = apriori_Kelly_martingale(x, m=0.5, N=N, n_A=int(N*eta), n_B=N-int(N*eta))
-        //                apk[m][N][eta] += np.argmax(mart >= 1/alpha)
-        //                c = c_base*(eta-1/2)
-        //                for d in dl:
-        //                    mart = alpha_mart(x, N, mu=1/2, eta=eta, u=1, \
-        //                                estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
-        //                    al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
+                //for m in mixtures:
+                //    print(f'{m=}')
+                //    for N in Nl:
+                //        print(f'\t{N=}')
+                //        sqk[m][N]=0
+                //        thetas[m][N]=0
+                //        for eta in etal:
+                //            apk[m][N][eta] = 0
+                //            al[m][N][eta] = {}
+                //            for d in dl:
+                //                al[m][N][eta][d] = 0
+                //        for g in g_kol:
+                //            kk[m][N][g] = 0
+                //        for g in g_wald:
+                //            kw[m][N][g] = 0
+                //        t = 0
+                //        while t <= 0.5:
+                //            x = sp.stats.uniform.rvs(size=N)
+                //            y = sp.stats.uniform.rvs(size=N)
+                //            x[y<=m] = 1
+                //            x[y>=(1-zm)] = 0
+                //            t = np.mean(x)
+                //        thetas[m][N] = t
+                var t = 0.0
+                var xp: List<Double> = listOf(0.0) // random x with mean > .5
+                while (t < 0.5) {
+                    val x = generateUniformSample(N) // random_state.uniform(0.0, 1.0, size) : prob uniform dist on 0, 1
+                    val y = generateUniformSample(N)
+                    xp = x.mapIndexed { idx, it ->
+                        if (y[idx] < m) 1.0
+                        else if (y[idx] >= zm1) 0.0
+                        else it
+                    }
+                    t = xp.average()
+                }
+                val sampleFn = SampleFromArrayWithoutReplacement(xp.toDoubleArray())
+                val theta = sampleFn.truePopulationMean()
+                println("test N=$N m=$m theta=$theta")
+
+                //        for i in range(reps):
+                //            np.random.shuffle(x)
+                //            mart = sqKelly_martingale(x, m=1/2, N=N, D=D, beta=beta)
+                //            sqk[m][N] += np.argmax(mart >= 1/alpha)
+                //            for g in g_kol:
+                //                mart = kaplan_kolmogorov(x, N, t=1/2, g=g)
+                //                kk[m][N][g] += np.argmax(mart >= 1/alpha)
+                //            for g in g_wald:
+                //                mart = kaplan_wald(x, N, t=1/2, g=g)
+                //                kw[m][N][g] += np.argmax(mart >= 1/alpha)
+                //            for eta in etal:
+                //                mart = apriori_Kelly_martingale(x, m=0.5, N=N, n_A=int(N*eta), n_B=N-int(N*eta))
+                //                apk[m][N][eta] += np.argmax(mart >= 1/alpha)
+                //                c = c_base*(eta-1/2)
+                //                for d in dl:
+                //                    mart = alpha_mart(x, N, mu=1/2, eta=eta, u=1, \
+                //                                estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
+                //                    al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
+
+                val upperBound = 1.0 // TODO
+
+                for (eta in etal) {
+                    val c = c_base*(eta - 0.5) // TODO wtf?
+
+                    for (d in dl) {
+                        val trunc = TruncShrinkage(N = N, upperBound = upperBound, minsd = 0.0, d = d, eta0 = eta, c = c)
+                        val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
+
+                        print("  eta0=$eta d=$d")
+                        val result =  runAlphaMartRepeated(
+                            drawSample = sampleFn,
+                            maxSamples = N,
+                            terminateOnNullReject = true,
+                            ntrials = reps,
+                            showDetail = false,
+                            alphaMart = alpha,
+                            eta0 = eta,
+                        )
+                        println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
+                        al.add(makeSRT(N, theta, 0.0, d, rr = result))
+                    }
+                }
+            }
+        }
 
         /* TODO
         val sqk = mutableMapOf<>()
@@ -175,7 +227,7 @@ class TestComparisonFromAlpha {
         //      'for each combination of $m$ and $N$ is in bold font.}')
     }
 
-    // See ## Simulation of a comparison audit
+    // See ## Simulation of a comparison audit, line starting with "overstatement_assorter ="
     @Test
     fun comparisonSimulation() {
         // overstatement_assorter = lambda overstatement_in_votes, assorter_margin :\

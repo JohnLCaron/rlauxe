@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
+import org.cryptobiotic.rlauxe.makeStandardContest
 import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.collections.first
 import kotlin.math.max
@@ -19,22 +21,20 @@ class TestComparisonSingle {
     fun testComparisonSingle() {
         val N = 10000
         val m = N
-        val theta = .509
-        val cvrs = makeCvrsByExactMean(N, theta)
+        val cvrMean = .509
+        val cvrs = makeCvrsByExactMean(N, cvrMean)
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
-        val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-        val compareAssertion = compareAudit.assertions[contest]!!.first()
+        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
 
-        val sampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+        val sampler = ComparisonNoErrors(cvrs, compareAssorter)
         val assorterMean = sampler.truePopulationMean()
 
         val eta0 = 20.0
         val d = 100
 
-        println("N=$N theta=$theta assorterMean=$assorterMean eta0=$eta0, d=$d u=${compareAssertion.assorter.upperBound}")
+        println("N=$N cvrMean=$cvrMean assorterMean=$assorterMean eta0=$eta0, d=$d u=${compareAssorter.upperBound}")
 
-        val result = doOne(sampler, m, eta0=eta0, d=d, u=compareAssertion.assorter.upperBound)
+        val result = doOne(sampler, m, eta0=eta0, d=d, u=compareAssorter.upperBound)
         println(result)
     }
 

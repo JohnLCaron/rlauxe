@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/17/2024
+last update: 09/18/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -31,8 +31,9 @@ Table of Contents
     * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
   * [Sample size simulations (Ballot Comparison)](#sample-size-simulations-ballot-comparison)
-    * [Notes/thoughts](#notesthoughts)
-  * [Old stuff](#old-stuff)
+  * [Polling vs Comparison](#polling-vs-comparison)
+  * [Unrealistic simulations in the ALPHA paper](#unrealistic-simulations-in-the-alpha-paper)
+  * [Notes/thoughts](#notesthoughts)
 <!-- TOC -->
 
 ## Papers
@@ -813,52 +814,255 @@ The false positives are partially mitigated when taking the sample cutoff into a
 Theres a very dramatic increase in RLA success going from etaFactor = 1 to 1.25, and perhaps 1.5 is a good choice dor
 these values of N, d, cvrMean, and cvrMeanDiff,
 
+## Polling vs Comparison
 
-### Notes/thoughts
+Here is the RLA success rate for a 20% cutoff for Polling and CVR Comparison when eta0Factor=1.0.
+
+````
+Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.0 cvrMeanDiff=-0.005; theta (col) vs N (row)
+  theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
+  
+% successRLA, for sampleMaxPct=20: polling
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.3,    1.6,    6.7, 
+  5000,    0.3,    0.4,    0.7,    1.1,    9.0,   30.6,   57.6, 
+ 10000,    0.7,    1.0,    1.6,    2.7,   20.8,   55.8,   85.5, 
+ 20000,    1.4,    2.0,    3.1,    5.7,   41.1,   83.2,   98.7, 
+ 50000,    3.0,    4.2,    5.7,   11.5,   76.8,   99.7,  100.0, 
+
+% successRLA, for sampleMaxPct=20: compare
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0, 
+  5000,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0, 
+ 10000,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   66.1, 
+ 20000,    0.0,    0.0,    0.0,    0.0,    0.0,   74.8,  100.0, 
+ 50000,    0.0,    0.0,    0.0,    0.0,   23.7,  100.0,  100.0, 
+
+RLA success difference for sampleMaxPct=20 % cutoff: (compare - polling)
+cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,  -0.01,  -0.02,   0.00,  -0.01,  -0.29,  -1.63,  -6.69, 
+  5000,  -0.31,  -0.40,  -0.72,  -1.08,  -9.04, -30.62, -57.57, 
+ 10000,  -0.72,  -1.01,  -1.59,  -2.70, -20.81, -55.78, -19.40, 
+ 20000,  -1.42,  -1.97,  -3.13,  -5.74, -41.10,  -8.41,   1.35, 
+ 50000,  -2.95,  -4.15,  -5.71, -11.51, -53.10,   0.34,   0.00, 
+````
+CVR compare is quite a bit worse than polling when eta0Factor=1.0.
+
+However, its much better when eta0Factor > 1:
+````
+Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.25 cvrMeanDiff=-0.005; theta (col) vs N (row)
+  theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
+% successRLA, for sampleMaxPct=20: polling
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.3,    1.7,    6.6, 
+  5000,    0.3,    0.4,    0.6,    0.9,    8.8,   29.9,   58.6, 
+ 10000,    0.8,    1.3,    1.5,    2.9,   20.5,   56.3,   85.5, 
+ 20000,    1.5,    2.2,    3.2,    5.6,   39.2,   84.3,   98.7, 
+ 50000,    2.9,    4.0,    5.8,   11.7,   77.1,   99.7,  100.0, 
+
+% successRLA, for sampleMaxPct=20: compare
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0, 
+  5000,    0.0,    0.0,    0.0,    0.0,   50.3,  100.0,  100.0, 
+ 10000,    0.0,    0.0,    0.0,    0.0,   99.8,  100.0,  100.0, 
+ 20000,    0.0,    0.0,    0.0,    7.3,  100.0,  100.0,  100.0, 
+ 50000,    0.0,    0.1,    2.7,   70.1,  100.0,  100.0,  100.0, 
+
+RLA success difference for sampleMaxPct=20 % cutoff: (compare - polling)
+cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,   0.00,  -0.01,   0.00,   0.00,  -0.27,  -1.68,  -6.56, 
+  5000,  -0.26,  -0.39,  -0.64,  -0.88,  41.52,  70.04,  41.36, 
+ 10000,  -0.79,  -1.28,  -1.54,  -2.89,  79.27,  43.68,  14.48, 
+ 20000,  -1.54,  -2.15,  -3.21,   1.74,  60.83,  15.71,   1.28, 
+ 50000,  -2.94,  -3.97,  -3.13,  58.42,  22.95,   0.34,   0.00, 
+
+Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.5 cvrMeanDiff=-0.005; theta (col) vs N (row)
+  theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
+% successRLA, for sampleMaxPct=20: polling
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.3,    1.7,    6.8, 
+  5000,    0.4,    0.5,    0.7,    1.2,    8.9,   29.8,   57.0, 
+ 10000,    0.9,    1.0,    1.5,    2.8,   21.0,   56.6,   84.9, 
+ 20000,    1.6,    2.3,    3.5,    5.8,   40.1,   84.3,   98.5, 
+ 50000,    2.7,    3.8,    5.9,   11.8,   76.8,   99.6,  100.0, 
+
+% successRLA, for sampleMaxPct=20: compare
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.0,   36.3,   80.7, 
+  5000,    0.0,    0.0,    0.5,    5.4,   98.2,  100.0,  100.0, 
+ 10000,    0.1,    1.2,    5.9,   35.5,  100.0,  100.0,  100.0, 
+ 20000,    0.7,    5.7,   22.4,   74.4,  100.0,  100.0,  100.0, 
+ 50000,    2.6,   20.5,   58.1,   98.1,  100.0,  100.0,  100.0, 
+
+RLA success difference for sampleMaxPct=20 % cutoff: (compare - polling)
+cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,   0.00,  -0.01,  -0.01,  -0.02,  -0.27,  34.51,  73.96, 
+  5000,  -0.36,  -0.49,  -0.15,   4.26,  89.35,  70.25,  43.03, 
+ 10000,  -0.77,   0.17,   4.39,  32.75,  79.02,  43.40,  15.13, 
+ 20000,  -0.85,   3.37,  18.91,  68.53,  59.92,  15.70,   1.46, 
+ 50000,  -0.11,  16.63,  52.20,  86.23,  23.16,   0.41,   0.00, 
+
+Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.75 cvrMeanDiff=-0.005; theta (col) vs N (row)
+  theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
+% successRLA, for sampleMaxPct=20: polling
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.3,    1.7,    7.0, 
+  5000,    0.4,    0.4,    0.6,    1.0,    9.2,   30.1,   57.7, 
+ 10000,    1.0,    1.4,    1.5,    2.9,   20.0,   56.3,   84.9, 
+ 20000,    1.6,    2.2,    3.0,    5.7,   40.2,   84.0,   98.5, 
+ 50000,    2.9,    4.2,    5.8,   11.9,   77.0,   99.7,  100.0, 
+
+% successRLA, for sampleMaxPct=20: compare
+       : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,    0.0,    0.0,    0.0,    0.0,    0.0,   72.5,   95.6, 
+  5000,    0.9,    4.1,    8.9,   27.1,   98.8,  100.0,  100.0, 
+ 10000,    3.6,   10.2,   21.8,   54.6,  100.0,  100.0,  100.0, 
+ 20000,    6.0,   19.1,   39.6,   82.0,  100.0,  100.0,  100.0, 
+ 50000,    9.3,   34.9,   67.4,   97.6,  100.0,  100.0,  100.0, 
+
+RLA success difference for sampleMaxPct=20 % cutoff: (compare - polling)
+cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
+  1000,  -0.01,   0.00,  -0.01,   0.00,  -0.29,  70.79,  88.55, 
+  5000,   0.48,   3.77,   8.22,  26.10,  89.56,  69.93,  42.27, 
+ 10000,   2.60,   8.83,  20.31,  51.64,  79.96,  43.75,  15.11, 
+ 20000,   4.36,  16.96,  36.65,  76.25,  59.76,  16.01,   1.54, 
+ 50000,   6.40,  30.68,  61.58,  85.75,  23.05,   0.33,   0.00, 
+````
+
+## Unrealistic simulations in the ALPHA paper
+
+Ive been puzzling over why I'm seeing comparison audits do worse than polling audits, when I had understood the opposite.
+
+I have not found any code in the SHANGRLA, ALPHA or OneAudit repositories that clearly shows an example comparison audit.
+The closest is [this ipython notebook](https://github.com/pbstark/alpha/blob/main/Code/alpha.ipynb).
+
+Under "Simulation of a comparison audit", we've got
+
+````
+N = 10000 # ballot cards containing the contest
+assorter_mean = (9000*0.51*1 + 1000*.5)/N # contest has 51% for winner in 9000 valid votes, and 1000 non-votes
+assorter_margin = 2*assorter_mean - 1
+u = 2/(2-assorter_margin)
+etal = [0.9, 1, u, 2, 2*u]
+..
+mart = alpha_mart(x, N, mu=1/2, eta=eta, u=u,
+estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,u,c=c,d=d))
+````
+The value u is clearly the upperBounds for the alpha_mart function ,and is equal to 1.009081735.
+The values of eta in etal are the initial eta0 guesses for the shrink_trunc function.
+But we've already seen above that values of eta0 > upperBounds will not satisfy the risk limit.
+Further, the range of values being tried here are not realistic. Realistic numbers would be
+in the range of u/2 plus or minus some percent error.
+
+Under "set up simulations" of the same notebook, we see the generation of the values in the ALPHA paper
+tables 7, 8, and 9 for comparison audits. The paper describes this as
+
+````
+To assess the relative performance of these supermartingales for comparison audits, they
+were applied to pseudo-random samples from nonnegative populations that had mass 0.001
+at zero (corresponding to errors that overstate the margin by the maximum possible, e.g.,
+that erroneously interpreted a vote for the loser as a vote for the winner), mass m ∈
+{0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99} at 1, and the remain mass uniformly distributed on [0, 1].
+````
+
+But AFAIU, there's no realistic scenario where a large mass should be clustered at 1. The large mass should be at 1/2, meaning "no error" between the CVR and the MVR. This assumes that he is using normalized assorter values,
+which could be a wrong assumption.
+
+In any case, it's a funny way to simulate the errors.
+````
+Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
+0 = flipped vote from loser to winner
+1/2 = flipped vote from loser to other, or other to winner
+1 = no error
+3/2 = flipped vote from other to loser, or winner to other
+2 = flipped vote from winner to loser
+where
+noerror = 1.0 / (2.0 - margin) == 1.0 / (3 - 2 * awinnerAvg), which ranges from .5 to 1.0.
+
+If you normalize the assort valeus by dividing by noassort, the possible assort values are:
+[0, 1/4, 1/2, 3/4, 1], where
+0 = flipped vote from loser to winner
+1/4 = flipped vote from loser to other, or other to winner
+1/2 = no error
+3/4 = flipped vote from other to loser, or winner to other
+1 = flipped vote from winner to loser
+````
+Seems like you would use historical error rates for each of the 5 possibilities.
+
+The code generates the samples in this way:
+````
+while t <= 0.5:
+x = sp.stats.uniform.rvs(size=N)
+y = sp.stats.uniform.rvs(size=N)
+x[y<=m] = 1
+x[y>=(1-zm)] = 0
+t = np.mean(x)
+thetas[m][N] = t
+````
+and the x array is used as input to alpha_mart like:
+````
+mart = alpha_mart(x, N, mu=1/2, eta=eta, u=1,
+estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
+al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
+````
+We also see u=1 indicating that the upper limit is 1, indicating normalized values.
+If one prints out the various thetas
+
+````
+m=0.9 N=10000 theta=0.9489346794038512
+m=0.75 N=10000 theta=0.8709895512609641
+m=0.5 N=10000 theta=0.744881901269972
+m=0.25 N=10000 theta=0.6216431953908437
+m=0.1 N=10000 theta=0.5526041143301229
+m=0.01 N=10000 theta=0.5069034946014742
+````
+only the bottom 3 are realistic, and there's not enough attention to the interesting cases of
+close elections.
+
+The results for mixtures = [.25, .1, .01] and N=10000 agree reasonably well with the ALPHA table 7, for N=10000:
+
+````
+m=0.25 eta=0.99 d=10 nsamples=62.91
+m=0.25 eta=0.99 d=100 nsamples=77.54
+m=0.25 eta=0.9 d=10 nsamples=60.08
+m=0.25 eta=0.9 d=100 nsamples=52.66
+m=0.25 eta=0.75 d=10 nsamples=63.55
+m=0.25 eta=0.75 d=100 nsamples=49.71
+m=0.25 eta=0.55 d=10 nsamples=84.08
+m=0.25 eta=0.55 d=100 nsamples=102.48
+m=0.1 eta=0.99 d=10 nsamples=378.34
+m=0.1 eta=0.99 d=100 nsamples=629.16
+m=0.1 eta=0.9 d=10 nsamples=352.6
+m=0.1 eta=0.9 d=100 nsamples=426.67
+m=0.1 eta=0.75 d=10 nsamples=343.49
+m=0.1 eta=0.75 d=100 nsamples=268.79
+m=0.1 eta=0.55 d=10 nsamples=396.1
+m=0.1 eta=0.55 d=100 nsamples=372.36
+m=0.01 eta=0.99 d=10 nsamples=7331.32
+m=0.01 eta=0.99 d=100 nsamples=8941.95
+m=0.01 eta=0.9 d=10 nsamples=7076.7
+m=0.01 eta=0.9 d=100 nsamples=8483.26
+m=0.01 eta=0.75 d=10 nsamples=6921.95
+m=0.01 eta=0.75 d=100 nsamples=7357.28
+m=0.01 eta=0.55 d=10 nsamples=6842.7
+m=0.01 eta=0.55 d=100 nsamples=6628.58
+````
+Using high values for eta0 (instead of the obvious value of using eta0 = mean assorter value of the cvrs)
+is explored in the [Sample size simulations (Ballot Comparison)](sample-size-simulations-ballot-comparison) and
+[Polling vs Comparison](polling-vs-comparison) section above, and needs more work.
+
+## Notes/thoughts
 
 The larger values of eta0 do better. It seems that the eta0Factor acts as an accelerant, making each sampled value count
-more towards accepting or rejecting the null hypotheses. 
+more towards accepting or rejecting the null hypotheses. Not clear if thats fair.
 
-TODO: quantify the accelerant value. See AlphaMart, trunk_shrink formula. Weights earlier values more, depending on d. Not clear if thats fair.
+TODO: quantify the accelerant value. See AlphaMart, trunk_shrink formula. Weights earlier values more, depending on d. 
 
 If you can accelerate comparison, can you accelerate polling?
 
 TODO: vary by N, d, cvrMean, and cvrMeanDiff
 
+Sample size is proportional to 1/theta, no N dependence for N > 1000. 
 
-## Old stuff
-
-See TestComparisonFromAlpha.comparisonNvsTheta()
-
-Choose eta0=20, d = 100
-
-See [Plots in the comparison tab](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=216356100#gid=216356100)
-
-Sample size is proportional to 1/theta, no N dependence for N > 1000. This makes RLA feasible down to theta = .501.
-
-
-````
-nsamples, ballot comparison, eta0=20.0, d = 100, error-free
-theta (col) vs N (row)
-    ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-1000,    951,    777,    631,    527,    450,    258,    138,     94,     71,     57,     38,     29,     19,     14,
-5000,   2253,   1294,    904,    695,    564,    290,    147,     98,     73,     59,     39,     29,     19,     14,
-10000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-20000,   2781,   1442,    973,    734,    589,    296,    148,     99,     74,     59,     39,     29,     19,     14,
-50000,   2907,   1475,    988,    742,    595,    298,    149,     99,     74,     59,     39,     29,     19,     14,
-
-pct nsamples, ballot comparison, eta0=20.0, d = 100, error-free
-theta (col) vs N (row)
-    ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-1000,  95.10,  77.70,  63.10,  52.70,  45.00,  25.80,  13.80,   9.40,   7.10,   5.70,   3.80,   2.90,   1.90,   1.40,
-5000,  45.06,  25.88,  18.08,  13.90,  11.28,   5.80,   2.94,   1.96,   1.46,   1.18,   0.78,   0.58,   0.38,   0.28,
-10000,  25.88,  13.90,   9.49,   7.21,   5.81,   2.94,   1.48,   0.98,   0.74,   0.59,   0.39,   0.29,   0.19,   0.14,
-20000,  13.91,   7.21,   4.87,   3.67,   2.95,   1.48,   0.74,   0.50,   0.37,   0.30,   0.20,   0.15,   0.10,   0.07,
-50000,   5.81,   2.95,   1.98,   1.48,   1.19,   0.60,   0.30,   0.20,   0.15,   0.12,   0.08,   0.06,   0.04,   0.03,
-````
-
-* why does setting eta0 high improve this?
-* Need to test this when there are errors in the CRVs.
-* Also, may need to adjust upper for comparison audits.
-* Note bug in ALPHA python code for alpha mart.
+Note bug in ALPHA python code for alpha mart.
 

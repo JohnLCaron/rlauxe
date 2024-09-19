@@ -207,7 +207,7 @@ fun plotDDsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: St
 }
 
 //// plots for theta vs eta0Factor
-fun plotTFsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
+fun plotTFsuccess2(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
     val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
     plotSRS(srs, utitle, false, rowf = "%6.2f", ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.theta },
@@ -219,6 +219,19 @@ fun plotTFsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: St
                 }
             } else {
                 srt.percentHist?.cumul(sampleMaxPct) ?: -1.0
+            }
+        }
+    )
+}
+
+fun plotTFsuccess(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
+    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
+    plotSRS(srs, utitle, false, rowf = "%6.2f", ff = "%6.1f", colTitle = colTitle,
+        colFld = { srt: SRT -> srt.theta },
+        rowFld = { srt: SRT -> srt.eta0Factor },
+        fld = { srt: SRT ->
+            if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
+                srt.percentHist.cumul(sampleMaxPct)
             }
         }
     )

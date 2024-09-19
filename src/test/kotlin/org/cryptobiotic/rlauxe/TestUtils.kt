@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe
 
 import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import kotlin.math.abs
 import kotlin.test.assertEquals
@@ -53,4 +54,6 @@ class SampleFromList(val list: DoubleArray) {
 }
 
 fun makeStandardContest() = AuditContest("standard", 0, listOf(0,1), listOf(0))
-fun makeStandardAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
+fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
+fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
+    ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)

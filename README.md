@@ -483,13 +483,13 @@ See [9/4/24 plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu2
 
 nvotes sampled vs theta = winning percent
 
-| N      | 0.510    | 0.520    | 0.530    | 0.540 | 0.550 | 0.575 | 0.600 | 0.650 | 0.7 |
-|--------|----------|----------|----------|-------|------|-------|-------|-------|-----|
-| 1000   |      897 |      726 |      569 | 446   |  340 | 201   | 128   | 60    | 36  |
-| 5000   |     3447 |     1948 |     1223 | 799   |  527 | 256   | 145   | 68    | 38  |
-| 10000  |     5665 |     2737 |     1430 | 871   |  549 | 266   | 152   | 68    | 38  |
-| 20000  |     8456 |     3306 |     1546 | 926   |  590 | 261   | 154   | 65    | 38  |
-| 50000  |    12225 |     3688 |     1686 | 994   |  617 | 263   | 155   | 67    | 37  |
+| N     | 0.510    | 0.520    | 0.530    | 0.540 | 0.550 | 0.575 | 0.600 | 0.650 | 0.7 |
+|-------|----------|----------|----------|-------|-------|-------|-------|-------|-----|
+| 1000  |      897 |      726 |      569 | 446   | 340   | 201   | 128   | 60    | 36  |
+| 5000  |     3447 |     1948 |     1223 | 799   | 527   | 256   | 145   | 68    | 38  |
+| 10000 |     5665 |     2737 |     1430 | 871   | 549   | 266   | 152   | 68    | 38  |
+| 20000 |     8456 |     3306 |     1546 | 926   | 590   | 261   | 154   | 65    | 38  |
+| 50000 |    12225 |     3688 |     1686 | 994   | 617   | 263   | 155   | 67    | 37  |
 
 
 stddev samples vs theta 
@@ -502,7 +502,7 @@ stddev samples vs theta
 | 20000  | 3751.976 | 2124.064 | 1051.194 | 656.632 | 449.989 | 190.791 | 123.333 | 47.084 | 28.173 |  
 | 50000  | 6873.319 | 2708.147 | 1274.291 | 740.712 | 475.265 | 194.538 | 130.865 | 51.086 | 26.439 |
 
-* no use for the parameter d in this case. Likely thats is used only for when eta0 != theta
+* no use for the parameter d in this case. Likely useful only for when eta0 != theta
 
 ### how to set the parameter d?
 
@@ -525,18 +525,18 @@ N and theta.
 * show tables of mean difference = (reported mean - theta) columns vs values of d parameter (rows)
 * ntrials = 1000
 
-A few representative plots are at See [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
+A few representative plots are at [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
 
 Notes:
 
-* For many values of N and theta, we cant help (margin too small; N too small); or it doesnt matter much (margin large, N large).
+* For many values of N and theta, we cant help (margin too small; N too small); or it doesn't matter much (margin large, N large).
 * Ive chosen a few plots where values of N and theta have pct samples 10 - 30%, since thats where improvements might matter for having a successful RLA vs a full hand recount.
 * High values of d work well when reported mean ~= theta. 
 * Low values of d work better as mean difference = (reported mean - theta) grows.
 * The question is, how much weight to give "outliers", at the expense of improving success rate for "common case" of reported mean ~= theta ?
 
 To Investigate
-* Does it makes sense to use small values of d for large values of reported mean? because it will only matter if (reported mean - theta) is large.
+* Does it make sense to use small values of d for large values of reported mean? because it will only matter if (reported mean - theta) is large.
 * Sample percents get higher as theta -> 0. Can we characterize that?
 * Number of samples is independent of N as N -> inf.
 
@@ -564,7 +564,6 @@ theta    margin    B       Bmargin  Bmargin/margin
 ````
 
 Tables 7 and 8 in ALPHA, showing comparison ballot results, switch from using theta to using "mass at 1". 
-TODO: I dont understand what that means.
 Also all the very small sample sizes in Table 7 of ALPHA are surprising. 5 ballots to reject the null hypothosis?
 
 However, see TestComparisonFromAlpha.kt; setting eta0 very high brings the numbers down such that comparison is much better
@@ -585,7 +584,7 @@ nsamples, ballot comparison, N=10000, d = 100, error-free; theta (col) vs eta0 (
 ````
 
 The idea of setting eta0 very high seems suspect. Examining the number of success vs failures shows that you cant set eta0 higher
-than the upper limit of the comparison assorter, or else you dont detect when theta <= .5 (the null hypothosis is true), as the following shows.
+than the upper limit of the comparison assorter, or else you don't detect when theta <= .5 (the null hypothosis is true), as the following shows.
 
 In the plots below, we simulate the reported mean of the cvrs as exactly 0.5% higher than theta (the true mean). 
 So for example when the reported cvr mean assort (aka Āc in SHANGRLA section 3.2) is 0.501, theta is .501 - .005 = 0.496.
@@ -698,7 +697,7 @@ The larger values of eta0Factor do better, and eta0Factor=1 is sometimes 20x wor
 More studies are needed varying across d, cvrMeanDiff, etc.
 
 It seems that the eta0Factor acts as an accelerant, making each sampled value count
-more towards accepting or rejecting the null hypotheses. Not clear if thats a fair thing to do.
+more towards accepting or rejecting the null hypotheses. Not clear if that's a fair thing to do.
 
 The above results show average number of samples needed and as a percentage of N. This ignores the large variance in the distribution.
 What we really want to know is what percentage of trials succeed at various cut-off values (where a full hand count will be more
@@ -811,7 +810,7 @@ cvrMean: 0.501,  0.502,  0.503,  0.504,  0.505,  0.506,  0.508,  0.510,  0.520, 
 
 The false positives are partially mitigated when taking the sample cutoff into account.
 
-Theres a very dramatic increase in RLA success going from etaFactor = 1 to 1.25, and perhaps 1.5 is a good choice dor
+There's a dramatic increase in RLA success going from etaFactor = 1 to 1.25, and perhaps 1.5 is a good choice dor
 these values of N, d, cvrMean, and cvrMeanDiff,
 
 ## Polling vs Comparison
@@ -848,7 +847,7 @@ cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540,
 ````
 CVR compare is quite a bit worse than polling when eta0Factor=1.0.
 
-However, its much better when eta0Factor > 1:
+However, it's much better when eta0Factor > 1:
 ````
 Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.25 cvrMeanDiff=-0.005; theta (col) vs N (row)
   theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
@@ -939,14 +938,14 @@ The closest is [this ipython notebook](https://github.com/pbstark/alpha/blob/mai
 Under "Simulation of a comparison audit", we've got
 
 ````
-N = 10000 # ballot cards containing the contest
-assorter_mean = (9000*0.51*1 + 1000*.5)/N # contest has 51% for winner in 9000 valid votes, and 1000 non-votes
-assorter_margin = 2*assorter_mean - 1
-u = 2/(2-assorter_margin)
-etal = [0.9, 1, u, 2, 2*u]
-..
-mart = alpha_mart(x, N, mu=1/2, eta=eta, u=u,
-estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,u,c=c,d=d))
+  N = 10000 # ballot cards containing the contest
+  assorter_mean = (9000*0.51*1 + 1000*.5)/N # contest has 51% for winner in 9000 valid votes, and 1000 non-votes
+  assorter_margin = 2*assorter_mean - 1
+  u = 2/(2-assorter_margin)
+  etal = [0.9, 1, u, 2, 2*u]
+  ..
+  mart = alpha_mart(x, N, mu=1/2, eta=eta, u=u,
+  estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,u,c=c,d=d))
 ````
 The value u is clearly the upperBounds for the alpha_mart function ,and is equal to 1.009081735.
 The values of eta in etal are the initial eta0 guesses for the shrink_trunc function.
@@ -965,45 +964,45 @@ that erroneously interpreted a vote for the loser as a vote for the winner), mas
 {0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99} at 1, and the remain mass uniformly distributed on [0, 1].
 ````
 
-But AFAIU, there's no realistic scenario where a large mass should be clustered at 1. The large mass should be at 1/2, meaning "no error" between the CVR and the MVR. This assumes that he is using normalized assorter values,
-which could be a wrong assumption.
+But AFAIU, there's no realistic scenario where a large mass should be clustered at 1. The large mass should be at 1/2, meaning "no error" between the CVR and the MVR. 
+This assumes that you are using normalized assorter values, which could be a wrong assumption for the paper.
 
 In any case, it's a funny way to simulate the errors.
 ````
 Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
-0 = flipped vote from loser to winner
-1/2 = flipped vote from loser to other, or other to winner
-1 = no error
-3/2 = flipped vote from other to loser, or winner to other
-2 = flipped vote from winner to loser
+  0 = flipped vote from loser to winner
+  1/2 = flipped vote from loser to other, or other to winner
+  1 = no error
+  3/2 = flipped vote from other to loser, or winner to other
+  2 = flipped vote from winner to loser
 where
-noerror = 1.0 / (2.0 - margin) == 1.0 / (3 - 2 * awinnerAvg), which ranges from .5 to 1.0.
+  noerror = 1.0 / (2.0 - margin) == 1.0 / (3 - 2 * awinnerAvg), which ranges from .5 to 1.0.
 
 If you normalize the assort valeus by dividing by noassort, the possible assort values are:
-[0, 1/4, 1/2, 3/4, 1], where
-0 = flipped vote from loser to winner
-1/4 = flipped vote from loser to other, or other to winner
-1/2 = no error
-3/4 = flipped vote from other to loser, or winner to other
-1 = flipped vote from winner to loser
+  [0, 1/4, 1/2, 3/4, 1], where
+    0 = flipped vote from loser to winner
+    1/4 = flipped vote from loser to other, or other to winner
+    1/2 = no error
+    3/4 = flipped vote from other to loser, or winner to other
+    1 = flipped vote from winner to loser
 ````
 Seems like you would use historical error rates for each of the 5 possibilities.
 
 The code generates the samples in this way:
 ````
 while t <= 0.5:
-x = sp.stats.uniform.rvs(size=N)
-y = sp.stats.uniform.rvs(size=N)
-x[y<=m] = 1
-x[y>=(1-zm)] = 0
-t = np.mean(x)
-thetas[m][N] = t
+  x = sp.stats.uniform.rvs(size=N)
+  y = sp.stats.uniform.rvs(size=N)
+  x[y<=m] = 1
+  x[y>=(1-zm)] = 0
+  t = np.mean(x)
+  thetas[m][N] = t
 ````
 and the x array is used as input to alpha_mart like:
 ````
-mart = alpha_mart(x, N, mu=1/2, eta=eta, u=1,
-estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
-al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
+  mart = alpha_mart(x, N, mu=1/2, eta=eta, u=1,
+  estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
+  al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
 ````
 We also see u=1 indicating that the upper limit is 1, indicating normalized values.
 If one prints out the various thetas
@@ -1048,8 +1047,8 @@ m=0.01 eta=0.55 d=10 nsamples=6842.7
 m=0.01 eta=0.55 d=100 nsamples=6628.58
 ````
 Using high values for eta0 (instead of the obvious value of using eta0 = mean assorter value of the cvrs)
-is explored in the [Sample size simulations (Ballot Comparison)](sample-size-simulations-ballot-comparison) and
-[Polling vs Comparison](polling-vs-comparison) section above, and needs more work.
+is explored in the [Sample size simulations (Ballot Comparison)](#sample-size-simulations-ballot-comparison) and
+[Polling vs Comparison](#polling-vs-comparison) section above, and needs more work.
 
 ## Notes/thoughts
 

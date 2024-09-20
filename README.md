@@ -461,4 +461,4 @@ null mean is 1/2 once again, which reproduces the original assorter.
 
 ## Simulations
 
-See [Simulations](docs/simulations.md)
+See [Simulations](docs/Simulations.md)

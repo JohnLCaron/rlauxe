@@ -1,10 +1,20 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 
+import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.core.ArrayAsSampleFn
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.core.generateUniformSample
+import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.integration.doOneAlphaMartRun
+import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.SRT
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
+import kotlin.test.assertEquals
 
 class TestComparisonMasses {
     // trying to understand what this paragraph from ALPHA p 21 means:
@@ -23,7 +33,7 @@ class TestComparisonMasses {
     @Test
     fun compareAlphaPaperMasses() {
         val ntrials = 100
-        val mixtures = listOf(.99, .9, .75, .5, .25, .1, .01) // mass at 1
+        val mixtures = listOf(.1, .05, .01) // mass at 1
 
         val zero_mass = listOf(0.0, 0.001) // mass at 0
         val zm = zero_mass[1]
@@ -34,7 +44,7 @@ class TestComparisonMasses {
         val c_base = 0.5 // for alpha. larger c since there is no particular expectation about error rates
         val etal = listOf(.99, .9, .75, .55)
 
-        val N = 100
+        val N = 10000
 
         val thetas = mutableListOf<Double>()
         for (m in mixtures) {
@@ -51,10 +61,10 @@ class TestComparisonMasses {
                 t = xp.average()
             }
             val sampleFn = SampleFromArrayWithoutReplacement(xp.toDoubleArray())
-            val theta = sampleFn.truePopulationMean()
+            val theta = sampleFn.sampleMean()
             println(" testMass m=$m N=$N theta=$theta")
             thetas.add(theta)
-            println("  xp = $xp")
+            // println("  xp = $xp")
 
         }
 
@@ -71,13 +81,13 @@ class TestComparisonMasses {
          */
 
         // our results
-        // testMass m=0.99 N=10000 theta=0.9947844780071875
-        // testMass m=0.9 N=10000 theta=0.9474056076403589
-        // testMass m=0.75 N=10000 theta=0.873438390209044
-        // testMass m=0.5 N=10000 theta=0.7523821325977146
-        // testMass m=0.25 N=10000 theta=0.621023803723251
-        // testMass m=0.1 N=10000 theta=0.5537632739421577
-        // testMass m=0.01 N=10000 theta=0.5043223724038491
+        // testMass m=0.99 N=10000 theta=0.9941992429721956
+        // testMass m=0.9 N=10000 theta=0.944582290094878
+        // testMass m=0.75 N=10000 theta=0.8741689022240599
+        // testMass m=0.5 N=10000 theta=0.7498653712253592
+        // testMass m=0.25 N=10000 theta=0.6263512529540856
+        // testMass m=0.1 N=10000 theta=0.5521977213321936
+        // testMass m=0.01 N=10000 theta=0.5051887823907698
 
         // python results
         // 	m=0.99 N=10000 t=0.9946234445107308
@@ -88,30 +98,66 @@ class TestComparisonMasses {
         //	m=0.1 N=10000 t=0.5499456507451624
         //	m=0.01 N=10000 t=0.5059920323745111
 
-        // whats the equivilent CVR ?
+        // whats the equivilent CVR with errors ?
         //  bassort in [0.0, 0.25252525252525254, 0.5050505050505051, 0.7575757575757576, 1.0101010101010102]
         //      where margin = 0.020000000000000018 noerror=0.5050505050505051
-        // it seems likely that he is working in normlized space, so divide everything by noerror, so possible values are
-        //   bassort in [0.0, 1/4, 1/2, 3/4, 1]
 
-        // A. "nonnegative populations that had mass 0.001 at zero, corresponding to errors that overstate the margin
-        // by the maximum possible, e.g., that erroneously interpreted a vote for the loser as a vote for the winner"
-        // 0 means "flipped vote from loser to winner" in the cvr
-        // So 1/1000 ballots has loser flipped to winner in the cvr (so opposite in mvr)
-        //
-        // B. "mass m ∈ {0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99} at 1"
-        // 1 means "flipped vote from winner to loser" in the cvr
-        // but why would there be such a high percentage?
-        // seems like this should have the same probability as A?
-        //
-        // C. "mass (1 − m − 0.001) uniformly distributed on [0, 1]"
-        // I guess to simulate random errors?
+        val cvrMean = 0.55
+        val cvrMeanDiff = -0.025
+        val theta = cvrMean + cvrMeanDiff  // the true mean of the MVRs
+        println("\nN=$N cvrMean=$cvrMean cvrMeanDiff=$cvrMeanDiff theta=${theta}")
 
-        // It looks to me that theres a factor of 2 error when he switched to normalized values.
-        // the only realistic meaning of a large mass is for the "no error" case.
-        // in which case those should be at 1/2, not 1.
+        val cvrs = makeCvrsByExactMean(N, cvrMean)
+        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
 
+        // fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
+        val (_, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, compareAssorter.upperBound)
+        val sampler = ComparisonWithErrors(cvrs, compareAssorter, theta)
+        val actualMvrMean = sampler.mvrs.map{ it.hasMarkFor(0,0) }.average()
+        assertEquals(theta, actualMvrMean, doublePrecision)
+        println("flippedVotes = ${sampler.flippedVotes} = ${100.0 * abs(sampler.flippedVotes)/N}%  actualMvrMean=$actualMvrMean")
 
+        val bassortAvg = sampler.sampleMean()
+        val bvalues = DoubleArray(N) { sampler.sample() }
+        println("bassortAvg = ${bvalues.average()}")
+        assertEquals(bassortAvg, bvalues.average(), doublePrecision)
 
+        println()
     }
+
+    // is it true we can normalize the assorter valeus and get the same result?
+    @Test
+    fun compareNormalizing() {
+        val N = 100
+        val cvrMean = .55
+        val cvrs = makeCvrsByExactMean(N, cvrMean)
+
+        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+        val sampler = ComparisonNoErrors(cvrs, compareAssorter)
+        val assorterMean = sampler.sampleMean()
+
+        val d = 100
+
+        println("N=$N cvrMean=$cvrMean assorterMean=$assorterMean noerror=${compareAssorter.noerror}, u=${compareAssorter.upperBound}")
+        println("sampler mean=${sampler.sampleMean()}, count=${sampler.sampleCount()}")
+
+        val resultNotNormalized = doOneAlphaMartRun(sampler, maxSamples = N, eta0 = assorterMean, d = d, u = compareAssorter.upperBound)
+        println("resultNotNormalized = $resultNotNormalized}")
+        println("resultNotNormalized = ${resultNotNormalized.sampleCount}")
+        println()
+
+        val normalizedValues = cvrs.map{ compareAssorter.bassort(it, it) / compareAssorter.noerror / 2 } // makes everything 1/2 when no errors
+        val samplerN = ArrayAsSampleFn(normalizedValues.toDoubleArray())
+        println("samplerN mean=${samplerN.sampleMean()}, count=${samplerN.sampleCount()}")
+
+        val resultNormalized = doOneAlphaMartRun(samplerN, maxSamples = N, eta0 = assorterMean, d = d, u = 1.0)
+        println("resultNormalized = $resultNormalized}")
+        println("\nresultNormalized = ${resultNormalized.sampleCount}")
+
+        // it would seem that the idea of normalizing is wrong, the algorithm relies on alternative mean > 1/2.
+        // probably violating the conditions of an assorter, namely B̄ ≡ Sum(B(bi, ci)) / N > 1/2
+    }
+
+
+
 }

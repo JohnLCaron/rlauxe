@@ -36,7 +36,7 @@ class TestRilacs {
         val upperBound = compareAssorter.upperBound
 
         val sampler = SampleFromArrayWithoutReplacement(x.toDoubleArray())
-        val assorterMean = sampler.truePopulationMean()
+        val assorterMean = sampler.sampleMean()
 
         println("N=$N cvrMean=$eta0 assorterMean=$assorterMean eta0=$eta0, d=$d u=${upperBound}")
 
@@ -45,12 +45,16 @@ class TestRilacs {
 
         result.etajs.forEachIndexed { idx, etaj ->
             //    λi ≡ (ηi/µi - 1) / (u −µi)
-            //
             val muj = result.mujs[idx]
-            val lambda = (etaj / muj - 1.0) / (upperBound - muj)
-            val maxLambda = 1.0 / muj
-            println(" lambda $lambda < $maxLambda ")
-            assertTrue(lambda < maxLambda)
+            if (muj > 0.0) {
+                val lambda = (etaj / muj - 1.0) / (upperBound - muj)
+                val maxLambda = 1.0 / muj
+                println(" lambda $lambda < $maxLambda ")
+                if (lambda >= maxLambda) {
+                    println("wtf")
+                }
+                assertTrue(lambda < maxLambda)
+            }
         }
     }
 

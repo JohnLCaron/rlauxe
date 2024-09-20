@@ -30,8 +30,7 @@ class TestComparisonFromAlpha {
         //alpha = 0.05
         //mixtures = [.99, .9, .75, .5, .25, .1, .01]  # mass at 1
         //zero_mass = [0, 0.001] # mass at 0
-        val reps = 100
-        val alpha = .05
+        val reps = 10000
         val mixtures = listOf(.99, .9, .75, .5, .25, .1, .01) // mass at 1
         val zero_mass = listOf(0.0, 0.001) // mass at 0
 
@@ -49,8 +48,8 @@ class TestComparisonFromAlpha {
         //
         //g_kol = [0.01, 0.1, 0.2]  # for the Kaplan-Kolmogorov method
         //g_wald = 1 - np.array(g_kol) # for Kaplan-Wald method
-        val g_kol = listOf(0.01, 0.1, 0.2) // for Kaplan-Kolmogorov method
-        val g_wald = g_kol.map { 1.0 - it } // for Kaplan-Wald method
+        //val g_kol = listOf(0.01, 0.1, 0.2) // for Kaplan-Kolmogorov method
+        //val g_wald = g_kol.map { 1.0 - it } // for Kaplan-Wald method
 
         //
         //D = 10 # for APK
@@ -59,13 +58,11 @@ class TestComparisonFromAlpha {
         //c_base = 0.5          # for alpha. larger c since there is no particular expectation about error rates
         //etal = [.99, .9, .75, .55]
         //Nl = [10000, 100000, 500000]
-        val D = 10
-        val beta = 1
         val dl = listOf(10, 100) // for alpha
         val c_base = 0.5 // for alpha. larger c since there is no particular expectation about error rates
         val etal = listOf(.99, .9, .75, .55)
         val Nl = listOf(10000)
-
+        println("ntrials=$reps")
         //
         //
         //for m in mixtures:
@@ -118,8 +115,13 @@ class TestComparisonFromAlpha {
                     t = xp.average()
                 }
                 val sampleFn = SampleFromArrayWithoutReplacement(xp.toDoubleArray())
-                val theta = sampleFn.truePopulationMean()
-                println("test N=$N m=$m theta=$theta")
+                val theta = sampleFn.sampleMean()
+
+                val assorter_margin = 2*theta - 1
+                val u = 2.0/(2-assorter_margin)
+                val upperBound = 2.0 / (3 - 2 * theta) // python has 1.0
+                require(u == upperBound)
+                println("test N=$N m=$m theta=$theta upperBound=$upperBound")
 
                 //        for i in range(reps):
                 //            np.random.shuffle(x)
@@ -140,16 +142,14 @@ class TestComparisonFromAlpha {
                 //                                estim=lambda x, N, mu, eta, u: shrink_trunc(x,N,mu,eta,1,c=c,d=d))
                 //                    al[m][N][eta][d] += np.argmax(mart >= 1/alpha)
 
-                val upperBound = 1.0 // TODO
-
-                for (eta in etal) {
-                    val c = c_base*(eta - 0.5) // TODO wtf?
+                for (eta0 in etal) {
+                    val c = c_base*(eta0 - 0.5) // TODO wtf?
 
                     for (d in dl) {
-                        val trunc = TruncShrinkage(N = N, upperBound = upperBound, minsd = 0.0, d = d, eta0 = eta, c = c)
+                        val trunc = TruncShrinkage(N = N, upperBound = upperBound, minsd = 0.0, d = d, eta0 = eta0, c = c)
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
 
-                        print("  eta0=$eta d=$d")
+                        print("  eta0=$eta0 d=$d")
                         val result =  runAlphaMartRepeated(
                             drawSample = sampleFn,
                             maxSamples = N,
@@ -157,7 +157,7 @@ class TestComparisonFromAlpha {
                             ntrials = reps,
                             showDetail = false,
                             alphaMart = alpha,
-                            eta0 = eta,
+                            eta0 = eta0,
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
                         al.add(makeSRT(N, theta, 0.0, d, rr = result))
@@ -225,6 +225,71 @@ class TestComparisonFromAlpha {
         //      f' simulations with mass {zm :.3f} zero, mass $m$ at 1, and mass $1-m-{zm :0.3f}$ uniformly ' +
         //      ' distributed on $[0, 1]$, for values of $m$ between 0.99 and 0.5. The smallest mean sample size ' +
         //      'for each combination of $m$ and $N$ is in bold font.}')
+        //
+        // ntrials=10000
+        //test N=10000 m=0.99 theta=0.993959078301467
+        //  eta0=0.99 d=10  avgSamplesNeeded = 5
+        //  eta0=0.99 d=100  avgSamplesNeeded = 5
+        //  eta0=0.9 d=10  avgSamplesNeeded = 5
+        //  eta0=0.9 d=100  avgSamplesNeeded = 6
+        //  eta0=0.75 d=10  avgSamplesNeeded = 7
+        //  eta0=0.75 d=100  avgSamplesNeeded = 8
+        //  eta0=0.55 d=10  avgSamplesNeeded = 11
+        //  eta0=0.55 d=100  avgSamplesNeeded = 19
+        //test N=10000 m=0.9 theta=0.9485003205258108
+        //  eta0=0.99 d=10  avgSamplesNeeded = 5
+        //  eta0=0.99 d=100  avgSamplesNeeded = 5
+        //  eta0=0.9 d=10  avgSamplesNeeded = 6
+        //  eta0=0.9 d=100  avgSamplesNeeded = 6
+        //  eta0=0.75 d=10  avgSamplesNeeded = 8
+        //  eta0=0.75 d=100  avgSamplesNeeded = 8
+        //  eta0=0.55 d=10  avgSamplesNeeded = 12
+        //  eta0=0.55 d=100  avgSamplesNeeded = 21
+        //test N=10000 m=0.75 theta=0.8791139193134786
+        //  eta0=0.99 d=10  avgSamplesNeeded = 7
+        //  eta0=0.99 d=100  avgSamplesNeeded = 7
+        //  eta0=0.9 d=10  avgSamplesNeeded = 8
+        //  eta0=0.9 d=100  avgSamplesNeeded = 8
+        //  eta0=0.75 d=10  avgSamplesNeeded = 10
+        //  eta0=0.75 d=100  avgSamplesNeeded = 10
+        //  eta0=0.55 d=10  avgSamplesNeeded = 15
+        //  eta0=0.55 d=100  avgSamplesNeeded = 26
+        //test N=10000 m=0.5 theta=0.7473513681447918
+        //  eta0=0.99 d=10  avgSamplesNeeded = 16
+        //  eta0=0.99 d=100  avgSamplesNeeded = 15
+        //  eta0=0.9 d=10  avgSamplesNeeded = 16
+        //  eta0=0.9 d=100  avgSamplesNeeded = 14
+        //  eta0=0.75 d=10  avgSamplesNeeded = 19
+        //  eta0=0.75 d=100  avgSamplesNeeded = 18
+        //  eta0=0.55 d=10  avgSamplesNeeded = 28
+        //  eta0=0.55 d=100  avgSamplesNeeded = 43
+        //test N=10000 m=0.25 theta=0.6261105699927882
+        //  eta0=0.99 d=10  avgSamplesNeeded = 59
+        //  eta0=0.99 d=100  avgSamplesNeeded = 69
+        //  eta0=0.9 d=10  avgSamplesNeeded = 56
+        //  eta0=0.9 d=100  avgSamplesNeeded = 52
+        //  eta0=0.75 d=10  avgSamplesNeeded = 61
+        //  eta0=0.75 d=100  avgSamplesNeeded = 48
+        //  eta0=0.55 d=10  avgSamplesNeeded = 82
+        //  eta0=0.55 d=100  avgSamplesNeeded = 100
+        //test N=10000 m=0.1 theta=0.5432493788831303
+        //  eta0=0.99 d=10  avgSamplesNeeded = 564
+        //  eta0=0.99 d=100  avgSamplesNeeded = 1004
+        //  eta0=0.9 d=10  avgSamplesNeeded = 513
+        //  eta0=0.9 d=100  avgSamplesNeeded = 651
+        //  eta0=0.75 d=10  avgSamplesNeeded = 491
+        //  eta0=0.75 d=100  avgSamplesNeeded = 394
+        //  eta0=0.55 d=10  avgSamplesNeeded = 557
+        //  eta0=0.55 d=100  avgSamplesNeeded = 518
+        //test N=10000 m=0.01 theta=0.5045508021773442
+        //  eta0=0.99 d=10  avgSamplesNeeded = 8026
+        //  eta0=0.99 d=100  avgSamplesNeeded = 9019
+        //  eta0=0.9 d=10  avgSamplesNeeded = 7903
+        //  eta0=0.9 d=100  avgSamplesNeeded = 8744
+        //  eta0=0.75 d=10  avgSamplesNeeded = 7744
+        //  eta0=0.75 d=100  avgSamplesNeeded = 7988
+        //  eta0=0.55 d=10  avgSamplesNeeded = 7778
+        //  eta0=0.55 d=100  avgSamplesNeeded = 7640
     }
 
     // See ## Simulation of a comparison audit, line starting with "overstatement_assorter ="
@@ -255,7 +320,7 @@ class TestComparisonFromAlpha {
         //c = 1/2
         //etal = [0.9, 1, u, 2, 2*u]
         //al = {}
-        val reps = 100
+        val reps = 10000
         val u = 2.0/(2-assorter_margin)
         assertEquals(1.009081735, u, doublePrecision)
         val dl = listOf(10, 100, 1000, 10000)
@@ -507,7 +572,7 @@ class TestComparisonFromAlpha {
                 val margin = compareAssertion.assorter.margin
                 val compareUpper = 2.0/(2-margin)
                 val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
-                val etaActual = drawSample.truePopulationMean()
+                val etaActual = drawSample.sampleMean()
                 val etaExpect =  1.0/(2-margin)
                 val same = doubleIsClose(etaActual, etaExpect, doublePrecision)
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
@@ -596,7 +661,7 @@ class TestComparisonFromAlpha {
 
             val margin = compareAssertion.assorter.margin
             val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
-            val etaActual = drawSample.truePopulationMean()
+            val etaActual = drawSample.sampleMean()
             val eta0 = factor / (2 - margin)
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
 

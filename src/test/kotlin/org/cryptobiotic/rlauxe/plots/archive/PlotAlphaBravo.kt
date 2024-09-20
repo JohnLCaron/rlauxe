@@ -17,7 +17,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SampleFnFromArray
+import org.cryptobiotic.rlauxe.core.ArrayAsSampleFn
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
@@ -209,7 +209,7 @@ class PlotAlphaBravo {
         repeat(nrepeat) {
             // each repetition gets different permutation
             val permuteValues = randomPermute(assortValues.toDoubleArray())
-            val sampleFn = SampleFnFromArray(permuteValues)
+            val sampleFn = ArrayAsSampleFn(permuteValues)
 
             // both alpha and bravo get the exact same sample
             val alphaResult: TestH0Result = alpha.testH0(N, terminateOnNullReject=true) { sampleFn.sample() }

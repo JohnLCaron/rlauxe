@@ -48,7 +48,7 @@ class TestAuditComparison {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    eta0 = cvrSampler.truePopulationMean(),
+                    eta0 = cvrSampler.sampleMean(),
                     d = 100,
                     ntrials = 100,
                     upperBound = it.assorter.upperBound()

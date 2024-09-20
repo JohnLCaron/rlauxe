@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,8 +15,9 @@ Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
     2   = flipped vote from winner to loser
 
     noerror = 1.0 / (2.0 - margin) == 1.0 / (3 - 2 * awinnerAvg), which ranges from .5 to 1.0.
-    If you normalize the assorter valeus by noassort:
-    bassort in [0, 1/4, 1/2, 3/4, 1]
+
+    If you normalize the assorter values by dividing by noerror/2:
+    then bassort in [0, 1/4, 1/2, 3/4, 1], and upperlimit = 1
  */
 
 // See SHANGRLA 3.2
@@ -44,7 +46,7 @@ class TestComparisonAssorter {
         assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
         assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser
         assertEquals(0.5, assorter.assort(otherCvr))  // voted for someone else
-        // so assort in [0, 1] in {0, .5, 1}
+        // so assort in {0, .5, 1}
 
         assertEquals(0.0, bassorter.overstatementError(winnerCvr, winnerCvr))
         assertEquals(-1.0, bassorter.overstatementError(winnerCvr, loserCvr))
@@ -62,6 +64,7 @@ class TestComparisonAssorter {
         val noerror = 1.0 / (2.0 - margin)
         assertEquals(.5050505050505051, noerror, doublePrecision)
         assertEquals(1.0 / (3 - 2 * awinnerAvg), noerror, doublePrecision)
+        assertEquals(noerror, bassorter.noerror, doublePrecision)
 
         // bassort(mvr: Cvr, cvr:Cvr)
         // (1 − ωi /upper) / (2 − margin/upper), upper == assorter.upper
@@ -76,10 +79,14 @@ class TestComparisonAssorter {
         assertEquals(0.5*noerror, bassorter.bassort(otherCvr, winnerCvr))      // flipped vote from other to winner
         assertEquals(1.5*noerror, bassorter.bassort(otherCvr, loserCvr))       // flipped vote from other to loser
         assertEquals(noerror, bassorter.bassort(otherCvr, otherCvr))           // no error
+
         // so bassort in [0, 2 / (2 - margin)] = [0, 2 / (3 - 2 * Aavg)] in {0, .5, 1, 1.5, 2} * noerror
         // so bassort in [0, 2*noerror], where noerror > .5. since margin > 0, since awinnerAvg > .5.
         val assortValues = listOf(0.0, .5, 1.0, 1.5, 2.0).map { it * noerror }
         println(" bassort in $assortValues where margin = $margin noerror=$noerror")
+
+        val assortValuesN = assortValues.map { it / noerror / 2 }
+        println(" assortValuesN in $assortValuesN")
     }
 
     @Test
@@ -259,14 +266,31 @@ class TestComparisonAssorter {
 
     @Test
     fun testBvsV() {
-        val thetas = listOf(.505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val thetas = listOf(.501, .5025, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val ff = "%8.4f"
-        println("  theta    margin    B       Bmargin  Bmargin/margin")
+        println("  theta   margin  noerror marginB marginB/margin")
         for (theta in thetas) {
             val margin = theta2margin(theta)
-            val B = 1.0/(2-margin)
-            val marginB = theta2margin(B)
-            println("${ff.format(theta)} ${ff.format(margin)} ${ff.format(B)} ${ff.format(marginB)} ${ff.format(marginB/margin)}")
+            //         val noerror = 1.0 / (2.0 - margin)
+            val noerror = 1.0/(2.0-margin) // assorter mean
+            val marginB = theta2margin(noerror)
+            println("${ff.format(theta)} ${ff.format(margin)} ${ff.format(noerror)} ${ff.format(marginB)} ${ff.format(marginB/margin)}")
         }
+    }
+
+    @Test
+    fun testStandardComparisonAssorter() {
+        val N = 1000
+        val cvrMean = 0.55
+        val cvrs = makeCvrsByExactMean(N, cvrMean)
+
+        val contest = AuditContest("standard", 0, listOf(0, 1), listOf(0))
+        val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
+        val compareAssertion = compareAudit.assertions[contest]!!.first()
+        val compareAssorter1 = compareAssertion.assorter
+
+        val compareAssorter2 = makeStandardComparisonAssorter(cvrMean)
+
+        assertEquals(compareAssorter1, compareAssorter2)
     }
 }

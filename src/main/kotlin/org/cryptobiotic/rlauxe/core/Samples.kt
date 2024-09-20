@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.math.ln
 import kotlin.random.Random
 
-// keeps track of the latest sample and the current and previous sample sum.
+//// keeps track of the latest sample and the current and previous sample sum.
 interface Samples {
     fun last(): Double // latest sample
     fun size(): Int    // total number of samples so far
@@ -30,93 +30,32 @@ class PrevSamples() : Samples {
     }
 }
 
-fun randomPermute(samples : DoubleArray): DoubleArray {
-    val n = samples.size
-    val permutedIndex = MutableList(n) { it }
-    permutedIndex.shuffle(Random)
-    return DoubleArray(n) { samples[permutedIndex[it]] }
-}
-
-fun randomPermute(samples : MutableList<Cvr>): List<Cvr> {
-    samples.shuffle(Random)
-    return samples
-}
-
+//// abstraction for creating a sequence of samples
 interface SampleFn { // TODO could be an Iterator
     fun sample(): Double // get next in sample
     fun reset()          // start over again with different permutation
-    fun truePopulationMean(): Double // for simulations
-    fun truePopulationCount(): Double
+    fun sampleMean(): Double // for simulations
+    fun sampleCount(): Double
     fun N(): Int  // population size
 }
 
-class SampleFnFromArray(val assortValues : DoubleArray): SampleFn {
-    var index = 0
-
-    override fun sample(): Double {
-        return assortValues[index++]
-    }
-
-    override fun reset() {
-        index = 0
-    }
-
-    override fun truePopulationMean(): Double {
-        return assortValues.toList().average()
-    }
-
-    override fun truePopulationCount(): Double {
-        return assortValues.toList().sum()
-    }
-
-    override fun N(): Int {
-        return assortValues.size
-    }
-
-}
-
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleFn {
-    val selectedIndices = mutableSetOf<Int>()
-    val N = assortValues.size
-
-    override fun sample(): Double {
-        while (true) {
-            val idx = Random.nextInt(N) // withoutReplacement
-            if (!selectedIndices.contains(idx)) {
-                selectedIndices.add(idx)
-                return assortValues[idx]
-            }
-            require(selectedIndices.size < assortValues.size)
-        }
-    }
-    override fun reset() {
-        selectedIndices.clear()
-    }
-
-    override fun truePopulationCount() = assortValues.sum()
-    override fun truePopulationMean() = assortValues.average()
-    override fun N() = N
-}
-
-class PollWithReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
+class PollWithReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleFn {
     val N = cvrs.size
-    val sampleMean = cvrs.map{ ass.assort(it) }.average()
-    val sampleCount = cvrs.map{ ass.assort(it) }.sum()
+    val sampleMean = cvrs.map { assorter.assort(it) }.average()
+    val sampleCount = cvrs.map { assorter.assort(it) }.sum()
 
     override fun sample(): Double {
-        val idx = Random.nextInt(N) // withoutReplacement
-        return ass.assort(cvrs[idx])
+        val idx = Random.nextInt(N) // with Replacement
+        return assorter.assort(cvrs[idx])
     }
 
-    override fun reset() {
-    }
-
-    override fun truePopulationMean() = sampleMean
-    override fun truePopulationCount() = sampleCount
+    override fun reset() {}
+    override fun sampleMean() = sampleMean
+    override fun sampleCount() = sampleCount
     override fun N() = N
 }
 
-class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): SampleFn {
+class PollWithoutReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0
@@ -126,14 +65,10 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
     }
 
     override fun sample(): Double {
-        if (idx >= cvrs.size) {
-            println("wtf")
-        }
-        if (permutedIndex[idx] >= cvrs.size) {
-            println("wtf")
-        }
+        require (idx < cvrs.size)
+        require (permutedIndex[idx] < cvrs.size)
         val curr = cvrs[permutedIndex[idx++]]
-        return ass.assort(curr)
+        return assorter.assort(curr)
     }
 
     override fun reset() {
@@ -141,17 +76,15 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val ass: AssorterFunction): S
         idx = 0
     }
 
-    override fun truePopulationMean() = cvrs.map{ ass.assort(it) }.average()
-    override fun truePopulationCount() = cvrs.map{
-        ass.assort(it)
-    }.sum()
-
+    override fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
+    override fun sampleCount() = cvrs.map{ assorter.assort(it) }.sum()
     override fun N() = N
 }
 
 ///////////////////////////////////////////////////////////////
 // the values produced here are the B assort values, SHANGRLA section 3.2.
-class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): SampleFn {
+
+class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -160,13 +93,13 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): Sa
 
     init {
         reset()
-        sampleMean = cvrs.map { cass.bassort(it, it)}.average()
-        sampleCount = cvrs.map { cass.bassort(it, it)}.sum()
+        sampleMean = cvrs.map { cassorter.bassort(it, it)}.average()
+        sampleCount = cvrs.map { cassorter.bassort(it, it)}.sum()
     }
 
     override fun sample(): Double {
         val curr = cvrs[permutedIndex[idx++]]
-        return cass.bassort(curr, curr) // mvr == cvr, no errors
+        return cassorter.bassort(curr, curr) // mvr == cvr, no errors
     }
 
     override fun reset() {
@@ -174,12 +107,12 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter): Sa
         idx = 0
     }
 
-    override fun truePopulationMean() = sampleMean
-    override fun truePopulationCount() = sampleCount
+    override fun sampleMean() = sampleMean
+    override fun sampleCount() = sampleCount
     override fun N() = N
 }
 
-data class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssorter, val mvrMean: Double): SampleFn {
+data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double): SampleFn {
     val N = cvrs.size
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
@@ -197,7 +130,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssort
         flippedVotes = flipExactVotes(mmvrs, mvrMean)
         mvrs = mmvrs.toList()
 
-        sampleCount = cvrs.mapIndexed { idx, it -> cass.bassort(mvrs[idx], it)}.sum()
+        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
         sampleMean = sampleCount / N
     }
 
@@ -205,7 +138,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssort
         val cvr = cvrs[permutedIndex[idx]]
         val mvr = mvrs[permutedIndex[idx]]
         idx++
-        return cass.bassort(mvr, cvr)
+        return cassorter.bassort(mvr, cvr)
     }
 
     override fun reset() {
@@ -213,10 +146,125 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cass: ComparisonAssort
         idx = 0
     }
 
-    override fun truePopulationMean() = sampleMean
-    override fun truePopulationCount() = sampleCount
+    override fun sampleMean() = sampleMean
+    override fun sampleCount() = sampleCount
     override fun N() = N
 }
+
+//// DoubleArrays
+fun randomPermute(samples : DoubleArray): DoubleArray {
+    val n = samples.size
+    val permutedIndex = MutableList(n) { it }
+    permutedIndex.shuffle(Random)
+    return DoubleArray(n) { samples[permutedIndex[it]] }
+}
+
+fun randomPermute(samples : MutableList<Cvr>): List<Cvr> {
+    samples.shuffle(Random)
+    return samples
+}
+
+// generate a sample thats approximately mean = theta
+fun generateUniformSample(N: Int) : DoubleArray {
+    return DoubleArray(N) {
+        Random.nextDouble(1.0)
+    }
+}
+
+// generate a sample thats approximately mean = theta
+fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
+    return DoubleArray(N) {
+        val r = Random.nextDouble(1.0)
+        if (r < ratio) 1.0 else 0.0
+    }
+}
+
+class ArrayAsSampleFn(val assortValues : DoubleArray): SampleFn {
+    var index = 0
+
+    override fun sample(): Double {
+        return assortValues[index++]
+    }
+
+    override fun reset() {
+        index = 0
+    }
+
+    override fun sampleMean(): Double {
+        return assortValues.toList().average()
+    }
+
+    override fun sampleCount(): Double {
+        return assortValues.toList().sum()
+    }
+
+    override fun N(): Int {
+        return assortValues.size
+    }
+}
+
+class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
+    val samples = generateSampleWithMean(N, ratio)
+    override fun sample(): Double {
+        val idx = Random.nextInt(N) // with Replacement
+        return samples[idx]
+    }
+    override fun reset() {
+        // noop
+    }
+    override fun sampleMean() = samples.average()
+    override fun sampleCount() = samples.sum()
+    override fun N() = N
+}
+
+class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleFn {
+    val N = assortValues.size
+    val permutedIndex = MutableList(N) { it }
+    var idx = 0
+
+    init {
+        reset()
+    }
+
+    override fun sample(): Double {
+        require (idx < N)
+        require (permutedIndex[idx] < N)
+        return assortValues[permutedIndex[idx++]]
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    override fun sampleCount() = assortValues.sum()
+    override fun sampleMean() = assortValues.average()
+    override fun N() = N
+}
+
+class SampleFromArrayWithoutReplacementOld(val assortValues : DoubleArray): SampleFn {
+    val selectedIndices = mutableSetOf<Int>()
+    val N = assortValues.size
+
+    override fun sample(): Double {
+        while (true) {
+            val idx = Random.nextInt(N)
+            if (!selectedIndices.contains(idx)) { // withoutReplacement
+                selectedIndices.add(idx)
+                return assortValues[idx]
+            }
+            require(selectedIndices.size < assortValues.size)
+        }
+    }
+    override fun reset() {
+        selectedIndices.clear()
+    }
+
+    override fun sampleCount() = assortValues.sum()
+    override fun sampleMean() = assortValues.average()
+    override fun N() = N
+}
+
 
 ///////////////////////////////////////////////////////////////
 /**
@@ -267,33 +315,4 @@ class Bernoulli(p: Double) {
             x++
         }
     }
-}
-
-// generate a sample thats approximately mean = theta
-fun generateUniformSample(N: Int) : DoubleArray {
-    return DoubleArray(N) {
-        Random.nextDouble(1.0)
-    }
-}
-
-// generate a sample thats approximately mean = theta
-fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
-    return DoubleArray(N) {
-        val r = Random.nextDouble(1.0)
-        if (r < ratio) 1.0 else 0.0
-    }
-}
-
-class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
-    val samples = generateSampleWithMean(N, ratio)
-    override fun sample(): Double {
-        val idx = Random.nextInt(N) // withoutReplacement
-        return samples[idx]
-    }
-    override fun reset() {
-        // noop
-    }
-    override fun truePopulationMean() = samples.average()
-    override fun truePopulationCount() = samples.sum()
-    override fun N() = N
 }

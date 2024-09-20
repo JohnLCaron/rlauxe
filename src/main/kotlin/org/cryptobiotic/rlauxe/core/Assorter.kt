@@ -82,7 +82,7 @@ data class ComparisonAssorter(
         val overstatement = overstatementError(mvr, cvr) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
         val denom =  (2.0 - margin/this.assorter.upperBound())
-        return tau / denom
+        return tau * noerror
     }
 
     //    overstatement error for a CVR compared to the human reading of the ballot.

@@ -123,7 +123,7 @@ class TestBravo  {
         var nsuccess = 0
 
         val N = drawSample.N()
-        val eta0 = drawSample.truePopulationMean()
+        val eta0 = drawSample.sampleMean()
         val estimFn = FixedMean(eta0)
         val alpha = AlphaMart(
             estimFn = estimFn,

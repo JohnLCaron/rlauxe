@@ -53,10 +53,10 @@ class TestSamples {
                 if (!silent && showContests) println("  ${it}")
 
                 val cvrSampler = PollWithoutReplacement(cvrs, it.assorter)
-                println("truePopulationCount = ${cvrSampler.truePopulationCount()}")
-                println("truePopulationMean = ${cvrSampler.truePopulationMean()}")
-                assertEquals((N * theta).toInt(), cvrSampler.truePopulationCount().toInt())
-                assertEquals(theta.toInt(), cvrSampler.truePopulationMean().toInt())
+                println("truePopulationCount = ${cvrSampler.sampleCount()}")
+                println("truePopulationMean = ${cvrSampler.sampleMean()}")
+                assertEquals((N * theta).toInt(), cvrSampler.sampleCount().toInt())
+                assertEquals(theta.toInt(), cvrSampler.sampleMean().toInt())
             }
         }
     }

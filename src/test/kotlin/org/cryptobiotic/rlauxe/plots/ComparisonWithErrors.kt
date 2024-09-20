@@ -25,6 +25,7 @@ import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.theta2margin
 import org.cryptobiotic.rlauxe.shangrla.eps
 import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import kotlin.collections.first
 import kotlin.collections.set
 import kotlin.test.Test
@@ -35,7 +36,14 @@ class ComparisonWithErrors {
     val showCalculation = false
     val showCalculationAll = false
 
-    data class ComparisonTask(val idx: Int, val N: Int, val cvrMean: Double, val cvrMeanDiff: Double, val eta0Factor: Double, val cvrs: List<Cvr>)
+    data class ComparisonTask(
+        val idx: Int,
+        val N: Int,
+        val cvrMean: Double,
+        val cvrMeanDiff: Double,
+        val eta0Factor: Double,
+        val cvrs: List<Cvr>
+    )
 
     // recreate TestComparisonsFromAlpha.comparisonNvsTheta, with cvrMeanDiff != 0
     @Test
@@ -56,7 +64,16 @@ class ComparisonWithErrors {
             cvrMeans.forEach { cvrMean ->
                 nlist.forEach { N ->
                     val cvrs = makeCvrsByExactMean(N, cvrMean)
-                    tasks.add(ComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff=cvrMeanDiff, eta0Factor=eta0Factor, cvrs))
+                    tasks.add(
+                        ComparisonTask(
+                            taskIdx++,
+                            N,
+                            cvrMean,
+                            cvrMeanDiff = cvrMeanDiff,
+                            eta0Factor = eta0Factor,
+                            cvrs
+                        )
+                    )
                 }
             }
             // val writer = SRTwriter("/home/stormy/temp/CvrComparison/comparisonNvsTheta$eta0Factor.csv")
@@ -113,7 +130,16 @@ class ComparisonWithErrors {
             cvrMeans.forEach { cvrMean ->
                 nlist.forEach { N ->
                     val cvrs = makeCvrsByExactMean(N, cvrMean)
-                    tasks.add(ComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff=cvrMeanDiff, eta0Factor=eta0Factor, cvrs))
+                    tasks.add(
+                        ComparisonTask(
+                            taskIdx++,
+                            N,
+                            cvrMean,
+                            cvrMeanDiff = cvrMeanDiff,
+                            eta0Factor = eta0Factor,
+                            cvrs
+                        )
+                    )
                 }
             }
             // val writer = SRTwriter("/home/stormy/temp/CvrComparison/comparisonNvsTheta$eta0Factor.csv")
@@ -189,7 +215,7 @@ class ComparisonWithErrors {
             repeat(nthreads) {
                 calcJobs.add(
                     launchCalculations(taskProducer) { task ->
-                        calculate(task, ntrials, d=d, cvrMeanDiff=task.cvrMeanDiff)
+                        calculate(task, ntrials, d = d, cvrMeanDiff = task.cvrMeanDiff)
                     })
             }
 
@@ -201,14 +227,16 @@ class ComparisonWithErrors {
 
         colHeader(calculations, "cvrMean", colf = "%6.3f") { it.reportedMean }
 
-        val titleFail = " failurePct, ballot comparison, cvrMean=$cvrMean, d = $d, error-free\n theta (col) vs eta0Factor (row)"
+        val titleFail =
+            " failurePct, ballot comparison, cvrMean=$cvrMean, d = $d, error-free\n theta (col) vs eta0Factor (row)"
         plotSRS(calculations, titleFail, true, colf = "%6.3f", rowf = "%6.2f",
             colFld = { srt: SRT -> cvrMean + srt.reportedMeanDiff },
             rowFld = { srt: SRT -> srt.eta0Factor },
             fld = { srt: SRT -> srt.failPct }
         )
 
-        val title = " nsamples, ballot comparison, cvrMean=$cvrMean, d = $d, error-free\n theta (col) vs eta0Factor (row)"
+        val title =
+            " nsamples, ballot comparison, cvrMean=$cvrMean, d = $d, error-free\n theta (col) vs eta0Factor (row)"
         plotSRS(calculations, title, true, colf = "%6.3f", rowf = "%6.2f",
             colFld = { srt: SRT -> cvrMean + srt.reportedMeanDiff },
             rowFld = { srt: SRT -> srt.eta0Factor },
@@ -269,7 +297,7 @@ class ComparisonWithErrors {
         nlist.forEach { N ->
             cvrMeans.forEach { cvrMean ->
                 val cvrs = makeCvrsByExactMean(N, cvrMean)
-                tasks.add(ComparisonTask(taskIdx++, N, cvrMean, 0.0, eta0Factor=1.0, cvrs))
+                tasks.add(ComparisonTask(taskIdx++, N, cvrMean, 0.0, eta0Factor = 1.0, cvrs))
             }
         }
 
@@ -294,7 +322,7 @@ class ComparisonWithErrors {
                     repeat(nthreads) {
                         calcJobs.add(
                             launchCalculations(taskProducer) { task ->
-                                calculate(task, nrepeat, d=d, cvrMeanDiff=cvrMeanDiff)
+                                calculate(task, nrepeat, d = d, cvrMeanDiff = cvrMeanDiff)
                             })
                     }
 
@@ -351,7 +379,7 @@ class ComparisonWithErrors {
             repeat(nthreads) {
                 calcJobs.add(
                     launchCalculations(taskProducer) { task ->
-                        calculate(task, ntrials, d=d, cvrMeanDiff=task.cvrMeanDiff)
+                        calculate(task, ntrials, d = d, cvrMeanDiff = task.cvrMeanDiff)
                     })
             }
 
@@ -385,7 +413,7 @@ class ComparisonWithErrors {
         plotSRS(calculations, "pct nsamples", false, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
             colFld = { srt: SRT -> srt.theta },
             rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.pctSamples}
+            fld = { srt: SRT -> srt.pctSamples }
         )
 
         plotTFsuccess(calculations, "", sampleMaxPct = 10, colTitle = "theta")
@@ -458,9 +486,18 @@ class ComparisonWithErrors {
     // common
 
     fun calculate(task: ComparisonTask, nrepeat: Int, d: Int, cvrMeanDiff: Double): SRT {
-        val rr = runComparisonWithMeanDiff(task.cvrMean, task.cvrs, cvrMeanDiff=cvrMeanDiff,
-            nrepeat = nrepeat, d = d, eta0Factor=task.eta0Factor)
-        val sr = makeSRT(task.N, reportedMean=task.cvrMean, reportedMeanDiff=cvrMeanDiff, d=d, eta0Factor=task.eta0Factor, rr=rr)
+        val rr = runComparisonWithMeanDiff(
+            task.cvrMean, task.cvrs, cvrMeanDiff = cvrMeanDiff,
+            nrepeat = nrepeat, d = d, eta0Factor = task.eta0Factor
+        )
+        val sr = makeSRT(
+            task.N,
+            reportedMean = task.cvrMean,
+            reportedMeanDiff = cvrMeanDiff,
+            d = d,
+            eta0Factor = task.eta0Factor,
+            rr = rr
+        )
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${rr.eta0}, $sr")
         if (showCalculationAll) println("${task.idx} (${calculations.size}): $rr")
         return sr
@@ -492,37 +529,41 @@ class ComparisonWithErrors {
             yield()
         }
     }
+}
 
-    fun runComparisonWithMeanDiff(
-        cvrMean: Double,
-        cvrs: List<Cvr>,
-        cvrMeanDiff: Double,
-        nrepeat: Int,
-        eta0Factor: Double,
-        d: Int = 100,
-        silent: Boolean = true
-    ): AlphaMartRepeatedResult {
-        val N = cvrs.size
-        val theta = cvrMean + cvrMeanDiff // the true mean
-        if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")
+fun runComparisonWithMeanDiff(
+    cvrMean: Double,
+    cvrs: List<Cvr>,
+    cvrMeanDiff: Double,
+    nrepeat: Int,
+    eta0Factor: Double,
+    d: Int = 100,
+    silent: Boolean = true
+): AlphaMartRepeatedResult {
+    val N = cvrs.size
+    val theta = cvrMean + cvrMeanDiff // the true mean
+    if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
-        val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-        val compareAssertion = compareAudit.assertions[contest]!!.first()
-        val sampleWithErrors = ComparisonWithErrors(cvrs, compareAssertion.assorter, theta)
+    /*
+    val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+    val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
+    val compareAssertion = compareAudit.assertions[contest]!!.first()
+    val compareAssorter = compareAssertion.assorter
+     */
+    val compareAssorter = makeStandardComparisonAssorter(cvrMean)
 
-        // fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
-        val (_, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, compareAssertion.assorter.upperBound)
+    // fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
+    val (_, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, compareAssorter.upperBound)
+    val sampleWithErrors = ComparisonWithErrors(cvrs, compareAssorter, theta)
 
-        val compareResult = runAlphaMartRepeated(
-            drawSample = sampleWithErrors,
-            maxSamples = N,
-            eta0 = eta0Factor *  noerrors,
-            d = d,
-            ntrials = nrepeat,
-            withoutReplacement = true,
-            upperBound = upperBound
-        )
-        return compareResult
-    }
+    val compareResult = runAlphaMartRepeated(
+        drawSample = sampleWithErrors,
+        maxSamples = N,
+        eta0 = eta0Factor *  noerrors,
+        d = d,
+        ntrials = nrepeat,
+        withoutReplacement = true,
+        upperBound = upperBound
+    )
+    return compareResult
 }

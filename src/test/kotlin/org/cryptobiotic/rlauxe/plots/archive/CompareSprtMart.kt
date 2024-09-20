@@ -17,7 +17,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SampleFnFromArray
+import org.cryptobiotic.rlauxe.core.ArrayAsSampleFn
 import org.cryptobiotic.rlauxe.core.SprtMart
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.Welford
@@ -186,7 +186,7 @@ class CompareSprtMart {
             val permuteValues = randomPermute(assortValues.toDoubleArray())
             val sprtResult: TestH0Result = sprt.testH0(permuteValues)
 
-            val sampleFn = SampleFnFromArray(permuteValues)
+            val sampleFn = ArrayAsSampleFn(permuteValues)
             val alphaResult: TestH0Result = alpha.testH0(N, terminateOnNullReject=true) { sampleFn.sample() }
 
             // TestH0Result val status: TestH0Status, val sampleCount: Int, val sampleMean: Double, val pvalues: List<Double>

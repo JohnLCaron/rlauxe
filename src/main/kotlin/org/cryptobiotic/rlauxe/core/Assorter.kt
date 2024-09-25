@@ -58,7 +58,8 @@ fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Tri
 data class ComparisonAssorter(
     val contest: AuditContest,
     val assorter: AssorterFunction,   // A
-    val avgCvrAssortValue: Double // Ā(c) = average CVR assort value
+    val avgCvrAssortValue: Double, // Ā(c) = average CVR assort value
+    val check: Boolean = true,
 ): ComparisonAssorterFunction {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
@@ -66,11 +67,20 @@ data class ComparisonAssorter(
 
     fun upperBound() = upperBound
 
+    init {
+        if (check) { // suspend checking for some tests
+            require(avgCvrAssortValue > 0.5) // the math requires this; otherwise divide by negative number flips the inequality
+            require(margin > 0.0)
+            require(noerror > 0.5)
+            require(upperBound > 1.0)
+        }
+    }
+
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-        //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, the _diluted margin_).
+        //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
         //
         //     ωi ≡ A(ci) − A(bi)   overstatementError
         //     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
@@ -82,7 +92,10 @@ data class ComparisonAssorter(
         val overstatement = overstatementError(mvr, cvr) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
         val denom =  (2.0 - margin/this.assorter.upperBound())
-        return tau * noerror
+        val result1 =  tau * noerror
+        val result2 =  tau /denom
+        require(result1 == result2)
+        return result1
     }
 
     //    overstatement error for a CVR compared to the human reading of the ballot.

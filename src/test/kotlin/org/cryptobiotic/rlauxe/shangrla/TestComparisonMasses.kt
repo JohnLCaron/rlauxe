@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.core.generateUniformSample
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.integration.doOneAlphaMartRun
+import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.SRT
 import org.junit.jupiter.api.Test

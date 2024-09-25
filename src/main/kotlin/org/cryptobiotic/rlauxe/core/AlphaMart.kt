@@ -65,7 +65,11 @@ class AlphaMart(
         val mjs = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
         val etajs = mutableListOf<Double>()
+        val ratms = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
+        val altbs = mutableListOf<Double>()
+        val altcs = mutableListOf<Double>()
+        val ratts = mutableListOf<Double>()
         val testStatistics = mutableListOf<Double>()
         val sampleSums = mutableListOf<Double>()
         sampleSums.add(sampleSum)
@@ -80,20 +84,22 @@ class AlphaMart(
 
             mj = populationMeanIfH0(N, withoutReplacement, prevSamples)
             mjs.add(mj)
+            ratms.add(etaj/mj)
 
-            // terms[m > u] = 0       # true mean is certainly less than hypothesized
-            // terms[m < 0] = np.inf  # true mean certainly greater than hypothesized
-            if (mj > 1.0 || mj < 0.0) {
+            // terms[m > u] = 0       # true mean is certainly less than 1/2
+            // terms[m < 0] = np.inf  # true mean certainly greater than 1/2
+            if (mj > upperBound || mj < 0.0) {
                 break
             }
 
-            // same as "wald_sprt" in SHANGRLA NonnegMean.py
-            //        Generalizes Wald's SPRT for the Bernoulli to sampling without replacement and to
-            //        nonnegative bounded values rather than binary values (for which it is a valid test, but not the SPRT).
+            // same as "alpha_mart" in SHANGRLA NonnegMean.py
+            //        Finds the ALPHA martingale for the hypothesis that the population
+            //        mean is less than or equal to t using a martingale method,
+            //        for a population of size N, based on a series of draws x.
             //        See Stark, 2022. ALPHA: Audit that Learns from Previous Hand-Audited Ballots
 
             // This is eq 4 of ALPHA, p.5 :
-            //      T_j = T_j-1 / u * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j))
+            //      T_j = T_j-1 * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j)) / u
             //      terms[np.isclose(0, m, atol=atol)] = 1  # ignore
             //      terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) {
@@ -104,7 +110,19 @@ class AlphaMart(
                 val p2 = (upperBound - etaj) / (upperBound - mj)
                 val term2 = (upperBound - xj) * p2
                 val term = (term1 + term2) / upperBound
+                // ALPHA eq 4
                 val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound
+
+                // alternative formulation (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
+                val altnum = (xj * etaj + (upperBound - xj) * (upperBound - etaj))
+                val altden = (xj * mj + (upperBound - xj) * (upperBound - mj))
+                val altb = altnum / altden
+                val altdenc = upperBound / 2
+                val altc = altnum / altdenc
+                altbs.add(altb)
+                altcs.add(altc)
+                ratts.add(altc/altb)
+
                 require( doubleIsClose(term, ttj))
                 //        terms[np.isclose(0, terms, atol=atol)] = (
                 //            1  # martingale effectively vanishes; p-value 1
@@ -146,10 +164,15 @@ class AlphaMart(
         }
 
         if (showDetails) {
+            println("xs = ${xs}")
             println("mujs = ${mjs}")
             println("etaj = ${etajs}")
+            println("etaj/mujs = ${ratms}")
             println("tjs = ${tjs}")
-            println("Tjs = ${testStatistics}")
+            println("altbs = ${altbs}")
+            println("altcs = ${altcs}")
+            println("altc/altb = ${ratts}")
+            //println("Tjs = ${testStatistics}")
         }
 
         val status = when {
@@ -162,8 +185,8 @@ class AlphaMart(
                 val rtjs = tjs.reversed()
                 val rTjs = testStatistics.reversed()
                 TestH0Status.SampleSum
-            } // same as m < 0
-            (mj > 1.0) -> {
+            }
+            (mj > upperBound) -> {
                 TestH0Status.AcceptNull
             }
             else -> {
@@ -287,7 +310,7 @@ class TruncShrinkage(
         // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
         // val est = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
         val est = if (f == 0.0) (d * eta0 + sampleSum) / dj1 else {
-            // note stdev not used if f = 0, except in capBelow
+            // note stdev not used if f = 0
             val (_, variance, _) = welford.result()
             val stdev = Math.sqrt(variance) // stddev of sample
             val sdj3 = if (lastj < 2) 1.0 else max(stdev, minsd) // LOOK

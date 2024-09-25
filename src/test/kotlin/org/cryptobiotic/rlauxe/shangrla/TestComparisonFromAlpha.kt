@@ -320,10 +320,10 @@ class TestComparisonFromAlpha {
         //c = 1/2
         //etal = [0.9, 1, u, 2, 2*u]
         //al = {}
-        val reps = 10000
+        val reps = 100
         val u = 2.0/(2-assorter_margin)
         assertEquals(1.009081735, u, doublePrecision)
-        val dl = listOf(10, 100, 1000, 10000)
+        val dl = listOf(10, 100, 1000, 10000, 100000)
         val etal = listOf(0.9, 1.0, u, 2.0, 2.0 * u) // should be .9, 1, 1.009, 2, 2.018
 
         // TODO check you get same result
@@ -399,8 +399,6 @@ class TestComparisonFromAlpha {
         //    print(f''' {eta :.3f} {" ".join(([f"& {al[eta][d] :,.0f} " for d in dl]))} \\\\''')
 
         // expected - python output
-        // \begin{table}
-        //\begin{tabular}{r|rr}
         //   eta      10,     100,   1000,  10000, 100000,
         // 0.900,   9892,    9885,   9752,    598,    558  \\
         // 1.000,   9892,    9882,    566,    349,    338  \\
@@ -420,25 +418,12 @@ class TestComparisonFromAlpha {
         // ours
         //  nsamples, ballot comparison, theta = 0.51, assortTheta=0.509, N=10000, error-free
         // d (col) vs eta0 (row)
-        //      ,     10,    100,   1000,  10000,
-        // 0.900,   7499,   3001,    507,    421,
-        // 1.000,   7387,   1900,    392,    338,
-        // 1.009,   7377,   1825,    384,    332,
-        // 2.000,   5514,    358,    326,    326,
-        // 2.018,   5457,    356,    326,    326,
-
-        //  nsamples, ballot comparison, theta = 0.51, assortTheta=0.509, N=10000, error-free
-        // d (col) vs eta0 (row)
-        //      ,     10,    100,   1000,  10000,
-        // 0.900,   7499,   3001,    507,    421,
-        // 1.000,   7387,   1900,    392,    338,
-        // 1.009,   7377,   1825,    384,    332,
-        // 2.500,   3823,    328,    326,    326,
-        // 5.000,   1006,    326,    326,    326,
-        // 7.500,    539,    326,    326,    326,
-        //10.000,    400,    326,    326,    326,
-        //15.000,    331,    326,    326,    326,
-        //20.000,    326,    326,    326,    326,
+        //       :    10,    100,   1000,  10000, 100000,
+        // 0.900,   7499,   3001,    507,    421,    414,
+        // 1.000,   7387,   1900,    392,    338,    333,
+        // 1.009,   7377,   1825,    384,    332,    327,
+        // 2.000,   5514,    358,    326,    326,    326,
+        // 2.018,   5457,    356,    326,    326,    326,
     }
 
     // does significantly better....

@@ -1,17 +1,11 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.core.SampleFn
-import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TruncShrinkage
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.math.max
 import kotlin.test.Test
 
-class TestComparisonSingle {
+class TestAlphaMartComparison {
 
     @Test
     fun testComparisonSingle() {
@@ -32,6 +26,35 @@ class TestComparisonSingle {
 
         val result = doOneAlphaMartRun(sampler, m, eta0 = eta0, d = d, u = compareAssorter.upperBound)
         println(result)
+    }
+
+    @Test
+    fun testComparisonUpper() {
+        val N = 10000
+        val cvrMean = .52
+        val cvrs = makeCvrsByExactMean(N, cvrMean)
+
+        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+
+        val sampler = ComparisonNoErrors(cvrs, compareAssorter)
+        val theta = sampler.sampleMean()
+
+        val eta0 = 1.0 * theta
+        val d = 100
+
+        println("N=$N cvrMean=$cvrMean theta=$theta eta0=$eta0, d=$d compareAssorter.upperBound=${compareAssorter.upperBound}")
+
+        val result = doOneAlphaMartRun(sampler, N, eta0 = eta0, d = d, u = compareAssorter.upperBound)
+        println("\n${result}")
+
+        /*
+        println("\nupper=1.0")
+        sampler.reset()
+        val result1 = doOneAlphaMartRun(sampler, N, eta0 = eta0, d = d, u = 1.0)
+        println(result1)
+        println("% improvement = ${100.0 * result.sampleCount/result1.sampleCount}")
+
+         */
     }
 }
 

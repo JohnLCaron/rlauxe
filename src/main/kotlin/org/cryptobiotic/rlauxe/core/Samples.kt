@@ -98,6 +98,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     }
 
     override fun sample(): Double {
+        require (idx < N)
         val curr = cvrs[permutedIndex[idx++]]
         return cassorter.bassort(curr, curr) // mvr == cvr, no errors
     }

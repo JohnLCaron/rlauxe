@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/18/2024
+last update: 09/25/2024
 
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
@@ -22,10 +22,10 @@ Table of Contents
   * [Use Styles](#use-styles)
   * [Phantom Ballots](#phantom-ballots)
   * [ALPHA testing statistic](#alpha-testing-statistic)
-    * [Sampling with or without replacement](#sampling-with-or-without-replacement)
-    * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [BRAVO testing statistic](#bravo-testing-statistic)
     * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
+    * [Sampling with or without replacement](#sampling-with-or-without-replacement)
+    * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [Questions](#questions)
   * [Stratified audits using OneAudit (not done)](#stratified-audits-using-oneaudit-not-done)
   * [Simulations](#simulations)
@@ -97,7 +97,7 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
     assign the value 1/2, otherwise.
  ````
 
-For polling, the assorter function is A_wk,ℓj(MVR).
+For polling, the assorter function is this A_wk,ℓj(MVR).
 
 For a comparison audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
 
@@ -130,7 +130,7 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
     assign the value “0” if it has a mark for exactly one candidate and not wk
     assign the value 1/2, otherwise.
 ````
-For polling, the assorter function is A_wk,ℓj(MVR).
+For polling, the assorter function is this A_wk,ℓj(bi).
 
 For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
 
@@ -167,13 +167,13 @@ The assorter assigns an assort value in [0, upper] to the ballot, which is used 
 For comparison audits, the system has already created a CVR (cast vote record) for each ballot which is compared to the MVR.
 The overstatement error for the ith ballot is
 ````
-    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper    overstatement error (SHANGRLA eq 2, p 9)
+    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper    "overstatement error" (SHANGRLA eq 2, p 9)
       bi is the manual voting record (MVR) for the ith ballot
       ci is the cast-vote record for the ith ballot
       A() is the assorter function
 Let
      Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-     v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, the _diluted margin_).
+     v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
      τi ≡ (1 − ωi /upper) ≥ 0
      B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper) ≡ "comparison assorter" ≡ B(MVR, CVR)
 
@@ -184,12 +184,20 @@ and so B is an half-average assorter.
 
 Notes 
 * polling vs comparison audits differ only in the assorter function.
-* The comparison assorter B needs Ā(c) ≡ the average CVR assort value.
-* Ā(c) should have the diluted margin as the denominator.
+* The comparison assorter B needs Ā(c) ≡ the average CVR assort value, > 0.5.
+* Ā(c) should have the diluted margin as the denominator. TODO
 (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
 Diluted refers to the fact that the denominator is the number of ballot cards, which is
 greater than or equal to the number of valid votes.)
-* If overstatement error is always zero (no errors in CRV), the assort value is 1 / (2.0 - margin/this.assorter.upperBound())
+* If overstatement error is always zero (no errors in CRV), the assort value is 
+      noerror = 1 / (2 - margin/assorter.upperBound()) 
+              = 1 / (3 - 2 * awinnerAvg/assorter.upperBound())
+              > 0.5 since awinnerAvg > 0.5
+* The possible values of the bassort function are:
+      {0, .5, 1, 1.5, 2} * noerror
+* When cvr = mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
+* However the convergence is slower than for polling (!), unless one "amplifies" the estimate function.
+
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
@@ -219,6 +227,7 @@ To conduct the audit, sample integers between 1 and NC.
 
 See note in SHANGRLA Section 3.4 on Colorado redacted ballots.
 
+
 ## Use Styles
 
 See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
@@ -238,6 +247,7 @@ see overstatement_assorter() in core/Assertion
     If `use_style == False`, then if the CVR contains the contest but the MVR does not,
     the MVR is considered to be a non -vote in the contest .
 
+
 ## Phantom Ballots
 
 See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
@@ -249,6 +259,7 @@ See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banu
 
     A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
     designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
+
 
 ## ALPHA testing statistic
 
@@ -284,17 +295,104 @@ Tj          ALPHA nonnegative supermartingale (Tj)_j∈N  starting at 1
 	P{∃j : Tj ≥ α−1 } ≤ α, if θ < µ (9) (follows from Ville's inequality)
 ````
 
+### BRAVO testing statistic
+
+BRAVO is based on Wald’s sequential probability ratio test (SPRT) of the simple hypothesis θ = µ against
+a simple alternative θ = η from IID Bernoulli(θ) observations.
+
+ALPHA is a simple adaptive extension of BRAVO. It is motivated
+by the SPRT for the Bernoulli and its optimality when the simple alternative is true.
+
+BRAVO is ALPHA with the following restrictions:
+* the sample is drawn with replacement from ballot cards that do have a valid vote for the
+reported winner w or the reported loser ℓ (ballot cards with votes for other candidates or
+non-votes are ignored)
+* ballot cards are encoded as 0 or 1, depending on whether they have a valid vote for the
+reported winner or for the reported loser; u = 1 and the only possible values of xi are 0
+and 1
+* µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement
+* ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
+Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected
+
+
+### AlphaMart formula as generalization of Wald SPRT:
+
+Bravo: Probability of drawing y if theta=n over probability of drawing y if theta=m:
+
+    y*(n/m) + (1-y)*(1-n)/(1-m)
+
+makes sense where y is 0 or 1, so one term or the other vanishes. But maybe that should really be
+
+    (y*n + (1-y)*(1-n)) / (y*m + (1-y)*(1-m))
+
+?? These agree when y=0 or 1.
+
+Alpha:
+
+Step 1: Replace discrete y with continuous x:
+
+    (1a) x*(n/m) + (1-x)*(1-n)/(1-m)
+
+Its not obvious what this is now. Still the probability ratio?? Should you really use
+
+    (1b) (x*n + (1-x)*(1-n)) / (x*m + (1-x)*(1-m))
+
+?? Turns out these equations are the same when mu = 1/2. then mu = (1-mu) and
+
+    (1a) x*n/m + (1-x)*(1-n)/(1-m) = (x*n + (1-x)*(1-n) / 2
+
+    (1b denominator) (x*m + (1-x)*(1-m)) = (x + (1-x))/2 = 1/2
+
+    (1c) (x*n + (1-x)(1-n)) / (1/2)
+
+(I think they are not identical for the general case of m != 1/2) TODO
+
+Step 2: Generalize range [0,1] to [0,upper]
+
+I think you need to replace x with x/u, (1-x) with (u-x)/u, n with n/u, etc
+
+So then (1a) becomes
+
+    (2a) (x/u*(n/m) + ((u-x)/u)*(u-n)/(u-m))
+       = (x*n/m + (u-x)*(u-n)/(u-m))/u
+
+But 1b becomes
+
+    (2b) (x/u)*(n/u) + ((u-x)/u)*((u-n)/u)) / (x/u)*(m/u) + ((u-x)/u)*((u-m)/u))  
+       = (x*n + (u-x)*(u-n)) / (x*m + (u-x)*(u-m))  
+
+note the lack of division by u, since every term has a u*u denominator, so all those cancel out.
+when m=1/2, 1c becomes
+
+    (2c) (x*n + (u-x)*(u-n)) / (x*m + (u-x)*(u-m)) = (x*n + (u-x)*(u-n)) / (u/2)
+
+
+Step 3: Use estimated nj instead of fixed n, and mj instead of fixed m = 1/2 when sampling without replacement:
+
+    (3a) (xj * (nj/mj) + (u-xj) * (u-nj)/(u-mj)) / u
+
+    (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj)) 
+
+    (3c) (xj*nj + (u-xj)*(u-nj)) / (u/2)  (with replacement, or m ~ 1/2, eg large N)
+
+Note 3b and 3c dont work at all when x = u/2, which is exactly what happens for the bulk of comparisons (cvr == mvr). 
+See TestProbRatios.testNumerics(). The approximation 3a perhaps was chosen to avoid that problem?
+
+
 ### Sampling with or without replacement
 
-We need E(Xj | X^j−1 ) computed with the null hypothosis that θ == µ == 1/2. 
+We need E(Xj | X^j−1 ) computed with the null hypothosis that θ == µ == 1/2.
 
 Sampling with replacement means that this value is always µ == 1/2.
 
 For sampling without replacement from a population with mean µ, after draw j - 1, the mean of
-the remaining numbers is 
-`(N * µ − Sum(X^j-1)/(N − j + 1).`
-If this ever becomes less than zero, the null hypothesis is certainly false. When allowed to sample all N
-values without replacement, eventually this value becomes less than zero.
+the remaining numbers is
+
+      (N * µ − Sum(X^j-1)/(N − j + 1).
+
+If this ever becomes less than zero, the null hypothesis is certainly false.
+When allowed to sample all N values without replacement, eventually this value becomes less than zero.
+
 
 ### Truncated shrinkage estimate of the population mean
 
@@ -331,56 +429,6 @@ reported results. The smaller d is, the faster the method adapts to the true pop
 but the higher the variance is. Whatever d is, the relative weight of the reported vote shares
 decreases as the sample size increases.
 ````
-
-### BRAVO testing statistic
-
-BRAVO is ALPHA with the following restrictions:
-* the sample is drawn with replacement from ballot cards that do have a valid vote for the
-reported winner w or the reported loser ℓ (ballot cards with votes for other candidates or
-non-votes are ignored)
-* ballot cards are encoded as 0 or 1, depending on whether they have a valid vote for the
-reported winner or for the reported loser; u = 1 and the only possible values of xi are 0
-and 1
-* µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement
-* ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
-Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected
-
-### AlphaMart formula as generalization of Wald SPRT:
-
-Bravo: Probability of drawing yk if theta=nu over probability of drawing yk if theta=mu:
-
-    yk*(nu/mu) + (1-yk)*(1-nu)/(1-mu)
-
-makes sense where yk is 0 or 1, so one term or the other vanishes.
-
-Alpha:
-
-Step 1: Replace discrete yk with continuous X_j:
-
-    X_j*(nu/mu) + (1-X_j)*(1-nu)/(1-mu)
-
-Its not obvious what this is now. Still the probability ratio?? Could you just use
-
-    ( X_j*nu + (1-X_j)*(1-nu) ) / ( X_j*mu + (1-X_j)*(1-mu) )
-
-
-Step 2: Generalize range [0,1] to [0,upper]
-
-    (X_j*(nu/mu) + (upper-X_j)*(upper-nu)/(upper-mu))/upper
-
-Step 3: Use estimated nu instead of fixed nu, and calculated mu when sampling without replacement.
-
-    (X_j * (nu_j/mu_j) + (upper-X_j) * (upper-nu_j)/(upper-mu_j))/upper
-
-looks like a weighted average now:
-
-    w * (nu_j/mu_j) + (1-w) * (upper-nu_j)/(upper-mu_j)
-
-    where 
-        w = X_j/upper, the normalized value of Xj.
-        nu_j/mu_j = ratio of hypothesised means
-        (upper - nu_j)/(upper - mu_j) = (1 - nu_j/upper) / (1 - mu_j/upper)
-
 
 ### Questions
 

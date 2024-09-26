@@ -320,7 +320,7 @@ class TestComparisonFromAlpha {
         //c = 1/2
         //etal = [0.9, 1, u, 2, 2*u]
         //al = {}
-        val reps = 100
+        val reps = 1000
         val u = 2.0/(2-assorter_margin)
         assertEquals(1.009081735, u, doublePrecision)
         val dl = listOf(10, 100, 1000, 10000, 100000)
@@ -369,6 +369,7 @@ class TestComparisonFromAlpha {
             }
         }
 
+        println("TestComparisonFromAlpha.comparisonSimulation ntrials=$reps")
         val title = " nsamples, ballot comparison, theta = $theta, assortTheta=$assorter_mean, N=$N, error-free\n d (col) vs eta0 (row)"
         plotSRS(srs, title, true, colf="%6.0f", rowf="%6.3f",
             colFld = { srt: SRT -> srt.d.toDouble() },
@@ -473,7 +474,7 @@ class TestComparisonFromAlpha {
 
         val d = 100
         val N = 10000
-        val reps = 100
+        val reps = 1000
 
         /* what to make of this ??
         val assorter_mean = (9000 * thetas.last() + 1000 * .5) / N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
@@ -509,16 +510,18 @@ class TestComparisonFromAlpha {
             }
         }
 
-        val title = " nsamples, ballot comparison, N=$N, d = $d, error-free\n theta (col) vs eta0 (row)"
+        println("TestComparisonFromAlpha.comparisonReplication ntrials=$reps")
+        val title = " nsamples, ballot comparison, N=$N, d-$d, error-free\n theta (col) vs eta0 (row)"
         plotSRS(srs, title, true, colf="%6.3f", rowf="%6.1f",
             colFld = { srt: SRT -> srt.reportedMean.toDouble() },
             rowFld = { srt: SRT -> srt.eta0 },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
-        //  nsamples, ballot comparison, N=10000, d = 100, error-free
+        // TestComparisonFromAlpha.comparisonReplication ntrials=1000
+        // nsamples, ballot comparison, N=10000, d = 100, error-free
         // theta (col) vs eta0 (row)
-        //      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
+        //       : 0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
         //   0.9,   9955,   9768,   9343,   8594,   7511,   2357,    501,    243,    157,    115,     70,     51,     34,     26,
         //   1.0,   9951,   9720,   9127,   7994,   6410,   1468,    336,    174,    116,     87,     54,     40,     27,     21,
         //   1.5,   9917,   9027,   6008,   3242,   1864,    427,    155,     98,     74,     59,     39,     29,     19,     14,

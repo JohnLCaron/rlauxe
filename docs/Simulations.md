@@ -1,5 +1,5 @@
 # Simulations
-last update: 09/20/2024
+last update: 09/26/2024
 
 Table of Contents
 <!-- TOC -->
@@ -49,6 +49,7 @@ stddev samples vs theta
 | 50000  | 6873.319 | 2708.147 | 1274.291 | 740.712 | 475.265 | 194.538 | 130.865 | 51.086 | 26.439 |
 
 * no use for the parameter d in this case. Likely useful only for when eta0 != theta
+* See PlotSampleSizes.kt
 
 ### how to set the parameter d?
 
@@ -64,7 +65,7 @@ but the higher the variance is. Whatever d is, the relative weight of the report
 decreases as the sample size increases.
 ````
 
-See [output](docs/DiffMeanOutput.txt) of DiffMeans.kt and PlotDiffMeans.kt. This is done for each value of
+See [output](DiffMeanOutput.txt) of DiffMeans.kt and PlotDiffMeans.kt. This is done for each value of
 N and theta.
 
 A few representative plots are at 
@@ -81,6 +82,7 @@ Notes:
 * High values of d work well when reported mean ~= theta. 
 * Low values of d work better as mean difference = (reported mean - theta) grows.
 * The question is, how much weight to give "outliers", at the expense of improving success rate for "common case" of reported mean ~= theta ?
+* See CreatePollingDiffMeans.kt
 
 To Investigate
 * Does it make sense to use small values of d for large values of reported mean? because it will only matter if (reported mean - theta) is large.
@@ -113,30 +115,34 @@ This is because the SHANGRLA comparison assorter reduces the margin by approx ha
   0.7000   0.4000   0.6250   0.2500   0.6250
 ````
 
+See TestComparisonAssorter.testBvsV().
+
 Tables 7 and 8 in ALPHA, showing comparison ballot results, switch from using theta to using "mass at 1". Which is
 not very clear (see [section](#unrealistic-simulations-in-the-alpha-paper) below).
 Also, the very small sample sizes in Table 7 of ALPHA are surprising. Really need only 5 ballots out of 500,000 
 to reject the null hypothosis?
 
-However, see TestComparisonFromAlpha.kt; setting eta0 very high brings the numbers down such that comparison is much better
+However, see TestComparisonFromAlpha.comparisonReplication(): setting eta0 very high brings the numbers down such that comparison is much better
 than polling, and can deal even with very small margins:
 
 ````
-nsamples, ballot comparison, N=10000, d = 100, error-free; theta (col) vs eta0 (row)
-      ,  0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
- 0.900,   9955,   9766,   9336,   8571,   7461,   2257,    464,    221,    140,    101,     59,     41,     25,     18,
- 1.000,   9951,   9718,   9115,   7957,   6336,   1400,    314,    159,    104,     77,     46,     32,     20,     14,
- 1.500,   9916,   9014,   5954,   3189,   1827,    418,    153,     98,     74,     59,     39,     29,     19,     14,
- 2.000,   9825,   6722,   2923,   1498,    937,    309,    148,     98,     74,     59,     39,     29,     19,     14,
- 5.000,   5173,   1620,    962,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
- 7.500,   3310,   1393,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-10.000,   2765,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-15.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-20.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
+TestComparisonFromAlpha.comparisonReplication ntrials=1000
+ nsamples, ballot comparison, N=10000, d = 100, error-free
+ theta (col) vs eta0 (row)
+       : 0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
+   0.9,   9955,   9768,   9343,   8594,   7511,   2357,    501,    243,    157,    115,     70,     51,     34,     26, 
+   1.0,   9951,   9720,   9127,   7994,   6410,   1468,    336,    174,    116,     87,     54,     40,     27,     21, 
+   1.5,   9917,   9027,   6008,   3242,   1864,    427,    155,     98,     74,     59,     39,     29,     19,     14, 
+   2.0,   9826,   6756,   2956,   1517,    949,    312,    148,     98,     74,     59,     39,     29,     19,     14, 
+   5.0,   5185,   1625,    963,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14, 
+   7.5,   3315,   1393,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14, 
+  10.0,   2768,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14, 
+  15.0,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14, 
+  20.0,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14, 
 ````
 
-The idea of setting eta0 very high seems suspect. Examining the number of success vs failures shows that you cant set eta0 higher
-than the upper limit of the comparison assorter, or else you don't detect when theta <= .5 (the null hypothosis is true), as the following shows.
+However, setting eta0 very high is suspect. Below, we see that setting eta0 higher
+than the upper limit of the comparison assorter creates false positives and so exceeds the risk limit.
 
 In the plots below, we simulate the reported mean of the cvrs as exactly 0.5% higher than theta (the true mean). 
 So for example when the reported cvr mean assort (aka Āc in SHANGRLA section 3.2) is 0.501, theta is .501 - .005 = 0.496.
@@ -145,14 +151,15 @@ We show theta vs various values of _eta0Factor_, where eta0 = eta0Factor * noerr
 assort value when the cvrs and the mvrs agree exactly (all overstatement errors are 0). 
 The value noerrors is a simple function of Āc: _noerrors = 1.0 / (3 - 2 * Āc)_.
 
-In the table below, the tables use eta0 = eta0Factor * noerrors.
+The tables below use eta0 = eta0Factor * noerrors.
 The upper bounds of the comparison assorter is 2 * noerrors, represented by the row with etaFactor = 2.0.
 
 Using eta0 == noerrors, there are no false positives. When eta0Factor is between 1.0 and 2.0, the false positives are
-(mostly) all less than 5%. When eta0 >= 2.0 * noerrors, the algorithm no longer stays within the risk limit.
+less than 5%. When eta0 >= 2.0 * noerrors, the algorithm no longer stays within the risk limit.
 
 ````
-Comparison ntrials=1000, N=10000, d=10000 cvrMeanDiff=-0.005; theta (col) vs etaFactor (row)
+ComparisonWithErrors.cvrComparisonFailure ntrials=1000, N=10000, d=10000 cvrMeanDiff=-0.005; theta (col) vs etaFactor (row)
+
 cvrMean: 0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
 successes
   theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570,  0.595,  0.645,  0.695, 
@@ -191,184 +198,144 @@ pct nsamples needed
 The "pct nsamples" is the number of samples needed for the successful RLAs (lower is better). 
 These get dramatically smaller as etaFactor gets larger. But eta0Factor >= upperLimit are bogus.
 
-Going back to N vs theta plots, for various values of eta0Factor, we want to see the influence of eta0Factor.
-(The value of d also matters, but for now, we set it high which tends to exaggerate the effect of eta0Factor).
-Here are the ratio of the number of samples / min number of samples, as well as the geometric average:
+Going back to N vs theta plots, for various values of eta0Factor
+(the value of d also matters, but for now, we set it high which tends to exaggerate the effect of eta0Factor),
+here are the ratio of the number of samples / min number of samples across eta0Factor
+(so 1.0 means that is the best setting of etaFactor),
+as well as the geometric average of the ratios:
 
 ````
-samplePct ratios across eta0Factor: ntrials=1000, d = 10000, cvrMeanDiff=-0.005, theta(col) vs N(row)
+ComparisonWithErrors.comparisonNvsTheta samplePct ratios across cvrMean: ntrials=1000, d = 10000, cvrMeanDiff=-0.005, theta(col) vs N(row)
+  theta: 0.501,  0.502,  0.503,  0.504,  0.505,  0.515,  0.525,  0.535,  0.545,  0.595,  0.695, 
 
 ratio eta0Factor=1.0,  theta(col) vs N(row)
-cvrMean: 0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
-  1000,  1.468,  3.336,  4.965,  5.994,  6.708,  6.874,  6.767,  5.486,  5.023, 
-  5000,  3.395, 10.264, 12.493, 12.662, 11.789,  9.500,  8.179,  6.350,  5.414, 
- 10000,  5.406, 15.133, 16.062, 14.679, 13.174, 10.177,  8.356,  6.141,  5.434, 
- 20000,  9.454, 20.869, 18.711, 15.999, 14.270, 10.417,  8.312,  6.405,  5.577, 
- 50000, 17.334, 25.519, 20.855, 16.968, 14.488, 10.579,  8.307,  6.842,  5.405, 
-geometric mean = 8.789756163050848
+cvrMean: 0.506,  0.507,  0.508,  0.509,  0.510,  0.520,  0.530,  0.540,  0.550,  0.600,  0.700, 
+  1000,  2.019,  1.094,  1.186,  1.340,  1.445,  3.340,  4.965,  5.953,  6.674,  6.391,  4.910, 
+  5000,  1.140,  1.569,  2.108,  2.711,  3.406, 10.475, 12.530, 12.811, 11.827,  8.009,  5.307, 
+ 10000,  1.297,  2.087,  3.039,  4.334,  5.632, 14.828, 16.177, 14.938, 12.983,  8.252,  5.546, 
+ 20000,  1.554,  2.956,  4.954,  7.200,  9.375, 19.493, 18.613, 16.350, 13.975,  8.275,  5.098, 
+ 50000,  2.085,  5.583,  9.922, 13.693, 17.645, 24.982, 20.751, 17.162, 14.598,  8.433,  5.559, 
+geometric mean = 5.822488696803993
 
 ratio eta0Factor=1.25,  theta(col) vs N(row)
-cvrMean: 0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
-  1000,  1.343,  1.930,  2.144,  2.229,  2.307,  2.285,  2.362,  2.163,  2.178, 
-  5000,  1.514,  2.153,  2.306,  2.420,  2.423,  2.350,  2.362,  2.257,  2.249, 
- 10000,  1.481,  2.207,  2.365,  2.395,  2.448,  2.380,  2.340,  2.187,  2.233, 
- 20000,  1.570,  2.299,  2.423,  2.420,  2.512,  2.402,  2.300,  2.250,  2.281, 
- 50000,  1.577,  2.269,  2.399,  2.441,  2.455,  2.383,  2.281,  2.397,  2.192, 
-geometric mean = 2.1980639614241024
+cvrMean: 0.506,  0.507,  0.508,  0.509,  0.510,  0.520,  0.530,  0.540,  0.550,  0.600,  0.700, 
+  1000,  2.013,  1.088,  1.158,  1.271,  1.315,  1.926,  2.160,  2.229,  2.310,  2.215,  2.141, 
+  5000,  1.081,  1.249,  1.354,  1.437,  1.525,  2.201,  2.329,  2.444,  2.425,  2.311,  2.204, 
+ 10000,  1.109,  1.243,  1.303,  1.439,  1.552,  2.153,  2.384,  2.444,  2.404,  2.318,  2.278, 
+ 20000,  1.105,  1.188,  1.325,  1.461,  1.561,  2.155,  2.373,  2.478,  2.437,  2.277,  2.089, 
+ 50000,  1.041,  1.178,  1.337,  1.447,  1.569,  2.212,  2.391,  2.454,  2.463,  2.324,  2.268, 
+geometric mean = 1.7815724664178847
 
 ratio eta0Factor=1.5,  theta(col) vs N(row)
-cvrMean: 0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
-  1000,  1.101,  1.255,  1.313,  1.323,  1.360,  1.365,  1.426,  1.362,  1.444, 
-  5000,  1.000,  1.246,  1.324,  1.372,  1.370,  1.363,  1.424,  1.398,  1.443, 
- 10000,  1.000,  1.235,  1.313,  1.366,  1.375,  1.376,  1.399,  1.341,  1.438, 
- 20000,  1.000,  1.271,  1.337,  1.354,  1.396,  1.383,  1.366,  1.374,  1.475, 
- 50000,  1.000,  1.278,  1.317,  1.356,  1.376,  1.388,  1.356,  1.504,  1.411, 
-geometric mean = 1.3196811521015344
+cvrMean: 0.506,  0.507,  0.508,  0.509,  0.510,  0.520,  0.530,  0.540,  0.550,  0.600,  0.700, 
+  1000,  1.967,  1.045,  1.055,  1.100,  1.079,  1.259,  1.308,  1.323,  1.360,  1.348,  1.415, 
+  5000,  1.000,  1.000,  1.000,  1.006,  1.015,  1.284,  1.339,  1.370,  1.375,  1.380,  1.418, 
+ 10000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.203,  1.325,  1.367,  1.361,  1.381,  1.469, 
+ 20000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.210,  1.310,  1.372,  1.376,  1.347,  1.337, 
+ 50000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.238,  1.328,  1.355,  1.395,  1.369,  1.452, 
+geometric mean = 1.1960415499515684
 
 ratio eta0Factor=1.75,  theta(col) vs N(row)
-cvrMean: 0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
-  1000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.056,  1.035,  1.072, 
-  5000,  1.036,  1.000,  1.000,  1.000,  1.000,  1.000,  1.028,  1.066,  1.078, 
- 10000,  1.009,  1.000,  1.000,  1.000,  1.000,  1.000,  1.016,  1.000,  1.083, 
- 20000,  1.169,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.031,  1.099, 
- 50000,  1.149,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.114,  1.050, 
-geometric mean = 1.0234372204868512
+cvrMean: 0.506,  0.507,  0.508,  0.509,  0.510,  0.520,  0.530,  0.540,  0.550,  0.600,  0.700, 
+  1000,  1.788,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.065, 
+  5000,  1.002,  1.070,  1.052,  1.000,  1.000,  1.000,  1.000,  1.000,  1.000,  1.014,  1.064, 
+ 10000,  1.073,  1.175,  1.125,  1.115,  1.058,  1.000,  1.000,  1.000,  1.000,  1.000,  1.096, 
+ 20000,  1.187,  1.292,  1.263,  1.250,  1.119,  1.000,  1.000,  1.000,  1.000,  1.000,  1.008, 
+ 50000,  1.416,  1.654,  1.508,  1.331,  1.239,  1.000,  1.000,  1.000,  1.000,  1.000,  1.106, 
+geometric mean = 1.0815679797954942
 
 ratio eta0Factor=1.9999999999999998,  theta(col) vs N(row)
-cvrMean: 0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700, 
-  1000,  1.163,  1.363,  1.248,  1.134,  1.162,  1.043,  1.000,  1.000,  1.000, 
-  5000,  1.944,  1.825,  1.554,  1.369,  1.254,  1.076,  1.000,  1.000,  1.000, 
- 10000,  2.459,  2.193,  1.584,  1.433,  1.237,  1.066,  1.000,  1.001,  1.000, 
- 20000,  3.506,  2.291,  1.768,  1.417,  1.260,  1.083,  1.021,  1.000,  1.000, 
- 50000,  3.962,  2.361,  1.769,  1.427,  1.295,  1.092,  1.021,  1.000,  1.000, 
-geometric mean = 1.3339424034953913
+cvrMean: 0.506,  0.507,  0.508,  0.509,  0.510,  0.520,  0.530,  0.540,  0.550,  0.600,  0.700, 
+  1000,  1.000,  1.008,  1.030,  1.135,  1.134,  1.332,  1.246,  1.162,  1.089,  1.019,  1.000, 
+  5000,  1.060,  1.338,  1.623,  1.779,  1.830,  1.913,  1.542,  1.321,  1.208,  1.000,  1.000, 
+ 10000,  1.200,  1.707,  2.094,  2.414,  2.548,  2.042,  1.614,  1.343,  1.246,  1.000,  1.000, 
+ 20000,  1.411,  2.231,  2.928,  3.157,  3.384,  2.166,  1.654,  1.425,  1.234,  1.018,  1.000, 
+ 50000,  1.861,  3.611,  4.449,  4.232,  4.159,  2.086,  1.718,  1.429,  1.293,  1.046,  1.000, 
+geometric mean = 1.5539324296871986
 ````
 
 The larger values of eta0Factor do better, and eta0Factor=1 is sometimes 20x worse than the smallest amount.
+However, as the margin gets smaller, eta0Factor=1 does better.
 More studies are needed varying across d, cvrMeanDiff, etc.
 
-It seems that the eta0Factor acts as an accelerant, making each sampled value count
-more towards accepting or rejecting the null hypotheses. Not clear if that's a fair thing to do.
+It seems that eta0Factor acts as an accelerant, making each sampled value count
+more towards accepting or rejecting the null hypotheses. Not clear if that's a "fair" thing to do. And if it is,
+can it be done with polling?
 
 The above results show average number of samples needed and as a percentage of N. This ignores the large variance in the distribution.
 What we really want to know is what percentage of trials succeed at various cut-off values (where a full hand count will be more
 efficient than sampling a large percentage of the ballots.)
 
-A more germane simulation is to keep a histogram of the percentage "successful RLA", as deciles. Below are the
-percentage "successful RLA" (higher is better) for audits with sampling cutoffs at 10, 20, 30, 40, and 50% of N.
+A more germane simulation is to keep a histogram of the percentage "successful RLA", as deciles. 
+Below are the
+percentage "successful RLA" (higher is better) for audits with sampling cutoffs at 10, 20, 30, 40, 50, and 100% of N.
 The reported cvr means have been adjusted to show details around close elections.
+Remember that "successRLA" are false positives when theta <= 0.5.
 
 ````
-Comparison ntrials=1000, N=10000, d=10000 cvrMeanDiff=-0.005; theta (col) vs etaFactor (row)
-cvrMean: 0.506,  0.507,  0.508,  0.509,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,
+ComparisonWithErrors.cvrComparisonFailure ntrials=10000, N=10000, d=10000 cvrMeanDiff=-0.005; theta (col) vs etaFactor (row)
+cvrMean: 0.501,  0.502,  0.503,  0.504,  0.505,  0.506,  0.508,  0.510,  0.520,  0.530,  0.540,
 
-% successRLA, for sampleMaxPct=10: 
-  theta: 0.501,  0.502,  0.503,  0.504,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0, 
-  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,   80.0,  100.0,  100.0,  100.0,  100.0, 
-  1.50,    0.0,    0.7,    3.2,    7.3,   22.5,   98.5,  100.0,  100.0,  100.0,  100.0, 
-  1.75,    3.7,    9.9,   13.9,   26.5,   32.9,   97.6,   99.9,  100.0,  100.0,  100.0, 
-  1.99,    7.1,   11.4,   16.2,   21.7,   25.3,   77.2,   96.1,   99.8,  100.0,  100.0, 
+% successRLA, for sampleMaxPct=10:
+  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535,
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   81.1,  100.0,  100.0,
+  1.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    2.9,   20.4,   98.5,  100.0,  100.0,
+  1.75,    0.0,    0.0,    0.0,    0.0,    1.6,    3.1,   14.3,   32.2,   97.3,  100.0,  100.0,
+  1.99,    0.0,    0.0,    0.0,    1.9,    4.6,    7.5,   16.4,   26.3,   76.0,   96.0,   99.8,
 
-% successRLA, for sampleMaxPct=20: 
-  theta: 0.501,  0.502,  0.503,  0.504,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   77.8,  100.0,  100.0, 
-  1.25,    0.0,    0.2,    0.9,    6.8,   18.6,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.50,    5.2,   14.7,   29.3,   48.0,   68.7,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.75,    9.7,   21.0,   31.9,   47.0,   64.8,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.99,    7.9,   13.7,   19.2,   25.8,   30.6,   95.3,  100.0,  100.0,  100.0,  100.0, 
+% successRLA, for sampleMaxPct=20:
+  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535,
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   77.0,
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    1.2,   18.9,  100.0,  100.0,  100.0,
+  1.50,    0.0,    0.0,    0.0,    0.0,    0.7,    4.5,   29.5,   68.0,  100.0,  100.0,  100.0,
+  1.75,    0.0,    0.0,    0.1,    0.8,    3.5,    9.1,   32.8,   62.7,  100.0,  100.0,  100.0,
+  1.99,    0.0,    0.0,    0.5,    2.0,    5.1,    8.8,   19.3,   33.3,   93.8,  100.0,  100.0,
 
-% successRLA, for sampleMaxPct=30: 
-  theta: 0.501,  0.502,  0.503,  0.504,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   20.9,  100.0,  100.0,  100.0, 
-  1.25,    0.2,    2.8,   13.6,   43.4,   70.7,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.50,    9.4,   28.1,   49.3,   76.1,   90.5,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.75,   11.3,   27.1,   43.7,   62.0,   79.9,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.99,    8.1,   14.1,   20.8,   28.4,   36.0,   99.9,  100.0,  100.0,  100.0,  100.0, 
+% successRLA, for sampleMaxPct=30:
+  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535,
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   19.5,  100.0,
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.1,   15.0,   72.1,  100.0,  100.0,  100.0,
+  1.50,    0.0,    0.0,    0.0,    0.1,    1.7,    8.7,   51.5,   90.6,  100.0,  100.0,  100.0,
+  1.75,    0.0,    0.0,    0.1,    1.0,    4.3,   11.5,   44.6,   80.2,  100.0,  100.0,  100.0,
+  1.99,    0.0,    0.0,    0.5,    2.0,    5.1,    9.0,   20.9,   38.7,   99.6,  100.0,  100.0,
 
-% successRLA, for sampleMaxPct=40: 
-  theta: 0.501,  0.502,  0.503,  0.504,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0, 
-  1.25,    1.2,   12.9,   41.4,   79.8,   95.5,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.50,   13.7,   41.6,   66.3,   91.6,   98.8,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.75,   13.5,   31.4,   53.3,   77.0,   91.4,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.99,    8.2,   14.6,   22.0,   31.5,   41.7,  100.0,  100.0,  100.0,  100.0,  100.0, 
+% successRLA, for sampleMaxPct=40:
+  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535,
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    1.1,   43.1,   96.1,  100.0,  100.0,  100.0,
+  1.50,    0.0,    0.0,    0.0,    0.2,    2.4,   13.2,   70.6,   98.3,  100.0,  100.0,  100.0,
+  1.75,    0.0,    0.0,    0.1,    1.0,    4.5,   13.0,   55.3,   91.5,  100.0,  100.0,  100.0,
+  1.99,    0.0,    0.0,    0.5,    2.0,    5.1,    9.1,   22.4,   45.3,  100.0,  100.0,  100.0,
 
-% successRLA, for sampleMaxPct=50: 
-  theta: 0.501,  0.502,  0.503,  0.504,  0.505,  0.515,  0.525,  0.535,  0.545,  0.570, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.5,  100.0,  100.0,  100.0,  100.0, 
-  1.25,    3.0,   28.3,   70.6,   96.4,   99.9,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.50,   17.6,   53.5,   83.0,   97.9,   99.9,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.75,   15.2,   36.5,   64.6,   88.3,   98.7,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.99,    8.3,   14.7,   23.5,   37.7,   51.5,  100.0,  100.0,  100.0,  100.0,  100.0, 
+% successRLA, for sampleMaxPct=50:
+  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535,
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.3,  100.0,  100.0,
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.1,    3.2,   72.1,   99.9,  100.0,  100.0,  100.0,
+  1.50,    0.0,    0.0,    0.0,    0.2,    3.0,   17.5,   85.2,   99.9,  100.0,  100.0,  100.0,
+  1.75,    0.0,    0.0,    0.1,    1.0,    4.7,   14.4,   66.3,   97.8,  100.0,  100.0,  100.0,
+  1.99,    0.0,    0.0,    0.5,    2.0,    5.2,    9.2,   24.2,   56.3,  100.0,  100.0,  100.0,
 
-````
-We can combine these plots with the false positives to get a sense of both successes and failures.
-Below, false positives are shown as negative "successRLA".
-
-````
-Comparison ntrials=1000, N=10000, d=10000 cvrMeanDiff=-0.005; theta (col) vs etaFactor (row)
-cvrMean: 0.501,  0.502,  0.503,  0.504,  0.505,  0.506,  0.508,  0.510,  0.520,  0.530,  0.540, 
-
-% successRLA, for sampleMaxPct=10: 
-  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0, 
-  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   81.6,  100.0,  100.0, 
-  1.50,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    2.7,   21.3,   98.3,  100.0,  100.0, 
-  1.75,    0.0,    0.0,    0.0,    0.0,   -1.5,    2.9,   14.8,   30.8,   96.7,  100.0,  100.0, 
-  1.99,    0.0,    0.0,    0.0,   -2.0,   -4.7,    8.4,   19.1,   27.5,   76.7,   97.0,   99.6, 
-
-% successRLA, for sampleMaxPct=20: 
-  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   77.2, 
-  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.8,   18.1,  100.0,  100.0,  100.0, 
-  1.50,    0.0,    0.0,    0.0,    0.0,   -0.6,    4.6,   26.2,   67.7,  100.0,  100.0,  100.0, 
-  1.75,    0.0,    0.0,    0.0,   -1.7,   -3.1,    8.1,   33.3,   62.7,  100.0,  100.0,  100.0, 
-  1.99,    0.0,   -0.1,   -0.5,   -2.1,   -5.5,    9.3,   21.2,   33.2,   94.9,  100.0,  100.0, 
-
-% successRLA, for sampleMaxPct=30: 
-  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,   21.7,  100.0, 
-  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    0.3,   14.6,   73.2,  100.0,  100.0,  100.0, 
-  1.50,    0.0,    0.0,    0.0,   -0.2,   -1.1,    8.6,   46.1,   91.7,  100.0,  100.0,  100.0, 
-  1.75,    0.0,    0.0,    0.0,   -1.9,   -3.8,   10.9,   43.9,   79.9,  100.0,  100.0,  100.0, 
-  1.99,    0.0,   -0.1,   -0.5,   -2.2,   -5.5,    9.4,   22.6,   38.3,   99.6,  100.0,  100.0, 
-
-% successRLA, for sampleMaxPct=40: 
-  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0, 
-  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    1.1,   42.9,   94.2,  100.0,  100.0,  100.0, 
-  1.50,    0.0,    0.0,    0.0,   -0.3,   -2.0,   11.8,   65.7,   98.5,  100.0,  100.0,  100.0, 
-  1.75,    0.0,    0.0,    0.0,   -1.9,   -4.2,   12.4,   55.1,   91.6,  100.0,  100.0,  100.0, 
-  1.99,    0.0,   -0.1,   -0.5,   -2.2,   -5.6,    9.4,   24.1,   45.3,  100.0,  100.0,  100.0, 
-
-% successRLA, for sampleMaxPct=50: 
-  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.5,  100.0,  100.0, 
-  1.25,    0.0,    0.0,    0.0,    0.0,    0.0,    3.3,   72.9,  100.0,  100.0,  100.0,  100.0, 
-  1.50,    0.0,    0.0,    0.0,   -0.3,   -2.7,   15.5,   83.6,  100.0,  100.0,  100.0,  100.0, 
-  1.75,    0.0,    0.0,    0.0,   -1.9,   -4.2,   14.5,   67.1,   98.1,  100.0,  100.0,  100.0, 
-  1.99,    0.0,   -0.1,   -0.5,   -2.2,   -5.6,    9.4,   26.5,   56.3,  100.0,  100.0,  100.0, 
-
-% successRLA, for sampleMaxPct=100: 
-  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535, 
-  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.25,    0.0,    0.0,    0.0,    0.0,   -0.6,   99.8,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.50,    0.0,    0.0,    0.0,   -0.3,   -3.7,   99.2,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.75,    0.0,    0.0,    0.0,   -1.9,   -4.4,   89.8,  100.0,  100.0,  100.0,  100.0,  100.0, 
-  1.99,    0.0,   -0.1,   -0.5,   -2.2,   -5.6,   20.8,  100.0,  100.0,  100.0,  100.0,  100.0, 
+% successRLA, for sampleMaxPct=100:
+  theta: 0.496,  0.497,  0.498,  0.499,  0.500,  0.501,  0.503,  0.505,  0.515,  0.525,  0.535,
+  1.00,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,  100.0,  100.0,  100.0,  100.0,  100.0,
+  1.25,    0.0,    0.0,    0.0,    0.0,    0.7,   99.8,  100.0,  100.0,  100.0,  100.0,  100.0,
+  1.50,    0.0,    0.0,    0.0,    0.2,    4.2,   99.6,  100.0,  100.0,  100.0,  100.0,  100.0,
+  1.75,    0.0,    0.0,    0.1,    1.0,    4.8,   89.1,  100.0,  100.0,  100.0,  100.0,  100.0,
+  1.99,    0.0,    0.0,    0.5,    2.0,    5.2,   20.9,  100.0,  100.0,  100.0,  100.0,  100.0,
 ````
 
 The false positives are partially mitigated when taking the sample cutoff into account.
 
-There's a dramatic increase in RLA success going from etaFactor = 1 to 1.25, and perhaps 1.5 is a good choice dor
+There's a dramatic increase in RLA success going from etaFactor = 1 to 1.25, and perhaps 1.5-1.75 is a good choice for
 these values of N, d, cvrMean, and cvrMeanDiff.
 
 ## Polling vs Comparison
 
-Here is the RLA success rate for a 20% cutoff for Polling and CVR Comparison when eta0Factor=1.0.
+Here is the RLA success rate for a 20% cutoff for Polling and CVR Comparison when eta0Factor=1.0:
 
 ````
+CompareAuditTypeWithErrors.plotAuditTypes
 Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.0 cvrMeanDiff=-0.005; theta (col) vs N (row)
   theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
   
@@ -388,7 +355,7 @@ Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000
  20000,    0.0,    0.0,    0.0,    0.0,    0.0,   74.8,  100.0, 
  50000,    0.0,    0.0,    0.0,    0.0,   23.7,  100.0,  100.0, 
 
-RLA success difference for sampleMaxPct=20 % cutoff: (compare - polling)
+RLA % success difference for sampleMaxPct=20 % cutoff: (compare - polling)
 cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
   1000,  -0.01,  -0.02,   0.00,  -0.01,  -0.29,  -1.63,  -6.69, 
   5000,  -0.31,  -0.40,  -0.72,  -1.08,  -9.04, -30.62, -57.57, 
@@ -398,11 +365,12 @@ cvrMean: 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540,
 ````
 CVR compare is quite a bit worse than polling when eta0Factor=1.0.
 
-However, it's much better when eta0Factor > 1:
+However, comparison audits are much better when eta0Factor > 1:
 ````
 *** eta0Factor=1.25
 Success Percentage Ratio nsamples Comparison and Polling; ntrials=10000, N=10000, d=1000 eta0Factor=1.25 cvrMeanDiff=-0.005; theta (col) vs N (row)
   theta: 0.501,  0.502,  0.503,  0.505,  0.515,  0.525,  0.535, 
+
 % successRLA, for sampleMaxPct=20: polling
        : 0.506,  0.507,  0.508,  0.510,  0.520,  0.530,  0.540, 
   1000,    0.0,    0.0,    0.0,    0.0,    0.3,    1.7,    6.6, 
@@ -625,7 +593,7 @@ Using high values for eta0 (instead of the obvious value of using eta0 = mean as
 is explored in the [Sample size simulations (Ballot Comparison)](#sample-size-simulations-ballot-comparison) and
 [Polling vs Comparison](#polling-vs-comparison) sections above, and needs more exploration.
 
-IS there something Im missing?
+Is there something Im missing?
 
 ## Notes/thoughts
 
@@ -640,5 +608,5 @@ TODO: vary by N, d, cvrMean, and cvrMeanDiff
 
 Sample size is proportional to 1/theta, no N dependence for N > 1000. 
 
-Note bug in ALPHA python code for alpha mart.
+Note bug in ALPHA python code for alpha mart (PR submitted).
 

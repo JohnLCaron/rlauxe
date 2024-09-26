@@ -22,7 +22,7 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
             Pair(entry.key, mmap)
         }.toMap()
 
-    // Now find the smallest value
+    /* Now find the smallest value
     val nsamplesMinMapOld = mutableMapOf<Int, MutableMap<Double, Double>>() // N, m -> fld
     nsi.forEach { N ->
         cvrMeans.forEach { theta ->
@@ -30,6 +30,8 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
             dmap[theta] = findSmallestNotZero(mmaps, N, theta)
         }
     }
+
+     */
 
     // Now make the ratio with the smallest value
     val nsamplesRatio = mutableMapOf<Double, MutableMap<Int, MutableMap<Double, Double>>>() // N, theta -> fld
@@ -40,7 +42,11 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
             cvrMeans.forEach { theta ->
                 val nmap = kmap.getOrPut(N) { mutableMapOf() }
                 val thisValue = entry.value[N]!![theta]!!
-                val wtf = thisValue / findSmallestNotZero(mmaps, N, theta)
+                var wtf = thisValue / findSmallestNotZero(mmaps, N, theta)
+                if (wtf.isNaN() || wtf.isInfinite()) {
+                    findSmallestNotZero(mmaps, N, theta)
+                    wtf = -1.0
+                }
                 nmap[theta] = wtf
             }
         }
@@ -73,8 +79,8 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
 
 fun findSmallestNotZero(mmaps: Map<Double, Map<Int, Map<Double, Double>>>, N: Int, theta: Double): Double {
     val llist = mmaps.map { entry -> entry.value[N]?.get(theta) ?: 0.0 }
-    val llistf = llist.filter{ it == 0.0 }
-    val result =  if (llistf.isEmpty()) -1.0 else llist.min()
+    val llistf = llist.filter{ it != 0.0 }
+    val result =  if (llistf.isEmpty()) -1.0 else llistf.min()
     return result
 }
 
@@ -122,6 +128,7 @@ fun extractPct(pct: Double?): Double {
     return pct
 }
 
+// older verrsion
 fun plotPctRatio(newdlc: Map<Int, List<SRT>>, thetas: List<Double>, nlist: List<Int>, reportedMeanDiff: Double) {
     newdlc.forEach { dl, sps ->
         plotSRTpct(

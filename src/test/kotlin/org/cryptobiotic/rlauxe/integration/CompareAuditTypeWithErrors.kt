@@ -66,7 +66,7 @@ class CompareAuditTypeWithErrors {
         }
 
         val nthreads = 30
-        val ntrials = 10000
+        val ntrials = 1000
         val d = 1000
         val eta0Factors = listOf(1.0, 1.25, 1.5, 1.75)
 
@@ -108,6 +108,7 @@ class CompareAuditTypeWithErrors {
                 showRatio(pollingResults, compareResults)
                 */
 
+                println("CompareAuditTypeWithErrors.plotAuditTypes")
                 println("Success Percentage Ratio nsamples Comparison and Polling; ntrials=$ntrials, N=$N, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
                 colHeader(pollingResults, "theta", colf = "%6.3f") { it.theta }
 

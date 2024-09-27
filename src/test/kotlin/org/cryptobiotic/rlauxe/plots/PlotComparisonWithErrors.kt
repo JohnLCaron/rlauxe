@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.plots
 
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.SRTcsvReader
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
@@ -8,7 +10,7 @@ import kotlin.collections.getOrPut
 class PlotComparisonWithErrors {
     val nrepeat = 100
     // val reader = SRTreader("src/test/data/plots/CvrComparison/SRT$nrepeat.csv")
-    val reader = SRTreader("/home/stormy/temp/CvrComparison/Full$nrepeat.csv")
+    val reader = SRTcsvReader("/home/stormy/temp/CvrComparison/Full$nrepeat.csv")
 
     // These are N vs theta plots for various values of d and MeanDiff
     @Test
@@ -32,11 +34,22 @@ class PlotComparisonWithErrors {
 
             plotNTsuccessPct(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
             plotNTsamples(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
-            plotNTpct(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
+            plotNTsamplesPct(srts, "d= ${ddiff.d} diffMean= ${ddiff.reportedMeanDiff} ")
             println("-----------------------------------------------")
         }
     }
 
+    // separate srts by reportedMean
+    fun makeCvrMeanGroups(srs: List<SRT>): Map<Double, List<SRT>> {
+        val mmap = mutableMapOf<Double, MutableList<SRT>>()
+        srs.forEach {
+            val dmap : MutableList<SRT> = mmap.getOrPut(it.reportedMean) { mutableListOf() }
+            dmap.add(it)
+        }
+        return mmap.toSortedMap()
+    }
+
+    ////////////////////////////////////////////////////////////
     data class DDiff(val d: Int, val reportedMeanDiff: Double)
 
     private val dDiffComparator = Comparator<DDiff> { o1, o2 ->

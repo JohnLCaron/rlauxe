@@ -1,15 +1,15 @@
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class TestHistogram {
+class TestDeciles {
 
     @Test
     fun testBasics() {
-        val hist = Histogram(10)
+        val hist = Deciles(10)
 
         // bin[key] goes from [(key-1)*incr, key*incr - 1]
         hist.add(0)
@@ -21,7 +21,7 @@ class TestHistogram {
         assertEquals(1,  hist.hist[2])
         assertNull(hist.hist[9])
 
-        val hist2 = Histogram(10)
+        val hist2 = Deciles(10)
         hist2.add(70)
         hist2.add(71)
         hist2.add(80)
@@ -32,12 +32,14 @@ class TestHistogram {
         assertEquals(2,  hist2.hist[8])
         assertEquals(1,  hist2.hist[9])
         assertNull(hist2.hist[10])
+
+        assertEquals(hist, Deciles.fromString(hist.toString()))
     }
 
     @Test
     fun testCumul() {
-        val hist = Histogram(10)
         val ntrials = 100
+        val hist = Deciles(ntrials)
         repeat(ntrials) { hist.add(it+1) }
 
         println("hist = ${hist}")
@@ -52,12 +54,14 @@ class TestHistogram {
         assertEquals(29.0, hist.cumul(30))
         assertEquals(99.0, hist.cumul(100))
         assertEquals(100.0, hist.cumul(110))
+
+        assertEquals(hist, Deciles.fromString(hist.toString()))
     }
 
     @Test
     fun testCumulNot100() {
-        val hist = Histogram(10)
         val ntrials = 111
+        val hist = Deciles(ntrials)
         repeat(ntrials) { hist.add(it+1) }
 
         println("hist = ${hist}")
@@ -72,14 +76,15 @@ class TestHistogram {
         assertEquals(29.0/1.11, hist.cumul(30), doublePrecision)
         assertEquals(99.0/1.11, hist.cumul(100), doublePrecision)
         assertEquals(100.0, hist.cumul(120), doublePrecision)
+
+        assertEquals(hist, Deciles.fromString(hist.toString()))
     }
 
     @Test
-    fun testHistogramSparse() {
-        val hist = Histogram(10)
+    fun testSparse() {
         val ntrials = 87
+        val hist = Deciles(100)
         repeat(ntrials) { hist.add(77) }
-        hist.ntrials = 100
 
         println("hist = ${hist}")
         println("hist binned = ${hist.toStringBinned()}")
@@ -93,5 +98,29 @@ class TestHistogram {
         assertEquals(87.0, hist.cumul(80))
         assertEquals(87.0, hist.cumul(90))
         assertEquals(87.0, hist.cumul(1200))
+
+        assertEquals(hist, Deciles.fromString(hist.toString()))
+    }
+
+    @Test
+    fun testCsv() {
+        val ntrials = 111
+        val hist = Deciles(ntrials)
+        repeat(ntrials) { hist.add(it+1) }
+
+        println("hist = ${hist}")
+        val roundtrip = Deciles.fromString(hist.toString())
+        assertEquals(hist, roundtrip)
+    }
+
+    @Test
+    fun testCsvWithQuotes() {
+        val ntrials = 87
+        val hist = Deciles(ntrials)
+        repeat(ntrials) { hist.add(77) }
+
+        println("hist = ${hist}")
+        val roundtrip = Deciles.fromString(" \"${hist}\" ") // quotes and leasing/trailing blanks
+        assertEquals(hist, roundtrip)
     }
 }

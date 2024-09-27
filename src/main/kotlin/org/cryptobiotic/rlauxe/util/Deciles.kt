@@ -1,8 +1,9 @@
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.util
 
-data class Histogram(val incr: Int) {
-    val hist = mutableMapOf<Int, Int>() // upper bound,count
-    var ntrials = 0
+data class Deciles(val ntrials: Int, val hist: MutableMap<Int, Int>) {
+    val incr = 10
+
+    constructor(ntrials: Int): this(ntrials, mutableMapOf())
 
     // bin[key] goes from [(key-1)*incr, key*incr - 1]
     fun add(q: Int) {
@@ -14,7 +15,7 @@ data class Histogram(val incr: Int) {
 
     override fun toString() = buildString {
         val shist = hist.toSortedMap()
-        append("[")
+        append("$ntrials [")
         shist.forEach { append("${it.key}:${it.value} ") }
         append("]")
     }
@@ -33,29 +34,48 @@ data class Histogram(val incr: Int) {
     }
 
     fun cumulPct() = buildString {
-        val untrials = if (ntrials == 0) 1 else ntrials
+        require(ntrials != 0) {"ntrials not set"}
         val smhist = hist.toSortedMap().toMutableMap()
         var cumul = 0
         smhist.forEach {
             cumul += it.value
             val binNo = it.key
             val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
-            append("$binDesc:${"%5.2f".format(((100.0 * cumul)/untrials))}; ")
+            append("$binDesc:${"%5.2f".format(((100.0 * cumul)/ntrials))}; ")
         }
     }
 
     // bin[key] goes from [(key-1)*incr, key*incr - 1]
     // max must be n * incr
     fun cumul(max: Int) : Double {
-        val untrials = if (ntrials == 0) 1 else ntrials
+        require(ntrials != 0) {"ntrials not set"}
         val smhist = hist.toSortedMap()
         var cumul = 0
         for (entry:Map.Entry<Int,Int> in smhist) {
             if (max < entry.key*incr) {
-                return 100.0 * cumul / untrials
+                return 100.0 * cumul / ntrials
             }
             cumul += entry.value
         }
-        return 100.0 * cumul / untrials
+        return 100.0 * cumul / ntrials
+    }
+
+    companion object {
+        // 111 [1:9 2:10 3:10 4:10 5:10 6:10 7:10 8:10 9:10 10:10 11:10 12:2 ]
+        fun fromString(str: String): Deciles {
+            val tokens = str.split(" ", "[", "]", "\"")
+            val ftokens = tokens.filter { it.isNotEmpty() }
+            val ntrials = ftokens.first().toInt()
+            val hist = mutableMapOf<Int, Int>()
+
+            for (tidx in 1 until ftokens.size) {
+                val ftoke = ftokens[tidx]
+                val htokes = ftoke.split(":")
+                val key = htokes[0].toInt()
+                val value = htokes[1].toInt()
+                hist[key] = value
+            }
+            return Deciles(ntrials, hist)
+        }
     }
 }

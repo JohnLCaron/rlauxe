@@ -15,18 +15,18 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
-import org.cryptobiotic.rlauxe.core.makeComparisonAudit
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.theta2margin
 import org.cryptobiotic.rlauxe.shangrla.eps
-import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import kotlin.collections.first
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.makeSRT
 import kotlin.collections.set
 import kotlin.test.Test
 
@@ -222,7 +222,7 @@ class ComparisonWithErrors {
             println()
             colHeader(calculations, "theta", colf = "%6.3f") { it.theta }
 
-            plotNTpct(calculations, "plotNTpct", colTitle = "cvrMean")
+            plotNTsamplesPct(calculations, "plotNTpct", colTitle = "cvrMean")
         }
 
         println("samplePct ratios across cvrMeanDiff: ntrials=$ntrials, d = $d, cvrMeanDiff=$cvrMeanDiff, theta(col) vs N(row)")
@@ -262,7 +262,7 @@ class ComparisonWithErrors {
         // val cvrMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
         // val cvrMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
 
-        val writer = SRTwriter("/home/stormy/temp/CvrComparison/SRT$ntrials.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/CvrComparison/SRT$ntrials.csv")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -363,7 +363,7 @@ class ComparisonWithErrors {
         val cvrMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(100)
 
-        val writer = SRTwriter("/home/stormy/temp/CvrComparison/Full$nrepeat.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/CvrComparison/Full$nrepeat.csv")
         var totalCalculations = 0
 
         cvrMeanDiffs.forEach { cvrMeanDiff ->
@@ -427,7 +427,7 @@ class ComparisonWithErrors {
             }
         }
 
-        val writer = SRTwriter("/home/stormy/temp/CvrComparison/Failures.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/CvrComparison/Failures.csv")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -471,12 +471,12 @@ class ComparisonWithErrors {
             fld = { srt: SRT -> srt.pctSamples }
         )
 
-        plotTFsuccess(calculations, "", sampleMaxPct = 10, colTitle = "theta")
-        plotTFsuccess(calculations, "", sampleMaxPct = 20, colTitle = "theta")
-        plotTFsuccess(calculations, "", sampleMaxPct = 30, colTitle = "theta")
-        plotTFsuccess(calculations, "", sampleMaxPct = 40, colTitle = "theta")
-        plotTFsuccess(calculations, "", sampleMaxPct = 50, colTitle = "theta")
-        plotTFsuccess(calculations, "", sampleMaxPct = 100, colTitle = "theta")
+        plotTFsuccessDecile(calculations, "", sampleMaxPct = 10, colTitle = "theta")
+        plotTFsuccessDecile(calculations, "", sampleMaxPct = 20, colTitle = "theta")
+        plotTFsuccessDecile(calculations, "", sampleMaxPct = 30, colTitle = "theta")
+        plotTFsuccessDecile(calculations, "", sampleMaxPct = 40, colTitle = "theta")
+        plotTFsuccessDecile(calculations, "", sampleMaxPct = 50, colTitle = "theta")
+        plotTFsuccessDecile(calculations, "", sampleMaxPct = 100, colTitle = "theta")
 
         // 9/25/24
         //cvrComparisonFailure ntrials=10000, N=10000, d=10000 cvrMeanDiff=-0.005; theta (col) vs etaFactor (row)

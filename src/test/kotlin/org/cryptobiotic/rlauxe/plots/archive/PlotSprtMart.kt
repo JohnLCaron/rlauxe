@@ -16,14 +16,13 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SprtMart
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.ceilDiv
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.plots.Histogram
+import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.core.cardsPerContest
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
@@ -179,7 +178,7 @@ fun runSprtMartRepeated(
     var totalSamples = 0
     var fail = 0
     var nsuccess = 0
-    val hist = Histogram(10) // bins of 10%
+    val hist = Deciles(ntrials) // bins of 10%
     val status = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
 

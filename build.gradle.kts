@@ -1,7 +1,8 @@
+import org.gradle.kotlin.dsl.from
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "1.9.23"
     alias(libs.plugins.serialization)
 }
 
@@ -16,12 +17,12 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.bull.result)
-    implementation(libs.bundles.xmlutil)
-    implementation(libs.ktor.serialization.kotlinx.json.jvm )
-    implementation(libs.kotlinx.cli)
-    implementation(libs.bundles.logging)
+   implementation(libs.bull.result)
+   // implementation(libs.kotlinx.cli)
+   // implementation(libs.bundles.logging)
 
+    testImplementation(libs.bundles.xmlutil )
+    testImplementation(libs.ktor.serialization.kotlinx.json.jvm )
     testImplementation(kotlin("test"))
 }
 
@@ -48,4 +49,20 @@ tasks.test {
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.register<Jar>("uberJar") {
+    archiveClassifier = "uber"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes("Main-Class" to "org.cryptobiotic.eg.cli.RunShowSystem")
+    }
+
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }

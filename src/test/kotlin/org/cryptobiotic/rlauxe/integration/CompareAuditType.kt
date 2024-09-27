@@ -22,10 +22,12 @@ import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.SRTwriter
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.plots.makeSRT
+import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.makeSRT
+import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.test.Test
 
 // PlotSampleSizes
@@ -119,7 +121,7 @@ class CompareAuditType {
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(10, 50, 250, 1250)
 
-        val writer = SRTwriter("/home/stormy/temp/AuditTypes/SRT$nrepeat.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/AuditTypes/SRT$nrepeat.csv")
         var totalCalculations = 0
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->

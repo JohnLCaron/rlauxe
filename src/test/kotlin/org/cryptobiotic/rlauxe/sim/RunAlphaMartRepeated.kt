@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.EstimFn
@@ -7,8 +7,9 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.ceilDiv
-import org.cryptobiotic.rlauxe.plots.Histogram
+import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.shangrla.eps
+import org.cryptobiotic.rlauxe.util.SRT
 import kotlin.math.max
 import kotlin.math.sqrt
 
@@ -42,36 +43,15 @@ fun runAlphaMartRepeated(
         withoutReplacement = withoutReplacement,
     )
 
-    var totalSamplesNeeded = 0
-    var fail = 0
-    var nsuccess = 0
-    val percentHist = Histogram(10) // bins of 10%
-    val status = mutableMapOf<TestH0Status, Int>()
-    val welford = Welford()
-
-    repeat(ntrials) {
-        drawSample.reset()
-        val testH0Result = alpha.testH0(maxSamples, terminateOnNullReject=true) { drawSample.sample() }
-        val currCount = status.getOrPut(testH0Result.status) { 0 }
-        status[testH0Result.status] = currCount + 1
-        if (testH0Result.status.fail) {
-            fail++
-        } else {
-            nsuccess++
-
-            totalSamplesNeeded += testH0Result.sampleCount
-            welford.update(testH0Result.sampleCount.toDouble()) // just to keep the stddev
-
-            // sampleCount was what percent of N? keep 10% histogram bins.
-            val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
-            percentHist.add(percent)
-        }
-        if (showDetail) println(" $it $testH0Result")
-    }
-    val (_, variance, _) = welford.result()
-    percentHist.ntrials = ntrials
-    return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, status)
+    return runAlphaMartRepeated(
+        drawSample = drawSample,
+        maxSamples = maxSamples,
+        terminateOnNullReject = true,
+        ntrials = ntrials,
+        alphaMart = alpha,
+        eta0 = eta0,
+        showDetail = showDetail,
+        )
 }
 
 // run AlphaMart in repeated trials, where alphaMart is supplied
@@ -79,10 +59,10 @@ fun runAlphaMartRepeated(
     drawSample: SampleFn,
     maxSamples: Int,
     terminateOnNullReject: Boolean = true,
-    ntrials: Int = 1,
-    showDetail: Boolean = false,
+    ntrials: Int,
     alphaMart: AlphaMart,
     eta0: Double,
+    showDetail: Boolean = false,
     ): AlphaMartRepeatedResult {
 
     val N = drawSample.N()
@@ -90,7 +70,7 @@ fun runAlphaMartRepeated(
     var totalSamplesNeeded = 0
     var fail = 0
     var nsuccess = 0
-    val percentHist = Histogram(10) // bins of 10%
+    val percentHist = Deciles(ntrials) // bins of 10%
     val status = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
 
@@ -115,7 +95,6 @@ fun runAlphaMartRepeated(
     }
 
     val (_, variance, _) = welford.result()
-    percentHist.ntrials = ntrials
     return AlphaMartRepeatedResult(eta0=eta0, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
         ntrials=ntrials, variance, percentHist, status)
 }
@@ -127,7 +106,7 @@ data class AlphaMartRepeatedResult(val eta0: Double,            // initial estim
                                    val nsuccess: Int,           // number of successful trials
                                    val ntrials: Int,            // total number of trials
                                    val variance: Double,        // variance over ntrials of samples needed
-                                   val percentHist: Histogram? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
+                                   val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
                                    val status: Map<TestH0Status, Int>? = null, // count of the trial status
 ) {
 
@@ -142,4 +121,10 @@ data class AlphaMartRepeatedResult(val eta0: Double,            // initial estim
         if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
         if (status != null) appendLine("  status:${status}")
     }
+}
+
+
+fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
+    return SRT(N, reportedMean, reportedMeanDiff, d, rr.eta0, eta0Factor, rr.nsuccess, rr.ntrials, rr.totalSamplesNeeded,
+        sqrt(rr.variance), rr.percentHist)
 }

@@ -19,9 +19,12 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.makeSRT
 import kotlin.test.Test
 
 import kotlin.text.format
@@ -115,7 +118,7 @@ class CreatePollingDiffMeans {
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(10, 50, 250, 1250)
 
-        val writer = SRTwriter("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
         var totalCalculations = 0
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->
@@ -166,7 +169,7 @@ class CreatePollingDiffMeans {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runAlphaMartWithMeanDiff(task.theta, task.cvrs, reportedMeanDiff=reportedMeanDiff, nrepeat = nrepeat, d = d, silent = true).first()
         val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
-        val sr = makeSRT(task.N, reportedMean, reportedMeanDiff, d, rr=rr)
+        val sr = makeSRT(task.N, reportedMean, reportedMeanDiff, d, rr = rr)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, ${rr.eta0}, $sr")
         return sr
     }

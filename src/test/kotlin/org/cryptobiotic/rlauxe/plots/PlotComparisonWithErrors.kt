@@ -39,16 +39,6 @@ class PlotComparisonWithErrors {
         }
     }
 
-    // separate srts by reportedMean
-    fun makeCvrMeanGroups(srs: List<SRT>): Map<Double, List<SRT>> {
-        val mmap = mutableMapOf<Double, MutableList<SRT>>()
-        srs.forEach {
-            val dmap : MutableList<SRT> = mmap.getOrPut(it.reportedMean) { mutableListOf() }
-            dmap.add(it)
-        }
-        return mmap.toSortedMap()
-    }
-
     ////////////////////////////////////////////////////////////
     data class DDiff(val d: Int, val reportedMeanDiff: Double)
 

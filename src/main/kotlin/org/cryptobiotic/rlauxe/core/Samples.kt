@@ -243,30 +243,6 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleF
     override fun N() = N
 }
 
-class SampleFromArrayWithoutReplacementOld(val assortValues : DoubleArray): SampleFn {
-    val selectedIndices = mutableSetOf<Int>()
-    val N = assortValues.size
-
-    override fun sample(): Double {
-        while (true) {
-            val idx = Random.nextInt(N)
-            if (!selectedIndices.contains(idx)) { // withoutReplacement
-                selectedIndices.add(idx)
-                return assortValues[idx]
-            }
-            require(selectedIndices.size < assortValues.size)
-        }
-    }
-    override fun reset() {
-        selectedIndices.clear()
-    }
-
-    override fun sampleCount() = assortValues.sum()
-    override fun sampleMean() = assortValues.average()
-    override fun N() = N
-}
-
-
 ///////////////////////////////////////////////////////////////
 /**
  * Welford's algorithm for running mean and variance.

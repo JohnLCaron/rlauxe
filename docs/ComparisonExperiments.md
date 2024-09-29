@@ -138,11 +138,11 @@ Choose cutoff = 20% as success target
 
 ![image info](images/plotNS.chooseD.svg)
 
-![image info](images/plotNS.chooseD.png)
+![image info](images/plotSuccessVsTheta.svg)
+![image info](images/plotFailuresVsTheta.svg)
 
 * when theta >= cvrMean, 100% of trials are successful at this setting
 * when theta < cvrMean, pct success starts to fall when theta < .505, and gets worse as theta approaches .5
 * surprising, gets worse as cvrMean gets closer to theta
 
-![image info](images/docs/images/plotSuccessVsTheta.svg)
-![image info](images/docs/images/plotFailuresVsTheta.svg)
+

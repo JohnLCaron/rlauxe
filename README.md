@@ -509,6 +509,6 @@ null mean is 1/2 once again, which reproduces the original assorter.
 
 ## Simulation Results
 
-[Simulations](docs/Simulations.md)
-[PollVsCvr](docs/PollVsCvr.md)
-[Comparison Experiments](docs/ComparisonExperiments.md)
+* [Simulations](docs/Simulations.md)
+* [PollVsCvr](docs/PollVsCvr.md)
+* [Comparison Experiments](docs/ComparisonExperiments.md)

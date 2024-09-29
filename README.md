@@ -28,7 +28,7 @@ Table of Contents
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [Questions](#questions)
   * [Stratified audits using OneAudit (not done)](#stratified-audits-using-oneaudit-not-done)
-  * [Simulations](#simulations)
+  * [Simulation Results](#simulation-results)
 <!-- TOC -->
 
 ## Papers
@@ -507,6 +507,8 @@ constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
 
-## Simulations
+## Simulation Results
 
-See [Simulations](docs/Simulations.md)
+[Simulations](docs/Simulations.md)
+[PollVsCvr](docs/PollVsCvr.md)
+[Comparison Experiments](docs/ComparisonExperiments.md)

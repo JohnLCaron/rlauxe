@@ -136,13 +136,13 @@ Choose cutoff = 20% as success target
 * determine NS as a function of cvrMean abd cvrMeanDiff
 * fine tune d as a function of theta; can we improve based on cvrMean?
 
-![image info](docs/images/plotNS.chooseD.svg)
+![image info](images/plotNS.chooseD.svg)
 
-![image info](docs/images/plotNS.chooseD.png)
+![image info](images/plotNS.chooseD.png)
 
 * when theta >= cvrMean, 100% of trials are successful at this setting
 * when theta < cvrMean, pct success starts to fall when theta < .505, and gets worse as theta approaches .5
 * surprising, gets worse as cvrMean gets closer to theta
 
-![image info](docs/images/docs/images/plotSuccessVsTheta.svg)
-![image info](docs/images/docs/images/plotFailuresVsTheta.svg)
+![image info](images/docs/images/plotSuccessVsTheta.svg)
+![image info](images/docs/images/plotFailuresVsTheta.svg)

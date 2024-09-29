@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.plots
 
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.SRTcsvReader
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut
@@ -15,7 +17,7 @@ class PlotPollingDiffMeans {
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
         val nrepeat = 100
 
-        val reader = SRTreader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
+        val reader = SRTcsvReader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
         val allSrts = reader.readCalculations()
         println(" number of SRTs = ${allSrts.size}")
 
@@ -64,7 +66,7 @@ class PlotPollingDiffMeans {
         val dlist = listOf(10, 50, 250, 1250)
         val nrepeat = 100
 
-        val reader = SRTreader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
+        val reader = SRTcsvReader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
         val allSrts = reader.readCalculations()
         println(" number of SRTs = ${allSrts.size}")
         val nThetaMap = makeNthetaMap(allSrts)
@@ -73,7 +75,7 @@ class PlotPollingDiffMeans {
         nThetaMap.forEach { (ntheta, srts) ->
             plotDDpct(srts, "N=${ntheta.N} theta=${ntheta.theta} ")
             plotDDfailPct(srts, "N=${ntheta.N} theta=${ntheta.theta} ")
-            plotDDsuccess(srts, "N=${ntheta.N} theta=${ntheta.theta} ", 30)
+            plotDDsuccessDecile(srts, "N=${ntheta.N} theta=${ntheta.theta} ", 30)
             println()
         }
 

@@ -10,11 +10,11 @@ import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.margin2theta
 import org.cryptobiotic.rlauxe.core.tabulateVotes
-import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.makeSRT
-import org.cryptobiotic.rlauxe.plots.plotDDpct
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotDDsample
-import org.cryptobiotic.rlauxe.plots.plotNTpct
+import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.test.Test
 
 class TestAuditPolling {

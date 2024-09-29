@@ -18,14 +18,14 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.integration.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.plots.Histogram
+import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.core.cardsPerContest
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta
-import org.cryptobiotic.rlauxe.integration.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.core.tabulateVotes
 import org.cryptobiotic.rlauxe.core.theta2margin
 import org.cryptobiotic.rlauxe.plots.ff
@@ -42,7 +42,7 @@ val showGeoMeanPlots = true
 
 // these are early plots, superceded by Create/PlotDiffMeans
 
-data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Histogram?)
+data class SR(val N: Int, val margin: Double, val nsamples: Double, val pct: Double, val stddev: Double, val hist: Deciles?)
 
 fun plotSRSnVt(srs: List<SR>, margins: List<Double>, ns: List<Int>, title: String = "") {
     val utitle = "number votes sampled: " + title

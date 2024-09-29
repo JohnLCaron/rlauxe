@@ -15,23 +15,23 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.plots.SRT
-import org.cryptobiotic.rlauxe.plots.SRTwriter
+import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.colHeader
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.plots.makeSRT
-import org.cryptobiotic.rlauxe.plots.plotNTpct
+import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotNTsuccess
+import org.cryptobiotic.rlauxe.plots.plotNTsuccessDecile
+import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
+import org.cryptobiotic.rlauxe.plots.plotTFdiffSuccessDecile
+import org.cryptobiotic.rlauxe.plots.plotTFsuccessDecile
+import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.test.Test
 
 // PlotSampleSizes
@@ -46,13 +46,11 @@ class CompareAuditTypeWithErrors {
     val showPctPlots = false
     val showGeoMeanPlots = false
 
-    val N = 10000
-
-    data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val cvrs: List<Cvr>)
+    data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val eta0Factor: Double, val cvrs: List<Cvr>)
 
     @Test
-    fun plotAuditTypes() {
-        val cvrMeans = listOf(.506, .507, .508, .51, .52, .53, .54)// , .6, .65, .7)
+    fun plotAuditTypesNT() {
+        val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .507, .508, .51, .52, .53, .54)// , .6, .65, .7)
         // val cvrMeans = listOf(.506, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
 
@@ -61,7 +59,7 @@ class CompareAuditTypeWithErrors {
         nlist.forEach { N ->
             cvrMeans.forEach { cvrMean ->
                 val cvrs = makeCvrsByExactMean(N, cvrMean)
-                tasks.add(AlphaMartTask(taskIdx++, N, cvrMean, cvrs))
+                tasks.add(AlphaMartTask(taskIdx++, N, cvrMean, 1.0, cvrs))
             }
         }
 
@@ -69,72 +67,165 @@ class CompareAuditTypeWithErrors {
         val ntrials = 1000
         val d = 1000
         val eta0Factors = listOf(1.0, 1.25, 1.5, 1.75)
+        val cvrMeanDiff =
+            -0.005 // listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
+
+        val writer = SRTcsvWriter("/home/stormy/temp/AuditTypes/NT$ntrials.csv")
+        var totalCalculations = 0
+
+        eta0Factors.forEach { eta0Factor ->
+
+            runBlocking {
+                val taskProducer = produceTasks(tasks)
+                val calcJobs = mutableListOf<Job>()
+                repeat(nthreads) {
+                    calcJobs.add(
+                        launchCalculations(taskProducer) { task ->
+                            calculate(task.copy(eta0Factor = eta0Factor), ntrials, d = d, cvrMeanDiff = cvrMeanDiff)
+                        })
+                }
+
+                // wait for all calculations to be done
+                joinAll(*calcJobs.toTypedArray())
+            }
+
+            val pollingResults = calculations.map { it.first }
+            val compareResults = calculations.map { it.second }
+            println("CompareAuditTypeWithErrors.plotAuditTypesNT")
+
+            println("Polling ntrials=$ntrials, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
+            showNT(pollingResults)
+
+            println("Comparison ntrials=$ntrials, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
+            showNT(compareResults)
+
+            println("Ratio nsamples Comparison/Polling ntrials=$ntrials, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
+            showCompMinusPollNT(pollingResults, compareResults)
+
+            println("Success Percentage Ratio nsamples Comparison and Polling; ntrials=$ntrials, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
+            colHeader(pollingResults, "theta", colf = "%6.3f") { it.theta }
+
+            plotNTsuccessDecile(pollingResults, "polling", 20)
+            plotNTsuccessDecile(compareResults, "compare", 20)
+            showSuccessDiff(pollingResults, compareResults, 20)
+
+            calculations = mutableListOf<Pair<SRT, SRT>>()
+        }
+        writer.close()
+    }
+
+    @Test
+    fun plotAuditTypesTF() {
+        val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .507, .508, .51, .52, .53, .54)// , .6, .65, .7)
+        // val cvrMeans = listOf(.506, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        val N = 10000
+        val eta0Factors = listOf(1.0, 1.25, 1.5, 1.75)
+
+        val tasks = mutableListOf<AlphaMartTask>()
+        var taskIdx = 0
+        eta0Factors.forEach { eta0Factor ->
+            cvrMeans.forEach { cvrMean ->
+                val cvrs = makeCvrsByExactMean(N, cvrMean)
+                tasks.add(AlphaMartTask(taskIdx++, N, cvrMean, eta0Factor, cvrs))
+            }
+        }
+
+        val nthreads = 30
+        val ntrials = 10000
+        val d = 1000
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean
         // val reportedMeanDiffs = listOf(-0.004, -0.01, -0.02,- 0.04, -0.09)   // % less than actual mean
-        val cvrMeanDiffs = listOf(-0.005) // listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
+        val cvrMeanDiff = -0.005// listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
 
-        val writer = SRTwriter("/home/stormy/temp/AuditTypes/SRT$ntrials.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/AuditTypes/SRT$ntrials.csv")
         var totalCalculations = 0
 
-        cvrMeanDiffs.forEach { cvrMeanDiff ->
-            eta0Factors.forEach { eta0Factor ->
+        println("CompareAuditTypeWithErrors.plotAuditTypesTF ntrials=$ntrials, N=$N, d=$d cvrMeanDiff=$cvrMeanDiff;")
 
-                runBlocking {
-                    val taskProducer = produceTasks(tasks)
-                    val calcJobs = mutableListOf<Job>()
-                    repeat(nthreads) {
-                        calcJobs.add(
-                            launchCalculations(taskProducer) { task ->
-                                calculate(task, ntrials, eta0Factor = eta0Factor, d = d, cvrMeanDiff = cvrMeanDiff)
-                            })
-                    }
-
-                    // wait for all calculations to be done
-                    joinAll(*calcJobs.toTypedArray())
-                }
-
-                val pollingResults = calculations.map { it.first }
-                val compareResults = calculations.map { it.second }
-
-                /*
-                println("Polling ntrials=$ntrials, N=$N, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
-                show(pollingResults)
-
-                println("Comparison ntrials=$ntrials, N=$N, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
-                show(compareResults)
-
-                println("Ratio nsamples Comparison/Polling ntrials=$ntrials, N=$N, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
-                showRatio(pollingResults, compareResults)
-                */
-
-                println("CompareAuditTypeWithErrors.plotAuditTypes")
-                println("Success Percentage Ratio nsamples Comparison and Polling; ntrials=$ntrials, N=$N, d=$d eta0Factor=$eta0Factor cvrMeanDiff=$cvrMeanDiff; theta (col) vs N (row)")
-                colHeader(pollingResults, "theta", colf = "%6.3f") { it.theta }
-
-                plotNTsuccess(pollingResults, "polling", 20)
-                plotNTsuccess(compareResults, "compare", 20)
-                showSuccessRatio(pollingResults, compareResults, 20)
-
-                calculations = mutableListOf<Pair<SRT, SRT>>()
+        runBlocking {
+            val taskProducer = produceTasks(tasks)
+            val calcJobs = mutableListOf<Job>()
+            repeat(nthreads) {
+                calcJobs.add(
+                    launchCalculations(taskProducer) { task ->
+                        calculate(task, ntrials, d = d, cvrMeanDiff = cvrMeanDiff)
+                    })
             }
+
+            // wait for all calculations to be done
+            joinAll(*calcJobs.toTypedArray())
         }
+
+        val pollingResults = calculations.map { it.first }
+        val compareResults = calculations.map { it.second }
+
+        println("Polling")
+        showTF(pollingResults)
+
+        println("Comparison")
+        showTF(compareResults)
+
+        // println("Comparison - Polling")
+        showDecile(pollingResults, compareResults, 10)
+        showDecile(pollingResults, compareResults, 20)
+        showDecile(pollingResults, compareResults, 30)
+        showDecile(pollingResults, compareResults, 40)
+        showDecile(pollingResults, compareResults, 50)
+        showDecile(pollingResults, compareResults, 100)
+
+        /*
+        println("Success Percentage Ratio nsamples Comparison and Polling theta (col) vs N (row)")
+        colHeader(pollingResults, "theta", colf = "%6.3f") { it.theta }
+        plotNTsuccess(pollingResults, "polling", 20)
+        plotNTsuccess(compareResults, "compare", 20)
+        showSuccessRatio(pollingResults, compareResults, 20)
+         */
+
+        // writer.writeCalculations(calculations)
+        calculations = mutableListOf<Pair<SRT, SRT>>()
         writer.close()
-        println("totalCalculations = $totalCalculations")
     }
 
-    fun showRatio(pollSrs: List<SRT>, compareSrs: List<SRT>) {
+
+    fun showNT(srts: List<SRT>) {
+        colHeader(srts, "theta", colf = "%6.3f") { it.theta }
+        plotNTsuccess(srts, "", colTitle = "cvrMean")
+        plotNTsuccessPct(srts, "", colTitle = "cvrMean")
+        // plotNTsamplesPct(srts, "", colTitle = "cvrMean")
+    }
+
+    fun showTF(srts: List<SRT>) {
+        colHeader(srts, "cvrMean", colf = "%6.3f") { it.reportedMean }
+        //plotTFsuccess(srts, "")
+        //plotTFsuccessPct(srts, "")
+        //plotTFsamplesPct(srts, "")
+        // plotTFsuccessCombo(srts, "")
+        plotTFsuccessDecile(srts, "", 20)
+        plotTFsuccessDecile(srts, "", 40)
+        plotTFsuccessDecile(srts, "", 100)
+    }
+
+    fun showDecile(pollingResults: List<SRT>, compareResults: List<SRT>, sampleMaxPct: Int) {
+        println("\nDecile $sampleMaxPct %")
+        colHeader(pollingResults, "cvrMean", colf = "%6.3f") { it.reportedMean }
+        plotTFsuccessDecile(pollingResults, "Polling", sampleMaxPct)
+        plotTFsuccessDecile(compareResults, "Comparison", sampleMaxPct)
+        plotTFdiffSuccessDecile(pollingResults, compareResults, sampleMaxPct, "")
+    }
+
+    fun showCompMinusPollNT(pollSrs: List<SRT>, compareSrs: List<SRT>) {
         colHeader(pollSrs, "theta", colf = "%6.3f") { it.theta }
 
         val srs = pollSrs.mapIndexed { idx, it ->
-            val comp = compareSrs[idx].nsamples
-            val poll = if (it.nsamples == 0.0) 1.0 else it.nsamples.toDouble()
+            val comp = compareSrs[idx].pctSamples
+            val poll = if (it.pctSamples == 0.0) 1.0 else it.pctSamples.toDouble()
             val den = if (poll == 0.0) 1.0 else poll
 
             it.copy(stddev = (comp - poll) / den) // hijack stddev
         }
 
-        val utitle = ""
+        val utitle = "Comparison - Polling"
         plotSRS(srs, utitle, false, ff = "%6.2f", colTitle = "cvrMean",
             colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.N.toDouble() },
@@ -142,7 +233,24 @@ class CompareAuditTypeWithErrors {
         )
     }
 
-    fun showSuccessRatio(pollSrs: List<SRT>, compareSrs: List<SRT>, sampleMaxPct: Int) {
+    fun showCompMinusPollTF(pollSrs: List<SRT>, compareSrs: List<SRT>) {
+        val srs = pollSrs.mapIndexed { idx, it ->
+            val comp = compareSrs[idx].pctSamples
+            val poll = if (it.pctSamples == 0.0) 1.0 else it.pctSamples.toDouble()
+            val den = if (poll == 0.0) 1.0 else poll
+
+            it.copy(stddev = (comp - poll) / den) // hijack stddev
+        }
+
+        val utitle = "Comparison - Polling"
+        plotSRS(srs, utitle, false, ff = "%6.2f", colTitle = "theta",
+            colFld = { srt: SRT -> srt.theta },
+            rowFld = { srt: SRT -> srt.eta0Factor },
+            fld = { srt: SRT -> srt.stddev }
+        )
+    }
+
+    fun showSuccessDiff(pollSrs: List<SRT>, compareSrs: List<SRT>, sampleMaxPct: Int) {
 
         val srs = pollSrs.mapIndexed { idx, it ->
             val comp = compareSrs[idx].percentHist!!.cumul(sampleMaxPct)
@@ -151,18 +259,22 @@ class CompareAuditTypeWithErrors {
             it.copy(stddev = fld) // hijack stddev
         }
 
-        plotSRS(srs, "RLA success difference for sampleMaxPct=$sampleMaxPct % cutoff: (compare - polling)", false, ff = "%6.2f", colTitle = "cvrMean",
+        plotSRS(srs,
+            "RLA success difference for sampleMaxPct=$sampleMaxPct % cutoff: (compare - polling)",
+            false,
+            ff = "%6.2f",
+            colTitle = "cvrMean",
             colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.N.toDouble() },
             fld = { srt: SRT -> srt.stddev }
         )
     }
 
-    fun show(srs: List<SRT>) {
-        colHeader(srs, "theta", colf = "%6.3f") { it.theta }
-        plotNTpct(srs, "title", colTitle = "cvrMean")
+    /*
+    fun showTF(srts: List<SRT>) {
+        colHeader(srts, "theta", colf = "%6.3f") { it.theta }
+        plotNTsuccessPct(srts, "", colTitle = "cvrMean")
 
-        /*
         plotSRS(srts, "successes", true, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
             colFld = { srt: SRT -> srt.theta },
             rowFld = { srt: SRT -> srt.eta0Factor },
@@ -193,18 +305,18 @@ class CompareAuditTypeWithErrors {
         plotTFsuccess(srts, "", sampleMaxPct = 40, colTitle = "theta")
         plotTFsuccess(srts, "", sampleMaxPct = 50, colTitle = "theta")
         plotTFsuccess(srts, "", sampleMaxPct = 100, colTitle = "theta")
-
-         */
     }
 
-    fun calculate(task: AlphaMartTask, ntrials: Int, cvrMeanDiff: Double, d: Int, eta0Factor: Double): Pair<SRT, SRT> {
+     */
+
+    fun calculate(task: AlphaMartTask, ntrials: Int, cvrMeanDiff: Double, d: Int): Pair<SRT, SRT> {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val prr = runDiffAuditTypes(
             cvrMean = task.cvrMean,
             cvrs = task.cvrs,
             cvrMeanDiff = cvrMeanDiff,
             ntrials = ntrials,
-            eta0Factor = eta0Factor,
+            eta0Factor = task.eta0Factor,
             d = d,
             silent = true
         )
@@ -244,7 +356,7 @@ class CompareAuditTypeWithErrors {
         ntrials: Int,
         eta0Factor: Double,
         d: Int = 1000,
-        silent: Boolean = true
+        silent: Boolean = true,
     ): Pair<SRT, SRT> {
         val N = cvrs.size
         val theta = cvrMean + cvrMeanDiff // the true mean
@@ -268,7 +380,7 @@ class CompareAuditTypeWithErrors {
         val compareResult = runAlphaMartRepeated(
             drawSample = comparisonSample,
             maxSamples = N,
-            eta0 = eta0Factor *  compareAssorter.noerror,
+            eta0 = eta0Factor * compareAssorter.noerror,
             d = d,
             ntrials = ntrials,
             withoutReplacement = true,
@@ -277,60 +389,7 @@ class CompareAuditTypeWithErrors {
         // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
         return Pair(
             makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor, pollingResult),
-            makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor, compareResult))
-    }
-
-    fun runDiffAuditTypesOld(
-        theta: Double,
-        cvrs: List<Cvr>,
-        reportedMeanDiff: Double,
-        nrepeat: Int,
-        d: Int = 500,
-        silent: Boolean = true,
-    ): Pair<AlphaMartRepeatedResult, AlphaMartRepeatedResult> {
-        val N = cvrs.size
-        if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
-
-        // ignore the "reported winner". just focus on d vs reportedMeanDiff
-        val reportedMean = theta + reportedMeanDiff
-
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
-
-        // polling
-        val pollingAudit = makePollingAudit(contests = listOf(contest))
-        val pollingAssertions = pollingAudit.assertions[contest]
-        require(pollingAssertions!!.size == 1)
-        val pollingAssertion = pollingAssertions.first()
-        val pollingSampler = PollWithoutReplacement(cvrs, pollingAssertion.assorter)
-        //println("pollingSampler mean=${pollingSampler.truePopulationMean()} count=${pollingSampler.truePopulationCount()}")
-        val pollingResult = runAlphaMartRepeated(
-            drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
-            maxSamples = N,
-            eta0 = reportedMean, // use the reportedMean for the initial guess
-            d = d,
-            ntrials = nrepeat,
-            withoutReplacement = true,
-            upperBound = pollingAssertion.assorter.upperBound()
+            makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor, compareResult)
         )
-
-        // comparison
-        val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-        val compareAssertions = compareAudit.assertions[contest]
-        require(compareAssertions!!.size == 1)
-        val compareAssertion = compareAssertions.first()
-        // val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
-        // println("compareSampler mean=${compareSampler.truePopulationMean()} count=${compareSampler.truePopulationCount()}")
-
-        val compareResult = runAlphaMartRepeated(
-            drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
-            maxSamples = N,
-            eta0 = reportedMean, // use the reportedMean for the initial guess
-            d = d,
-            ntrials = nrepeat,
-            withoutReplacement = true,
-            upperBound = compareAssertion.assorter.upperBound()
-        )
-
-        return Pair(pollingResult, compareResult)
     }
 }

@@ -10,112 +10,112 @@
 text {
    text-rendering: optimizeLegibility;
 }
-#pTFMNFa .plot-title {
+#psCte0u .plot-title {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 16.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .plot-subtitle {
+#psCte0u .plot-subtitle {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .plot-caption {
+#psCte0u .plot-caption {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .legend-title {
+#psCte0u .legend-title {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .legend-item {
+#psCte0u .legend-item {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .axis-title-x {
+#psCte0u .axis-title-x {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .axis-text-x {
+#psCte0u .axis-text-x {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dt4HRxP .axis-tooltip-text-x {
+#dHt0eC7 .axis-tooltip-text-x {
    fill: #ffffff;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .axis-title-y {
+#psCte0u .axis-title-y {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 15.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .axis-text-y {
+#psCte0u .axis-text-y {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dt4HRxP .axis-tooltip-text-y {
+#dHt0eC7 .axis-tooltip-text-y {
    fill: #ffffff;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .facet-strip-text-x {
+#psCte0u .facet-strip-text-x {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#pTFMNFa .facet-strip-text-y {
+#psCte0u .facet-strip-text-y {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dt4HRxP .tooltip-text {
+#dHt0eC7 .tooltip-text {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: normal;
    font-style: normal;   
 }
-#dt4HRxP .tooltip-title {
+#dHt0eC7 .tooltip-title {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
    font-weight: bold;
    font-style: normal;   
 }
-#dt4HRxP .tooltip-label {
+#dHt0eC7 .tooltip-label {
    fill: #474747;
    font-family: Lucida Grande, sans-serif;
    font-size: 13.0px;
@@ -124,7 +124,7 @@ text {
 }
 
   </style>
-  <g id="pTFMNFa">
+  <g id="psCte0u">
     <path fill-rule="evenodd" fill="rgb(255,255,255)" fill-opacity="1.0" d="M0.0 0.0 L0.0 400.0 L600.0 400.0 L600.0 0.0 Z">
     </path>
     <g transform="translate(29.5 45.5 ) ">
@@ -164,7 +164,7 @@ text {
           </g>
         </g>
       </g>
-      <g clip-path="url(#ceFVsFm)" clip-bounds-jfx="[rect (29.941816366404606, 0.0), (379.0388631094104, 302.0)]">
+      <g clip-path="url(#cfuRmfI)" clip-bounds-jfx="[rect (29.941816366404606, 0.0), (379.0388631094104, 302.0)]">
         <g transform="translate(29.941816366404606 0.0 ) ">
           <g>
             <g>
@@ -254,13 +254,13 @@ text {
           </g>
         </g>
         <defs>
-          <clipPath id="coaOOqm">
+          <clipPath id="cr7Girx">
             <rect x="29.941816366404606" y="0.0" width="379.0388631094104" height="302.0">
             </rect>
           </clipPath>
         </defs>
         <defs>
-          <clipPath id="ceFVsFm">
+          <clipPath id="cfuRmfI">
             <rect x="29.941816366404606" y="0.0" width="379.0388631094104" height="302.0">
             </rect>
           </clipPath>
@@ -382,7 +382,7 @@ text {
     </g>
     <g transform="translate(59.44181636640461 16.8 ) ">
       <text class="plot-title" y="0.0">
-        <tspan>Comparison Audit: n samples needed</tspan>
+        <tspan>Comparison Audit: % success at 20% cutoff</tspan>
       </text>
     </g>
     <g transform="translate(59.44181636640461 36.0 ) ">
@@ -587,6 +587,6 @@ text {
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(71,71,71)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 400.0 L600.0 400.0 L600.0 0.0 Z">
     </path>
   </g>
-  <g id="dt4HRxP">
+  <g id="dHt0eC7">
   </g>
 </svg>

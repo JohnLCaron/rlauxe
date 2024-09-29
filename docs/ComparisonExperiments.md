@@ -119,11 +119,11 @@ geometricMean
 ````
 
 * need to be more aggressive (larger etaFactor) when cutoff is smaller
-* false positives slighty greater than alpha. probably need to decrease alpha slightly to compensate?
+* false positives slightly greater than alpha. probably need to decrease alpha to compensate?
 * not clear what controls the false positives. I would have thought eta0factor.
 * everything weighted equally,  which is not right
 
-Choose cutoff = 20% as success target
+Choose cutoff = 20% as success target:
 ````
   cvrComparisonAnalyze at cutoff=20
   d=10000 eta0Factor=1.75 geometricMean=0.996 maxFalsePositive=5.360
@@ -136,13 +136,12 @@ Choose cutoff = 20% as success target
 * determine NS as a function of cvrMean abd cvrMeanDiff
 * fine tune d as a function of theta; can we improve based on cvrMean?
 
-![image info](images/plotNS.chooseD.svg)
-
 ![image info](images/plotSuccessVsTheta.svg)
-![image info](images/plotFailuresVsTheta.svg)
 
 * when theta >= cvrMean, 100% of trials are successful at this setting
 * when theta < cvrMean, pct success starts to fall when theta < .505, and gets worse as theta approaches .5
-* surprising, gets worse as cvrMean gets closer to theta
+* surprising, apparently gets worse as cvrMean gets closer to theta
 
+![image info](images/plotFailuresVsTheta.svg)
 
+* goes over 5% when theta exactly .5

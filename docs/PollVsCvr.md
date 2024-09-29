@@ -1,4 +1,4 @@
-
+# Raw data for Cvr vs Polling
 
 ````
 CompareAuditTypeWithErrors.plotAuditTypes ntrials=1000, N=10000, d=1000 cvrMeanDiff=-0.005;

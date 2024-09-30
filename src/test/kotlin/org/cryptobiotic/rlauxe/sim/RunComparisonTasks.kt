@@ -15,11 +15,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.TruncShrinkageAccelerated
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.Stopwatch
 
 data class ComparisonTask(
     val idx: Int,
@@ -28,7 +31,8 @@ data class ComparisonTask(
     val cvrMeanDiff: Double,
     val eta0Factor: Double,
     val d: Int, // parameter for shrinkTruncate
-    val cvrs: List<Cvr>
+    val cvrs: List<Cvr>,
+    val useAcc: Boolean = false,
 ) {
     val theta = cvrMean + cvrMeanDiff
     init {
@@ -44,6 +48,8 @@ class ComparisonRunner {
 
     // run all the tasks concurrently
     fun run(tasks: List<ComparisonTask>, ntrials: Int, nthreads: Int = 30): List<SRT> {
+        val stopwatch = Stopwatch()
+        println("run ${tasks.size} comparison tasks with $nthreads threads and $ntrials trials")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -57,6 +63,7 @@ class ComparisonRunner {
             // wait for all calculations to be done
             joinAll(*calcJobs.toTypedArray())
         }
+        println("that took ${stopwatch.tookPer(tasks.size, "task")}")
         return calculations
     }
 
@@ -86,15 +93,27 @@ class ComparisonRunner {
         val (_, noerrors, upperBound) = comparisonAssorterCalc(task.cvrMean, compareAssorter.upperBound)
         val sampleWithErrors = ComparisonWithErrors(task.cvrs, compareAssorter, task.theta)
 
-        val compareResult = runAlphaMartRepeated(
-            drawSample = sampleWithErrors,
-            maxSamples = task.N,
-            eta0 = task.eta0Factor * noerrors,
-            d = task.d,
-            ntrials = nrepeat,
-            withoutReplacement = true,
-            upperBound = upperBound
-        )
+        val compareResult = if (task.useAcc) {
+            val trunc = TruncShrinkageAccelerated(N = task.N, upperBound = upperBound, d = task.d, eta0 = noerrors, accFactor=task.eta0Factor)
+            val alpha = AlphaMart(estimFn = trunc, N = task.N, upperBound=upperBound)
+            runAlphaEstimRepeated(
+                drawSample = sampleWithErrors,
+                maxSamples = task.N,
+                eta0 = noerrors,
+                ntrials = nrepeat,
+                alphaMart=alpha,
+            )
+        } else {
+            runAlphaMartRepeated(
+                drawSample = sampleWithErrors,
+                maxSamples = task.N,
+                eta0 = task.eta0Factor * noerrors,
+                d = task.d,
+                ntrials = nrepeat,
+                withoutReplacement = true,
+                upperBound = upperBound
+            )
+        }
         return compareResult
     }
 
@@ -116,6 +135,7 @@ class ComparisonRunner {
             if (calculation != null) {
                 mutex.withLock {
                     calculations.add(calculation)
+                    if (calculations.size % 100 == 0) print(" ${calculations.size}")
                 }
             }
             yield()

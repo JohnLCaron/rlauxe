@@ -37,9 +37,16 @@ data class TestH0Result(
 
 private val eps = 2.220446049250313e-16
 
+/**
+ * Finds the ALPHA martingale for the hypothesis that the population
+ * mean is less than or equal to t using a martingale method,
+ * for a population of size N, based on a series of draws x.
+ * See Stark, 2022. ALPHA: Audit that Learns from Previous Hand-Audited Ballots
+ * Derived from "alpha_mart" in SHANGRLA NonnegMean.py
+ */
 class AlphaMart(
-    val estimFn : EstimFn,
-    val N: Int, // number of ballot cards in the population of cards from which the sample is drawn
+    val estimFn : EstimFn,  // estimator of the population mean
+    val N: Int,             // number of ballot cards
     val withoutReplacement: Boolean = true,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
@@ -67,9 +74,9 @@ class AlphaMart(
         val etajs = mutableListOf<Double>()
         val ratms = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
-        val altbs = mutableListOf<Double>()
-        val altcs = mutableListOf<Double>()
-        val ratts = mutableListOf<Double>()
+        //val altbs = mutableListOf<Double>()
+        //val altcs = mutableListOf<Double>()
+        //val ratts = mutableListOf<Double>()
         val testStatistics = mutableListOf<Double>()
         val sampleSums = mutableListOf<Double>()
         sampleSums.add(sampleSum)
@@ -92,16 +99,11 @@ class AlphaMart(
                 break
             }
 
-            // same as "alpha_mart" in SHANGRLA NonnegMean.py
-            //        Finds the ALPHA martingale for the hypothesis that the population
-            //        mean is less than or equal to t using a martingale method,
-            //        for a population of size N, based on a series of draws x.
-            //        See Stark, 2022. ALPHA: Audit that Learns from Previous Hand-Audited Ballots
-
             // This is eq 4 of ALPHA, p.5 :
             //      T_j = T_j-1 * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j)) / u
             //      terms[np.isclose(0, m, atol=atol)] = 1  # ignore
             //      terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
+
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) {
                 1.0 // TODO
             } else {
@@ -110,10 +112,11 @@ class AlphaMart(
                 val p2 = (upperBound - etaj) / (upperBound - mj)
                 val term2 = (upperBound - xj) * p2
                 val term = (term1 + term2) / upperBound
+
                 // ALPHA eq 4
                 val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound
 
-                // alternative formulation (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
+                /* alternative formulation (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
                 val altnum = (xj * etaj + (upperBound - xj) * (upperBound - etaj))
                 val altden = (xj * mj + (upperBound - xj) * (upperBound - mj))
                 val altb = altnum / altden
@@ -121,7 +124,7 @@ class AlphaMart(
                 val altc = altnum / altdenc
                 altbs.add(altb)
                 altcs.add(altc)
-                ratts.add(altc/altb)
+                ratts.add(altc/altb) */
 
                 require( doubleIsClose(term, ttj))
                 //        terms[np.isclose(0, terms, atol=atol)] = (
@@ -169,10 +172,7 @@ class AlphaMart(
             println("etaj = ${etajs}")
             println("etaj/mujs = ${ratms}")
             println("tjs = ${tjs}")
-            println("altbs = ${altbs}")
-            println("altcs = ${altcs}")
-            println("altc/altb = ${ratts}")
-            //println("Tjs = ${testStatistics}")
+            println("Tjs = ${testStatistics}")
         }
 
         val status = when {
@@ -335,17 +335,58 @@ class TruncShrinkage(
     }
 }
 
-// old way
-fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
-    val t = 0.5
-    if (!withoutReplacement) return t  // with replacement
-    if (x.size() == 0) return t
+// modified version of TruncShrinkage, putting the accFactor on the entire terms, not just eta0
+class TruncShrinkageAccelerated(
+    val N: Int,
+    val withoutReplacement: Boolean = true,
+    val upperBound: Double,
+    val eta0: Double,
+    cp: Double? = null,
+    val d: Int,
+    val accFactor: Double = 1.0,
+) : EstimFn {
+    val c = cp ?: max(eps, ((eta0 - .5) / 2))
+    val capAbove = upperBound * (1 - eps)
 
-    val sum = x.sum()
-    val m1 = (N * t - sum)
-    val m2 = (N - x.size())
-    val m3 = m1 / m2
-    return m3
+    init {
+        require(upperBound > 0.0)
+        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
+        require(eta0 >= 0.5)
+        require(c > 0.0)
+        require(d >= 0)
+    }
+
+    val welford = Welford()
+
+    // estimate population mean from previous samples
+    override fun eta(prevSamples: Samples): Double {
+        val lastj = prevSamples.size()
+        val dj1 = (d + lastj).toDouble()
+
+        val sampleSum = if (lastj == 0) 0.0 else {
+            welford.update(prevSamples.last())
+            prevSamples.sum()
+        }
+
+        val orgEst = (d * eta0 + sampleSum) / dj1
+        val est = accFactor * orgEst
+
+        // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
+        // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
+        // for instance c = (η0 − µ)/2.
+        val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        val e_j = c / sqrt(dj1)
+        val capBelow = mean + e_j
+
+        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj, capBelow=${capBelow}(${est < capBelow})")
+        // println("  meanOld=$meanUnderNull mean = $mean e_j=$e_j capBelow=${capBelow}(${est < capBelow})")
+
+        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , upper),
+        //    where ǫi → 0 as the sample size grows.
+        //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
+        val boundedEst = min(max(capBelow, est), capAbove)
+        return boundedEst
+    }
 }
 
 fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
@@ -357,28 +398,6 @@ class FixedEstimFn(
     val eta0: Double,
 ) : EstimFn {
     override fun eta(prevSamples: Samples) = eta0
-}
-
-// TODO compare to FixedEstimFn
-class FixedAlternativeMean(val N: Int, val eta0:Double): EstimFn {
-
-    //         val m = DoubleArray(x.size) {
-    //            val m1 = (N * t - Sp[it])
-    //            val m2 = (N - j[it] + 1)
-    //            val m3 = m1 / m2
-    //            if (isFinite) (N * t - Sp[it]) / (N - j[it] + 1) else t
-    //        }
-
-    override fun eta(prevSamples: Samples): Double {
-        val j = prevSamples.size() + 1
-        val sampleSum = prevSamples.sum()
-        val m1 = (N * eta0 - sampleSum)
-        val m2 = (N - j + 1)
-        val m3 = m1 / m2
-        val result = (N * eta0 - sampleSum) / (N - j + 1)
-        return result
-    }
-
 }
 
 // SHANGRLA NonnegMean

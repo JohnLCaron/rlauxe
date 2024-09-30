@@ -43,7 +43,7 @@ fun runAlphaMartRepeated(
         withoutReplacement = withoutReplacement,
     )
 
-    return runAlphaMartRepeated(
+    return runAlphaEstimRepeated(
         drawSample = drawSample,
         maxSamples = maxSamples,
         terminateOnNullReject = true,
@@ -55,7 +55,7 @@ fun runAlphaMartRepeated(
 }
 
 // run AlphaMart in repeated trials, where alphaMart is supplied
-fun runAlphaMartRepeated(
+fun runAlphaEstimRepeated(
     drawSample: SampleFn,
     maxSamples: Int,
     terminateOnNullReject: Boolean = true,

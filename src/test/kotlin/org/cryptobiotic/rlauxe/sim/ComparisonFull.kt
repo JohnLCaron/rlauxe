@@ -40,7 +40,7 @@ class ComparisonFull {
         val writer = SRTcsvWriter("/home/stormy/temp/sim/cvrComparisonND.csv")
 
         val runner = ComparisonRunner()
-        val results =  runner.run(tasks, ntrials)
+        val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
         writer.close()
@@ -86,7 +86,7 @@ class ComparisonFull {
         val writer = SRTcsvWriter("/home/stormy/temp/sim/full/comparisonFull.csv")
 
         val runner = ComparisonRunner()
-        val results =  runner.run(tasks, ntrials)
+        val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
         writer.close()
@@ -106,7 +106,7 @@ class ComparisonFull {
     fun cvrComparisonAnalyze(all: List<SRT>, cutoff: Int) {
         println("\n************************************************************")
         println("cvrComparisonAnalyze at cutoff=$cutoff")
-        val mnMap: Map<MND, List<SRT>>  = makeMNmap(all)
+        val mnMap: Map<MND, List<SRT>> = makeMNmap(all)
         mnMap.forEach { mn, srts ->
             // construct the MNFDresult, one for each SRT
             srts.forEach { srt ->
@@ -117,7 +117,7 @@ class ComparisonFull {
             var best = 0.0
             var maxFalsePositive = 0.0
             mn.fds.forEach {
-                if (it.theta > 0.5)  {
+                if (it.theta > 0.5) {
                     best = max(best, it.percentHist)
                 } else {
                     maxFalsePositive = max(maxFalsePositive, it.percentHist)
@@ -149,7 +149,7 @@ class ComparisonFull {
         }
 
         // now lets find out which fd has the best geometric mean
-        val fds = mutableMapOf<FD, FDresult> ()
+        val fds = mutableMapOf<FD, FDresult>()
         mnMap.keys.forEach { mn ->
             mn.fds.forEach { mmfd ->
                 val want = FD(mmfd.d, mmfd.eta0Factor)
@@ -168,13 +168,13 @@ class ComparisonFull {
         if (showFalsePositives) {
             // who has the most false positives?
             println("false positives")
-            val falsePos = mnMap.keys.filter{ it.maxFalsePositive > 0.0 }.sortedBy {  it.maxFalsePositive }.reversed()
+            val falsePos = mnMap.keys.filter { it.maxFalsePositive > 0.0 }.sortedBy { it.maxFalsePositive }.reversed()
             falsePos.forEach { println("  $it") }
 
             println("false positives > 5%")
-            mnMap.keys.filter{ it.maxFalsePositive > 5.0 }.forEach {
+            mnMap.keys.filter { it.maxFalsePositive > 5.0 }.forEach {
                 println(it)
-                it.fds.filter{ it.percentHist > 5.0 }.forEach {
+                it.fds.filter { it.percentHist > 5.0 }.forEach {
                     println("    d=${it.d} f=${dd(it.eta0Factor)} theta=${dd(it.theta)} percentHist=${dd(it.percentHist)}")
                 }
             }
@@ -188,49 +188,84 @@ class ComparisonFull {
             bests.forEach { println("  $it") }
         }
     }
+}
 
-    ////////////////////////////////////////////////////////////
-    // ((N, cvrMean, cvrMeanDiff, cutoff) x (eta0factor, D)
+////////////////////////////////////////////////////////////
+// ((N, cvrMean, cvrMeanDiff, cutoff) x (eta0factor, D)
 
-    // have to be data classes to get the auto equals thing
-    data class MND(val N: Int, val cvrMean: Double, val cvrMeanDiff: Double) {
-        val theta = cvrMean + cvrMeanDiff
-        val fds = mutableListOf<MNFDresult>()
-        var best : Double = 0.0
-        var maxFalsePositive : Double = 0.0
+// have to be data classes to get the auto equals thing
+data class MND(val N: Int, val cvrMean: Double, val cvrMeanDiff: Double) {
+    val theta = cvrMean + cvrMeanDiff
+    val fds = mutableListOf<MNFDresult>()
+    var best : Double = 0.0
+    var maxFalsePositive : Double = 0.0
 
-        override fun toString() = "N=$N cvrMean=$cvrMean theta=${dd(theta)} best=${dd(best)} maxFalsePositive=${dd(maxFalsePositive)}"
-    }
+    override fun toString() = "N=$N cvrMean=$cvrMean theta=${dd(theta)} best=${dd(best)} maxFalsePositive=${dd(maxFalsePositive)}"
 
-    class MNFDresult(val d: Int, val eta0Factor: Double, val theta: Double, val percentHist: Double) {
-        var ratio: Double = 0.0
-        fun falsePositive() = if (theta > 0.5) 0.0 else percentHist
-        override fun toString() = " ${dd(ratio)} : d=$d f=${dd(eta0Factor)} theta=${dd(theta)} percentHist=${dd(percentHist)}"
-    }
-
-    fun makeMNmap(srs: List<SRT>): Map<MND, List<SRT>> {
-        val mmap = mutableMapOf<MND, MutableList<SRT>>()
-        srs.forEach {
-            val key = MND(it.N, it.reportedMean, it.reportedMeanDiff)
-            val dmap : MutableList<SRT> = mmap.getOrPut(key) { mutableListOf() }
-            dmap.add(it)
+    fun calcBestFandDbyRatio() {
+        val fs = mutableMapOf<Double, FDresult>()
+        val ds = mutableMapOf<Double, FDresult>()
+        fds.forEach { mmfd ->
+                val want = FD(mmfd.d, mmfd.eta0Factor)
+                val fr = fs.getOrPut(mmfd.eta0Factor) { FDresult(want) }
+                if (mmfd.ratio > 0.0) fr.ratios.add(mmfd.ratio)
+                val dr = ds.getOrPut(mmfd.d.toDouble()) { FDresult(want) }
+                if (mmfd.ratio > 0.0) dr.ratios.add(mmfd.ratio)
+            }
+        fs.values.forEach { fdr ->
+            fdr.geometricMean = geometricMean(fdr.ratios)
         }
-        return mmap
-    }
-
-    data class FD(val d: Int, val eta0Factor: Double) {
-        override fun toString() = "d=$d eta0Factor=$eta0Factor"
-    }
-
-    data class FDresult(val fd: FD) {
-        val ratios = mutableListOf<Double>()
-        var geometricMean: Double = 0.0
-        var maxFalsePositive: Double = 0.0
-        fun trackFalsePositive(falsePositive: Double) {
-            maxFalsePositive = max(maxFalsePositive, falsePositive)
+        ds.values.forEach { fdr ->
+            fdr.geometricMean = geometricMean(fdr.ratios)
         }
-        override fun toString() = "$fd geometricMean=${dd(geometricMean)} maxFalsePositive=${dd(maxFalsePositive)}"
+        val fss = fs.values.sortedBy { it.geometricMean }.reversed()
+        val fsBest = fss.first().fd.eta0Factor
+        val dss = ds.values.sortedBy { it.geometricMean }.reversed()
+        val dsBest = dss.first().fd.d
+        println("   best d=${dsBest.toInt()} eta0Factor=${dd(fsBest)}")
     }
+}
+
+class MNFDresult(val d: Int, val eta0Factor: Double, val theta: Double, val percentHist: Double) {
+    var ratio: Double = 0.0
+    fun falsePositive() = if (theta > 0.5) 0.0 else percentHist
+    override fun toString() = " ${dd(ratio)} : d=$d f=${dd(eta0Factor)} theta=${dd(theta)} percentHist=${dd(percentHist)}"
+}
+
+fun makeMNmap(srs: List<SRT>): Map<MND, List<SRT>> {
+    val mmap = mutableMapOf<MND, MutableList<SRT>>()
+    srs.forEach {
+        val key = MND(it.N, it.reportedMean, it.reportedMeanDiff)
+        val dmap : MutableList<SRT> = mmap.getOrPut(key) { mutableListOf() }
+        dmap.add(it)
+    }
+    return mmap
+}
+
+data class FD(val d: Int, val eta0Factor: Double) {
+    override fun toString() = "d=$d eta0Factor=$eta0Factor"
+}
+
+data class FDresult(val fd: FD) {
+    val ratios = mutableListOf<Double>()
+    var geometricMean: Double = 0.0
+    var maxFalsePositive: Double = 0.0
+    fun trackFalsePositive(falsePositive: Double) {
+        maxFalsePositive = max(maxFalsePositive, falsePositive)
+    }
+    override fun toString() = "$fd geometricMean=${dd(geometricMean)} maxFalsePositive=${dd(maxFalsePositive)}"
+}
+
+data class FDaverage(val fd: FD) {
+    var runningSum = 0.0
+    var count = 0
+    fun add(term: Double) {
+        runningSum += term
+        count++
+    }
+    fun average() = if (count == 0) 0.0 else runningSum / count
+
+    override fun toString() = "$fd average=${dd(average() )}"
 }
 
 fun dd(d: Double) = "%5.3f".format(d)

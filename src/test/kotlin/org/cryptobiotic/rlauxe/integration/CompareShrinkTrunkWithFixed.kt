@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.shangrla.eps
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.math.max
 import kotlin.test.Test
@@ -109,7 +110,7 @@ class CompareShrinkTrunkWithFixed {
         val trunc = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val alpha = AlphaMart(estimFn = trunc, N = sampleFn.N())
 
-        return runAlphaMartRepeated(
+        return runAlphaEstimRepeated(
             drawSample = sampleFn,
             maxSamples = N,
             terminateOnNullReject = true,
@@ -125,7 +126,7 @@ class CompareShrinkTrunkWithFixed {
         val fixed = FixedEstimFn(eta0 = eta0)
         val alpha = AlphaMart(estimFn = fixed, N = N)
 
-        return runAlphaMartRepeated(
+        return runAlphaEstimRepeated(
             drawSample = sampleFn,
             maxSamples = N,
             terminateOnNullReject = true,

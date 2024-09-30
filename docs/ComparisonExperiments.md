@@ -9,7 +9,7 @@
 * seems like you want to pick d based on theta
 * best proxy for theta is cvrMean
 
-## ComparisonParameters cvrComparisonFull and cvrComparisonAnalyze
+## ComparisonFull cvrComparisonFull and cvrComparisonAnalyze
 
 Run all combinations:
 ````

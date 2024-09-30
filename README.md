@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/25/2024
+last update: 09/30/2024
 
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
@@ -139,7 +139,6 @@ One only needs one assorter for each winner, not one for each winner/loser pair.
 Notes
 * Someone has to enforce that each CVR has <= number of allowed votes.
 * multiple winners are allowed
-* TODO check if upperBounds is set correctly.
 
 
 #### IRV
@@ -164,7 +163,7 @@ See SHANGRLA Section 3.2.
 A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
 The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
 
-For comparison audits, the system has already created a CVR (cast vote record) for each ballot which is compared to the MVR.
+For comparison audits, the system has already created a CVR (cast vote record) for each ballot, which is compared to the MVR.
 The overstatement error for the ith ballot is
 ````
     ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper    "overstatement error" (SHANGRLA eq 2, p 9)
@@ -185,7 +184,7 @@ and so B is an half-average assorter.
 Notes 
 * polling vs comparison audits differ only in the assorter function.
 * The comparison assorter B needs Ā(c) ≡ the average CVR assort value, > 0.5.
-* Ā(c) should have the diluted margin as the denominator. TODO
+* Ā(c) should have the diluted margin as the denominator. TODO check this
 (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
 Diluted refers to the fact that the denominator is the number of ballot cards, which is
 greater than or equal to the number of valid votes.)
@@ -196,12 +195,14 @@ greater than or equal to the number of valid votes.)
 * The possible values of the bassort function are:
       {0, .5, 1, 1.5, 2} * noerror
 * When cvr = mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
-* However the convergence is slower than for polling (!), unless one "amplifies" the estimate function.
+* However the convergence is slower than for polling (!), unless one "amplifies" the estimate function. (Here we
+  experiment with "eta0Factor" that multiplies eta0 = noerror by a factor between 1 and 2.)
+* see [Sample size simulations (Ballot Comparison)](docs/Simulations.md#sample-size-simulations-ballot-comparison)
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
-(This seems to apply only to ballot comparision)
+(This seems to apply only to ballot comparison)
 
 To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
 
@@ -230,6 +231,8 @@ See note in SHANGRLA Section 3.4 on Colorado redacted ballots.
 
 ## Use Styles
 
+_In the code but not tested yet._
+
 See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
 
 This gets a tighter bound when you know what ballots have which contests.
@@ -249,6 +252,8 @@ see overstatement_assorter() in core/Assertion
 
 
 ## Phantom Ballots
+
+_In the code but not tested yet._
 
 See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
 
@@ -306,13 +311,13 @@ by the SPRT for the Bernoulli and its optimality when the simple alternative is 
 BRAVO is ALPHA with the following restrictions:
 * the sample is drawn with replacement from ballot cards that do have a valid vote for the
 reported winner w or the reported loser ℓ (ballot cards with votes for other candidates or
-non-votes are ignored)
+non-votes are ignored).
 * ballot cards are encoded as 0 or 1, depending on whether they have a valid vote for the
 reported winner or for the reported loser; u = 1 and the only possible values of xi are 0
-and 1
-* µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement
+and 1.
+* µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement.
 * ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
-Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected
+Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected.
 
 
 ### AlphaMart formula as generalization of Wald SPRT:
@@ -345,7 +350,7 @@ Its not obvious what this is now. Still the probability ratio?? Should you reall
 
     (1c) (x*n + (1-x)(1-n)) / (1/2)
 
-(I think they are not identical for the general case of m != 1/2) TODO
+(I think they are not identical for the general case of m != 1/2 and m != n.
 
 Step 2: Generalize range [0,1] to [0,upper]
 

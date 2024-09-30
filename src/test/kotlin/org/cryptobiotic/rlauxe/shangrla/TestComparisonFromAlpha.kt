@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.sim.makeSRT
+import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -150,7 +151,7 @@ class TestComparisonFromAlpha {
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
 
                         print("  eta0=$eta0 d=$d")
-                        val result =  runAlphaMartRepeated(
+                        val result =  runAlphaEstimRepeated(
                             drawSample = sampleFn,
                             maxSamples = N,
                             terminateOnNullReject = true,

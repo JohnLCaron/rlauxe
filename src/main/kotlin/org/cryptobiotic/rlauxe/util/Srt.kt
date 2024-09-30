@@ -6,7 +6,7 @@ import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
 data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
-               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: org.cryptobiotic.rlauxe.util.Deciles?) {
+               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?) {
 
     val theta = reportedMean + reportedMeanDiff // the true mean
     val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio

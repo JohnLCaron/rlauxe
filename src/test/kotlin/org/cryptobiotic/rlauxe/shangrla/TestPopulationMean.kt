@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.Samples
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.doubleIsClose
-import org.cryptobiotic.rlauxe.core.meanUnderNull
 import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test
@@ -257,4 +256,17 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * noerror
         override fun prevSum() = noerror
     }
+}
+
+// old way
+fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
+    val t = 0.5
+    if (!withoutReplacement) return t  // with replacement
+    if (x.size() == 0) return t
+
+    val sum = x.sum()
+    val m1 = (N * t - sum)
+    val m2 = (N - x.size())
+    val m3 = m1 / m2
+    return m3
 }

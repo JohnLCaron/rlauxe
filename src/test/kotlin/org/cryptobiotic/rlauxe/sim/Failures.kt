@@ -8,7 +8,7 @@ class Failures {
 
     @Test
     fun cvrComparisonFailure() {
-        val cvrMeanDiffs = listOf(-.005, -.01, -.15, 0.0, .005, .01, .15)
+        val cvrMeanDiffs = listOf(-.15, -.01, -.005, 0.0, .005, .01, .15)
         val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .508, .51, .52, .53, .54, .55)
 
         val N = 10000

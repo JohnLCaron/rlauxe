@@ -13,7 +13,7 @@ import kotlin.math.max
 // * determine NS as a function of cvrMean abd cvrMeanDiff
 // * fine tune d as a function of theta; can we improve based on cvrMean?
 
-class ComparisonChooseD {
+class ComparisonAccelerated {
     val showRaw = false
     val showDetail = false
     val showFalsePositives = false
@@ -21,14 +21,13 @@ class ComparisonChooseD {
 
     @Test
     fun generateChooseDF() {
-        val ds = listOf(5000)
-        val fs = listOf(1.4, 1.5, 1.6, 1.7, 1.8)
+        val ds = listOf(50) // , 250, 1000, 5000)
+        val fs = listOf(1.2, 1.3, 1.4) // DoubleArray(5) { 1.4 + it * .1 }.toList()
+        println("ds = $ds")
+        println("fs = $fs")
 
         val cvrMeanDiffs = listOf(0.0, -.0005, -.001, -.003, -.005, -.008, -.010, -.015, -.020)
-        val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .508, .51, .52)
-
-        //val cvrMeanDiffs = listOf(0.0, -.0005, -.00075, -.001, -.002, -.003, -.004, -.005, -.008, -.010)
-        //val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .508, .51, .52, .53, .54, .55)
+        val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .508, .51, .52, .53, .54, .55)
 
         val N = 50000
         val ntrials = 1000
@@ -49,7 +48,8 @@ class ComparisonChooseD {
                                 cvrMeanDiff,
                                 eta0Factor = eta0Factor,
                                 d = d,
-                                cvrs = cvrs
+                                cvrs = cvrs,
+                                useAcc = true,
                             )
                         )
                     }
@@ -57,7 +57,7 @@ class ComparisonChooseD {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/testChooseDF.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/testChooseDFAcc.csv")
 
         val runner = ComparisonRunner()
         val results = runner.run(tasks, ntrials)
@@ -70,7 +70,7 @@ class ComparisonChooseD {
     // analyse D values from generateChooseDF
     @Test
     fun analyzeChooseD() {
-        val reader = SRTcsvReader("/home/stormy/temp/sim/dvalues/testChooseDF.csv")
+        val reader = SRTcsvReader("/home/stormy/temp/sim/dvalues/testChooseDFAcc.csv")
         val all = reader.readCalculations()
         analyzeChooseD(all, 20)
     }

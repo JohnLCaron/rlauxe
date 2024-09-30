@@ -18,11 +18,11 @@ repositories {
 
 dependencies {
    implementation(libs.bull.result)
-   // implementation(libs.kotlinx.cli)
+   implementation(libs.kotlinx.coroutines.core)
    // implementation(libs.bundles.logging)
 
-    testImplementation(libs.bundles.xmlutil )
-    testImplementation(libs.ktor.serialization.kotlinx.json.jvm )
+    //testImplementation(libs.bundles.xmlutil )
+    //testImplementation(libs.ktor.serialization.kotlinx.json.jvm )
     testImplementation(kotlin("test"))
 }
 

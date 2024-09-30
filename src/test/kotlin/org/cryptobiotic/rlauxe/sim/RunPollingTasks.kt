@@ -22,6 +22,7 @@ import org.cryptobiotic.rlauxe.core.FixedEstimFn
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.util.Stopwatch
 
 data class PollingTask(
     val idx: Int,
@@ -45,6 +46,8 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
 
     // run all the tasks concurrently
     fun run(tasks: List<PollingTask>, ntrials: Int, nthreads: Int = 30): List<SRT> {
+        val stopwatch = Stopwatch()
+        println("run ${tasks.size} polling tasks with $nthreads threads and $ntrials trials")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -58,6 +61,7 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
             // wait for all calculations to be done
             joinAll(*calcJobs.toTypedArray())
         }
+        println("that took ${stopwatch.tookPer(tasks.size, "task")}")
         return calculations
     }
 
@@ -87,7 +91,7 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
 
         val pollingResult = if (useFixedEstimFn) {
             val alpha = AlphaMart(estimFn = FixedEstimFn(task.cvrMean), N = task.N)
-            runAlphaMartRepeated(
+            runAlphaEstimRepeated(
                 drawSample = sampler,
                 maxSamples = task.N,
                 ntrials = nrepeat,
@@ -126,6 +130,7 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
             if (calculation != null) {
                 mutex.withLock {
                     calculations.add(calculation)
+                    if (calculations.size % 1000 == 0) print(" ${calculations.size}")
                 }
             }
             yield()

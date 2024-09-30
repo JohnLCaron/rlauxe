@@ -1,6 +1,6 @@
 # Comparison Experiments
 
-## 9/29/24
+## 9/30/24
 
 * suppose NS (number of samples needed) depends only on theta (and alpha)
 * eta0 = cvrMean * etaFactor; etaFactor is the aggression factor
@@ -152,4 +152,5 @@ Here are false positives at d=5000 for several values of eta0Factor:
 ![plotFailuresVsTheta](images/testChooseDF.1.5.svg)
 ![plotFailuresVsTheta](images/testChooseDF.1.8.svg)
 
+* need to be more aggressive (larger etaFactor) when cutoff is smaller, but stay within 5%
 

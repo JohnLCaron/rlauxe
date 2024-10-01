@@ -1,6 +1,6 @@
 # Comparison Experiments
 
-## 9/30/24
+## 10/01/24
 
 * suppose NS (number of samples needed) depends only on theta (and alpha)
 * eta0 = cvrMean * etaFactor; etaFactor is the aggression factor

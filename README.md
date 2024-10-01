@@ -1,5 +1,5 @@
 # rlauxe
-last update: 09/30/2024
+last update: 10/01/2024
 
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
@@ -20,7 +20,6 @@ Table of Contents
     * [Comparison audits vs polling audits](#comparison-audits-vs-polling-audits)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Use Styles](#use-styles)
-  * [Phantom Ballots](#phantom-ballots)
   * [ALPHA testing statistic](#alpha-testing-statistic)
     * [BRAVO testing statistic](#bravo-testing-statistic)
     * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
@@ -182,13 +181,14 @@ and so B is an half-average assorter.
 ````
 
 Notes 
-* polling vs comparison audits differ only in the assorter function.
+
+* polling vs comparison audits differ in the assorter function.
 * The comparison assorter B needs Ā(c) ≡ the average CVR assort value, > 0.5.
 * Ā(c) should have the diluted margin as the denominator. TODO check this
-(Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
-Diluted refers to the fact that the denominator is the number of ballot cards, which is
-greater than or equal to the number of valid votes.)
-* If overstatement error is always zero (no errors in CRV), the assort value is 
+    (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
+    Diluted refers to the fact that the denominator is the number of ballot cards, which is
+    greater than or equal to the number of valid votes.)
+* If overstatement error is always zero (no errors in CRV), the assort value is always
       noerror = 1 / (2 - margin/assorter.upperBound()) 
               = 1 / (3 - 2 * awinnerAvg/assorter.upperBound())
               > 0.5 since awinnerAvg > 0.5
@@ -198,9 +198,22 @@ greater than or equal to the number of valid votes.)
 * However the convergence is slower than for polling (!), unless one "amplifies" the estimate function. (Here we
   experiment with "eta0Factor" that multiplies eta0 = noerror by a factor between 1 and 2.)
 * see [Sample size simulations (Ballot Comparison)](docs/Simulations.md#sample-size-simulations-ballot-comparison)
+* see [Comparison Experiments](docs/ComparisonExperiments.md)
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
+
+_In the code but not tested yet._
+
+See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
+
+    What if the ballot manifest is not accurate?
+    it suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
+    requires only an upper bound on the total number of ballots cast
+    This ensures that the true risk limit remains smaller than the nominal risk limit.
+
+    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
+    designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
 
 (This seems to apply only to ballot comparison)
 
@@ -226,7 +239,7 @@ To conduct the audit, sample integers between 1 and NC.
    overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
    and as if the value the assorter assigned to the CVR was 1/2.
 
-See note in SHANGRLA Section 3.4 on Colorado redacted ballots.
+Also see note in SHANGRLA Section 3.4 on Colorado redacted ballots.
 
 
 ## Use Styles
@@ -249,21 +262,6 @@ see overstatement_assorter() in core/Assertion
 
     If `use_style == False`, then if the CVR contains the contest but the MVR does not,
     the MVR is considered to be a non -vote in the contest .
-
-
-## Phantom Ballots
-
-_In the code but not tested yet._
-
-See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
-
-    What if the ballot manifest is not accurate?
-    it suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
-    requires only an upper bound on the total number of ballots cast
-    This ensures that the true risk limit remains smaller than the nominal risk limit.
-
-    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
-    designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
 
 
 ## ALPHA testing statistic
@@ -305,19 +303,17 @@ Tj          ALPHA nonnegative supermartingale (Tj)_j∈N  starting at 1
 BRAVO is based on Wald’s sequential probability ratio test (SPRT) of the simple hypothesis θ = µ against
 a simple alternative θ = η from IID Bernoulli(θ) observations.
 
-ALPHA is a simple adaptive extension of BRAVO. It is motivated
-by the SPRT for the Bernoulli and its optimality when the simple alternative is true.
+ALPHA is a simple adaptive extension of BRAVO. 
+It is motivated by the SPRT for the Bernoulli and its optimality when the simple alternative is true.
 
 BRAVO is ALPHA with the following restrictions:
-* the sample is drawn with replacement from ballot cards that do have a valid vote for the
-reported winner w or the reported loser ℓ (ballot cards with votes for other candidates or
-non-votes are ignored).
+* the sample is drawn with replacement from ballot cards that do have a valid vote for the reported winner w 
+  or the reported loser ℓ (ballot cards with votes for other candidates or non-votes are ignored).
 * ballot cards are encoded as 0 or 1, depending on whether they have a valid vote for the
-reported winner or for the reported loser; u = 1 and the only possible values of xi are 0
-and 1.
+  reported winner or for the reported loser; u = 1 and the only possible values of xi are 0 and 1.
 * µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement.
 * ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
-Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected.
+  Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected.
 
 
 ### AlphaMart formula as generalization of Wald SPRT:
@@ -442,7 +438,7 @@ _"The draws must be in random order, or the sequence is not a supermartingale un
 
 Is ALPHA dependent on N? Only to test sampleSum > N * t ?? 
 I think this means that one needs the same number of samples for 100, 1000, 1000000 etc. 
-So its highly effective (as percentage of sampling) as N increases.
+So its effectiveness increases (as percentage of sampling) as N increases.
 
 Is sampling without replacement more efficient than with replacement? YES
 

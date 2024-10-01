@@ -31,7 +31,7 @@ class ComparisonChooseD {
         //val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .508, .51, .52, .53, .54, .55)
 
         val N = 50000
-        val ntrials = 1000
+        val ntrials = 10000
 
         val tasks = mutableListOf<ComparisonTask>()
         var taskIdx = 0

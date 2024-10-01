@@ -1,6 +1,6 @@
 # Comparison Experiments
 
-## 9/30/24
+## 10/01/24
 
 * suppose NS (number of samples needed) depends only on theta (and alpha)
 * eta0 = cvrMean * etaFactor; etaFactor is the aggression factor
@@ -142,15 +142,26 @@ Choose cutoff = 20% as success target:
 * when theta < cvrMean, pct success starts to fall when theta < .505, and gets worse as theta approaches .5
 * surprising, apparently gets worse as cvrMean gets closer to theta
 
-![plotFailuresVsTheta](images/plotFailuresVsTheta.svg)
+Here are false positives at d=5000 for several values of eta0Factor, averaging over 1000 trials:
 
-* goes over 5% when theta exactly .5
+![plotFailuresVsTheta](images/ntrials1000/testChooseDF.1.3.svg)
+![plotFailuresVsTheta](images/ntrials1000/testChooseDF.1.4.svg)
+![plotFailuresVsTheta](images/ntrials1000/testChooseDF.1.5.svg)
+![plotFailuresVsTheta](images/ntrials1000/testChooseDF.1.6.svg)
+![plotFailuresVsTheta](images/ntrials1000/testChooseDF.1.7.svg)
+![plotFailuresVsTheta](images/ntrials1000/testChooseDF.1.8.svg)
 
-Here are false positives at d=5000 for several values of eta0Factor:
+When I run with 10,000 trials, the numbers cluster tighter around 5%:
 
-![plotFailuresVsTheta](images/testChooseDF.1.3.svg)
-![plotFailuresVsTheta](images/testChooseDF.1.5.svg)
-![plotFailuresVsTheta](images/testChooseDF.1.8.svg)
+![plotFailuresVsTheta](images/ntrials10000/testChooseDF.1.4.svg)
+![plotFailuresVsTheta](images/ntrials10000/testChooseDF.1.5.svg)
+![plotFailuresVsTheta](images/ntrials10000/testChooseDF.1.6.svg)
+![plotFailuresVsTheta](images/ntrials10000/testChooseDF.1.7.svg)
+![plotFailuresVsTheta](images/ntrials10000/testChooseDF.1.8.svg)
 
-* need to be more aggressive (larger etaFactor) when cutoff is smaller, but stay within 5%
+Notes
+
+* Cluster around 5% when theta exactly .5 (i.e. a tie).
+* Cluster gets tighter as number of trials gets higher. It seems that the risk limit is actually ok. 
+* Need to be more aggressive (larger etaFactor) when cutoff is smaller, but stay within 5%
 

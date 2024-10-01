@@ -20,7 +20,6 @@ Table of Contents
     * [Comparison audits vs polling audits](#comparison-audits-vs-polling-audits)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Use Styles](#use-styles)
-  * [Phantom Ballots](#phantom-ballots)
   * [ALPHA testing statistic](#alpha-testing-statistic)
     * [BRAVO testing statistic](#bravo-testing-statistic)
     * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)

@@ -53,6 +53,53 @@ class TestWelford {
         w2(sample)
     }
 
+    @Test
+    fun testWelfordMeanVar() {
+        val (pm, pv) = SLwelford(sample)
+        val last = sample.size - 1
+
+        assertEquals(sample.average(), pm[last])
+        assertEquals(sample.variance(), pv[last])
+
+        val (pm2, pv2) = welfordMeanVar(sample)
+        assertEquals(sample.average(), pm2[last])
+        assertEquals(sample.variance(), pv2[last])
+
+        pm.forEachIndexed { idx, it ->
+            assertEquals(it, pm2[idx])
+        }
+        pv.forEachIndexed { idx, it ->
+            assertEquals(it, pv2[idx])
+        }
+
+        val welford = Welford()
+        sample.forEachIndexed { idx, it ->
+            welford.update(it)
+            val (wm, wv, _) = welford.result()
+            assertEquals(wm, pm2[idx])
+            assertEquals(wv, pv2[idx])
+        }
+    }
+
+    @Test
+    fun testWelfordMeanVar2() {
+        val x = listOf(0.75, 0.9, 0.9, 0.9, 0.75, 0.9, 0.9, 0.9, 0.9, 0.9)
+        val welford = Welford()
+
+        val means = mutableListOf<Double>()
+        val stdev = mutableListOf<Double>()
+        x.forEachIndexed { idx, it ->
+            welford.update(it)
+            val (wm, wv, _) = welford.result()
+            means.add(wm)
+            stdev.add(sqrt(wv))
+        }
+        println("means = ${means}")
+        println("stdev = ${stdev}")
+        // [0.         0.005625   0.005      0.00421875 0.0054     0.005, 0.00459184 0.00421875 0.00388889 0.0036    ]
+    }
+
+
 }
 
 // this is the original code from SHANGRLA
@@ -125,6 +172,27 @@ fun SLwelford(x: DoubleArray): Pair<DoubleArray, DoubleArray> {
         v.add(v.last() + (xj - m[m.size-2]) * (xj - m.last()))
     }
     v.forEachIndexed{ idx, it -> v[idx] = it / (idx+1)}
+
+    return Pair(m.toDoubleArray(), v.toDoubleArray())
+}
+
+// AI conversion to kotlin
+fun welfordMeanVar(x: DoubleArray): Pair<DoubleArray, DoubleArray> {
+    val m = mutableListOf<Double>()
+    val v = mutableListOf<Double>()
+    m.add(x[0])
+    v.add(0.0)
+
+    for (i in 1 until x.size) {
+        val xi = x[i]
+        m.add((m.last() + (xi - m.last()) / (i + 1)))
+        v.add(v.last() + (xi - m[m.size - 2]) * (xi - m.last()))
+    }
+
+    val r = IntArray(x.size) { i -> i + 1 }
+    for (i in v.indices) {
+        v[i] /= r[i]
+    }
 
     return Pair(m.toDoubleArray(), v.toDoubleArray())
 }

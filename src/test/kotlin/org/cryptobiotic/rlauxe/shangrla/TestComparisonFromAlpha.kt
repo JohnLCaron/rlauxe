@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.core.generateUniformSample
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean

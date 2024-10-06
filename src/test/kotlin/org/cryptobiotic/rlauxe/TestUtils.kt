@@ -48,7 +48,12 @@ fun doublesAreEqual(a: List<Double>, b: List<Double>) {
     repeat(a.size) { assertEquals(a[it], b[it], "$it: ${a[it]} != ${b[it]}") }
 }
 
-class SampleFromList(val list: DoubleArray) {
+class SampleFromArray(val array: DoubleArray) {
+    var index = 0
+    fun sample() = array[index++]
+}
+
+class SampleFromList(val list: List<Double>) {
     var index = 0
     fun sample() = list[index++]
 }

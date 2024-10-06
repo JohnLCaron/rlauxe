@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.shangrla.eps
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.util.SRT
 import kotlin.math.max
 import kotlin.math.sqrt

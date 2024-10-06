@@ -1,42 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sqrt
-
-private val showDetail = false
-
-// estimate the population mean for the jth sample from the previous j-1 samples
-interface EstimFn {
-    fun eta(prevSamples: Samples): Double
-}
-
-enum class TestH0Status(val fail: Boolean) {
-    StatRejectNull(false), // statistical rejection of H0
-    LimitReached(true), // cant tell from the number of samples allowed
-    //// only when sampling without replacement all the way to N, in practice, this never happens I think
-    SampleSum(false), // SampleSum > N * t, so we know H0 is false
-    AcceptNull(true), // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
-}
-
-data class TestH0Result(
-    val status: TestH0Status,  // how did the test conclude?
-    val sampleCount: Int,   // number of samples needed to decide (or maximum allowed)
-    val sampleMean: Double, // average of the assort values in the sample
-    val pvalues: List<Double>,  // set of pvalues (only need for testing)
-    val etajs: List<Double>,  // ni
-    val mujs: List<Double>,  // mi
-) {
-
-    override fun toString() = buildString {
-        append("TestH0Result status=$status")
-        append("  sampleCount=$sampleCount")
-        append("  sampleMean=$sampleMean")
-    }
-}
-
-private val eps = 2.220446049250313e-16
-
 /**
  * Finds the ALPHA martingale for the hypothesis that the population
  * mean is less than or equal to t using a martingale method,
@@ -51,6 +14,8 @@ class AlphaMart(
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
 ) {
+    private val showDetail = false
+
     init {
         require(riskLimit > 0.0 && riskLimit < 1.0 )
         require(upperBound > 0.0)
@@ -72,11 +37,7 @@ class AlphaMart(
         val mjs = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
         val etajs = mutableListOf<Double>()
-        val ratms = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
-        //val altbs = mutableListOf<Double>()
-        //val altcs = mutableListOf<Double>()
-        //val ratts = mutableListOf<Double>()
         val testStatistics = mutableListOf<Double>()
         val sampleSums = mutableListOf<Double>()
         sampleSums.add(sampleSum)
@@ -91,7 +52,6 @@ class AlphaMart(
 
             mj = populationMeanIfH0(N, withoutReplacement, prevSamples)
             mjs.add(mj)
-            ratms.add(etaj/mj)
 
             // terms[m > u] = 0       # true mean is certainly less than 1/2
             // terms[m < 0] = np.inf  # true mean certainly greater than 1/2
@@ -101,8 +61,6 @@ class AlphaMart(
 
             // This is eq 4 of ALPHA, p.5 :
             //      T_j = T_j-1 * ((X_j * eta_j / µ_j) + (u - X_j) * (u - eta_j) / ( u - µ_j)) / u
-            //      terms[np.isclose(0, m, atol=atol)] = 1  # ignore
-            //      terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
 
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) {
                 1.0 // TODO
@@ -115,16 +73,6 @@ class AlphaMart(
 
                 // ALPHA eq 4
                 val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound
-
-                /* alternative formulation (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
-                val altnum = (xj * etaj + (upperBound - xj) * (upperBound - etaj))
-                val altden = (xj * mj + (upperBound - xj) * (upperBound - mj))
-                val altb = altnum / altden
-                val altdenc = upperBound / 2
-                val altc = altnum / altdenc
-                altbs.add(altb)
-                altcs.add(altc)
-                ratts.add(altc/altb) */
 
                 require( doubleIsClose(term, ttj))
                 //        terms[np.isclose(0, terms, atol=atol)] = (
@@ -148,16 +96,6 @@ class AlphaMart(
             sampleSums.add(sampleSum)
             prevSamples.addSample(xj)
 
-            // TODO why ??
-            //        terms[np.isclose(0, m, atol=atol)] = 1  # ignore
-            //        terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
-            //        terms[np.isclose(0, terms, atol=atol)] = (
-            //            1  # martingale effectively vanishes; p-value 1
-            //        )
-            //        terms[-1] = (
-            //            np.inf if Stot > N * t else terms[-1]
-            //        )  # final sample makes the total greater than the null
-            //        return np.minimum(1, 1 / terms) // WHY maximum value is 1 ??
             val pvalue = 1.0 / testStatistic
             pvalues.add(pvalue)
 
@@ -170,7 +108,6 @@ class AlphaMart(
             println("xs = ${xs}")
             println("mujs = ${mjs}")
             println("etaj = ${etajs}")
-            println("etaj/mujs = ${ratms}")
             println("tjs = ${tjs}")
             println("Tjs = ${testStatistics}")
         }
@@ -180,21 +117,12 @@ class AlphaMart(
                 TestH0Status.LimitReached
             }
             (mj < 0.0) -> {
-                val rmj = mjs.reversed()
-                val retajs = etajs.reversed()
-                val rtjs = tjs.reversed()
-                val rTjs = testStatistics.reversed()
                 TestH0Status.SampleSum
             }
             (mj > upperBound) -> {
                 TestH0Status.AcceptNull
             }
             else -> {
-                val rx = xs.reversed()
-                val rmj = mjs.reversed()
-                val retajs = etajs.reversed()
-                val rtjs = tjs.reversed()
-                val rTjs = testStatistics.reversed()
                 TestH0Status.StatRejectNull
             }
         }
@@ -265,243 +193,3 @@ class AlphaMart(
 //        terms = np.cumprod((x*etaj/m + (u-x)*(u-etaj)/(u-m))/u)
 //    terms[m<0] = np.inf
 //    return terms
-
-// I think this agrees with SHANGRLA NonnegMean.shrink_trunc(), but not sure if thats really canonical
-class TruncShrinkage(
-    val N: Int,
-    val withoutReplacement: Boolean = true,
-    val upperBound: Double,
-    val minsd: Double, // only used if f > 0
-    val eta0: Double,
-    val c: Double,
-    val d: Int,
-    val f: Double = 0.0,
-) : EstimFn {
-    val capAbove = upperBound * (1 - eps)
-    val wterm = d * eta0  // eta0 given weight of d. eta is weighted average of eta0 and samples
-
-    init {
-        require(upperBound > 0.0)
-//        if (eta0 < 0.5 || eta0 > upperBound) {
-//            println("wtf")
-//        }
-//        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
-        if (eta0 < 0.5) {
-            println("eta0 < 0.5")
-        }
-//         require(eta0 >= 0.5) // ??
-        require(c > 0.0)
-        require(d >= 0)
-    }
-
-    val welford = Welford()
-
-    // estimate population mean from previous samples
-    override fun eta(prevSamples: Samples): Double {
-        val lastj = prevSamples.size()
-        val dj1 = (d + lastj).toDouble()
-
-        val sampleSum = if (lastj == 0) 0.0 else {
-            welford.update(prevSamples.last())
-            prevSamples.sum()
-        }
-
-        // (2.5.2, eq 14, "truncated shrinkage")
-        // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
-        // val est = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        val est = if (f == 0.0) (d * eta0 + sampleSum) / dj1 else {
-            // note stdev not used if f = 0
-            val (_, variance, _) = welford.result()
-            val stdev = Math.sqrt(variance) // stddev of sample
-            val sdj3 = if (lastj < 2) 1.0 else max(stdev, minsd) // LOOK
-            ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        }
-
-        // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
-        // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
-        // for instance c = (η0 − µ)/2.
-        val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
-        val e_j = c / sqrt(dj1)
-        val capBelow = mean + e_j
-
-        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj, capBelow=${capBelow}(${est < capBelow})")
-        // println("  meanOld=$meanUnderNull mean = $mean e_j=$e_j capBelow=${capBelow}(${est < capBelow})")
-
-        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , upper),
-        //    where ǫi → 0 as the sample size grows.
-        //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
-        val boundedEst = min(max(capBelow, est), capAbove)
-        return boundedEst
-    }
-}
-
-// modified version of TruncShrinkage, putting the accFactor on the entire terms, not just eta0
-class TruncShrinkageAccelerated(
-    val N: Int,
-    val withoutReplacement: Boolean = true,
-    val upperBound: Double,
-    val eta0: Double,
-    cp: Double? = null,
-    val d: Int,
-    val accFactor: Double = 1.0,
-) : EstimFn {
-    val c = cp ?: max(eps, ((eta0 - .5) / 2))
-    val capAbove = upperBound * (1 - eps)
-
-    init {
-        require(upperBound > 0.0)
-        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
-        require(eta0 >= 0.5)
-        require(c > 0.0)
-        require(d >= 0)
-    }
-
-    val welford = Welford()
-
-    // estimate population mean from previous samples
-    override fun eta(prevSamples: Samples): Double {
-        val lastj = prevSamples.size()
-        val dj1 = (d + lastj).toDouble()
-
-        val sampleSum = if (lastj == 0) 0.0 else {
-            welford.update(prevSamples.last())
-            prevSamples.sum()
-        }
-
-        val orgEst = (d * eta0 + sampleSum) / dj1
-        val est = accFactor * orgEst
-
-        // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
-        // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
-        // for instance c = (η0 − µ)/2.
-        val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
-        val e_j = c / sqrt(dj1)
-        val capBelow = mean + e_j
-
-        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj, capBelow=${capBelow}(${est < capBelow})")
-        // println("  meanOld=$meanUnderNull mean = $mean e_j=$e_j capBelow=${capBelow}(${est < capBelow})")
-
-        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , upper),
-        //    where ǫi → 0 as the sample size grows.
-        //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
-        val boundedEst = min(max(capBelow, est), capAbove)
-        return boundedEst
-    }
-}
-
-fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
-    val sampleNum = prevSamples.size()
-    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
-}
-
-class FixedEstimFn(
-    val eta0: Double,
-) : EstimFn {
-    override fun eta(prevSamples: Samples) = eta0
-}
-
-// SHANGRLA NonnegMean
-//
-// def shrink_trunc(self, x: np.array, **kwargs) -> np.array:
-//        """
-//        apply shrinkage/truncation estimator to an array to construct a sequence of "alternative" values
-//
-//        sample mean is shrunk towards eta, with relative weight d compared to a single observation,
-//        then that combination is shrunk towards u, with relative weight f/(stdev(x)).
-//
-//        The result is truncated above at u*(1-eps) and below at m_j+e_j(c,j)
-//
-//        Shrinking towards eta stabilizes the sample mean as an estimate of the population mean.
-//        Shrinking towards u takes advantage of low-variance samples to grow the test statistic more rapidly.
-//
-//        The running standard deviation is calculated using Welford's method.
-//
-//        S_1 := 0
-//        S_j := \sum_{i=1}^{j-1} x_i, j >= 1
-//        m_j := (N*t-S_j)/(N-j+1) if np.isfinite(N) else t
-//        e_j := c/sqrt(d+j-1)
-//        sd_1 := sd_2 = 1
-//        sd_j := sqrt[(\sum_{i=1}^{j-1} (x_i-S_j/(j-1))^2)/(j-2)] \wedge minsd, j>2
-//        eta_j :=  ( [(d*eta + S_j)/(d+j-1) + f*u/sd_j]/(1+f/sd_j) \vee (m_j+e_j) ) \wedge u*(1-eps)
-//
-//        Parameters
-//        ----------
-//        x: np.array
-//            input data
-//        attributes used:
-//            eta: float in (t, u) (default u*(1-eps))
-//                initial alternative hypothethesized value for the population mean
-//            c: positive float
-//                scale factor for allowing the estimated mean to approach t from above
-//            d: positive float
-//                relative weight of eta compared to an observation, in updating the alternative for each term
-//            f: positive float
-//                relative weight of the upper bound u (normalized by the sample standard deviation)
-//            minsd: positive float
-//                lower threshold for the standard deviation of the sample, to avoid divide-by-zero errors and
-//                to limit the weight of u
-//        """
-//        # set the parameters
-//        u = self.u
-//        N = self.N
-//        t = self.t
-//        eta = getattr(self, "eta", u * (1 - np.finfo(float).eps))
-//        c = getattr(self, "c", 1 / 2)
-//        d = getattr(self, "d", 100)
-//        f = getattr(self, "f", 0)
-//        minsd = getattr(self, "minsd", 10**-6)
-//        S, _, j, m = self.sjm(N, t, x)
-//        _, v = welford_mean_var(x)
-//        sdj = np.sqrt(v)
-//        # threshold the sd, set first two sds to 1
-//        sdj = np.insert(np.maximum(sdj, minsd), 0, 1)[0:-1]
-//        sdj[1] = 1
-//        weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
-//        return np.minimum(
-//            u * (1 - np.finfo(float).eps),
-//            np.maximum(weighted, m + c / np.sqrt(d + j - 1)),
-//        )
-
-// shrink_trunc from ONEAUDIT
-// def shrink_trunc(x: np.array, N: int, mu: float=1/2, nu: float=1-np.finfo(float).eps, u: float=1, c: float=1/2,
-//                 d: float=100) -> np.array:
-//     '''
-//    apply the shrinkage and truncation estimator to an array
-//
-//    sample mean is shrunk towards nu, with relative weight d times the weight of a single observation.
-//    estimate is truncated above at u-u*eps and below at mu_j+e_j(c,j)
-//
-//    S_1 = 0
-//    S_j = \sum_{i=1}^{j-1} x_i, j > 1
-//    m_j = (N*mu-S_j)/(N-j+1) if np.isfinite(N) else mu
-//    e_j = c/sqrt(d+j-1)
-//    eta_j =  ( (d*nu + S_j)/(d+j-1) \vee (m_j+e_j) ) \wedge u*(1-eps)
-//
-//    Parameters
-//    ----------
-//    x : input data
-//    mu : float in (0, 1): hypothesized population mean under the null = 1/2
-//    eta : float in (t, 1)
-//        initial alternative hypothethesized value for the population mean
-//    c : positive float
-//        scale factor for allowing the estimated mean to approach t from above
-//    d : positive float
-//        relative weight of nu compared to an observation, in updating the alternative for each term
-//    '''
-//
-//    S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
-//    j = np.arange(1,len(x)+1)              # 1, 2, 3, ..., len(x)
-//    m = (N*mu-S)/(N-j+1) if np.isfinite(N) else mu   # mean of population after (j-1)st draw, if null is true
-//    eps = np.finfo(float).eps
-
-//    est = (d*nu+S)/(d+j-1)
-
-// estimate is truncated above at u-u*eps and below at mu_j+e_j(c,j)
-//    e_j(c,j) = c/np.sqrt(d+j-1)
-//    capBelow = m+c/np.sqrt(d+j-1)
-//    capAbove = u*(1-np.finfo(float).eps)
-//    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
-
-//    termMax = np.maximum(term2, term3)
-//    termMin = np.minimum(term1, termMax)
-//    return np.minimum(u*(1-np.finfo(float).eps), np.maximum((d*nu+S)/(d+j-1),m+c/np.sqrt(d+j-1)))

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.shangrla.eps
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -86,7 +85,7 @@ class TruncShrinkageDebug(
 
     // estimate population mean from previous samples
     fun eta(prevSamples: Samples): TruncShrinkageResult {
-        val lastj = prevSamples.size()
+        val lastj = prevSamples.numberOfSamples()
         val dj1 = (d + lastj).toDouble()
 
         val sampleSum = if (lastj == 0) 0.0 else {
@@ -111,7 +110,7 @@ class TruncShrinkageDebug(
 
         val e_j = c / sqrt(dj1)
         val mean = meanUnderNull(N, 0.5, prevSamples)
-        val mean2 = populationMeanIfH0(prevSamples.size(), prevSamples.sum())
+        val mean2 = populationMeanIfH0(prevSamples.numberOfSamples(), prevSamples.sum())
         if  (mean != mean2) {
             println("wtf")
         }
@@ -132,11 +131,11 @@ class TruncShrinkageDebug(
 
     fun meanUnderNull(N: Int, t: Double, x: Samples): Double {
         if (!withoutReplacement) return t  // t is always 1/2 ??
-        if (x.size() == 0) return t
+        if (x.numberOfSamples() == 0) return t
 
         val sum = x.sum()
         val m1 = (N * t - sum)
-        val m2 = (N - x.size())
+        val m2 = (N - x.numberOfSamples())
         val m3 = m1 / m2
         return m3
     }

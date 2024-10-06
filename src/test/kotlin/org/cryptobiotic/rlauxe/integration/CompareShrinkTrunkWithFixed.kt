@@ -8,10 +8,9 @@ import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.shangrla.eps
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated
-import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.math.max
 import kotlin.test.Test
 

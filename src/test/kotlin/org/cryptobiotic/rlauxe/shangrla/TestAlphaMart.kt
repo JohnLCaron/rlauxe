@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.SampleFromList
+import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.Bernoulli
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.math.max
 import kotlin.test.Test
@@ -123,7 +124,7 @@ class TestAlphaMart {
 
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
-        val sampler = SampleFromList(x.toDoubleArray())
+        val sampler = SampleFromArray(x.toDoubleArray())
 
         val result = alpha.testH0(x.size, false) { sampler.sample() }
         println(" test_shrink_trunk_f1 = ${result}")
@@ -165,7 +166,7 @@ class TestAlphaMart {
             c = c
         )
         val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
-        val sampler = SampleFromList(x.toDoubleArray())
+        val sampler = SampleFromArray(x.toDoubleArray())
 
         val result = alpha.testH0(x.size, false) { sampler.sample() }
         println(" test_shrink_trunk_f1_wreplacement = ${result}")
@@ -238,7 +239,7 @@ class TestAlphaMart {
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
-        val sampler = SampleFromList(x.toDoubleArray())
+        val sampler = SampleFromArray(x.toDoubleArray())
         return alpha.testH0(x.size, true) { sampler.sample() }
     }
 
@@ -255,7 +256,7 @@ class TestAlphaMart {
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
-        val sampler = SampleFromList(x.toDoubleArray())
+        val sampler = SampleFromArray(x.toDoubleArray())
         return alpha.testH0(x.size, false) { sampler.sample() }
     }
 

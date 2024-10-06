@@ -1,32 +1,39 @@
 package org.cryptobiotic.rlauxe.core
 
 import kotlin.math.ln
+import kotlin.math.sqrt
 import kotlin.random.Random
 
-//// keeps track of the latest sample and the current and previous sample sum.
+//// keeps track of the latest sample, number of samples, and the sample sum.
 interface Samples {
-    fun last(): Double // latest sample
-    fun size(): Int    // total number of samples so far
+    fun last(): Double  // latest sample
+    fun numberOfSamples(): Int    // total number of samples so far
     fun sum(): Double   // sum of samples so far
-    fun prevSum(): Double // sum os samples excluding latest
+    fun mean(): Double   // average of samples so far
+    fun variance(): Double   // variance of samples so far
 }
 
+/**
+ * This ensures that the called function doesnt have access to the current sample,
+ * as required by "predictable function of the data X1 , . . . , Xi−1" requirement.
+ * Its up to the method using this to make it "previous samples", by not adding the current sample to it until
+ * the end of the iteration.
+ */
 class PrevSamples() : Samples {
     private var last = 0.0
-    private var size = 0
     private var sum = 0.0
-    private var prevSum = 0.0
+    private val welford = Welford()
 
-    override fun sum() = sum
     override fun last() = last
-    override fun size() = size
-    override fun prevSum() = prevSum
+    override fun numberOfSamples() = welford.count
+    override fun sum() = sum
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
 
     fun addSample(sample : Double) {
-        prevSum = sum
-        sum += sample
-        size++
         last = sample
+        sum += sample
+        welford.update(sample)
     }
 }
 
@@ -269,6 +276,9 @@ class Welford(
         val sample_variance = M2 / (count - 1)
         return Triple(mean, variance, sample_variance)
     }
+
+    // current stddev
+    fun variance() = if (count == 0) 0.0 else M2 / count
 
     override fun toString(): String {
         return "(mean, variance and sample) = ${this.result()}"

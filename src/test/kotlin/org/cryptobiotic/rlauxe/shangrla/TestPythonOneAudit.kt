@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.core.findFirstIndex
 import org.cryptobiotic.rlauxe.core.np_cumprod
 import org.cryptobiotic.rlauxe.core.np_cumsum
@@ -188,9 +189,6 @@ class Results(val reps: Int) {
         return "avgReject = ${avgReject()}}"
     }
 }
-
-
-val eps = 2.220446049250313e-16
 
 ////////////////////////////////////
 // identical in oa-batch and oa-polling

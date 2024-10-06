@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.SampleFromList
+import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.Samples
@@ -156,7 +156,7 @@ class TestPopulationMeanWithoutReplacement {
         val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta, f = f, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
-        val sampler = SampleFromList(x.toDoubleArray())
+        val sampler = SampleFromArray(x.toDoubleArray())
         println("alphaTestH0")
         val result: TestH0Result = alpha.testH0(x.size, false) { sampler.sample() }
 
@@ -218,7 +218,7 @@ class TestPopulationMeanWithoutReplacement {
         val halfSamples = HalfSamples()
         repeat(100) {
             val num = (N * 0.5 - halfSamples.sum())
-            val den = (N - halfSamples.size())
+            val den = (N - halfSamples.numberOfSamples())
             val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSamples = halfSamples)
             println("mj=${mj} num=$num den=$den")
             halfSamples.count++
@@ -229,9 +229,10 @@ class TestPopulationMeanWithoutReplacement {
     class HalfSamples(): Samples {
         var count = 0
         override fun last() = .5
-        override fun size() = count
+        override fun numberOfSamples() = count
         override fun sum() = count * .5
-        override fun prevSum() = .5
+        override fun mean() = 0.5
+        override fun variance() = 0.0
     }
 
     @Test
@@ -248,13 +249,14 @@ class TestPopulationMeanWithoutReplacement {
         }
     }
 
-    class ComparisonSamples(val awinnerAvg: Double): Samples {
+    class ComparisonSamples(awinnerAvg: Double): Samples {
         val noerror = 1.0 / (3 - 2 * awinnerAvg)
         var count = 0
         override fun last() = noerror
-        override fun size() = count
+        override fun numberOfSamples() = count
         override fun sum() = count * noerror
-        override fun prevSum() = noerror
+        override fun mean() = noerror
+        override fun variance() = 0.0
     }
 }
 
@@ -262,11 +264,11 @@ class TestPopulationMeanWithoutReplacement {
 fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
     val t = 0.5
     if (!withoutReplacement) return t  // with replacement
-    if (x.size() == 0) return t
+    if (x.numberOfSamples() == 0) return t
 
     val sum = x.sum()
     val m1 = (N * t - sum)
-    val m2 = (N - x.size())
+    val m2 = (N - x.numberOfSamples())
     val m3 = m1 / m2
     return m3
 }

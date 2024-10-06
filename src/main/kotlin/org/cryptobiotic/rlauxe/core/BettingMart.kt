@@ -115,10 +115,6 @@ fun betting_mart(
 }
 */
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // modify routine from alpha_mart
-    // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)=
-
     // TODO merge with alpha_mart?
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
     fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean = false, drawSample : () -> Double) : TestH0Result {
@@ -141,34 +137,35 @@ fun betting_mart(
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
             xs.add(xj)
+            require(xj > 0.0)
+            require(xj <= upperBound)
 
             // AlphaMart val etaj = estimFn.eta(prevSamples)
-            // EstimFn could be cast as betting BettingFn
+            // EstimFn could be converted to BettingFn
             val lamj = bettingFn.bet(prevSamples)
             bets.add(lamj)
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(N, withoutReplacement, prevSamples)
             mjs.add(mj)
-            // terms[m > u] = 0       # true mean is certainly less than 1/2
-            // terms[m < 0] = np.inf  # true mean certainly greater than 1/2
-            if (mj > upperBound || mj < 0.0) {
-                break
-            }
 
             // TODO
             //     for (i in terms.indices) {
             //        when {
-            // 1           m[i] > u -> terms[i] = 0.0
+            // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
             // 3           isCloseToU(m[i], u, atol, rtol) -> terms[i] = 1.0
             // 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0
-            // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY
+            // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
             // 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]
             //        }
             //    }
 
-            val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) {
+            if (mj > upperBound || mj < 0.0) { // 1, 5
+                break
+            }
+
+            val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) { // 2, 3
                 1.0 // TODO look at this
             } else {
                 // AlphaMart
@@ -176,7 +173,7 @@ fun betting_mart(
 
                 // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10
                 val ttj = 1.0 + lamj * (xj - mj) // (1 + λi (Xi − µi )) ALPHA eq 10
-                if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // TODO look at this
+                if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // TODO look at this // 4
             }
             tjs.add(tj)
             testStatistic *= tj // Tj ← Tj-1 & tj

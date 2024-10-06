@@ -5,6 +5,10 @@ import org.cryptobiotic.rlauxe.SampleFromList
 import org.cryptobiotic.rlauxe.core.AgrapaBet
 import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.core.FixedBet
+import org.cryptobiotic.rlauxe.core.OptimalComparison
+import org.cryptobiotic.rlauxe.core.PrevSamples
+import org.cryptobiotic.rlauxe.core.eps
+import org.cryptobiotic.rlauxe.core.eta_to_lam
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.math.max
 import kotlin.math.min
@@ -61,98 +65,6 @@ class TestBettingMart {
         }
     }
 
-    /*
-        def test_agrapa(self):
-        t = 0.5
-        c_g_0 = 0.5
-        c_g_m = 0.99
-        c_g_g = 0
-        N = np.inf
-        u = 1
-        n = 10
-        # test for sampling with replacement, constant c
-        for val in [0.6, 0.7]:
-            for lam in [0.2, 0.5]:
-                test = NonnegMean(N=N, u=u, bet=NonnegMean.fixed_bet,
-                                  c_grapa_0=c_g_0, c_grapa_m=c_g_m, c_grapa_grow=c_g_g,
-                                  lam=lam)
-                x = val * np.ones(n)
-                lam_0 = test.agrapa(x)
-                term = max(0, min(c_g_0 / t, (val - t) / (val - t) ** 2))
-                lam_t = term * np.ones_like(x)
-                lam_t[0] = lam
-                np.testing.assert_almost_equal(lam_0, lam_t)
-        # test for sampling without replacement, growing c, but zero sample variance
-        N = 10
-        n = 5
-        t = 0.5
-        c_g_0 = 0.6
-        c_g_m = 0.9
-        c_g_g = 2
-        for val in [0.75, 0.9]:
-            for lam in [0.25, 0.5]:
-                test = NonnegMean(N=N, u=u, bet=NonnegMean.agrapa,
-                                  c_grapa_0=c_g_0, c_grapa_max=c_g_m, c_grapa_grow=c_g_g,
-                                  lam=lam)
-                x = val * np.ones(n)
-                lam_0 = test.agrapa(x)
-                t_adj = np.array([(N * t - i * val) / (N - i) for i in range(n)])
-                mj = val
-                lam_t = (mj - t_adj) / (mj - t_adj) ** 2
-                lam_t = np.insert(lam_t, 0, lam)[0:-1]
-                j = np.arange(n)
-                cj = c_g_0 + (c_g_m - c_g_0) * (1 - 1 / (1 + c_g_g * np.sqrt(j)))
-                lam_t = np.minimum(cj / t_adj, lam_t)
-                np.testing.assert_almost_equal(lam_0, lam_t)
-     */
-    /*
-    fun testAgrapa() {
-    var t = 0.5
-    var c_g_0 = 0.5
-    var c_g_m = 0.99
-    var c_g_g = 0
-    var N = Double.POSITIVE_INFINITY
-    var u = 1
-    var n = 10
-    // test for sampling with replacement, constant c
-    for (val in listOf(0.6, 0.7)) {
-        for (lam in listOf(0.2, 0.5)) {
-            val test = NonnegMean(N, u, NonnegMean.fixedBet,
-                                  c_g_0, c_g_m, c_g_g, lam)
-            val x = DoubleArray(n) { `val` }
-            val lam_0 = test.agrapa(x)
-            val term = max(0.0, min(c_g_0 / t, (`val` - t) / (`val` - t).pow(2)))
-            val lam_t = DoubleArray(n) { term }
-            lam_t[0] = lam
-            Assert.assertArrayEquals(lam_0, lam_t, 0.001)
-        }
-    }
-
-    // test for sampling without replacement, growing c, but zero sample variance
-    N = 10.0
-    n = 5
-    t = 0.5
-    c_g_0 = 0.6
-    c_g_m = 0.9
-    c_g_g = 2
-    for (val in listOf(0.75, 0.9)) {
-        for (lam in listOf(0.25, 0.5)) {
-            val test = NonnegMean(N, u, NonnegMean.agrapa,
-                                  c_g_0, c_g_m, c_g_g, lam)
-            val x = DoubleArray(n) { `val` }
-            val lam_0 = test.agrapa(x)
-            val t_adj = DoubleArray(n) { i -> (N * t - i * `val`) / (N - i) }
-            val mj = `val`
-            val lam_t = t_adj.map { (mj - it) / (mj - it).pow(2) }.toDoubleArray()
-            lam_t[0] = lam
-            val `j` = IntArray(n) { it }
-            val `cj` = `j`.map { c_g_0 + (c_g_m - c_g_0) * (1 - 1 / (1 + c_g_g * sqrt(it.toDouble()))) }.toDoubleArray()
-            val lam_t = DoubleArray(n) { i -> min(`cj`[i] / t_adj[i], lam_t[i]) }
-            Assert.assertArrayEquals(lam_0, lam_t, 0.001)
-        }
-    }
-}
-     */
     @Test
     fun testAgrapa0() {
         var t = 0.5
@@ -170,7 +82,6 @@ class TestBettingMart {
                     N = N,
                     withoutReplacement = false, // another simpleton
                     upperBound = u,
-                    t = t,
                     lam0 = lam,
                     c_grapa_0 = c_g_0,
                     c_grapa_max = c_g_m,
@@ -200,7 +111,7 @@ class TestBettingMart {
         val c_g_0 = 0.6
         val c_g_m = 0.9
         val c_g_g = 2.0
-        var u = 1.0
+        var u = 1.0  // TODO should be 2 * noerror
         // test for sampling without replacement, growing c, but zero sample variance
         for (value in listOf(0.75, 0.9)) {
             for (lam in listOf(0.25, 0.5)) {
@@ -209,7 +120,6 @@ class TestBettingMart {
                     N = N,
                     withoutReplacement = true,
                     upperBound = u,
-                    t = t,
                     lam0 = lam,
                     c_grapa_0 = c_g_0,
                     c_grapa_max = c_g_m,
@@ -267,11 +177,10 @@ class TestBettingMart {
     fun testAgrapaWithVariance() {
         val N = 100
         val n = 10
-        val t = 0.5
         val c_g_0 = 0.6
         val c_g_m = 0.9
         val c_g_g = 2.0
-        var u = 1.0
+        var u = 1.0  // TODO should be 2 * noerror
 
         val x = listOf(0.75, 0.9, 0.9, 0.9, 0.75, 0.9, 0.9, 0.9, 0.9, 0.9)
         val lam = 0.55
@@ -281,7 +190,6 @@ class TestBettingMart {
             N = N,
             withoutReplacement = true,
             upperBound = u,
-            t = t,
             lam0 = lam,
             c_grapa_0 = c_g_0,
             c_grapa_max = c_g_m,
@@ -293,9 +201,94 @@ class TestBettingMart {
         println("  ${result}")
         println("   bets=  ${result.etajs}") // these are the bets, despite the name
 
-        val expected = listOf(0.55,  1.60812183, 1.66536931, 1.70245166, 1.73233083, 1.75309598, 1.77771742, 1.80148744, 1.82491642, 1.84834123)
+        // from SHANGRLAorg.test_agrapa_with_variance()
+        val expected = listOf(
+            0.55,
+            1.60812183,
+            1.66536931,
+            1.70245166,
+            1.73233083,
+            1.75309598,
+            1.77771742,
+            1.80148744,
+            1.82491642,
+            1.84834123
+        )
         expected.forEachIndexed { idx, it ->
             assertEquals(it, result.etajs[idx], doublePrecision)
         }
     }
+
+    @Test
+    fun testOptimalComparison() {
+        val N = 100
+        val mean = .51                              // .5 < mean <= 1
+        val dilutedMargin = 2 * mean - 1            // aka v;  0 < v <= 1
+        val noerror = 1.0 / (2.0 - dilutedMargin)   // aka a;  1/2 < a <= 1
+        val upperBound = 2 * noerror                // aka u; 1 < u <= 2
+        val p2 = .001
+        val mu = .5
+
+        val eta =  (1.0 - upperBound * (1.0 - p2)) / (2.0 - 2.0 * upperBound) + upperBound * (1.0 - p2) - 0.5
+        val lam =  eta_to_lam(eta, mu, upperBound) // (eta / mu - 1) / (upper - mu)
+
+        // so this equation only works if mu = .5
+        val p0 = 1.0 - p2
+        val expectedLam = (2 - 4 * noerror * p0) / (1 - 2 * noerror) // Cobra eq 3
+
+        assertEquals(expectedLam, lam)
+    }
+
+    @Test
+    fun testOptimalComparisonBet() {
+        val N = 100
+        val mean = .51
+        val dilutedMargin = 2 * mean - 1
+        val noerror = 1.0 / (2.0 - dilutedMargin)
+        val upperBound = 2 * noerror
+        val p2 = .001
+
+        val betFn = OptimalComparison(
+            N = N,
+            withoutReplacement = true,
+            upperBound = upperBound,
+            p2 = p2
+        )
+
+        val prevSamples = PrevSamples()
+        val x = listOf(1, 1, 1, 0, 1, 1, 0, 0, 1, 1)
+        val bets = mutableListOf<Double>()
+        x.forEach {
+            bets.add(betFn.bet(prevSamples))
+            prevSamples.addSample(it * noerror)
+        }
+        println("bets = $bets")
+    }
+
+    @Test
+    fun testOptimalComparisonBet2() {
+        val N = 100
+        val mean = .51
+        val dilutedMargin = 2 * mean - 1
+        val noerror = 1.0 / (2.0 - dilutedMargin)
+        val upperBound = 2 * noerror
+        val p2 = .001
+        println("upperBound = $upperBound")
+        val betFn2 = OptimalComparison(
+            N = N,
+            withoutReplacement = true,
+            upperBound = 1.0 + eps,
+            p2 = p2
+        )
+
+        val x = listOf(1, 1, 1, 0, 1, 1, 0, 0, 1, 1)
+        val prevSamples2 = PrevSamples()
+        val bets2 = mutableListOf<Double>()
+        x.forEach {
+            bets2.add( betFn2.bet(prevSamples2) )
+            prevSamples2.addSample(it.toDouble())
+        }
+        println("bets2 = $bets2")
+    }
+
 }

@@ -75,11 +75,14 @@ fun eta_to_lam(eta: Double, mu: Double, upper: Double): Double {
     return (eta / mu - 1) / (upper - mu)
 }
 
-// // SHANGRLA Nonneg_mean.agrapa()
-//  lamj = (mj - t_adj) / (sdj2 + (t_adj - mj) ** 2)  # agrapa bet
-
-
-
+// SmithRamdas 2022, section B.3
+// Rather than solve (42), we take the Taylor approximation of (1 + y)−1 by (1 − y) for y ≈ 0 to obtain
+// λaGRAPA (m) := −c/(1-m) ∨ (µ_t-1 - m) / (variance_t-1 + (µ_t-1 - m)**2) ∧ c/m
+// for some truncation level c ≤ 1
+//
+// SHANGRLA Nonneg_mean.agrapa()
+//  This implementation alters the method from support \mu \in [0, 1] to \mu \in [0, u], and to constrain
+//  the bets to be positive (for one-sided tests against the alternative that the true mean is larger than hypothesized)
 /**
  * Approximate Growth rate adaptive to the particular alternative (AGRAPA)
  * @parameter t hypothesized population mean
@@ -89,134 +92,12 @@ fun eta_to_lam(eta: Double, mu: Double, upper: Double): Double {
 class AgrapaBet(
     val N: Int,
     val withoutReplacement: Boolean = true,
-    val upperBound: Double,
-    val t: Double,
-    val lam0: Double, // initaal guess
+    val upperBound: Double, // TODO why not used ??
+    val lam0: Double, // initial guess TODO how to pick this?
     val c_grapa_0: Double,
     val c_grapa_max: Double,
     val c_grapa_grow: Double
 ): BettingFn {
-    //val welford = Welford()
-    //var sampleSum = 0.0
-
-/*
-def agrapa(self, x: np.array, **kwargs) -> np.array:
-        """
-        maximize approximate growth rate adapted to the particular alternative (aGRAPA) bet of Waudby-Smith & Ramdas (WSR)
-
-        This implementation alters the method from support \mu \in [0, 1] to \mu \in [0, u], and to constrain
-        the bets to be positive (for one-sided tests against the alternative that the true mean is larger than
-        hypothesized)
-
-        lam_j := 0 \vee (\hat{\mu}_{j-1}-t)/(\hat{\sigma}_{j-1}^2 + (t-\hat{\mu})^2) \wedge c_grapa/t
-
-        \hat{\sigma} is the standard deviation of the sample.
-
-        \hat{\mu} is the mean of the sample
-
-        The value of c_grapa \in (0, 1) is passed as an instance variable of Class NonnegMean
-
-        The running standard deviation is calculated using Welford's method.
-
-        S_0 := 0
-        S_j := \sum_{i=0}^{j-1} x_i, j >= 1
-        t_adj := (N*t-S_j)/(N-j+1) if np.isfinite(N) else t
-        sd_0 := 0
-        sd_j := sqrt[(\sum_{i=1}^{j-1} (x_i-S_j/(j-1))^2)/(j-2)] \wedge minsd, j>2
-        lam_1 := self.lam
-        lam_j :=  0 \vee (\hat{m_{j-1}-t)/(sd_{j-1}^2 + (t-m_{j-1})^2) \wedge c_grapa/t
-
-        Parameters
-        ----------
-        x: np.array
-            input data
-        attributes used:
-            c_grapa_0: float in (0, 1)
-                initial scale factor c_j in WSR's agrapa bet
-            c_grapa_max: float in (1, 1-np.finfo(float).eps]
-                asymptotic limit of the value of c_j
-            c_grapa_grow: float in [0, np.infty)
-                rate at which to allow c to grow towards c_grapa_max.
-                c_j := c_grapa_0 + (c_grapa_max-c_grapa_0)*(1-1/(1+c_grapa_grow*np.sqrt(j)))
-                A value of 0 keeps c_j equal to c_grapa for all j.
-
-        """
-        # set the parameters
-        u = self.u  # population upper bound
-        N = self.N  # population size
-        t = self.t  # hypothesized population mean
-        lam = getattr(self, "lam", 0.5)  # initial bet
-        c_g_0 = getattr(
-            self, "c_grapa_0", (1 - np.finfo(float).eps)
-        )  # initial truncation value c for agrapa
-        c_g_m = getattr(
-            self, "c_grapa_max", (1 - np.finfo(float).eps)
-        )  # asymptotic limit of c
-        c_g_g = getattr(self, "c_grapa_grow", 0)  # rate to let c grow towards c_g_m
-
-        mj, sdj2 = welford_mean_var(x)
-        t_adj = (
-            (N * t - np.insert(np.cumsum(x), 0, 0)[0:-1]) / (N - np.arange(len(x)))
-            if np.isfinite(N)
-            else t * np.ones(len(x))
-        )
-        lamj = (mj - t_adj) / (sdj2 + (t_adj - mj) ** 2)  # agrapa bet
-        #  shift and set first bet to self.lam
-        lamj = np.insert(lamj, 0, lam)[0:-1]
-        c = c_g_0 + (c_g_m - c_g_0) * (1 - 1 / (1 + c_g_g * np.sqrt(np.arange(len(x)))))
-        lamj = np.maximum(0, np.minimum(c / t_adj, lamj))
-        return lamj
-
-
-fun agrapa(
-    x: List<Double>, c_grapa_0: Double = (1 - Double.MIN_VALUE),
-    c_grapa_max: Double = (1 - Double.MIN_VALUE),
-    c_grapa_grow: Double = 0.0,
-    u: Double?,
-    N: Double?,
-    t: Double?,
-    lam: Double = 0.5,
-): List<Double> {
-
-    val mj: List<Double>
-    val sdj2: List<Double>
-    val mjAcc = 0.0
-    val sdj2Acc = 0.0
-    val t_adj: List<Double> = mk.emptyArray(x.size)
-
-    val lamj = mk.zeros(x.size + 1)
-
-    lamj[0] = lam
-
-    mjAcc += x[0]
-    mj = mk.array(doubleArrayOf(mjAcc))
-    sdj2 = when (mj.size) {
-        1 -> mk.zeros(1)
-        else -> mk.array(doubleArrayOf(sdj2Acc / (mj.size - 1))) // Finishing Welford's method.
-    }
-
-    val temp = (N?.let { -mk.cumsum(x).insert(0, 0.0) + it * t!! / (it - (0 until x.size).toDoubleArray()) }
-        ?: t?.toDouble()!!)
-    t_adj = when {
-        t_adj.size > 0 && N != Double.POSITIVE_INFINITY ->
-            temp
-
-        else ->
-            mk.expandDims(t?.toDouble() ?: 0.0)
-    }
-
-    lamj = ((mj - t_adj) / (sdj2 + (t_adj - mj).pow(2.0)))
-        .insert(0, lam)
-        .sliceArray(0 until lamj.size - 1) // Insert and slide.
-
-    val c =
-        c_grapa_0 + (c_grapa_max - c_grapa_0) * (1 - 1 / (1 + c_grapa_grow * kotlin.math.sqrt((0 until x.size).toDoubleArray().indices.toDouble())))
-
-    lamj = kotlin.math.max(0.toDouble(), kotlin.math.min(c / t_adj, lamj))
-
-    return lamj
-}
- */
 
     // "λi can be a predictable function of the data X1 , . . . , Xi−1" COBRA section 4.2
     // The bet must only use the previous samples
@@ -239,49 +120,90 @@ fun agrapa(
 
 //        lamj = np.maximum(0, np.minimum(c / t_adj, lamj))
 //        return lamj
-        val result =  max(0.0, min(c / t_adj, lamj))
+        val result =  max(0.0, min(lamj, c / t_adj))
         return result
     }
 
-    /* estimate population mean from previous samples
-    fun eta(prevSamples: Samples): Double {
-        val lastj = prevSamples.size()
-        val dj1 = (d + lastj).toDouble()
+}
 
-        val sampleSum = if (lastj == 0) 0.0 else {
-            welford.update(prevSamples.last())
-            prevSamples.sum()
-        }
+//     def optimal_comparison(self, x: np.array, **kwargs) -> np.array:
+//        """
+//        The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
+//        for which overstatement assorters take a small number of possible values and are concentrated
+//        on a single value when the CVRs have no errors.
+//
+//        Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
+//        and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
+//
+//        eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
+//
+//        Translating to p2=1-p0 gives:
+//
+//        eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+//
+//        Parameters
+//        ----------
+//        x: np.array
+//            input data
+//        rate_error_2: float
+//            hypothesized rate of two-vote overstatements
+//
+//        Returns
+//        -------
+//        eta: float
+//            estimated alternative mean to use in alpha
+//        """
+//        # set the parameters
+//        # TO DO: double check where rate_error_2 is set
+//        p2 = getattr(self, "rate_error_2", 1e-4)  # rate of 2-vote overstatement errors
+//        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
 
-        // (2.5.2, eq 14, "truncated shrinkage")
-        // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
-        // val est = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        val est = if (f == 0.0) (d * eta0 + sampleSum) / dj1 else {
-            // note stdev not used if f = 0
-            val (_, variance, _) = welford.result()
-            val stdev = sqrt(variance) // stddev of sample
-            val sdj3 = if (lastj < 2) 1.0 else max(stdev, minsd) // LOOK
-            ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        }
-
-        // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
-        // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
-        // for instance c = (η0 − µ)/2.
-        val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
-        val e_j = c / sqrt(dj1)
-        val capBelow = mean + e_j
-
-        // println("est = $est sampleSum=$sampleSum d=$d eta0=$eta0 dj1=$dj1 lastj = $lastj, capBelow=${capBelow}(${est < capBelow})")
-        // println("  meanOld=$meanUnderNull mean = $mean e_j=$e_j capBelow=${capBelow}(${est < capBelow})")
-
-        // The estimate ηi is thus the sample mean, shrunk towards η0 and truncated to the interval [µi + ǫi , upper),
-        //    where ǫi → 0 as the sample size grows.
-        //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
-        val boundedEst = min(max(capBelow, est), capAbove)
-        return boundedEst
+/**
+ * The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
+ * for which overstatement assorters take a small number of possible values and are concentrated
+ * on a single value when the CVRs have no errors.
+ * Let p0 be the rate of error-free CVRs,
+ *     p1 the rate of 1-vote overstatements,
+ *     p2 the rate of 2-vote overstatements = 1-p0-p1
+ * Ignore the understatements.
+ * from SHANGRLA Nonneg_mean.optimal_comparison()
+ */
+class OptimalComparison(
+    val N: Int,
+    val withoutReplacement: Boolean = true,
+    val upperBound: Double,
+    // val p1: Double = 0.0, // the rate of 1-vote overstatements // assume 0
+    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
+): BettingFn {
+    init {
+        require(upperBound > 1.0)
     }
 
-     */
+    override fun bet(prevSamples: Samples): Double {
+        val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
+
+        // note eta is a constant
+        //        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
+        val eta =  (1.0 - upperBound * (1.0 - p2)) / (2.0 - 2.0 * upperBound) + upperBound * (1.0 - p2) - 0.5
+        return eta_to_lam(eta, mu, upperBound)
+    }
 
 }
 
+class OptimalComparisonFull(
+    val N: Int,
+    val withoutReplacement: Boolean = true,
+    val upperBound: Double,
+    val p1: Double = 0.0, // the rate of 1-vote overstatements
+    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
+): BettingFn {
+
+    override fun bet(prevSamples: Samples): Double {
+        val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
+
+        //        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
+        val eta =  (1.0 - upperBound * (1.0 - p2)) / (2.0 - 2.0 * upperBound) + upperBound * (1.0 - p2) - 0.5
+        return eta_to_lam(eta, mu, upperBound)
+    }
+
+}

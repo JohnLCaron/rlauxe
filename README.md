@@ -32,17 +32,20 @@ Table of Contents
 
 ## Papers
 
-    SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA	Stark; 24 Mar 2020
+    SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
         https://github.com/pbstark/SHANGRLA
 
-    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots	Stark; Jan 7, 2022
+    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots.	Stark, Jan 7, 2022
         https://github.com/pbstark/alpha.
 
-    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit	Stark, P.B., 6 Mar 2023.
+    Estimating means of bounded random variables by betting. 	Waudby-Smith and Ramdas, Aug 29, 2022
+        https://github.com/WannabeSmith/betting-paper-simulations
+
+    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit.     Stark, 6 Mar 2023.
         https://github.com/pbstark/ONEAudit
 
-    COBRA: Comparison-Optimal Betting for Risk-limiting Audits, Jacob Spertus, 16 Mar 2023
-
+    COBRA: Comparison-Optimal Betting for Risk-limiting Audits.     Jacob Spertus, 16 Mar 2023
+        https://github.com/spertus/comparison-RLA-betting/tree/main
 
 ## SHANGRLA framework
 

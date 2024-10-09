@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.shangrla
+package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.AlphaMart

@@ -5,7 +5,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
-data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
+// data class for capturing results from repeated audit trials.
+// Should just be in test, but put it here to share with rlaplot
+data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val testParameters: Map<String, Double>, val eta0Factor: Double,
                val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?) {
 
     val theta = reportedMean + reportedMeanDiff // the true mean
@@ -13,6 +15,7 @@ data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Doubl
     val failPct = 100.0 * (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val nsamples = totalSamplesNeeded.toDouble() / (if (nsuccess == 0) 1 else nsuccess) // avg number of samples for successes
     val pctSamples = 100.0 * nsamples / (if (N == 0) 1 else N)
+    val eta0 = testParameters["eta0"] ?: 0.0
 }
 
 // simple serialization to csv files
@@ -82,6 +85,6 @@ class SRTcsvReader(filename: String) {
 
         val percentHist = if (idx < tokens.size) org.cryptobiotic.rlauxe.util.Deciles.Companion.fromString(ttokens[idx++]) else null
 
-        return SRT(N, reportedMean, reportedMeanDiff, d, eta0, eta0Factor, nsuccess, ntrials, nsamples, stddev, percentHist)
+        return SRT(N, reportedMean, reportedMeanDiff, d, mapOf("eta0" to eta0), eta0Factor, nsuccess, ntrials, nsamples, stddev, percentHist)
     }
 }

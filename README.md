@@ -1,5 +1,5 @@
 # rlauxe
-last update: 10/01/2024
+last update: 10/09/2024
 
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
@@ -40,6 +40,8 @@ Table of Contents
 
     ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit	Stark, P.B., 6 Mar 2023.
         https://github.com/pbstark/ONEAudit
+
+    COBRA: Comparison-Optimal Betting for Risk-limiting Audits, Jacob Spertus, 16 Mar 2023
 
 
 ## SHANGRLA framework

@@ -1,21 +1,26 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.text.toInt
+import kotlin.times
 
 class TestSamples {
 
     @Test
     fun testSampleMeans() {
-        repeat (20) {
+        repeat(20) {
             testSampleMeans(100, .575)
         }
     }
 
     fun testSampleMeans(N: Int, theta: Double, silent: Boolean = false, showContests: Boolean = true) {
         val cvrs = makeCvrsByExactMean(N, theta)
-        val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+        val checkAvotes = cvrs.map { it.hasMarkFor(0, 0) }.sum()
         assertEquals((N * theta).toInt(), checkAvotes.toInt())
 
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
@@ -62,9 +67,9 @@ class TestSamples {
     }
 
     @Test
-    fun testmakeCvrsByExactMean() {
-        repeat (20) {
-            val cvrs = makeCvrsByExactMean(100, .575)
+    fun testMakeCvrsByExactMean() {
+        repeat(20) {
+            val cvrs = makeCvrsByExactMean(100, .573)
             val actual = cvrs.map { it.hasMarkFor(0, 0) }.sum()
             assertEquals(57, actual)
         }
@@ -84,7 +89,7 @@ class TestSamples {
         val meanDiff = -.015
         val N = 10000
         println("testComparisonWithErrors N=$N cvrMean=$cvrMean meanDiff=$meanDiff")
-        repeat (11) {
+        repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
             val bassorter = ComparisonAssorter(contest, assorter, cvrMean)
             assertEquals(.02, bassorter.margin, doublePrecision)
@@ -102,12 +107,14 @@ class TestSamples {
 
             val cvrVotes = cs.cvrs.map { assorter.assort(it) }.sum()
             val mvrVotes = cs.mvrs.map { assorter.assort(it) }.sum()
-            assertEquals(cvrVotes + cs.flippedVotes, mvrVotes, doublePrecision)
+            assertEquals(cvrVotes - cs.flippedVotes, mvrVotes, doublePrecision)
             assertEquals(N * cs.mvrMean, mvrVotes, doublePrecision)
 
             println(" ComparisonWithErrors: cvrVotes=$cvrVotes mvrVotes=$mvrVotes sampleCount=${cs.sampleCount} sampleMean=${cs.sampleMean}")
 
-            val expectedAssortValue = cs.flippedVotes * (2 * bassorter.noerror) + (N - cs.flippedVotes) * (bassorter.noerror)
+            val expectedAssortValue = (N - cs.flippedVotes) * (bassorter.noerror)
+
+            testLimits(cs, N, bassorter.upperBound)
 
             repeat(11) {
                 cs.reset()
@@ -119,4 +126,95 @@ class TestSamples {
             }
         }
     }
+
+    fun testLimits(sampler: SampleFn, nsamples: Int, upper: Double) {
+        repeat(nsamples) {
+            val ss = sampler.sample()
+            assertTrue(ss >= 0)
+            assertTrue(ss <= upper)
+        }
+    }
+
+    fun countAssortValues(sampler: SampleFn, nsamples: Int, assortValue: Double): Int {
+        sampler.reset()
+        var count = 0
+        repeat(nsamples) {
+            val ss = sampler.sample()
+            if (doubleIsClose(ss, assortValue)) count++
+        }
+        return count
+    }
+
+    @Test
+    fun testComparisonWithErrorsLimits() {
+        val N = 20000
+        val reportedMargin = .05
+        val reportedAvg = margin2theta(reportedMargin)
+        val cvrs = makeCvrsByExactMean(N, reportedAvg)
+        val compareAssorter = makeStandardComparisonAssorter(reportedAvg)
+        val meanDiff = .01
+        val sampler = ComparisonWithErrors(cvrs, compareAssorter, reportedAvg-meanDiff)
+        testLimits(sampler, N, compareAssorter.upperBound)
+
+        val noerror = compareAssorter.noerror
+        assertEquals((meanDiff*N).toInt(), countAssortValues(sampler, N, 0.0))
+        assertEquals(0, countAssortValues(sampler, N, noerror/2))
+        assertEquals(((1.0-meanDiff)*N).toInt(), countAssortValues(sampler, N, noerror))
+        assertEquals(0, countAssortValues(sampler, N, 3*noerror/2))
+        assertEquals(0, countAssortValues(sampler, N, 2*noerror))
+    }
+
+    @Test
+    fun testComparisonWithP2ErrorRates() {
+        val N = 20000
+        val margins = listOf(.017, .03, .05)
+        val p2s = listOf(.015, .01, .005, .001, .000)
+        for (margin in margins) {
+            for (p2 in p2s) {
+
+                val theta = margin2theta(margin)
+                val cvrs = makeCvrsByExactMean(N, theta)
+                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2)
+                testLimits(sampler, N, compareAssorter.upperBound)
+
+                val noerror = compareAssorter.noerror
+                assertEquals((p2 * N).toInt(), countAssortValues(sampler, N, 0.0))
+                assertEquals(0, countAssortValues(sampler, N, noerror / 2))
+                assertEquals(((1.0 - p2) * N).toInt(), countAssortValues(sampler, N, noerror))
+                assertEquals(0, countAssortValues(sampler, N, 3 * noerror / 2))
+                assertEquals(0, countAssortValues(sampler, N, 2 * noerror))
+            }
+        }
+    }
+
+    @Test
+    fun testComparisonWithBothErrorRates() {
+        val N = 20000
+        val margins = listOf(.017, .03, .05)
+        val p1s = listOf(.01, .001)
+        val p2s = listOf(.01, .001, .0001)
+        for (margin in margins) {
+            for (p2 in p2s) {
+                for (p1 in p1s) {
+                    val theta = margin2theta(margin)
+                    val cvrs = makeCvrsByExactMean(N, theta)
+                    val compareAssorter = makeStandardComparisonAssorter(theta)
+                    val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2, p1, true) // false just makes the numbers imprecise
+                    testLimits(sampler, N, compareAssorter.upperBound)
+                    println("\nmargin=$margin p2 = $p2 p1= $p1")
+                    val noerror = compareAssorter.noerror
+                   // println(" p2 = ${countAssortValues(sampler, N, 0.0)} expect ${(p2 * N)}")
+                    // println(" p1 = ${countAssortValues(sampler, N, noerror / 2)} expect ${(p1 * N)}")
+
+                    assertEquals(0, countAssortValues(sampler, N, 2 * noerror))
+                    assertEquals(0, countAssortValues(sampler, N, 3 * noerror / 2))
+                    assertEquals((p2 * N).toInt(), countAssortValues(sampler, N, 0.0))
+                    assertEquals((p1 * N).toInt(), countAssortValues(sampler, N, noerror / 2))
+                    assertEquals(((1.0 - p2 - p1) * N).toInt(), countAssortValues(sampler, N, noerror))
+                }
+            }
+        }
+    }
+
 }

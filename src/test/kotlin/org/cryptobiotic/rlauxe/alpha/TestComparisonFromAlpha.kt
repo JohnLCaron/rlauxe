@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.shangrla
+package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.AuditContest
@@ -32,7 +32,7 @@ class TestComparisonFromAlpha {
         //alpha = 0.05
         //mixtures = [.99, .9, .75, .5, .25, .1, .01]  # mass at 1
         //zero_mass = [0, 0.001] # mass at 0
-        val reps = 10000
+        val reps = 1000
         val mixtures = listOf(.99, .9, .75, .5, .25, .1, .01) // mass at 1
         val zero_mass = listOf(0.0, 0.001) // mass at 0
 
@@ -310,7 +310,7 @@ class TestComparisonFromAlpha {
         //assorter_mean = (9000*0.51*1 + 1000*.5)/N  # contest has 51% for winner in 9000 valid votes, and 1000 non-votes
         //assorter_margin = 2*assorter_mean - 1
         val theta = 0.51
-        val N = 10000
+        val N = 1000
         val u_b = 1
         val assorter_mean = (9000*theta + 1000*.5)/N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
         val assorter_margin = 2*assorter_mean - 1

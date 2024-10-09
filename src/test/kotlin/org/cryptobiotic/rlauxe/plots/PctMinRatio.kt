@@ -111,7 +111,7 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
                 // data class SRT(val N: Int, val theta: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double,
                 //               val failPct: Double, val nsamples: Double, val stddev: Double)
                 val sr = SRT(
-                    N, margin, 0.0, 0, 0.0, 0.0, 0, 0, 0,
+                    N, margin, 0.0, 0, emptyMap(), 0.0, 0, 0, 0,
                     stddev = TODO(),
                     percentHist = null
                 ) // TODO

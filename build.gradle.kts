@@ -17,16 +17,14 @@ repositories {
 }
 
 dependencies {
-   implementation(libs.bull.result)
-   implementation(libs.kotlinx.coroutines.core)
-   // implementation(libs.bundles.logging)
+    implementation(libs.bull.result)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation("org.apache.commons:commons-math3:3.6.1")
 
-    //testImplementation(libs.bundles.xmlutil )
-    //testImplementation(libs.ktor.serialization.kotlinx.json.jvm )
     testImplementation(kotlin("test"))
 }
 
-tasks.test  {
+tasks.test {
     useJUnitPlatform()
     minHeapSize = "512m"
     maxHeapSize = "8g"

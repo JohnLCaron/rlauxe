@@ -57,42 +57,8 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     return randomCvrs
 }
 
-// change cvrs to have the exact number of votes for avg = theta
-fun flipExactVotes(cvrs: MutableList<Cvr>, theta: Double): Int {
-    val ncards = cvrs.size
-    val expectedAVotes = (ncards * theta).toInt()
-    val actualAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
-    val needToChangeVotesToA = expectedAVotes - actualAvotes
-    var changed = 0
-    // we need more A votes, needToChangeVotesToA > 0
-    if (needToChangeVotesToA > 0) {
-        while (changed < needToChangeVotesToA) {
-            val cvrIdx = Random.nextInt(ncards)
-            val cvr = cvrs[cvrIdx]
-            if (cvr.hasMarkFor(0, 1) == 1) {
-                val votes = mutableMapOf<Int, Map<Int, Int>>()
-                votes[0] = mapOf(0 to 1)
-                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
-                changed++
-            }
-        }
-    } else {
-        // we need more B votes, needToChangeVotesToA < 0
-        while (changed > needToChangeVotesToA) {
-            val cvrIdx = Random.nextInt(ncards)
-            val cvr = cvrs[cvrIdx]
-            if (cvr.hasMarkFor(0, 0) == 1) {
-                val votes = mutableMapOf<Int, Map<Int, Int>>()
-                votes[0] = mapOf(1 to 1)
-                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
-                changed--
-            }
-        }
-    }
-    val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
-    require(checkAvotes == expectedAVotes)
-    return changed
-}
+///////////////////////////////////////////////////////////////////////////////
+// old, deprectaed
 
 fun makeCvrsByCount(ncards: Int, count: Int) : List<Cvr> {
     val result = mutableListOf<Cvr>()
@@ -241,15 +207,6 @@ class ContestBuilder(
 
     fun done() = builder.done()
 }
-
-/*
-fun cvrFromVote(candidateIdx: Int, cvrId: String = "crv${Random.nextInt(9999)}", contestIdx: Int = 0): Cvr {
-    val builder =  CvrBuilder(cvrId, false)
-    builder.addVote( contestIdx, candidateIdx )
-    return builder.build()
-}
-
- */
 
 data class ContestVotes(val contestId: Int, val votes: List<Vote>) {
     constructor(contestIdx: Int) : this(contestIdx, emptyList())

@@ -198,11 +198,7 @@ class CompareAuditType {
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val calculation = calculate(task) // not inside the mutex!!
-            if (calculation != null) {
-                mutex.withLock {
-                    calculations.add(calculation)
-                }
-            }
+            mutex.withLock { calculations.add(calculation) }
             yield()
         }
     }

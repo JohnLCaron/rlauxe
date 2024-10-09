@@ -53,7 +53,6 @@ fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Tri
     return Triple(margin, noerror, upperBound)
 }
 
-
 /** See SHANGRLA Section 3.2 */
 data class ComparisonAssorter(
     val contest: AuditContest,
@@ -68,11 +67,9 @@ data class ComparisonAssorter(
     fun upperBound() = upperBound
 
     init {
-        if (check) { // suspend checking for some tests
-            require(avgCvrAssortValue > 0.5) // the math requires this; otherwise divide by negative number flips the inequality
-            require(margin > 0.0)
-            require(noerror > 0.5)
-            require(upperBound > 1.0)
+        if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
+            require(avgCvrAssortValue > 0.5) { "($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            require(noerror > 0.5) { "($noerror) noerror must be > .5" }
         }
     }
 

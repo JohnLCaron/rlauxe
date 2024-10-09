@@ -137,7 +137,7 @@ fun betting_mart(
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
             xs.add(xj)
-            require(xj > 0.0)
+            require(xj >= 0.0)
             require(xj <= upperBound)
 
             // AlphaMart val etaj = estimFn.eta(prevSamples)
@@ -172,7 +172,7 @@ fun betting_mart(
                 // val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound // ALPHA eq 4
 
                 // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10
-                val ttj = 1.0 + lamj * (xj - mj) // (1 + λi (Xi − µi )) ALPHA eq 10
+                val ttj = 1.0 + lamj * (xj - mj) // (1 + λi (Xi − µi )) ALPHA eq 10, SmithRamdas eq 34 (WoR)
                 if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // TODO look at this // 4
             }
             tjs.add(tj)

@@ -13,7 +13,6 @@ import kotlin.test.assertFailsWith
 // from SHANGRLA test_Assertion.py
 class TestOverstatementsFromShangrla {
 
-
     //     # is it weird that margin calling signature involves cvr_list,
     //    # but not so for overstatement_assorter_margin
     //    def test_overstatement_assorter_margin(self):
@@ -199,6 +198,7 @@ class TestOverstatementsFromShangrla {
         //                        ( CVR.as_vote(c.get_vote_for("AvB", winr))
         //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
         //                        + 1)/2), upper_bound=1))
+        //        aVb.margin=0.2
 
         val contest = AuditContest(
             id = "AvB",
@@ -207,9 +207,10 @@ class TestOverstatementsFromShangrla {
             candidates = listOf(0, 1),
             winners = listOf(0),
         )
+        val margin = 0.2
 
         val assort = PluralityAssorter(contest, 0, 1)
-        var aVb = ComparisonAssorter(contest, assort, 0.0)
+        var aVb = ComparisonAssorter(contest, assort, (margin + 1.0)/2)
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0

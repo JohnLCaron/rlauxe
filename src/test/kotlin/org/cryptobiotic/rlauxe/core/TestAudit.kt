@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class TestAudit {
 
@@ -91,14 +93,14 @@ class TestAudit {
     }
 
     @Test
-    fun testComparisonSuper() {
+    fun testComparisonSuperMajority() {
         val contest = AuditContest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidates = listOf(0, 1, 2, 3, 4),
             winners = listOf(2, 4),
-            minFraction = .66,
+            minFraction = .33,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
@@ -119,6 +121,28 @@ class TestAudit {
             assertIs< SuperMajorityAssorter>(it.assorter.assorter)
             assertEquals(1.0 / (2.0 * contest.minFraction!!), it.assorter.assorter.upperBound())
         }
+    }
+
+    @Test
+    fun testComparisonSuperMajorityFail() {
+        val contest = AuditContest(
+            id = "AvB",
+            idx = 0,
+            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            candidates = listOf(0, 1, 2, 3, 4),
+            winners = listOf(2, 4),
+            minFraction = .66,
+        )
+        val counts = listOf(1000, 980, 3000, 50, 3001)
+        val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+
+        // TODO: no winners have minFraction = .66, where do we test that ?
+        val exception = assertFailsWith<RuntimeException> {
+            makeComparisonAudit(listOf(contest), riskLimit = .01, cvrs)
+        }
+        println(exception)
+        assertNotNull(exception.message)
+        assertTrue(exception.message!!.contains("avgCvrAssortValue must be > .5"))
     }
 
 }

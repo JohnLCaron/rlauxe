@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import kotlin.math.ln
-import kotlin.math.sqrt
 import kotlin.random.Random
 
 //// keeps track of the latest sample, number of samples, and the sample sum.
@@ -45,6 +44,9 @@ interface SampleFn { // TODO could be an Iterator
     fun sampleCount(): Double
     fun N(): Int  // population size
 }
+
+///////////////////////////////////////////////////////////////
+// For polling audits.
 
 class PollWithReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleFn {
     val N = cvrs.size
@@ -91,6 +93,7 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunctio
 ///////////////////////////////////////////////////////////////
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
+// the mvr and cvr always agree.
 class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter): SampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
@@ -107,7 +110,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     override fun sample(): Double {
         require (idx < N)
         val curr = cvrs[permutedIndex[idx++]]
-        return cassorter.bassort(curr, curr) // mvr == cvr, no errors
+        return cassorter.bassort(curr, curr) // mvr == cvr, no errors. could just return cassorter.noerror
     }
 
     override fun reset() {
@@ -120,6 +123,8 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     override fun N() = N
 }
 
+// generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only) to make mvrs have mvrMean
+// withReplacement
 data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double): SampleFn {
     val N = cvrs.size
     val mvrs : List<Cvr>
@@ -159,17 +164,137 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
     override fun N() = N
 }
 
+// generate mvr by starting with cvrs and flipping (N * p2) votes (type 2 errors) and (N * p1) votes (type 1 errors)
+// withReplacement
+data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
+                                    val p2: Double, val p1: Double = 0.0, val withoutReplacement: Boolean = true): SampleFn {
+    val N = cvrs.size
+    val mvrs : List<Cvr>
+    val permutedIndex = MutableList(N) { it }
+    val sampleMean: Double
+    val sampleCount: Double
+    val flippedVotes2: Int
+    val flippedVotes1: Int
+    var idx = 0
+
+    init {
+        reset()
+
+        // we want to flip the exact number of votes, for reproducibility
+        val mmvrs: MutableList<Cvr> = mutableListOf<Cvr>()
+        mmvrs.addAll(cvrs)
+        flippedVotes2 = add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2).toInt())
+        flippedVotes1 =  if (p1 == 0.0) 0 else {
+            add1voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p1).toInt())
+        }
+        mvrs = mmvrs.toList()
+
+        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
+        sampleMean = sampleCount / N
+    }
+
+    override fun sample(): Double {
+        if (withoutReplacement) {
+            val cvr = cvrs[permutedIndex[idx]]
+            val mvr = mvrs[permutedIndex[idx]]
+            idx++
+            return cassorter.bassort(mvr, cvr)
+        } else {
+            val chooseIdx = Random.nextInt(N) // with Replacement
+            val cvr = cvrs[chooseIdx]
+            val mvr = mvrs[chooseIdx]
+            return cassorter.bassort(mvr, cvr)
+        }
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    override fun sampleMean() = sampleMean
+    override fun sampleCount() = sampleCount
+    override fun N() = N
+}
+
+///////////////////////
+private val debug = false
+
+// change cvrs to have the exact number of votes for wantAvg
+fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
+    val ncards = cvrs.size
+    val expectedAVotes = (ncards * wantAvg).toInt()
+    val actualAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    val needToChangeVotesFromA = actualAvotes - expectedAVotes
+    return add2voteOverstatements(cvrs, needToChangeVotesFromA)
+}
+
+// change cvrs to add the given number of two-vote overstatements.
+// Note that we replace the Cvr in the list when we change it
+fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
+    val ncards = cvrs.size
+    val startingAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    var changed = 0
+    // we need more A votes, needToChangeVotesFromA < 0>
+    if (needToChangeVotesFromA < 0) {
+        while (changed > needToChangeVotesFromA) {
+            val cvrIdx = Random.nextInt(ncards)
+            val cvr = cvrs[cvrIdx]
+            if (cvr.hasMarkFor(0, 1) == 1) {
+                val votes = mutableMapOf<Int, Map<Int, Int>>()
+                votes[0] = mapOf(0 to 1)
+                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                changed--
+            }
+        }
+    } else {
+        // we need more B votes, needToChangeVotesFromA > 0
+        while (changed < needToChangeVotesFromA) {
+            val cvrIdx = Random.nextInt(ncards)
+            val cvr = cvrs[cvrIdx]
+            if (cvr.hasMarkFor(0, 0) == 1) {
+                val votes = mutableMapOf<Int, Map<Int, Int>>()
+                votes[0] = mapOf(1 to 1)
+                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                changed++
+            }
+        }
+    }
+    val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
+    require(checkAvotes == startingAvotes - needToChangeVotesFromA)
+    return changed
+}
+
+// change cvrs to add the given number of one-vote overstatements.
+fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
+    val ncards = cvrs.size
+    val startingAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    var changed = 0
+    while (changed < needToChangeVotesFromA) {
+        val cvrIdx = Random.nextInt(ncards)
+        val cvr = cvrs[cvrIdx]
+        if (cvr.hasMarkFor(0, 0) == 1) {
+            val votes = mutableMapOf<Int, Map<Int, Int>>()
+            votes[0] = mapOf(2 to 1)
+            cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+            changed++
+        }
+    }
+    val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
+    require(checkAvotes == startingAvotes - needToChangeVotesFromA)
+    return changed
+}
+
+
+///////////////////////
 //// DoubleArrays
 fun randomPermute(samples : DoubleArray): DoubleArray {
     val n = samples.size
     val permutedIndex = MutableList(n) { it }
     permutedIndex.shuffle(Random)
     return DoubleArray(n) { samples[permutedIndex[it]] }
-}
-
-fun randomPermute(samples : MutableList<Cvr>): List<Cvr> {
-    samples.shuffle(Random)
-    return samples
 }
 
 // generate a sample thats approximately mean = theta

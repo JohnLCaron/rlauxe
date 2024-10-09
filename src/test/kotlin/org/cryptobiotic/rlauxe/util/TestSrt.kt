@@ -13,7 +13,7 @@ class TestSrt {
 
         // SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
         //               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?)
-        val target = SRT(19, 42.0, -.006, 99, 77.0, 1.1, 123, 234, 456, 0.009, hist)
+        val target = SRT(19, 42.0, -.006, 99, mapOf("eta0" to 77.0), 1.1, 123, 234, 456, 0.009, hist)
 
         val testFile = "/home/stormy/temp/test/testWriteRead.csv"
         val writer = SRTcsvWriter(testFile)
@@ -32,7 +32,7 @@ class TestSrt {
     fun testNullHistogram() {
         // SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
         //               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?)
-        val target = SRT(19, 42.0, -.006, 99, 77.0, 1.1, 123, 234, 456, 0.009, null)
+        val target = SRT(19, 42.0, -.006, 99, mapOf("eta0" to 77.0), 1.1, 123, 234, 456, 0.009, null)
 
         val testFile = "/home/stormy/temp/test/testNullHistogram.csv"
         val writer = SRTcsvWriter(testFile)

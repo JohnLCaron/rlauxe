@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 
 class TestBetaFn {
 
-
     @Test
     fun testOptimalComparison() {
         val N = 100
@@ -42,7 +41,7 @@ class TestBetaFn {
             p2 = p2
         )
 
-        val prevSamples = PrevSamples()
+        val prevSamples = PrevSamplesWithRates(noerror)
         val x = listOf(1, 1, 1, 0, 1, 1, 0, 0, 1, 1)
         val bets = mutableListOf<Double>()
         x.forEach {
@@ -69,7 +68,7 @@ class TestBetaFn {
         )
 
         val x = listOf(1, 1, 1, 0, 1, 1, 0, 0, 1, 1)
-        val prevSamples2 = PrevSamples()
+        val prevSamples2 = PrevSamplesWithRates(noerror)
         val bets2 = mutableListOf<Double>()
         x.forEach {
             bets2.add( betFn2.bet(prevSamples2) )

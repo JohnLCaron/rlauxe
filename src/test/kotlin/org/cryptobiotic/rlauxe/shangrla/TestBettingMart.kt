@@ -45,7 +45,7 @@ class TestBettingMart {
                 //    val upperBound: Double = 1.0,  // aka u
                 //)
                 println("assort value = $value lam=$lam")
-                val betta = BettingMart(bettingFn = FixedBet(lam), N = N, withoutReplacement = false)
+                val betta = BettingMart(bettingFn = FixedBet(lam), noerror=0.0, N = N, withoutReplacement = false)
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
@@ -84,7 +84,7 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
-                val betta = BettingMart(bettingFn = agrapa, N = N, withoutReplacement = false)
+                val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, withoutReplacement = false)
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
@@ -122,7 +122,7 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
-                val betta = BettingMart(bettingFn = agrapa, N = N, withoutReplacement = false)
+                val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, withoutReplacement = false)
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
@@ -192,7 +192,7 @@ class TestBettingMart {
             c_grapa_max = c_g_m,
             c_grapa_grow = c_g_g,
         )
-        val betta = BettingMart(bettingFn = agrapa, N = N, withoutReplacement = false)
+        val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, withoutReplacement = false)
         val sampler = SampleFromList(x)
         val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
         println("  ${result}")

@@ -9,6 +9,7 @@ class BettingMart(
     val bettingFn : BettingFn,
     val N: Int,             // number of ballot cards
     val withoutReplacement: Boolean = true,
+    val noerror: Double, // for comparison assorters who need rate counting
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
 ) {
@@ -123,7 +124,7 @@ fun betting_mart(
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = 1.0     // – T ← 1: test statistic
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
-        val prevSamples = PrevSamples() // – S ← 0: sample sum
+        val prevSamples = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
 
         // keep series for debugging, remove for production
         val xs = mutableListOf<Double>()

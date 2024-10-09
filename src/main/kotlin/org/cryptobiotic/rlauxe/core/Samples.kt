@@ -36,6 +36,36 @@ class PrevSamples() : Samples {
     }
 }
 
+class PrevSamplesWithRates(val noerror: Double) : Samples {
+    private var last = 0.0
+    private var sum = 0.0
+    private val welford = Welford()
+    private var countP0 = 0
+    private var countP1 = 0
+    private var countP2 = 0
+
+    override fun last() = last
+    override fun numberOfSamples() = welford.count
+    override fun sum() = sum
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+
+    // these are the rates from the previous samples.
+    fun sampleP0count() = countP0
+    fun sampleP1count() = countP1
+    fun sampleP2count() = countP2
+
+    fun addSample(sample : Double) {
+        last = sample
+        sum += sample
+        welford.update(sample)
+
+        if (doubleIsClose(sample, noerror)) countP0++
+        if (doubleIsClose(sample, noerror/2)) countP1++
+        if (doubleIsClose(sample, 0.0)) countP2++
+    }
+}
+
 //// abstraction for creating a sequence of samples
 interface SampleFn { // TODO could be an Iterator
     fun sample(): Double // get next in sample
@@ -175,6 +205,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
     val sampleCount: Double
     val flippedVotes2: Int
     val flippedVotes1: Int
+
     var idx = 0
 
     init {
@@ -194,17 +225,18 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
     }
 
     override fun sample(): Double {
-        if (withoutReplacement) {
+        val assortVal = if (withoutReplacement) {
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             idx++
-            return cassorter.bassort(mvr, cvr)
+            cassorter.bassort(mvr, cvr)
         } else {
             val chooseIdx = Random.nextInt(N) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
-            return cassorter.bassort(mvr, cvr)
+            cassorter.bassort(mvr, cvr)
         }
+        return assortVal
     }
 
     override fun reset() {

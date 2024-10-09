@@ -138,7 +138,7 @@ fun runBettingMartRepeated(
     bettingMart: BettingMart,
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
-    showDetail: Boolean = false,
+    showDetails: Boolean = false,
 ): BettingMartRepeatedResult {
 
     val N = drawSample.N()
@@ -152,7 +152,7 @@ fun runBettingMartRepeated(
 
     repeat(ntrials) {
         drawSample.reset()
-        val testH0Result = bettingMart.testH0(maxSamples, terminateOnNullReject=terminateOnNullReject) { drawSample.sample() }
+        val testH0Result = bettingMart.testH0(maxSamples, terminateOnNullReject=terminateOnNullReject, showDetails=showDetails) { drawSample.sample() }
         val currCount = status.getOrPut(testH0Result.status) { 0 }
         status[testH0Result.status] = currCount + 1
         if (testH0Result.status.fail) {
@@ -167,7 +167,7 @@ fun runBettingMartRepeated(
             val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
             percentHist.add(percent)
         }
-        if (showDetail) println(" $it $testH0Result")
+        if (showDetails) println(" $it $testH0Result")
     }
 
     val (_, variance, _) = welford.result()

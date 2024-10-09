@@ -13,11 +13,11 @@ import kotlin.math.sqrt
  *  The bet must only use the previous samples
  */
 interface BettingFn {
-    fun bet(prevSamples: Samples): Double
+    fun bet(prevSamples: PrevSamplesWithRates): Double
 }
 
 class FixedBet(val lam: Double): BettingFn {
-    override fun bet(prevSamples: Samples) = lam
+    override fun bet(prevSamples: PrevSamplesWithRates) = lam
 }
 
 /*
@@ -110,7 +110,7 @@ class AgrapaBet(
     val c_grapa_grow: Double
 ): BettingFn {
 
-    override fun bet(prevSamples: Samples): Double {
+    override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastSampleNumber = prevSamples.numberOfSamples()
         if (lastSampleNumber == 0) return lam0 // initial guess
 
@@ -183,7 +183,7 @@ class OptimalComparisonNoP1(
         require(upperBound > 1.0)
     }
 
-    override fun bet(prevSamples: Samples): Double {
+    override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
 
         // note eta is a constant
@@ -205,7 +205,7 @@ class EstimAdapter(
         require(upperBound > 1.0)
     }
 
-    override fun bet(prevSamples: Samples): Double {
+    override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         require (upperBound > mu)
         val eta = estimFn.eta(prevSamples)
@@ -214,24 +214,3 @@ class EstimAdapter(
     }
 
 }
-
-
-// Cobra section 4.2 Adaptive betting
-// In a BSM, the bets need not be fixed and λi can be a predictable function of the
-// data X1 , . . . , Xi−1 . This allows us to estimate the rates based on past samples as
-// well as a priori considerations. We adapt the “shrink-trunc” estimator of Stark [11] to rate estimation.
-// For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the
-// degree of shrinkage to the a priori estimate p_̃k , and a truncation factor eps_k ≥ 0,
-// enforcing a lower bound on the estimated rate.
-//
-// Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
-// Then the shrink-trunc estimate is:
-//   p̃_ki :=  (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1)  V eps_k   (4)
-// The rates are allowed to learn from past data in the current audit through
-// p̂_k(i−1) , while being anchored to the a priori estimate p̃_k . The tuning parameter
-// d_k reflects the degree of confidence in the a priori rate, with large d_k anchoring
-// more strongly to p̃_k . Finally, eps_k should generally be set above 0. In particular,
-// eps_k > 0 will prevent stalls.
-// At each time i, the shrink-trunc estimated rate p̃_ki can be plugged into (2)
-// and set equal to 0 to obtain the bet λi . Fixing p̃_1i := 0 allows us to use (3), in
-// which case λi = (2 − 4a(1 − p̃2i ))/(1 − 2a).

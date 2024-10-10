@@ -6,8 +6,6 @@ import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.text.toInt
-import kotlin.times
 
 class TestSamples {
 

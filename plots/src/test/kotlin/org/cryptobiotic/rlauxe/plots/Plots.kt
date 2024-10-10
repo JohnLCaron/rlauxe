@@ -126,7 +126,7 @@ fun plotTFsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTit
 
 fun extractDecile(srt: SRT, sampleMaxPct: Int): Double {
     return if (srt.percentHist == null || srt.percentHist!!.cumul(sampleMaxPct) == 0.0) 0.0 else {
-        srt.percentHist.cumul(sampleMaxPct)
+        srt.percentHist!!.cumul(sampleMaxPct)
     }
 }
 

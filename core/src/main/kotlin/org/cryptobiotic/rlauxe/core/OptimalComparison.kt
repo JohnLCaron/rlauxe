@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.rlauxe.core
 
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -8,9 +8,7 @@ import org.apache.commons.math3.optim.univariate.BrentOptimizer;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
-import org.cryptobiotic.rlauxe.core.BettingFn
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.math.max
 

@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 // See SHANGRLA 2.3
 class TestAssorterSuperMajority {
@@ -21,10 +22,11 @@ class TestAssorterSuperMajority {
         val cvr0 = makeCvr(0)
         val cvr1 = makeCvr(1)
         val cvr2 = makeCvr(2)
-        val winner12 = SuperMajorityAssorter(contest, winner = 1, contest.minFraction!!)
+        val minFraction = contest.minFraction!!
+        val winner12 = SuperMajorityAssorter(contest, winner = 1, minFraction)
         assertEquals(1.0 / (2 * winner12.minFraction), winner12.upperBound)
         assertEquals(0.0, winner12.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
-        assertEquals(0.5 / contest.minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
+        assertEquals(0.5 / minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
         assertEquals(0.0, winner12.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
 
         val votes = mutableMapOf<Int, Map<Int, Int>>()
@@ -115,7 +117,7 @@ class TestAssorterSuperMajority {
         val p = counts[winner] / n
         val q = counts.sum() / n
         // pq/(2f ) + (1 − q)/2
-        val avg = p * q / (2 * contest.minFraction) + (1.0 - q) / 2.0
+        val avg = p * q / (2 * contest.minFraction!!) + (1.0 - q) / 2.0
         assertEquals(avg, assortAvg, doublePrecision)
         println(" ($winner)= $assortAvg")
         return assortAvg

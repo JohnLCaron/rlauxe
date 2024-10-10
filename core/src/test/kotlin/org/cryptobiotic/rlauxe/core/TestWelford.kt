@@ -191,7 +191,7 @@ fun welfordMeanVar(x: DoubleArray): Pair<DoubleArray, DoubleArray> {
 
     val r = IntArray(x.size) { i -> i + 1 }
     for (i in v.indices) {
-        v[i] /= r[i]
+        v[i] = v[i]/r[i]
     }
 
     return Pair(m.toDoubleArray(), v.toDoubleArray())

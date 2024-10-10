@@ -124,10 +124,11 @@ fun plotTFsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTit
     )
 }
 
-fun extractDecile(srt: SRT, sampleMaxPct: Int) =
-    if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
+fun extractDecile(srt: SRT, sampleMaxPct: Int): Double {
+    return if (srt.percentHist == null || srt.percentHist!!.cumul(sampleMaxPct) == 0.0) 0.0 else {
         srt.percentHist.cumul(sampleMaxPct)
     }
+}
 
 fun plotTFdiffSuccessDecile(pollSrs: List<SRT>, compareSrs: List<SRT>, sampleMaxPct: Int, title: String = "", colTitle: String= "") {
     val utitle = "Comparison - Polling: % successRLA, for sampleMaxPct=$sampleMaxPct: " + title

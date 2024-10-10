@@ -1,19 +1,10 @@
-import org.gradle.kotlin.dsl.from
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm")
     alias(libs.plugins.serialization)
 }
 
-group = "org.cryptobiotic.rlauxe"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
-//    maven {
-//        url ("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-//    }
 }
 
 dependencies {

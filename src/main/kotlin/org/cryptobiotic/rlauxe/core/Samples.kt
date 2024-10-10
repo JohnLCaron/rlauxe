@@ -43,6 +43,8 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
     private var countP0 = 0
     private var countP1 = 0
     private var countP2 = 0
+    private var countP3 = 0
+    private var countP4 = 0
 
     override fun last() = last
     override fun numberOfSamples() = welford.count
@@ -54,6 +56,8 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
     fun sampleP0count() = countP0
     fun sampleP1count() = countP1
     fun sampleP2count() = countP2
+    fun sampleP3count() = countP3
+    fun sampleP4count() = countP4
 
     fun addSample(sample : Double) {
         last = sample
@@ -61,8 +65,10 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
         welford.update(sample)
 
         if (doubleIsClose(sample, noerror)) countP0++
-        if (doubleIsClose(sample, noerror/2)) countP1++
+        if (doubleIsClose(sample, noerror*0.5)) countP1++
         if (doubleIsClose(sample, 0.0)) countP2++
+        if (doubleIsClose(sample, noerror*1.5)) countP3++
+        if (doubleIsClose(sample, noerror*2.0)) countP4++
     }
 }
 

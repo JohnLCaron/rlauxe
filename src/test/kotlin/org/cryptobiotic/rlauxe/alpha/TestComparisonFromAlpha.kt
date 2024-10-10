@@ -564,7 +564,7 @@ class TestComparisonFromAlpha {
                 val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
                 val etaActual = drawSample.sampleMean()
                 val etaExpect =  1.0/(2-margin)
-                val same = doubleIsClose(etaActual, etaExpect, doublePrecision)
+                val same = doubleIsClose(etaActual, etaExpect)
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
 
                 val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(

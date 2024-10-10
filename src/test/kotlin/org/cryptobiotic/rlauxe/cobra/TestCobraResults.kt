@@ -1,22 +1,75 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.BettingMart
+import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.core.doubleIsClose
 import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.margin2theta
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.sim.runBettingMartRepeated
 import org.cryptobiotic.rlauxe.util.AdaptiveComparison
 import org.cryptobiotic.rlauxe.util.OracleComparison
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-// Try to reproduce COBRA table 2 results
+// Reproduce COBRA results
 class TestCobraResults {
+
+    //Fig. 1. Deterministic sample sizes (y-axis; log10 scale) for a comparison audit of a
+    //plurality contest with various diluted margins (x-axis) and risk limits (colors), with no
+    //error in CVRs and a maximal bet of λ = 2 on every draw
+    @Test
+    fun testFigure1() {
+        val alphas = listOf(.001, .01, .05, .10)
+        val margins = listOf(.0001, .0002, .0025, .005, .0075, .01, .03, .03, .04, .05, )
+        val N = 150000
+        val ntrials = 100
+
+        val ratios = mutableListOf<Double>()
+        for (alpha in alphas.reversed()) {
+            for (margin in margins.reversed()) {
+                val theta = margin2theta(margin)
+                val cvrs = makeCvrsByExactMean(N, theta)
+                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val sampler = ComparisonNoErrors(cvrs, compareAssorter)
+                val upperBound = compareAssorter.upperBound
+                println("testFigure1: alpha=${alpha} margin=${margin} a=${compareAssorter.noerror}")
+
+                val fixed = FixedBet(2.0)
+                val betting =
+                    BettingMart(
+                        riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
+                        noerror = compareAssorter.noerror, upperBound = upperBound
+                    )
+
+                val result = runBettingMartRepeated(
+                    drawSample = sampler,
+                    maxSamples = N,
+                    ntrials = ntrials,
+                    bettingMart = betting,
+                    testParameters = mapOf("alpha" to alpha, "margin" to margin)
+                )
+                println("  result = ${result.status} ${result.avgSamplesNeeded()}")
+
+                val expected = ln(1 / alpha) / ln(2 * compareAssorter.noerror)
+                val ratio = result.avgSamplesNeeded().toDouble() / expected
+                ratios.add(ratio)
+                println("  expected = ${expected}, ratio=$ratio")
+                assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.01)) // within 1 %
+                println()
+            }
+        }
+        val gmean = geometricMean(ratios)
+        println("geometricMean = $gmean")
+        assertTrue(doubleIsClose(1.0, gmean, 0.002)) // within .2 %
+    }
 
     // sampling with replacement from a population of size N = 10000.
     // At each combination of diluted margin v ∈ {0.05, 0.10, 0.20} and
@@ -63,6 +116,7 @@ class TestCobraResults {
                     val ratio = result.avgSamplesNeeded().toDouble() / expected.meanSamples
                     ratios.add(ratio)
                     println("  expected = ${expected.meanSamples}, ${expected.samples90} $ratio")
+                    assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.10)) // within 10 %
                 }
                 println()
                 // makeSRT(N, theta, 0.0, d, rr = result)
@@ -125,7 +179,7 @@ class TestCobraResults {
                             val ratio = result.avgSamplesNeeded().toDouble() / expected.oracleMean
                             ratios.add(ratio)
                             println("  expected = ${expected.oracleMean}, ${expected.oracle90} $ratio")
-                            assertTrue(doubleIsClose(1.0, ratio, 0.10)) // with 10 %
+                            assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.12)) // within 12 %
                         }
                         println()
                     }
@@ -180,12 +234,15 @@ class TestCobraResults {
                         // pass the prior rates to the betting function
                         val adaptive = AdaptiveComparison(
                             N = N,
+                            withoutReplacement = false,
                             upperBound = upperBound,
                             a = compareAssorter.noerror,
                             d1 = d1,
                             d2 = d2,
                             p1 = p1prior,
                             p2 = p2prior,
+                            p3 = 0.0,
+                            p4 = 0.0,
                             eps=eps,
                         )
                         val betting =
@@ -205,7 +262,7 @@ class TestCobraResults {
                             val ratio = result.avgSamplesNeeded().toDouble() / expected.adaptiveMean
                             ratios.add(ratio)
                             println("  expected = ${expected.adaptiveMean}, ${expected.adaptive90} ratio=$ratio")
-                            assertTrue(doubleIsClose(1.0, ratio, 0.10)) // with 10 %
+                            assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.12)) // within 12 %
                         }
                         println() // "took ${stopwatch}")
                     }

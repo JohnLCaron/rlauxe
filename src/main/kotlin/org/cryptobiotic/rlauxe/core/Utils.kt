@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import java.lang.Math.log
 import kotlin.math.abs
-import kotlin.math.exp
-import kotlin.math.ln
 
 
 fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {

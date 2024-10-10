@@ -10,11 +10,13 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.cryptobiotic.rlauxe.core.BettingFn
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import kotlin.math.ln
 import kotlin.math.max
 
-// betting functions that use Kelly optimization
+// betting functions that use Kelly optimization of lambda parameter for the BettingFn
 
+// We know the true rate of p1 and p2 errors
 class OracleComparison(
     val N: Int, // not used
     val withoutReplacement: Boolean = true,  // not used
@@ -26,7 +28,7 @@ class OracleComparison(
     val lam: Double
     init {
         require(upperBound > 1.0)
-        val kelly = Kelly(a, p1, p2)
+        val kelly = OptimalLambda(a, p1, p2)
         lam = kelly.solve()
     }
     // note lam is a constant
@@ -35,9 +37,6 @@ class OracleComparison(
     }
 }
 
-//
-// Results in Table 2
-//
 // https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R
 //   if(strategy == "adaptive"){
 //    if(is.null(pars)){stop("Need to specify pars$prior_p_k, pars$d_k, pars$eps_k for k in 1,2")}
@@ -60,6 +59,21 @@ class OracleComparison(
 //    "eps_2" = sim_frame$eps_2[i]
 //    )
 //   stopping_times_adaptive[i,] <- replicate(n_sims, simulate_audit(pop, a =  sim_frame$a[i], strategy = "adaptive", pars = pars_adaptive))
+//
+// log_expected_value <- function(lambda, a, p_1, p_2){
+//  log(1 + lambda * (a - 1/2)) * (1 - p_1 - p_2) + log(1 + lambda * (a/2 - 1/2)) * p_1 + log(1 - lambda / 2) * p_2
+// }
+//
+// optimal_lambda <- function(a, p_1, p_2){
+//  temp_log_expected_value <- function(lambda){
+//    log_expected_value(lambda, a = a, p_1 = p_1, p_2 = p_2)
+//  }
+//  derivative <- function(lambda){
+//    (a - 1/2) * (1 - p_1 - p_2) / (1 + lambda * (a - 1/2)) + (a - 1) * p_1 / (2 - lambda * (1 - a)) + p_2 / (2 - lambda)
+//  }
+//  solution <- optimize(temp_log_expected_value, interval = c(0,2), maximum = TRUE)
+//  solution$maximum
+// }
 
 // Cobra section 4.2 Adaptive betting
 // In a BSM, the bets need not be fixed and λi can be a predictable function of the
@@ -73,25 +87,19 @@ class OracleComparison(
 // eps_k > 0 will prevent stalls.
 //
 // At each time i, the shrink-trunc estimated rate p̃_ki can be plugged into (2)
-// and set equal to 0 to obtain the bet λi . Fixing p̃_1i := 0 allows us to use (3), in
-// which case λi = (2 − 4a(1 − p̃2i ))/(1 − 2a).
+// and set equal to 0 to obtain the bet λi .
 //
-//
-// For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
-// and a truncation factor eps_k ≥ 0, enforcing a lower bound on the estimated rate.
-// Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
-// Then the shrink-trunc estimate is:
-//   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
-
 class AdaptiveComparison(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
     val a: Double, // noerror
-    val d1: Int,  // weight p1
-    val d2: Int, // weight p2
-    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements
-    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements
+    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
+    val d2: Int, // weight p2, p4
+    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
+    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
+    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
+    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     val eps: Double = .00001
 ): BettingFn {
     init {
@@ -100,14 +108,23 @@ class AdaptiveComparison(
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastj = prevSamples.numberOfSamples()
-        val p1est = estimateRate(d1, p1, prevSamples.sampleP1count().toDouble() / lastj, lastj, eps)
-        val p2est = estimateRate(d2, p2, prevSamples.sampleP2count().toDouble()  / lastj, lastj, eps)
-        val kelly = Kelly(a, p1est, p2est)
-        if (lastj == 100)
-            print("")
+        val p1est = if (p1 == 0.0) 0.0 else estimateRate(d1, p1, prevSamples.sampleP1count().toDouble() / lastj, lastj, eps)
+        val p2est = if (p2 == 0.0) 0.0 else estimateRate(d2, p2, prevSamples.sampleP2count().toDouble() / lastj, lastj, eps)
+        val p3est = if (p3 == 0.0) 0.0 else estimateRate(d1, p3, prevSamples.sampleP3count().toDouble() / lastj, lastj, eps)
+        val p4est = if (p4 == 0.0) 0.0 else estimateRate(d2, p4, prevSamples.sampleP4count().toDouble() / lastj, lastj, eps)
+        if (p3est > 0 || p4est > 0) {
+            println("wtf")
+        }
+        val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        val kelly = OptimalLambda(a, p1est, p2est, p3est, p4est, mui)
         return kelly.solve()
     }
 
+    // For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
+    // and a truncation factor eps_k ≥ 0, enforcing a lower bound on the estimated rate.
+    // Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
+    // Then the shrink-trunc estimate is:
+    //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
     fun estimateRate(d: Int, apriori: Double, sampleRate: Double, sampleNum: Int, eps: Double): Double {
         //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
         val est = (d * apriori + sampleNum * sampleRate) / (d + sampleNum - 1)
@@ -115,32 +132,37 @@ class AdaptiveComparison(
     }
 }
 
-//
-// log_expected_value <- function(lambda, a, p_1, p_2){
-//  log(1 + lambda * (a - 1/2)) * (1 - p_1 - p_2) + log(1 + lambda * (a/2 - 1/2)) * p_1 + log(1 - lambda / 2) * p_2
-//}
-//
-//optimal_lambda <- function(a, p_1, p_2){
-//  temp_log_expected_value <- function(lambda){
-//    log_expected_value(lambda, a = a, p_1 = p_1, p_2 = p_2)
-//  }
-//  derivative <- function(lambda){
-//    (a - 1/2) * (1 - p_1 - p_2) / (1 + lambda * (a - 1/2)) + (a - 1) * p_1 / (2 - lambda * (1 - a)) + p_2 / (2 - lambda)
-//  }
-//  solution <- optimize(temp_log_expected_value, interval = c(0,2), maximum = TRUE)
-//  solution$maximum
-//}
-
-class Kelly(val a: Double, val p1: Double, val p2: Double) {
-    val p0 = 1.0 - p1 - p2
+/**
+ * This follows the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R
+ * Not completely sure of the relationship to COBRA section 3.2.
+ * Has been generalized to allow p3 and p4 errors and sampling without replacement (WoR) by setting mui.
+ *
+ * a := 1 / (2 − v/au)
+ *    v := 2Āc − 1 is the diluted margin: the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
+ *   au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
+ * mui := mean value under H0, = 1/2 for with replacement
+ * p0 := #{xi = a}/N is the rate of correct CVRs.
+ * p1 := #{xi = a/2}/N is the rate of 1-vote overstatements.
+ * p2 := #{xi = 0}/N is the rate of 2-vote overstatements.
+ * p3 := #{xi = 3a/2}/N is the rate of 1-vote understatements.
+ * p4 := #{xi = 2a}/N is the rate of 2-vote understatements.
+ */
+class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Double = 0.0, val p4: Double = 0.0, val mui: Double = 0.5) {
+    val p0 = 1.0 - p1 - p2 - p3 - p4
     val debug = false
 
     fun solve(): Double {
         val stopwatch = Stopwatch()
-        // Define the function to be optimized
-        val function = UnivariateFunction { lam -> log_expected_value(lam) }
+        val function = UnivariateFunction { lam -> expected_value_logT(lam) }  // The function to be optimized
 
-        // Create an optimizer
+        // BrentOptimizer: For a function defined on some interval (lo, hi),
+        // this class finds an approximation x to the point at which the function attains its minimum.
+        // It implements Richard Brent's algorithm (from his book "Algorithms for Minimization without Derivatives", p. 79)
+        // for finding minima of real univariate functions.
+        // This code is an adaptation, partly based on the Python code from SciPy (module "optimize.py" v0.5);
+        // the original algorithm is also modified to use an initial guess provided by the user,
+        // to ensure that the best point encountered is the one returned.
+        // Also see https://en.wikipedia.org/wiki/Brent%27s_method
         val optimizer = BrentOptimizer(1e-6, 1e-6)
 
         // Optimize the function within the given range [start, end]
@@ -152,27 +174,50 @@ class Kelly(val a: Double, val p1: Double, val p2: Double) {
             GoalType.MAXIMIZE,
             MaxEval(1000)
         )
-        if (debug) println( "Kelly: p1=${p1}  p2=${p2} point=${result.point} took=$stopwatch")
+        if (debug) println( "Kelly: p1=${p1}  p2=${p2}  p3=${p3}  p4=${p4} point=${result.point} took=$stopwatch")
         return result.point
     }
 
-    // EF [Ti ] = p0 [1 + λ(a − 1/2)] + p1 [1 − λ(1 − a)/2] + p2 [1 − λ/2]
-    // EF [Ti ] = p0 * EF [1 + λ(a − 1/2)] + p1 * EF[1 − λ(1 − a)/2] + p2 * [1 − λ/2]
-    // EF [Ti] = p0 * EF [1 + λ(a − 1/2)] + p1 * EF[1 − λ(1 − a)/2] + p2 * [1 − λ/2]
-    // d/dλ (EF[log Ti])
+    // EF [Ti ] = p0 [1 + λ(a − mu_i)] + p1 [1 + λ(a/2 − mu_i)] + p2 [1 − λ*mu_i)]  + p3 [1 + λ(3*a/2 − mu_i)]  + p4 [[1 + λ(2*a − mu_i)]
+    // EF [Ti ] = p0 * EF[1 + λ(a − mu_i)] + p1 * EF[1 + λ(a/2 − mu_i)] + p2 * EF[1 − λ*mu_i)] + p3 * EF[1 + λ(3*a/2 − mu_i)] + p4 * EF[1 + λ(2*a − mu_i)]
 
     // log_expected_value <- function(lambda, a, p_1, p_2){
     //  log(1 + lambda * (a - 1/2)) * (1 - p_1 - p_2) + log(1 + lambda * (a/2 - 1/2)) * p_1 + log(1 - lambda / 2) * p_2
     //}
-    fun log_expected_value(lam: Double): Double {
-        return ln(1.0 + lam * (a - 0.5)) * p0 + ln(1.0 + lam * (a/2 - 0.5)) * p1 + ln(1.0 - lam / 2) * p2
+
+    // not really sure of this; its not really the ln of Ti
+    // EF [ln(Ti) ] = p0 * ln[1 + λ(a − mu_i)] + p1 * ln[1 + λ(a/2 − mu_i)] + p2 * ln[1 − λ*mu_i)]  + p3 * ln[1 + λ(3*a/2 − mu_i)] + p4 * ln[1 + λ(2*a − mu_i)]
+    fun expected_value_logT(lam: Double): Double {
+        return ln(1.0 + lam * (a - mui)) * p0 +
+                ln(1.0 + lam * (a*0.5 - mui)) * p1 +
+                ln(1.0 - lam * mui) * p2 +
+                ln(1.0 + lam * (a*1.5 - mui)) * p3 +
+                ln(1.0 + lam * (a*2.0 - mui)) * p4
     }
 
-    // not used
+    // why not just use
+    fun lnExpectedT(lam: Double): Double {
+        return ln(expectedT(lam))
+    }
+
+    fun expectedT(lam: Double): Double {
+        return (1.0 + lam * (a - mui)) * p0 +       // term0
+                (1.0 + lam * (a*0.5 - mui)) * p1 +  // term1
+                (1.0 - lam * mui) * p2 +            // term2
+                (1.0 + lam * (a*1.5 - mui)) * p3 +  // term3
+                (1.0 + lam * (a*2.0 - mui)) * p4    // term4
+    }
+
+
+    // chain rule:   d/dx (ln(f(x)) = f'(x) / f(x) for each of the first 3 terms of expectedT separately, and mui = 0.5
+
     //  derivative <- function(lambda){
     //    (a - 1/2) * (1 - p_1 - p_2) / (1 + lambda * (a - 1/2)) + (a - 1) * p_1 / (2 - lambda * (1 - a)) + p_2 / (2 - lambda)
     //  }
-    fun derivative(lam: Double): Double {
-        return (a - 0.5) * (1.0 - p1 - p2) / (1.0 + lam * (a - 0.5)) + (a - 1.0) * p1 / (2.0 - lam * (1.0 - a)) + p2 / (2.0 - lam)
+    // so this is p0 * d/dx (ln(term0)) + p1 * d/dx (ln(term1)) + p2 * d/dx (ln(term2))
+    fun derivativeFromRcode(lam: Double): Double {
+        return p0 * (a - 0.5) / (1.0 + lam * (a - 0.5)) +
+                p1 * (a - 1.0) / (2.0 - lam * (1.0 - a)) +
+                p2 / (2.0 - lam)
     }
 }

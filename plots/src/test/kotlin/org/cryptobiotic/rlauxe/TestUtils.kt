@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import kotlin.math.abs
-import kotlin.math.exp
-import kotlin.math.ln
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -64,10 +62,3 @@ fun makeStandardContest() = AuditContest("standard", 0, listOf(0,1), listOf(0))
 fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
     ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)
-
-
-fun geometricMean(x: List<Double>): Double {
-    if (x.size == 0) return 0.0
-    val lnsum = x.filter{it > 0}.map{ ln(it) }.sum()
-    return exp( lnsum / x.size )
-}

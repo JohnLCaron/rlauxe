@@ -14,6 +14,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.3.1")
     implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.7.0")
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.lets.plot)
     testImplementation(kotlin("test"))

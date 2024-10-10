@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 // See SHANGRLA 2.3
 class TestAssorterSuperMajority {

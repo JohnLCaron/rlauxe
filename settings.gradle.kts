@@ -3,3 +3,5 @@ plugins {
 }
 rootProject.name = "rlauxe"
 
+include("core")
+include("plots")

@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TruncShrinkageAccelerated
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 data class ComparisonTask(

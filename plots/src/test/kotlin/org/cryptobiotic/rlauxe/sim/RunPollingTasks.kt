@@ -17,11 +17,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.EstimFn
 import org.cryptobiotic.rlauxe.core.FixedEstimFn
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 data class PollingTask(

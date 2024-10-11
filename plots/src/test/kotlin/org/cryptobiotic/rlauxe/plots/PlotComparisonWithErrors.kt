@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.plots
 
-import org.cryptobiotic.rlauxe.util.SRT
-import org.cryptobiotic.rlauxe.util.SRTcsvReader
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import kotlin.test.Test
 
 import kotlin.collections.getOrPut

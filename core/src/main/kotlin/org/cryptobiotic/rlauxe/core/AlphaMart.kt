@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.doubleIsClose
+
 /**
  * Finds the ALPHA martingale for the hypothesis that the population
  * mean is less than or equal to t using a martingale method,
@@ -74,7 +76,7 @@ class AlphaMart(
                 // ALPHA eq 4
                 val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound
 
-                require( doubleIsClose(term, ttj))
+                require(doubleIsClose(term, ttj))
                 //        terms[np.isclose(0, terms, atol=atol)] = (
                 //            1  # martingale effectively vanishes; p-value 1
                 //        )

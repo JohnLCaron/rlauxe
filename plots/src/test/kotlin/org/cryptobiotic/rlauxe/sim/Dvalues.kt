@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sim
 
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.SRTcsvWriter
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.junit.jupiter.api.Test
 
 // explore values of d for both polling and comparison

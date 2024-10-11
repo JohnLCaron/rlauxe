@@ -1,6 +1,5 @@
-package org.cryptobiotic.rlaplots
+package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.util.SRT
 import kotlin.collections.List
 
 fun main() {

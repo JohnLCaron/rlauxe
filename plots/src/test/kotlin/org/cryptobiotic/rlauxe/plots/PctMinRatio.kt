@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.plots
 
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.exp
@@ -11,15 +11,15 @@ fun plotRatio(results: Map<Double, List<SRT>>) {
 
     // assume all sets have same N/theta values
     val fistSet: List<SRT> = results.values.first()
-    val cvrMeans = findValuesFromSRT(fistSet) { it.reportedMean }
-    val ns = findValuesFromSRT(fistSet) { it.N.toDouble() }
+    val cvrMeans = findValuesFromSRT(fistSet) { SRT.reportedMean }
+    val ns = findValuesFromSRT(fistSet) { SRT.N.toDouble() }
     val nsi = ns.map { it.toInt() }
 
     // get maps for all results
     val mmaps: Map<Double, Map<Int, Map<Double, Double>>> =
         results.map { entry ->
             val mmap: Map<Int, Map<Double, Double>> =
-                makeMapFromSRTs(entry.value, cvrMeans, nsi) { it.pctSamples}
+                makeMapFromSRTs(entry.value, cvrMeans, nsi) { SRT.pctSamples }
             Pair(entry.key, mmap)
         }.toMap()
 
@@ -89,7 +89,7 @@ fun findSmallestNotZero(mmaps: Map<Double, Map<Int, Map<Double, Double>>>, N: In
 fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {
     val newdlc = mutableMapOf<Int, MutableList<SRT>>() // N, m -> fld
     // val newsrs = mutableListOf<SRT>()
-    val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { 100.0 * it.nsamples / it.N } }.toMap() // dl -> N, m -> pct
+    val dlmapPct = dlcalcs.mapValues { entry -> entry.key to makeMapFromSRTs(entry.value, thetas, ns) { 100.0 * SRT.nsamples / SRT.N } }.toMap() // dl -> N, m -> pct
     // makeSRmap(srs: List<SRT>, extract: (SRT) -> Double): Map<Int, Map<Double, Double>>
     thetas.forEach { margin ->
         ns.forEach { N ->

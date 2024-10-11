@@ -7,11 +7,10 @@ import org.cryptobiotic.rlauxe.core.ArrayAsSampleFn
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.core.generateUniformSample
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.util.SRT
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
@@ -38,11 +37,6 @@ class TestComparisonMasses {
         val zero_mass = listOf(0.0, 0.001) // mass at 0
         val zm = zero_mass[1]
         val zm1 = 1.0 - zm
-
-        val al = mutableListOf<SRT>()
-        val dl = listOf(10, 100) // for alpha
-        val c_base = 0.5 // for alpha. larger c since there is no particular expectation about error rates
-        val etal = listOf(.99, .9, .75, .55)
 
         val N = 10000
 

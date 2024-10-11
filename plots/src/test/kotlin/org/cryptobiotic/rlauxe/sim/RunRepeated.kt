@@ -7,10 +7,10 @@ import org.cryptobiotic.rlauxe.core.SampleFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.Welford
-import org.cryptobiotic.rlauxe.core.ceilDiv
+import org.cryptobiotic.rlauxe.util.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.core.eps
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 import kotlin.math.max
 import kotlin.math.sqrt
 

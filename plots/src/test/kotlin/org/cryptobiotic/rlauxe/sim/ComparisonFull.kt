@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.sim
 
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.util.SRT
-import org.cryptobiotic.rlauxe.util.SRTcsvReader
-import org.cryptobiotic.rlauxe.util.SRTcsvWriter
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.junit.jupiter.api.Test
 import kotlin.collections.forEach
 import kotlin.math.max

@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.plots.archive
 
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.core.np_cumprod
-import org.cryptobiotic.rlauxe.core.np_cumsum
+import org.cryptobiotic.rlauxe.util.np_cumprod
+import org.cryptobiotic.rlauxe.util.np_cumsum
 
 // identical in ONEAUDIT oa-batch and oa-polling
 // probably the same as SHANGRLA NonnegMean.py sprt_mart

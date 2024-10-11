@@ -1,6 +1,4 @@
-package org.cryptobiotic.rlaplots
-
-import org.cryptobiotic.rlauxe.util.SRT
+package org.cryptobiotic.rlauxe.rlaplots
 
 fun main() {
     val wtf: ClosedFloatingPointRange<Double> = 0.5..0.52

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.util
 
 import kotlin.math.abs
 

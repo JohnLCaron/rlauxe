@@ -5,6 +5,10 @@ import org.cryptobiotic.rlauxe.SampleFromList
 import org.cryptobiotic.rlauxe.core.AgrapaBet
 import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.core.FixedBet
+import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
+import org.cryptobiotic.rlauxe.core.PrevSamples
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.lam_to_eta
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.math.max
 import kotlin.math.min
@@ -177,7 +181,7 @@ class TestBettingMart {
         val c_g_0 = 0.6
         val c_g_m = 0.9
         val c_g_g = 2.0
-        var u = 1.0  // TODO should be 2 * noerror
+        var u = 1.0
 
         val x = listOf(0.75, 0.9, 0.9, 0.9, 0.75, 0.9, 0.9, 0.9, 0.9, 0.9)
         val lam = 0.55
@@ -214,6 +218,30 @@ class TestBettingMart {
         expected.forEachIndexed { idx, it ->
             assertEquals(it, result.etajs[idx], doublePrecision)
         }
+    }
+
+    @Test
+    fun testOptimalComparisonNoP1() {
+        val N = 100
+        val upper = 1.1
+
+        // from SHANGRLA.test_optimal
+        //  with p2=.01 bet=1.0339999999999994
+        //  with p2=.001 bet2=1.0933999999999995
+        //  with p2=.0001 bet3=1.0993399999999998
+
+        // since OptimalComparisonNoP1 depends only on P2, we dont need to test more
+        val optimal = OptimalComparisonNoP1(N = N, withoutReplacement = true, upperBound = upper, p2 = .01)
+        val bet = optimal.bet(PrevSamplesWithRates(upper/2))
+        assertEquals(1.0339999999999994, lam_to_eta(bet, .5, upper))
+
+        val optimal2 = OptimalComparisonNoP1(N = N, withoutReplacement = true, upperBound = upper, p2 = .001)
+        val bet2 = optimal2.bet(PrevSamplesWithRates(upper/2))
+        assertEquals(1.0933999999999995, lam_to_eta(bet2, .5, upper))
+
+        val optimal3 = OptimalComparisonNoP1(N = N, withoutReplacement = true, upperBound = upper, p2 = .0001)
+        val bet3 = optimal3.bet(PrevSamplesWithRates(upper/2))
+        assertEquals(1.0993399999999998, lam_to_eta(bet3, .5, upper))
     }
 
 }

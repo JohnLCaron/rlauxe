@@ -163,24 +163,35 @@ class AgrapaBet(
 //        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
 
 /**
+ * From SHANGRLA Nonneg_mean.optimal_comparison().
+ * When p1=0, can use closed form to solve for lambda.
+ *
  * The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
  * for which overstatement assorters take a small number of possible values and are concentrated
  * on a single value when the CVRs have no errors.
- * Let p0 be the rate of error-free CVRs,
- *     p1 the rate of 1-vote overstatements,
- *     p2 the rate of 2-vote overstatements = 1-p0-p1
- * Ignore the understatements.
- * from SHANGRLA Nonneg_mean.optimal_comparison()
+ *
+ * Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
+ * and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
+ *
+ *   eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
+ *
+ * Translating to p2=1-p0 gives:
+ *
+ *   eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+ *
+ * @param x an array of input data
+ * @param rateError2 a float representing hypothesized rate of two-vote overstatements
+ * @return eta, the estimated alternative mean to use in alpha
  */
 class OptimalComparisonNoP1(
     val N: Int,
     val withoutReplacement: Boolean = true,
-    val upperBound: Double,
-    // val p1: Double = 0.0, // the rate of 1-vote overstatements // assume 0
+    val upperBound: Double,   // bassort u = 2 * noerror, not assorter upper = 1.0
     val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
 ): BettingFn {
     init {
         require(upperBound > 1.0)
+        // require(upperBound * (1.0 - p2) > 1.0)
     }
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
@@ -188,8 +199,17 @@ class OptimalComparisonNoP1(
 
         // note eta is a constant
         //        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
-        val eta =  (1.0 - upperBound * (1.0 - p2)) / (2.0 - 2.0 * upperBound) + upperBound * (1.0 - p2) - 0.5
-        return eta_to_lam(eta, mu, upperBound)
+        //         eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+        val eta1 =  (1.0 - upperBound * (1.0 - p2))
+        val eta2 =  (2.0 - 2.0 * upperBound)
+        val eta12 = eta1 / eta2
+        val eta3 =  upperBound * (1.0 - p2) - 0.5
+        val eta4 =  eta12 + eta3
+        val result =  eta_to_lam(eta4, mu, upperBound)
+        if (result <= 0.0) {
+            println("hmmmm ${upperBound * (1.0 - p2)} should be > 1.0")
+        }
+        return result
     }
 
 }

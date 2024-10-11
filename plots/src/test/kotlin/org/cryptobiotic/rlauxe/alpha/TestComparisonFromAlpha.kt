@@ -8,12 +8,12 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.core.generateUniformSample
 import org.cryptobiotic.rlauxe.core.makeComparisonAudit
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated

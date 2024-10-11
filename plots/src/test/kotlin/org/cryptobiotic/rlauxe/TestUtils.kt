@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import kotlin.math.abs
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 val doublePrecision = 1.0e-8
 
@@ -16,46 +14,6 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
     //
     //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
     return abs(a - b) <= atol + rtol * abs(b)
-}
-
-fun doublesAreClose(a: List<Double>, b: List<Double>, rtol: Double=1.0e-5, atol:Double=1.0e-8) {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-
-    assertEquals(a.size, b.size, "size differs")
-    repeat(a.size) { assertTrue(doubleIsClose(a[it], b[it], rtol, atol), "$it: ${a[it]} !~ ${b[it]}") }
-}
-
-fun doublesAreClose(a: DoubleArray, b: DoubleArray, rtol: Double=1.0e-5, atol:Double=1.0e-8) {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-
-    assertEquals(a.size, b.size, "size differs")
-    repeat(a.size) { assertTrue(doubleIsClose(a[it], b[it], rtol, atol), "$it: ${a[it]} !~ ${b[it]}") }
-}
-
-fun doublesAreEqual(a: List<Double>, b: List<Double>) {
-    //    For finite values, isclose uses the following equation to test whether
-    //    two floating point values are equivalent.
-    //
-    //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-
-    assertEquals(a.size, b.size, "size differs")
-    repeat(a.size) { assertEquals(a[it], b[it], "$it: ${a[it]} != ${b[it]}") }
-}
-
-class SampleFromArray(val array: DoubleArray) {
-    var index = 0
-    fun sample() = array[index++]
-}
-
-class SampleFromList(val list: List<Double>) {
-    var index = 0
-    fun sample() = list[index++]
 }
 
 fun makeStandardContest() = AuditContest("standard", 0, listOf(0,1), listOf(0))

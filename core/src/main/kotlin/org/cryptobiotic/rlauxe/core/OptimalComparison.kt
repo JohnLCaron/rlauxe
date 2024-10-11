@@ -134,6 +134,7 @@ class AdaptiveComparison(
  * This follows the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R
  * Not completely sure of the relationship to COBRA section 3.2.
  * Has been generalized to allow p3 and p4 errors and sampling without replacement (WoR) by setting mui.
+ * Note if (lam < 1.0) "**** betting against"
  *
  * a := 1 / (2 − v/au)
  *    v := 2Āc − 1 is the diluted margin: the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.

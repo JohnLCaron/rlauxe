@@ -1,7 +1,5 @@
-package org.cryptobiotic.rlaplots
+package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.util.SRT
-import org.cryptobiotic.rlauxe.util.SRTcsvReader
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout

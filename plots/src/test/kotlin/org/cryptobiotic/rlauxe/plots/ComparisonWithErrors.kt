@@ -19,13 +19,13 @@ import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.theta2margin
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.theta2margin
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.util.SRT
-import org.cryptobiotic.rlauxe.util.SRTcsvWriter
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.makeSRT
 import kotlin.collections.set
 import kotlin.test.Test

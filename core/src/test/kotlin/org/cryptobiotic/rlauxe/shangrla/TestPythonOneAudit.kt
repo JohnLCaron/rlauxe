@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
-import org.cryptobiotic.rlauxe.core.findFirstIndex
-import org.cryptobiotic.rlauxe.core.np_cumprod
-import org.cryptobiotic.rlauxe.core.np_cumsum
+import org.cryptobiotic.rlauxe.util.findFirstIndex
+import org.cryptobiotic.rlauxe.util.np_cumprod
+import org.cryptobiotic.rlauxe.util.np_cumsum
 import org.cryptobiotic.rlauxe.core.randomPermute
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.max

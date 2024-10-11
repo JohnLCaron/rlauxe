@@ -5,9 +5,9 @@ import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
-import org.cryptobiotic.rlauxe.core.doubleIsClose
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.margin2theta
+import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.margin2theta
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean

@@ -1,14 +1,19 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.rlauxe.rlaplots
 
+import org.cryptobiotic.rlauxe.util.Deciles
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
 // data class for capturing results from repeated audit trials.
-// Should just be in test, but put it here to share with rlaplot
-data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val testParameters: Map<String, Double>, val eta0Factor: Double,
-               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?) {
+// Should be in test, put it here to share with plots module.
+data class SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double,
+               val d: Int,
+               val testParameters: Map<String, Double>,
+               val eta0Factor: Double,
+               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double,
+               val percentHist: Deciles?) {
 
     val theta = reportedMean + reportedMeanDiff // the true mean
     val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
@@ -83,7 +88,7 @@ class SRTcsvReader(filename: String) {
         val nsamples = ttokens[idx++].toInt()
         val stddev = ttokens[idx++].toDouble()
 
-        val percentHist = if (idx < tokens.size) org.cryptobiotic.rlauxe.util.Deciles.Companion.fromString(ttokens[idx++]) else null
+        val percentHist = if (idx < tokens.size) Deciles.Companion.fromString(ttokens[idx++]) else null
 
         return SRT(N, reportedMean, reportedMeanDiff, d, mapOf("eta0" to eta0), eta0Factor, nsuccess, ntrials, nsamples, stddev, percentHist)
     }

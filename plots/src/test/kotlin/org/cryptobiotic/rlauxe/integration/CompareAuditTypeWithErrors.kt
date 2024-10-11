@@ -18,11 +18,11 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.util.SRT
-import org.cryptobiotic.rlauxe.util.SRTcsvWriter
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.colHeader
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.sim.makeSRT

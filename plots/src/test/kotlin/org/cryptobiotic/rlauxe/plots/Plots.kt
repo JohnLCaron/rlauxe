@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.plots
 
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 
 //// plots for crtMean by meanDiff
 fun plotMeanFailPct(srs: List<SRT>, title: String) {

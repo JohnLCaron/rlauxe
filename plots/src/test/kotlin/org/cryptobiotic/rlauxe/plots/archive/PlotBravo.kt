@@ -23,12 +23,12 @@ import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.core.randomPermute
 import org.cryptobiotic.rlauxe.integration.FixedMean
-import org.cryptobiotic.rlauxe.core.cardsPerContest
-import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.margin2theta
-import org.cryptobiotic.rlauxe.core.tabulateVotes
-import org.cryptobiotic.rlauxe.core.theta2margin
+import org.cryptobiotic.rlauxe.util.cardsPerContest
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.margin2theta
+import org.cryptobiotic.rlauxe.util.tabulateVotes
+import org.cryptobiotic.rlauxe.util.theta2margin
 import kotlin.test.Test
 
 import org.cryptobiotic.rlauxe.util.Stopwatch

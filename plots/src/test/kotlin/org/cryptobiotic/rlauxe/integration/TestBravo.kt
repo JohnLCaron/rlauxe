@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.SampleFromArrayWithReplacement
 import org.cryptobiotic.rlauxe.core.Samples
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.util.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples

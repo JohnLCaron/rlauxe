@@ -20,14 +20,14 @@ import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.core.cardsPerContest
+import org.cryptobiotic.rlauxe.util.cardsPerContest
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.core.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.core.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.margin2theta
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.margin2theta
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
-import org.cryptobiotic.rlauxe.core.tabulateVotes
-import org.cryptobiotic.rlauxe.core.theta2margin
+import org.cryptobiotic.rlauxe.util.tabulateVotes
+import org.cryptobiotic.rlauxe.util.theta2margin
 import org.cryptobiotic.rlauxe.plots.ff
 import kotlin.test.Test
 

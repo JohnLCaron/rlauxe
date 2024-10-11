@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.doubleIsClose
+
 /**
  * Finds the betting martingale for the hypothesis that the population
  * mean is less than or equal to t using a martingale method,

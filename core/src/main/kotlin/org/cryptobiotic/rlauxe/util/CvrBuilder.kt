@@ -1,5 +1,9 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.flipExactVotes
 import kotlin.random.Random
 
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {

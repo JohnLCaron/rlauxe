@@ -168,37 +168,3 @@ class FixedEstimFn(
     override fun eta(prevSamples: Samples) = eta0
 }
 
-/**
- * @param rateError2 a float representing hypothesized rate of two-vote overstatements
- */
-class OptimalBettingScheme(
-    val upperBound: Double,
-    val rateError2:Double = 0.0001 // aka p2
-) : EstimFn {
-    init {
-        require(upperBound > 0.0)
-    }
-
-    /**
-     * The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
-     * for which overstatement assorters take a small number of possible values and are concentrated
-     * on a single value when the CVRs have no errors.
-     *
-     * Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
-     * and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
-     *
-     * eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
-     *
-     * Translating to p2=1-p0 gives:
-     *
-     * eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
-     *
-     * @param x an array of input data
-     * @param rateError2 a float representing hypothesized rate of two-vote overstatements
-     * @return eta, the estimated alternative mean to use in alpha
-     */
-    override fun eta(prevSamples: Samples) : Double {
-        return (1 - this.upperBound * (1 - rateError2)) / (2 - 2 * this.upperBound) + this.upperBound * (1 - rateError2) - 0.5
-    }
-}
-

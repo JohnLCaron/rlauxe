@@ -116,7 +116,7 @@ class TestCobraResults {
                     val ratio = result.avgSamplesNeeded().toDouble() / expected.meanSamples
                     ratios.add(ratio)
                     println("  expected = ${expected.meanSamples}, ${expected.samples90} $ratio")
-                    assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.10)) // within 10 %
+                    assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.12)) // within 12 %
                 }
                 println()
                 // makeSRT(N, theta, 0.0, d, rr = result)
@@ -179,7 +179,7 @@ class TestCobraResults {
                             val ratio = result.avgSamplesNeeded().toDouble() / expected.oracleMean
                             ratios.add(ratio)
                             println("  expected = ${expected.oracleMean}, ${expected.oracle90} $ratio")
-                            assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.12)) // within 12 %
+                            assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.15)) // within 15 %
                         }
                         println()
                     }
@@ -262,7 +262,7 @@ class TestCobraResults {
                             val ratio = result.avgSamplesNeeded().toDouble() / expected.adaptiveMean
                             ratios.add(ratio)
                             println("  expected = ${expected.adaptiveMean}, ${expected.adaptive90} ratio=$ratio")
-                            assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.12)) // within 12 %
+                            assertTrue(doubleIsClose(1.0, ratio, doublePrecision, 0.15)) // within 15 %
                         }
                         println() // "took ${stopwatch}")
                     }

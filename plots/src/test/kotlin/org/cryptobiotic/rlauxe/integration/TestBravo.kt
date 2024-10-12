@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.core.Samples
 import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.rlaplots.SRT
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
@@ -63,7 +62,7 @@ class TestBravo  {
         trueMeans.forEach {
             val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
             // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult
-            results.add(makeSRT(N, eta0, 0.0, d=0, eta0Factor=1.0, rr))
+            results.add(rr.makeSRT(N, eta0, 0.0, d=0, eta0Factor=1.0))
         }
         return results
     }

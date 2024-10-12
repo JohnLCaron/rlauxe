@@ -25,7 +25,6 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.colHeader
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotNTsuccess
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessDecile
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
@@ -388,8 +387,8 @@ class CompareAuditTypeWithErrors {
         )
         // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
         return Pair(
-            makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor, pollingResult),
-            makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor, compareResult)
+            pollingResult.makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor),
+            compareResult.makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor)
         )
     }
 }

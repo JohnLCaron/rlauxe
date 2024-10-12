@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.util.margin2theta
 import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.cryptobiotic.rlauxe.rlaplots.SRT
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.plots.plotDDsample
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
@@ -44,7 +43,7 @@ class TestAuditPolling {
                     if (show) print("${resultWithout.avgSamplesNeeded().toDouble()}, ${resultWith.avgSamplesNeeded().toDouble()}, ${"%5.2f".format(speedup)}, ")
                     if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
                     // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
-                    srs.add(makeSRT(N, margin2theta(margin), 0.0, d=d, 1.0, resultWithout))
+                    srs.add(resultWithout.makeSRT(N, margin2theta(margin), 0.0, d=d, 1.0))
                 }
                 if (show) println()
             }

@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -162,7 +161,7 @@ class TestComparisonFromAlpha {
                             eta0 = eta0,
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
-                        al.add(makeSRT(N, theta, 0.0, d, rr = result))
+                        al.add(result.makeSRT(N, theta, 0.0, d))
                     }
                 }
             }
@@ -367,7 +366,7 @@ class TestComparisonFromAlpha {
                     ntrials = reps,
                     upperBound = u,
                 )
-                srs.add(makeSRT(N, reportedMean=theta, reportedMeanDiff=0.0, eta0Factor=eta, d=d, rr=mart))
+                srs.add(mart.makeSRT(N, reportedMean=theta, reportedMeanDiff=0.0, eta0Factor=eta, d=d))
             }
         }
 
@@ -508,7 +507,7 @@ class TestComparisonFromAlpha {
                     ntrials = reps,
                     upperBound = compareAssorter.upperBound(),
                 )
-                srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
+                srs.add(mart.makeSRT(N, theta, 0.0, d))
             }
         }
 
@@ -575,7 +574,7 @@ class TestComparisonFromAlpha {
                     ntrials = ntrials,
                     upperBound = compareUpper,
                 )
-                srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
+                srs.add(mart.makeSRT(N, theta, 0.0, d))
             }
         }
 
@@ -663,7 +662,7 @@ class TestComparisonFromAlpha {
                 ntrials = ntrials,
                 upperBound = compareAssertion.assorter.upperBound,
             )
-            srs.add(makeSRT(N, theta, 0.0, d, rr=mart))
+            srs.add(mart.makeSRT(N, theta, 0.0, d))
 
             val title = " nsamples, ballot comparison, eta0=eta0, d = $d, error-free\n theta (col) vs N (row)"
             plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",

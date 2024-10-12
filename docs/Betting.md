@@ -64,16 +64,16 @@ is when p2oracle = .001.
 
 Plot 1 shows the average number of samples needed to reject the null, aka "success":
 
-![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccessVsMargin.1000.html)
+[plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
 
 Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
 theta <= 0.5:
 
-![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccess20VsMargin.1000.html)
+[plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
 
 Plot 3 zooms in on the false positives when the cutoff is 20% of N:
 
-![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotFailuresVsTheta.1000.html)
+[plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
 
 Comments
 * the weighting factor d_k is set to 100 = .1/p_k. Arguably it should be inversely proportional to p_k, since

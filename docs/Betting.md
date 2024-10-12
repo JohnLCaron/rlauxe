@@ -23,8 +23,7 @@ where
 * a := 1 / (2 − v/au)
 * v := 2Āc − 1 is the diluted margin
 * au := assort upper value; = 1 for plurality, 1/(2*minFraction) for supermajority
-* mu_i := mean value under H0 (= 1/2 for with replacement), otherwise for WoR, varies for each sample i (COBRA section 6.1).
-  TODO: investigate stalling problem in 6.2.
+* mu_i := mean value under H0 (= 1/2 for with replacement), otherwise for WoR, varies for each sample i (ALPHA section 2.2.1).
 * The possible values of the comparison assort function are: {1, 1/2, 0, 3/2, 2} * a
 
 The expected value of the test statistic (generalized from COBRA section 3.2) is based on the comparison assort values
@@ -45,13 +44,14 @@ Following COBRA, we start with only the p2 errors, and use Adaptive betting from
 to estimate the p2 rate, using an adapted form of ALPHA's shrink_trunc algorithm:
 
 ````
-    p̃_ki :=  (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1)
+    p̃_ki :=  (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ eps_k
 where    
     k = (1,2,3,4) is one of the rates from Table 1 above
     p̃_ki is the estimated rate at time i
     p̃_k is the a priori estimate for rate pk
     d_k is the adaptive weighting value for the kth rate
     p̂_ki is the measured sample rate at time i
+    eps_k is the lower bound for the estimated rate
 ````
 
 The estimated rate p̃_ki is then plugged into Equation 1, and BrentOptimizer is used to find the maximal value of lamda for 
@@ -64,16 +64,16 @@ is when p2oracle = .001.
 
 Plot 1 shows the average number of samples needed to reject the null, aka "success":
 
-![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccessVsMargin.100.svg)
+![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccessVsMargin.1000.html)
 
 Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
 theta <= 0.5:
 
-![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccess20VsMargin.100.svg)
+![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotSuccess20VsMargin.1000.html)
 
 Plot 3 zooms in on the false positives when the cutoff is 20% of N:
 
-![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotFailuresVsTheta.100.svg)
+![plotSuccessVsTheta](../plots/src/test/data/bet/plotAdaptiveComparison.plotFailuresVsTheta.1000.html)
 
 Comments
 * the weighting factor d_k is set to 100 = .1/p_k. Arguably it should be inversely proportional to p_k, since
@@ -81,7 +81,7 @@ Comments
 * this algorithm does well when p2oracle ~= p2prior, giving good results down to margins of 1-2%.
 * we are testing very high values of p2oracle, in order to see how the algorithm responds when the overstatement
   errors are high enough to change the election outcome.
-* the false positives stay under the 5% risk limit, even when theta = 1/2.
+* the false positives (mostly) stay under the 5% risk limit, even when theta = 1/2.
 * TODO test if these conclusions hold when p1 is non-zero, and when there are varying levels of 
   "random error" in the form of non-zero rates for all the errors.
 * TODO test a wide range of p2priors, as well as a range of d values.

@@ -152,6 +152,7 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
 
     fun solve(): Double {
         val stopwatch = Stopwatch()
+        // TODO why arent we giving it the derivitive ?
         val function = UnivariateFunction { lam -> expected_value_logT(lam) }  // The function to be optimized
 
         // BrentOptimizer: For a function defined on some interval (lo, hi),
@@ -208,15 +209,18 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     }
 
 
-    // chain rule:   d/dx (ln(f(x)) = f'(x) / f(x) for each of the first 3 terms of expectedT separately, and mui = 0.5
-
+    // chain rule:   d/dx (ln(f(x)) = f'(x) / f(x) for each of the first 3 terms of expectedT separately
     //  derivative <- function(lambda){
     //    (a - 1/2) * (1 - p_1 - p_2) / (1 + lambda * (a - 1/2)) + (a - 1) * p_1 / (2 - lambda * (1 - a)) + p_2 / (2 - lambda)
     //  }
     // so this is p0 * d/dx (ln(term0)) + p1 * d/dx (ln(term1)) + p2 * d/dx (ln(term2))
+    // TODO why arent we using the derivitive ? Apparently optimize() operates on the function, not its derivitive.
+    // "The function optimize searches the interval from lower to upper for a minimum or maximum of the function f with respect to its first argument."
     fun derivativeFromRcode(lam: Double): Double {
-        return p0 * (a - 0.5) / (1.0 + lam * (a - 0.5)) +
-                p1 * (a - 1.0) / (2.0 - lam * (1.0 - a)) +
-                p2 / (2.0 - lam)
+        return  p0 * (a - mui) / (1.0 + lam * (a - mui)) +
+                p1 * (a*0.5 - mui) / (1.0 + lam * (a*0.5 - mui)) +
+                p2 * mui / (lam * mui - 1.0) +  // LOOK the R code has the sign wrong
+                p3 * (a*1.5 - mui) / (1.0 + lam * (a*1.5 - mui)) +
+                p4 * (a*2.0 - mui) / (1.0 + lam * (a*2.0 - mui))
     }
 }

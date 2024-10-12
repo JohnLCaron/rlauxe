@@ -16,7 +16,7 @@ Table of Contents
       * [APPROVAL](#approval)
       * [SUPERMAJORITY](#supermajority)
       * [IRV](#irv)
-    * [Comparison audits vs polling audits](#comparison-audits-vs-polling-audits)
+    * [Comparison audits](#comparison-audits)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Use Styles](#use-styles)
   * [ALPHA testing statistic](#alpha-testing-statistic)
@@ -159,7 +159,7 @@ and possibly
     5 Oct 2023
 ````
 
-### Comparison audits vs polling audits
+### Comparison audits
 
 See SHANGRLA Section 3.2.
 
@@ -193,9 +193,11 @@ Notes
     Diluted refers to the fact that the denominator is the number of ballot cards, which is
     greater than or equal to the number of valid votes.)
 * If overstatement error is always zero (no errors in CRV), the assort value is always
+  ````
       noerror = 1 / (2 - margin/assorter.upperBound()) 
               = 1 / (3 - 2 * awinnerAvg/assorter.upperBound())
               > 0.5 since awinnerAvg > 0.5
+  ````
 * The possible values of the bassort function are:
       {0, .5, 1, 1.5, 2} * noerror
 * When cvr = mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
@@ -323,11 +325,7 @@ Bravo: Probability of drawing y if theta=n over probability of drawing y if thet
 
     y*(n/m) + (1-y)*(1-n)/(1-m)
 
-makes sense where y is 0 or 1, so one term or the other vanishes. But maybe that should really be
-
-    (y*n + (1-y)*(1-n)) / (y*m + (1-y)*(1-m))
-
-?? These agree when y=0 or 1.
+makes sense where y is 0 or 1, so one term or the other vanishes. 
 
 Alpha:
 
@@ -373,12 +371,7 @@ Step 3: Use estimated nj instead of fixed n, and mj instead of fixed m = 1/2 whe
 
     (3a) (xj * (nj/mj) + (u-xj) * (u-nj)/(u-mj)) / u
 
-    (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj)) 
-
-    (3c) (xj*nj + (u-xj)*(u-nj)) / (u/2)  (with replacement, or m ~ 1/2, eg large N)
-
-Note 3b and 3c dont work at all when x = u/2, which is exactly what happens for the bulk of comparisons (cvr == mvr). 
-See TestProbRatios.testNumerics(). The approximation 3a perhaps was chosen to avoid that problem?
+    (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
 
 
 ### Sampling with or without replacement
@@ -456,7 +449,7 @@ Options
 
 ## Stratified audits using OneAudit (not done)
 
-Deal with one contest at a time for now .
+Deal with one contest at a time for now.
 
 ````
 Let bi denote the true votes on the ith ballot card; there are N ballots in all. 

@@ -121,12 +121,15 @@ data class AlphaMartRepeatedResult(val eta0: Double,            // initial estim
         if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
         if (status != null) appendLine("  status:${status}")
     }
+
+    fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0): SRT {
+        return SRT(N, reportedMean, reportedMeanDiff,
+            mapOf("d" to d.toDouble(), "eta" to this.eta0, "eta0Factor" to eta0Factor),
+            this.nsuccess, this.ntrials, this.totalSamplesNeeded,
+            sqrt(this.variance), this.percentHist)
+    }
 }
 
-fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
-    return SRT(N, reportedMean, reportedMeanDiff, d, mapOf("eta" to rr.eta0), eta0Factor, rr.nsuccess, rr.ntrials, rr.totalSamplesNeeded,
-        sqrt(rr.variance), rr.percentHist)
-}
 
 //////////////////////////////////////////////////////////////////
 
@@ -140,7 +143,7 @@ fun runBettingMartRepeated(
     terminateOnNullReject: Boolean = true,
     showDetails: Boolean = false,
 ): BettingMartRepeatedResult {
-
+    val showH0Result = false
     val N = drawSample.N()
 
     var totalSamplesNeeded = 0
@@ -167,7 +170,7 @@ fun runBettingMartRepeated(
             val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
             percentHist.add(percent)
         }
-        if (showDetails) println(" $it $testH0Result")
+        if (showH0Result) println(" $it $testH0Result")
     }
 
     val (_, variance, _) = welford.result()
@@ -196,9 +199,12 @@ data class BettingMartRepeatedResult(
         if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
         if (status != null) appendLine("  status:${status}")
     }
-}
 
-fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: BettingMartRepeatedResult): SRT {
-    return SRT(N, reportedMean, reportedMeanDiff, d, rr.testParameters, eta0Factor, rr.nsuccess, rr.ntrials, rr.totalSamplesNeeded,
-        sqrt(rr.variance), rr.percentHist)
+    fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double): SRT {
+        return SRT(N, reportedMean, reportedMeanDiff,
+            this.testParameters,
+            this.nsuccess, this.ntrials, this.totalSamplesNeeded,
+            sqrt(this.variance), this.percentHist)
+    }
+
 }

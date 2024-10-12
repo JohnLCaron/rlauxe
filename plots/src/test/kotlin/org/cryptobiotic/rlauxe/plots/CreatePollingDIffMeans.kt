@@ -24,7 +24,6 @@ import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import kotlin.test.Test
 
 import kotlin.text.format
@@ -169,7 +168,7 @@ class CreatePollingDiffMeans {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runAlphaMartWithMeanDiff(task.theta, task.cvrs, reportedMeanDiff=reportedMeanDiff, nrepeat = nrepeat, d = d, silent = true).first()
         val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
-        val sr = makeSRT(task.N, reportedMean, reportedMeanDiff, d, rr = rr)
+        val sr = rr.makeSRT(task.N, reportedMean, reportedMeanDiff, d)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, ${rr.eta0}, $sr")
         return sr
     }

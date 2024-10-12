@@ -26,7 +26,6 @@ import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import kotlin.collections.set
 import kotlin.test.Test
 
@@ -570,13 +569,12 @@ class ComparisonWithErrors {
             task.cvrMean, task.cvrs, cvrMeanDiff = cvrMeanDiff,
             nrepeat = nrepeat, d = d, eta0Factor = task.eta0Factor
         )
-        val sr = makeSRT(
+        val sr = rr.makeSRT(
             task.N,
             reportedMean = task.cvrMean,
             reportedMeanDiff = cvrMeanDiff,
             d = d,
             eta0Factor = task.eta0Factor,
-            rr = rr
         )
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${rr.eta0}, $sr")
         if (showCalculationAll) println("${task.idx} (${calculations.size}): $rr")

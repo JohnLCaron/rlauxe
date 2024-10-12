@@ -66,12 +66,11 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
 
     fun calculate(task: PollingTask, ntrials: Int): SRT {
         val rr = runPollingWithErrors(task, nrepeat = ntrials)
-        val sr = makeSRT(
+        val sr = rr.makeSRT(
             task.N,
             reportedMean = task.cvrMean,
             reportedMeanDiff = task.cvrMeanDiff,
             d = task.d,
-            rr = rr
         )
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${rr.eta0}, $sr")
         if (showCalculationAll) println("${task.idx} (${calculations.size}): $rr")

@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.flipExactVotes
 import kotlin.random.Random
 
+// for testing, add here to share between modules
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
     var total = 0
@@ -62,18 +63,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// old, deprectaed
-
-fun makeCvrsByCount(ncards: Int, count: Int) : List<Cvr> {
-    val result = mutableListOf<Cvr>()
-    repeat(ncards) {
-        val votes = mutableMapOf<Int, Map<Int, Int>>()
-        val cand = if (it < count) 0 else 0
-        votes[0] = mapOf(cand to 1)
-        result.add(Cvr("card-$it", votes))
-    }
-    return result
-}
+// old, deprecated TODO get rid of
 
 fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
     val r = mutableMapOf<Int, MutableMap<Int, Int>>()

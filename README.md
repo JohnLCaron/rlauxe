@@ -1,6 +1,5 @@
 # rlauxe
-last update: 10/09/2024
-
+last update: 10/12/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -38,7 +37,7 @@ Table of Contents
     ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots.	Stark, Jan 7, 2022
         https://github.com/pbstark/alpha.
 
-    Estimating means of bounded random variables by betting. 	Waudby-Smith and Ramdas, Aug 29, 2022
+    BETTING     Estimating means of bounded random variables by betting. 	Waudby-Smith and Ramdas, Aug 29, 2022
         https://github.com/WannabeSmith/betting-paper-simulations
 
     ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit.     Stark, 6 Mar 2023.
@@ -200,11 +199,8 @@ Notes
 * The possible values of the bassort function are:
       {0, .5, 1, 1.5, 2} * noerror
 * When cvr = mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
-* However the convergence is slower than for polling (!), unless one "amplifies" the estimate function. (Here we
-  experiment with "eta0Factor" that multiplies eta0 = noerror by a factor between 1 and 2.)
-* see [Sample size simulations (Ballot Comparison)](docs/Simulations.md#sample-size-simulations-ballot-comparison)
-* see [Comparison Experiments](docs/ComparisonExperiments.md)
-
+* However the convergence is slower than for polling (!), unless one "amplifies" the estimate function.
+  See [Ballot Comparison using Betting Martingales](docs/Betting.md) that uses betting strategies to do so. 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
@@ -516,5 +512,4 @@ null mean is 1/2 once again, which reproduces the original assorter.
 ## Simulation Results
 
 * [Simulations](docs/Simulations.md)
-* [PollVsCvr](docs/PollVsCvr.md)
-* [Comparison Experiments](docs/ComparisonExperiments.md)
+* [Ballot Comparison using Betting Martingales](docs/Betting.md)

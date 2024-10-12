@@ -26,7 +26,6 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.sim.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.test.Test
 
@@ -289,7 +288,7 @@ class CompareAuditType {
                     ntrials = reps,
                     upperBound = compareAssertion.assorter.upperBound,
                 )
-                compareSrs.add(makeSRT(N, theta, 0.0, d, rr=compareResult))
+                compareSrs.add(compareResult.makeSRT(N, theta, 0.0, d))
 
                 val pollingResult = runAlphaMartRepeated(
                     drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
@@ -300,7 +299,7 @@ class CompareAuditType {
                     withoutReplacement = true,
                     upperBound = pollingAssertion.assorter.upperBound()
                 )
-                pollingSrs.add(makeSRT(N, theta, 0.0, d, rr=pollingResult))
+                pollingSrs.add(pollingResult.makeSRT(N, theta, 0.0, d))
             }
         }
 

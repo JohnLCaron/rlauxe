@@ -6,6 +6,7 @@ import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
+import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
 
 // generic multiple line plotter
@@ -67,6 +68,9 @@ fun srtPlot(
                 size = 1.0
                 symbol = Symbol.CIRCLE_OPEN
                 color = Color.BLUE
+
+                // tooltips(variables, formats, title, anchor, minWidth, hide)
+                tooltips(xname, yname, catName)
             }
 
             layout {
@@ -81,17 +85,18 @@ fun srtPlot(
 }
 
 ////////////////////////////////////////////////////////////////////////////
-fun readAndFilter(filename: String,
-                  thetaRange: ClosedRange<Double>? = null,
-                  N: Int? = null,
-                  reportedMeanDiff: Double? = null,
-                  eta0Factor: Double? = null,
-                  d: Int? = null,
+fun readAndFilter(
+    filename: String,
+    thetaRange: ClosedRange<Double>? = null,
+    N: Int? = null,
+    reportedMeanDiff: Double? = null,
+    eta0Factor: Double? = null,
+    d: Int? = null,
 ): List<SRT> {
     val reader = SRTcsvReader(filename)
     val srts = reader.readCalculations()
     return srts.filter {
-                (thetaRange == null || thetaRange.contains(it.theta))
+        (thetaRange == null || thetaRange.contains(it.theta))
                 && (N == null || it.N == N)
                 && (reportedMeanDiff == null || it.reportedMeanDiff == reportedMeanDiff)
                 && (d == null || it.d == d)
@@ -102,7 +107,7 @@ fun readAndFilter(filename: String,
 fun readFilterTN(filename: String, theta: Double, N: Int): List<SRT> {
     val reader = SRTcsvReader(filename)
     val srts = reader.readCalculations()
-    return srts.filter{ it.theta == theta && it.N == N}
+    return srts.filter { it.theta == theta && it.N == N }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

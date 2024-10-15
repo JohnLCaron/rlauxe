@@ -20,9 +20,9 @@ class GenAdaptiveComparisonTable {
         val reportedMeans = listOf(0.501, 0.502, 0.503, 0.504, 0.505, 0.506, 0.5075, 0.508, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.58, 0.6,)
 
         val N = 10000
-        val ntrials = 100
-        val p2prior = .001
-        val d2 = (1.0/p2prior).toInt()/10
+        val ntrials = 1000
+        val p2prior = .0001
+        val d2 = 100 // (1.0/p2prior).toInt()/10
 
         val tasks = mutableListOf<BettingTask>()
         var taskCount = 0
@@ -51,7 +51,7 @@ class GenAdaptiveComparisonTable {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/bet/plotAdaptiveComparison.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/bet/plotAdaptiveComparison0001.csv")
 
         val runner = BettingRunner()
         val results =  runner.run(tasks, ntrials)
@@ -61,7 +61,7 @@ class GenAdaptiveComparisonTable {
         println("${results.size} results written to ${writer.filename} took ${stopwatch.tookPer(taskCount, "task")} of $ntrials trials each")
     }
 
-    // just do one repeated task
+    // just do one task
     @Test
     fun testOneAdaptiveComparison() {
         val stopwatch = Stopwatch()

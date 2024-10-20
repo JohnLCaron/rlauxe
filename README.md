@@ -508,4 +508,4 @@ null mean is 1/2 once again, which reproduces the original assorter.
 
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)
-* [Notes on Corla](docs/Corla.md)
+* [Notes on Corla](docs/corla.md)

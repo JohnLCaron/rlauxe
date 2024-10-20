@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.core.Welford
 import org.cryptobiotic.rlauxe.util.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.core.eps
+import org.cryptobiotic.rlauxe.corla.Corla
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import kotlin.math.max
 import kotlin.math.sqrt
@@ -207,4 +208,50 @@ data class BettingMartRepeatedResult(
             sqrt(this.variance), this.percentHist)
     }
 
+}
+
+//////////////////////////////////////////////////////////////////
+
+// run BettingMart in repeated trials
+fun runCorlaRepeated(
+    drawSample: SampleFn,
+    maxSamples: Int,
+    ntrials: Int,
+    corla: Corla,
+    testParameters: Map<String, Double>,
+    showDetails: Boolean = false,
+): BettingMartRepeatedResult {
+    val showH0Result = false
+    val N = drawSample.N()
+
+    var totalSamplesNeeded = 0
+    var fail = 0
+    var nsuccess = 0
+    val percentHist = Deciles(ntrials) // bins of 10%
+    val status = mutableMapOf<TestH0Status, Int>()
+    val welford = Welford()
+
+    repeat(ntrials) {
+        drawSample.reset()
+        val testH0Result = corla.testH0(maxSamples, terminateOnNullReject = true) { drawSample.sample() }
+        val currCount = status.getOrPut(testH0Result.status) { 0 }
+        status[testH0Result.status] = currCount + 1
+        if (testH0Result.status.fail) {
+            fail++
+        } else {
+            nsuccess++
+
+            totalSamplesNeeded += testH0Result.sampleCount
+            welford.update(testH0Result.sampleCount.toDouble()) // just to keep the stddev
+
+            // sampleCount was what percent of N? keep 10% histogram bins.
+            val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
+            percentHist.add(percent)
+        }
+        if (showH0Result) println(" $it $testH0Result")
+    }
+
+    val (_, variance, _) = welford.result()
+    return BettingMartRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
+        ntrials=ntrials, variance, percentHist, status)
 }

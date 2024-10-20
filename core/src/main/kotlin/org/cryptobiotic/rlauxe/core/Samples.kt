@@ -65,6 +65,7 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
         sum += sample
         welford.update(sample)
 
+        // or just say which overstatement it is
         if (doubleIsClose(sample, noerror)) countP0++
         if (doubleIsClose(sample, noerror * 0.5)) countP1++
         if (doubleIsClose(sample, 0.0)) countP2++

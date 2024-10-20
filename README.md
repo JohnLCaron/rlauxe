@@ -1,5 +1,5 @@
 # rlauxe
-last update: 10/12/2024
+last update: 10/20/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -506,3 +506,4 @@ null mean is 1/2 once again, which reproduces the original assorter.
 
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)
+* [Notes on Corla](docs/Corla.md)

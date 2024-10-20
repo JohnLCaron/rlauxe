@@ -15,22 +15,21 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AdaptiveComparison
-import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.corla.Corla
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
-data class BettingTask(
+data class CorlaTask(
     val idx: Int,
     val N: Int,
     val cvrMean: Double,
     val cvrs: List<Cvr>,
-    val d2: Int, // weight p2, p4
-    val p2oracle: Double, // oracle rate of 2-vote overstatements
-    val p2prior: Double, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
+    val riskLimit: Double = 0.05,
+    val p2: Double,      // oracle rate of 2-vote overstatements
+    val p1: Double,     // oracle rate of 1-vote overstatements
 ) {
     // val theta = cvrMean + cvrMeanDiff
     init {
@@ -38,14 +37,14 @@ data class BettingTask(
     }
 }
 
-class BettingRunner {
+class CorlaRunner {
     private val showCalculation = false
     private val showTaskResult = false
     private val mutex = Mutex()
     private val calculations = mutableListOf<SRT>()
 
     // run all the tasks concurrently
-    fun run(tasks: List<BettingTask>, ntrials: Int, nthreads: Int = 30): List<SRT> {
+    fun run(tasks: List<CorlaTask>, ntrials: Int, nthreads: Int = 30): List<SRT> {
         val stopwatch = Stopwatch()
         println("run ${tasks.size} comparison tasks with $nthreads threads and $ntrials trials")
         runBlocking {
@@ -65,21 +64,21 @@ class BettingRunner {
         return calculations
     }
 
-    fun calculate(task: BettingTask, ntrials: Int): SRT {
+    fun calculate(task: CorlaTask, ntrials: Int): SRT {
         val stopwatch = Stopwatch()
-        val rr = runBettingMart(task, ntrials = ntrials)
+        val rr = runCorla(task, ntrials = ntrials)
         val sr = rr.makeSRT(
             N=task.N,
             reportedMean = task.cvrMean,
-            reportedMeanDiff = -task.p2oracle, // TODO
+            reportedMeanDiff = -task.p2, // TODO
         )
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, $sr")
         if (showTaskResult) println("${task.idx} (${calculations.size}): $rr took $stopwatch")
         return sr
     }
 
-    fun runBettingMart(
-        task: BettingTask,
+    fun runCorla(
+        task: CorlaTask,
         ntrials: Int,
         silent: Boolean = false
     ): BettingMartRepeatedResult {
@@ -88,47 +87,24 @@ class BettingRunner {
         // generate with the oracle, or true rates
         val compareAssorter = makeStandardComparisonAssorter(task.cvrMean)
 
-        val sampler = ComparisonWithErrorRates(task.cvrs, compareAssorter, p2 = task.p2oracle, withoutReplacement = true)
+        val sampler = ComparisonWithErrorRates(task.cvrs, compareAssorter, p1 = task.p1, p2 = task.p2, withoutReplacement = true)
         val upperBound = compareAssorter.upperBound
-        if (!silent) println("runBettingMart: p2=${task.p2oracle} p2prior=${task.p2prior}")
+        if (!silent) println("runCorla: p1=${task.p1} p2=${task.p2}")
 
-        //     val N: Int,
-        //    val withoutReplacement: Boolean = true,
-        //    val upperBound: Double,
-        //    val a: Double, // noerror
-        //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
-        //    val d2: Int, // weight p2, p4
-        //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-        //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-        //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-        //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
-        //    val eps: Double = .00001
-        val adaptive = AdaptiveComparison(
-            N = task.N,
-            withoutReplacement = true,
-            upperBound = upperBound,
-            a = compareAssorter.noerror,
-            d1 = 0,
-            d2 = task.d2,
-            p1 = 0.0,
-            p2 = task.p2prior,
-            p3 = 0.0,
-            p4 = 0.0,
-        )
-        val betting =
-            BettingMart(bettingFn = adaptive, N = task.N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = true)
+        val corla = Corla(N = task.N, riskLimit=task.riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
+            p1 = task.p1, p2 = task.p2, p3 = 0.0, p4 = 0.0)
 
-        return runBettingMartRepeated(
+        return runCorlaRepeated(
             drawSample = sampler,
             maxSamples = task.N,
             ntrials = ntrials,
-            bettingMart = betting,
-            testParameters = mapOf("p2oracle" to task.p2oracle, "p2prior" to task.p2prior, "d2" to task.d2.toDouble()),
+            corla = corla,
+            testParameters = mapOf("p1" to task.p1, "p2oracle" to task.p2),
             showDetails = false,
         )
     }
 
-    private fun CoroutineScope.produceTasks(producer: Iterable<BettingTask>): ReceiveChannel<BettingTask> =
+    private fun CoroutineScope.produceTasks(producer: Iterable<CorlaTask>): ReceiveChannel<CorlaTask> =
         produce {
             for (task in producer) {
                 send(task)
@@ -138,8 +114,8 @@ class BettingRunner {
         }
 
     private fun CoroutineScope.launchCalculations(
-        input: ReceiveChannel<BettingTask>,
-        calculate: (BettingTask) -> SRT?,
+        input: ReceiveChannel<CorlaTask>,
+        calculate: (CorlaTask) -> SRT?,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val calculation = calculate(task) // not inside the mutex!!

@@ -70,9 +70,8 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
             task.N,
             reportedMean = task.cvrMean,
             reportedMeanDiff = task.cvrMeanDiff,
-            d = task.d,
         )
-        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${rr.eta0}, $sr")
+        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, $sr")
         if (showCalculationAll) println("${task.idx} (${calculations.size}): $rr")
         return sr
     }
@@ -81,7 +80,7 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
         task: PollingTask,
         nrepeat: Int,
         silent: Boolean = true
-    ): AlphaMartRepeatedResult {
+    ): RunTestRepeatedResult {
         if (!silent) println(" N=${task.N} theta=${task.theta} d=${task.d} cvrMeanDiff=${task.cvrMeanDiff}")
 
         val pollingAssorter = makeStandardPluralityAssorter()
@@ -89,12 +88,12 @@ class PollingRunner(val useFixedEstimFn: Boolean = false) {
 
         val pollingResult = if (useFixedEstimFn) {
             val alpha = AlphaMart(estimFn = FixedEstimFn(task.cvrMean), N = task.N)
-            runAlphaEstimRepeated(
+            runTestRepeated(
                 drawSample = sampler,
                 maxSamples = task.N,
                 ntrials = nrepeat,
-                alphaMart = alpha,
-                eta0 = task.cvrMean,
+                testFn = alpha,
+                testParameters = mapOf("eta0" to task.cvrMean),
             )
         } else {
             runAlphaMartRepeated(

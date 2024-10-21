@@ -376,7 +376,8 @@ class ArrayAsSampleFn(val assortValues : DoubleArray): SampleFn {
     }
 }
 
-class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
+// generate random values with given mean
+class SampleMeanWithReplacement(val N: Int, ratio: Double): SampleFn {
     val samples = generateSampleWithMean(N, ratio)
     override fun sample(): Double {
         val idx = Random.nextInt(N) // with Replacement
@@ -384,6 +385,20 @@ class SampleFromArrayWithReplacement(val N: Int, ratio: Double): SampleFn {
     }
     override fun reset() {
         // noop
+    }
+    override fun sampleMean() = samples.average()
+    override fun sampleCount() = samples.sum()
+    override fun N() = N
+}
+
+class SampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleFn {
+    var samples = generateSampleWithMean(N, ratio)
+    var index = 0
+    override fun sample(): Double {
+        return samples[index++]
+    }
+    override fun reset() {
+        samples = generateSampleWithMean(N, ratio)
     }
     override fun sampleMean() = samples.average()
     override fun sampleCount() = samples.sum()

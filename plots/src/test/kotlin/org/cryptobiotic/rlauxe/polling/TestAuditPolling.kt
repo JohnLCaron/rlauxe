@@ -1,19 +1,11 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.polling
 
-import org.cryptobiotic.rlauxe.core.AuditContest
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PollWithReplacement
-import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.util.cardsPerContest
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.util.margin2theta
-import org.cryptobiotic.rlauxe.util.tabulateVotes
-import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.plots.plotDDsample
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 
 class TestAuditPolling {
@@ -36,14 +28,14 @@ class TestAuditPolling {
                     val cvrs = makeCvrsByExactMean(N, margin2theta(margin))
                     val resultWithout = testPollingWorkflow(margin, withoutReplacement = true, cvrs, d, silent = true).first()
                     val resultWith = testPollingWorkflow(margin, withoutReplacement = false, cvrs, d, silent = true).first()
-                    if (show) print("$d, ${cvrs.size}, $margin, ${resultWithout.eta0}, ")
+                    if (show) print("$d, ${cvrs.size}, $margin, ")
                     val speedup = resultWith.avgSamplesNeeded().toDouble() / resultWithout.avgSamplesNeeded().toDouble()
                     val pct = (100.0 * resultWithout.avgSamplesNeeded().toDouble() / N).toInt()
 
                     if (show) print("${resultWithout.avgSamplesNeeded().toDouble()}, ${resultWith.avgSamplesNeeded().toDouble()}, ${"%5.2f".format(speedup)}, ")
                     if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
-                    // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
-                    srs.add(resultWithout.makeSRT(N, margin2theta(margin), 0.0, d=d, 1.0))
+                    // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult): SRT {
+                    srs.add(resultWithout.makeSRT(N, margin2theta(margin), 0.0))
                 }
                 if (show) println()
             }
@@ -52,7 +44,7 @@ class TestAuditPolling {
         plotDDsample(srs, "PollingWithoutDD")
     }
 
-    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<AlphaMartRepeatedResult> {
+    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<RunTestRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 
@@ -76,7 +68,7 @@ class TestAuditPolling {
         val audit = makePollingAudit(contests = contests)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
-        val results = mutableListOf<AlphaMartRepeatedResult>()
+        val results = mutableListOf<RunTestRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")
             assertions.forEach {
@@ -102,8 +94,6 @@ class TestAuditPolling {
         return results // TODO only one
     }
 
-}
-
 // 8/31/2024
 // compares well with table 3 of ALPHA
 // eta0 = theta, no divergence of sample from true. 100 repetitions
@@ -124,3 +114,5 @@ class TestAuditPolling {
 //   500,  10340,   9219,   4144,   1733,    527,    609,    138,     30,
 //  1000,  14077,   7972,   3180,   1840,    657,    380,    124,     35,
 //  2000,  11381,   8237,   2959,   1677,    953,    436,    170,     26,
+
+}

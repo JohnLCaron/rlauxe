@@ -19,11 +19,11 @@ import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
 import kotlin.test.Test
 
 import kotlin.text.format
@@ -168,8 +168,8 @@ class CreatePollingDiffMeans {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runAlphaMartWithMeanDiff(task.theta, task.cvrs, reportedMeanDiff=reportedMeanDiff, nrepeat = nrepeat, d = d, silent = true).first()
         val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
-        val sr = rr.makeSRT(task.N, reportedMean, reportedMeanDiff, d)
-        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, ${rr.eta0}, $sr")
+        val sr = rr.makeSRT(task.N, reportedMean, reportedMeanDiff)
+        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, $sr")
         return sr
     }
 
@@ -207,7 +207,7 @@ class CreatePollingDiffMeans {
         nrepeat: Int,
         d: Int = 500,
         silent: Boolean = true
-    ): List<AlphaMartRepeatedResult> {
+    ): List<RunTestRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
@@ -216,7 +216,7 @@ class CreatePollingDiffMeans {
         val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
         val audit = makePollingAudit(contests = listOf(contest))
 
-        val results = mutableListOf<AlphaMartRepeatedResult>()
+        val results = mutableListOf<RunTestRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->
             if (!silent && showContests) println("Assertions for Contest ${contest.id}")
             assertions.forEach { assert ->

@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
-import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sim.runTestRepeated
 import kotlin.math.max
 import kotlin.test.Test
 
@@ -59,8 +59,8 @@ class CompareShrinkTrunkWithFixed {
         val etas = listOf(.505, .51, .52, .53, .54, .55, .6, .7) // alternative means
         val N = 10000
         val ntrials = 1000
-        val fixResults = mutableListOf<AlphaMartRepeatedResult>()
-        val truncResults = mutableListOf<AlphaMartRepeatedResult>()
+        val fixResults = mutableListOf<RunTestRepeatedResult>()
+        val truncResults = mutableListOf<RunTestRepeatedResult>()
 
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
@@ -85,8 +85,8 @@ class CompareShrinkTrunkWithFixed {
         calcMean(" success50percent", fixResults, truncResults) { it.percentHist!!.cumul(50) }
     }
 
-    fun calcMean(title: String, fixResults : List<AlphaMartRepeatedResult>, truncResults : List<AlphaMartRepeatedResult>,
-                 fld: (AlphaMartRepeatedResult) -> Double) {
+    fun calcMean(title: String, fixResults : List<RunTestRepeatedResult>, truncResults : List<RunTestRepeatedResult>,
+                 fld: (RunTestRepeatedResult) -> Double) {
         val fixFld = mutableListOf<Double>()
         val truncFld = mutableListOf<Double>()
         fixResults.forEachIndexed{ idx, fixResult ->
@@ -97,7 +97,7 @@ class CompareShrinkTrunkWithFixed {
         // println("GeometricMean for $title: fix=${geometricMean(fixFld)}, trunc=${geometricMean(truncFld)}")
     }
 
-    fun runAlphaMartTruncRepeated(eta0: Double, sampleFn: SampleFn, ntrials: Int): AlphaMartRepeatedResult {
+    fun runAlphaMartTruncRepeated(eta0: Double, sampleFn: SampleFn, ntrials: Int): RunTestRepeatedResult {
         val u = 1.0
         val d = 10000
         val f = 0.0
@@ -109,30 +109,28 @@ class CompareShrinkTrunkWithFixed {
         val trunc = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
         val alpha = AlphaMart(estimFn = trunc, N = sampleFn.N())
 
-        return runAlphaEstimRepeated(
+        return runTestRepeated(
             drawSample = sampleFn,
             maxSamples = N,
             terminateOnNullReject = true,
             ntrials = ntrials,
-            showDetail = false,
-            alphaMart = alpha,
-            eta0 = eta0,
+            testFn = alpha,
+            testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
         )
     }
 
-    fun runAlphaMartFixedRepeated(eta0: Double, sampleFn: SampleFn, ntrials: Int): AlphaMartRepeatedResult {
+    fun runAlphaMartFixedRepeated(eta0: Double, sampleFn: SampleFn, ntrials: Int): RunTestRepeatedResult {
         val N = sampleFn.N()
         val fixed = FixedEstimFn(eta0 = eta0)
         val alpha = AlphaMart(estimFn = fixed, N = N)
 
-        return runAlphaEstimRepeated(
+        return runTestRepeated(
             drawSample = sampleFn,
             maxSamples = N,
             terminateOnNullReject = true,
             ntrials = ntrials,
-            showDetail = false,
-            alphaMart = alpha,
-            eta0 = eta0,
+            testFn = alpha,
+            testParameters = mapOf("eta0" to eta0),
         )
     }
 }

@@ -25,7 +25,7 @@ import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import kotlin.test.Test
 
@@ -158,14 +158,14 @@ class CompareAuditType {
 
                  */
 
-                calculations = mutableListOf<Pair<AlphaMartRepeatedResult, AlphaMartRepeatedResult>>()
+                calculations = mutableListOf<Pair<RunTestRepeatedResult, RunTestRepeatedResult>>()
             }
         }
         writer.close()
         println("totalCalculations = $totalCalculations")
     }
 
-    fun calculate(task: AlphaMartTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): Pair<AlphaMartRepeatedResult, AlphaMartRepeatedResult> {
+    fun calculate(task: AlphaMartTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): Pair<RunTestRepeatedResult, RunTestRepeatedResult> {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val rr = runDiffAuditTypes(
             task.theta,
@@ -188,12 +188,12 @@ class CompareAuditType {
             channel.close()
         }
 
-    private var calculations = mutableListOf<Pair<AlphaMartRepeatedResult, AlphaMartRepeatedResult>>()
+    private var calculations = mutableListOf<Pair<RunTestRepeatedResult, RunTestRepeatedResult>>()
     private val mutex = Mutex()
 
     private fun CoroutineScope.launchCalculations(
         input: ReceiveChannel<AlphaMartTask>,
-        calculate: (AlphaMartTask) -> Pair<AlphaMartRepeatedResult, AlphaMartRepeatedResult>,
+        calculate: (AlphaMartTask) -> Pair<RunTestRepeatedResult, RunTestRepeatedResult>,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val calculation = calculate(task) // not inside the mutex!!
@@ -209,7 +209,7 @@ class CompareAuditType {
         nrepeat: Int,
         d: Int = 500,
         silent: Boolean = true,
-    ): Pair<AlphaMartRepeatedResult, AlphaMartRepeatedResult> {
+    ): Pair<RunTestRepeatedResult, RunTestRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
@@ -280,7 +280,7 @@ class CompareAuditType {
             val pollingAssertion = pollingAudit.assertions[contest]!!.first()
 
             for (eta in etas) {
-                val compareResult: AlphaMartRepeatedResult = runAlphaMartRepeated(
+                val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
                     maxSamples = N,
                     eta0 = eta,
@@ -288,7 +288,7 @@ class CompareAuditType {
                     ntrials = reps,
                     upperBound = compareAssertion.assorter.upperBound,
                 )
-                compareSrs.add(compareResult.makeSRT(N, theta, 0.0, d))
+                compareSrs.add(compareResult.makeSRT(N, theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
                     drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
@@ -299,7 +299,7 @@ class CompareAuditType {
                     withoutReplacement = true,
                     upperBound = pollingAssertion.assorter.upperBound()
                 )
-                pollingSrs.add(pollingResult.makeSRT(N, theta, 0.0, d))
+                pollingSrs.add(pollingResult.makeSRT(N, theta, 0.0))
             }
         }
 
@@ -307,14 +307,14 @@ class CompareAuditType {
         plotSRS(compareSrs, ctitle, true, colf = "%6.3f",
             colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.nsamples.toDouble() }
+            fld = { srt: SRT -> srt.nsamples }
         )
 
         val ptitle = " nsamples, ballot polling, N=$N, d = $d, error-free\n theta (col) vs eta0Factor (row)"
         plotSRS(pollingSrs, ptitle, true, colf = "%6.3f",
             colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.nsamples.toDouble() }
+            fld = { srt: SRT -> srt.nsamples }
         )
     }
     //  nsamples, ballot comparison, N=10000, d = 100, error-free

@@ -73,10 +73,8 @@ class ComparisonRunner {
             task.N,
             reportedMean = task.cvrMean,
             reportedMeanDiff = task.cvrMeanDiff,
-            d = task.d,
-            eta0Factor = task.eta0Factor,
         )
-        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${rr.eta0}, $sr")
+        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${sr.eta0}, $sr")
         if (showCalculationAll) println("${task.idx} (${calculations.size}): $rr")
         return sr
     }
@@ -85,7 +83,7 @@ class ComparisonRunner {
         task: ComparisonTask,
         nrepeat: Int,
         silent: Boolean = true
-    ): AlphaMartRepeatedResult {
+    ): RunTestRepeatedResult {
         if (!silent) println(" N=${task.N} theta=${task.theta} d=${task.d} cvrMeanDiff=${task.cvrMeanDiff}")
 
         val compareAssorter = makeStandardComparisonAssorter(task.cvrMean)
@@ -95,12 +93,12 @@ class ComparisonRunner {
         val compareResult = if (task.useAcc) {
             val trunc = TruncShrinkageAccelerated(N = task.N, upperBound = upperBound, d = task.d, eta0 = noerrors, accFactor=task.eta0Factor)
             val alpha = AlphaMart(estimFn = trunc, N = task.N, upperBound=upperBound)
-            runAlphaEstimRepeated(
+            runTestRepeated(
                 drawSample = sampleWithErrors,
                 maxSamples = task.N,
-                eta0 = noerrors,
+                testParameters = mapOf("eta0" to noerrors, "d" to task.d.toDouble(), "eta0Factor" to task.eta0Factor),
                 ntrials = nrepeat,
-                alphaMart=alpha,
+                testFn=alpha,
             )
         } else {
             runAlphaMartRepeated(

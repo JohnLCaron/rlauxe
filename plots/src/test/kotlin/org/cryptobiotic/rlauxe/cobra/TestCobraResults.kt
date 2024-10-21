@@ -11,9 +11,9 @@ import org.cryptobiotic.rlauxe.util.margin2theta
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.sim.runBettingMartRepeated
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.OracleComparison
+import org.cryptobiotic.rlauxe.sim.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.test.Test
@@ -49,11 +49,11 @@ class TestCobraResults {
                         noerror = compareAssorter.noerror, upperBound = upperBound
                     )
 
-                val result = runBettingMartRepeated(
+                val result = runTestRepeated(
                     drawSample = sampler,
                     maxSamples = N,
                     ntrials = ntrials,
-                    bettingMart = betting,
+                    testFn = betting,
                     testParameters = mapOf("alpha" to alpha, "margin" to margin)
                 )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
@@ -102,11 +102,11 @@ class TestCobraResults {
                 val betting =
                     BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
-                val result = runBettingMartRepeated(
+                val result = runTestRepeated(
                     drawSample = sampleWithErrors,
                     maxSamples = N,
                     ntrials = ntrials,
-                    bettingMart = betting,
+                    testFn = betting,
                     testParameters = mapOf("p2" to p2, "margin" to margin)
                 )
                 println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
@@ -166,11 +166,11 @@ class TestCobraResults {
                         val betting =
                             BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
-                        val result = runBettingMartRepeated(
+                        val result = runTestRepeated(
                             drawSample = sampleWithErrors,
                             maxSamples = N,
                             ntrials = ntrials,
-                            bettingMart = betting,
+                            testFn = betting,
                             testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin)
                         )
                         println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
@@ -248,11 +248,11 @@ class TestCobraResults {
                         val betting =
                             BettingMart(bettingFn = adaptive, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
-                        val result = runBettingMartRepeated(
+                        val result = runTestRepeated(
                             drawSample = sampler,
                             maxSamples = N,
                             ntrials = ntrials,
-                            bettingMart = betting,
+                            testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
                             showDetails = false,
                         )

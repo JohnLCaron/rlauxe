@@ -18,7 +18,6 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.theta2margin
 import org.cryptobiotic.rlauxe.core.eps
@@ -26,6 +25,7 @@ import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
 import kotlin.collections.set
 import kotlin.test.Test
 
@@ -573,10 +573,8 @@ class ComparisonWithErrors {
             task.N,
             reportedMean = task.cvrMean,
             reportedMeanDiff = cvrMeanDiff,
-            d = d,
-            eta0Factor = task.eta0Factor,
         )
-        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, ${rr.eta0}, $sr")
+        if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.cvrMean}, $sr")
         if (showCalculationAll) println("${task.idx} (${calculations.size}): $rr")
         return sr
     }
@@ -617,7 +615,8 @@ fun runComparisonWithMeanDiff(
     eta0Factor: Double,
     d: Int = 100,
     silent: Boolean = true
-): AlphaMartRepeatedResult {
+): RunTestRepeatedResult {
+
     val N = cvrs.size
     val theta = cvrMean + cvrMeanDiff // the true mean
     if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")

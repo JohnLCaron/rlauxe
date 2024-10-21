@@ -10,11 +10,11 @@ class Welford(
     var M2: Double = 0.0,    // M2 aggregates the squared distance from the mean
 ) {
     // Update with new value
-    fun update(new_value: Double) {
+    fun update(newValue: Double) {
         count++
-        val delta = new_value - mean
+        val delta = newValue - mean
         mean += delta / count
-        val delta2 = new_value - mean
+        val delta2 = newValue - mean
         M2 += delta * delta2
     }
 
@@ -22,8 +22,8 @@ class Welford(
     fun result() : Triple<Double, Double, Double> {
         if (count < 2) return Triple(mean, 0.0, 0.0)
         val variance = M2 / count
-        val sample_variance = M2 / (count - 1)
-        return Triple(mean, variance, sample_variance)
+        val sampleVariance = M2 / (count - 1)
+        return Triple(mean, variance, sampleVariance)
     }
 
     // current variance

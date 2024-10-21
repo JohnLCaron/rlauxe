@@ -19,7 +19,7 @@ interface Samples {
  * Its up to the method using this to make it "previous samples", by not adding the current sample to it until
  * the end of the iteration.
  */
-class PrevSamples() : Samples {
+class PrevSamples : Samples {
     private var last = 0.0
     private var sum = 0.0
     private val welford = Welford()
@@ -89,7 +89,7 @@ interface SampleFn { // TODO could be an Iterator
 class PollWithReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleFn {
     val N = cvrs.size
     val sampleMean = cvrs.map { assorter.assort(it) }.average()
-    val sampleCount = cvrs.map { assorter.assort(it) }.sum()
+    val sampleCount = cvrs.sumOf { assorter.assort(it) }
 
     override fun sample(): Double {
         val idx = Random.nextInt(N) // with Replacement
@@ -124,7 +124,7 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunctio
     }
 
     override fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
-    override fun sampleCount() = cvrs.map{ assorter.assort(it) }.sum()
+    override fun sampleCount() = cvrs.sumOf { assorter.assort(it) }
     override fun N() = N
 }
 
@@ -142,7 +142,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     init {
         reset()
         sampleMean = cvrs.map { cassorter.bassort(it, it)}.average()
-        sampleCount = cvrs.map { cassorter.bassort(it, it)}.sum()
+        sampleCount = cvrs.sumOf { cassorter.bassort(it, it) }
     }
 
     override fun sample(): Double {
@@ -176,7 +176,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
         reset()
 
         // we want to flip the exact number of votes, for reproducibility
-        val mmvrs: MutableList<Cvr> = mutableListOf<Cvr>()
+        val mmvrs = mutableListOf<Cvr>()
         mmvrs.addAll(cvrs)
         flippedVotes = flipExactVotes(mmvrs, mvrMean)
         mvrs = mmvrs.toList()
@@ -220,7 +220,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
         reset()
 
         // we want to flip the exact number of votes, for reproducibility
-        val mmvrs: MutableList<Cvr> = mutableListOf<Cvr>()
+        val mmvrs = mutableListOf<Cvr>()
         mmvrs.addAll(cvrs)
         flippedVotes2 = add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2).toInt())
         flippedVotes1 =  if (p1 == 0.0) 0 else {
@@ -258,13 +258,12 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
 }
 
 ///////////////////////
-private val debug = false
 
 // change cvrs to have the exact number of votes for wantAvg
 fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
     val ncards = cvrs.size
     val expectedAVotes = (ncards * wantAvg).toInt()
-    val actualAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    val actualAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     val needToChangeVotesFromA = actualAvotes - expectedAVotes
     return add2voteOverstatements(cvrs, needToChangeVotesFromA)
 }
@@ -273,7 +272,7 @@ fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
 // Note that we replace the Cvr in the list when we change it
 fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
     val ncards = cvrs.size
-    val startingAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0
     // we need more A votes, needToChangeVotesFromA < 0>
     if (needToChangeVotesFromA < 0) {
@@ -300,8 +299,8 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             }
         }
     }
-    val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
-    if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
+    val checkAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    // if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
     require(checkAvotes == startingAvotes - needToChangeVotesFromA)
     return changed
 }
@@ -309,7 +308,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
 // change cvrs to add the given number of one-vote overstatements.
 fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
     val ncards = cvrs.size
-    val startingAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
+    val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0
     while (changed < needToChangeVotesFromA) {
         val cvrIdx = Random.nextInt(ncards)
@@ -321,8 +320,8 @@ fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             changed++
         }
     }
-    val checkAvotes = cvrs.map {  it.hasMarkFor(0, 0)}.sum()
-    if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
+    val checkAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    // if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
     require(checkAvotes == startingAvotes - needToChangeVotesFromA)
     return changed
 }

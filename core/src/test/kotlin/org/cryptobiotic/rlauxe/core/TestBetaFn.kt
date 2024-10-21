@@ -16,7 +16,7 @@ class TestBetaFn {
         val mu = .5
 
         val eta =  (1.0 - upperBound * (1.0 - p2)) / (2.0 - 2.0 * upperBound) + upperBound * (1.0 - p2) - 0.5
-        val lam =  eta_to_lam(eta, mu, upperBound) // (eta / mu - 1) / (upper - mu)
+        val lam =  etaToLam(eta, mu, upperBound) // (eta / mu - 1) / (upper - mu)
 
         // so this equation only works if mu = .5
         val p0 = 1.0 - p2

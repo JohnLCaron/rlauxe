@@ -16,7 +16,6 @@ class BettingMart(
     val upperBound: Double = 1.0,  // aka u
 ): RiskTestingFn {
     private val showDetail = false
-    val welford = Welford()
 
     init {
         require(riskLimit > 0.0 && riskLimit < 1.0 )

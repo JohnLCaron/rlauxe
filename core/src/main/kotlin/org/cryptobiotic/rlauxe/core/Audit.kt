@@ -11,8 +11,8 @@ data class AuditPolling(
         contests.forEach {
             appendLine("  Contest=${it}")
             val cass = assertions[it]!!
-            cass.forEach {
-                appendLine("     ${it}")
+            cass.forEach { a ->
+                appendLine("     $a")
             }
         }
     }
@@ -66,8 +66,8 @@ data class AuditComparison(
         contests.forEach {
             appendLine("  Contest=${it}")
             val cass = assertions[it]!!
-            cass.forEach {
-                appendLine("     ${it}")
+            cass.forEach { a ->
+                appendLine("     $a")
             }
         }
     }

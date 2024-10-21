@@ -1,13 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math3.optim.MaxEval
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
-import org.apache.commons.math3.optim.univariate.BrentOptimizer;
-import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
-import org.apache.commons.math3.optim.univariate.SearchInterval;
-import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
+import org.apache.commons.math3.optim.univariate.BrentOptimizer
+import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
+import org.apache.commons.math3.optim.univariate.SearchInterval
+import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.math.max
@@ -75,7 +75,7 @@ class OracleComparison(
 
 // Cobra section 4.2 Adaptive betting
 // In a BSM, the bets need not be fixed and λi can be a predictable function of the
-// data X1 , . . . , Xi−1 . This allows us to estimate the rates based on past samples as
+// data X1, . . . , Xi−1 . This allows us to estimate the rates based on past samples as
 // well as a priori considerations. We adapt the “shrink-trunc” estimator of Stark [11] to rate estimation.
 //
 // The rates are allowed to learn from past data in the current audit through
@@ -153,7 +153,7 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     fun solve(): Double {
         val stopwatch = Stopwatch()
         // TODO why arent we giving it the derivitive ?
-        val function = UnivariateFunction { lam -> expected_value_logT(lam) }  // The function to be optimized
+        val function = UnivariateFunction { lam -> expectedValueLogt(lam) }  // The function to be optimized
 
         // BrentOptimizer: For a function defined on some interval (lo, hi),
         // this class finds an approximation x to the point at which the function attains its minimum.
@@ -187,7 +187,8 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
 
     // not really sure of this; its not really the ln of Ti
     // EF [ln(Ti) ] = p0 * ln[1 + λ(a − mu_i)] + p1 * ln[1 + λ(a/2 − mu_i)] + p2 * ln[1 − λ*mu_i)]  + p3 * ln[1 + λ(3*a/2 − mu_i)] + p4 * ln[1 + λ(2*a − mu_i)]
-    fun expected_value_logT(lam: Double): Double {
+    fun expectedValueLogt(lam: Double): Double {
+
         return ln(1.0 + lam * (a - mui)) * p0 +
                 ln(1.0 + lam * (a*0.5 - mui)) * p1 +
                 ln(1.0 - lam * mui) * p2 +

@@ -49,7 +49,7 @@ and to allow u to vary by draw.
         return mu * (1 + lam * (self.u - mu))
  */
 
-fun lam_to_eta(lam: Double, mu: Double, upper: Double): Double {
+fun lamToEta(lam: Double, mu: Double, upper: Double): Double {
     return mu * (1 + lam * (upper - mu))
 }
 
@@ -72,7 +72,7 @@ fun lam_to_eta(lam: Double, mu: Double, upper: Double): Double {
         """
         return (eta / mu - 1) / (self.u - mu)
  */
-fun eta_to_lam(eta: Double, mu: Double, upper: Double): Double {
+fun etaToLam(eta: Double, mu: Double, upper: Double): Double {
     return (eta / mu - 1) / (upper - mu)
 }
 
@@ -177,10 +177,6 @@ class AgrapaBet(
  * Translating to p2=1-p0 gives:
  *
  *   eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
- *
- * @param x an array of input data
- * @param rateError2 a float representing hypothesized rate of two-vote overstatements
- * @return eta, the estimated alternative mean to use in alpha
  */
 class OptimalComparisonNoP1(
     val N: Int,
@@ -204,7 +200,7 @@ class OptimalComparisonNoP1(
         val eta12 = eta1 / eta2
         val eta3 =  upperBound * (1.0 - p2) - 0.5
         val eta4 =  eta12 + eta3
-        val result =  eta_to_lam(eta4, mu, upperBound)
+        val result =  etaToLam(eta4, mu, upperBound)
         if (result <= 0.0) {
             println("hmmmm ${upperBound * (1.0 - p2)} should be > 1.0")
         }
@@ -229,7 +225,7 @@ class EstimAdapter(
         require (upperBound > mu)
         val eta = estimFn.eta(prevSamples)
         require (upperBound > eta)
-        return eta_to_lam(eta, mu, upperBound)
+        return etaToLam(eta, mu, upperBound)
     }
 
 }

@@ -4,7 +4,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
-val eps = 2.220446049250313e-16
+const val eps = 2.220446049250313e-16
 
 fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
     val sampleNum = prevSamples.numberOfSamples()

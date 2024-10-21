@@ -15,39 +15,19 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.TruncShrinkageAccelerated
-import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
-data class ComparisonTask(
-    val idx: Int,
-    val N: Int,
-    val cvrMean: Double,
-    val cvrMeanDiff: Double,
-    val eta0Factor: Double,
-    val d: Int, // parameter for shrinkTruncate
-    val cvrs: List<Cvr>,
-    val useAcc: Boolean = false,
-) {
-    val theta = cvrMean + cvrMeanDiff
-    init {
-        require( N == cvrs.size)
-    }
-}
-
-class ComparisonRunner {
+class AlphaComparisonRunner {
     private val showCalculation = false
     private val showCalculationAll = false
     private val mutex = Mutex()
     private val calculations = mutableListOf<SRT>()
 
     // run all the tasks concurrently
-    fun run(tasks: List<ComparisonTask>, ntrials: Int, nthreads: Int = 30): List<SRT> {
+    fun run(tasks: List<AlphaComparisonTask>, ntrials: Int, nthreads: Int = 30): List<SRT> {
         val stopwatch = Stopwatch()
         println("run ${tasks.size} comparison tasks with $nthreads threads and $ntrials trials")
         runBlocking {
@@ -67,7 +47,7 @@ class ComparisonRunner {
         return calculations
     }
 
-    fun calculate(task: ComparisonTask, ntrials: Int): SRT {
+    fun calculate(task: AlphaComparisonTask, ntrials: Int): SRT {
         val rr = runComparisonWithErrors(task, nrepeat = ntrials)
         val sr = rr.makeSRT(
             task.N,
@@ -80,7 +60,7 @@ class ComparisonRunner {
     }
 
     fun runComparisonWithErrors(
-        task: ComparisonTask,
+        task: AlphaComparisonTask,
         nrepeat: Int,
         silent: Boolean = true
     ): RunTestRepeatedResult {
@@ -90,18 +70,7 @@ class ComparisonRunner {
         val (_, noerrors, upperBound) = comparisonAssorterCalc(task.cvrMean, compareAssorter.upperBound)
         val sampleWithErrors = ComparisonWithErrors(task.cvrs, compareAssorter, task.theta)
 
-        val compareResult = if (task.useAcc) {
-            val trunc = TruncShrinkageAccelerated(N = task.N, upperBound = upperBound, d = task.d, eta0 = noerrors, accFactor=task.eta0Factor)
-            val alpha = AlphaMart(estimFn = trunc, N = task.N, upperBound=upperBound)
-            runTestRepeated(
-                drawSample = sampleWithErrors,
-                maxSamples = task.N,
-                testParameters = mapOf("eta0" to noerrors, "d" to task.d.toDouble(), "eta0Factor" to task.eta0Factor),
-                ntrials = nrepeat,
-                testFn=alpha,
-            )
-        } else {
-            runAlphaMartRepeated(
+        return runAlphaMartRepeated(
                 drawSample = sampleWithErrors,
                 maxSamples = task.N,
                 eta0 = task.eta0Factor * noerrors,
@@ -110,11 +79,9 @@ class ComparisonRunner {
                 withoutReplacement = true,
                 upperBound = upperBound
             )
-        }
-        return compareResult
     }
 
-    private fun CoroutineScope.produceTasks(producer: Iterable<ComparisonTask>): ReceiveChannel<ComparisonTask> =
+    private fun CoroutineScope.produceTasks(producer: Iterable<AlphaComparisonTask>): ReceiveChannel<AlphaComparisonTask> =
         produce {
             for (task in producer) {
                 send(task)
@@ -124,8 +91,8 @@ class ComparisonRunner {
         }
 
     private fun CoroutineScope.launchCalculations(
-        input: ReceiveChannel<ComparisonTask>,
-        calculate: (ComparisonTask) -> SRT?,
+        input: ReceiveChannel<AlphaComparisonTask>,
+        calculate: (AlphaComparisonTask) -> SRT?,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val calculation = calculate(task) // not inside the mutex!!

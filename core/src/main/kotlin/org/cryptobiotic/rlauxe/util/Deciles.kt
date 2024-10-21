@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 data class Deciles(val ntrials: Int, val hist: MutableMap<Int, Int>) {
-    val incr = 10
+    private val incr = 10
 
     constructor(ntrials: Int): this(ntrials, mutableMapOf())
 

@@ -15,28 +15,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AdaptiveComparison
-import org.cryptobiotic.rlauxe.core.BettingMart
-import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
-import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
-
-data class BettingTask(
-    val idx: Int,
-    val N: Int,
-    val cvrMean: Double,
-    val cvrs: List<Cvr>,
-    val d2: Int, // weight p2, p4
-    val p2oracle: Double, // oracle rate of 2-vote overstatements
-    val p2prior: Double, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-) {
-    // val theta = cvrMean + cvrMeanDiff
-    init {
-        require( N == cvrs.size)
-    }
-}
 
 class BettingRunner {
     private val showCalculation = false
@@ -89,24 +71,12 @@ class BettingRunner {
         val compareAssorter = makeStandardComparisonAssorter(task.cvrMean)
 
         val sampler = ComparisonWithErrorRates(task.cvrs, compareAssorter, p2 = task.p2oracle, withoutReplacement = true)
-        val upperBound = compareAssorter.upperBound
         if (!silent) println("runBettingMart: p2=${task.p2oracle} p2prior=${task.p2prior}")
 
-        //     val N: Int,
-        //    val withoutReplacement: Boolean = true,
-        //    val upperBound: Double,
-        //    val a: Double, // noerror
-        //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
-        //    val d2: Int, // weight p2, p4
-        //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-        //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-        //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-        //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
-        //    val eps: Double = .00001
         val adaptive = AdaptiveComparison(
             N = task.N,
             withoutReplacement = true,
-            upperBound = upperBound,
+            upperBound = compareAssorter.upperBound,
             a = compareAssorter.noerror,
             d1 = 0,
             d2 = task.d2,
@@ -116,7 +86,8 @@ class BettingRunner {
             p4 = 0.0,
         )
         val betting =
-            BettingMart(bettingFn = adaptive, N = task.N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = true)
+            BettingMart(bettingFn = adaptive, N = task.N, noerror=compareAssorter.noerror,
+                upperBound = compareAssorter.upperBound, withoutReplacement = true)
 
         return runTestRepeated(
             drawSample = sampler,

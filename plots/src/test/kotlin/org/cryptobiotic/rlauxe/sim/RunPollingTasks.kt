@@ -15,27 +15,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.FixedEstimFn
-import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
-
-data class PollingTask(
-    val idx: Int,
-    val N: Int,
-    val cvrMean: Double,
-    val cvrMeanDiff: Double,
-    val d: Int, // parameter for shrinkTruncate
-    val cvrs: List<Cvr>
-) {
-    val theta = cvrMean + cvrMeanDiff
-    init {
-        require(N == cvrs.size)
-    }
-}
 
 class PollingRunner(val useFixedEstimFn: Boolean = false) {
     private val showCalculation = false

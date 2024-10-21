@@ -157,7 +157,7 @@ class TestCorla {
 
         val writer = SRTcsvWriter("/home/stormy/temp/corla/plotCorla${ntrials}.csv")
 
-        val runner = CorlaRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

@@ -219,7 +219,7 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     fun derivativeFromRcode(lam: Double): Double {
         return  p0 * (a - mui) / (1.0 + lam * (a - mui)) +
                 p1 * (a*0.5 - mui) / (1.0 + lam * (a*0.5 - mui)) +
-                p2 * mui / (lam * mui - 1.0) +  // LOOK the R code has the sign wrong
+                p2 * mui / (lam * mui - 1.0) +
                 p3 * (a*1.5 - mui) / (1.0 + lam * (a*1.5 - mui)) +
                 p4 * (a*2.0 - mui) / (1.0 + lam * (a*2.0 - mui))
     }

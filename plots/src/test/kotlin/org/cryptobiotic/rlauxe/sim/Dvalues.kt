@@ -34,7 +34,7 @@ class Dvalues {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/pollingAlpha.csv")
 
-        val runner = PollingRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -58,14 +58,14 @@ class Dvalues {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 cvrMeanDiffs.forEach { cvrMeanDiff ->
                     val cvrMean = theta - cvrMeanDiff
-                    tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = 0, cvrs = cvrs))
+                    tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = 0, cvrs = cvrs, useFixedEstimFn = true))
                 }
             }
         }
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/pollingBravo.csv")
 
-        val runner = PollingRunner(useFixedEstimFn = true)
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -84,7 +84,7 @@ class Dvalues {
         val ns = listOf(5000, 10000, 20000)
         val ntrials = 100
 
-        val tasks = mutableListOf<ComparisonTask>()
+        val tasks = mutableListOf<AlphaComparisonTask>()
         var taskIdx = 0
         dlist.forEach { d ->
             thetas.forEach { theta ->
@@ -92,7 +92,7 @@ class Dvalues {
                     cvrMeanDiffs.forEach { cvrMeanDiff ->
                         val cvrMean = theta - cvrMeanDiff
                         val cvrs = makeCvrsByExactMean(N, cvrMean)
-                        tasks.add(ComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff, eta0Factor=1.9, d = d, cvrs = cvrs))
+                        tasks.add(AlphaComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff, eta0Factor=1.9, d = d, cvrs = cvrs))
                     }
                 }
             }
@@ -100,7 +100,7 @@ class Dvalues {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/comparisonAlpha9.csv")
 
-        val runner = ComparisonRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

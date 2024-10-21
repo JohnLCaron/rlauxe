@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.BettingRunner
 import org.cryptobiotic.rlauxe.sim.BettingTask
+import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.makeCvrsByMargin
@@ -53,7 +54,7 @@ class GenAdaptiveComparisonTable {
 
         val writer = SRTcsvWriter("/home/stormy/temp/bet/plotAdaptiveComparison0001.csv")
 
-        val runner = BettingRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -102,7 +103,7 @@ class GenAdaptiveComparisonTable {
 
         val writer = SRTcsvWriter("/home/stormy/temp/bet/plotAdaptiveComparison.csv")
 
-        val runner = BettingRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

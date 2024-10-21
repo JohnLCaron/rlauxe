@@ -33,7 +33,7 @@ class ComparisonChooseD {
         val N = 50000
         val ntrials = 10000
 
-        val tasks = mutableListOf<ComparisonTask>()
+        val tasks = mutableListOf<AlphaComparisonTask>()
         var taskIdx = 0
 
         cvrMeans.forEach { cvrMean ->
@@ -42,7 +42,7 @@ class ComparisonChooseD {
                 ds.forEach { d ->
                     fs.forEach { eta0Factor ->
                         tasks.add(
-                            ComparisonTask(
+                            AlphaComparisonTask(
                                 taskIdx++,
                                 N,
                                 cvrMean,
@@ -59,7 +59,7 @@ class ComparisonChooseD {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/testChooseDF.csv")
 
-        val runner = ComparisonRunner()
+        val runner = RepeatedTaskRunner()
         val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

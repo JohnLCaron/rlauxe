@@ -18,13 +18,13 @@ class Failures {
         val ntrials = 1000
         val eta0Factor = 1.99
 
-        val tasks = mutableListOf<ComparisonTask>()
+        val tasks = mutableListOf<AlphaComparisonTask>()
         var taskIdx = 0
         cvrMeans.forEach { cvrMean ->
             cvrMeanDiffs.forEach { cvrMeanDiff ->
                 val cvrs = makeCvrsByExactMean(N, cvrMean)
                 tasks.add(
-                    ComparisonTask(
+                    AlphaComparisonTask(
                         taskIdx++,
                         N,
                         cvrMean,
@@ -39,7 +39,7 @@ class Failures {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/failures/comparison99.csv")
 
-        val runner = ComparisonRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -57,13 +57,13 @@ class Failures {
         val ntrials = 1000
         val eta0Factor = 1.99
 
-        val tasks = mutableListOf<ComparisonTask>()
+        val tasks = mutableListOf<AlphaComparisonTask>()
         var taskIdx = 0
         cvrMeans.forEach { cvrMean ->
             cvrMeanDiffs.forEach { cvrMeanDiff ->
                 val cvrs = makeCvrsByMargin(N, theta2margin(cvrMean))
                 tasks.add(
-                    ComparisonTask(
+                    AlphaComparisonTask(
                         taskIdx++,
                         N,
                         cvrMean,
@@ -78,7 +78,7 @@ class Failures {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/failures/comparison99.csv")
 
-        val runner = ComparisonRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

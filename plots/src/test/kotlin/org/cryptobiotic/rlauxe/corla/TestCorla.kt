@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.sim.*
 import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Test
 
-class TestCorlaa {
+class TestCorla {
 
     @Test
     fun testOne() {
@@ -30,11 +30,11 @@ class TestCorlaa {
         val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
             p1 = p1, p2 = p2, p3 = 0.0, p4 = 0.0)
 
-        val corlaResult = runCorlaRepeated(
+        val corlaResult = runTestRepeated(
             drawSample = sampler,
             maxSamples = N,
             ntrials = ntrials,
-            corla = corla,
+            testFn = corla,
             testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin),
             showDetails = false,
         )
@@ -89,11 +89,11 @@ class TestCorlaa {
                         val betting =
                             BettingMart(bettingFn = adaptive, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
-                        val bettingResult = runBettingMartRepeated(
+                        val bettingResult = runTestRepeated(
                             drawSample = sampler,
                             maxSamples = N,
                             ntrials = ntrials,
-                            bettingMart = betting,
+                            testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
                             showDetails = false,
                         )
@@ -102,11 +102,11 @@ class TestCorlaa {
                         val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
                             p1 = p1prior, p2 = p2prior, p3 = 0.0, p4 = 0.0) // not using the priors
 
-                        val corlaResult = runCorlaRepeated(
+                        val corlaResult = runTestRepeated(
                             drawSample = sampler,
                             maxSamples = N,
                             ntrials = ntrials,
-                            corla = corla,
+                            testFn = corla,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
                             showDetails = false,
                         )

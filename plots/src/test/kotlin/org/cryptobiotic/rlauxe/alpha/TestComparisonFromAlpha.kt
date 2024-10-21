@@ -11,11 +11,11 @@ import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.sim.runAlphaEstimRepeated
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sim.runTestRepeated
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -151,17 +151,15 @@ class TestComparisonFromAlpha {
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
 
                         print("  eta0=$eta0 d=$d")
-                        val result =  runAlphaEstimRepeated(
+                        val result =  runTestRepeated(
                             drawSample = sampleFn,
                             maxSamples = N,
-                            terminateOnNullReject = true,
                             ntrials = reps,
-                            showDetail = false,
-                            alphaMart = alpha,
-                            eta0 = eta0,
+                            testFn = alpha,
+                            testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
-                        al.add(result.makeSRT(N, theta, 0.0, d))
+                        al.add(result.makeSRT(N, theta, 0.0))
                     }
                 }
             }
@@ -310,7 +308,6 @@ class TestComparisonFromAlpha {
         //assorter_margin = 2*assorter_mean - 1
         val theta = 0.51
         val N = 1000
-        val u_b = 1
         val assorter_mean = (9000*theta + 1000*.5)/N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
         val assorter_margin = 2*assorter_mean - 1
 
@@ -358,7 +355,7 @@ class TestComparisonFromAlpha {
         val srs = mutableListOf<SRT>()
         for (eta in etal) {
             for (d in dl) {
-                val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
+                val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = SampleFromArrayWithoutReplacement(x),
                     maxSamples = N,
                     eta0 = eta,
@@ -366,7 +363,7 @@ class TestComparisonFromAlpha {
                     ntrials = reps,
                     upperBound = u,
                 )
-                srs.add(mart.makeSRT(N, reportedMean=theta, reportedMeanDiff=0.0, eta0Factor=eta, d=d))
+                srs.add(mart.makeSRT(N, reportedMean=theta, reportedMeanDiff=0.0))
             }
         }
 
@@ -499,7 +496,7 @@ class TestComparisonFromAlpha {
             // println("theta = $theta upperBound = ${compareAssorter.upperBound()}")
 
             for (eta in etas) {
-                val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
+                val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
                     maxSamples = N,
                     eta0 = eta,
@@ -507,16 +504,16 @@ class TestComparisonFromAlpha {
                     ntrials = reps,
                     upperBound = compareAssorter.upperBound(),
                 )
-                srs.add(mart.makeSRT(N, theta, 0.0, d))
+                srs.add(mart.makeSRT(N, theta, 0.0))
             }
         }
 
         println("TestComparisonFromAlpha.comparisonReplication ntrials=$reps")
         val title = " nsamples, ballot comparison, N=$N, d-$d, error-free\n theta (col) vs eta0 (row)"
         plotSRS(srs, title, true, colf="%6.3f", rowf="%6.1f",
-            colFld = { srt: SRT -> srt.reportedMean.toDouble() },
+            colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.eta0 },
-            fld = { srt: SRT -> srt.nsamples.toDouble() }
+            fld = { srt: SRT -> srt.nsamples }
         )
 
         // TestComparisonFromAlpha.comparisonReplication ntrials=1000
@@ -566,7 +563,7 @@ class TestComparisonFromAlpha {
                 val same = doubleIsClose(etaActual, etaExpect)
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
 
-                val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
+                val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = drawSample,
                     maxSamples = N,
                     eta0 = compareUpper - eps,
@@ -574,7 +571,7 @@ class TestComparisonFromAlpha {
                     ntrials = ntrials,
                     upperBound = compareUpper,
                 )
-                srs.add(mart.makeSRT(N, theta, 0.0, d))
+                srs.add(mart.makeSRT(N, theta, 0.0))
             }
         }
 
@@ -654,7 +651,7 @@ class TestComparisonFromAlpha {
             val eta0 = factor / (2 - margin)
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
 
-            val mart: AlphaMartRepeatedResult = runAlphaMartRepeated(
+            val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                 drawSample = drawSample,
                 maxSamples = N,
                 eta0 = eta0,
@@ -662,7 +659,7 @@ class TestComparisonFromAlpha {
                 ntrials = ntrials,
                 upperBound = compareAssertion.assorter.upperBound,
             )
-            srs.add(mart.makeSRT(N, theta, 0.0, d))
+            srs.add(mart.makeSRT(N, theta, 0.0))
 
             val title = " nsamples, ballot comparison, eta0=eta0, d = $d, error-free\n theta (col) vs N (row)"
             plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",

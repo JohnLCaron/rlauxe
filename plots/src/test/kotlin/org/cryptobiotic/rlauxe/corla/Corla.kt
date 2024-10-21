@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
-import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.core.*
 import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -12,10 +8,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
-    val p1: Double, val p2: Double, val p3: Double, val p4: Double) {
+    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn {
     val gamma = 1.03
 
-    fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean = false, drawSample : () -> Double) : TestH0Result {
+    override fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean, drawSample : () -> Double) : TestH0Result {
         require(maxSample <= N)
 
         var sampleNumber = 0        // – j ← 0: sample number

@@ -387,8 +387,8 @@ class CompareAuditTypeWithErrors {
         )
         // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
         return Pair(
-            pollingResult.makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor),
-            compareResult.makeSRT(N, cvrMean, cvrMeanDiff, d, eta0Factor)
+            pollingResult.makeSRT(N, cvrMean, cvrMeanDiff),
+            compareResult.makeSRT(N, cvrMean, cvrMeanDiff)
         )
     }
 }

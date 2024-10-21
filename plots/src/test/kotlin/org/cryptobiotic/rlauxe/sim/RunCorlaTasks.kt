@@ -81,7 +81,7 @@ class CorlaRunner {
         task: CorlaTask,
         ntrials: Int,
         silent: Boolean = false
-    ): BettingMartRepeatedResult {
+    ): RunTestRepeatedResult {
         if (!silent) println(" task=${task.idx}")
 
         // generate with the oracle, or true rates
@@ -94,11 +94,11 @@ class CorlaRunner {
         val corla = Corla(N = task.N, riskLimit=task.riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
             p1 = task.p1, p2 = task.p2, p3 = 0.0, p4 = 0.0)
 
-        return runCorlaRepeated(
+        return runTestRepeated(
             drawSample = sampler,
             maxSamples = task.N,
             ntrials = ntrials,
-            corla = corla,
+            testFn = corla,
             testParameters = mapOf("p1" to task.p1, "p2oracle" to task.p2),
             showDetails = false,
         )

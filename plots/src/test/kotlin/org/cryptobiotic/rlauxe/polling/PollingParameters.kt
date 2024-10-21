@@ -1,8 +1,10 @@
-package org.cryptobiotic.rlauxe.sim
+package org.cryptobiotic.rlauxe.polling
 
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.junit.jupiter.api.Test
+import org.cryptobiotic.rlauxe.sim.PollingRunner
+import org.cryptobiotic.rlauxe.sim.PollingTask
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import kotlin.test.Test
 
 // explore comparison parameters
 class PollingParameters {

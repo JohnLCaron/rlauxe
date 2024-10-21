@@ -82,7 +82,7 @@ class BettingRunner {
         task: BettingTask,
         ntrials: Int,
         silent: Boolean = false
-    ): BettingMartRepeatedResult {
+    ): RunTestRepeatedResult {
         if (!silent) println(" task=${task.idx}")
 
         // generate with the oracle, or true rates
@@ -118,11 +118,11 @@ class BettingRunner {
         val betting =
             BettingMart(bettingFn = adaptive, N = task.N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = true)
 
-        return runBettingMartRepeated(
+        return runTestRepeated(
             drawSample = sampler,
             maxSamples = task.N,
             ntrials = ntrials,
-            bettingMart = betting,
+            testFn = betting,
             testParameters = mapOf("p2oracle" to task.p2oracle, "p2prior" to task.p2prior, "d2" to task.d2.toDouble()),
             showDetails = false,
         )

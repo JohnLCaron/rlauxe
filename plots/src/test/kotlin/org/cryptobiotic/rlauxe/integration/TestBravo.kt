@@ -1,17 +1,13 @@
 package org.cryptobiotic.rlauxe.integration
 
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.EstimFn
-import org.cryptobiotic.rlauxe.core.SampleFn
-import org.cryptobiotic.rlauxe.core.SampleFromArrayWithReplacement
-import org.cryptobiotic.rlauxe.core.Samples
-import org.cryptobiotic.rlauxe.core.Welford
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
-import org.cryptobiotic.rlauxe.sim.AlphaMartRepeatedResult
+import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sim.runTestRepeated
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -24,7 +20,7 @@ class TestBravo  {
     fun testBravo() {
         val N = 20_000
         val m = 100
-        runBravo(N, m, .55, .55, withoutReplacement = true)
+        runBravoRepeat(eta0 = .55, trueMeans=listOf(.55), ntrials=1)
     }
 
     @Test
@@ -54,55 +50,46 @@ class TestBravo  {
         plotNTsamplesPct(results, "BravoWithout")
     }
 
-    fun runBravoRepeat(eta0: Double, trueMeans: List<Double>, withoutReplacement: Boolean ): List<SRT> {
+    //     fun runBravo(N : Int, m: Int, eta0 : Double, trueMean: Double, withoutReplacement: Boolean, ntrials:Int = 1): RunTestRepeatedResult {
+    fun runBravoRepeat(eta0: Double, trueMeans: List<Double>, withoutReplacement: Boolean = true, ntrials: Int = 100 ): List<SRT> {
         val N = 20_000
         val m = 2000
-        val nrepeat = 100
         val results = mutableListOf<SRT>()
-        trueMeans.forEach {
-            val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
-            // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult
-            results.add(rr.makeSRT(N, eta0, 0.0, d=0, eta0Factor=1.0))
+        trueMeans.forEach { trueMean ->
+            val estimFn = FixedMean(eta0)
+            val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement)
+            val sampler = if (withoutReplacement) SampleMeanWithoutReplacement(N, trueMean) else SampleMeanWithReplacement(N, trueMean)
+
+            val rr = runTestRepeated(
+                drawSample = sampler,
+                maxSamples = m,
+                testParameters = mapOf("eta0" to eta0),
+                ntrials = ntrials,
+                testFn=alpha,
+            )
+
+            //val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
+            // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult
+            results.add(rr.makeSRT(N, eta0, 0.0))
         }
         return results
     }
 
-    fun runBravo(N : Int, m: Int, eta0 : Double, trueMean: Double, withoutReplacement: Boolean, ntrials:Int = 1): AlphaMartRepeatedResult {
-        //println("runBravo N=$N eta0=$eta0 trueMean=$trueMean repeat=$nrepeat")
-        val estimFn = FixedMean(eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement)
-        val sampler = GenerateAssorterValue(trueMean)
-
-        val welford = Welford()
-        var totalSamples = 0
-        var fail = 0
-        var nsuccess = 0
-        repeat(ntrials) {
-            val testH0Result = alpha.testH0(m, true) { sampler.sample() }
-            if (testH0Result.status.fail) {
-                fail++
-            } else {
-                nsuccess++
-                welford.update(testH0Result.sampleCount.toDouble())
-                totalSamples += testH0Result.sampleCount
-            }
-        }
-        return AlphaMartRepeatedResult(eta0 = eta0, N = N, totalSamples, nsuccess, ntrials, welford.result().second)
-    }
-
-
-    @Test
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    /*
     fun testWithSampleMean() {
-        val randomMeans = listOf(.505, .51, .52, .53, .55, .60)
+        val sampleMeans = listOf(.505, .51, .52, .53, .55, .60)
         val N = 20_000
         val m = 4000
         val nrepeat = 100
 
-        randomMeans.forEach { ratio ->
-            val sampler = SampleFromArrayWithReplacement(N, ratio)
-            val result = runBravo(sampler, m, ratio, nrepeat, false)
-            val voteDiff = N * (result.eta0 - ratio)
-            println(" testWithSampleMean ratio=${"%5.4f".format(ratio)} "+
+        sampleMeans.forEach { mean ->
+            val result = runBravoRepeat(eta0 = 0.0, trueMeans = sampleMeans, withoutReplacement = false, ntrials = nrepeat )
+
+                val sampler = SampleMeanWithReplacement(N, mean)
+            val result = runBravo(sampler, m, mean, nrepeat, false)
+            val voteDiff = N * (result.eta0 - mean)
+            println(" testWithSampleMean ratio=${"%5.4f".format(mean)} "+
                     "eta0=${"%5.4f".format(result.eta0)} " +
                     "voteDiff=${"%4d".format(voteDiff.toInt())} " +
                     "sampleCount=${df.format(result.avgSamplesNeeded())} " +
@@ -114,9 +101,9 @@ class TestBravo  {
         }
     }
 
-    // in this scenario, the ration that the sample was generated by is the "true mean", and the generated samples reflect errors.
+    // in this scenario, the ratio that the sample was generated by is the "true mean", and the generated samples reflect errors.
     // the diff between the two must have some spread, eg normal dist ??
-    fun runBravo(drawSample : SampleFn, m: Int, trueMean: Double, ntrials:Int = 1, withoutReplacement: Boolean = true): AlphaMartRepeatedResult {
+    fun runBravo(drawSample : SampleFn, m: Int, trueMean: Double, ntrials:Int = 1, withoutReplacement: Boolean = true): RunTestRepeatedResult {
         var totalSamples = 0
         var sampleMeanSum = 0.0
         var fail = 0
@@ -148,7 +135,7 @@ class TestBravo  {
             }
         }
 
-        return AlphaMartRepeatedResult(
+        return RunTestRepeatedResult(
             eta0 = eta0,
             N = N,
             totalSamples,
@@ -158,6 +145,8 @@ class TestBravo  {
             percentHist = hist
         )
     }
+
+     */
 
 }
 
@@ -181,12 +170,5 @@ class TestBravo  {
 class FixedMean(val eta0: Double): EstimFn {
     override fun eta(prevSamples: Samples): Double {
         return eta0
-    }
-}
-
-class GenerateAssorterValue(val ratio: Double) {
-    fun sample() : Double {
-        val r = Random.nextDouble(1.0)
-        return if (r < ratio) 1.0 else 0.0
     }
 }

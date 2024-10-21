@@ -15,7 +15,7 @@ class AlphaMart(
     val withoutReplacement: Boolean = true,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
-) {
+): RiskTestingFn {
     private val showDetail = false
 
     init {
@@ -24,7 +24,7 @@ class AlphaMart(
     }
 
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
-    fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean = false, drawSample : () -> Double) : TestH0Result {
+    override fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean, drawSample : () -> Double) : TestH0Result {
         require(maxSample <= N)
 
         var sampleNumber = 0        // – j ← 0: sample number

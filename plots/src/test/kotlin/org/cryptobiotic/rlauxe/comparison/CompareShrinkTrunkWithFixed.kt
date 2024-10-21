@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.FixedEstimFn

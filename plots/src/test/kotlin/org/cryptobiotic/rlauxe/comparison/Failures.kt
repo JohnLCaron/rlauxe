@@ -1,7 +1,9 @@
-package org.cryptobiotic.rlauxe.sim
+package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
+import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByMargin
 import org.cryptobiotic.rlauxe.util.theta2margin
 import org.junit.jupiter.api.Test

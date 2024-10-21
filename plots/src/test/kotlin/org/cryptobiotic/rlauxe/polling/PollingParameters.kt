@@ -18,7 +18,7 @@ class PollingParameters {
         val dlist = listOf(10, 50, 250, 1250)
 
         val ns = listOf(5000, 10000, 20000)
-        val ntrials = 10000
+        val ntrials = 1000
 
         val tasks = mutableListOf<PollingTask>()
         var taskIdx = 0
@@ -51,7 +51,7 @@ class PollingParameters {
         val cvrMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
 
         val ns = listOf(5000, 10000, 20000)
-        val ntrials = 10000
+        val ntrials = 1000
 
         val tasks = mutableListOf<PollingTask>()
         var taskIdx = 0

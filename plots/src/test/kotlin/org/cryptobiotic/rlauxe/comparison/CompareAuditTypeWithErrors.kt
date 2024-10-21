@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.comparison
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -130,7 +130,7 @@ class CompareAuditTypeWithErrors {
         }
 
         val nthreads = 30
-        val ntrials = 10000
+        val ntrials = 1000
         val d = 1000
 
         // val reportedMeanDiffs = listOf(0.005, 0.01, 0.02, 0.05, 0.1, 0.2)   // % greater than actual mean

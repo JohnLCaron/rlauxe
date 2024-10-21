@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.comparison
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

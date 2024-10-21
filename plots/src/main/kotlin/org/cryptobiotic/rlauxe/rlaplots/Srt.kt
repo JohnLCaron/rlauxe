@@ -8,7 +8,6 @@ import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
 // data class for capturing results from repeated audit trials.
-// Should be in test, put it here to share with plots module.
 data class SRT(val N: Int,
                val reportedMean: Double,
                val reportedMeanDiff: Double,

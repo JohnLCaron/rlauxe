@@ -57,3 +57,43 @@ data class AlphaComparisonTask(
     override fun reportedMean() = cvrMean
     override fun reportedMeanDiff() = cvrMeanDiff
 }
+
+// run AlphaMart with TrunkShrinkage in repeated trials
+// this creates the riskTestingFn for you
+fun runAlphaMartRepeated(
+    drawSample: SampleFn,
+    maxSamples: Int,
+    eta0: Double,
+    d: Int = 500,
+    f: Double = 0.0,
+    withoutReplacement: Boolean = true,
+    ntrials: Int = 1,
+    upperBound: Double = 1.0,
+    showDetails: Boolean = false,
+    estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
+): RunTestRepeatedResult {
+
+    val N = drawSample.N()
+    val t = 0.5
+    val minsd = 1.0e-6
+    val c = max(eps, ((eta0 - t) / 2))
+
+    val useEstimFn = estimFn ?: TruncShrinkage(N, true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+
+    val alpha = AlphaMart(
+        estimFn = useEstimFn,
+        N = N,
+        upperBound = upperBound,
+        withoutReplacement = withoutReplacement,
+    )
+
+    return runTestRepeated(
+        drawSample = drawSample,
+        maxSamples = maxSamples,
+        terminateOnNullReject = true,
+        ntrials = ntrials,
+        testFn = alpha,
+        testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
+        showDetails = showDetails,
+    )
+}

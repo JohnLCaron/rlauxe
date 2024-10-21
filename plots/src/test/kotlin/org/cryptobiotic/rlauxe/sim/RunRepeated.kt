@@ -4,49 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.rlaplots.SRT
-import kotlin.math.max
 import kotlin.math.sqrt
-
-// run AlphaMart with TrunkShrinkage in repeated trials
-fun runAlphaMartRepeated(
-    drawSample: SampleFn,
-    maxSamples: Int,
-    eta0: Double,
-    d: Int = 500,
-    f: Double = 0.0,
-    withoutReplacement: Boolean = true,
-    ntrials: Int = 1,
-    upperBound: Double = 1.0,
-    showDetails: Boolean = false,
-    estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
-): RunTestRepeatedResult {
-
-    val N = drawSample.N()
-    val t = 0.5
-    val minsd = 1.0e-6
-    val c = max(eps, ((eta0 - t) / 2))
-
-    // class TruncShrinkage(val N: Int, val u: Double, val t: Double, val minsd : Double, val d: Int, val eta0: Double,
-    //                     val f: Double, val c: Double, val eps: Double): EstimFn {
-    val useEstimFn = estimFn ?: TruncShrinkage(N, true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
-
-    val alpha = AlphaMart(
-        estimFn = useEstimFn,
-        N = N,
-        upperBound = upperBound,
-        withoutReplacement = withoutReplacement,
-    )
-
-    return runTestRepeated(
-        drawSample = drawSample,
-        maxSamples = maxSamples,
-        terminateOnNullReject = true,
-        ntrials = ntrials,
-        testFn = alpha,
-        testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
-        showDetails = showDetails,
-        )
-}
 
 data class RunTestRepeatedResult(
                val testParameters: Map<String, Double>, // various parameters, depends on the test

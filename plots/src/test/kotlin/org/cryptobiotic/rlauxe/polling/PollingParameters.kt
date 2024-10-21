@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.polling
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.PollingRunner
 import org.cryptobiotic.rlauxe.sim.PollingTask
+import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import kotlin.test.Test
 
@@ -17,7 +18,7 @@ class PollingParameters {
         val dlist = listOf(10, 50, 250, 1250)
 
         val ns = listOf(5000, 10000, 20000)
-        val ntrials = 10000
+        val ntrials = 1000
 
         val tasks = mutableListOf<PollingTask>()
         var taskIdx = 0
@@ -35,7 +36,7 @@ class PollingParameters {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/pollingAlpha.csv")
 
-        val runner = PollingRunner()
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -50,7 +51,7 @@ class PollingParameters {
         val cvrMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
 
         val ns = listOf(5000, 10000, 20000)
-        val ntrials = 10000
+        val ntrials = 1000
 
         val tasks = mutableListOf<PollingTask>()
         var taskIdx = 0
@@ -59,14 +60,14 @@ class PollingParameters {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 cvrMeanDiffs.forEach { cvrMeanDiff ->
                     val cvrMean = theta - cvrMeanDiff
-                    tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = 0, cvrs = cvrs))
+                    tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = 0, cvrs = cvrs, useFixedEstimFn = true))
                 }
             }
         }
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/pollingBravo.csv")
 
-        val runner = PollingRunner(useFixedEstimFn = true)
+        val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

@@ -42,10 +42,6 @@ data class Assertion(
 /////////////////////////////////////////////////////////////////////////////////
 
 
-interface ComparisonAssorterFunction {
-    fun bassort(mvr: Cvr, cvr: Cvr) : Double
-}
-
 fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
     val margin = 2.0 * assortAvgValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assortUpperBound)  // assort value when there's no error
@@ -59,7 +55,7 @@ data class ComparisonAssorter(
     val assorter: AssorterFunction,   // A
     val avgCvrAssortValue: Double, // Ā(c) = average CVR assort value
     val check: Boolean = true,
-): ComparisonAssorterFunction {
+) {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
@@ -74,7 +70,7 @@ data class ComparisonAssorter(
     }
 
     // B(bi, ci)
-    override fun bassort(mvr: Cvr, cvr:Cvr): Double {
+    fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
         //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).

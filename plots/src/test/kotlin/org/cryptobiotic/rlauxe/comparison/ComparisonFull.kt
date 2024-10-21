@@ -1,10 +1,12 @@
-package org.cryptobiotic.rlauxe.sim
+package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
+import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.junit.jupiter.api.Test
 import kotlin.collections.forEach
 import kotlin.math.max
@@ -26,20 +28,20 @@ class ComparisonFull {
         val d = 10000
         val ntrials = 10000
 
-        val tasks = mutableListOf<ComparisonTask>()
+        val tasks = mutableListOf<AlphaComparisonTask>()
         var taskIdx = 0
         eta0Factors.forEach { eta0Factor ->
             cvrMeans.forEach { cvrMean ->
                 val cvrs = makeCvrsByExactMean(N, cvrMean)
                 cvrMeanDiffs.forEach { cvrMeanDiff ->
-                    tasks.add(ComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff, eta0Factor, d = d, cvrs = cvrs))
+                    tasks.add(AlphaComparisonTask(taskIdx++, N, cvrMean, cvrMeanDiff, eta0Factor, d = d, cvrs = cvrs))
                 }
             }
         }
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/cvrComparisonND.csv")
 
-        val runner = ComparisonRunner()
+        val runner = RepeatedTaskRunner()
         val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -58,7 +60,7 @@ class ComparisonFull {
 
         val ntrials = 10000
 
-        val tasks = mutableListOf<ComparisonTask>()
+        val tasks = mutableListOf<AlphaComparisonTask>()
         var taskIdx = 0
         ns.forEach { N ->
             cvrMeans.forEach { cvrMean ->
@@ -67,7 +69,7 @@ class ComparisonFull {
                     eta0Factors.forEach { eta0Factor ->
                         ds.forEach { d ->
                             tasks.add(
-                                ComparisonTask(
+                                AlphaComparisonTask(
                                     taskIdx++,
                                     N,
                                     cvrMean,
@@ -85,7 +87,7 @@ class ComparisonFull {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/full/comparisonFull.csv")
 
-        val runner = ComparisonRunner()
+        val runner = RepeatedTaskRunner()
         val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

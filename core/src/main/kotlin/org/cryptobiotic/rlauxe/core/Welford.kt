@@ -26,7 +26,7 @@ class Welford(
         return Triple(mean, variance, sample_variance)
     }
 
-    // current stddev
+    // current variance
     fun variance() = if (count == 0) 0.0 else M2 / count
 
     override fun toString(): String {

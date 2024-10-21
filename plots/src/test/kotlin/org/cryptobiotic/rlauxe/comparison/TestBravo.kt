@@ -1,14 +1,11 @@
-package org.cryptobiotic.rlauxe.integration
+package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
-import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runTestRepeated
-import kotlin.random.Random
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)

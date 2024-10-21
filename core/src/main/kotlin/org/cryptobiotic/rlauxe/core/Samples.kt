@@ -399,6 +399,7 @@ class SampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleFn {
     }
     override fun reset() {
         samples = generateSampleWithMean(N, ratio)
+        index = 0
     }
     override fun sampleMean() = samples.average()
     override fun sampleCount() = samples.sum()

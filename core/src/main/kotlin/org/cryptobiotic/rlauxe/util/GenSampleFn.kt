@@ -93,8 +93,9 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
 }
 
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
-// to make mvrs have mvrMean. TODO withReplacement only?
-data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double):
+// to make mvrs have mvrMean.
+data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
+                                val withoutReplacement: Boolean = true):
     GenSampleFn {
     val N = cvrs.size
     val mvrs : List<Cvr>
@@ -118,10 +119,18 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
     }
 
     override fun sample(): Double {
-        val cvr = cvrs[permutedIndex[idx]]
-        val mvr = mvrs[permutedIndex[idx]]
-        idx++
-        return cassorter.bassort(mvr, cvr)
+        val assortVal = if (withoutReplacement) {
+            val cvr = cvrs[permutedIndex[idx]]
+            val mvr = mvrs[permutedIndex[idx]]
+            idx++
+            cassorter.bassort(mvr, cvr)
+        } else {
+            val chooseIdx = Random.nextInt(N) // with Replacement
+            val cvr = cvrs[chooseIdx]
+            val mvr = mvrs[chooseIdx]
+            cassorter.bassort(mvr, cvr)
+        }
+        return assortVal
     }
 
     override fun reset() {
@@ -366,7 +375,7 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): GenSamp
 ///////////////////////////////////////////////////////////////
 
 // generate Bernoulli with probability p.
-// TODO where dis I get this? numpy?
+// TODO where did I get this? numpy?
 class Bernoulli(p: Double) {
     val log_q = ln(1.0 - p)
     val n = 1.0

@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.util.GenSampleFn
 import kotlin.math.sqrt
 
 data class RunTestRepeatedResult(
@@ -38,7 +39,7 @@ data class RunTestRepeatedResult(
 }
 
 fun runTestRepeated(
-    drawSample: SampleFn,
+    drawSample: GenSampleFn,
     maxSamples: Int,
     ntrials: Int,
     testFn: RiskTestingFn,

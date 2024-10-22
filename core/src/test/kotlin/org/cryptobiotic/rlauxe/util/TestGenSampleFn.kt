@@ -1,18 +1,14 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.util.cardsPerContest
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.margin2theta
-import org.cryptobiotic.rlauxe.util.tabulateVotes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestSamples {
+class TestGenSampleFn {
 
     @Test
     fun testSampleMeans() {
@@ -130,7 +126,7 @@ class TestSamples {
         }
     }
 
-    fun testLimits(sampler: SampleFn, nsamples: Int, upper: Double) {
+    fun testLimits(sampler: GenSampleFn, nsamples: Int, upper: Double) {
         repeat(nsamples) {
             val ss = sampler.sample()
             assertTrue(ss >= 0)
@@ -138,7 +134,7 @@ class TestSamples {
         }
     }
 
-    fun countAssortValues(sampler: SampleFn, nsamples: Int, assortValue: Double): Int {
+    fun countAssortValues(sampler: GenSampleFn, nsamples: Int, assortValue: Double): Int {
         sampler.reset()
         var count = 0
         repeat(nsamples) {

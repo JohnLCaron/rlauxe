@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.Bernoulli
+import org.cryptobiotic.rlauxe.util.Bernoulli
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.TruncShrinkage

@@ -30,5 +30,4 @@ interface RiskTestingFn {
         showDetails: Boolean = false,
         drawSample: () -> Double,
     ): TestH0Result
-
 }

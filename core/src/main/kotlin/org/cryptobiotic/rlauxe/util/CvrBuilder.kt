@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.flipExactVotes
 import kotlin.random.Random
 
 // for testing, add here to share between modules
@@ -63,7 +62,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// old, deprecated TODO get rid of
+// old, deprecated TODO get rid of?
 
 fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
     val r = mutableMapOf<Int, MutableMap<Int, Int>>()
@@ -200,26 +199,6 @@ class ContestBuilder(
     }
 
     fun done() = builder.done()
-}
-
-data class ContestVotes(val contestId: Int, val votes: List<Vote>) {
-    constructor(contestIdx: Int) : this(contestIdx, emptyList())
-    constructor(contestIdx: Int, candidateIdx: Int) : this(contestIdx, listOf(Vote(candidateIdx, 1)))
-    constructor(contestIdx: Int, candidateIdx: Int, vote: Int) : this(contestIdx, listOf(Vote(candidateIdx, vote)))
-    constructor(contestIdx: Int, candidateIdx: Int, vote: Boolean) : this(contestIdx, listOf(Vote(candidateIdx, vote)))
-    constructor(contestIdx: Int, vararg votes: Vote) : this(contestIdx, votes.toList())
-
-    companion object {
-        // TODO test we dont have duplicate candidates
-        fun add(contestIdx: Int, vararg vs: Vote): ContestVotes {
-            return ContestVotes(contestIdx, vs.toList())
-        }
-    }
-}
-
-// TODO vote count vs true/false
-data class Vote(val candidateIdx: Int, val vote: Int = 1) {
-    constructor(candidateIdx: Int, vote: Boolean): this(candidateIdx, if (vote) 1 else 0)
 }
 
 /*

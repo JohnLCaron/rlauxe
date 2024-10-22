@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
+import org.cryptobiotic.rlauxe.util.GenSampleFn
+import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
 import kotlin.math.max
 
 data class PollingTask(
@@ -22,7 +24,7 @@ data class PollingTask(
         require(N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleFn {
+    override fun makeSampler(): GenSampleFn {
         return PollWithoutReplacement(cvrs, pollingAssorter)
     }
 

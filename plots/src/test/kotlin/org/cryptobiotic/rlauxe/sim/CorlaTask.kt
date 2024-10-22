@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.sim
 
-import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.util.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
-import org.cryptobiotic.rlauxe.core.SampleFn
+import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.corla.Corla
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 
@@ -22,7 +22,7 @@ data class CorlaTask(
         require(N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleFn {
+    override fun makeSampler(): GenSampleFn {
         // generate with the oracle, or true rates
         return ComparisonWithErrorRates(cvrs, compareAssorter, p1 = p1, p2 = p2, withoutReplacement = true)
     }

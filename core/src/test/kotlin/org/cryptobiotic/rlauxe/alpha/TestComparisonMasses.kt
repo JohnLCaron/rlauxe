@@ -1,12 +1,12 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
-import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.core.ArrayAsSampleFn
-import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.util.ArrayAsGenSampleFn
+import org.cryptobiotic.rlauxe.util.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
-import org.cryptobiotic.rlauxe.core.generateUniformSample
+import org.cryptobiotic.rlauxe.util.generateUniformSample
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
@@ -29,9 +29,9 @@ class TestComparisonMasses {
 
     // replicate results from alpha.ipynb, "# set up simulations"
     // also see TestComparisonFromAlpha, testSetupSimulations
+    // TODO fix this now that I understand it better
     @Test
     fun compareAlphaPaperMasses() {
-        val ntrials = 100
         val mixtures = listOf(.1, .05, .01) // mass at 1
 
         val zero_mass = listOf(0.0, 0.001) // mass at 0
@@ -58,8 +58,6 @@ class TestComparisonMasses {
             val theta = sampleFn.sampleMean()
             println(" testMass m=$m N=$N theta=$theta")
             thetas.add(theta)
-            // println("  xp = $xp")
-
         }
 
         val expected = listOf(
@@ -104,9 +102,8 @@ class TestComparisonMasses {
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val compareAssorter = makeStandardComparisonAssorter(cvrMean)
 
-        // fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
-        val (_, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, compareAssorter.upperBound)
-        val sampler = ComparisonWithErrors(cvrs, compareAssorter, theta)
+        // sanity checks
+        val sampler = ComparisonWithErrors(cvrs, compareAssorter, theta, withoutReplacement = true)
         val actualMvrMean = sampler.mvrs.map{ it.hasMarkFor(0,0) }.average()
         assertEquals(theta, actualMvrMean, doublePrecision)
         println("flippedVotes = ${sampler.flippedVotes} = ${100.0 * abs(sampler.flippedVotes)/N}%  actualMvrMean=$actualMvrMean")
@@ -114,7 +111,7 @@ class TestComparisonMasses {
         val bassortAvg = sampler.sampleMean()
         val bvalues = DoubleArray(N) { sampler.sample() }
         println("bassortAvg = ${bvalues.average()}")
-        assertEquals(bassortAvg, bvalues.average(), doublePrecision)
+        assertEquals(bassortAvg, bvalues.average(), doublePrecision) // wont be exact unless its withoutReplacement
 
         println()
     }
@@ -141,7 +138,7 @@ class TestComparisonMasses {
         println()
 
         val normalizedValues = cvrs.map{ compareAssorter.bassort(it, it) / compareAssorter.noerror / 2 } // makes everything 1/2 when no errors
-        val samplerN = ArrayAsSampleFn(normalizedValues.toDoubleArray())
+        val samplerN = ArrayAsGenSampleFn(normalizedValues.toDoubleArray())
         println("samplerN mean=${samplerN.sampleMean()}, count=${samplerN.sampleCount()}")
 
         val resultNormalized = doOneAlphaMartRun(samplerN, maxSamples = N, eta0 = assorterMean, d = d, u = 1.0)

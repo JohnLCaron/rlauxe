@@ -60,7 +60,7 @@ class ErrorMessages(val id: String, private val level: Int = 1) {
     fun contains(subs: String): Boolean {
         var result = false
         messages.forEach { if (it.contains(subs)) result = true}
-        if (result) return result
+        if (result) return true
         nested.forEach { if (it.contains(subs)) result = true }
         return result
     }

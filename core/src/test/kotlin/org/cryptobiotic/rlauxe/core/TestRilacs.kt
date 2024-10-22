@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
+import org.cryptobiotic.rlauxe.util.GenSampleFn
+import org.cryptobiotic.rlauxe.util.SampleFromArrayWithoutReplacement
 import org.junit.jupiter.api.Test
 import kotlin.math.max
 import kotlin.test.assertTrue
@@ -58,7 +60,7 @@ class TestRilacs {
     }
 
     fun doOne(
-        drawSample: SampleFn,
+        drawSample: GenSampleFn,
         maxSamples: Int,
         eta0: Double,
         d: Int = 100,

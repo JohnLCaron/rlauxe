@@ -1,13 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math3.optim.MaxEval
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
-import org.apache.commons.math3.optim.univariate.BrentOptimizer;
-import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
-import org.apache.commons.math3.optim.univariate.SearchInterval;
-import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
+import org.apache.commons.math3.optim.univariate.BrentOptimizer
+import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
+import org.apache.commons.math3.optim.univariate.SearchInterval
+import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.math.max
@@ -75,7 +75,7 @@ class OracleComparison(
 
 // Cobra section 4.2 Adaptive betting
 // In a BSM, the bets need not be fixed and λi can be a predictable function of the
-// data X1 , . . . , Xi−1 . This allows us to estimate the rates based on past samples as
+// data X1, . . . , Xi−1 . This allows us to estimate the rates based on past samples as
 // well as a priori considerations. We adapt the “shrink-trunc” estimator of Stark [11] to rate estimation.
 //
 // The rates are allowed to learn from past data in the current audit through
@@ -110,9 +110,7 @@ class AdaptiveComparison(
         val p2est = if (p2 == 0.0) 0.0 else estimateRate(d2, p2, prevSamples.sampleP2count().toDouble() / lastj, lastj, eps)
         val p3est = if (p3 == 0.0) 0.0 else estimateRate(d1, p3, prevSamples.sampleP3count().toDouble() / lastj, lastj, eps)
         val p4est = if (p4 == 0.0) 0.0 else estimateRate(d2, p4, prevSamples.sampleP4count().toDouble() / lastj, lastj, eps)
-        if (p3est > 0 || p4est > 0) {
-            println("wtf")
-        }
+
         val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, p1est, p2est, p3est, p4est, mui)
         return kelly.solve()
@@ -153,7 +151,7 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     fun solve(): Double {
         val stopwatch = Stopwatch()
         // TODO why arent we giving it the derivitive ?
-        val function = UnivariateFunction { lam -> expected_value_logT(lam) }  // The function to be optimized
+        val function = UnivariateFunction { lam -> expectedValueLogt(lam) }  // The function to be optimized
 
         // BrentOptimizer: For a function defined on some interval (lo, hi),
         // this class finds an approximation x to the point at which the function attains its minimum.
@@ -185,9 +183,10 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     //  log(1 + lambda * (a - 1/2)) * (1 - p_1 - p_2) + log(1 + lambda * (a/2 - 1/2)) * p_1 + log(1 - lambda / 2) * p_2
     //}
 
-    // not really sure of this; its not really the ln of Ti
+    // not really sure of this; its not really the ln of Ti, some kind of approx?
     // EF [ln(Ti) ] = p0 * ln[1 + λ(a − mu_i)] + p1 * ln[1 + λ(a/2 − mu_i)] + p2 * ln[1 − λ*mu_i)]  + p3 * ln[1 + λ(3*a/2 − mu_i)] + p4 * ln[1 + λ(2*a − mu_i)]
-    fun expected_value_logT(lam: Double): Double {
+    fun expectedValueLogt(lam: Double): Double {
+
         return ln(1.0 + lam * (a - mui)) * p0 +
                 ln(1.0 + lam * (a*0.5 - mui)) * p1 +
                 ln(1.0 - lam * mui) * p2 +
@@ -214,7 +213,7 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     //    (a - 1/2) * (1 - p_1 - p_2) / (1 + lambda * (a - 1/2)) + (a - 1) * p_1 / (2 - lambda * (1 - a)) + p_2 / (2 - lambda)
     //  }
     // so this is p0 * d/dx (ln(term0)) + p1 * d/dx (ln(term1)) + p2 * d/dx (ln(term2))
-    // TODO why arent we using the derivitive ? Apparently optimize() operates on the function, not its derivitive.
+    //  why arent we using the derivitive ? Apparently optimize() operates on the function, not its derivitive.
     // "The function optimize searches the interval from lower to upper for a minimum or maximum of the function f with respect to its first argument."
     fun derivativeFromRcode(lam: Double): Double {
         return  p0 * (a - mui) / (1.0 + lam * (a - mui)) +

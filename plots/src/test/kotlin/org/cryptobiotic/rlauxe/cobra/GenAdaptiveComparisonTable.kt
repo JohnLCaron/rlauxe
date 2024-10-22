@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.BettingRunner
 import org.cryptobiotic.rlauxe.sim.BettingTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.Stopwatch

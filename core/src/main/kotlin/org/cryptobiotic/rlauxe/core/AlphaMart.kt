@@ -87,9 +87,6 @@ class AlphaMart(
             testStatistic *= tj // Tj ← Tj-1 & tj
 
             testStatistics.add(testStatistic)
-            if (testStatistic == 0.0) {
-               //  println("testStatistic == 0.0")
-            }
 
             if (showDetail) println("    $sampleNumber = $xj sum= $sampleSum, m=$mj etaj = $etaj tj=$tj, Tj = $testStatistic")
 

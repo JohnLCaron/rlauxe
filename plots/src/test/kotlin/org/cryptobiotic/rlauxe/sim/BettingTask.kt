@@ -17,7 +17,7 @@ data class BettingTask(
         require( N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleFn {
+    override fun makeSampler(): GenSampleFn {
         return ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2oracle, withoutReplacement = true)
     }
 

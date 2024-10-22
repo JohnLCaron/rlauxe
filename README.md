@@ -27,7 +27,7 @@ Table of Contents
     * [Sampling with or without replacement](#sampling-with-or-without-replacement)
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [Questions](#questions)
-  * [Stratified audits using OneAudit (not done)](#stratified-audits-using-oneaudit-not-done)
+  * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Simulation Results](#simulation-results)
 <!-- TOC -->
 
@@ -36,23 +36,23 @@ Table of Contents
     SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
         https://github.com/pbstark/SHANGRLA
 
-    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots.	Stark, Jan 7, 2022
+    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
         https://github.com/pbstark/alpha.
 
-    BETTING     Estimating means of bounded random variables by betting. 	Waudby-Smith and Ramdas, Aug 29, 2022
+    BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
         https://github.com/WannabeSmith/betting-paper-simulations
 
-    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit.     Stark, 6 Mar 2023.
-        https://github.com/pbstark/ONEAudit
-
-    COBRA: Comparison-Optimal Betting for Risk-limiting Audits.     Jacob Spertus, 16 Mar 2023
+    COBRA: Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
         https://github.com/spertus/comparison-RLA-betting/tree/main
+
+    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit. Stark, 6 Mar 2023.
+        https://github.com/pbstark/ONEAudit
 
 ## SHANGRLA framework
 
 SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
 It uses an _assorter_ to assign a number to each ballot, and a _statistical test function_ that allows an audit to statistically
-prove that an election outcome is correct (or not) to within a _risk level_, for example within 95% probability.
+prove that an election outcome is correct (or not) to within a _risk level_, for example with 95% probability.
 
 It checks outcomes by testing _half-average assertions_, each of which claims that the mean of a finite list of numbers 
 between 0 and upper is greater than 1/2. The complementary _null hypothesis_ is that each assorter mean is not greater than 1/2.
@@ -148,7 +148,7 @@ Notes
 
 #### IRV
 
-Not implemented yet.
+TODO
 
 See
 ````
@@ -188,9 +188,9 @@ and so B is an half-average assorter.
 
 Notes 
 
-* polling vs comparison audits differ in the assorter function.
-* The comparison assorter B needs Ā(c) ≡ the average CVR assort value, > 0.5.
-* Ā(c) should have the diluted margin as the denominator. TODO check this
+* polling vs comparison audits differ in the assorter function and the testing function.
+* The comparison assorter B needs Ā(c) ≡ the average CVR assort value > 0.5.
+* Ā(c) should have the diluted margin as the denominator. 
     (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
     Diluted refers to the fact that the denominator is the number of ballot cards, which is
     greater than or equal to the number of valid votes.)
@@ -208,7 +208,7 @@ Notes
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
-_In the code but not tested yet._
+_In the code for ballot comparison but not polling yet TODO. See ComparisonAssorter.bassort()._
 
 See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
 
@@ -220,8 +220,6 @@ See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banu
     A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
     designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
 
-(This seems to apply only to ballot comparison)
-
 To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
 
 Let NC denote an upper bound on the number of ballot cards that contain the contest. 
@@ -230,8 +228,7 @@ identifiable physical ballot card that can be retrieved if that CVR is selected 
 
 If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
 including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest contest 
-(i.e., the assorter assigns the value 1/2 to phantom CVRs). 
-Find the corresponding assorter margin (v ≡ 2Ā − 1).
+(i.e., the assorter assigns the value 1/2 to phantom CVRs). TODO. Find the corresponding assorter margin (v ≡ 2Ā − 1).
 
 To conduct the audit, sample integers between 1 and NC.
 
@@ -244,12 +241,17 @@ To conduct the audit, sample integers between 1 and NC.
    overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
    and as if the value the assorter assigned to the CVR was 1/2.
 
-Also see note in SHANGRLA Section 3.4 on Colorado redacted ballots.
+Some jurisdictions, notably Colorado, redact CVRs if revealing them might compromise
+vote anonymity. If such CVRs are omitted from the tally and the number of phantom
+CVRs and ballots are increased correspondingly, this approach still leads to a valid RLA.
+But if they are included in the tally, then if they are selected for audit they should be
+treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
+the overstatement error.
 
 
 ## Use Styles
 
-_In the code but not tested yet._
+_In the code but not tested yet TODO._
 
 See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
 
@@ -449,7 +451,7 @@ Options
 * are we using batches (cluster sampling)?
 
 
-## Stratified audits using OneAudit (not done)
+## Stratified audits using OneAudit (TODO)
 
 Deal with one contest at a time for now.
 

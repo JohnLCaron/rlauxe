@@ -16,12 +16,12 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
-import org.cryptobiotic.rlauxe.core.SampleFn
+import org.cryptobiotic.rlauxe.core.GenSampleFn
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 interface RepeatedTask {
-    fun makeSampler() : SampleFn
+    fun makeSampler() : GenSampleFn
     fun makeTestFn() : RiskTestingFn
     fun makeTestParameters() : Map<String, Double>
     fun maxSamples() : Int

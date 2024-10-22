@@ -22,7 +22,7 @@ data class PollingTask(
         require(N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleFn {
+    override fun makeSampler(): GenSampleFn {
         return PollWithoutReplacement(cvrs, pollingAssorter)
     }
 

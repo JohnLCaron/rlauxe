@@ -23,7 +23,7 @@ data class AlphaComparisonTask(
         require( N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleFn {
+    override fun makeSampler(): GenSampleFn {
         return ComparisonWithErrors(cvrs, compareAssorter, theta)
     }
 
@@ -61,7 +61,7 @@ data class AlphaComparisonTask(
 // run AlphaMart with TrunkShrinkage in repeated trials
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
-    drawSample: SampleFn,
+    drawSample: GenSampleFn,
     maxSamples: Int,
     eta0: Double,
     d: Int = 500,

@@ -130,7 +130,7 @@ class TestSamples {
         }
     }
 
-    fun testLimits(sampler: SampleFn, nsamples: Int, upper: Double) {
+    fun testLimits(sampler: GenSampleFn, nsamples: Int, upper: Double) {
         repeat(nsamples) {
             val ss = sampler.sample()
             assertTrue(ss >= 0)
@@ -138,7 +138,7 @@ class TestSamples {
         }
     }
 
-    fun countAssortValues(sampler: SampleFn, nsamples: Int, assortValue: Double): Int {
+    fun countAssortValues(sampler: GenSampleFn, nsamples: Int, assortValue: Double): Int {
         sampler.reset()
         var count = 0
         repeat(nsamples) {

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,7 +35,7 @@ class TestAlphaMartComparison {
 }
 
 fun doOneAlphaMartRun(
-    drawSample: SampleFn,
+    drawSample: GenSampleFn,
     maxSamples: Int,
     eta0: Double,
     d: Int,

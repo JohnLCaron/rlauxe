@@ -58,7 +58,7 @@ class TestRilacs {
     }
 
     fun doOne(
-        drawSample: SampleFn,
+        drawSample: GenSampleFn,
         maxSamples: Int,
         eta0: Double,
         d: Int = 100,

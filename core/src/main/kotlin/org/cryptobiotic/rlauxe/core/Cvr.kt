@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-// If we knew the contests and candidate indices, we could just use a 2dim array: votes[contest][candidate]
+// If we knew the contests and candidate indices, we could just use a 2dim array: votes[contest][candidate] : Int
 // or we could pass in the Map, but create the index array.
 // perhaps the audit contains the string -> index map?
 
@@ -17,7 +17,7 @@ class Cvr(
         return if (contestVotes == null) 0 else contestVotes[candidateIdx] ?: 0
     }
 
-    // Is there exactly one vote in the contestIdx among the given candidates?
+    // Is there exactly one vote in the contest among the given candidates?
     fun hasOneVote(contestIdx: Int, candidates: List<Int>): Boolean {
         val contestVotes = this.votes[contestIdx] ?: return false
         val totalVotes = contestVotes.filter{ candidates.contains(it.key) }.map { it.value }.sum()

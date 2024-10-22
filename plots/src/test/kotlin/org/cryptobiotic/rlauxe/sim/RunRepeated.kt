@@ -38,7 +38,7 @@ data class RunTestRepeatedResult(
 }
 
 fun runTestRepeated(
-    drawSample: SampleFn,
+    drawSample: GenSampleFn,
     maxSamples: Int,
     ntrials: Int,
     testFn: RiskTestingFn,

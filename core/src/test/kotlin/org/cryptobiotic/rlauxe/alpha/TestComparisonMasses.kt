@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.core.ArrayAsSampleFn
+import org.cryptobiotic.rlauxe.core.ArrayAsGenSampleFn
 import org.cryptobiotic.rlauxe.core.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.core.generateUniformSample
@@ -141,7 +141,7 @@ class TestComparisonMasses {
         println()
 
         val normalizedValues = cvrs.map{ compareAssorter.bassort(it, it) / compareAssorter.noerror / 2 } // makes everything 1/2 when no errors
-        val samplerN = ArrayAsSampleFn(normalizedValues.toDoubleArray())
+        val samplerN = ArrayAsGenSampleFn(normalizedValues.toDoubleArray())
         println("samplerN mean=${samplerN.sampleMean()}, count=${samplerN.sampleCount()}")
 
         val resultNormalized = doOneAlphaMartRun(samplerN, maxSamples = N, eta0 = assorterMean, d = d, u = 1.0)

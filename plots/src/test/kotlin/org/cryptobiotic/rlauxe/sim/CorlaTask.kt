@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.sim
 
-import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.util.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
-import org.cryptobiotic.rlauxe.core.GenSampleFn
+import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.corla.Corla
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 

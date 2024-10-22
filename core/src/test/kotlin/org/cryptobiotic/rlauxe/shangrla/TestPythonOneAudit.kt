@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.util.findFirstIndex
 import org.cryptobiotic.rlauxe.util.np_cumprod
 import org.cryptobiotic.rlauxe.util.np_cumsum
-import org.cryptobiotic.rlauxe.core.randomPermute
+import org.cryptobiotic.rlauxe.util.randomPermute
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.max
 

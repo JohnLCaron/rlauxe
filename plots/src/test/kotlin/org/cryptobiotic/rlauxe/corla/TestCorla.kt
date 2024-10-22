@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.BettingMart
-import org.cryptobiotic.rlauxe.core.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.util.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter

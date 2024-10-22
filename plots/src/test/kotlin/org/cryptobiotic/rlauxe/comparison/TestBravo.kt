@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.sim.runTestRepeated
+import org.cryptobiotic.rlauxe.util.GenSampleMeanWithReplacement
+import org.cryptobiotic.rlauxe.util.GenSampleMeanWithoutReplacement
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)

@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.FixedEstimFn
-import org.cryptobiotic.rlauxe.core.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.core.GenSampleFn
+import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean

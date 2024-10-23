@@ -16,7 +16,7 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
     return abs(a - b) <= atol + rtol * abs(b)
 }
 
-fun makeStandardContest() = AuditContest("standard", 0, listOf(0,1), listOf(0))
+fun makeStandardContest() = AuditContest("standard", 0, listOf("A","B"), listOf("A"))
 fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
     ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)

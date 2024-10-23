@@ -24,6 +24,13 @@ class Cvr(
         return (totalVotes == 1)
     }
 
+    // Is there exactly one vote in the contest among all the votes?
+    fun hasOneVote(contestIdx: Int): Boolean {
+        val contestVotes = this.votes[contestIdx] ?: return false
+        val totalVotes = contestVotes.map { it.value }.sum()
+        return (totalVotes == 1)
+    }
+
     override fun toString(): String {
         return "$id: $votes $phantom"
     }

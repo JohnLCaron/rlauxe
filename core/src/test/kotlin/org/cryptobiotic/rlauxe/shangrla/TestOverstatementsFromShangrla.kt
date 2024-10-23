@@ -62,8 +62,8 @@ class TestOverstatementsFromShangrla {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            winnerNames = listOf("Alice"),
         )
 
         val assort = PluralityAssorter(contest, 0, 1)
@@ -132,8 +132,8 @@ class TestOverstatementsFromShangrla {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            winnerNames = listOf("Alice"),
         )
 
         val assort = PluralityAssorter(contest, 0, 1)
@@ -164,11 +164,11 @@ class TestOverstatementsFromShangrla {
         //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
         //        mvrs = CVR.from_dict(mvr_dict)
         val mvrb = CvrBuilders()
-            .addCrv().addContest("AvB", "Alice").done()
-            .addCrv().addContest("AvB", "Bob").done()
-            .addCrv().addContest("AvB").done()
-            .addCrv().addContest("CvD", "Elvis").addCandidate("Candy", 0).done()
-            .addCrv(phantom=true).addContest("AvB").done()
+            .addCrv().addContest("AvB", "Alice").ddone()
+            .addCrv().addContest("AvB", "Bob").ddone()
+            .addCrv().addContest("AvB").ddone()
+            .addCrv().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
+            .addCrv(phantom=true).addContest("AvB").ddone()
 
         println(mvrb.show())
         val mvrs = mvrb.build()
@@ -181,11 +181,11 @@ class TestOverstatementsFromShangrla {
         //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
         //        cvrs = CVR.from_dict(cvr_dict)
         val cvrb = CvrBuilders()
-            .addCrv().addContest("AvB", "Alice").done()
-            .addCrv().addContest("AvB", "Bob").done()
-            .addCrv().addContest("AvB").done()
-            .addCrv().addContest("CvD", "Elvis").done()
-            .addCrv(phantom=true).addContest("AvB").done()
+            .addCrv().addContest("AvB", "Alice").ddone()
+            .addCrv().addContest("AvB", "Bob").ddone()
+            .addCrv().addContest("AvB").ddone()
+            .addCrv().addContest("CvD", "Elvis").ddone()
+            .addCrv(phantom=true).addContest("AvB").ddone()
         println(cvrb.show())
         val cvrs = cvrb.build()
 
@@ -204,8 +204,8 @@ class TestOverstatementsFromShangrla {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1),
-            winners = listOf(0),
+            candidateNames = listOf( "Alice", "Bob"),
+            winnerNames = listOf("Alice"),
         )
         val margin = 0.2
 
@@ -305,8 +305,8 @@ class TestOverstatementsFromShangrla {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            winnerNames = listOf("Alice"),
         )
 
         val assort = PluralityAssorter(contest, 0, 1)

@@ -45,8 +45,8 @@ class TestAssertionsFromShangrla {
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2, 3), // Alice, Bob, Candy, Dan
-            winners = listOf(0, 1), // Alice, Bob
+            candidateNames = listOf( "Alice", "Bob", "Candy", "Dan"),
+            winnerNames = listOf("Alice", "Bob"),
         )
 
         val asrtns = makePluralityAssertions(contest = contest)
@@ -122,8 +122,8 @@ class TestAssertionsFromShangrla {
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            winnerNames = listOf("Alice"),
             minFraction = 2.0 / 3.0,
         )
 
@@ -139,10 +139,10 @@ class TestAssertionsFromShangrla {
         votes = makeCvr(3)
         assertEquals(0.5, target.assorter.assort(votes), "wrong value for vote for invalid vote--Dan")
 
-        var cvr = CvrBuilders().addCrv().addContest("AvB", "Alice").addCandidate("Bob").done().build().first()
+        var cvr = CvrBuilders().addCrv().addContest("AvB", "Alice").addCandidate("Bob").ddone().build().first()
         assertEquals(0.5, target.assorter.assort(cvr), "wrong value for vote for invalid vote--Alice & Bob")
 
-        cvr = CvrBuilders().addCrv().addContest("AvB", "Bob").addCandidate("Candy").done().build().first()
+        cvr = CvrBuilders().addCrv().addContest("AvB", "Bob").addCandidate("Candy").ddone().build().first()
         assertEquals(0.5, target.assorter.assort(cvr), "wrong value for vote for invalid vote--Bob & Candy")
     }
 }

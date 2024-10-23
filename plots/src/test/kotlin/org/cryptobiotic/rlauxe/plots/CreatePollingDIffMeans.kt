@@ -213,7 +213,7 @@ class CreatePollingDiffMeans {
 
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
         val audit = makePollingAudit(contests = listOf(contest))
 
         val results = mutableListOf<RunTestRepeatedResult>()

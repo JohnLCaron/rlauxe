@@ -16,8 +16,8 @@ class TestAudit {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2, 3, 4),
-            winners = listOf(2, 4),
+            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            winnerNames = listOf("C", "E"),
         )
         val audit = makePollingAudit(listOf(contest), riskLimit = .01)
         assertIs<AuditPolling>(audit)
@@ -42,8 +42,8 @@ class TestAudit {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2, 3, 4),
-            winners = listOf(2, 4),
+            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            winnerNames = listOf("C", "E"),
             minFraction = .42
         )
         val audit = makePollingAudit(listOf(contest), riskLimit = .01)
@@ -69,8 +69,8 @@ class TestAudit {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2, 3, 4),
-            winners = listOf(2, 4),
+            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            winnerNames = listOf("C", "E"),
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
@@ -99,8 +99,8 @@ class TestAudit {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2, 3, 4),
-            winners = listOf(2, 4),
+            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            winnerNames = listOf("C", "E"),
             minFraction = .33,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
@@ -130,8 +130,8 @@ class TestAudit {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2, 3, 4),
-            winners = listOf(2, 4),
+            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            winnerNames = listOf("C", "E"),
             minFraction = .66,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)

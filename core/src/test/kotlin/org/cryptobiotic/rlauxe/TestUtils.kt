@@ -38,7 +38,7 @@ class SampleFromList(val list: List<Double>) {
     fun sample() = list[index++]
 }
 
-fun makeStandardContest() = AuditContest("standard", 0, listOf(0,1), listOf(0))
+fun makeStandardContest() = AuditContest("standard", 0, listOf("A", "B"), listOf("A"))
 fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
     ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)

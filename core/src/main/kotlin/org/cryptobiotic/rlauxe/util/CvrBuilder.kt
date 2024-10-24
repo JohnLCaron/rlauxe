@@ -3,7 +3,8 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import kotlin.random.Random
+
+// for testing, here to share between modules
 
 class CvrContest(val name: String, val id: Int) {
     val candidates = mutableMapOf<String, Int>()
@@ -146,18 +147,19 @@ fun makeContestsFromCvrs(
     cards: Map<Int, Int>, // contestId -> ncards
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
 ): List<AuditContest> {
-
+    val svotes = votes.toSortedMap()
     val contests = mutableListOf<AuditContest>()
 
-    for ((contestId, candidateMap) in votes) {
-        val winner = candidateMap.maxBy { it.value }.key
+    for ((contestId, candidateMap) in svotes.toSortedMap()) {
+        val scandidateMap = candidateMap.toSortedMap()
+        val winner = scandidateMap.maxBy { it.value }.key
 
         contests.add(
             AuditContest(
                 id = "contest$contestId",
                 idx = contestId,
                 choiceFunction = choiceFunction,
-                candidateNames = candidateMap.keys.map { "candidate$it" },
+                candidateNames = scandidateMap.keys.map { "candidate$it" },
                 winnerNames = listOf("candidate$winner"),
             )
         )

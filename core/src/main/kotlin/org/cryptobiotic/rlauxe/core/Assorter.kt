@@ -24,9 +24,8 @@ data class SuperMajorityAssorter(val contest: AuditContest, val winner: Int, val
 
     // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: Cvr): Double {
-        val w = mvr.hasMarkFor(contest.idx, winner) // TODO ok its all the votes ?
-        // was if (mvr.hasOneVote(contest.idx, contest.candidates)) (w / (2 * minFraction)) else .5
-        return if (mvr.hasOneVote(contest.idx)) (w / (2 * minFraction)) else .5
+        val w = mvr.hasMarkFor(contest.idx, winner)
+        return if (mvr.hasOneVote(contest.idx, contest.candidateNames.size)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound

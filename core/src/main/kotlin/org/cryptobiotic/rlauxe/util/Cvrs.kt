@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.AuditContest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import kotlin.random.Random
 
-// for testing, add here to share between modules
+// for testing, here to share between modules
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
     var total = 0
@@ -43,10 +41,6 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
 
 fun margin2theta(margin: Double) = (margin + 1.0) / 2.0
 fun theta2margin(theta: Double) = 2.0 * theta - 1.0
-
-//fun makeCvrsByExactMean(ncards: Int, margin: Double = 0.0) : List<Cvr> {
-//    return makeCvrsByExactMean(ncards, margin2theta(margin))
-//}
 
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()

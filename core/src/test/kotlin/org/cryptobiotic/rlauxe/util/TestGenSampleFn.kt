@@ -40,6 +40,9 @@ class TestGenSampleFn {
             contests.forEach { println("  ${it}") }
         }
         contests.forEach { contest ->
+            if (contest.winners != listOf(0)) {
+                makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+            }
             assertEquals(contest.winners, listOf(0))
         }
 

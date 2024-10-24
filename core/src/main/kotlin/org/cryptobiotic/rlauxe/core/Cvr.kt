@@ -24,10 +24,14 @@ class Cvr(
         return (totalVotes == 1)
     }
 
-    // Is there exactly one vote in the contest among all the votes?
-    fun hasOneVote(contestIdx: Int): Boolean {
+    // Is there exactly one vote in the contest among all the legitimate contests?
+    // This excludes candidates with index >= ncandidates, which are mistakes? miscodeing?
+    // This assumes candidate indexes are sequential starting at 0.
+    // This reproduces behavior in SHANGRLA test_Assertion.
+    // This is only used my supermajority assorter.
+    fun hasOneVote(contestIdx: Int, ncandidates: Int): Boolean {
         val contestVotes = this.votes[contestIdx] ?: return false
-        val totalVotes = contestVotes.map { it.value }.sum()
+        val totalVotes = contestVotes.filter { it.key < ncandidates }.map { it.value }.sum()
         return (totalVotes == 1)
     }
 

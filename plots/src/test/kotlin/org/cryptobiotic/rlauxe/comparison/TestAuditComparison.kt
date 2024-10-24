@@ -30,8 +30,8 @@ class TestAuditComparison {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1),
-            winners = listOf(0),
+            candidateNames = listOf( "A", "B"),
+            winnerNames = listOf("A"),
         )
 
         val assort = PluralityAssorter(contest, 0, 1)

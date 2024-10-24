@@ -33,8 +33,8 @@ class TestComparisonAssorter {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf("A"),
         )
         val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
         val awinnerAvg = .51
@@ -99,8 +99,8 @@ class TestComparisonAssorter {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1),
-            winners = listOf(0),
+            candidateNames = listOf( "A", "B"),
+            winnerNames = listOf("A"),
         )
         val cvrs: List<Cvr> = makeCvrsByExactMean(ncards = 100, mean = .55)
 
@@ -126,8 +126,8 @@ class TestComparisonAssorter {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf("A"),
         )
         val counts = listOf(1000, 980, 100)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
@@ -155,8 +155,8 @@ class TestComparisonAssorter {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0), // TODO not using winners here
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf("A"),  // TODO not using winners here
         )
         val realWinner = 4
         val counts = listOf(1000, 980, 3000, 50, 3001)
@@ -193,8 +193,8 @@ class TestComparisonAssorter {
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf(),
             minFraction = 0.60,
         )
         val counts = listOf(1000, 980, 100)
@@ -215,8 +215,8 @@ class TestComparisonAssorter {
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0, 1),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf("A", "B"),
             minFraction = 0.35,
         )
         val counts = listOf(1000, 980, 100)
@@ -241,8 +241,8 @@ class TestComparisonAssorter {
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2, 3, 4),
-            winners = listOf(0,1,3),
+            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            winnerNames = listOf("A", "B", "D"),
             minFraction = 0.25,
         )
 
@@ -290,7 +290,7 @@ class TestComparisonAssorter {
         val cvrMean = 0.55
         val cvrs = makeCvrsByExactMean(N, cvrMean)
 
-        val contest = AuditContest("standard", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("standard", 0, listOf("A", "B"), listOf("A"))
         val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
         val compareAssertion = compareAudit.assertions[contest]!!.first()
         val compareAssorter1 = compareAssertion.assorter

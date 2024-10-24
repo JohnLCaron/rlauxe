@@ -483,7 +483,7 @@ class TestComparisonFromAlpha {
 
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
@@ -546,7 +546,7 @@ class TestComparisonFromAlpha {
         val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
         assertEquals(1.009081735, u, doublePrecision)
          */
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
@@ -637,7 +637,7 @@ class TestComparisonFromAlpha {
         val d = 10000
         val ntrials = 100
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
 
         for (factor in factors) {
             val srs = mutableListOf<SRT>()

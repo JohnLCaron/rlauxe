@@ -20,7 +20,7 @@ class TestGenSampleFn {
     fun testSampleMeans(N: Int, theta: Double, silent: Boolean = false, showContests: Boolean = true) {
         val cvrs = makeCvrsByExactMean(N, theta)
         val checkAvotes = cvrs.map { it.hasMarkFor(0, 0) }.sum()
-        assertEquals((N * theta).toInt(), checkAvotes.toInt())
+        assertEquals((N * theta).toInt(), checkAvotes)
 
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
@@ -40,6 +40,9 @@ class TestGenSampleFn {
             contests.forEach { println("  ${it}") }
         }
         contests.forEach { contest ->
+            if (contest.winners != listOf(0)) {
+                makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+            }
             assertEquals(contest.winners, listOf(0))
         }
 
@@ -80,8 +83,8 @@ class TestGenSampleFn {
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            winnerNames = listOf("Alice"),
         )
         val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
         val cvrMean = .51

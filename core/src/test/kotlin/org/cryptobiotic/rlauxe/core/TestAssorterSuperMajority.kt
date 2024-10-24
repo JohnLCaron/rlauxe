@@ -16,8 +16,8 @@ class TestAssorterSuperMajority {
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf("A"),
             minFraction = 0.60,
         )
         val cvr0 = makeCvr(0)
@@ -42,8 +42,8 @@ class TestAssorterSuperMajority {
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf(),
             minFraction = 0.60,
         )
         val counts = listOf(1000, 980, 100)
@@ -64,8 +64,8 @@ class TestAssorterSuperMajority {
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2),
-            winners = listOf(0, 1),
+            candidateNames = listOf( "A", "B", "C"),
+            winnerNames = listOf("A", "B"),
             minFraction = 0.35,
         )
         val counts = listOf(1000, 980, 100)
@@ -90,8 +90,8 @@ class TestAssorterSuperMajority {
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidates = listOf(0, 1, 2, 3, 4, 5, 6),
-            winners = listOf(0,1,3),
+            candidateNames = listOf( "A", "B", "C", "D", "E", "F", "G"),
+            winnerNames = listOf("A", "B", "D"),
             minFraction = 0.25,
         )
 

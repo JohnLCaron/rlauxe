@@ -216,7 +216,7 @@ class CompareAuditType {
         // ignore the "reported winner". just focus on d vs reportedMeanDiff
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("contest0", 0,listOf("A","B"), listOf("A"))
 
         // polling
         val pollingAudit = makePollingAudit(contests = listOf(contest))
@@ -266,7 +266,7 @@ class CompareAuditType {
         val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
 
-        val contest = AuditContest("contest0", 0, listOf(0, 1), listOf(0))
+        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
 
         val pollingSrs = mutableListOf<SRT>()
         val compareSrs = mutableListOf<SRT>()

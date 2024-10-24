@@ -1,5 +1,5 @@
 # rlauxe
-last update: 10/20/2024
+last update: 10/22/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -11,13 +11,13 @@ Read this on github.io : https://johnlcaron.github.io/rlauxe/
 Table of Contents
 <!-- TOC -->
 * [rlauxe](#rlauxe)
-  * [Papers](#papers)
+  * [Reference Papers](#reference-papers)
   * [SHANGRLA framework](#shangrla-framework)
     * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
       * [PLURALITY](#plurality)
       * [APPROVAL](#approval)
       * [SUPERMAJORITY](#supermajority)
-      * [IRV](#irv)
+      * [IRV (TODO)](#irv-todo)
     * [Comparison audits](#comparison-audits)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Use Styles](#use-styles)
@@ -31,21 +31,23 @@ Table of Contents
   * [Simulation Results](#simulation-results)
 <!-- TOC -->
 
-## Papers
+## Reference Papers
 
     SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
         https://github.com/pbstark/SHANGRLA
 
-    ALPHA	    ALPHA: Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
+    ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
         https://github.com/pbstark/alpha.
 
     BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
         https://github.com/WannabeSmith/betting-paper-simulations
 
-    COBRA: Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
+    COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
         https://github.com/spertus/comparison-RLA-betting/tree/main
 
-    ONEAudit    ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit. Stark, 6 Mar 2023.
+    P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
+
+    ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark, 6 Mar 2023.
         https://github.com/pbstark/ONEAudit
 
 ## SHANGRLA framework
@@ -146,9 +148,7 @@ Notes
 * multiple winners are allowed
 
 
-#### IRV
-
-TODO
+#### IRV (TODO)
 
 See
 ````
@@ -206,11 +206,10 @@ Notes
 * However the convergence is slower than for polling (!), unless one "amplifies" the estimate function.
   See [Ballot Comparison using Betting Martingales](docs/Betting.md) that uses betting strategies to do so. 
 
+
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
-_In the code for ballot comparison but not polling yet TODO. See ComparisonAssorter.bassort()._
-
-See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banuelos, Philip B. Stark. July 14, 2012
+From P2Z paper:
 
     What if the ballot manifest is not accurate?
     it suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
@@ -220,34 +219,37 @@ See "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" Jorge H. Banu
     A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
     designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
 
-To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
+    To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
+    
+From SHANGRLA, section 3.4:
 
-Let NC denote an upper bound on the number of ballot cards that contain the contest. 
-Suppose that n ≤ NC CVRs contain the contest and that each of those CVRs is associated with a unique,
-identifiable physical ballot card that can be retrieved if that CVR is selected for audit.
+    Let NC denote an upper bound on the number of ballot cards that contain the contest. 
+    Suppose that n ≤ NC CVRs contain the contest and that each of those CVRs is associated with a unique,
+    identifiable physical ballot card that can be retrieved if that CVR is selected for audit.
+    
+    If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
+    including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest contest 
+    (i.e., the assorter assigns the value 1/2 to phantom CVRs). Find the corresponding assorter margin (v ≡ 2Ā − 1).
+    
+    To conduct the audit, sample integers between 1 and NC.
+    
+    1. If the resulting integer is between 1 and n, retrieve and inspect the ballot card associated with the corresponding CVR.
+        1. If the associated ballot contains the contest, calculate the overstatement error as in (SHANGRLA eq 2, above).
+        2. If the associated ballot does not contain the contest, calculate the overstatement error using the value the 
+           assorter assigned to the CVR, but as if the value the assorter assigns to the physical ballot is zero
+           (that is, the overstatement error is equal to the value the assorter assigned to the CVR).
+       2. If the resulting integer is between n + 1 and NC , we have drawn a phantom CVR and a phantom ballot. Calculate the
+          overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
+          and as if the value the assorter assigned to the CVR was 1/2.
+    
+    Some jurisdictions, notably Colorado, redact CVRs if revealing them might compromise
+    vote anonymity. If such CVRs are omitted from the tally and the number of phantom
+    CVRs and ballots are increased correspondingly, this approach still leads to a valid RLA.
+    But if they are included in the tally, then if they are selected for audit they should be
+    treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
+    the overstatement error.
 
-If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
-including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest contest 
-(i.e., the assorter assigns the value 1/2 to phantom CVRs). TODO. Find the corresponding assorter margin (v ≡ 2Ā − 1).
-
-To conduct the audit, sample integers between 1 and NC.
-
-1. If the resulting integer is between 1 and n, retrieve and inspect the ballot card associated with the corresponding CVR.
-    1. If the associated ballot contains the contest, calculate the overstatement error as in (SHANGRLA eq 2, above).
-    2. If the associated ballot does not contain the contest, calculate the overstatement error using the value the 
-       assorter assigned to the CVR, but as if the value the assorter assigns to the physical ballot is zero
-       (that is, the overstatement error is equal to the value the assorter assigned to the CVR).
-2. If the resulting integer is between n + 1 and NC , we have drawn a phantom CVR and a phantom ballot. Calculate the
-   overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
-   and as if the value the assorter assigned to the CVR was 1/2.
-
-Some jurisdictions, notably Colorado, redact CVRs if revealing them might compromise
-vote anonymity. If such CVRs are omitted from the tally and the number of phantom
-CVRs and ballots are increased correspondingly, this approach still leads to a valid RLA.
-But if they are included in the tally, then if they are selected for audit they should be
-treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
-the overstatement error.
-
+_In the code for ballot comparison but not polling yet TODO. See ComparisonAssorter.bassort()._
 
 ## Use Styles
 

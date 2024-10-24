@@ -45,7 +45,7 @@ class ContestUnderAudit(val contest: AuditContest, var ncards: Int? = null) {
 //
 //    CVRs can include a sequence number to facilitate ordering, sorting, and permuting
 // CVR being audited, mutable
-//         self.votes = votes  # contest/vote dict
+//        self.votes = votes  # contest/vote dict
 //        self.id = id  # identifier
 //        self.phantom = phantom  # is this a phantom CVR?
 //        self.tally_pool = tally_pool  # what tallying pool of cards does this CVR belong to (used by ONEAudit)?
@@ -53,10 +53,10 @@ class ContestUnderAudit(val contest: AuditContest, var ncards: Int? = null) {
 //        self.sample_num = sample_num  # pseudorandom number used for consistent sampling
 //        self.p = p  # sampling probability
 //        self.sampled = sampled  # is this CVR in the sample?
-class CvrUnderAudit(val cvr: Cvr) {
+//     var sampleNum = 0 // # pseudorandom number used for consistent sampling
+class CvrUnderAudit(val cvr: Cvr, var sampleNum: Int = 0) {
     val id = cvr.id
     val phantom = cvr.phantom
-    var sampleNum = 0 // # pseudorandom number used for consistent sampling
     var sampled = false //  # is this CVR in the sample?
 
     fun hasContest(want: Int) = cvr.votes.containsKey(want)
@@ -64,8 +64,15 @@ class CvrUnderAudit(val cvr: Cvr) {
     constructor(id: String, contestIdx: Int): this( Cvr(id, mapOf(contestIdx to emptyMap())))
 }
 
+fun makeCvras(cvrs: List<Cvr>, random: Random): List<CvrUnderAudit> {
+    // just assigns a random number, then sorts it
+    // otherwise, could create a permutation of ncards
+    return cvrs.map { CvrUnderAudit(it, random.nextInt()) }
+}
 
 /*
+SHANGRLA Audit.make_phantoms()
+
 Make phantom CVRs as needed for phantom cards; set contest parameters `cards` (if not set) and `cvrs`
 
 If use_style, phantoms are "per contest": each contest needs enough to account for the difference between
@@ -252,6 +259,7 @@ fun assignSampleNums(cvrList: MutableList<CvrUnderAudit>, prng: Random): Boolean
     return true
 }
 
+// prepare the MVRs and CVRs for comparison by putting them into the same (random) order in which the CVRs were selected
 fun prepComparisonSample(mvrSample: MutableList<CvrUnderAudit>, cvrSample: MutableList<CvrUnderAudit>, sampleOrder: Map<String, Map<String, Any>>) {
     mvrSample.sortBy { sampleOrder[it.id]?.get("selectionOrder") as Int }
     cvrSample.sortBy { sampleOrder[it.id]?.get("selectionOrder") as Int }
@@ -261,6 +269,7 @@ fun prepComparisonSample(mvrSample: MutableList<CvrUnderAudit>, cvrSample: Mutab
     }
 }
 
+// Put the mvr sample back into the random selection order.
 fun prepPollingSample(mvrSample: MutableList<CvrUnderAudit>, sampleOrder: Map<String, Map<String, Any>>){
     mvrSample.sortBy { sampleOrder[it.id]?.get("selectionOrder") as Int }
 }
@@ -278,27 +287,24 @@ fun sortCvrSampleNum(cvrList: MutableList<CvrUnderAudit>): Boolean  {
 
     Parameters
     ----------
-    cvr_list: list
-        list of CVR objects
-    contests: dict
-        dict of Contest objects. Contest sample sizes must be set before calling this function.
-    sampled_cvr_indices: list
-        indices of cvrs already in the sample
+    cvr_list: list of CVR objects
+    contests: Contest sample sizes must be set before calling this function.
+    sampled_cvr_indices: indices of cvrs already in the sample
 
     Returns
     -------
-    sampled_cvr_indices: list
-        indices of CVRs to sample (0-indexed)
+    sampled_cvr_indices: indices of CVRs to sample
 */
 fun consistentSampling(
     cvrList: List<CvrUnderAudit>,
-    contests: MutableMap<String, ContestUnderAudit>,
+    contests: Map<String, ContestUnderAudit>,
     sampledCvrIndices: MutableList<Int>
 ): List<Int> {
     //        current_sizes = defaultdict(int)
     //        contest_in_progress = lambda c: (current_sizes[c.id] < c.sample_size)
     val currentSizes = mutableMapOf<String, Int>()
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+    fun contestInProgress(c: ContestUnderAudit) =
+        (currentSizes[c.id] ?: 0) < c.sampleSize
 
     //        if sampled_cvr_indices is None:
     //            sampled_cvr_indices = []
@@ -342,12 +348,13 @@ fun consistentSampling(
     //            inx += 1
     var inx = sampledIndices.size
     while (contests.values.any { contestInProgress(it) }) {
-        if (contests.values.any {
-                contestInProgress(it) && cvrList.get(sortedCvrIndices[inx]).hasContest(it.idx) }) {
-            sampledIndices.add(sortedCvrIndices[inx])
+        val sidx = sortedCvrIndices[inx]
+        val cvr = cvrList[sidx]
+        if (contests.values.any { contestInProgress(it) && cvr.hasContest(it.idx) }) {
+            sampledIndices.add(sidx)
             contests.forEach { (_, contest) ->
-                if (contestInProgress(contest) && cvrList[sortedCvrIndices[inx]].hasContest(contest.idx)) {
-                    contest.sampleThreshold = cvrList[sortedCvrIndices[inx]]!!.sampleNum
+                if (contestInProgress(contest) && cvr.hasContest(contest.idx)) {
+                    contest.sampleThreshold = cvr.sampleNum
                     currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
                 }
             }

@@ -73,7 +73,7 @@ data class AuditComparison(
     }
 }
 
-fun makeComparisonAudit(contests: List<AuditContest>, riskLimit: Double  = 0.05, cvrs : Iterable<Cvr>): AuditComparison {
+fun makeComparisonAudit(contests: List<AuditContest>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
     val comparisonAssertions = mutableMapOf<AuditContest, List<ComparisonAssertion>>()
 
     contests.forEach { contest ->

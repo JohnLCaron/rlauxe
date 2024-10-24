@@ -75,7 +75,7 @@ class TestAudit {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
 
-        val audit = makeComparisonAudit(listOf(contest), riskLimit = .01, cvrs)
+        val audit = makeComparisonAudit(listOf(contest), cvrs, riskLimit = .01, )
         assertIs<AuditComparison>(audit)
         println("audit = $audit")
 
@@ -106,7 +106,7 @@ class TestAudit {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
 
-        val audit = makeComparisonAudit(listOf(contest), riskLimit = .01, cvrs)
+        val audit = makeComparisonAudit(listOf(contest), cvrs, riskLimit = .01)
         assertIs<AuditComparison>(audit)
         println("audit = $audit")
 
@@ -139,7 +139,7 @@ class TestAudit {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         val exception = assertFailsWith<RuntimeException> {
-            makeComparisonAudit(listOf(contest), riskLimit = .01, cvrs)
+            makeComparisonAudit(listOf(contest), cvrs, riskLimit = .01)
         }
         println(exception)
         assertNotNull(exception.message)

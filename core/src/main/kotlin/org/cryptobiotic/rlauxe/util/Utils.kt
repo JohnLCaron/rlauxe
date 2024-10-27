@@ -1,7 +1,10 @@
 package org.cryptobiotic.rlauxe.util
 
+import java.security.SecureRandom
 import kotlin.math.abs
+import kotlin.random.Random
 
+val secureRandom = SecureRandom.getInstanceStrong()!!
 
 fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
     //    For finite values, isclose uses the following equation to test whether

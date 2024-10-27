@@ -23,7 +23,7 @@ class PollWithReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunction):
     val sampleCount = cvrs.sumOf { assorter.assort(it) }
 
     override fun sample(): Double {
-        val idx = Random.nextInt(N) // with Replacement
+        val idx = secureRandom.nextInt(N) // with Replacement
         return assorter.assort(cvrs[idx])
     }
 
@@ -50,7 +50,7 @@ class PollWithoutReplacement(val cvrs : List<Cvr>, val assorter: AssorterFunctio
     }
 
     override fun reset() {
-        permutedIndex.shuffle(Random)
+        permutedIndex.shuffle(secureRandom)
         idx = 0
     }
 
@@ -83,7 +83,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     }
 
     override fun reset() {
-        permutedIndex.shuffle(Random)
+        permutedIndex.shuffle(secureRandom)
         idx = 0
     }
 
@@ -125,7 +125,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
             idx++
             cassorter.bassort(mvr, cvr)
         } else {
-            val chooseIdx = Random.nextInt(N) // with Replacement
+            val chooseIdx = secureRandom.nextInt(N) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
@@ -134,7 +134,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
     }
 
     override fun reset() {
-        permutedIndex.shuffle(Random)
+        permutedIndex.shuffle(secureRandom)
         idx = 0
     }
 
@@ -181,7 +181,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
             idx++
             cassorter.bassort(mvr, cvr)
         } else {
-            val chooseIdx = Random.nextInt(N) // with Replacement
+            val chooseIdx = secureRandom.nextInt(N) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
@@ -190,7 +190,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
     }
 
     override fun reset() {
-        permutedIndex.shuffle(Random)
+        permutedIndex.shuffle(secureRandom)
         idx = 0
     }
 
@@ -219,7 +219,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     // we need more A votes, needToChangeVotesFromA < 0>
     if (needToChangeVotesFromA < 0) {
         while (changed > needToChangeVotesFromA) {
-            val cvrIdx = Random.nextInt(ncards)
+            val cvrIdx = secureRandom.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 1) == 1) {
                 val votes = mutableMapOf<Int, Map<Int, Int>>()
@@ -231,7 +231,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     } else {
         // we need more B votes, needToChangeVotesFromA > 0
         while (changed < needToChangeVotesFromA) {
-            val cvrIdx = Random.nextInt(ncards)
+            val cvrIdx = secureRandom.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 0) == 1) {
                 val votes = mutableMapOf<Int, Map<Int, Int>>()
@@ -253,7 +253,7 @@ fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0
     while (changed < needToChangeVotesFromA) {
-        val cvrIdx = Random.nextInt(ncards)
+        val cvrIdx = secureRandom.nextInt(ncards)
         val cvr = cvrs[cvrIdx]
         if (cvr.hasMarkFor(0, 0) == 1) {
             val votes = mutableMapOf<Int, Map<Int, Int>>()
@@ -281,14 +281,14 @@ fun randomPermute(samples : DoubleArray): DoubleArray {
 // generate a sample thats approximately mean = theta
 fun generateUniformSample(N: Int) : DoubleArray {
     return DoubleArray(N) {
-        Random.nextDouble(1.0)
+        secureRandom.nextDouble(1.0)
     }
 }
 
 // generate a sample thats approximately mean = theta
 fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
     return DoubleArray(N) {
-        val r = Random.nextDouble(1.0)
+        val r = secureRandom.nextDouble(1.0)
         if (r < ratio) 1.0 else 0.0
     }
 }
@@ -321,7 +321,7 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): GenSampleFn {
 class GenSampleMeanWithReplacement(val N: Int, ratio: Double): GenSampleFn {
     val samples = generateSampleWithMean(N, ratio)
     override fun sample(): Double {
-        val idx = Random.nextInt(N) // with Replacement
+        val idx = secureRandom.nextInt(N) // with Replacement
         return samples[idx]
     }
     override fun reset() {
@@ -363,7 +363,7 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): GenSamp
     }
 
     override fun reset() {
-        permutedIndex.shuffle(Random)
+        permutedIndex.shuffle(secureRandom)
         idx = 0
     }
 

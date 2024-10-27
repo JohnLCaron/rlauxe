@@ -58,7 +58,7 @@ class TestAuditPolling {
         }
 
         // make contests from cvrs
-        val contests: List<AuditContest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+        val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
         if (!silent && showContests) {
             println("Contests")
             contests.forEach { println("  ${it}") }

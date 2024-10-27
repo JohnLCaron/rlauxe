@@ -12,7 +12,7 @@ class TestAudit {
 
     @Test
     fun testPollingBasics() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -38,7 +38,7 @@ class TestAudit {
 
     @Test
     fun testPollingSuper() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
@@ -65,7 +65,7 @@ class TestAudit {
 
     @Test
     fun testComparisonBasics() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -95,7 +95,7 @@ class TestAudit {
 
     @Test
     fun testComparisonSuperMajority() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
@@ -126,7 +126,7 @@ class TestAudit {
 
     @Test
     fun testComparisonSuperMajorityFail() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,

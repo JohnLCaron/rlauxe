@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 
@@ -146,16 +146,16 @@ fun makeContestsFromCvrs(
     votes: Map<Int, Map<Int, Int>>,  // contestId -> candidate -> votes
     cards: Map<Int, Int>, // contestId -> ncards
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-): List<AuditContest> {
+): List<Contest> {
     val svotes = votes.toSortedMap()
-    val contests = mutableListOf<AuditContest>()
+    val contests = mutableListOf<Contest>()
 
     for ((contestId, candidateMap) in svotes.toSortedMap()) {
         val scandidateMap = candidateMap.toSortedMap()
         val winner = scandidateMap.maxBy { it.value }.key
 
         contests.add(
-            AuditContest(
+            Contest(
                 id = "contest$contestId",
                 idx = contestId,
                 choiceFunction = choiceFunction,

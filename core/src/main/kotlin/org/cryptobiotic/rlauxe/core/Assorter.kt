@@ -7,7 +7,7 @@ interface AssorterFunction {
 }
 
 /** See SHANGRLA, section 2.1. */
-data class PluralityAssorter(val contest: AuditContest, val winner: Int, val loser: Int): AssorterFunction {
+data class PluralityAssorter(val contest: Contest, val winner: Int, val loser: Int): AssorterFunction {
     // SHANGRLA section 2, p 4.
     override fun assort(mvr: Cvr): Double {
         val w = mvr.hasMarkFor(contest.idx, winner)
@@ -19,7 +19,7 @@ data class PluralityAssorter(val contest: AuditContest, val winner: Int, val los
 }
 
 /** See SHANGRLA, section 2.3. */
-data class SuperMajorityAssorter(val contest: AuditContest, val winner: Int, val minFraction: Double): AssorterFunction {
+data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minFraction: Double): AssorterFunction {
     val upperBound = 0.5 / minFraction
 
     // SHANGRLA eq (1), section 2.3, p 5.
@@ -33,7 +33,7 @@ data class SuperMajorityAssorter(val contest: AuditContest, val winner: Int, val
 }
 
 data class Assertion(
-    val contest: AuditContest,
+    val contest: Contest,
     val assorter: AssorterFunction,
 ) {
     override fun toString() = "Assertion for ${contest.id} assorter=${assorter.desc()}"
@@ -51,7 +51,7 @@ fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Tri
 
 /** See SHANGRLA Section 3.2 */
 data class ComparisonAssorter(
-    val contest: AuditContest,
+    val contest: Contest,
     val assorter: AssorterFunction,   // A
     val avgCvrAssortValue: Double, // Ā(c) = average CVR assort value
     val check: Boolean = true,
@@ -142,7 +142,7 @@ data class ComparisonAssorter(
 }
 
 class ComparisonAssertion(
-    val contest: AuditContest,
+    val contest: Contest,
     val assorter: ComparisonAssorter,
 ) {
     override fun toString() = "ComparisonAssertion for ${contest.id} assorter=${assorter.desc()}"

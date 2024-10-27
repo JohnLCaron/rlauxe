@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
@@ -58,7 +58,7 @@ class TestOverstatementsFromShangrla {
 
     @Test
     fun test_overstatement_assorter_margin() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -128,7 +128,7 @@ class TestOverstatementsFromShangrla {
 
     @Test
     fun test_overstatement_assorter_mean() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -200,7 +200,7 @@ class TestOverstatementsFromShangrla {
         //                        + 1)/2), upper_bound=1))
         //        aVb.margin=0.2
 
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -301,7 +301,7 @@ class TestOverstatementsFromShangrla {
         //
         //        winner = ["Alice"]
         //        loser = ["Bob", "Candy"]
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,

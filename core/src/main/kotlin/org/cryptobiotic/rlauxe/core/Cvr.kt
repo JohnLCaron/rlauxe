@@ -2,7 +2,10 @@ package org.cryptobiotic.rlauxe.core
 
 // If we knew the contests and candidate indices, we could just use a 2dim array: votes[contest][candidate] : Int
 // or we could pass in the Map, but create the index array.
-// perhaps the audit contains the string -> index map?
+// the audit contains the contest string -> index map?
+// the contest contains the candiate string -> index map?
+
+typealias Mvr = Cvr
 
 class Cvr(
     val id: String,

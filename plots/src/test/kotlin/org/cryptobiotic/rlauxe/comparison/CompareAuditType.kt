@@ -15,13 +15,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.plotSRS
@@ -216,7 +213,7 @@ class CompareAuditType {
         // ignore the "reported winner". just focus on d vs reportedMeanDiff
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = AuditContest("contest0", 0,listOf("A","B"), listOf("A"))
+        val contest = Contest("contest0", 0,listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         // polling
         val pollingAudit = makePollingAudit(contests = listOf(contest))
@@ -266,7 +263,7 @@ class CompareAuditType {
         val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
 
-        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
+        val contest = Contest("contest0", 0, listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         val pollingSrs = mutableListOf<SRT>()
         val compareSrs = mutableListOf<SRT>()

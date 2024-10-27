@@ -29,7 +29,7 @@ class TestComparisonAssorter {
 
     @Test
     fun testBasics() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -95,7 +95,7 @@ class TestComparisonAssorter {
 
     @Test
     fun testTwoCandidatePlurality() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -122,7 +122,7 @@ class TestComparisonAssorter {
 
     @Test
     fun testThreeCandidatePluralityAvg() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -151,7 +151,7 @@ class TestComparisonAssorter {
 
     @Test
     fun testNCandidatePluralityAvg() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -175,7 +175,7 @@ class TestComparisonAssorter {
         }
     }
 
-    fun testNwayPlurality(contest : AuditContest, cvrs: List<Cvr>, winner: Int, loser:Int): Double {
+    fun testNwayPlurality(contest : Contest, cvrs: List<Cvr>, winner: Int, loser:Int): Double {
         val assort = PluralityAssorter(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, assort, assortAvg, false)
@@ -189,7 +189,7 @@ class TestComparisonAssorter {
 
     @Test
     fun testSupermajorityNoMajority() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
@@ -211,7 +211,7 @@ class TestComparisonAssorter {
 
     @Test
     fun testSupermajorityMultipleWinners() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "ABC",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
@@ -237,7 +237,7 @@ class TestComparisonAssorter {
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val ncandidates = counts.size
 
-        val contest = AuditContest(
+        val contest = Contest(
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
@@ -260,7 +260,7 @@ class TestComparisonAssorter {
         // (6)= 0.4000644875256966
     }
 
-    fun testNwaySupermajority(contest : AuditContest, cvrs: List<Cvr>, winner: Int): Double {
+    fun testNwaySupermajority(contest : Contest, cvrs: List<Cvr>, winner: Int): Double {
         val assort = SuperMajorityAssorter(contest, winner, contest.minFraction!!)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val cwinner = ComparisonAssorter(contest, assort, assortAvg, false)
@@ -290,7 +290,7 @@ class TestComparisonAssorter {
         val cvrMean = 0.55
         val cvrs = makeCvrsByExactMean(N, cvrMean)
 
-        val contest = AuditContest("standard", 0, listOf("A", "B"), listOf("A"))
+        val contest = Contest("standard", 0, listOf("A", "B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
         val compareAssertion = compareAudit.assertions[contest]!!.first()
         val compareAssorter1 = compareAssertion.assorter

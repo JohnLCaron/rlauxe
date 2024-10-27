@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.makeCvr
@@ -41,7 +41,7 @@ class TestAssertionsFromShangrla {
 
     @Test
     fun test_make_plurality_assertions() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -118,7 +118,7 @@ class TestAssertionsFromShangrla {
 
     @Test
     fun test_supermajority_assorter() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "ABCs",
             idx = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,

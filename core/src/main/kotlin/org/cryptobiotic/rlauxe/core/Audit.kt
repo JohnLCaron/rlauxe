@@ -1,10 +1,12 @@
 package org.cryptobiotic.rlauxe.core
 
+enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
+
 data class AuditPolling(
     val auditType: AuditType,
     val riskLimit: Double,
-    val contests: List<AuditContest>,
-    val assertions: Map<AuditContest, List<Assertion>>,
+    val contests: List<Contest>, // order must not change; this is the contest name -> index
+    val assertions: Map<Contest, List<Assertion>>,
 ) {
     override fun toString() = buildString {
         appendLine("AuditPolling: auditType=$auditType riskLimit=$riskLimit")
@@ -18,12 +20,12 @@ data class AuditPolling(
     }
 }
 
-fun makePollingAudit(contests: List<AuditContest>, riskLimit: Double  = 0.05): AuditPolling {
-    val assertions: Map<AuditContest, List<Assertion>> = contests.associate { makePollingAssertions(it) }
+fun makePollingAudit(contests: List<Contest>, riskLimit: Double  = 0.05): AuditPolling {
+    val assertions: Map<Contest, List<Assertion>> = contests.associate { makePollingAssertions(it) }
     return AuditPolling(AuditType.POLLING, riskLimit, contests, assertions)
 }
 
-fun makePollingAssertions(contest: AuditContest): Pair<AuditContest, List<Assertion>> =
+fun makePollingAssertions(contest: Contest): Pair<Contest, List<Assertion>> =
     when (contest.choiceFunction) {
         SocialChoiceFunction.APPROVAL,
         SocialChoiceFunction.PLURALITY, -> Pair(contest, makePluralityAssertions(contest))
@@ -31,7 +33,7 @@ fun makePollingAssertions(contest: AuditContest): Pair<AuditContest, List<Assert
         else -> throw RuntimeException(" choice function ${contest.choiceFunction} is not supported")
     }
 
-fun makePluralityAssertions(contest: AuditContest): List<Assertion> {
+fun makePluralityAssertions(contest: Contest): List<Assertion> {
     // test that every winner beats every loser. SHANGRLA 2.1
     val assertions = mutableListOf<Assertion>()
     contest.winners.forEach { winner ->
@@ -43,7 +45,7 @@ fun makePluralityAssertions(contest: AuditContest): List<Assertion> {
     return assertions
 }
 
-fun makeSuperMajorityAssertions(contest: AuditContest): List<Assertion> {
+fun makeSuperMajorityAssertions(contest: Contest): List<Assertion> {
     // each winner generates 1 assertion. SHANGRLA 2.3
     val assertions = mutableListOf<Assertion>()
     contest.winners.forEach { winner ->
@@ -58,8 +60,8 @@ fun makeSuperMajorityAssertions(contest: AuditContest): List<Assertion> {
 data class AuditComparison(
     val auditType: AuditType,
     val riskLimit: Double,
-    val contests: List<AuditContest>,
-    val assertions: Map<AuditContest, List<ComparisonAssertion>>,
+    val contests: List<Contest>,
+    val assertions: Map<Contest, List<ComparisonAssertion>>,
 ) {
     override fun toString() = buildString {
         appendLine("AuditComparison: auditType=$auditType riskLimit=$riskLimit")
@@ -73,8 +75,8 @@ data class AuditComparison(
     }
 }
 
-fun makeComparisonAudit(contests: List<AuditContest>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
-    val comparisonAssertions = mutableMapOf<AuditContest, List<ComparisonAssertion>>()
+fun makeComparisonAudit(contests: List<Contest>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
+    val comparisonAssertions = mutableMapOf<Contest, List<ComparisonAssertion>>()
 
     contests.forEach { contest ->
         val assertions = when (contest.choiceFunction) {

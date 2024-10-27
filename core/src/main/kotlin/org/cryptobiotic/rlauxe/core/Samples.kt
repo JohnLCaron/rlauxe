@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import kotlin.math.ln
-import kotlin.random.Random
 
 /** keeps track of the latest sample, number of samples, and the sample sum. */
 interface Samples {

@@ -15,8 +15,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
@@ -213,7 +214,7 @@ class CreatePollingDiffMeans {
 
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = AuditContest("contest0", 0, listOf("A","B"), listOf("A"))
+        val contest = Contest("contest0", 0, listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val audit = makePollingAudit(contests = listOf(contest))
 
         val results = mutableListOf<RunTestRepeatedResult>()

@@ -8,10 +8,10 @@ import kotlin.test.assertEquals
 // from shangrla test_CVR
 class TestCvr {
     // TODO assign idx
-    val contests: List<AuditContest> = listOf(
-        AuditContest("city_council", 0, candidateNames= listOf("Doug", "Emily", "Frank", "Gail", "Harry"),
-            winnerNames= listOf("Doug", "Emily", "Frank")),
-        AuditContest("measure_1", 1, candidateNames= listOf("yes", "no"),
+    val contests: List<org.cryptobiotic.rlauxe.core.Contest> = listOf(
+        Contest("city_council", 0, candidateNames= listOf("Doug", "Emily", "Frank", "Gail", "Harry"),
+            winnerNames= listOf("Doug", "Emily", "Frank"), choiceFunction = SocialChoiceFunction.PLURALITY),
+        Contest("measure_1", 1, candidateNames= listOf("yes", "no"),
             winnerNames= listOf("yes"), SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
     )
 

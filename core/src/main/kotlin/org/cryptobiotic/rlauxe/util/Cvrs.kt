@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import kotlin.random.Random
 
 // for testing, here to share between modules
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
@@ -15,7 +14,7 @@ fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
             total++
         }
     }
-    cvrs.shuffle( Random)
+    cvrs.shuffle( secureRandom )
     return cvrs
 }
 
@@ -31,7 +30,7 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     val result = mutableListOf<Cvr>()
     repeat(ncards) {
         val votes = mutableMapOf<Int, Map<Int, Int>>()
-        val random = Random.nextDouble(1.0)
+        val random = secureRandom.nextDouble(1.0)
         val cand = if (random < .5 + margin/2.0) 0 else 1
         votes[0] = mapOf(cand to 1)
         result.add(Cvr("card-$it", votes))
@@ -46,7 +45,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
         val votes = mutableMapOf<Int, Map<Int, Int>>()
-        val random = Random.nextDouble(1.0)
+        val random = secureRandom.nextDouble(1.0)
         val cand = if (random < mean) 0 else 1
         votes[0] = mapOf(cand to 1)
         randomCvrs.add(Cvr("card-$it", votes))

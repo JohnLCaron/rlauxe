@@ -34,7 +34,7 @@ class TestGenSampleFn {
         }
 
         // make contests from cvrs
-        val contests: List<AuditContest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+        val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
         if (!silent && showContests) {
             println("Contests")
             contests.forEach { println("  ${it}") }
@@ -79,7 +79,7 @@ class TestGenSampleFn {
 
     @Test
     fun testComparisonWithErrors() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,

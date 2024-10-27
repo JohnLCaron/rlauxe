@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.comparison
 
-import org.cryptobiotic.rlauxe.core.AuditContest
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonAssertion
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
@@ -26,7 +26,7 @@ class TestAuditComparison {
         val cvrs = makeCvrsByExactMean(N, theta)
         println("ncvrs = ${cvrs.size} theta=$theta")
 
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,

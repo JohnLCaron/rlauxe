@@ -12,7 +12,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testBasics() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -34,7 +34,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testTwoCandidatePlurality() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -54,7 +54,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testThreeCandidatePluralityAssorter() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -72,7 +72,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testThreeCandidatePluralityAvg() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -111,7 +111,7 @@ class TestAssorterPlurality {
         }
     }
 
-    fun test3way(contest : AuditContest, cvrs: List<Cvr>, counts: List<Int>, winner: Int, loser:Int, other: Int): Double {
+    fun test3way(contest : Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int, loser:Int, other: Int): Double {
         val assort = PluralityAssorter(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         assertEquals((counts[winner] + counts[other]*.5)/counts.sum(), assortAvg)
@@ -121,7 +121,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testNCandidatePluralityAvg() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -167,7 +167,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testMultipleWinners() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -197,7 +197,7 @@ class TestAssorterPlurality {
 
     @Test
     fun testNoMissingMultipleWinners() {
-        val contest = AuditContest(
+        val contest = Contest(
             id = "AvB",
             idx = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
@@ -238,7 +238,7 @@ class TestAssorterPlurality {
         // (4, 3)= 0.6837255634416636
     }
 
-    fun testNway(contest : AuditContest, cvrs: List<Cvr>, counts: List<Int>, winner: Int, loser:Int): Double {
+    fun testNway(contest : Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int, loser:Int): Double {
         val assort = PluralityAssorter(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val others = counts.mapIndexed { idx, it -> if (idx != winner && idx != loser) it else 0}.sum()

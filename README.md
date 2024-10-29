@@ -1,5 +1,5 @@
 # rlauxe
-last update: 10/22/2024
+last update: 10/29/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -17,7 +17,7 @@ Table of Contents
       * [PLURALITY](#plurality)
       * [APPROVAL](#approval)
       * [SUPERMAJORITY](#supermajority)
-      * [IRV (TODO)](#irv-todo)
+      * [IRV (In Progress)](#irv-in-progress)
     * [Comparison audits](#comparison-audits)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Use Styles](#use-styles)
@@ -148,7 +148,7 @@ Notes
 * multiple winners are allowed
 
 
-#### IRV (TODO)
+#### IRV (In Progress)
 
 See
 ````

@@ -5,8 +5,8 @@ import kotlin.random.Random
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 
 data class Contest(
-    val id: String,
-    val idx: Int,
+    val id: String, // change to name?
+    val idx: Int,   // change to id?
     var candidateNames: List<String>, // order must not change; this is the candidate name -> index
     val winnerNames: List<String>,
     val choiceFunction: SocialChoiceFunction,
@@ -14,6 +14,7 @@ data class Contest(
 ) {
     val winners: List<Int>
     val losers: List<Int>
+    val candidates: List<Int>
 
     init {
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
@@ -24,6 +25,7 @@ data class Contest(
         }
         winners = mwinners.toList()
         losers = mlosers.toList()
+        candidates = winners + losers
     }
 }
 
@@ -63,7 +65,7 @@ class CvrUnderAudit(val cvr: Cvr, var sampleNum: Int = 0) {
     var sampled = false //  # is this CVR in the sample?
     var p: Double = 0.0
 
-    fun hasContest(want: Int) = cvr.votes.containsKey(want)
+    fun hasContest(want: Int) = cvr.hasContest(want)
 
     constructor(id: String, contestIdx: Int) : this(Cvr(id, mapOf(contestIdx to emptyMap())))
 }

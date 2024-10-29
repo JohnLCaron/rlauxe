@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 
 // for testing, here to share between modules
 
@@ -110,60 +108,4 @@ data class ContestVotes(val contestId: String, val votes: List<Vote>) {
 // TODO vote count vs true/false
 data class Vote(val candidateId: String, val vote: Int = 1) {
     constructor(candidateId: String, vote: Boolean): this(candidateId, if (vote) 1 else 0)
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// old, deprecated TODO get rid of?
-
-fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
-    val r = mutableMapOf<Int, MutableMap<Int, Int>>()
-    for (cvr in cvrs) {
-        for ((con, conVotes) in cvr.votes) {
-            val accumVotes = r.getOrPut(con) { mutableMapOf() }
-            for ((cand, vote) in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + vote
-            }
-        }
-    }
-    return r
-}
-
-// Number of cards in each contest, return contestId -> ncards
-fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
-    val d = mutableMapOf<Int, Int>()
-    for (cvr in cvrs) {
-        for (con in cvr.votes.keys) {
-            val accum = d.getOrPut(con) { 0 }
-            d[con] = accum + 1
-        }
-    }
-    return d
-}
-
-fun makeContestsFromCvrs(
-    votes: Map<Int, Map<Int, Int>>,  // contestId -> candidate -> votes
-    cards: Map<Int, Int>, // contestId -> ncards
-    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-): List<Contest> {
-    val svotes = votes.toSortedMap()
-    val contests = mutableListOf<Contest>()
-
-    for ((contestId, candidateMap) in svotes.toSortedMap()) {
-        val scandidateMap = candidateMap.toSortedMap()
-        val winner = scandidateMap.maxBy { it.value }.key
-
-        contests.add(
-            Contest(
-                id = "contest$contestId",
-                idx = contestId,
-                choiceFunction = choiceFunction,
-                candidateNames = scandidateMap.keys.map { "candidate$it" },
-                winnerNames = listOf("candidate$winner"),
-            )
-        )
-    }
-
-    return contests
 }

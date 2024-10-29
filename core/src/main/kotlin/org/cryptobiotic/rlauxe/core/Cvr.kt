@@ -5,24 +5,23 @@ package org.cryptobiotic.rlauxe.core
 // the audit contains the contest string -> index map?
 // the contest contains the candiate string -> index map?
 
-typealias Mvr = Cvr
 
 class Cvr(
     val id: String,
     val votes: Map<Int, Map<Int, Int>>, // contest : candidate : vote
     val phantom: Boolean = false
 ) {
-    fun hasContest(contestIdx: Int): Boolean = votes[contestIdx] != null
+    fun hasContest(contestId: Int): Boolean = votes[contestId] != null
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
-    fun hasMarkFor(contestIdx: Int, candidateIdx: Int): Int {
-        val contestVotes = votes[contestIdx]
-        return if (contestVotes == null) 0 else contestVotes[candidateIdx] ?: 0
+    fun hasMarkFor(contestId: Int, candidateId: Int): Int {
+        val contestVotes = votes[contestId]
+        return if (contestVotes == null) 0 else contestVotes[candidateId] ?: 0
     }
 
     // Is there exactly one vote in the contest among the given candidates?
-    fun hasOneVote(contestIdx: Int, candidates: List<Int>): Boolean {
-        val contestVotes = this.votes[contestIdx] ?: return false
+    fun hasOneVote(contestId: Int, candidates: List<Int>): Boolean {
+        val contestVotes = this.votes[contestId] ?: return false
         val totalVotes = contestVotes.filter{ candidates.contains(it.key) }.map { it.value }.sum()
         return (totalVotes == 1)
     }
@@ -32,8 +31,8 @@ class Cvr(
     // This assumes candidate indexes are sequential starting at 0.
     // This reproduces behavior in SHANGRLA test_Assertion.
     // This is only used my supermajority assorter.
-    fun hasOneVote(contestIdx: Int, ncandidates: Int): Boolean {
-        val contestVotes = this.votes[contestIdx] ?: return false
+    fun hasOneVote(contestId: Int, ncandidates: Int): Boolean {
+        val contestVotes = this.votes[contestId] ?: return false
         val totalVotes = contestVotes.filter { it.key < ncandidates }.map { it.value }.sum()
         return (totalVotes == 1)
     }

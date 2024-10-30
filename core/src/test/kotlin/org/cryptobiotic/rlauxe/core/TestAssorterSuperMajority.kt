@@ -31,8 +31,8 @@ class TestAssorterSuperMajority {
         assertEquals(0.5 / minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
         assertEquals(0.0, winner12.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
 
-        val votes = mutableMapOf<Int, Map<Int, Int>>()
-        votes[0] = mapOf(0 to 1, 2 to 1)
+        val votes = mutableMapOf<Int, IntArray>()
+        votes[0] = intArrayOf(0, 2)
         val cvr02 = Cvr("card", votes)
         assertEquals(0.5, winner12.assort(cvr02)) // otherwise
     }

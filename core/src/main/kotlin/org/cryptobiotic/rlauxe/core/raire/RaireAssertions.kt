@@ -1,56 +1,10 @@
 package org.cryptobiotic.rlauxe.core.raire
 
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import org.cryptobiotic.rlauxe.core.RaireAssorter
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 
-// reading RAIRE JSON result files
-@Serializable
-data class RaireResultsJson(
-    @SerialName("Overall Expected Polls (#)")
-    val overallExpectedPollsNumber : String,
-    @SerialName("Ballots involved in audit (#)")
-    val ballotsInvolvedInAuditNumber : String,
-    val audits: List<RaireContestAuditJson>,
-)
+import org.cryptobiotic.rlaux.core.raire.RaireCvr
+import org.cryptobiotic.rlauxe.core.*
 
-@Serializable
-data class RaireContestAuditJson(
-    val contest: String,
-    val winner: String,
-    val eliminated: List<String>,
-    @SerialName("Expected Polls (#)")
-    val expectedPollsNumber : String,
-    @SerialName("Expected Polls (%)")
-    val expectedPollsPercent : String,
-    val assertions: List<RaireAssertionJson>,
-)
-
-@Serializable
-data class RaireAssertionJson(
-    val winner: String,
-    val loser: String,
-    val already_eliminated: List<String>,
-    val assertion_type: String,
-    val explanation: String,
-)
-
-@OptIn(ExperimentalSerializationApi::class)
-fun readRaireResults(filename: String): RaireResultsJson {
-    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
-    Files.newInputStream(Path.of(filename), StandardOpenOption.READ).use { inp ->
-        val result =  jsonReader.decodeFromStream<RaireResultsJson>(inp)
-        // println(Json.encodeToString(result))
-        return result
-    }
-}
 
 data class RaireResults(
     val overallExpectedPollsNumber : Int,
@@ -63,15 +17,8 @@ data class RaireResults(
     }
 }
 
-fun RaireResultsJson.import() =
-    RaireResults(
-        this.overallExpectedPollsNumber.toInt(),
-        this.ballotsInvolvedInAuditNumber.toInt(),
-        this.audits.map { it.import() },
-    )
-
 data class RaireContestAudit(
-    val contest: String,
+    val name: String,
     val winner: Int,  // the sum of winner and eliminated must be all the candiates
     val eliminated: List<Int>,
     val expectedPollsNumber : Int,
@@ -81,20 +28,25 @@ data class RaireContestAudit(
     val candidates =  listOf(winner) + eliminated // seems likely
 
     fun show() = buildString {
-        appendLine("  contest $contest winner $winner eliminated $eliminated")
+        appendLine("  contest $name winner $winner eliminated $eliminated")
         assertions.forEach { append(it.show()) }
     }
-}
 
-fun RaireContestAuditJson.import() =
-    RaireContestAudit(
-        this.contest,
-        this.winner.toInt(),
-        this.eliminated .map { it.toInt() },
-        this.expectedPollsNumber.toInt(),
-        this.expectedPollsPercent.toDouble(),
-        this.assertions.map { it.import() },
-    )
+    fun toContest(): Contest {
+        //    val name: String,
+        //    val id: Int,
+        //    var candidateNames: Map<String, Int>, // candidate name -> candidate id
+        //    val winnerNames: List<String>,
+        //    val choiceFunction: SocialChoiceFunction,
+        return Contest(
+            name,
+            name.toInt(),
+            candidates.associate{ it.toString() to it },
+            listOf(winner.toString()),
+            SocialChoiceFunction.IRV,
+        )
+    }
+}
 
 data class RaireAssertion(
     val winner: Int,
@@ -103,7 +55,7 @@ data class RaireAssertion(
     val assertionType: String,
     val explanation: String,
 )  {
-    var assort: RaireAssorter? = null
+    var assorter: RaireAssorter? = null  // bit of a kludge
 
     fun show() = buildString {
         appendLine("    assertion type '$assertionType' winner $winner loser $loser alreadyEliminated $alreadyEliminated explanation: '$explanation'")
@@ -118,20 +70,71 @@ data class RaireAssertion(
     }
 }
 
-fun RaireAssertionJson.import() =
-    RaireAssertion(
-        this.winner.toInt(),
-        this.loser.toInt(),
-        this.already_eliminated .map { it.toInt() },
-        this.assertion_type,
-        this.explanation,
-    )
-
 // add assorters to the assertions
 fun RaireContestAudit.addAssorters(): List<RaireAssorter> {
     return this.assertions.map {
         val assort = RaireAssorter(this, it)
-        it.assort = assort
+        it.assorter = assort
         assort
     }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): AssorterFunction {
+    val contestName = contest.name
+    val contestId = contest.name.toInt()
+    // I believe this doesnt change in the course of the audit
+    val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
+
+    override fun upperBound() = 1.0
+    override fun desc() = "RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}"
+
+    override fun assort(mvr: Cvr): Double {
+        val rcvr = mvr as RaireCvr
+        return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
+        else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)
+        else throw RuntimeException("unknown assertionType = $(this.assertionType")
+    }
+
+    fun assortWinnerOnly(rcvr: RaireCvr): Double {
+        // CVR is a vote for the winner only if it has the winner as its first preference
+        val awinner = if (rcvr.get_vote_for(contestId, assertion.winner) == 1) 1 else 0
+        // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
+        val aloser = rcvr.rcv_lfunc_wo( contestId, assertion.winner, assertion.loser)
+
+        //     An assorter must either have an `assort` method or both `winner` and `loser` must be defined
+        //    (in which case assort(c) = (winner(c) - loser(c) + 1)/2. )
+        return (awinner - aloser + 1) * 0.5
+    }
+
+    fun assortIrvElimination(rcvr: RaireCvr): Double {
+        // Context is that all candidates in "already_eliminated" have been
+        // eliminated and their votes distributed to later preferences
+        val awinner = rcvr.rcv_votefor_cand(contestId, assertion.winner, remaining)
+        val aloser = rcvr.rcv_votefor_cand(contestId, assertion.loser, remaining)
+
+        return (awinner - aloser + 1) * 0.5
+    }
+}
+
+fun makeRaireComparisonAudit(rcontests: List<RaireContestAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
+    val comparisonAssertions = mutableMapOf<Contest, List<ComparisonAssertion>>()
+
+    val contests = mutableListOf<Contest>()
+    rcontests.forEach { rcontest ->
+        rcontest.addAssorters()
+        val contest = rcontest.toContest()
+        contests.add(contest)
+
+        val clist = rcontest.assertions.map { assertion ->
+            val avgCvrAssortValue = cvrs.map { assertion.assorter!!.assort(it) }.average()
+            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter!!, avgCvrAssortValue)
+            ComparisonAssertion(contest, comparisonAssorter)
+        }
+        comparisonAssertions[contest] = clist
+    }
+
+    return AuditComparison(AuditType.CARD_COMPARISON, riskLimit, contests, comparisonAssertions)
 }

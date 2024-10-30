@@ -67,7 +67,7 @@ class CvrUnderAudit(val cvr: Cvr, var sampleNum: Int = 0) {
 
     fun hasContest(want: Int) = cvr.hasContest(want)
 
-    constructor(id: String, contestIdx: Int) : this(Cvr(id, mapOf(contestIdx to emptyMap())))
+    constructor(id: String, contestIdx: Int) : this(Cvr(id, mapOf(contestIdx to IntArray(0))))
 }
 
 fun makeCvras(cvrs: List<Cvr>, random: Random): List<CvrUnderAudit> {
@@ -169,7 +169,7 @@ fun makePhantoms(
 private class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
     fun build(): CvrUnderAudit {
-        val votes = contests.map { it to emptyMap<Int, Int>() }.toMap()
+        val votes = contests.map { it to IntArray(0) }.toMap()
         return CvrUnderAudit(Cvr(id, votes, true))
     }
 }

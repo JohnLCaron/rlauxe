@@ -12,7 +12,7 @@ data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,   // number of samples needed to decide (or maximum allowed)
     val sampleMean: Double, // average of the assort values in the sample
-    val pvalues: List<Double>,  // set of pvalues (only need for testing)
+    val pvalues: List<Double>,  // set of pvalues
     val etajs: List<Double>,  // ni
     val mujs: List<Double>,  // mi
 ) {

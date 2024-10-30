@@ -2,11 +2,10 @@
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
-import org.cryptobiotic.rlauxe.core.RaireAssorter
-import org.cryptobiotic.rlauxe.core.raire.import
-import org.cryptobiotic.rlauxe.core.raire.addAssorters
-import org.cryptobiotic.rlauxe.core.raire.readRaireResults
+import org.cryptobiotic.rlauxe.core.raire.*
 import org.cryptobiotic.rlauxe.csv.readColoradoBallotManifest
+import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.util.theta2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -387,7 +386,6 @@ class AssertionRLA {
         }
         val minMargin = margins.min()
         println("min = $minMargin")
-        val minAssertion = assorts[1]
 
 //audit.write_audit_parameters(contests=contests)
 //#%% md
@@ -398,9 +396,15 @@ class AssertionRLA {
 //# find initial sample size
 //sample_size = audit.find_sample_size(contests, cvrs=cvr_list)
 //print(f'{sample_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
-    // TODO SHANGRLA doing complicated stuff. Partly because they use the same fuctionm for different purposes.
-    //   Surprising that they dont just use the min margin. Could even precompute, depending on your error_rate assumptions
-    val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
+
+        // TODO SHANGRLA doing complicated stuff. Partly because they use the same fuctionm for different purposes.
+        //   Surprising that they dont just use the min margin. Could even precompute, depending on your error_rate assumptions
+        val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
+
+        val auditComparison = makeRaireComparisonAudit(raireResults.contests, rcContest.cvrs)
+        val comparisonAssertions = auditComparison.assertions.values.first()
+        val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+
 
 //## Draw the first sample
 //#%%
@@ -454,22 +458,20 @@ class AssertionRLA {
 //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'maximum assertion p-value {p_max}')
 //done = audit.summarize_status(contests)
-/*
-                val N = manifest.nballots
-                val optimal = OptimalComparisonNoP1(
-                    N = N,
-                    withoutReplacement = true,
-                    upperBound = upperBound,
-                    p2 = p2
-                )
 
-                val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)
-                val x = DoubleArray(n) { value }
-                val sampler = SampleFromArray(x)
-                val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+        val sampler: GenSampleFn = ComparisonNoErrors(rcContest.cvrs, minAssorter)
 
- */
+        val optimal = OptimalComparisonNoP1(
+            N = N,
+            withoutReplacement = true,
+            upperBound = minAssorter.upperBound,
+            p2 = 0.0
+        )
 
+        val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)
+        val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
+        println(result)
+        println("pvalues = ${result.pvalues}")
 
 
 // p-values for assertions in contest 339

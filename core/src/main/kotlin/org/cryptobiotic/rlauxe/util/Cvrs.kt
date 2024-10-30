@@ -10,8 +10,8 @@ fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
     var total = 0
     counts.forEachIndexed { idx, it ->
         repeat(it) {
-            val votes = mutableMapOf<Int, Map<Int, Int>>()
-            votes[0] = mapOf(idx to 1)
+            val votes = mutableMapOf<Int, IntArray>()
+            votes[0] = intArrayOf(idx)
             cvrs.add(Cvr("card-$total", votes))
             total++
         }
@@ -21,8 +21,8 @@ fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
 }
 
 fun makeCvr(idx: Int): Cvr {
-    val votes = mutableMapOf<Int, Map<Int, Int>>()
-    votes[0] = mapOf(idx to 1)
+    val votes = mutableMapOf<Int, IntArray>()
+    votes[0] = intArrayOf(idx)
     return Cvr("card", votes)
 }
 
@@ -31,10 +31,10 @@ fun makeCvr(idx: Int): Cvr {
 fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     val result = mutableListOf<Cvr>()
     repeat(ncards) {
-        val votes = mutableMapOf<Int, Map<Int, Int>>()
         val random = secureRandom.nextDouble(1.0)
         val cand = if (random < .5 + margin/2.0) 0 else 1
-        votes[0] = mapOf(cand to 1)
+        val votes = mutableMapOf<Int, IntArray>()
+        votes[0] = intArrayOf(cand)
         result.add(Cvr("card-$it", votes))
     }
     return result
@@ -46,10 +46,10 @@ fun theta2margin(theta: Double) = 2.0 * theta - 1.0
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
-        val votes = mutableMapOf<Int, Map<Int, Int>>()
         val random = secureRandom.nextDouble(1.0)
         val cand = if (random < mean) 0 else 1
-        votes[0] = mapOf(cand to 1)
+        val votes = mutableMapOf<Int, IntArray>()
+        votes[0] = intArrayOf(cand)
         randomCvrs.add(Cvr("card-$it", votes))
     }
     flipExactVotes(randomCvrs, mean)
@@ -65,9 +65,9 @@ fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
     for (cvr in cvrs) {
         for ((con, conVotes) in cvr.votes) {
             val accumVotes = r.getOrPut(con) { mutableMapOf() }
-            for ((cand, vote) in conVotes) {
+            for (cand in conVotes) {
                 val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + vote
+                accumVotes[cand] = accum + 1
             }
         }
     }

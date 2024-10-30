@@ -25,17 +25,20 @@ data class RaireCvrContest(
 
 // "RaireCvr is always for one contest" probably an artifact of raire processing
 class RaireCvr(
-    id: String,
+    name: String,
+    contestId: Int,
+    rankedChoices: IntArray, // could be Map<Int, IntArray>
     phantom: Boolean,
-    val contestNumber: Int,
-    val rankedChoices: List<Int>, // could be Map<Int, IntArray>
-): Cvr(id, emptyMap(), phantom) {
-    constructor(ranks: List<Int>): this( "", false,0, ranks) // for quick testing
-    constructor(contest: Int, id: String, ranks: List<Int>): this( id, false, contest, ranks) // for quick testing
+): Cvr(name, mapOf(contestId to rankedChoices), phantom) {
+
+    constructor(contest: Int, ranks: List<Int>): this( "", contest, ranks.toIntArray(), false) // for quick testing
+    constructor(contest: Int, id: String, ranks: List<Int>): this( id, contest, ranks.toIntArray(), false) // for quick testing
 
     /** if candidate not ranked, 0 , else rank (1 based */
-    fun get_vote_for(candidate: Int): Int {
-        return if (!rankedChoices.contains(candidate)) 0 else rankedChoices.indexOf(candidate) + 1
+    fun get_vote_for(contest: Int, candidate: Int): Int {
+        val rankedChoices = votes[contest]
+        return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
+               else rankedChoices.indexOf(candidate) + 1
     }
 
     /**
@@ -46,9 +49,9 @@ class RaireCvr(
      * @param loser identifier for losing candidate
      * @return 1 if the given vote is a vote for 'loser' and 0 otherwise
      */
-    fun rcv_lfunc_wo(winner: Int, loser: Int): Int {
-        val rank_winner = get_vote_for(winner)
-        val rank_loser = get_vote_for(loser)
+    fun rcv_lfunc_wo(contest: Int, winner: Int, loser: Int): Int {
+        val rank_winner = get_vote_for(contest, winner)
+        val rank_loser = get_vote_for(contest, loser)
 
         return when {
             rank_winner == 0 && rank_loser != 0 -> 1
@@ -67,19 +70,19 @@ class RaireCvr(
      * Essentially, if you reduce the ballot down to only those candidates in 'remaining',
      * and 'cand' is the first preference, return 1; otherwise return 0.
      */
-    fun rcv_votefor_cand(cand: Int, remaining: List<Int>): Int {
+    fun rcv_votefor_cand(contest: Int, cand: Int, remaining: List<Int>): Int {
         if (cand !in remaining) {
             return 0
         }
 
-        val rank_cand = get_vote_for(cand) ?: return 0
+        val rank_cand = get_vote_for(contest, cand) ?: return 0
         if (rank_cand == 0) return 0
 
         for (altc in remaining) {
             if (altc == cand) {
                 continue
             }
-            val rank_altc = get_vote_for(altc)
+            val rank_altc = get_vote_for(contest, altc)
             if (rank_altc != 0 && rank_altc <= rank_cand) {
                 return 0
             }

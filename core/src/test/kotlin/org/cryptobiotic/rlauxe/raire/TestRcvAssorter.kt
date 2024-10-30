@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.raire.import
-import org.cryptobiotic.rlauxe.core.raire.makeAssorters
+import org.cryptobiotic.rlauxe.core.raire.addAssorters
 import org.cryptobiotic.rlauxe.core.raire.readRaireResults
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -54,34 +54,33 @@ class TestRcvAssorter {
         val rr =
             readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json")
         val raireResults = rr.import()
-        val show = raireResults.show()
-        // println(show)
-
-        val rrContest = raireResults.contests.find { it.contest == "334"}!!
-        rrContest.makeAssorters() // adds assorts to the assertion
+        // println(raireResults.show())
+        val contest = 334
+        val rrContest = raireResults.contests.find { it.name == "334"}!!
+        rrContest.addAssorters() // adds assorts to the assertion
 
         // winner only assertion
         val wassertion = rrContest.assertions.find { it.match(5, 47, true) }!!
-        println(wassertion.assort)
+        println(wassertion.assorter)
 
-        assertEquals(1.0, wassertion.assort!!.assort(RaireCvr(listOf(5, 47))))
-        assertEquals(0.0, wassertion.assort!!.assort(RaireCvr(listOf(47, 5))))
-        assertEquals(0.5, wassertion.assort!!.assort(RaireCvr(listOf(3, 6))))
-        assertEquals(0.0, wassertion.assort!!.assort(RaireCvr(listOf(3, 47))))
-        assertEquals(0.5, wassertion.assort!!.assort(RaireCvr(listOf(3, 5))))
+        assertEquals(1.0, wassertion.assorter!!.assort(RaireCvr(contest, listOf(5, 47))))
+        assertEquals(0.0, wassertion.assorter!!.assort(RaireCvr(contest, listOf(47, 5))))
+        assertEquals(0.5, wassertion.assorter!!.assort(RaireCvr(contest, listOf(3, 6))))
+        assertEquals(0.0, wassertion.assorter!!.assort(RaireCvr(contest, listOf(3, 47))))
+        assertEquals(0.5, wassertion.assorter!!.assort(RaireCvr(contest, listOf(3, 5))))
 
         // elimination assertion
         //            assorter = assertions['334']['5 v 3 elim 1 6 47'].assorter
         val eassertion = rrContest.assertions.find { it.match(5, 3, false, listOf(1, 6, 47)) }!!
-        println(eassertion.assort)
+        println(eassertion.assorter)
 
-        assertEquals(1.0, eassertion.assort!!.assort(RaireCvr(listOf(5, 47))))
-        assertEquals(1.0, eassertion.assort!!.assort(RaireCvr(listOf(47, 5))))
-        assertEquals(0.0, eassertion.assort!!.assort(RaireCvr(listOf(6, 1, 3, 5))))
-        assertEquals(0.0, eassertion.assort!!.assort(RaireCvr(listOf(3, 47))))
-        assertEquals(0.5, eassertion.assort!!.assort(RaireCvr(listOf())))
-        assertEquals(0.5, eassertion.assort!!.assort(RaireCvr(listOf(6, 47))))
-        assertEquals(1.0, eassertion.assort!!.assort(RaireCvr(listOf(6, 47, 5))))
+        assertEquals(1.0, eassertion.assorter!!.assort(RaireCvr(contest, listOf(5, 47))))
+        assertEquals(1.0, eassertion.assorter!!.assort(RaireCvr(contest, listOf(47, 5))))
+        assertEquals(0.0, eassertion.assorter!!.assort(RaireCvr(contest, listOf(6, 1, 3, 5))))
+        assertEquals(0.0, eassertion.assorter!!.assort(RaireCvr(contest, listOf(3, 47))))
+        assertEquals(0.5, eassertion.assorter!!.assort(RaireCvr(contest, listOf())))
+        assertEquals(0.5, eassertion.assorter!!.assort(RaireCvr(contest, listOf(6, 47))))
+        assertEquals(1.0, eassertion.assorter!!.assort(RaireCvr(contest, listOf(6, 47, 5))))
 
         //
         //            votes = CVR.from_vote({'5': 1, '47': 2})

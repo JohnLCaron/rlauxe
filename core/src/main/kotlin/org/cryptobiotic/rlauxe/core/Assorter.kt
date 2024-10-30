@@ -14,8 +14,8 @@ interface AssorterFunction {
 data class PluralityAssorter(val contest: Contest, val winner: Int, val loser: Int): AssorterFunction {
     // SHANGRLA section 2, p 4.
     override fun assort(mvr: Cvr): Double {
-        val w = mvr.hasMarkFor(contest.idx, winner)
-        val l = mvr.hasMarkFor(contest.idx, loser)
+        val w = mvr.hasMarkFor(contest.id, winner)
+        val l = mvr.hasMarkFor(contest.id, loser)
         return (w - l + 1) * 0.5
     }
     override fun upperBound() = 1.0
@@ -28,8 +28,8 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
 
     // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: Cvr): Double {
-        val w = mvr.hasMarkFor(contest.idx, winner)
-        return if (mvr.hasOneVote(contest.idx, contest.candidates)) (w / (2 * minFraction)) else .5
+        val w = mvr.hasMarkFor(contest.id, winner)
+        return if (mvr.hasOneVote(contest.id, contest.candidates)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound
@@ -40,7 +40,7 @@ data class Assertion(
     val contest: Contest,
     val assorter: AssorterFunction,
 ) {
-    override fun toString() = "Assertion for ${contest.id} assorter=${assorter.desc()}"
+    override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()}"
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -114,8 +114,8 @@ data class ComparisonAssorter(
         //            raise ValueError(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
-        if (useStyle and !cvr.hasContest(contest.idx)) {
-            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.id}")
+        if (useStyle and !cvr.hasContest(contest.id)) {
+            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.name}")
         }
 
         //        If use_style, then if the CVR contains the contest but the MVR does
@@ -125,7 +125,7 @@ data class ComparisonAssorter(
         //            0
         //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
         //            else self.assort(mvr)
-        val mvr_assort = if (mvr.phantom || (useStyle && !mvr.hasContest(contest.idx))) 0.0
+        val mvr_assort = if (mvr.phantom || (useStyle && !mvr.hasContest(contest.id))) 0.0
                          else this.assorter.assort(mvr)
 
         //        If not use_style, then if the CVR contains the contest but the MVR does not,
@@ -149,43 +149,5 @@ class ComparisonAssertion(
     val contest: Contest,
     val assorter: ComparisonAssorter,
 ) {
-    override fun toString() = "ComparisonAssertion for ${contest.id} assorter=${assorter.desc()}"
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion) {
-    val contestName = contest.contest
-    // I believe this doesnt change in the course of the audit
-    val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
-
-    fun upperBound() = 1.0
-    fun desc() = "RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}"
-
-    fun assort(rcvr: RaireCvr): Double {
-        return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
-        else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)
-        else throw RuntimeException("unknown assertionType = $(this.assertionType")
-    }
-
-    fun assortWinnerOnly(rcvr: RaireCvr): Double {
-        // CVR is a vote for the winner only if it has the winner as its first preference
-        val awinner = if (rcvr.get_vote_for(assertion.winner) == 1) 1 else 0
-        // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = rcvr.rcv_lfunc_wo( assertion.winner, assertion.loser)
-
-        //     An assorter must either have an `assort` method or both `winner` and `loser` must be defined
-        //    (in which case assort(c) = (winner(c) - loser(c) + 1)/2. )
-        return (awinner - aloser + 1) * 0.5
-    }
-
-    fun assortIrvElimination(rcvr: RaireCvr): Double {
-        // Context is that all candidates in "already_eliminated" have been
-        // eliminated and their votes distributed to later preferences
-        val awinner = rcvr.rcv_votefor_cand(assertion.winner, remaining)
-        val aloser = rcvr.rcv_votefor_cand(assertion.loser, remaining)
-
-        return (awinner - aloser + 1) * 0.5
-    }
-
+    override fun toString() = "ComparisonAssertion for ${contest.name} assorter=${assorter.desc()}"
 }

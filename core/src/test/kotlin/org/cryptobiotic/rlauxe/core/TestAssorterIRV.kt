@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
@@ -13,10 +14,10 @@ class TestAssorterIRV {
     @Test
     fun testBasics() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.IRV,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
         )
         val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
@@ -35,10 +36,10 @@ class TestAssorterIRV {
     @Test
     fun testTwoCandidatePlurality() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B"),
+            candidateNames = listToMap( "A", "B"),
             winnerNames = listOf("A"),
         )
         val cvrs: List<Cvr> = makeCvrsByExactMean(ncards = 100, mean = .55)
@@ -55,10 +56,10 @@ class TestAssorterIRV {
     @Test
     fun testThreeCandidatePluralityAssorter() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
         )
         val cvr0 = makeCvr(0)
@@ -73,10 +74,10 @@ class TestAssorterIRV {
     @Test
     fun testThreeCandidatePluralityAvg() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
         )
         val counts = listOf(1000, 980, 100)
@@ -122,10 +123,10 @@ class TestAssorterIRV {
     @Test
     fun testNCandidatePluralityAvg() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("E"),
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
@@ -168,10 +169,10 @@ class TestAssorterIRV {
     @Test
     fun testMultipleWinners() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
@@ -198,10 +199,10 @@ class TestAssorterIRV {
     @Test
     fun testNoMissingMultipleWinners() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)

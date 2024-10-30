@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -13,10 +14,10 @@ class TestAssorterSuperMajority {
     @Test
     fun testThreeCandidateSuperMajorityAssorter() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
             minFraction = 0.60,
         )
@@ -30,8 +31,8 @@ class TestAssorterSuperMajority {
         assertEquals(0.5 / minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
         assertEquals(0.0, winner12.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
 
-        val votes = mutableMapOf<Int, Map<Int, Int>>()
-        votes[0] = mapOf(0 to 1, 2 to 1)
+        val votes = mutableMapOf<Int, IntArray>()
+        votes[0] = intArrayOf(0, 2)
         val cvr02 = Cvr("card", votes)
         assertEquals(0.5, winner12.assort(cvr02)) // otherwise
     }
@@ -39,10 +40,10 @@ class TestAssorterSuperMajority {
     @Test
     fun testThreeCandidateNoMajority() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf(),
             minFraction = 0.60,
         )
@@ -61,10 +62,10 @@ class TestAssorterSuperMajority {
     @Test
     fun testThreeCandidateMultipleWinners() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A", "B"),
             minFraction = 0.35,
         )
@@ -87,10 +88,10 @@ class TestAssorterSuperMajority {
         val ncandidates = counts.size
 
         val contest = Contest(
-            id = "ABCs",
-            idx = 0,
+            name = "ABCs",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E", "F", "G"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E", "F", "G"),
             winnerNames = listOf("A", "B", "D"),
             minFraction = 0.25,
         )

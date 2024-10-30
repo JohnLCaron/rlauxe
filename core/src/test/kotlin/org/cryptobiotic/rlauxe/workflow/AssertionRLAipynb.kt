@@ -2,13 +2,11 @@
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
-import org.cryptobiotic.rlauxe.core.RaireAssorter
-import org.cryptobiotic.rlauxe.core.raire.import
-import org.cryptobiotic.rlauxe.core.raire.makeAssorters
-import org.cryptobiotic.rlauxe.core.raire.readRaireResults
+import org.cryptobiotic.rlauxe.core.raire.*
 import org.cryptobiotic.rlauxe.csv.readColoradoBallotManifest
+import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.util.theta2margin
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -378,14 +376,16 @@ class AssertionRLA {
         // these are the means of the polling pluraility assorters; use this to set the margins
         var count = 0
         val rrContest = raireResults.contests.first()
-        val assorts: List<RaireAssorter> = rrContest.makeAssorters()
-        assorts.forEach { assort ->
+        val assorts: List<RaireAssorter> = rrContest.addAssorters()
+        val margins = assorts.map { assort ->
             val rcvrs = raireCvrs.contests.first().cvrs
             val mean = rcvrs.map { assort.assort(it) }.average()
             println(" ${assort.desc()} mean=$mean margin = ${theta2margin(mean)}")
-
             assertEquals(expected[count++], theta2margin(mean))
+            theta2margin(mean)
         }
+        val minMargin = margins.min()
+        println("min = $minMargin")
 
 //audit.write_audit_parameters(contests=contests)
 //#%% md
@@ -396,7 +396,16 @@ class AssertionRLA {
 //# find initial sample size
 //sample_size = audit.find_sample_size(contests, cvrs=cvr_list)
 //print(f'{sample_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
-//#%% md
+
+        // TODO SHANGRLA doing complicated stuff. Partly because they use the same fuctionm for different purposes.
+        //   Surprising that they dont just use the min margin. Could even precompute, depending on your error_rate assumptions
+        val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
+
+        val auditComparison = makeRaireComparisonAudit(raireResults.contests, rcContest.cvrs)
+        val comparisonAssertions = auditComparison.assertions.values.first()
+        val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+
+
 //## Draw the first sample
 //#%%
 //# draw the initial sample using consistent sampling
@@ -406,9 +415,11 @@ class AssertionRLA {
 //sampled_cvr_indices = CVR.consistent_sampling(cvr_list=cvr_list, contests=contests)
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
 //print(f'The sample includes {n_sampled_phantoms} phantom cards.')
+        // The sample includes 0 phantom cards.
 //#%%
 //len(cvr_list), manifest_cards, audit.max_cards
-//#%%
+        // (146662, 293555, 293555)
+
 //# for comparison audit
 //cards_to_retrieve, sample_order, cvr_sample, mvr_phantoms_sample = \
 //    Dominion.sample_from_cvrs(cvr_list, manifest, sampled_cvr_indices)
@@ -447,21 +458,38 @@ class AssertionRLA {
 //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'maximum assertion p-value {p_max}')
 //done = audit.summarize_status(contests)
-        /*
-                val N = manifest.nballots
-                val optimal = OptimalComparisonNoP1(
-                    N = N,
-                    withoutReplacement = true,
-                    upperBound = upperBound,
-                    p2 = p2
-                )
 
-                val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)
-                val x = DoubleArray(n) { value }
-                val sampler = SampleFromArray(x)
-                val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+        val sampler: GenSampleFn = ComparisonNoErrors(rcContest.cvrs, minAssorter)
 
-         */
+        val optimal = OptimalComparisonNoP1(
+            N = N,
+            withoutReplacement = true,
+            upperBound = minAssorter.upperBound,
+            p2 = 0.0
+        )
+
+        val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)
+        val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
+        println(result)
+        println("pvalues = ${result.pvalues}")
+
+
+// p-values for assertions in contest 339
+//	18 v 17 elim 15 16 45: 0.47847909464463045
+//	17 v 16 elim 15 18 45: 0.48779308744628547
+//	15 v 18 elim 16 17 45: 0.44631352397209006
+//	18 v 16 elim 15 17 45: 2.877844184074244e-07
+//	17 v 16 elim 15 45: 0.0035354717267599813
+//	15 v 17 elim 16 45: 4.0458461637126434e-07
+//	15 v 17 elim 16 18 45: 2.3358046805505937e-07
+//	18 v 16 elim 15 45: 5.790407277111407e-13
+//	15 v 16 elim 17 45: 9.312863307985585e-12
+//	15 v 16 elim 17 18 45: 1.8495628594508403e-09
+//	15 v 16 elim 18 45: 1.1604860427653792e-14
+//	15 v 16 elim 45: 9.55405920633293e-14
+//	15 v 45: 1.373326785425354e-26
+//
+//contest 339 audit INCOMPLETE at risk limit 0.05. Attained risk 0.48779308744628547
 
 //# Log the status of the audit
 //audit.write_audit_parameters(contests)
@@ -478,6 +506,8 @@ class AssertionRLA {
 //
 //new_size = audit.find_sample_size(contests, cvrs=cvr_list, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'{new_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
+        // new_size=7098
+        //[('339', 6726)]
 //
 //#%%
 //# save the first sample
@@ -526,70 +556,27 @@ class AssertionRLA {
 //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'maximum assertion p-value {p_max}')
 //done = audit.summarize_status(contests)
+        // p-values for assertions in contest 339
+        //	18 v 17 elim 15 16 45: 1.4449144036994632e-65
+        //	17 v 16 elim 15 18 45: 1.2395432394747009e-28
+        //	15 v 18 elim 16 17 45: 5.2774518365009846e-42
+        //	18 v 16 elim 15 17 45: 6.205447790363212e-127
+        //	17 v 16 elim 15 45: 2.8080650629218943e-86
+        //	15 v 17 elim 16 45: 2.6490812247796027e-123
+        //	15 v 17 elim 16 18 45: 1.7998086930305547e-166
+        //	18 v 16 elim 15 45: 1.7022899132638306e-231
+        //	15 v 16 elim 17 45: 4.74504262834718e-210
+        //	15 v 16 elim 17 18 45: 2.445447527327654e-209
+        //	15 v 16 elim 18 45: 9.191770721839916e-261
+        //	15 v 16 elim 45: 8.342200191989171e-244
+        //	15 v 45: 0.0
+        //
+        //contest 339 AUDIT COMPLETE at risk limit 0.05. Attained risk 1.2395432394747009e-28
+        // TODO now its overkill
     }
 }
 
-//    @classmethod
-//    def set_all_margins_from_cvrs(
-//        cls,
-//        audit: object = None,
-//        contests: dict = None,
-//        cvr_list: "Collection[CVR]" = None,
-//    ):
-//        """
-//        Find all the assorter margins in a set of Assertions. Updates the dict of dicts of assertions
-//        and the contest dict.
-//
-//        Appropriate only if cvrs are available. Otherwise, base margins on the reported results.
-//
-//        This function is primarily about side-effects on the assertions in the contest dict.
-//
-//        Parameters
-//        ----------
-//        audit: Audit
-//            information about the audit
-//        contests: dict of Contest objects
-//        cvr_list: Collection
-//            collection of CVR objects
-//
-//        Returns
-//        -------
-//        min_margin: float
-//            smallest margin in the audit
-//
-//        Side effects
-//        ------------
-//        sets the margin of every assertion
-//        sets the assertion.test.u for every assertion, according to whether
-//           `assertion.contest.audit_type==Audit.AUDIT_TYPE.POLLING`
-//           or `assertion.contest.audit_type in [Audit.AUDIT_TYPE.CARD_COMPARISON, Audit.AUDIT_TYPE.ONEAUDIT]`
-//        """
-//        min_margin = np.infty
-//        for c, con in contests.items():
-//            con.margins = {}
-//            for a, asn in con.assertions.items():
-//                asn.set_margin_from_cvrs(audit, cvr_list)
-//                margin = asn.margin
-//                con.margins.update({a: margin})
-//                if con.audit_type == Audit.AUDIT_TYPE.POLLING:
-//                    u = asn.assorter.upper_bound
-//                elif con.audit_type in [
-//                    Audit.AUDIT_TYPE.CARD_COMPARISON,
-//                    Audit.AUDIT_TYPE.ONEAUDIT,
-//                ]:
-//                    u = 2 / (2 - margin / asn.assorter.upper_bound)
-//                else:
-//                    raise NotImplementedError(
-//                        f"audit type {con.audit_type} not implemented"
-//                    )
-//                asn.test.u = u
-//                min_margin = min(min_margin, margin)
-//        return min_margin
-
-fun set_all_margins_from_cvrs() {
-
-}
-
+////////////////////////////////////////////////////////////////////////////////////////////////
 fun maxVal(inputList: ArrayList<ArrayList<String>>): Int {
     var maxValue = inputList[0][1].toInt()
 

@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.util.SampleFromArrayWithoutReplacement
-import org.cryptobiotic.rlauxe.util.generateUniformSample
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
@@ -12,6 +8,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sim.runTestRepeated
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -479,7 +476,7 @@ class TestComparisonFromAlpha {
 
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
 
-        val contest = Contest("contest0", 0, listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
@@ -542,7 +539,7 @@ class TestComparisonFromAlpha {
         val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
         assertEquals(1.009081735, u, doublePrecision)
          */
-        val contest = Contest("contest0", 0, listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
@@ -633,7 +630,7 @@ class TestComparisonFromAlpha {
         val d = 10000
         val ntrials = 100
 
-        val contest = Contest("contest0", 0, listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         for (factor in factors) {
             val srs = mutableListOf<SRT>()

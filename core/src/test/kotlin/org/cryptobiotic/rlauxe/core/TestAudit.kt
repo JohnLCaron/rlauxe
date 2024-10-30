@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -13,10 +14,10 @@ class TestAudit {
     @Test
     fun testPollingBasics() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
         )
         val audit = makePollingAudit(listOf(contest), riskLimit = .01)
@@ -39,10 +40,10 @@ class TestAudit {
     @Test
     fun testPollingSuper() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
             minFraction = .42
         )
@@ -66,10 +67,10 @@ class TestAudit {
     @Test
     fun testComparisonBasics() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
@@ -96,10 +97,10 @@ class TestAudit {
     @Test
     fun testComparisonSuperMajority() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
             minFraction = .33,
         )
@@ -127,10 +128,10 @@ class TestAudit {
     @Test
     fun testComparisonSuperMajorityFail() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
             minFraction = .66,
         )

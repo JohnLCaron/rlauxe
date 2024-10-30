@@ -5,9 +5,9 @@ import kotlin.random.Random
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 
 data class Contest(
-    val id: String, // change to name?
-    val idx: Int,   // change to id?
-    var candidateNames: List<String>, // order must not change; this is the candidate name -> index
+    val name: String,
+    val id: Int,
+    var candidateNames: Map<String, Int>, // candidate name -> candidate id
     val winnerNames: List<String>,
     val choiceFunction: SocialChoiceFunction,
     val minFraction: Double? = null, // supermajority only.
@@ -20,8 +20,8 @@ data class Contest(
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
         val mwinners = mutableListOf<Int>()
         val mlosers = mutableListOf<Int>()
-        candidateNames.forEachIndexed { idx, cand ->
-            if (winnerNames.contains(cand)) mwinners.add(idx) else mlosers.add(idx)
+        candidateNames.forEach { (name, id) ->
+            if (winnerNames.contains(name)) mwinners.add(id) else mlosers.add(id)
         }
         winners = mwinners.toList()
         losers = mlosers.toList()
@@ -31,8 +31,8 @@ data class Contest(
 
 // contest being audited, mutable
 class ContestUnderAudit(val contest: Contest, var ncards: Int? = null) {
-    val id = contest.id
-    val idx = contest.idx
+    val id = contest.name
+    val idx = contest.id
     var sampleSize: Int = 0 // Estimate the sample size required to confirm the contest at its risk limit
     var ncvrs: Int = 0
     var sampleThreshold = 0 // seems to be the highest sample.sampleNum used for this contest
@@ -67,7 +67,7 @@ class CvrUnderAudit(val cvr: Cvr, var sampleNum: Int = 0) {
 
     fun hasContest(want: Int) = cvr.hasContest(want)
 
-    constructor(id: String, contestIdx: Int) : this(Cvr(id, mapOf(contestIdx to emptyMap())))
+    constructor(id: String, contestIdx: Int) : this(Cvr(id, mapOf(contestIdx to IntArray(0))))
 }
 
 fun makeCvras(cvrs: List<Cvr>, random: Random): List<CvrUnderAudit> {
@@ -169,7 +169,7 @@ fun makePhantoms(
 private class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
     fun build(): CvrUnderAudit {
-        val votes = contests.map { it to emptyMap<Int, Int>() }.toMap()
+        val votes = contests.map { it to IntArray(0) }.toMap()
         return CvrUnderAudit(Cvr(id, votes, true))
     }
 }

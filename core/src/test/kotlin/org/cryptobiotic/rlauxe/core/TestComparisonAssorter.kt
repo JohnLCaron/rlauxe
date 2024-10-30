@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
@@ -30,10 +31,10 @@ class TestComparisonAssorter {
     @Test
     fun testBasics() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
         )
         val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
@@ -96,10 +97,10 @@ class TestComparisonAssorter {
     @Test
     fun testTwoCandidatePlurality() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B"),
+            candidateNames = listToMap( "A", "B"),
             winnerNames = listOf("A"),
         )
         val cvrs: List<Cvr> = makeCvrsByExactMean(ncards = 100, mean = .55)
@@ -123,10 +124,10 @@ class TestComparisonAssorter {
     @Test
     fun testThreeCandidatePluralityAvg() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
         )
         val counts = listOf(1000, 980, 100)
@@ -152,10 +153,10 @@ class TestComparisonAssorter {
     @Test
     fun testNCandidatePluralityAvg() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),  // TODO not using winners here
         )
         val realWinner = 4
@@ -190,10 +191,10 @@ class TestComparisonAssorter {
     @Test
     fun testSupermajorityNoMajority() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf(),
             minFraction = 0.60,
         )
@@ -212,10 +213,10 @@ class TestComparisonAssorter {
     @Test
     fun testSupermajorityMultipleWinners() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A", "B"),
             minFraction = 0.35,
         )
@@ -238,10 +239,10 @@ class TestComparisonAssorter {
         val ncandidates = counts.size
 
         val contest = Contest(
-            id = "ABCs",
-            idx = 0,
+            name = "ABCs",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("A", "B", "D"),
             minFraction = 0.25,
         )
@@ -290,7 +291,7 @@ class TestComparisonAssorter {
         val cvrMean = 0.55
         val cvrs = makeCvrsByExactMean(N, cvrMean)
 
-        val contest = Contest("standard", 0, listOf("A", "B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contest = Contest("standard", 0, listToMap("A", "B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
         val compareAssertion = compareAudit.assertions[contest]!!.first()
         val compareAssorter1 = compareAssertion.assorter

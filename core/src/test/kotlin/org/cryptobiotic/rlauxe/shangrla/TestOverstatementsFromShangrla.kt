@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -59,10 +60,10 @@ class TestOverstatementsFromShangrla {
     @Test
     fun test_overstatement_assorter_margin() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            candidateNames = listToMap( "Alice", "Bob", "Candy"),
             winnerNames = listOf("Alice"),
         )
 
@@ -129,10 +130,10 @@ class TestOverstatementsFromShangrla {
     @Test
     fun test_overstatement_assorter_mean() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            candidateNames = listToMap( "Alice", "Bob", "Candy"),
             winnerNames = listOf("Alice"),
         )
 
@@ -201,10 +202,10 @@ class TestOverstatementsFromShangrla {
         //        aVb.margin=0.2
 
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "Alice", "Bob"),
+            candidateNames = listToMap( "Alice", "Bob"),
             winnerNames = listOf("Alice"),
         )
         val margin = 0.2
@@ -302,10 +303,10 @@ class TestOverstatementsFromShangrla {
         //        winner = ["Alice"]
         //        loser = ["Bob", "Candy"]
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            candidateNames = listToMap( "Alice", "Bob", "Candy"),
             winnerNames = listOf("Alice"),
         )
 

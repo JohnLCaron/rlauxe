@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.core.makePluralityAssertions
 import org.cryptobiotic.rlauxe.core.makeSuperMajorityAssertions
+import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -42,10 +43,10 @@ class TestAssertionsFromShangrla {
     @Test
     fun test_make_plurality_assertions() {
         val contest = Contest(
-            id = "ABCs",
-            idx = 0,
+            name = "ABCs",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "Alice", "Bob", "Candy", "Dan"),
+            candidateNames = listToMap( "Alice", "Bob", "Candy", "Dan"),
             winnerNames = listOf("Alice", "Bob"),
         )
 
@@ -119,10 +120,10 @@ class TestAssertionsFromShangrla {
     @Test
     fun test_supermajority_assorter() {
         val contest = Contest(
-            id = "ABCs",
-            idx = 0,
+            name = "ABCs",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            candidateNames = listToMap( "Alice", "Bob", "Candy"),
             winnerNames = listOf("Alice"),
             minFraction = 2.0 / 3.0,
         )

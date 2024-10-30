@@ -222,8 +222,8 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             val cvrIdx = secureRandom.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 1) == 1) {
-                val votes = mutableMapOf<Int, Map<Int, Int>>()
-                votes[0] = mapOf(0 to 1)
+                val votes = mutableMapOf<Int, IntArray>()
+                votes[0] = intArrayOf(0)
                 cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
                 changed--
             }
@@ -234,8 +234,8 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             val cvrIdx = secureRandom.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 0) == 1) {
-                val votes = mutableMapOf<Int, Map<Int, Int>>()
-                votes[0] = mapOf(1 to 1)
+                val votes = mutableMapOf<Int, IntArray>()
+                votes[0] = intArrayOf(1)
                 cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
                 changed++
             }
@@ -256,8 +256,8 @@ fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
         val cvrIdx = secureRandom.nextInt(ncards)
         val cvr = cvrs[cvrIdx]
         if (cvr.hasMarkFor(0, 0) == 1) {
-            val votes = mutableMapOf<Int, Map<Int, Int>>()
-            votes[0] = mapOf(2 to 1)
+            val votes = mutableMapOf<Int, IntArray>()
+            votes[0] = intArrayOf(2)
             cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
             changed++
         }

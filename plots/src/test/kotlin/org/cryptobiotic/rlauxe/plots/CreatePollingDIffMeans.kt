@@ -25,6 +25,7 @@ import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.test.Test
 
 import kotlin.text.format
@@ -214,12 +215,12 @@ class CreatePollingDiffMeans {
 
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = Contest("contest0", 0, listOf("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val audit = makePollingAudit(contests = listOf(contest))
 
         val results = mutableListOf<RunTestRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->
-            if (!silent && showContests) println("Assertions for Contest ${contest.id}")
+            if (!silent && showContests) println("Assertions for Contest ${contest.name}")
             assertions.forEach { assert ->
                 if (!silent && showContests) println("  ${assert}")
 

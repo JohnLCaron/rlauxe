@@ -1,15 +1,14 @@
 // Kotlin code
 
-import org.cryptobiotic.rla.csv.readColoradoBallotManifest
-import org.cryptobiotic.rla.csv.readRaireCvrs
-import org.cryptobiotic.rlauxe.core.AuditType
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.json.import
-import org.cryptobiotic.rlauxe.json.readRaireResults
+import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
+import org.cryptobiotic.rlauxe.core.RaireAssorter
+import org.cryptobiotic.rlauxe.core.raire.import
+import org.cryptobiotic.rlauxe.core.raire.makeAssorters
+import org.cryptobiotic.rlauxe.core.raire.readRaireResults
+import org.cryptobiotic.rlauxe.csv.readColoradoBallotManifest
+import org.cryptobiotic.rlauxe.util.theta2margin
 import kotlin.random.Random
-import kotlin.random.nextULong
-import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -153,7 +152,7 @@ import kotlin.test.assertEquals
 //        - `agrapa`
 //    + `test_kwargs`: keyword arguments for the risk function
 //
-data class ShangrlaAudit (
+data class ShangrlaAudit(
     val seed: Long,
     val simSeed: Long?,
     val quantile: Double, // quantile of the sample size to use for setting initial sample size
@@ -165,7 +164,7 @@ data class ShangrlaAudit (
     val logFile: String,
     val errorRate1: Double,
     val errorRate2: Double,
-    val reps: Int // number of replications to use to estimate sample sizes. If `reps is None`, uses a deterministic method
+    val reps: Int, // number of replications to use to estimate sample sizes. If `reps is None`, uses a deterministic method
 )
 
 //----
@@ -192,7 +191,7 @@ data class ShangrlaAudit (
 //        - `use_style`: True to use style information from CVRs to target the sample. False for polling audits or for sampling from all ballots for every contest.
 //        - other keys and values are added by the software, including `cvrs`, the number of CVRs that contain the contest, and `p`, the sampling fraction expected to be required to confirm the contest
 
-data class ShangrlaContest (
+data class ShangrlaContest(
     val name: String,
     val risk_limit: Double = 0.05,
     val cards: Int, // upper bound on the number of cast cards that contain the contest
@@ -200,10 +199,10 @@ data class ShangrlaContest (
     val n_winners: Int,
     val candidate: List<Int>,
     val winner: List<Int>,
-    val assertion_file : String, // for IRV
+    val assertion_file: String, // for IRV
     val audit_type: AuditType,
- //   'test':             NonnegMean.alpha_mart,
- //   'estim':            NonnegMean.optimal_comparison
+    //   'test':             NonnegMean.alpha_mart,
+    //   'estim':            NonnegMean.optimal_comparison
 )
 
 class AssertionRLA {
@@ -266,7 +265,7 @@ class AssertionRLA {
         //               }
         //
         //contests = Contest.from_dict_of_dicts(contest_dict)
-        val contest = ShangrlaContest(
+        val scontest = ShangrlaContest(
             name = "DA",
             risk_limit = 0.05,
             cards = 146662,
@@ -278,6 +277,7 @@ class AssertionRLA {
             audit_type = AuditType.CARD_COMPARISON,
         )
 
+        // Raire Assertions
         //# read the assertions for the IRV contest
         //for c in contests:
         //    if contests[c].choice_function == Contest.SOCIAL_CHOICE_FUNCTION.IRV:
@@ -289,17 +289,15 @@ class AssertionRLA {
         // JSON input: .....        "already_eliminated": "",
         // had to change                     "already_eliminated": "",  to                     "already_eliminated": [],
         // also no good reaspon to use string instead of int
-        val rr = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
+        val rr =
+            readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
         val raireResults = rr.import()
+        val show = raireResults.show()
+        println(show)
 
-
-//# construct the dict of dicts of assertions for each contest
-//Assertion.make_all_assertions(contests)
-//audit.check_audit_parameters(contests)
-//
-    //## Read the ballot manifest
-    //# special for Primary/Dominion manifest format
-    //manifest = pd.read_excel(audit.manifest_file)
+        //## Read the ballot manifest
+        //# special for Primary/Dominion manifest format
+        //manifest = pd.read_excel(audit.manifest_file)
         // TODO this has only batches, not distinguished by contest
         // val manifest = read_manifest_file(audit.manifestFile)
         // (293555, 293555) = audit.max_cards, np.sum(manifest['Total Ballots'])
@@ -313,10 +311,14 @@ class AssertionRLA {
 //cvr_list = Dominion.raire_to_dominion(cvr_list)
 //print(f'Read {cvrs_read} cvrs; {unique_ids} unique CVR identifiers after merging')
 
-        val cvrs = readRaireCvrs("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire")
-        println(" cvrs contests=${cvrs.contests.size} cvrs =${cvrs.contests.first().cvrs.size}")
-        assertEquals(1, cvrs.contests.size)
-        assertEquals(146662, cvrs.contests.first().cvrs.size)
+        // RaireCvrs
+        val raireCvrs =
+            readRaireCvrs("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire")
+        val rcContest = raireCvrs.contests.first()
+        val N = rcContest.cvrs.size // ??
+        println(" raireCvrs contests=${raireCvrs.contests.size} ncards =${N}")
+        assertEquals(1, raireCvrs.contests.size)
+        assertEquals(146662, N)
 
 //# Check that there is a card in the manifest for every card (possibly) cast. If not, add phantoms.
 //manifest, manifest_cards, phantom_cards = Dominion.prep_manifest(manifest, audit.max_cards, len(cvr_list))
@@ -341,6 +343,49 @@ class AssertionRLA {
 //
 //print(f'minimum assorter margin {min_margin}')
 //Contest.print_margins(contests)
+        // minimum assorter margin 0.019902906001554532
+        //margins in contest 339:
+        //	assertion 18 v 17 elim 15 16 45: 0.045792366120740224
+        //	assertion 17 v 16 elim 15 18 45: 0.019902906001554532
+        //	assertion 15 v 18 elim 16 17 45: 0.028923647570604505
+        //	assertion 18 v 16 elim 15 17 45: 0.0830003681935334
+        //	assertion 17 v 16 elim 15 45: 0.058079120699294995
+        //	assertion 15 v 17 elim 16 45: 0.08064120222007065
+        //	assertion 15 v 17 elim 16 18 45: 0.10951712099930444
+        //	assertion 18 v 16 elim 15 45: 0.14875018750596603
+        //	assertion 15 v 16 elim 17 45: 0.13548158350492967
+        //	assertion 15 v 16 elim 17 18 45: 0.1365247985163165
+        //	assertion 15 v 16 elim 18 45: 0.16666893946625572
+        //	assertion 15 v 16 elim 45: 0.15626406294745743
+        //	assertion 15 v 45: 0.2956457705472446
+        println()
+
+        val expected = listOf(
+            0.045792366120740224,
+            0.019902906001554532,
+             0.028923647570604505,
+            0.0830003681935334,
+            0.058079120699294995,
+             0.08064120222007065,
+            0.10951712099930444,
+             0.14875018750596603,
+             0.13548158350492967,
+            0.1365247985163165,
+            0.16666893946625572,
+            0.15626406294745743,
+            0.2956457705472446,
+        )
+        // these are the means of the polling pluraility assorters; use this to set the margins
+        var count = 0
+        val rrContest = raireResults.contests.first()
+        val assorts: List<RaireAssorter> = rrContest.makeAssorters()
+        assorts.forEach { assort ->
+            val rcvrs = raireCvrs.contests.first().cvrs
+            val mean = rcvrs.map { assort.assort(it) }.average()
+            println(" ${assort.desc()} mean=$mean margin = ${theta2margin(mean)}")
+
+            assertEquals(expected[count++], theta2margin(mean))
+        }
 
 //audit.write_audit_parameters(contests=contests)
 //#%% md
@@ -402,7 +447,22 @@ class AssertionRLA {
 //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'maximum assertion p-value {p_max}')
 //done = audit.summarize_status(contests)
-//#%%
+        /*
+                val N = manifest.nballots
+                val optimal = OptimalComparisonNoP1(
+                    N = N,
+                    withoutReplacement = true,
+                    upperBound = upperBound,
+                    p2 = p2
+                )
+
+                val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)
+                val x = DoubleArray(n) { value }
+                val sampler = SampleFromArray(x)
+                val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+
+         */
+
 //# Log the status of the audit
 //audit.write_audit_parameters(contests)
 //#%% md
@@ -466,254 +526,74 @@ class AssertionRLA {
 //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'maximum assertion p-value {p_max}')
 //done = audit.summarize_status(contests)
-//#%%
-        //# Log the status of the audit
-        //audit.write_audit_parameters(contests)
-        //#%% md
-        //# How many more cards should be audited?
-        //
-        //Estimate how many more cards will need to be audited to confirm any remaining contests. The enlarged sample size is based on:
-        //
-        //* cards already sampled
-        //* the assumption that we will continue to see errors at the same rate observed in the sample
-        //#%%
-        //# Estimate sample size required to confirm the outcome, if errors continue
-        //# at the same rate as already observed.
-        //
-        //new_size = audit.find_sample_size(contests, cvrs=cvr_list, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
-        //print(f'{new_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
-        //
-        //#%%
-        //# save the first sample
-        //sampled_cvr_indices_old, cards_to_retrieve_old, sample_order_old, cvr_sample_old, mvr_phantoms_sample_old = \
-        //    sampled_cvr_indices, cards_to_retrieve,     sample_order,     cvr_sample,     mvr_phantoms_sample
-        //#%%
-        //# draw the sample
-        //sampled_cvr_indices = CVR.consistent_sampling(cvr_list=cvr_list, contests=contests)
-        //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
-        //print(f'The sample includes {n_sampled_phantoms} phantom cards.')
-        //
-        //# for comparison audit
-        //cards_to_retrieve, sample_order, cvr_sample, mvr_phantoms_sample = \
-        //    Dominion.sample_from_cvrs(cvr_list, manifest, sampled_cvr_indices)
-        //
-        //# for polling audit
-        //# cards_to_retrieve, sample_order, mvr_phantoms_sample = Dominion.sample_from_manifest(manifest, sample)
-        //
-        //# write the sample
-        //# could write only the incremental sample using list(set(cards_to_retrieve) - set(cards_to_retrieve_old))
-        //Dominion.write_cards_sampled(audit.sample_file, cards_to_retrieve, print_phantoms=False)
-        //#%%
-        //# for real data
-        //with open(audit.mvr_file) as f:
-        //    mvr_json = json.load(f)
-        //
-        //mvr_sample = CVR.from_dict(mvr_json['ballots'])
-        //
-        //# for simulated data, no errors
-        //mvr_sample = cvr_sample.copy()
-        //#%% md
-        //## Find measured risks for all assertions
-        //#%%
-        //CVR.prep_comparison_sample(mvr_sample, cvr_sample, sample_order)  # for comparison audit
-        //# CVR.prep_polling_sample(mvr_sample, sample_order)  # for polling audit
-        //
-        //###### TEST
-        //# permute part of the sample to introduce errors deliberately
-        //mvr_sample = cvr_sample.copy()
-        //n_errs = 5
-        //errs = mvr_sample[0:n_errs].copy()
-        //np.random.seed(12345678)
-        //np.random.shuffle(errs)
-        //mvr_sample[0:n_errs] = errs
-        //#%%
-        //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
-        //print(f'maximum assertion p-value {p_max}')
-        //done = audit.summarize_status(contests)
     }
 }
 
-fun workflowOld() {
-    //+ Read overall audit information (including the seed) and contest information
-    //+ Read assertions for IRV contests and construct assertions for all other contests
-    //+ Read ballot manifest
-    //+ Read cvrs. Every CVR should have a corresponding manifest entry.
-
-    val audit = ShangrlaAudit(
-        1234567890123456789L,
-        314159265,
-        0.8,
-        "./data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
-        "./data/SFDA2019/N19 ballot manifest with WH location for RLA Upload VBM 11-14.xlsx",
-        true,
-        "./data/sample.csv",
-        "./data/mvr.json",
-        "./data/log.json",
-        0.001,
-        0.0,
-        100
-    )
-    // audit.max_cards = np.sum([s.max_cards for s in audit.strata.values()])
-    // assertEquals(293555, audit.max_cards)
-
-    var maxCardsEdit = 293555 // wtf?
-
-    //// and the assertions must get read here
-//contest_dict = {'339':{
-//                   'name': 'DA',
-//                   'risk_limit':       0.05,
-//                   'cards':            146662,
-//                   'choice_function':  Contest.SOCIAL_CHOICE_FUNCTION.IRV,
-//                   'n_winners':        1,
-//                   'candidates':       ['15','16','17','18','45'],
-//                   'winner':           ['15'],
-//                   'assertion_file':   './data/SFDA2019/SF2019Nov8Assertions.json',
-//                   'audit_type':       Audit.AUDIT_TYPE.CARD_COMPARISON,
-//                   'test':             NonnegMean.alpha_mart,
-//                   'estim':            NonnegMean.optimal_comparison
-//                  }
-//               }
+//    @classmethod
+//    def set_all_margins_from_cvrs(
+//        cls,
+//        audit: object = None,
+//        contests: dict = None,
+//        cvr_list: "Collection[CVR]" = None,
+//    ):
+//        """
+//        Find all the assorter margins in a set of Assertions. Updates the dict of dicts of assertions
+//        and the contest dict.
 //
-//contests = Contest.from_dict_of_dicts(contest_dict)
+//        Appropriate only if cvrs are available. Otherwise, base margins on the reported results.
+//
+//        This function is primarily about side-effects on the assertions in the contest dict.
+//
+//        Parameters
+//        ----------
+//        audit: Audit
+//            information about the audit
+//        contests: dict of Contest objects
+//        cvr_list: Collection
+//            collection of CVR objects
+//
+//        Returns
+//        -------
+//        min_margin: float
+//            smallest margin in the audit
+//
+//        Side effects
+//        ------------
+//        sets the margin of every assertion
+//        sets the assertion.test.u for every assertion, according to whether
+//           `assertion.contest.audit_type==Audit.AUDIT_TYPE.POLLING`
+//           or `assertion.contest.audit_type in [Audit.AUDIT_TYPE.CARD_COMPARISON, Audit.AUDIT_TYPE.ONEAUDIT]`
+//        """
+//        min_margin = np.infty
+//        for c, con in contests.items():
+//            con.margins = {}
+//            for a, asn in con.assertions.items():
+//                asn.set_margin_from_cvrs(audit, cvr_list)
+//                margin = asn.margin
+//                con.margins.update({a: margin})
+//                if con.audit_type == Audit.AUDIT_TYPE.POLLING:
+//                    u = asn.assorter.upper_bound
+//                elif con.audit_type in [
+//                    Audit.AUDIT_TYPE.CARD_COMPARISON,
+//                    Audit.AUDIT_TYPE.ONEAUDIT,
+//                ]:
+//                    u = 2 / (2 - margin / asn.assorter.upper_bound)
+//                else:
+//                    raise NotImplementedError(
+//                        f"audit type {con.audit_type} not implemented"
+//                    )
+//                asn.test.u = u
+//                min_margin = min(min_margin, margin)
+//        return min_margin
 
-    // # read the assertions for the IRV contest
-    //for c in contests:
-    //    if contests[c].choice_function == Contest.SOCIAL_CHOICE_FUNCTION.IRV:
-    //        with open(contests[c].assertion_file, 'r') as f:
-    //            contests[c].assertion_json = json.load(f)['audits'][0]['assertions']
-    //#%%
-    //# construct the dict of dicts of assertions for each contest
-    //Assertion.make_all_assertions(contests)
-    //#%%
-    //audit.check_audit_parameters(contests)
+fun set_all_margins_from_cvrs() {
 
-    // # special for Primary/Dominion manifest format
-    //manifest = pd.read_excel(audit.manifest_file)
-// # read the assertions for the IRV contest
-//for c in contests:
-//    if contests[c].choice_function == Contest.SOCIAL_CHOICE_FUNCTION.IRV:
-//        with open(contests[c].assertion_file, 'r') as f:
-//            contests[c].assertion_json = json.load(f)['audits'][0]['assertions']
-//#%%
-//# construct the dict of dicts of assertions for each contest
-//Assertion.make_all_assertions(contests)
-//#%%
-//audit.check_audit_parameters(contests)
-
-    // read the ballot manifest
-// # special for Primary/Dominion manifest format
-//manifest = pd.read_excel(audit.manifest_file)
-
-    val manifestData = ArrayList<ArrayList<String>>()
-    val manifest = prep_manifest(manifestData, maxCardsEdit, 5) // size of cvrList is considered as 5 here
-
-    val prng = Random(audit.seed.toInt())
-
-    //  for ballot-level comparison audits
-    //cvr_list, cvrs_read, unique_ids = CVR.from_raire_file(audit.cvr_file)
-    //cvr_list = Dominion.raire_to_dominion(cvr_list)
-    //print(f'Read {cvrs_read} cvrs; {unique_ids} unique CVR identifiers after merging')
-    //#%%
-    //# double-check whether the manifest accounts for every card
-    //audit.max_cards, np.sum(manifest['Total Ballots'])
-    //#%%
-    //# Check that there is a card in the manifest for every card (possibly) cast. If not, add phantoms.
-    //manifest, manifest_cards, phantom_cards = Dominion.prep_manifest(manifest, audit.max_cards, len(cvr_list))
-    //manifest
-// somewhere we are reading the cvrFile = raire_file
-//              Contest,id,N,C1,C2,C3 ...
-//                id is the contest_id
-//                N is the number of candidates in that contest
-//                and C1, ... are the candidate id's relevant to that contest.
-//             Then a line for every ranking that appears on a ballot:
-//             Contest id,Ballot id,R1,R2,R3,..
-// 1
-//Contest,339,4,15,16,17,18
-//339,99813_1_1,17
-//339,99813_1_3,16
-    //         Returns
-    //        -------
-    //        cvrs: list of CVR objects
-    //        cvrs_read: int
-    //            number of CVRs read
-    //        unique_ids: int
-    //            number of distinct CVR identifiers read
-    //        """
-
-// and the assertions
-// # find upper bound on total cards across strata
-//  audit.max_cards = np.sum([s.max_cards for s in audit.strata.values()])
-    // assertEquals(293555, audit.max_cards)
-//'''
-//max_cards = 293555 # 146662 VBM turnout per SF Elections release 12
-//https://sfelections.sfgov.org/november-5-2019-election-results-summary
-//'''
-//#%%
-//# contests to audit. Edit with details of your contest (eg., Contest 339 is the DA race)
-
-
-//+ Draw the random sample:
-//    - Use the specified design, including using consistent sampling for style information
-//    - Express sample cards in terms of the manifest
-//    - Export
-    val sampleRandom = ArrayList<Int>()
-    for (i in 0 until manifest.size) {
-        sampleRandom.add(prng.nextInt(1, manifest.size))
-    }
-
-    /*
-    val cardsToRetrieve = sample_from_manifest(manifest, sampleRandom)
-
-    val mvrSample = cvrSample.toMutableList()
-    val nErrs = 5
-    val errs = mvrSample.subList(0, nErrs)
-    errs.shuffle(Random(12345678))
-    mvrSample.subList(0, nErrs).clear()
-    mvrSample.addAll(0, errs)
-
-    val pMax = Assertion.setPValues(contests, mvrSample, cvrSample)
-    println("maximum assertion p-value $pMax")
-    val done = audit.summarizeStatus(contests)
-
-    val newSize = audit.findSampleSize(contests, cvrList, mvrSample, cvrSample)
-    println("newSize=$newSize\n${contests.map { Pair(it.key, it.value.sampleSize) }}")
-
-    val sampledCvrIndices = CVR.consistentSampling(cvrList, contests)
-    val sampledPhantoms = sampledCvrIndices.count { it > manifestCards }
-    println("The sample includes $sampledPhantoms phantom cards.")
-
-    val (cardsToRetrieve, sampleOrder, cvrSample, mvrPhantomsSample) =
-        Dominion.sampleFromCvrs(cvrList, manifest, sampledCvrIndices)
-
-     */
 }
 
-/*
-fun testRealData() {
-    // for real data
-    val mvrFile = File(audit.mvrFile)
-    val mvrJson = mvrFile.useLines {
-        it.fold("") { some, text -> "$some\n$text" }
-    }
-
-    val mvrSample = CVR.fromDict(Json.decodeFromString<Map<String, Any>>(mvrJson)["ballots"] as Map<String, Any>)
-
-// for simulated data, no errors
-    val mvrSample = cvrSample.toMutableMap()
-
-    val pMax = Assertion.setPValues(contests = contests, mvrSample = mvrSample, cvrSample = cvrSample)
-    println("maximum assertion p-value $pMax")
-
-    val done = audit.summarizeStatus(contests)
-}
-
- */
-
-
-fun maxVal(inputList: ArrayList<ArrayList<String>>) : Int {
+fun maxVal(inputList: ArrayList<ArrayList<String>>): Int {
     var maxValue = inputList[0][1].toInt()
 
-    for ( i in 1 until inputList.size ) {
+    for (i in 1 until inputList.size) {
         if (inputList[i][1].toInt() > maxValue) {
             maxValue = inputList[i][1].toInt()
         }
@@ -722,17 +602,21 @@ fun maxVal(inputList: ArrayList<ArrayList<String>>) : Int {
     return maxValue
 }
 
-fun sumVal(inputList: ArrayList<ArrayList<String>>) : Int {
+fun sumVal(inputList: ArrayList<ArrayList<String>>): Int {
     var sum = 0
 
-    for ( i in 1 until inputList.size ) {
+    for (i in 1 until inputList.size) {
         sum += inputList[i][1].toInt()
     }
 
     return sum
 }
 
-fun prep_manifest(manifest: ArrayList<ArrayList<String>>, maxCardsEdit: Int, cvrCount: Int): ArrayList<ArrayList<String>> {
+fun prep_manifest(
+    manifest: ArrayList<ArrayList<String>>,
+    maxCardsEdit: Int,
+    cvrCount: Int,
+): ArrayList<ArrayList<String>> {
     val manifestCards = sumVal(manifest)
     var phantomCards = maxCardsEdit - manifestCards
     if (phantomCards < 0) {
@@ -756,8 +640,8 @@ fun prep_manifest(manifest: ArrayList<ArrayList<String>>, maxCardsEdit: Int, cvr
 fun sample_from_manifest(manifest: ArrayList<ArrayList<String>>, sample: ArrayList<Int>): ArrayList<ArrayList<String>> {
     val cardsToRetrieve = ArrayList<ArrayList<String>>()
 
-    for ( i in 1 until sample.size ) {
-        cardsToRetrieve.add(manifest[sample[i] -1])
+    for (i in 1 until sample.size) {
+        cardsToRetrieve.add(manifest[sample[i] - 1])
     }
 
     return cardsToRetrieve

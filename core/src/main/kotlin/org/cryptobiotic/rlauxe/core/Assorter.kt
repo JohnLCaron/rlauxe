@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlaux.core.raire.RaireCvr
+import org.cryptobiotic.rlauxe.core.raire.RaireAssertion
+import org.cryptobiotic.rlauxe.core.raire.RaireContestAudit
+
 interface AssorterFunction {
     fun assort(mvr: Cvr) : Double
     fun upperBound(): Double
@@ -25,7 +29,7 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
     // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: Cvr): Double {
         val w = mvr.hasMarkFor(contest.idx, winner)
-        return if (mvr.hasOneVote(contest.idx, contest.candidateNames.size)) (w / (2 * minFraction)) else .5
+        return if (mvr.hasOneVote(contest.idx, contest.candidates)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound
@@ -53,7 +57,7 @@ fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Tri
 data class ComparisonAssorter(
     val contest: Contest,
     val assorter: AssorterFunction,   // A
-    val avgCvrAssortValue: Double, // Ā(c) = average CVR assort value
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
     val check: Boolean = true,
 ) {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
@@ -146,4 +150,42 @@ class ComparisonAssertion(
     val assorter: ComparisonAssorter,
 ) {
     override fun toString() = "ComparisonAssertion for ${contest.id} assorter=${assorter.desc()}"
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion) {
+    val contestName = contest.contest
+    // I believe this doesnt change in the course of the audit
+    val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
+
+    fun upperBound() = 1.0
+    fun desc() = "RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}"
+
+    fun assort(rcvr: RaireCvr): Double {
+        return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
+        else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)
+        else throw RuntimeException("unknown assertionType = $(this.assertionType")
+    }
+
+    fun assortWinnerOnly(rcvr: RaireCvr): Double {
+        // CVR is a vote for the winner only if it has the winner as its first preference
+        val awinner = if (rcvr.get_vote_for(assertion.winner) == 1) 1 else 0
+        // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
+        val aloser = rcvr.rcv_lfunc_wo( assertion.winner, assertion.loser)
+
+        //     An assorter must either have an `assort` method or both `winner` and `loser` must be defined
+        //    (in which case assort(c) = (winner(c) - loser(c) + 1)/2. )
+        return (awinner - aloser + 1) * 0.5
+    }
+
+    fun assortIrvElimination(rcvr: RaireCvr): Double {
+        // Context is that all candidates in "already_eliminated" have been
+        // eliminated and their votes distributed to later preferences
+        val awinner = rcvr.rcv_votefor_cand(assertion.winner, remaining)
+        val aloser = rcvr.rcv_votefor_cand(assertion.loser, remaining)
+
+        return (awinner - aloser + 1) * 0.5
+    }
+
 }

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -13,10 +14,10 @@ class TestAssorterSuperMajority {
     @Test
     fun testThreeCandidateSuperMajorityAssorter() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A"),
             minFraction = 0.60,
         )
@@ -39,10 +40,10 @@ class TestAssorterSuperMajority {
     @Test
     fun testThreeCandidateNoMajority() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf(),
             minFraction = 0.60,
         )
@@ -61,10 +62,10 @@ class TestAssorterSuperMajority {
     @Test
     fun testThreeCandidateMultipleWinners() {
         val contest = Contest(
-            id = "ABC",
-            idx = 0,
+            name = "ABC",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C"),
+            candidateNames = listToMap( "A", "B", "C"),
             winnerNames = listOf("A", "B"),
             minFraction = 0.35,
         )
@@ -87,10 +88,10 @@ class TestAssorterSuperMajority {
         val ncandidates = counts.size
 
         val contest = Contest(
-            id = "ABCs",
-            idx = 0,
+            name = "ABCs",
+            id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listOf( "A", "B", "C", "D", "E", "F", "G"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E", "F", "G"),
             winnerNames = listOf("A", "B", "D"),
             minFraction = 0.25,
         )

@@ -70,7 +70,7 @@ class TestAuditPolling {
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()
         audit.assertions.map { (contest, assertions) ->
-            if (!silent && showContests) println("Assertions for Contest ${contest.id}")
+            if (!silent && showContests) println("Assertions for Contest ${contest.name}")
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 

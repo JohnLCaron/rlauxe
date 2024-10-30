@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.raire.import
-import org.cryptobiotic.rlauxe.core.raire.makeAssorters
+import org.cryptobiotic.rlauxe.core.raire.addAssorters
 import org.cryptobiotic.rlauxe.core.raire.readRaireResults
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -58,7 +58,7 @@ class TestRcvAssorter {
         // println(show)
 
         val rrContest = raireResults.contests.find { it.contest == "334"}!!
-        rrContest.makeAssorters() // adds assorts to the assertion
+        rrContest.addAssorters() // adds assorts to the assertion
 
         // winner only assertion
         val wassertion = rrContest.assertions.find { it.match(5, 47, true) }!!

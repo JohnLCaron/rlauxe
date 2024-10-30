@@ -3,6 +3,7 @@ package org.cryptobiotic.rlaux.core.raire
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.core.Cvr
 import java.io.Reader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -22,62 +23,20 @@ data class RaireCvrContest(
     val cvrs: List<RaireCvr>,
 )
 
-// RaireCvr is always for one contest.
-data class RaireCvr(
+// "RaireCvr is always for one contest" probably an artifact of raire processing
+class RaireCvr(
+    id: String,
+    phantom: Boolean,
     val contestNumber: Int,
-    val location: String,    // guess this might be a location
-    val rankedChoices: List<Int>,
-) {
-    constructor(ranks: List<Int>): this(0, "", ranks) // for quick testing
+    val rankedChoices: List<Int>, // could be Map<Int, IntArray>
+): Cvr(id, emptyMap(), phantom) {
+    constructor(ranks: List<Int>): this( "", false,0, ranks) // for quick testing
+    constructor(contest: Int, id: String, ranks: List<Int>): this( id, false, contest, ranks) // for quick testing
 
-    fun rank(candidate: Int): Int {
-        return rankedChoices.indexOf(candidate) + 1 // seems to be 1 based, see TestRcvAssorter
-    }
-
-// def get_vote_for(self, contest_id: str, candidate: str):
-//    return (
-//        False
-//        if (contest_id not in self.votes or candidate not in self.votes[contest_id])
-//        else self.votes[contest_id][candidate]
-//    )
-
-
+    /** if candidate not ranked, 0 , else rank (1 based */
     fun get_vote_for(candidate: Int): Int {
-        return if (!rankedChoices.contains(candidate)) 0 else rank(candidate)
+        return if (!rankedChoices.contains(candidate)) 0 else rankedChoices.indexOf(candidate) + 1
     }
-
-
-//
-//     def rcv_lfunc_wo(self, contest_id: str, winner: str, loser: str) -> int:
-//        """
-//        Check whether vote is a vote for the loser with respect to a 'winner only'
-//        assertion between the given 'winner' and 'loser'.
-//
-//        Parameters:
-//        -----------
-//        contest_id: string
-//            identifier for the contest
-//        winner: string
-//            identifier for winning candidate
-//        loser: string
-//            identifier for losing candidate
-//        cvr: CVR object
-//
-//        Returns:
-//        --------
-//        1 if the given vote is a vote for 'loser' and 0 otherwise
-//        """
-//        rank_winner = self.get_vote_for(contest_id, winner)
-//        rank_loser = self.get_vote_for(contest_id, loser)
-//
-//        if not bool(rank_winner) and bool(rank_loser):
-//            return 1
-//        elif bool(rank_winner) and bool(rank_loser) and rank_loser < rank_winner:
-//            return 1
-//        else:
-//            return 0
-//
-
 
     /**
      * Check whether vote is a vote for the loser with respect to a 'winner only'
@@ -98,50 +57,14 @@ data class RaireCvr(
         }
     }
 
-//    def rcv_votefor_cand(self, contest_id: str, cand: str, remaining: list) -> int:
-//        """
-//        Check whether 'vote' is a vote for the given candidate in the context
-//        where only candidates in 'remaining' remain standing.
-//
-//        Parameters:
-//        -----------
-//        contest_id: string
-//            identifier of the contest used in the CVRs
-//        cand: string
-//            identifier for candidate
-//        remaining: list
-//            list of identifiers of candidates still standing
-//
-//        vote: dict of dicts
-//
-//        Returns:
-//        --------
-//        1 if the given vote for the contest counts as a vote for 'cand' and 0 otherwise. Essentially,
-//        if you reduce the ballot down to only those candidates in 'remaining',
-//        and 'cand' is the first preference, return 1; otherwise return 0.
-//        """
-//        if not cand in remaining:
-//            return 0
-//
-//        if not bool(rank_cand := self.get_vote_for(contest_id, cand)):
-//            return 0
-//        else:
-//            for altc in remaining:
-//                if altc == cand:
-//                    continue
-//                rank_altc = self.get_vote_for(contest_id, altc)
-//                if bool(rank_altc) and rank_altc <= rank_cand:
-//                    return 0
-//            return 1
-
     /**
      * Check whether 'vote' is a vote for the given candidate in the context
      * where only candidates in 'remaining' remain standing.
      *
      * @param cand identifier for candidate
      * @param remaining list of identifiers of candidates still standing
-     * @return 1 if the given vote for the contest counts as a vote for 'cand' and 0 otherwise. Essentially,
-     * if you reduce the ballot down to only those candidates in 'remaining',
+     * @return 1 if the given vote for the contest counts as a vote for 'cand' and 0 otherwise.
+     * Essentially, if you reduce the ballot down to only those candidates in 'remaining',
      * and 'cand' is the first preference, return 1; otherwise return 0.
      */
     fun rcv_votefor_cand(cand: Int, remaining: List<Int>): Int {
@@ -205,11 +128,11 @@ fun readRaireCvrs(filename: String): RaireCvrs {
             cvrs = mutableListOf()
         } else {
             val cid = line.get(0).toInt()
-            val wtf = line.get(1)
+            val location = line.get(1)
             val rankedChoices = readVariableListOfInt(line, 2)
             require(cid == contestId)
             require(choices.containsAll(rankedChoices))
-            cvrs.add(RaireCvr(cid, wtf, rankedChoices))
+            cvrs.add(RaireCvr(cid, location, rankedChoices))
         }
     }
     if (cvrs.isNotEmpty()) {

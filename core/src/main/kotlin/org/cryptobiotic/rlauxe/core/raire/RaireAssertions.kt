@@ -127,7 +127,8 @@ fun RaireAssertionJson.import() =
         this.explanation,
     )
 
-fun RaireContestAudit.makeAssorters(): List<RaireAssorter> {
+// add assorters to the assertions
+fun RaireContestAudit.addAssorters(): List<RaireAssorter> {
     return this.assertions.map {
         val assort = RaireAssorter(this, it)
         it.assort = assort

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,9 +10,9 @@ import kotlin.test.assertEquals
 class TestCvr {
     // TODO assign idx
     val contests: List<org.cryptobiotic.rlauxe.core.Contest> = listOf(
-        Contest("city_council", 0, candidateNames= listOf("Doug", "Emily", "Frank", "Gail", "Harry"),
+        Contest("city_council", 0, candidateNames= listToMap("Doug", "Emily", "Frank", "Gail", "Harry"),
             winnerNames= listOf("Doug", "Emily", "Frank"), choiceFunction = SocialChoiceFunction.PLURALITY),
-        Contest("measure_1", 1, candidateNames= listOf("yes", "no"),
+        Contest("measure_1", 1, candidateNames= listToMap("yes", "no"),
             winnerNames= listOf("yes"), SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
     )
 
@@ -79,7 +80,7 @@ class TestCvr {
     @Test
     fun test_make_phantoms() {
         val cvras = cvrs.map { CvrUnderAudit(it) }
-        val contestas: Map<String, ContestUnderAudit> = contests.map { it.id to ContestUnderAudit(it) }.toMap()
+        val contestas: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         contestas["measure_1"]?.ncards = 5
 
         val prefix = "phantom-"
@@ -106,7 +107,7 @@ class TestCvr {
 
         //// use_style = false
         val cvrasf = cvrs.map { CvrUnderAudit(it) }
-        val contestasf: Map<String, ContestUnderAudit> = contests.map { it.id to ContestUnderAudit(it) }.toMap()
+        val contestasf: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         // contestasf["measure_1"]?.ncards = 5 // LOOK
         val (resultf: List<CvrUnderAudit>, nphantomsf: Int) = makePhantoms(
             cvras = cvrasf,
@@ -182,7 +183,7 @@ def test_consistent_sampling(self):
         for ((index, cvra) in cvras.withIndex()) {
             cvra.sampleNum = index
         }
-        val contestas: Map<String, ContestUnderAudit> = contests.map { it.id to ContestUnderAudit(it) }.toMap()
+        val contestas: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         contestas["city_council"]?.sampleSize = 3
         contestas["measure_1"]?.sampleSize = 4
 

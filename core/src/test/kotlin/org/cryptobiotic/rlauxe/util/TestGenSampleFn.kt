@@ -55,7 +55,7 @@ class TestGenSampleFn {
                 assertEquals(0, (ass.assorter as PluralityAssorter).winner)
             }
 
-            if (!silent && showContests) println("Assertions for Contest ${contest.id}")
+            if (!silent && showContests) println("Assertions for Contest ${contest.name}")
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
@@ -80,10 +80,10 @@ class TestGenSampleFn {
     @Test
     fun testComparisonWithErrors() {
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "Alice", "Bob", "Candy"),
+            candidateNames = listToMap( "Alice", "Bob", "Candy"),
             winnerNames = listOf("Alice"),
         )
         val assorter = PluralityAssorter(contest, winner = 0, loser = 1)

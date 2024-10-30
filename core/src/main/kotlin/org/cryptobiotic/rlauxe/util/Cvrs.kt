@@ -100,10 +100,10 @@ fun makeContestsFromCvrs(
 
         contests.add(
             Contest(
-                id = "contest$contestId",
-                idx = contestId,
+                name = "contest$contestId",
+                id = contestId,
                 choiceFunction = choiceFunction,
-                candidateNames = scandidateMap.keys.map { "candidate$it" },
+                candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
                 winnerNames = listOf("candidate$winner"),
             )
         )

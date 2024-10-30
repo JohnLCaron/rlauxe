@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.junit.jupiter.api.Test
 
 // TODO
@@ -27,10 +28,10 @@ class TestAuditComparison {
         println("ncvrs = ${cvrs.size} theta=$theta")
 
         val contest = Contest(
-            id = "AvB",
-            idx = 0,
+            name = "AvB",
+            id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listOf( "A", "B"),
+            candidateNames = listToMap( "A", "B"),
             winnerNames = listOf("A"),
         )
 
@@ -44,7 +45,7 @@ class TestAuditComparison {
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         audit.assertions.map { (contest, assertions) ->
-            println("Assertions for Contest ${contest.id}")
+            println("Assertions for Contest ${contest.name}")
             assertions.forEach { it: ComparisonAssertion ->
                 println("  ${it}")
 

@@ -6,10 +6,10 @@ import org.cryptobiotic.rlauxe.core.Cvr
 
 class CvrContest(val name: String, val id: Int) {
     val candidates = mutableMapOf<String, Int>()
-    var candidateIdx = 0
+    var candidateId = 0
 
     fun getCandidateIdx(name: String): Int {
-        return candidates.getOrPut(name) { candidateIdx++ }
+        return candidates.getOrPut(name) { candidateId++ }
     }
 }
 
@@ -74,7 +74,7 @@ class ContestBuilder(
     val builder: CvrBuilder,
     val contest: CvrContest,
 ) {
-    val votes = mutableMapOf<Int, Int>() // Map(candidateIdx, vote))
+    val votes = mutableMapOf<Int, Int>() // Map(candidateId, vote))
 
     fun addCandidate(candName: String, addVote: Int = 1): ContestBuilder {
         val candIdx =  contest.getCandidateIdx(candName)

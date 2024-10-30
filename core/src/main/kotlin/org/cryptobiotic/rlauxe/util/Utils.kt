@@ -32,6 +32,11 @@ fun ceilDiv(numerator: Int, denominator: Int): Int {
     return fracCeil
 }
 
+
+fun listToMap(vararg names: String): Map<String, Int> {
+    return names.mapIndexed { idx, value -> value to idx }.toMap()
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // covers for numpy: will be replaced
 

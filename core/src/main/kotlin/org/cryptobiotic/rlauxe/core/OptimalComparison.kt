@@ -150,7 +150,6 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
 
     fun solve(): Double {
         val stopwatch = Stopwatch()
-        // TODO why arent we giving it the derivitive ?
         val function = UnivariateFunction { lam -> expectedValueLogt(lam) }  // The function to be optimized
 
         // BrentOptimizer: For a function defined on some interval (lo, hi),

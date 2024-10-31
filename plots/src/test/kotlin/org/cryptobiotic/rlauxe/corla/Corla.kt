@@ -7,6 +7,7 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
+// The algorithm that colorado-rla uses, from SuperSimple paper
 class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
     val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn {
     val gamma = 1.03

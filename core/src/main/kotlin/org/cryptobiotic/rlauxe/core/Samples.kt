@@ -35,7 +35,7 @@ class PrevSamples : Samples {
     }
 }
 
-/** This also counts the under/overstatements. */
+/** This also counts the under/overstatements for comparison audits. */
 class PrevSamplesWithRates(val noerror: Double) : Samples {
     private var last = 0.0
     private var sum = 0.0

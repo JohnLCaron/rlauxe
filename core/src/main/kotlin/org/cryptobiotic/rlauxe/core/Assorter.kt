@@ -1,9 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
-import org.cryptobiotic.rlauxe.core.raire.RaireAssertion
-import org.cryptobiotic.rlauxe.core.raire.RaireContestAudit
-
 interface AssorterFunction {
     fun assort(mvr: Cvr) : Double
     fun upperBound(): Double

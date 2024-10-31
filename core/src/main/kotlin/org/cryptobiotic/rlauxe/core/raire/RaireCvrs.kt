@@ -9,9 +9,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-// this is probably RAIRE CSV format for ranked choice CVRs
-// input to RAIRE I assume, not sure where these are produced
-// We can use them also as the input to the RLA
+// this is RAIRE CSV format for ranked choice CVRs from SFDA2019
+// input to RAIRE, not sure where these are produced
 data class RaireCvrs(
     val contests: List<RaireCvrContest>,
     val filename: String,
@@ -93,7 +92,7 @@ class RaireCvr(
 
 /////////////////////////////////////////////////////////////////////
 // From SFDA2019_PrelimReport12VBMJustDASheets.raire
-// TODO Colorado may be very diffrent
+// TODO Colorado may be very different, see corla
 
 // 1
 // Contest,339,4,15,16,17,18

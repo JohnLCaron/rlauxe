@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 // the contest contains the candidate name -> candidate id
-// TODO instead of Map<Int, Int>, could just be List<Int>, the list of candidates voted for. vote is always 1
-//  or IntArray,
 
 open class Cvr(
     val id: String,

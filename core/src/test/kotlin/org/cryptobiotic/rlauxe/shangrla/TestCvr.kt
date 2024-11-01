@@ -1,6 +1,10 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.core.sampling.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.sampling.CvrUnderAudit
+import org.cryptobiotic.rlauxe.core.sampling.consistentSampling
+import org.cryptobiotic.rlauxe.core.sampling.makePhantoms
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import kotlin.test.Test
@@ -170,15 +174,14 @@ def test_consistent_sampling(self):
     np.testing.assert_approx_equal(con_tests['city_council'].sample_threshold, 2)
     np.testing.assert_approx_equal(con_tests['measure_1'].sample_threshold, 5)
      */
-    data class CVR(val id: String, val votes: Map<String, Map<String, Int>>, var phantom: Boolean, var sampleNum: Int? = null)
 
-    data class Contest(val riskLimit: Double, val id: String, val cards: Int?, val choiceFunction: String,
-                       val nWinners: Int, val candidates: List<String>, val winner: List<String>, val sampleSize: Int, var sampleThreshold: Int? = null)
+    //data class Contest(val riskLimit: Double, val id: String, val cards: Int?, val choiceFunction: String,
+    //                   val nWinners: Int, val candidates: List<String>, val winner: List<String>, val sampleSize: Int, var sampleThreshold: Int? = null)
 
     @Test
     fun testConsistentSampling() {
         // consistentSampling assumes that phantoms have already been generated and sample_num has been assigned to every CVR, including phantoms
-        // TODO following SHAGRLA test, there are no phantoms here
+        // TODO following SHANGRLA test, there are no phantoms here
         val cvras = cvrs.map { CvrUnderAudit(it) }
         for ((index, cvra) in cvras.withIndex()) {
             cvra.sampleNum = index

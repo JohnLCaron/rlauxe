@@ -397,8 +397,17 @@ class AssertionRLA {
 //sample_size = audit.find_sample_size(contests, cvrs=cvr_list)
 //print(f'{sample_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
 
-        // TODO SHANGRLA doing complicated stuff. Partly because they use the same fuctionm for different purposes.
-        //   Surprising that they dont just use the min margin. Could even precompute, depending on your error_rate assumptions
+        // TODO SHANGRLA doing complicated stuff. I think trying to audit simultaneous contests (dont understand the rules for that)
+        //   Has strata but not using them. What are they?
+        //   How does consistent sampling play with multiple contests?
+        //   The ballot pools may be differenent for each contest (style?).
+        //   I think you randomly pick ballots until your contest.sample_size is satisfied
+        //   Also see  proportional-with-error-bound (PPEB) sampling (aslam pdf)
+        //
+        // TODO SHANGRLA has an option to do a simulation, then pick the max over contest and assertion.
+        //   Surprising that they dont just use the min margin, at least within a contest.
+        //   Calls test.sample_size(), test-specific simulation.
+        //   We could do our own simulation, dont need to follow SHANGLRA's convolutions.
         val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
 
         val auditComparison = makeRaireComparisonAudit(raireResults.contests, rcContest.cvrs)
@@ -465,7 +474,7 @@ class AssertionRLA {
             N = N,
             withoutReplacement = true,
             upperBound = minAssorter.upperBound,
-            p2 = 0.0
+            p2 = 0.01
         )
 
         val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)

@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.makeCvrsByMargin
-import org.cryptobiotic.rlauxe.util.margin2theta
-import org.cryptobiotic.rlauxe.util.theta2margin
+import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 
 class GenAdaptiveComparisonTable {
@@ -79,7 +79,7 @@ class GenAdaptiveComparisonTable {
             p2s.forEach { p2 ->
                 // the cvrs get generated with this exact margin.
                 // then the mvrs are generated with over/understatement errors, which means the cvrs overstate the winner's margin.
-                val cvrs = makeCvrsByMargin(N, theta2margin(cvrMean))
+                val cvrs = makeCvrsByMargin(N, mean2margin(cvrMean))
                 tasks.add(
                     //     val N: Int,
                     //    val cvrMean: Double,
@@ -113,7 +113,7 @@ class GenAdaptiveComparisonTable {
     @Test
     fun makeTheta() {
         val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        margins.forEach{ print("${margin2theta(it)}, " ) }
+        margins.forEach{ print("${margin2mean(it)}, " ) }
         println()
     }
 }

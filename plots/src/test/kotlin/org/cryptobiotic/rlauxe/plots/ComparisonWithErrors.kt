@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.theta2margin
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
@@ -243,7 +243,7 @@ class ComparisonWithErrors {
         val d = 10
 
         // * If overstatement error is always zero (no errors in CRV), the assort value is 1 / (2.0 - margin/this.assorter.upperBound())
-        val expected = 2 / (2 - theta2margin(cvrMean)) // u = 2/(2-assorter_margin)
+        val expected = 2 / (2 - mean2margin(cvrMean)) // u = 2/(2-assorter_margin)
         val etas = listOf(0.9, 0.95, 0.99, 1.0, expected, 2.0, 5.0)
 
         val tasks = mutableListOf<ComparisonTask>()

@@ -33,12 +33,6 @@ import kotlin.test.Test
 
 // compare ballot polling to card comparison
 class CompareAuditType {
-    val showCalculation = false
-    val showContests = false
-    val showAllPlots = false
-    val showPctPlots = false
-    val showGeoMeanPlots = false
-
     val N = 10000
 
     data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<Cvr>)
@@ -217,8 +211,8 @@ class CompareAuditType {
         val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         // polling
-        val pollingAudit = makePollingAudit(contests = listOf(contest))
-        val pollingAssertions = pollingAudit.assertions[contest]
+        val pollingAudit = makePollingAudit(contests = listOf(contest), cvrs)
+        val pollingAssertions = pollingAudit.assertions[contest.id]
         require(pollingAssertions!!.size == 1)
         val pollingAssertion = pollingAssertions.first()
         val pollingSampler = PollWithoutReplacement(cvrs, pollingAssertion.assorter)
@@ -235,7 +229,7 @@ class CompareAuditType {
 
         // comparison
         val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-        val compareAssertions = compareAudit.assertions[contest]
+        val compareAssertions = compareAudit.assertions[contest.id]
         require(compareAssertions!!.size == 1)
         val compareAssertion = compareAssertions.first()
         // val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
@@ -272,10 +266,10 @@ class CompareAuditType {
             val cvrs = makeCvrsByExactMean(N, theta)
 
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-            val compareAssertion = compareAudit.assertions[contest]!!.first()
+            val compareAssertion = compareAudit.assertions[contest.id]!!.first()
 
-            val pollingAudit = makePollingAudit(contests = listOf(contest))
-            val pollingAssertion = pollingAudit.assertions[contest]!!.first()
+            val pollingAudit = makePollingAudit(contests = listOf(contest), cvrs)
+            val pollingAssertion = pollingAudit.assertions[contest.id]!!.first()
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(

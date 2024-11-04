@@ -22,7 +22,7 @@ class TestCorla {
         val ntrials = 100
         val riskLimit = .05
 
-        val theta = margin2theta(margin)
+        val theta = margin2mean(margin)
         val cvrs = makeCvrsByExactMean(N, theta)
         val compareAssorter = makeStandardComparisonAssorter(theta)
         val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = p1, withoutReplacement = false)
@@ -60,7 +60,7 @@ class TestCorla {
         val ratioSuccesses = mutableListOf<Double>()
         for (p2o in p2oracle) {
             for (p1o in p1oracle) {
-                val theta = margin2theta(margin)
+                val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta)
                 for (p1prior in p1priors) {

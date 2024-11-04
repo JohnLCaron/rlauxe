@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.junit.jupiter.api.Test
@@ -20,20 +22,34 @@ class TestAudit {
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
             winnerNames = listOf("C", "E"),
         )
-        val audit = makePollingAudit(listOf(contest), riskLimit = .01)
+        val cvrs = CvrBuilders()
+            .addCrv().addContest("AvB", "0").ddone()
+            .addCrv().addContest("AvB", "1").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCrv().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .build()
+        val audit = makePollingAudit(listOf(contest), cvrs, riskLimit = .01)
         assertIs<AuditPolling>(audit)
         println("audit = $audit")
 
         assertEquals(.01, audit.riskLimit)
         assertEquals(1, audit.contests.size)
 
-        val assertions = audit.assertions[contest]
+        val assertions = audit.assertions[contest.id]
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
             assertIs<Assertion>(it)
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
+            println("$it: ${it.avgCvrAssortValue}, ${it.margin}")
+            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.margin, doublePrecision)
         }
     }
 
@@ -47,20 +63,36 @@ class TestAudit {
             winnerNames = listOf("C", "E"),
             minFraction = .42
         )
-        val audit = makePollingAudit(listOf(contest), riskLimit = .01)
+        val cvrs = CvrBuilders()
+            .addCrv().addContest("AvB", "0").ddone()
+            .addCrv().addContest("AvB", "1").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCrv().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .addCrv().addContest("AvB", "4").ddone()
+            .build()
+        val audit = makePollingAudit(listOf(contest), cvrs, riskLimit = .01)
         assertIs<AuditPolling>(audit)
         println("audit = $audit")
 
         assertEquals(.01, audit.riskLimit)
         assertEquals(1, audit.contests.size)
 
-        val assertions = audit.assertions[contest]
+        val assertions = audit.assertions[contest.id]
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
             assertIs<Assertion>(it)
             assertIs<SuperMajorityAssorter>(it.assorter)
             assertEquals(1.0 / (2.0 * contest.minFraction!!), it.assorter.upperBound())
+            println("$it: ${it.avgCvrAssortValue}, ${it.margin}")
+            assertEquals(-0.04329004329004327, it.margin, doublePrecision) // TODO
         }
     }
 
@@ -83,7 +115,7 @@ class TestAudit {
         assertEquals(.01, audit.riskLimit)
         assertEquals(1, audit.contests.size)
 
-        val assertions = audit.assertions[contest]
+        val assertions = audit.assertions[contest.id]
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
@@ -114,7 +146,7 @@ class TestAudit {
         assertEquals(.01, audit.riskLimit)
         assertEquals(1, audit.contests.size)
 
-        val assertions = audit.assertions[contest]
+        val assertions = audit.assertions[contest.id]
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {

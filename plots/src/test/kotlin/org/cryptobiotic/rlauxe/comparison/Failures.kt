@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByMargin
-import org.cryptobiotic.rlauxe.util.theta2margin
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 
 class Failures {
@@ -63,7 +63,7 @@ class Failures {
         var taskIdx = 0
         cvrMeans.forEach { cvrMean ->
             cvrMeanDiffs.forEach { cvrMeanDiff ->
-                val cvrs = makeCvrsByMargin(N, theta2margin(cvrMean))
+                val cvrs = makeCvrsByMargin(N, mean2margin(cvrMean))
                 tasks.add(
                     AlphaComparisonTask(
                         taskIdx++,

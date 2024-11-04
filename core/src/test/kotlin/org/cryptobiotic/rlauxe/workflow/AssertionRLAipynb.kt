@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.raire.*
 import org.cryptobiotic.rlauxe.csv.readColoradoBallotManifest
 import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.util.GenSampleFn
-import org.cryptobiotic.rlauxe.util.theta2margin
+import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -203,6 +203,8 @@ data class ShangrlaContest(
     //   'estim':            NonnegMean.optimal_comparison
 )
 
+// SHANGRLA examples/assertion-RLA.ipynb
+
 class AssertionRLA {
     @Test
     fun workflow() {
@@ -380,9 +382,9 @@ class AssertionRLA {
         val margins = assorts.map { assort ->
             val rcvrs = raireCvrs.contests.first().cvrs
             val mean = rcvrs.map { assort.assort(it) }.average()
-            println(" ${assort.desc()} mean=$mean margin = ${theta2margin(mean)}")
-            assertEquals(expected[count++], theta2margin(mean))
-            theta2margin(mean)
+            println(" ${assort.desc()} mean=$mean margin = ${mean2margin(mean)}")
+            assertEquals(expected[count++], mean2margin(mean))
+            mean2margin(mean)
         }
         val minMargin = margins.min()
         println("min = $minMargin")

@@ -48,14 +48,14 @@ class TestGenSampleFn {
 
 
         // Polling Audit
-        val audit = makePollingAudit(contests = contests)
+        val audit = makePollingAudit(contests = contests, cvrs)
 
-        audit.assertions.map { (contest, assertions) ->
+        audit.assertions.map { (contestId, assertions) ->
             assertions.forEach { ass ->
                 assertEquals(0, (ass.assorter as PluralityAssorter).winner)
             }
 
-            if (!silent && showContests) println("Assertions for Contest ${contest.name}")
+            if (!silent && showContests) println("Assertions for Contest ${contestId}")
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
@@ -151,7 +151,7 @@ class TestGenSampleFn {
     fun testComparisonWithErrorsLimits() {
         val N = 20000
         val reportedMargin = .05
-        val reportedAvg = margin2theta(reportedMargin)
+        val reportedAvg = margin2mean(reportedMargin)
         val cvrs = makeCvrsByExactMean(N, reportedAvg)
         val compareAssorter = makeStandardComparisonAssorter(reportedAvg)
         val meanDiff = .01
@@ -174,7 +174,7 @@ class TestGenSampleFn {
         for (margin in margins) {
             for (p2 in p2s) {
 
-                val theta = margin2theta(margin)
+                val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta)
                 val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2)
@@ -199,7 +199,7 @@ class TestGenSampleFn {
         for (margin in margins) {
             for (p2 in p2s) {
                 for (p1 in p1s) {
-                    val theta = margin2theta(margin)
+                    val theta = margin2mean(margin)
                     val cvrs = makeCvrsByExactMean(N, theta)
                     val compareAssorter = makeStandardComparisonAssorter(theta)
                     val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2, p1, true) // false just makes the numbers imprecise

@@ -40,8 +40,8 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     return result
 }
 
-fun margin2theta(margin: Double) = (margin + 1.0) / 2.0
-fun theta2margin(theta: Double) = 2.0 * theta - 1.0
+fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
+fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()

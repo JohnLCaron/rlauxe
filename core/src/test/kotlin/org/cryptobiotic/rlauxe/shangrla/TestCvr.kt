@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 // from shangrla test_CVR
 class TestCvr {
     // TODO assign idx
-    val contests: List<org.cryptobiotic.rlauxe.core.Contest> = listOf(
+    val contests: List<Contest> = listOf(
         Contest("city_council", 0, candidateNames= listToMap("Doug", "Emily", "Frank", "Gail", "Harry"),
             winnerNames= listOf("Doug", "Emily", "Frank"), choiceFunction = SocialChoiceFunction.PLURALITY),
         Contest("measure_1", 1, candidateNames= listToMap("yes", "no"),

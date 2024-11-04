@@ -4,6 +4,9 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
+//// Adapted from SHANGRLA Audit.py
+// Also see https://github.com/votingworks/consistent_sampler/blob/master/consistent_sampler/consistent_sampler.py
+
 // contest being audited, mutable
 class ContestUnderAudit(val contest: Contest, var ncards: Int? = null) {
     val id = contest.name
@@ -24,6 +27,7 @@ class ContestUnderAudit(val contest: Contest, var ncards: Int? = null) {
 //    to facilitate consistent sampling)
 //
 //    CVRs can include a sequence number to facilitate ordering, sorting, and permuting
+
 // CVR being audited, mutable
 //        self.votes = votes  # contest/vote dict
 //        self.id = id  # identifier
@@ -284,147 +288,3 @@ fun consistentSampling(
     }
     return sampledIndices
 }
-
-
-/*
-Estimate sample size for each contest && overall to allow the audit to complete.
-Uses simulations. For speed, uses the numpy.r&&om Mersenne Twister instead of cryptor&&om, a higher-quality
-PRNG used to select the actual audit sample.
-
-Parameters
-----------
-contests: dict of dicts; the contest data structure. outer keys are contest identifiers; inner keys are assertions
-    TODO wrong, this is now just dict of Contests
-cvrs: list of CVR objects; the full set of CVRs
-mvr_sample: list of CVR objects; manually ascertained votes
-cvr_sample: list of CVR objects; CVRs corresponding to the cards that were manually inspected
-
-Returns
--------
-new_size: int
-new sample size
-
-Side effects
-------------
-sets c.sample_size for each Contest in contests
-if use_style, sets cvr.p for each CVR
-*/
-//         if len(self.strata) > 1:
-//            raise NotImplementedError('Stratified audits are not currently implemented.')
-//        stratum = next(iter(self.strata.values())) # the only stratum
-//        if stratum.use_style and cvrs is None:
-//            raise ValueError("stratum.use_style==True but cvrs were not provided.")
-//        # unless style information is being used, the sample size is the same for every contest.
-//        old = (0 if stratum.use_style
-//               else len(mvr_sample))
-//        old_sizes = {c:old for c in contests.keys()}
-
-/*
-// useStyles = true, no stratum
-fun find_sample_size(
-    contests: Map<String, ContestUnderAudit>,
-    cvrs: List<CvrUnderAudit>,
-    mvr_sample: List<Cvr> = emptyList(),
-    cvr_sample: List<Cvr> = emptyList(),
-): Int {
-    val use_style = true
-
-    // unless style information is being used, the sample size is the same for every contest.
-    val old = if (use_style) 0 else mvr_sample.size
-    val old_sizes: MutableMap<String, Int> =
-        contests.keys.associate { it to old }.toMutableMap()  // old_sizes = {c:old for c in contests.keys()}
-
-//        for c, con in contests.items():
-//            if stratum.use_style:
-//                old_sizes[c] = np.sum(np.array([cvr.sampled for cvr in cvrs if cvr.has_contest(c)]))
-//            new_size = 0
-//            for a, asn in con.assertions.items():
-//                if not asn.proved:
-//                    if mvr_sample is not None: # use MVRs to estimate the next sample size. Set `prefix=True` to use data
-//                        data, u =  asn.mvrs_to_data(mvr_sample, cvr_sample)
-//                        new_size = max(new_size, asn.find_sample_size(data=data, prefix=True,
-//                                                                  reps=self.reps, quantile=self.quantile,
-//                                                                  seed=self.sim_seed))
-//                    else:
-//                        data=None
-//                        new_size = max(new_size, asn.find_sample_size(data=data, rate_1=self.error_rate_1,
-//                                                                  rate_2=self.error_rate_2,
-//                                                                  reps=self.reps, quantile=self.quantile,
-//                                                                  seed=self.sim_seed))
-//            con.sample_size = new_size
-
-    requireNotNull(cvrs)
-
-    for ((contestId, contestAudit) in contests) {
-        val contest = contestAudit.contest
-            // old_sizes[c] = np.sum(np.array([cvr.sampled for cvr in cvrs if cvr.has_contest(c)]))
-            // TODO summing booleans?? Maybe 0 or 1 ??
-            old_sizes[contestId] = cvrs.filter { it.hasContest(contest.idx) }.map { if (it.sampled) 1 else 0 }.sum()
-        var new_size = 0
-        for ((_, asn) in contestAudit.assertions) {
-            if (!asn.proved) {
-                if (mvr_sample.isNotEmpty()) { // use MVRs to estimate the next sample size. Set `prefix=True` to use data
-                    val (data, _) = asn.mvrs_to_data(mvr_sample, cvr_sample)
-                    new_size = max(
-                        new_size,
-                        asn.find_sample_size(
-                            data = data, prefix = true,
-                            reps = this.reps, quantile = this.quantile,
-                            seed = this.sim_seed
-                        )
-                    )
-                }
-            } else {
-                new_size = max(
-                    new_size, asn.find_sample_size(
-                        data = null, rate1 = this.error_rate_1,
-                        rate2 = this.error_rate_2,
-                        reps = this.reps, quantile = this.quantile,
-                        seed = this.sim_seed
-                    )
-                )
-            }
-        }
-        contestAudit.sampleSize = new_size
-    }
-
-//        if stratum.use_style:
-//            for cvr in cvrs:
-//                if cvr.sampled:
-//                    cvr.p=1
-//                else:
-//                    cvr.p=0
-//                    for c, con in contests.items():
-//                        if cvr.has_contest(c) and not cvr.sampled:
-//                            cvr.p = max(con.sample_size/(con.cards - old_sizes[c]), cvr.p)
-//            total_size = math.ceil(np.sum([x.p for x in cvrs if not x.phantom]))
-//        else:
-//            total_size = np.max(np.array([con.sample_size for con in contests.values()]))
-//        return total_size
-    var total_size: Int
-    if (use_style) {
-        requireNotNull(cvrs)
-        for (cvr in cvrs) {
-            if (cvr.sampled) {
-                cvr.p = 1.0
-            } else {
-                cvr.p = 0.0
-                for ((name, con) in contests) {
-                    if (cvr.hasContest(con.idx) && !cvr.sampled) {
-                        val p1 = con.sampleSize.toDouble() / (con.ncards!! - old_sizes[name]!!)
-                        cvr.p = max(p1, cvr.p!!) // TODO nullability
-                    }
-                }
-            }
-        }
-        // total_size = ceil(np.sum([x.p for x in cvrs if !x.phantom))
-        val summ: Double = cvrs.filter { !it.phantom }.map { it.p!! }.sum()
-        total_size = ceil(summ).toInt()
-    } else {
-        // total_size = np.max(np.array([con.sample_size for con in contests.values()]))
-        total_size = contests.values.map { it.sampleSize!! }.max()
-    }
-    return total_size
-}
-
- */

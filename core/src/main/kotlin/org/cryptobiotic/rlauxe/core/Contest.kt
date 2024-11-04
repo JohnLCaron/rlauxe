@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import kotlin.random.Random
-
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 
 data class Contest(

@@ -1,9 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.mean2margin
+
 interface AssorterFunction {
     fun assort(mvr: Cvr) : Double
     fun upperBound(): Double
     fun desc(): String
+    fun winner(): Int
+    fun loser(): Int
 }
 
 /** See SHANGRLA, section 2.1. */
@@ -16,6 +20,8 @@ data class PluralityAssorter(val contest: Contest, val winner: Int, val loser: I
     }
     override fun upperBound() = 1.0
     override fun desc() = "PluralityAssorter winner=$winner loser=$loser"
+    override fun winner() = winner
+    override fun loser() = loser
 }
 
 /** See SHANGRLA, section 2.3. */
@@ -30,12 +36,18 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
 
     override fun upperBound() = upperBound
     override fun desc() = "SuperMajorityAssorter winner=$winner minFraction=$minFraction"
+    override fun winner() = winner
+    override fun loser() = -1 // TODO
 }
 
 data class Assertion(
     val contest: Contest,
     val assorter: AssorterFunction,
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
 ) {
+    val margin = mean2margin(avgCvrAssortValue)
+    val winner = assorter.winner()
+    val loser = assorter.loser()
     override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()}"
 }
 
@@ -145,5 +157,7 @@ class ComparisonAssertion(
     val contest: Contest,
     val assorter: ComparisonAssorter,
 ) {
+    val avgCvrAssortValue = assorter.avgCvrAssortValue
+    val margin = assorter.margin
     override fun toString() = "ComparisonAssertion for ${contest.name} assorter=${assorter.desc()}"
 }

@@ -50,7 +50,7 @@ class TestAssertionsFromShangrla {
             winnerNames = listOf("Alice", "Bob"),
         )
 
-        val asrtns = makePluralityAssertions(contest = contest)
+        val asrtns = makePluralityAssertions(contest = contest, emptyList())
 
         val aliceVsCandy = asrtns.find { it.assorter.desc().contains("winner=0 loser=2") }!!
 
@@ -128,7 +128,7 @@ class TestAssertionsFromShangrla {
             minFraction = 2.0 / 3.0,
         )
 
-        val target = makeSuperMajorityAssertions(contest = contest).first()
+        val target = makeSuperMajorityAssertions(contest = contest, emptyList()).first()
 
         var votes = makeCvr(0)
         assertEquals(0.75, target.assorter.assort(votes), "wrong value for vote for winner")

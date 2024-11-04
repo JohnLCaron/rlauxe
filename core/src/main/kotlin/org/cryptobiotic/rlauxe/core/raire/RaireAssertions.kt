@@ -90,6 +90,8 @@ class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): 
 
     override fun upperBound() = 1.0
     override fun desc() = "RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}"
+    override fun winner() = assertion.winner
+    override fun loser() = assertion.loser
 
     override fun assort(mvr: Cvr): Double {
         val rcvr = mvr as RaireCvr
@@ -120,7 +122,7 @@ class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): 
 }
 
 fun makeRaireComparisonAudit(rcontests: List<RaireContestAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
-    val comparisonAssertions = mutableMapOf<Contest, List<ComparisonAssertion>>()
+    val comparisonAssertions = mutableMapOf<Int, List<ComparisonAssertion>>()
 
     val contests = mutableListOf<Contest>()
     rcontests.forEach { rcontest ->
@@ -133,7 +135,7 @@ fun makeRaireComparisonAudit(rcontests: List<RaireContestAudit>, cvrs : Iterable
             val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter!!, avgCvrAssortValue)
             ComparisonAssertion(contest, comparisonAssorter)
         }
-        comparisonAssertions[contest] = clist
+        comparisonAssertions[contest.id] = clist
     }
 
     return AuditComparison(AuditType.CARD_COMPARISON, riskLimit, contests, comparisonAssertions)

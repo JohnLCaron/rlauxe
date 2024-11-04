@@ -78,7 +78,7 @@ class ContestBuilder(
 
     fun addCandidate(candName: String, addVote: Int = 1): ContestBuilder {
         val candIdx =  contest.getCandidateIdx(candName)
-        votes.add(candIdx)
+        if (addVote == 1) votes.add(candIdx)
         return this
     }
 

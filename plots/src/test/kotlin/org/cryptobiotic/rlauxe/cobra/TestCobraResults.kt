@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.margin2theta
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
@@ -35,7 +35,7 @@ class TestCobraResults {
         val ratios = mutableListOf<Double>()
         for (alpha in alphas.reversed()) {
             for (margin in margins.reversed()) {
-                val theta = margin2theta(margin)
+                val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta)
                 val sampler = ComparisonNoErrors(cvrs, compareAssorter)
@@ -85,7 +85,7 @@ class TestCobraResults {
         val ratios = mutableListOf<Double>()
         for (margin in margins) {
             for (p2 in p2s) {
-                val theta = margin2theta(margin)
+                val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta)
                 val sampleWithErrors =
@@ -148,7 +148,7 @@ class TestCobraResults {
             for (p2 in p2oracle) {
                 for (p1m in p1priors) {
                     for (p2m in p2priors) {
-                        val theta = margin2theta(margin)
+                        val theta = margin2mean(margin)
                         val cvrs = makeCvrsByExactMean(N, theta)
                         val compareAssorter = makeStandardComparisonAssorter(theta)
                         val sampleWithErrors =
@@ -219,7 +219,7 @@ class TestCobraResults {
         val ratios = mutableListOf<Double>()
         for (p2o in p2oracle) {
             for (p1o in p1oracle) {
-                val theta = margin2theta(margin)
+                val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta)
                 for (p1prior in p1priors) {

@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.theta2margin
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -277,10 +277,10 @@ class TestComparisonAssorter {
         val ff = "%8.4f"
         println("  theta   margin  noerror marginB marginB/margin")
         for (theta in thetas) {
-            val margin = theta2margin(theta)
+            val margin = mean2margin(theta)
             //         val noerror = 1.0 / (2.0 - margin)
             val noerror = 1.0/(2.0-margin) // assorter mean
-            val marginB = theta2margin(noerror)
+            val marginB = mean2margin(noerror)
             println("${ff.format(theta)} ${ff.format(margin)} ${ff.format(noerror)} ${ff.format(marginB)} ${ff.format(marginB/margin)}")
         }
     }
@@ -293,7 +293,7 @@ class TestComparisonAssorter {
 
         val contest = Contest("standard", 0, listToMap("A", "B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-        val compareAssertion = compareAudit.assertions[contest]!!.first()
+        val compareAssertion = compareAudit.assertions[contest.id]!!.first()
         val compareAssorter1 = compareAssertion.assorter
 
         val compareAssorter2 = makeStandardComparisonAssorter(cvrMean)

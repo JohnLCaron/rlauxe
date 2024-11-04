@@ -10,12 +10,13 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 // rewrite of us.freeandfair.corla.csv.DominionCVRExportParser
-
+// TODO IRVHeadersParser
 data class CvrExport(
     val countyId: String,
     val filename: String,
     val header: String,
     val cvrs: List<CastVoteRecord>,
+    val schema: Schema,
 ) {
     fun show() = buildString {
         appendLine("countyId = $countyId")
@@ -53,6 +54,8 @@ data class CastVoteRecord(
     var precinctPortion: String? = null
     var votes =  mutableListOf<ContestVotes>()
 
+    fun voteFor(contest: Int): ContestVotes? = votes.find { it.contestId == contest}
+
     fun show() = buildString {
         append("$cvrNumber, ")
         append("$tabulatorNum, ")
@@ -80,12 +83,12 @@ fun readDominionCvrExport(filename: String, countyId: String): CvrExport {
 
     // 1) we expect the first line to be the election name
     val electionName = records.next()
-    showLine("electionName", electionName)
+    //showLine("electionName", electionName)
     lineNum++
 
     // 2) the contest name for that column
     val contestLine = records.next()
-    showLine("contestLine", contestLine)
+    //showLine("contestLine", contestLine)
 
     var my_first_contest_column = 0
     while ("" == contestLine[my_first_contest_column]) {
@@ -95,7 +98,7 @@ fun readDominionCvrExport(filename: String, countyId: String): CvrExport {
 
     // 3) the choice name for that column
     val choiceLine = records.next()
-    showLine("choiceLine", choiceLine)
+    //showLine("choiceLine", choiceLine)
     lineNum++
 
     // 4) seems the be the header for the first 6 columns
@@ -143,7 +146,7 @@ fun readDominionCvrExport(filename: String, countyId: String): CvrExport {
         cvrs.add(cvr)
     }
 
-    return CvrExport(countyId, filename, header, cvrs)
+    return CvrExport(countyId, filename, header, cvrs, schema)
 }
 
 val d3f = "%3d"
@@ -199,10 +202,29 @@ fun makeRegularVotes(line: CSVRecord, start: Int, count: Int): List<Int> {
 
 class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: List<ContestInfo> ) {
 
+    fun choices(contestId: Int): List<String> {
+        val contest = contests.find{ it.contestIdx == contestId }
+        val result = mutableListOf<String>()
+        if (contest != null) {
+            for (colIdx in contest.startCol until contest.startCol + contest.nchoices) {
+                result.add( columns[colIdx].choice )
+            }
+        }
+        return result
+    }
+
+    fun voteFor(contestId: Int, cvr: CastVoteRecord): List<String> {
+        val choices = choices(contestId)
+        val contestVotes = cvr.voteFor(contestId)
+        val result = mutableListOf<String>()
+        contestVotes?.votes?.forEach { result.add( choices[it]) } // could barf if malformed
+        return result
+    }
+
     fun show() = buildString {
         contests.forEach {
             with (it) {
-                appendLine("Contest $contestIdx $contestName $startCol $ncols isIRV=$isIRV nchoices=$nchoices")
+                appendLine("Contest $contestIdx '$contestName' $startCol $ncols isIRV=$isIRV nchoices=$nchoices")
                 for (colIdx in startCol until startCol+ncols) {
                     val col = columns[colIdx]
                     appendLine("    ${col.choice}")
@@ -212,16 +234,18 @@ class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: Lis
     }
 }
 
-class ColumnInfo(val colno:Int, val contest: String, val choice: String, val header: String) {
+class ColumnInfo(val colno:Int, val contestName: String, val choice: String, val header: String) {
     var contestIdx: Int = -1
 }
 
-class ContestInfo(val contestIdx: Int, val contestName: String, val startCol: Int, val ncols: Int) {
+class ContestInfo(val contestIdx: Int, colName: String, val startCol: Int, val ncols: Int) {
+    val contestName: String
     val isIRV: Boolean
     val nchoices: Int
 
     init {
-        isIRV = contestName.contains("Number of ranks=")
+        contestName = cleanName(colName)
+        isIRV = colName.contains("Number of ranks=")
         nchoices = if (isIRV) {
             // val pos = contestName.("Number of ranks=") + "Number of ranks=".length
             sqrt(ncols.toDouble()).toInt()
@@ -236,27 +260,32 @@ fun makeSchema(contests: CSVRecord, choices: CSVRecord, headers: CSVRecord): Sch
 
     val columns = mutableListOf<ColumnInfo>()
     for (idx in 0 until contests.size()) {
-        columns.add( ColumnInfo(idx, contests.get(idx).trim(), choices.get(idx).trim(), headers.get(idx).trim() ) )
+        columns.add( ColumnInfo(idx, contests.get(idx), cleanName(choices.get(idx)), headers.get(idx) ) )
     }
-    val nheaders = columns.first { it.contest.isNotEmpty() }.colno
+    val nheaders = columns.first { it.contestName.isNotEmpty() }.colno
 
     val skipIdx = nheaders
     var startIdx = nheaders
     var currContestIdx = 0
-    var currContestName = ""
+    var currContestColName = ""
     val ccontests = mutableListOf<ContestInfo>()
     for (colidx in skipIdx until columns.size) { // skip the first 7
         val col = columns.get(colidx)
-        if (colidx != skipIdx && col.contest != currContestName) {
-            ccontests.add( ContestInfo(currContestIdx, currContestName, startIdx,colidx-startIdx) )
+        if (colidx != skipIdx && col.contestName != currContestColName) {
+            ccontests.add( ContestInfo(currContestIdx, currContestColName, startIdx,colidx-startIdx) )
             startIdx = colidx
             currContestIdx++
         }
         col.contestIdx = currContestIdx
-        currContestName = col.contest
+        currContestColName = col.contestName
     }
-    ccontests.add( ContestInfo(currContestIdx, currContestName, startIdx, columns.size-startIdx) )
+    ccontests.add( ContestInfo(currContestIdx, currContestColName, startIdx, columns.size-startIdx) )
 
     return Schema(columns, nheaders, ccontests)
+}
+
+fun cleanName(col: String) : String {
+    val pos = col.indexOf("(")
+    return if (pos > 0) col.substring(0, pos).trim() else col.trim()
 }
 

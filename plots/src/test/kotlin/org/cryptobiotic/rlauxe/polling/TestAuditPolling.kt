@@ -25,7 +25,7 @@ class TestAuditPolling {
         dl.forEach { d ->
             Nlist.forEach { N ->
                 margins.forEach { margin ->
-                    val cvrs = makeCvrsByExactMean(N, margin2theta(margin))
+                    val cvrs = makeCvrsByExactMean(N, margin2mean(margin))
                     val resultWithout = testPollingWorkflow(margin, withoutReplacement = true, cvrs, d, silent = true).first()
                     val resultWith = testPollingWorkflow(margin, withoutReplacement = false, cvrs, d, silent = true).first()
                     if (show) print("$d, ${cvrs.size}, $margin, ")
@@ -35,7 +35,7 @@ class TestAuditPolling {
                     if (show) print("${resultWithout.avgSamplesNeeded().toDouble()}, ${resultWith.avgSamplesNeeded().toDouble()}, ${"%5.2f".format(speedup)}, ")
                     if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
                     // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult): SRT {
-                    srs.add(resultWithout.makeSRT(N, margin2theta(margin), 0.0))
+                    srs.add(resultWithout.makeSRT(N, margin2mean(margin), 0.0))
                 }
                 if (show) println()
             }
@@ -65,12 +65,12 @@ class TestAuditPolling {
         }
 
         // Polling Audit
-        val audit = makePollingAudit(contests = contests)
+        val audit = makePollingAudit(contests = contests, cvrs)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()
-        audit.assertions.map { (contest, assertions) ->
-            if (!silent && showContests) println("Assertions for Contest ${contest.name}")
+        audit.assertions.map { (contestId, assertions) ->
+            if (!silent && showContests) println("Assertions for Contest ${contestId}")
             assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
@@ -81,7 +81,7 @@ class TestAuditPolling {
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
                     maxSamples = N,
-                    eta0 = margin2theta(margin),
+                    eta0 = margin2mean(margin),
                     d = d,
                     ntrials = 10,
                     withoutReplacement = withoutReplacement,

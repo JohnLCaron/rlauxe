@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.util.theta2margin
+import org.cryptobiotic.rlauxe.util.mean2margin
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -18,7 +18,7 @@ data class SRT(val N: Int,
                val stddev: Double,
                val percentHist: Deciles?) {
 
-    val reportedMargin = theta2margin(reportedMean)
+    val reportedMargin = mean2margin(reportedMean)
     val theta = reportedMean + reportedMeanDiff // the true mean
     val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val failPct = 100.0 * (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 10/29/2024
+last update: 11/04/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -29,6 +29,7 @@ Table of Contents
     * [Questions](#questions)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Simulation Results](#simulation-results)
+  * [RLA Options](#rla-options)
 <!-- TOC -->
 
 ## Reference Papers
@@ -46,6 +47,9 @@ Table of Contents
         https://github.com/spertus/comparison-RLA-betting/tree/main
 
     P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
+
+    RAIRE       Risk-Limiting Audits for IRV Elections			Blom, Stucky, Teague,  29 Oct 2019
+        https://arxiv.org/abs/1903.08804
 
     ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark, 6 Mar 2023.
         https://github.com/pbstark/ONEAudit
@@ -513,3 +517,7 @@ null mean is 1/2 once again, which reproduces the original assorter.
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)
 * [Notes on Corla](docs/Corla.md)
+
+## RLA Options
+
+* [RLA Options](docs/RlaOptions.md)

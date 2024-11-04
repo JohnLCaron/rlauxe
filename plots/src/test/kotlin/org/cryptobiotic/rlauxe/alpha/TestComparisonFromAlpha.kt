@@ -482,7 +482,7 @@ class TestComparisonFromAlpha {
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-            val compareAssertions = compareAudit.assertions[contest]
+            val compareAssertions = compareAudit.assertions[contest.id]
             require(compareAssertions!!.size == 1)
             val compareAssertion = compareAssertions.first()
             val compareAssorter = compareAssertion.assorter
@@ -546,7 +546,7 @@ class TestComparisonFromAlpha {
             for (N in nlist) {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-                val compareAssertion = compareAudit.assertions[contest]!!.first()
+                val compareAssertion = compareAudit.assertions[contest.id]!!.first()
 
                 val margin = compareAssertion.assorter.margin
                 val compareUpper = 2.0/(2-margin)
@@ -636,7 +636,7 @@ class TestComparisonFromAlpha {
             val srs = mutableListOf<SRT>()
             val cvrs = makeCvrsByExactMean(N, theta)
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-            val compareAssertion = compareAudit.assertions[contest]!!.first()
+            val compareAssertion = compareAudit.assertions[contest.id]!!.first()
 
             val margin = compareAssertion.assorter.margin
             val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)

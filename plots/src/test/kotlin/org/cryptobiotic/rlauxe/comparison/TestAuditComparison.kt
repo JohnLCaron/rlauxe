@@ -44,8 +44,8 @@ class TestAuditComparison {
         val audit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
 
         // this has to be run separately for each assorter, but we want to combine them in practice
-        audit.assertions.map { (contest, assertions) ->
-            println("Assertions for Contest ${contest.name}")
+        audit.assertions.map { (contestId, assertions) ->
+            println("Assertions for Contest ${contestId}")
             assertions.forEach { it: ComparisonAssertion ->
                 println("  ${it}")
 

@@ -91,7 +91,7 @@ class TestProbRatios {
         val sumrs = r1 + r0
         when {
             Xj == 0.5 -> assertEquals(1.0, r1+r0)
-            Xj < 0.5 -> assertTrue(1.0 > r1+r0)
+            Xj < 0.5 -> assertTrue(1.0 > r1+r0) // TODO intermittent failures
             Xj > 0.5 -> assertTrue(1.0 < r1+r0)
             else -> throw RuntimeException("bugger off")
         }

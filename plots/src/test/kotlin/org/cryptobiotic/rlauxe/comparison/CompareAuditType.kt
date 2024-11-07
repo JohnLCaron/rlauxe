@@ -22,7 +22,8 @@ import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.test.Test

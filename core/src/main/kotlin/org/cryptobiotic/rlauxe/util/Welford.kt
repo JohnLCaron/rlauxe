@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.util
 
 /**
  * Welford's algorithm for running mean and variance.

@@ -1,21 +1,24 @@
-package org.cryptobiotic.rlauxe.sim
+package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.core.RiskTestingFn
+import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.util.GenSampleFn
+import org.cryptobiotic.rlauxe.util.quantile
 import kotlin.math.sqrt
 
 data class RunTestRepeatedResult(
-               val testParameters: Map<String, Double>, // various parameters, depends on the test
-               val N: Int,                  // population size (eg number of ballots)
-               val totalSamplesNeeded: Int, // total number of samples needed in nsuccess trials
-               val nsuccess: Int,           // number of successful trials
-               val ntrials: Int,            // total number of trials
-               val variance: Double,        // variance over ntrials of samples needed
-               val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
-               val status: Map<TestH0Status, Int>? = null, // count of the trial status
+    val testParameters: Map<String, Double>, // various parameters, depends on the test
+    val N: Int,                  // population size (eg number of ballots)
+    val totalSamplesNeeded: Int, // total number of samples needed in nsuccess trials
+    val nsuccess: Int,           // number of successful trials
+    val ntrials: Int,            // total number of trials
+    val variance: Double,        // variance over ntrials of samples needed
+    val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
+    val status: Map<TestH0Status, Int>? = null, // count of the trial status
+    val sampleCount: List<Int> = emptyList(),
 ) {
     fun successPct(): Double = 100.0 * nsuccess / (if (ntrials == 0) 1 else ntrials)
     fun failPct(): Double  = 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
@@ -27,15 +30,8 @@ data class RunTestRepeatedResult(
         append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
         if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
         if (status != null) appendLine("  status:${status}")
+        if (sampleCount.isNotEmpty()) appendLine("  $sampleCount: 90% quantile:${quantile(sampleCount, .90)}")
     }
-
-    fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double): SRT {
-        return SRT(N, reportedMean, reportedMeanDiff,
-            this.testParameters,
-            this.nsuccess, this.ntrials, this.totalSamplesNeeded,
-            sqrt(this.variance), this.percentHist)
-    }
-
 }
 
 fun runTestRepeated(
@@ -56,6 +52,7 @@ fun runTestRepeated(
     val percentHist = Deciles(ntrials) // bins of 10%
     val status = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
+    val sampleCounts = mutableListOf<Int>()
 
     repeat(ntrials) {
         drawSample.reset()
@@ -73,11 +70,12 @@ fun runTestRepeated(
             // sampleCount was what percent of N? keep 10% histogram bins.
             val percent = ceilDiv(100 * testH0Result.sampleCount, N) // percent, rounded up
             percentHist.add(percent)
+            sampleCounts.add(testH0Result.sampleCount)
         }
         if (showH0Result) println(" $it $testH0Result")
     }
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, status)
+        ntrials=ntrials, variance, percentHist, status, sampleCounts)
 }

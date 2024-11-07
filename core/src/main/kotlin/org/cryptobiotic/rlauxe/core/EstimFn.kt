@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt

@@ -1,12 +1,15 @@
-// Kotlin code
+package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
-import org.cryptobiotic.rlauxe.core.raire.*
-import org.cryptobiotic.rlauxe.csv.readColoradoBallotManifest
+import org.cryptobiotic.rlauxe.csv.readDominionBallotManifest
+import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -206,6 +209,7 @@ data class ShangrlaContest(
 // SHANGRLA examples/assertion-RLA.ipynb
 
 class AssertionRLA {
+
     @Test
     fun workflow() {
 
@@ -236,15 +240,15 @@ class AssertionRLA {
             1234567890123456789L,
             314159265,
             0.8,
-            "./data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
+            "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
             manifestFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/N19-manifest.csv",
             // "./data/SFDA2019/N19 ballot manifest with WH location for RLA Upload VBM 11-14.xlsx",
             true,
             "./data/sample.csv",
             "./data/mvr.json",
             "./data/log.json",
-            0.001,
-            0.0,
+            0.01,
+            0.00,
             100
         )
 
@@ -298,10 +302,8 @@ class AssertionRLA {
         //## Read the ballot manifest
         //# special for Primary/Dominion manifest format
         //manifest = pd.read_excel(audit.manifest_file)
-        // TODO this has only batches, not distinguished by contest
-        // val manifest = read_manifest_file(audit.manifestFile)
         // (293555, 293555) = audit.max_cards, np.sum(manifest['Total Ballots'])
-        val manifest = readColoradoBallotManifest(audit.manifestFile, 339)
+        val manifest = readDominionBallotManifest(audit.manifestFile, 339)
         println(" manifest nbatches=${manifest.batches.size} manifest.nballots =${manifest.nballots}")
         assertEquals(293555, manifest.nballots)
 
@@ -310,19 +312,26 @@ class AssertionRLA {
 //cvr_list, cvrs_read, unique_ids = CVR.from_raire_file(audit.cvr_file)
 //cvr_list = Dominion.raire_to_dominion(cvr_list)
 //print(f'Read {cvrs_read} cvrs; {unique_ids} unique CVR identifiers after merging')
+// Read 146663 cvrs; 146662 unique CVR identifiers after merging
 
-        // RaireCvrs
-        val raireCvrs =
-            readRaireCvrs("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire")
+        // This single contest cvr file is the only real cvr data in SHANGRLA
+        // //         'cvr_file':       './data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire',
+        val raireCvrs = readRaireCvrs(audit.cvrFile)
         val rcContest = raireCvrs.contests.first()
         val N = rcContest.cvrs.size // ??
         println(" raireCvrs contests=${raireCvrs.contests.size} ncards =${N}")
         assertEquals(1, raireCvrs.contests.size)
         assertEquals(146662, N)
 
-//# Check that there is a card in the manifest for every card (possibly) cast. If not, add phantoms.
+// # double-check whether the manifest accounts for every card
+//audit.max_cards, np.sum(manifest['Total Ballots'])
+//        (293555, 293555)
+// # Check that there is a card in the manifest for every card (possibly) cast. If not, add phantoms.
 //manifest, manifest_cards, phantom_cards = Dominion.prep_manifest(manifest, audit.max_cards, len(cvr_list))
-// Looks like this was already done to the file we have, see Dominion.prep_manifest() in SHANGRLA
+//manifest
+// 5481 rows by 6 cols
+
+// TODO we have 146662 cvrs and 293555 manifest ballots. Why is that almost 2x (293324) ?
 
 //## Create CVRs for phantom cards
 //#%%
@@ -336,7 +345,7 @@ class AssertionRLA {
 //
 //cvr_list, phantom_vrs = CVR.make_phantoms(audit=audit, contests=contests, cvr_list=cvr_list, prefix='phantom-1-')
 //print(f"Created {phantom_vrs} phantom records")
-// "Created 0 phantom records" TODO skip this for now
+// "Created 0 phantom records" TODO why?
 
 //# find the mean of the assorters for the CVRs and check whether the assertions are met
 //min_margin = Assertion.set_all_margins_from_cvrs(audit=audit, contests=contests, cvr_list=cvr_list)
@@ -363,24 +372,24 @@ class AssertionRLA {
         val expected = listOf(
             0.045792366120740224,
             0.019902906001554532,
-             0.028923647570604505,
+            0.028923647570604505,
             0.0830003681935334,
             0.058079120699294995,
-             0.08064120222007065,
+            0.08064120222007065,
             0.10951712099930444,
-             0.14875018750596603,
-             0.13548158350492967,
+            0.14875018750596603,
+            0.13548158350492967,
             0.1365247985163165,
             0.16666893946625572,
             0.15626406294745743,
             0.2956457705472446,
         )
-        // these are the means of the polling pluraility assorters; use this to set the margins
+        // these are the averages of the polling plurality assorters; use this to set the margins
         var count = 0
-        val rrContest = raireResults.contests.first()
+        val rrContest: RaireContestAudit = raireResults.contests.first()
         val assorts: List<RaireAssorter> = rrContest.addAssorters()
+        val rcvrs = raireCvrs.contests.first().cvrs
         val margins = assorts.map { assort ->
-            val rcvrs = raireCvrs.contests.first().cvrs
             val mean = rcvrs.map { assort.assort(it) }.average()
             println(" ${assort.desc()} mean=$mean margin = ${mean2margin(mean)}")
             assertEquals(expected[count++], mean2margin(mean))
@@ -389,57 +398,75 @@ class AssertionRLA {
         val minMargin = margins.min()
         println("min = $minMargin")
 
+// seems to write audit as a json file to audit.log_file
 //audit.write_audit_parameters(contests=contests)
-//#%% md
+
+        //  Double check here - debugging
+        // replicate_p_values(N, raireResults.contests, rcContest.cvrs)
+
 //## Set up for sampling
-//#%% md
-//## Find initial sample size
-//#%%
 //# find initial sample size
-//sample_size = audit.find_sample_size(contests, cvrs=cvr_list)
-//print(f'{sample_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
+// sample_size = audit.find_sample_size(contests, cvrs=cvr_list)
+// print(f'{sample_size=}\n{[(i, c.sample_size) for i, c in contests.items()]}')
+// sample_size=372
+//[('339', 372)]
 
-        // TODO SHANGRLA doing complicated stuff. I think trying to audit simultaneous contests (dont understand the rules for that)
-        //   Has strata but not using them. What are they?
-        //   How does consistent sampling play with multiple contests?
-        //   The ballot pools may be differenent for each contest (style?).
-        //   I think you randomly pick ballots until your contest.sample_size is satisfied
-        //   Also see  proportional-with-error-bound (PPEB) sampling (aslam pdf)
-        //
-        // TODO SHANGRLA has an option to do a simulation, then pick the max over contest and assertion.
-        //   Surprising that they dont just use the min margin, at least within a contest.
-        //   Calls test.sample_size(), test-specific simulation.
-        //   We could do our own simulation, dont need to follow SHANGLRA's convolutions.
-        val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
+        val results = calc_sample_sizes(10, raireResults.contests, rcContest.cvrs)
+        println("calc_sample_sizes = $results")
+        val sampleSize = results.sampleCount[0] // TODO
 
-        val auditComparison = makeRaireComparisonAudit(raireResults.contests, rcContest.cvrs)
-        val comparisonAssertions = auditComparison.assertions.values.first()
-        val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+        /*
+                val ccontest2: Contest = rrContest.toContest()
+                val cvras: List<CvrUnderAudit> = makeCvras(rcvrs, Random)
+                // contests: List<Contest>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05
+                val caudit2: AuditComparison = makeComparisonAudit(listOf(ccontest), rcvrs)
+                // val N: Int, val alpha: Double, val error_rate_1: Double, val error_rate_2: Double, val reps: Int, val quantile: Double
+                val findSampleSize = FindSampleSize(N, scontest.risk_limit, audit.errorRate1, audit.errorRate2, audit.reps, audit.quantile)
+                // audit: AuditComparison, contests: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>,
+                val cua = ContestUnderAudit(ccontest, N)
+                val ss = findSampleSize.find_sample_size(caudit, listOf(cua), cvras)
+                println("sampleSize = $ss")
+         */
 
 
+        ///// consistent sampling
 //## Draw the first sample
 //#%%
 //# draw the initial sample using consistent sampling
 //prng = SHA256(audit.seed)
 //CVR.assign_sample_nums(cvr_list, prng)
+        // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
+        val cvras = rcvrs.map { CvrUnderAudit(it, secureRandom.nextInt()) }
+        println("calc_sample_sizes = $results")
+
 //#%%
 //sampled_cvr_indices = CVR.consistent_sampling(cvr_list=cvr_list, contests=contests)
+        val contestUA = raireResults.contests.map {
+            val cua = it.toContestUnderAudit(N)
+            cua.sampleSize = sampleSize
+            cua
+        }
+        val sampled_cvr_indices = consistentSampling(cvras, contestUA)
+        println("sampled = ${sampled_cvr_indices.size}")
+
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
 //print(f'The sample includes {n_sampled_phantoms} phantom cards.')
         // The sample includes 0 phantom cards.
 //#%%
 //len(cvr_list), manifest_cards, audit.max_cards
         // (146662, 293555, 293555)
-
 //# for comparison audit
 //cards_to_retrieve, sample_order, cvr_sample, mvr_phantoms_sample = \
 //    Dominion.sample_from_cvrs(cvr_list, manifest, sampled_cvr_indices)
 //
-//# for polling audit
+//# for polling audit (not used)
 //# cards_to_retrieve, sample_order, mvr_phantoms_sample = Dominion.sample_from_manifest(manifest, sample)
 //#%%
-//# write the sample
+//# write the sample "cards_to_retrieve" to the file "audit.sample_file"
 //Dominion.write_cards_sampled(audit.sample_file, cards_to_retrieve, print_phantoms=False)
+
+
+
 //#%% md
 //## Read the audited sample data
 //#%%
@@ -469,20 +496,6 @@ class AssertionRLA {
 //p_max = Assertion.set_p_values(contests=contests, mvr_sample=mvr_sample, cvr_sample=cvr_sample)
 //print(f'maximum assertion p-value {p_max}')
 //done = audit.summarize_status(contests)
-
-        val sampler: GenSampleFn = ComparisonNoErrors(rcContest.cvrs, minAssorter)
-
-        val optimal = OptimalComparisonNoP1(
-            N = N,
-            withoutReplacement = true,
-            upperBound = minAssorter.upperBound,
-            p2 = 0.01
-        )
-
-        val betta = BettingMart(bettingFn = optimal, N = N, noerror=0.0, withoutReplacement = false)
-        val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
-        println(result)
-        println("pvalues = ${result.pvalues}")
 
 
 // p-values for assertions in contest 339
@@ -587,6 +600,96 @@ class AssertionRLA {
     }
 }
 
+fun replicate_p_values(
+    N: Int,
+    contests: List<RaireContestAudit>,
+    cvrs: List<RaireCvr>,
+) {
+    // TODO SHANGRLA doing complicated stuff. I think trying to audit simultaneous contests (dont understand the rules for that)
+    //   Has strata but not using them. What are they?
+    //   How does consistent sampling play with multiple contests?
+    //   The ballot pools may be differenent for each contest (style?).
+    //   I think you randomly pick ballots until your contest.sample_size is satisfied
+    //   Also see  proportional-with-error-bound (PPEB) sampling (aslam pdf)
+    //
+    // TODO SHANGRLA has an option to do a simulation, then pick the max over contest and assertion.
+    //   Surprising that they dont just use the min margin, at least within a contest.
+    //   Calls test.sample_size(), test-specific simulation.
+    //   We could do our own simulation, dont need to follow SHANGLRA's convolutions.
+    val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
+
+    val auditComparison = makeRaireComparisonAudit(contests, cvrs)
+    val comparisonAssertions = auditComparison.assertions.values.first()
+    val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+
+    val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
+
+    val optimal = OptimalComparisonNoP1(
+        N = N,
+        withoutReplacement = true,
+        upperBound = minAssorter.upperBound,
+        p2 = 0.01
+    )
+
+    val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
+    val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
+    println(result)
+    println("pvalues = ${result.pvalues}")
+}
+
+// TODO sample size is always the same, so no need to make repeated runs
+// artifact of testing without errors
+fun calc_sample_sizes(
+    ntrials: Int,
+    contests: List<RaireContestAudit>,
+    cvrs: List<RaireCvr>,
+): RunTestRepeatedResult {
+
+    val N = cvrs.size
+    val auditComparison = makeRaireComparisonAudit(contests, cvrs)
+    val comparisonAssertions = auditComparison.assertions.values.first()
+    // val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+    val minAssertion = comparisonAssertions.minBy { it.margin }
+    val minAssorter = minAssertion.assorter
+
+    val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
+
+    // class AdaptiveComparison(
+    //    val N: Int,
+    //    val withoutReplacement: Boolean = true,
+    //    val upperBound: Double, // compareAssorter.upperBound
+    //    val a: Double, // noerror
+    //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
+    //    val d2: Int, // weight p2, p4
+    //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
+    //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
+    //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
+    //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
+    //    val eps: Double = .00001
+    val optimal = AdaptiveComparison(
+        N = N,
+        withoutReplacement = true,
+        upperBound = minAssorter.upperBound,
+        a = minAssorter.noerror,
+        d1 = 100,
+        d2 = 100,
+        p1 = .01,
+        p2 = .001,
+        p3 = 0.0,
+        p4 = 0.0,
+    )
+    val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
+
+    return runTestRepeated(
+        drawSample = sampler,
+        maxSamples = N,
+        ntrials = ntrials,
+        testFn = betta,
+        testParameters = mapOf("p2" to optimal.p2, "margin" to minAssertion.margin),
+        showDetails = false,
+    )
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 fun maxVal(inputList: ArrayList<ArrayList<String>>): Int {
     var maxValue = inputList[0][1].toInt()
@@ -635,7 +738,10 @@ fun prep_manifest(
     return manifest
 }
 
-fun sample_from_manifest(manifest: ArrayList<ArrayList<String>>, sample: ArrayList<Int>): ArrayList<ArrayList<String>> {
+fun sample_from_manifest(
+    manifest: ArrayList<ArrayList<String>>,
+    sample: ArrayList<Int>,
+): ArrayList<ArrayList<String>> {
     val cardsToRetrieve = ArrayList<ArrayList<String>>()
 
     for (i in 1 until sample.size) {

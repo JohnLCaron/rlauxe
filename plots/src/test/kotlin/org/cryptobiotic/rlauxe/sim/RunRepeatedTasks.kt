@@ -16,8 +16,11 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 interface RepeatedTask {

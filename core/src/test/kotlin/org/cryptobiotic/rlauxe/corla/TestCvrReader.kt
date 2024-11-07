@@ -34,7 +34,7 @@ class TestCvrReader {
     @Test
     fun parseBoulder23Succeeds() {
 
-        val filename = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/corla/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
+        val filename = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/corla/Boulder23/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
         val result: CvrExport = readDominionCvrExport(filename, "Boulder")
         println(result.summary())
 

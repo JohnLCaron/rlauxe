@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.sampling.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.sampling.CvrUnderAudit
-import org.cryptobiotic.rlauxe.core.sampling.consistentSampling
-import org.cryptobiotic.rlauxe.core.sampling.makePhantoms
+import org.cryptobiotic.rlauxe.sampling.ContestUnderAudit
+import org.cryptobiotic.rlauxe.sampling.CvrUnderAudit
+import org.cryptobiotic.rlauxe.sampling.consistentSampling
+import org.cryptobiotic.rlauxe.sampling.makePhantoms
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import kotlin.test.Test

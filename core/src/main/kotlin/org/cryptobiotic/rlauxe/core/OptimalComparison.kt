@@ -90,7 +90,7 @@ class OracleComparison(
 class AdaptiveComparison(
     val N: Int,
     val withoutReplacement: Boolean = true,
-    val upperBound: Double,
+    val upperBound: Double, // compareAssorter.upperBound
     val a: Double, // noerror
     val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
     val d2: Int, // weight p2, p4

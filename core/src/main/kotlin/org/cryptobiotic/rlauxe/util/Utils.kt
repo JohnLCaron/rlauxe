@@ -111,6 +111,7 @@ fun numpy_append(pfx: DoubleArray, a: DoubleArray) : DoubleArray {
 
 // computes the q-th quantile of data along the specified axis.
 // The q-th quantile represents the value below which q percent of the data falls.
+// i think a has to be sorted
 fun numpy_quantile(a: IntArray, q: Double): Int {
     // for (i=0, sum=0; i<n; i++) sum += Number[i];
     //tot = sum;
@@ -127,12 +128,13 @@ fun numpy_quantile(a: IntArray, q: Double): Int {
 
 // this one assumes you cant change data array
 // https://softwareengineering.stackexchange.com/questions/195652/how-to-calculate-percentile-in-java-without-using-library/453902
-fun numpy_quantile2(data: IntArray, quantile: Double): Int {
+fun quantile(data: List<Int>, quantile: Double): Int {
 
     require (quantile in 0.0..1.0)
     val total = data.sum() * quantile
 
-    val sortedData = data.copyOf() // or sort in place, which changes data
+    val sortedData = mutableListOf<Int>()
+    sortedData.addAll(data) // or sort in place, which changes data
     sortedData.sort()
 
     var i = 0

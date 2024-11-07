@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /** keeps track of the latest sample, number of samples, and the sample sum. */

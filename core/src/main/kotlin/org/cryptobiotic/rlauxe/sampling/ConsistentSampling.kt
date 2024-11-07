@@ -1,18 +1,20 @@
-package org.cryptobiotic.rlauxe.core.sampling
+package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
 //// Adapted from SHANGRLA Audit.py
-// Also see https://github.com/votingworks/consistent_sampler/blob/master/consistent_sampler/consistent_sampler.py
 
 // contest being audited, mutable
+/**
+ * @parameter ncards: upper bound
+ */
 class ContestUnderAudit(val contest: Contest, var ncards: Int? = null) {
     val id = contest.name
     val idx = contest.id
     var sampleSize: Int = 0 // Estimate the sample size required to confirm the contest at its risk limit
-    var ncvrs: Int = 0
+    var ncvrs: Int = 0      // number of cvrs with this contest
     var sampleThreshold = 0 // seems to be the highest sample.sampleNum used for this contest
 }
 
@@ -155,12 +157,15 @@ private class PhantomBuilder(val id: String) {
 
 ///////////////////////////////////////////////////////////////////////
 
+/*
 fun assignSampleNums(cvrList: MutableList<CvrUnderAudit>, prng: Random): Boolean {
     for (cvr in cvrList) {
         cvr.sampleNum = prng.nextInt()
     }
     return true
 }
+
+ */
 
 // prepare the MVRs and CVRs for comparison by putting them into the same (random) order in which the CVRs were selected
 fun prepComparisonSample(
@@ -202,6 +207,7 @@ fun sortCvrSampleNum(cvrList: MutableList<CvrUnderAudit>): Boolean {
     -------
     sampled_cvr_indices: indices of CVRs to sample
 */
+// Also see https://github.com/votingworks/consistent_sampler/blob/master/consistent_sampler/consistent_sampler.py
 fun consistentSampling(
     cvrList: List<CvrUnderAudit>,
     contests: Map<String, ContestUnderAudit>,
@@ -288,3 +294,50 @@ fun consistentSampling(
     }
     return sampledIndices
 }
+
+// first time only, we'll add the subsequent rounds later. KISS
+fun consistentSampling(
+    cvrList: List<CvrUnderAudit>,
+    contests: List<ContestUnderAudit>,
+): List<Int> {
+    val currentSizes = mutableMapOf<String, Int>()
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+
+    // get list of cvr indexes sorted by sampleNum
+    val sortedCvrIndices = cvrList.indices.sortedBy { cvrList[it].sampleNum }
+
+    // go through the sortedCvrIndices, starting after the existing sampledIndices
+    val sampledIndices = mutableListOf<Int>()
+    var inx = 0
+    // do we need more samples?
+    while (contests.any { contestInProgress(it) }) {
+        val sidx = sortedCvrIndices[inx]
+        val cvr = cvrList[sidx]
+        // does this cvr contribute to one or more contests that need more samples?
+        if (contests.any { contestInProgress(it) && cvr.hasContest(it.idx) }) {
+            // then use it
+            sampledIndices.add(sidx)
+            cvr.sampled = true
+            contests.forEach { contest ->
+                if (contestInProgress(contest) && cvr.hasContest(contest.idx)) {
+                    contest.sampleThreshold = cvr.sampleNum // track the largest sample used
+                    currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
+                }
+            }
+        }
+        inx++
+    }
+
+    //        for i in range(len(cvr_list)):
+    //            if i in sampled_cvr_indices:
+    //                cvr_list[i].sampled = True
+    //        return sampled_cvr_indices
+    // mark that cvr is sampled. TODO seems inefficient
+    /* cvrList.forEachIndexed { idx, cvr ->
+        if (sampledIndices.contains(idx)) {
+            cvr.sampled = true
+        }
+    } */
+    return sampledIndices
+}
+

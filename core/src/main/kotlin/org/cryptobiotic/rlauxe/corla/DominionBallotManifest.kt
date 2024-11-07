@@ -7,9 +7,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-data class ColoradoBallotManifest(
+// so far, only tested on "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/N19-manifest.csv"
+data class DominionBallotManifest(
     val countyId: Long,
-    val batches: List<ColoradoBallotBatch>,
+    val batches: List<DominionBallotBatch>,
     val header: String,
     val filename: String,
 ) {
@@ -18,7 +19,7 @@ data class ColoradoBallotManifest(
 
 // Tray #,Tabulator Number,Batch Number,Total Ballots,VBMCart.Cart number
 //1,99808,78,116,3
-data class ColoradoBallotBatch(
+data class DominionBallotBatch(
     val trayNumber: Int,
     val tabulator: Int,
     val batchNumber: Int,
@@ -27,7 +28,7 @@ data class ColoradoBallotBatch(
     val sequenceStart: Int, // The first sequence number (of all ballots) in this batch
 )
 
-fun readColoradoBallotManifest(filename: String, countyId: Long): ColoradoBallotManifest {
+fun readDominionBallotManifest(filename: String, countyId: Long): DominionBallotManifest {
     val path: Path = Paths.get(filename)
     val reader: Reader = Files.newBufferedReader(path)
     val parser = CSVParser(reader, CSVFormat.DEFAULT)
@@ -43,11 +44,11 @@ fun readColoradoBallotManifest(filename: String, countyId: Long): ColoradoBallot
     require("Tray #, Tabulator Number, Batch Number, Total Ballots, VBMCart.Cart number".equals(header))
 
     // subsequent lines contain ballot manifest info
-    val batches = mutableListOf<ColoradoBallotBatch>()
+    val batches = mutableListOf<DominionBallotBatch>()
 
     while (records.hasNext()) {
         val line = records.next()
-        val bmi = ColoradoBallotBatch(
+        val bmi = DominionBallotBatch(
             line.get(0).toInt(),
             line.get(1).toInt(),
             line.get(2).toInt(),
@@ -59,5 +60,5 @@ fun readColoradoBallotManifest(filename: String, countyId: Long): ColoradoBallot
         sequenceStart += bmi.batchSize
     }
 
-    return ColoradoBallotManifest(countyId, batches, header, filename)
+    return DominionBallotManifest(countyId, batches, header, filename)
 }

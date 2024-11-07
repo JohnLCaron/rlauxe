@@ -1,8 +1,7 @@
-package org.cryptobiotic.rlauxe.core.sampling
+package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.sampling.NonnegMean.Companion.makeAlphaMart
 import org.cryptobiotic.rlauxe.util.*
 import java.security.SecureRandom
 import kotlin.math.ceil

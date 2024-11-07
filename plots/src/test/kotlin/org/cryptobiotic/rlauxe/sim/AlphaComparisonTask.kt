@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.util.GenSampleFn
 import kotlin.math.max

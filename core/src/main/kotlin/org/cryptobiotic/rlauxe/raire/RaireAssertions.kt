@@ -1,9 +1,10 @@
-package org.cryptobiotic.rlauxe.core.raire
+package org.cryptobiotic.rlauxe.raire
 
 
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.sampling.ContestUnderAudit
 
 
 data class RaireResults(
@@ -44,6 +45,13 @@ data class RaireContestAudit(
             candidates.associate{ it.toString() to it },
             listOf(winner.toString()),
             SocialChoiceFunction.IRV,
+        )
+    }
+
+    fun toContestUnderAudit(ncards: Int): ContestUnderAudit {
+        return ContestUnderAudit(
+            toContest(),
+            ncards,
         )
     }
 }

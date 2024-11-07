@@ -9,8 +9,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-// this is RAIRE CSV format for ranked choice CVRs from SFDA2019
-// input to RAIRE, not sure where these are produced
+// this is (apparently) RAIRE CSV format for ranked choice CVRs from SFDA2019
+// input to RAIRE, not sure where these are produced, somewhere in SFDA2019
 data class RaireCvrs(
     val contests: List<RaireCvrContest>,
     val filename: String,
@@ -33,7 +33,7 @@ class RaireCvr(
     constructor(contest: Int, ranks: List<Int>): this( "", contest, ranks.toIntArray(), false) // for quick testing
     constructor(contest: Int, id: String, ranks: List<Int>): this( id, contest, ranks.toIntArray(), false) // for quick testing
 
-    /** if candidate not ranked, 0 , else rank (1 based */
+    /** if candidate not ranked, 0 , else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {
         val rankedChoices = votes[contest]
         return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0

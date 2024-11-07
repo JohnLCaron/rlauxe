@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sim.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import kotlin.math.max
 import kotlin.test.Test
 

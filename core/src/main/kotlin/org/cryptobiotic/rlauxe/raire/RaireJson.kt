@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.core.raire
+package org.cryptobiotic.rlauxe.raire
 
 
 import kotlinx.serialization.ExperimentalSerializationApi

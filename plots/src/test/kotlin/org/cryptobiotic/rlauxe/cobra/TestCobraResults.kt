@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.OracleComparison
-import org.cryptobiotic.rlauxe.sim.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.test.Test

@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.util.mean2margin
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
+import kotlin.math.sqrt
 
 // data class for capturing results from repeated audit trials.
 data class SRT(val N: Int,
@@ -192,4 +194,12 @@ class SRTcsvReaderVersion1(filename: String) {
             mapOf("d" to d.toDouble(), "eta0" to eta0, "eta0Factor" to eta0Factor),
             nsuccess, ntrials, nsamples, stddev, percentHist)
     }
+}
+
+
+fun RunTestRepeatedResult.makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double): SRT {
+    return SRT(N, reportedMean, reportedMeanDiff,
+        this.testParameters,
+        this.nsuccess, this.ntrials, this.totalSamplesNeeded,
+        sqrt(this.variance), this.percentHist)
 }

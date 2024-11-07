@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
-import org.cryptobiotic.rlauxe.core.raire.import
-import org.cryptobiotic.rlauxe.core.raire.addAssorters
-import org.cryptobiotic.rlauxe.core.raire.readRaireResults
+import org.cryptobiotic.rlauxe.raire.import
+import org.cryptobiotic.rlauxe.raire.addAssorters
+import org.cryptobiotic.rlauxe.raire.readRaireResults
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

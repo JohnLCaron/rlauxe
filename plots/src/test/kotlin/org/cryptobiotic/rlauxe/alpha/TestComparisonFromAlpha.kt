@@ -6,8 +6,9 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
-import org.cryptobiotic.rlauxe.sim.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sim.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

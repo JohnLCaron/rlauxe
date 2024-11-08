@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 
 // for testing, here to share between modules
 
@@ -29,7 +31,7 @@ class CvrBuilders {
         return cb
     }
 
-    fun build(): List<Cvr> {
+    fun build(): List<CvrIF> {
         return builders.map { it.build() }
     }
 
@@ -64,9 +66,10 @@ class CvrBuilder(
 
     fun done() = builders
 
-    fun build() : Cvr {
+    fun build() : CvrIF {
         val votes: Map<Int, IntArray> = contests.values.map { it.build() }.toMap()
-        return Cvr("card$id", votes, phantom)
+        val cvr = Cvr("card$id", votes)
+        return if (phantom) CvrUnderAudit(cvr, phantom = true) else cvr
     }
 }
 

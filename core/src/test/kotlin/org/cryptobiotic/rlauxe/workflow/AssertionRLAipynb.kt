@@ -436,7 +436,7 @@ class AssertionRLA {
 //prng = SHA256(audit.seed)
 //CVR.assign_sample_nums(cvr_list, prng)
         // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
-        val cvras = rcvrs.map { CvrUnderAudit(it, secureRandom.nextInt()) }
+        val cvras = rcvrs.map { CvrUnderAudit(it, phantom = false, secureRandom.nextInt()) }
         println("calc_sample_sizes = $results")
 
 //#%%

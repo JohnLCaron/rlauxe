@@ -20,12 +20,12 @@ data class AuditPolling(
     }
 }
 
-fun makePollingAudit(contests: List<Contest>, cvrs: Iterable<Cvr>, riskLimit: Double  = 0.05): AuditPolling {
+fun makePollingAudit(contests: List<Contest>, cvrs: Iterable<CvrIF>, riskLimit: Double  = 0.05): AuditPolling {
     val assertions: Map<Int, List<Assertion>> = contests.associate { makePollingAssertions(it, cvrs) }
     return AuditPolling(AuditType.POLLING, riskLimit, contests, assertions)
 }
 
-fun makePollingAssertions(contest: Contest, cvrs: Iterable<Cvr>): Pair<Int, List<Assertion>> =
+fun makePollingAssertions(contest: Contest, cvrs: Iterable<CvrIF>): Pair<Int, List<Assertion>> =
     when (contest.choiceFunction) {
         SocialChoiceFunction.APPROVAL,
         SocialChoiceFunction.PLURALITY, -> Pair(contest.id, makePluralityAssertions(contest, cvrs))
@@ -33,7 +33,7 @@ fun makePollingAssertions(contest: Contest, cvrs: Iterable<Cvr>): Pair<Int, List
         else -> throw RuntimeException(" choice function ${contest.choiceFunction} is not supported")
     }
 
-fun makePluralityAssertions(contest: Contest, cvrs: Iterable<Cvr>): List<Assertion> {
+fun makePluralityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
     // test that every winner beats every loser. SHANGRLA 2.1
     val assertions = mutableListOf<Assertion>()
     contest.winners.forEach { winner ->
@@ -46,7 +46,7 @@ fun makePluralityAssertions(contest: Contest, cvrs: Iterable<Cvr>): List<Asserti
     return assertions
 }
 
-fun makeSuperMajorityAssertions(contest: Contest, cvrs: Iterable<Cvr>): List<Assertion> {
+fun makeSuperMajorityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
     // each winner generates 1 assertion. SHANGRLA 2.3
     val assertions = mutableListOf<Assertion>()
     contest.winners.forEach { winner ->

@@ -1,6 +1,10 @@
 # RLA Options
-11/4/2024
+11/4/2024 (DRAFT)
 
+I am trying to see what "user visible" options need to be allowed, where user is, eg, Colorado DOS, 
+or a consultant working with them configuring the library for their needs. 
+So I wanted to leave out all the research questions, its our job to answer those, 
+and I was picking the best answers in my understanding so far.
 
 ## Sampling with replacement vs sampling without replacement
 
@@ -91,24 +95,3 @@ Audit types
 4. ONEAudit?
 5. Hybrid?
 6. Stratified?
-
-### Workflow
-
-1. Before election
-Each jurisdiction has an election manifest that lists all contests and candidates.
-Create the union of those. Also by contest
-
-2. After election
-Each county knows what valid ballots were cast, and the ballot styles of each ballot.
-Count the number of cards for each contest. combine across jurisdictions = N(contest)
-Count total cards.
-
-3. Generate CVRS for all cast ballots. Count NCVR(contest)
-
-4. read ballot manifest to give a mapping from a sequence number to a ballot location.
-
-6. add phantoms
-7. for each assorter, calculate margin including phantoms
-8.   estimate sample sizes
-9. consistent sampling
-10. run audit

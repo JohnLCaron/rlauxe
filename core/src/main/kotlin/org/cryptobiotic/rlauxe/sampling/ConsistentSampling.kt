@@ -1,22 +1,11 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import kotlin.random.Random
+import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 
 //// Adapted from SHANGRLA Audit.py
-
-// contest being audited, mutable
-/**
- * @parameter ncards: upper bound
- */
-class ContestUnderAudit(val contest: Contest, var ncards: Int? = null) {
-    val id = contest.name
-    val idx = contest.id
-    var sampleSize: Int = 0 // Estimate the sample size required to confirm the contest at its risk limit
-    var ncvrs: Int = 0      // number of cvrs with this contest
-    var sampleThreshold = 0 // seems to be the highest sample.sampleNum used for this contest
-}
 
 //    CVRs can be assigned to a `tally_pool`, useful for the ONEAudit method or batch-level comparison audits
 //    using the `batch` attribute (batch-level comparison audits are not currently implemented)
@@ -40,22 +29,7 @@ class ContestUnderAudit(val contest: Contest, var ncards: Int? = null) {
 //        self.p = p  # sampling probability
 //        self.sampled = sampled  # is this CVR in the sample?
 //     var sampleNum = 0 // # pseudorandom number used for consistent sampling
-class CvrUnderAudit(val cvr: Cvr, var sampleNum: Int = 0) {
-    val id = cvr.id
-    val phantom = cvr.phantom
-    var sampled = false //  # is this CVR in the sample?
-    var p: Double = 0.0
 
-    fun hasContest(want: Int) = cvr.hasContest(want)
-
-    constructor(id: String, contestIdx: Int) : this(Cvr(id, mapOf(contestIdx to IntArray(0))))
-}
-
-fun makeCvras(cvrs: List<Cvr>, random: Random): List<CvrUnderAudit> {
-    // just assigns a random number, then sorts it
-    // otherwise, could create a permutation of ncards
-    return cvrs.map { CvrUnderAudit(it, random.nextInt()) }
-}
 
 /*
 SHANGRLA Audit.make_phantoms()
@@ -121,9 +95,9 @@ fun makePhantoms(
     var n_phantoms: Int
     val n_cvrs = cvras.size
     for (contest in contestas) { // } set contest parameters
-        contest.ncvrs = cvras.filter { it.hasContest(contest.idx) && !it.phantom }.count() // count or sum ?
-        contest.ncards =
-            if (contest.ncards == null) maxCards else contest.ncards // upper bound on cards cast in the contest TODO where?
+        contest.ncvrs = cvras.filter { it.hasContest(contest.id) && !it.phantom }.count() // count or sum ?
+        contest.upperBound =
+            if (contest.upperBound == null) maxCards else contest.upperBound // upper bound on cards cast in the contest TODO where?
     }
     if (!useStyles) {              //  make (max_cards-len(cvr_list)) phantoms
         n_phantoms = maxCards - n_cvrs
@@ -132,13 +106,13 @@ fun makePhantoms(
         }
     } else {                         // create phantom CVRs as needed for each contest
         for (contest in contestas) {
-            val phantoms_needed = contest.ncards!! - contest.ncvrs
+            val phantoms_needed = contest.upperBound!! - contest.ncvrs
             while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
                 phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
             }
             // list contest on the first n phantom CVRs
             repeat(phantoms_needed) {
-                phantombs[it].contests.add(contest.idx)
+                phantombs[it].contests.add(contest.id)
             }
         }
         n_phantoms = phantombs.size
@@ -151,7 +125,7 @@ private class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
     fun build(): CvrUnderAudit {
         val votes = contests.map { it to IntArray(0) }.toMap()
-        return CvrUnderAudit(Cvr(id, votes, true))
+        return CvrUnderAudit(Cvr(id, votes), phantom = true)
     }
 }
 
@@ -216,7 +190,7 @@ fun consistentSampling(
     //        current_sizes = defaultdict(int)
     //        contest_in_progress = lambda c: (current_sizes[c.id] < c.sample_size)
     val currentSizes = mutableMapOf<String, Int>()
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.name] ?: 0) < c.sampleSize
 
     //        if sampled_cvr_indices is None:
     //            sampled_cvr_indices = []
@@ -232,8 +206,8 @@ fun consistentSampling(
     // look through the already sampled cvrs and add up the contest counts
     previousCvrIndices.forEach { sam ->
         contests.forEach { (_, contest) ->
-            if (cvrList[sam].hasContest(contest.idx)) {
-                currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
+            if (cvrList[sam].hasContest(contest.id)) {
+                currentSizes[contest.name] = currentSizes[contest.name]?.plus(1) ?: 1
             }
         }
     }
@@ -269,13 +243,13 @@ fun consistentSampling(
         val sidx = sortedCvrIndices[inx]
         val cvr = cvrList[sidx]
         // does this cvr contribute to one or more contests that need more samples?
-        if (contests.values.any { contestInProgress(it) && cvr.hasContest(it.idx) }) {
+        if (contests.values.any { contestInProgress(it) && cvr.hasContest(it.id) }) {
             // then use it
             sampledIndices.add(sidx)
             contests.forEach { (_, contest) ->
-                if (contestInProgress(contest) && cvr.hasContest(contest.idx)) {
+                if (contestInProgress(contest) && cvr.hasContest(contest.id)) {
                     contest.sampleThreshold = cvr.sampleNum // track the largest sample used
-                    currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
+                    currentSizes[contest.name] = currentSizes[contest.name]?.plus(1) ?: 1
                 }
             }
         }
@@ -301,7 +275,7 @@ fun consistentSampling(
     contests: List<ContestUnderAudit>,
 ): List<Int> {
     val currentSizes = mutableMapOf<String, Int>()
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.name] ?: 0) < c.sampleSize
 
     // get list of cvr indexes sorted by sampleNum
     val sortedCvrIndices = cvrList.indices.sortedBy { cvrList[it].sampleNum }
@@ -314,14 +288,14 @@ fun consistentSampling(
         val sidx = sortedCvrIndices[inx]
         val cvr = cvrList[sidx]
         // does this cvr contribute to one or more contests that need more samples?
-        if (contests.any { contestInProgress(it) && cvr.hasContest(it.idx) }) {
+        if (contests.any { contestInProgress(it) && cvr.hasContest(it.id) }) {
             // then use it
             sampledIndices.add(sidx)
             cvr.sampled = true
             contests.forEach { contest ->
-                if (contestInProgress(contest) && cvr.hasContest(contest.idx)) {
+                if (contestInProgress(contest) && cvr.hasContest(contest.id)) {
                     contest.sampleThreshold = cvr.sampleNum // track the largest sample used
-                    currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
+                    currentSizes[contest.name] = currentSizes[contest.name]?.plus(1) ?: 1
                 }
             }
         }

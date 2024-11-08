@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.raire.RaireContestAudit
 import org.cryptobiotic.rlauxe.raire.makeRaireComparisonAudit
@@ -50,10 +49,10 @@ class FindSampleSize(
         val contests = rcontests.map { it.toContestUnderAudit(N) }
         // unless style information is being used, the sample size is the same for every contest.
         val old_sizes: MutableMap<Int, Int> =
-            contests.associate { it.idx to 0 }.toMutableMap()
+            contests.associate { it.id to 0 }.toMutableMap()
 
         for (contest in contests) {
-            val contestId = contest.idx
+            val contestId = contest.id
             old_sizes[contestId] = cvrs.filter { it.hasContest(contestId) }.map { if (it.sampled) 1 else 0 }.sum()
 
             // max sample size over all assertions in this contest
@@ -82,8 +81,8 @@ class FindSampleSize(
             } else {
                 cvr.p = 0.0
                 for (con in contests) {
-                    if (cvr.hasContest(con.idx) && !cvr.sampled) {
-                        val p1 = con.sampleSize.toDouble() / (con.ncards!! - old_sizes[con.idx]!!)
+                    if (cvr.hasContest(con.id) && !cvr.sampled) {
+                        val p1 = con.sampleSize.toDouble() / (con.upperBound!! - old_sizes[con.id]!!)
                         cvr.p = max(p1, cvr.p) // TODO nullability
                     }
                 }

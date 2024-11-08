@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterFunction {
-    fun assort(mvr: Cvr) : Double
+    fun assort(mvr: CvrIF) : Double
     fun upperBound(): Double
     fun desc(): String
     fun winner(): Int
@@ -13,7 +13,7 @@ interface AssorterFunction {
 /** See SHANGRLA, section 2.1. */
 data class PluralityAssorter(val contest: Contest, val winner: Int, val loser: Int): AssorterFunction {
     // SHANGRLA section 2, p 4.
-    override fun assort(mvr: Cvr): Double {
+    override fun assort(mvr: CvrIF): Double {
         val w = mvr.hasMarkFor(contest.id, winner)
         val l = mvr.hasMarkFor(contest.id, loser)
         return (w - l + 1) * 0.5
@@ -29,7 +29,7 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
     val upperBound = 0.5 / minFraction
 
     // SHANGRLA eq (1), section 2.3, p 5.
-    override fun assort(mvr: Cvr): Double {
+    override fun assort(mvr: CvrIF): Double {
         val w = mvr.hasMarkFor(contest.id, winner)
         return if (mvr.hasOneVote(contest.id, contest.candidates)) (w / (2 * minFraction)) else .5
     }
@@ -82,7 +82,7 @@ data class ComparisonAssorter(
     }
 
     // B(bi, ci)
-    fun bassort(mvr: Cvr, cvr:Cvr): Double {
+    fun bassort(mvr: CvrIF, cvr:CvrIF): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
         //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
@@ -114,7 +114,7 @@ data class ComparisonAssorter(
     //        Phantom CVRs and MVRs are treated specially:
     //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
     //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
-    fun overstatementError(mvr: Cvr, cvr: Cvr, useStyle: Boolean = true): Double {
+    fun overstatementError(mvr: CvrIF, cvr: CvrIF, useStyle: Boolean = true): Double {
 
 
         //        # sanity check

@@ -4,7 +4,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 
 
 data class RaireResults(
@@ -101,7 +101,7 @@ class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): 
     override fun winner() = assertion.winner
     override fun loser() = assertion.loser
 
-    override fun assort(mvr: Cvr): Double {
+    override fun assort(mvr: CvrIF): Double {
         val rcvr = mvr as RaireCvr
         return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
         else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)

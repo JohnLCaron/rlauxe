@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ContestUnderAudit
-import org.cryptobiotic.rlauxe.sampling.CvrUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.consistentSampling
 import org.cryptobiotic.rlauxe.sampling.makePhantoms
 import org.cryptobiotic.rlauxe.util.listToMap
@@ -83,9 +83,9 @@ class TestCvr {
     
     @Test
     fun test_make_phantoms() {
-        val cvras = cvrs.map { CvrUnderAudit(it) }
+        val cvras = cvrs.map { CvrUnderAudit.fromCvrIF(it, phantom = false) }
         val contestas: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
-        contestas["measure_1"]?.ncards = 5
+        contestas["measure_1"]?.upperBound = 5
 
         val prefix = "phantom-"
 
@@ -101,8 +101,8 @@ class TestCvr {
 
         assertEquals(5, contestas["city_council"]!!.ncvrs)
         assertEquals(4, contestas["measure_1"]!!.ncvrs)
-        assertEquals(8, contestas["city_council"]!!.ncards)
-        assertEquals(5, contestas["measure_1"]!!.ncards)
+        assertEquals(8, contestas["city_council"]!!.upperBound)
+        assertEquals(5, contestas["measure_1"]!!.upperBound)
 
         assertEquals(8, result.filter{ it.hasContest(0) }.size)
         assertEquals(5, result.filter{ it.hasContest(1) }.size)
@@ -110,7 +110,7 @@ class TestCvr {
         assertEquals(4, result.filter{ it.hasContest(1) && !it.phantom }.size)
 
         //// use_style = false
-        val cvrasf = cvrs.map { CvrUnderAudit(it) }
+        val cvrasf = cvrs.map { CvrUnderAudit.fromCvrIF(it, phantom = false) }
         val contestasf: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         // contestasf["measure_1"]?.ncards = 5 // LOOK
         val (resultf: List<CvrUnderAudit>, nphantomsf: Int) = makePhantoms(
@@ -125,8 +125,8 @@ class TestCvr {
 
         assertEquals(5, contestasf["city_council"]!!.ncvrs)
         assertEquals(4, contestasf["measure_1"]!!.ncvrs)
-        assertEquals(8, contestasf["city_council"]!!.ncards)
-        assertEquals(8, contestasf["measure_1"]!!.ncards)
+        assertEquals(8, contestasf["city_council"]!!.upperBound)
+        assertEquals(8, contestasf["measure_1"]!!.upperBound)
 
         assertEquals(5, resultf.filter{ it.hasContest(0) }.size)
         assertEquals(4, resultf.filter{ it.hasContest(1) }.size)
@@ -182,7 +182,7 @@ def test_consistent_sampling(self):
     fun testConsistentSampling() {
         // consistentSampling assumes that phantoms have already been generated and sample_num has been assigned to every CVR, including phantoms
         // TODO following SHANGRLA test, there are no phantoms here
-        val cvras = cvrs.map { CvrUnderAudit(it) }
+        val cvras = cvrs.map { CvrUnderAudit.fromCvrIF(it, phantom = false) }
         for ((index, cvra) in cvras.withIndex()) {
             cvra.sampleNum = index
         }

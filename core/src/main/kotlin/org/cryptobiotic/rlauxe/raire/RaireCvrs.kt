@@ -3,7 +3,9 @@ package org.cryptobiotic.rlaux.core.raire
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import java.io.Reader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -20,18 +22,28 @@ data class RaireCvrContest(
     val contestNumber: Int,
     val choices: List<Int>,
     val cvrs: List<RaireCvr>,
-)
+) {
+    //     val name: String,
+    //    val id: Int,
+    //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
+    //    val winnerNames: List<String>,
+    //    val choiceFunction: SocialChoiceFunction,
+    fun toContest(): Contest {
+        val candidateNames = choices.associate { "cand$it" to it }.toMap()
+        val winnerNames = listOf("cand15")
+        return Contest("RaireCvrContest", contestNumber, candidateNames, winnerNames, SocialChoiceFunction.IRV)
+    }
+}
 
 // "RaireCvr is always for one contest" probably an artifact of raire processing
 class RaireCvr(
-    name: String,
+    cvrId: String,
     contestId: Int,
     rankedChoices: IntArray, // could be Map<Int, IntArray>
-    phantom: Boolean,
-): Cvr(name, mapOf(contestId to rankedChoices), phantom) {
+): Cvr(cvrId, mapOf(contestId to rankedChoices)) {
 
-    constructor(contest: Int, ranks: List<Int>): this( "", contest, ranks.toIntArray(), false) // for quick testing
-    constructor(contest: Int, id: String, ranks: List<Int>): this( id, contest, ranks.toIntArray(), false) // for quick testing
+    constructor(contest: Int, ranks: List<Int>): this( "", contest, ranks.toIntArray()) // for quick testing
+    constructor(contest: Int, id: String, ranks: List<Int>): this( id, contest, ranks.toIntArray()) // for quick testing
 
     /** if candidate not ranked, 0 , else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 
 // for testing, here to share between modules
@@ -60,7 +61,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 ///////////////////////////////////////////////////////////////////////////////
 // old, deprecated TODO get rid of?
 
-fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
+fun tabulateVotes(cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
     val r = mutableMapOf<Int, MutableMap<Int, Int>>()
     for (cvr in cvrs) {
         for ((con, conVotes) in cvr.votes) {

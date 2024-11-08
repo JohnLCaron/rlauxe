@@ -1,16 +1,17 @@
 package org.cryptobiotic.rlauxe.raire
 
-
-
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.mean2margin
 
-
+// The ouput of RAIRE assertion generator, read from JSON files
 data class RaireResults(
     val overallExpectedPollsNumber : Int,
     val ballotsInvolvedInAuditNumber : Int,
-    val contests: List<RaireContestAudit>,
+    val contests: List<RaireContestUnderAudit>,
 ) {
     fun show() = buildString {
         appendLine("overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
@@ -18,14 +19,15 @@ data class RaireResults(
     }
 }
 
-data class RaireContestAudit(
-    val name: String,
+class RaireContestUnderAudit(
+    contest: Contest,
     val winner: Int,  // the sum of winner and eliminated must be all the candiates
     val eliminated: List<Int>,
     val expectedPollsNumber : Int,
     val expectedPollsPercent : Double,
     val assertions: List<RaireAssertion>,
-)  {
+): ContestUnderAudit(contest) {
+
     val candidates =  listOf(winner) + eliminated // seems likely
 
     fun show() = buildString {
@@ -33,26 +35,62 @@ data class RaireContestAudit(
         assertions.forEach { append(it.show()) }
     }
 
-    fun toContest(): Contest {
-        //    val name: String,
-        //    val id: Int,
-        //    var candidateNames: Map<String, Int>, // candidate name -> candidate id
-        //    val winnerNames: List<String>,
-        //    val choiceFunction: SocialChoiceFunction,
-        return Contest(
-            name,
-            name.toInt(),
-            candidates.associate{ it.toString() to it },
-            listOf(winner.toString()),
-            SocialChoiceFunction.IRV,
-        )
+    // add assorters to the assertions
+    fun addAssorters(): List<RaireAssorter> {
+        return this.assertions.map {
+            val assort = RaireAssorter(this, it)
+            it.assorter = assort
+            assort
+        }
     }
 
-    fun toContestUnderAudit(ncards: Int): ContestUnderAudit {
-        return ContestUnderAudit(
-            toContest(),
-            ncards,
-        )
+    override fun makeComparisonAssertions(cvrs : Iterable<CvrUnderAudit>) {
+        this.assertions.forEach {
+            val assort = RaireAssorter(this, it)
+            it.assorter = assort
+        }
+
+        // TODO coroutines ??
+        val stopwatch = Stopwatch()
+        this.comparisonAssertions = assertions.map { assertion ->
+            val welford = Welford()
+            cvrs.forEach { cvr ->
+                if (cvr.hasContest(contest.id)) {
+                    welford.update(assertion.assorter!!.assort(cvr))
+                }
+            }
+            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter!!, welford.mean)
+            println(" assertion ${assertion} has margin ${comparisonAssorter.margin}")
+            ComparisonAssertion(contest, comparisonAssorter)
+        }
+        println(" that took $stopwatch")
+
+        val margins = comparisonAssertions.map { assert ->
+            mean2margin(assert.assorter.avgCvrAssortValue)
+        }
+        val minMargin = margins.min()
+        this.minAssert = comparisonAssertions.find { it.assorter.margin == minMargin }
+        println("min = $minMargin minAssert = $minAssert")
+    }
+
+    companion object {
+        fun make(name: String,
+                 winner: Int,  // the sum of winner and eliminated must be all the candiates
+                 eliminated: List<Int>,
+                 expectedPollsNumber : Int,
+                 expectedPollsPercent : Double,
+                 assertions: List<RaireAssertion>): RaireContestUnderAudit {
+
+            val candidates =  listOf(winner) + eliminated // the sum of winner and eliminated must be all the candiates
+            val contest = Contest(
+                name,
+                name.toInt(), // ??
+                candidates.associate{ it.toString() to it },
+                listOf(winner.toString()),
+                SocialChoiceFunction.IRV,
+            )
+            return RaireContestUnderAudit(contest, winner, eliminated, expectedPollsNumber, expectedPollsPercent, assertions)
+        }
     }
 }
 
@@ -63,12 +101,13 @@ data class RaireAssertion(
     val assertionType: String,
     val explanation: String,
 )  {
-    var assorter: RaireAssorter? = null  // bit of a kludge
+    var assorter: RaireAssorter? = null  // TODO bit of a kludge, added after construction
 
     fun show() = buildString {
         appendLine("    assertion type '$assertionType' winner $winner loser $loser alreadyEliminated $alreadyEliminated explanation: '$explanation'")
     }
 
+    // testing
     fun match(winner: Int, loser: Int, winnerType: Boolean, already: List<Int> = emptyList()): Boolean {
         if (this.winner != winner || this.loser != loser) return false
         if (winnerType && (assertionType != "WINNER_ONLY")) return false
@@ -78,19 +117,11 @@ data class RaireAssertion(
     }
 }
 
-// add assorters to the assertions
-fun RaireContestAudit.addAssorters(): List<RaireAssorter> {
-    return this.assertions.map {
-        val assort = RaireAssorter(this, it)
-        it.assorter = assort
-        assort
-    }
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): AssorterFunction {
+// TODO is this a comparison assorter ??
+class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAssertion): AssorterFunction {
     val contestName = contest.name
     val contestId = contest.name.toInt()
     // I believe this doesnt change in the course of the audit
@@ -102,7 +133,8 @@ class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): 
     override fun loser() = assertion.loser
 
     override fun assort(mvr: CvrIF): Double {
-        val rcvr = mvr as RaireCvr
+        val cvrUA = mvr as CvrUnderAudit
+        val rcvr = cvrUA.cvr as RaireCvr
         return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
         else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")
@@ -129,13 +161,14 @@ class RaireAssorter(contest: RaireContestAudit, val assertion: RaireAssertion): 
     }
 }
 
-fun makeRaireComparisonAudit(rcontests: List<RaireContestAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
+// TODO eliminate I think
+fun makeRaireComparisonAudit(rcontests: List<RaireContestUnderAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
     val comparisonAssertions = mutableMapOf<Int, List<ComparisonAssertion>>()
 
     val contests = mutableListOf<Contest>()
     rcontests.forEach { rcontest ->
         rcontest.addAssorters()
-        val contest = rcontest.toContest()
+        val contest = rcontest.contest
         contests.add(contest)
 
         val clist = rcontest.assertions.map { assertion ->

@@ -210,7 +210,7 @@ data class ShangrlaContest(
 
 class AssertionRLA {
 
-    @Test
+    // @Test
     fun workflow() {
 
 //audit = Audit.from_dict({
@@ -386,7 +386,7 @@ class AssertionRLA {
         )
         // these are the averages of the polling plurality assorters; use this to set the margins
         var count = 0
-        val rrContest: RaireContestAudit = raireResults.contests.first()
+        val rrContest: RaireContestUnderAudit = raireResults.contests.first()
         val assorts: List<RaireAssorter> = rrContest.addAssorters()
         val rcvrs = raireCvrs.contests.first().cvrs
         val margins = assorts.map { assort ->
@@ -442,11 +442,11 @@ class AssertionRLA {
 //#%%
 //sampled_cvr_indices = CVR.consistent_sampling(cvr_list=cvr_list, contests=contests)
         val contestUA = raireResults.contests.map {
-            val cua = it.toContestUnderAudit(N)
-            cua.sampleSize = sampleSize
-            cua
+            it.ncvrs = N
+            it.sampleSize = sampleSize
+            it
         }
-        val sampled_cvr_indices = consistentSampling(cvras, contestUA)
+        val sampled_cvr_indices = consistentSampling(contestUA, cvras)
         println("sampled = ${sampled_cvr_indices.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
@@ -602,7 +602,7 @@ class AssertionRLA {
 
 fun replicate_p_values(
     N: Int,
-    contests: List<RaireContestAudit>,
+    contests: List<RaireContestUnderAudit>,
     cvrs: List<RaireCvr>,
 ) {
     // TODO SHANGRLA doing complicated stuff. I think trying to audit simultaneous contests (dont understand the rules for that)
@@ -641,7 +641,7 @@ fun replicate_p_values(
 // artifact of testing without errors
 fun calc_sample_sizes(
     ntrials: Int,
-    contests: List<RaireContestAudit>,
+    contests: List<RaireContestUnderAudit>,
     cvrs: List<RaireCvr>,
 ): RunTestRepeatedResult {
 

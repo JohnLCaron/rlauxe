@@ -15,7 +15,7 @@ data class AlphaComparisonTask(
     val cvrMeanDiff: Double,
     val eta0Factor: Double,
     val d: Int, // parameter for shrinkTruncate
-    val cvrs: List<Cvr>,
+    val cvrs: List<CvrIF>,
     val withoutReplacement: Boolean = true,
     val estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
 ): RepeatedTask {

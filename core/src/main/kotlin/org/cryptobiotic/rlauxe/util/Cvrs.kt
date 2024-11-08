@@ -44,8 +44,8 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
 fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 
-fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
-    val randomCvrs = mutableListOf<Cvr>()
+fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<CvrIF> {
+    val randomCvrs = mutableListOf<CvrIF>()
     repeat(ncards) {
         val random = secureRandom.nextDouble(1.0)
         val cand = if (random < mean) 0 else 1
@@ -76,7 +76,7 @@ fun tabulateVotes(cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
 }
 
 // Number of cards in each contest, return contestId -> ncards
-fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
+fun cardsPerContest(cvrs: List<CvrIF>): Map<Int, Int> {
     val d = mutableMapOf<Int, Int>()
     for (cvr in cvrs) {
         for (con in cvr.votes.keys) {

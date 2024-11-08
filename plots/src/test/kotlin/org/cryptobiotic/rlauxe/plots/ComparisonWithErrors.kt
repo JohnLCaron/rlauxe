@@ -17,6 +17,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -42,7 +43,7 @@ class ComparisonWithErrors {
         val cvrMean: Double,
         val cvrMeanDiff: Double,
         val eta0Factor: Double,
-        val cvrs: List<Cvr>
+        val cvrs: List<CvrIF>
     )
 
     @Test
@@ -610,7 +611,7 @@ class ComparisonWithErrors {
 
 fun runComparisonWithMeanDiff(
     cvrMean: Double,
-    cvrs: List<Cvr>,
+    cvrs: List<CvrIF>,
     cvrMeanDiff: Double,
     nrepeat: Int,
     eta0Factor: Double,

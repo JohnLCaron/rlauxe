@@ -103,7 +103,7 @@ class TestComparisonAssorter {
             candidateNames = listToMap( "A", "B"),
             winnerNames = listOf("A"),
         )
-        val cvrs: List<Cvr> = makeCvrsByExactMean(ncards = 100, mean = .55)
+        val cvrs = makeCvrsByExactMean(ncards = 100, mean = .55)
 
         val awinner = PluralityAssorter(contest, winner = 0, loser = 1)
         val awinnerAvg = cvrs.map { awinner.assort(it) }.average()

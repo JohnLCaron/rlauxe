@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,7 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-// reading RAIRE JSON result files
+// reading RAIRE JSON cvr files
 @Serializable
 data class RaireResultsJson(
     @SerialName("Overall Expected Polls (#)")
@@ -59,7 +58,7 @@ fun RaireResultsJson.import() =
     )
 
 fun RaireContestAuditJson.import() =
-    RaireContestAudit(
+    RaireContestUnderAudit.make(
         this.contest,
         this.winner.toInt(),
         this.eliminated .map { it.toInt() },

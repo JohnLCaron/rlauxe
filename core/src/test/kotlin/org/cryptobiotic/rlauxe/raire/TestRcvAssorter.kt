@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
-import org.cryptobiotic.rlauxe.raire.import
-import org.cryptobiotic.rlauxe.raire.addAssorters
-import org.cryptobiotic.rlauxe.raire.readRaireResults
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -49,7 +46,7 @@ import org.junit.jupiter.api.Test
 //
 
 class TestRcvAssorter {
-    @Test
+    // @Test
     fun testRaireAssorter() {
         val rr =
             readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json")

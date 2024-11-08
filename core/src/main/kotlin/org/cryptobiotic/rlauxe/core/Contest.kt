@@ -31,23 +31,25 @@ data class Contest(
 }
 
 /**
- * @parameter ncvrs: dount of cvrs for this contest
+ * Assume Comparison Audit, use_styles == true
+ * @parameter ncvrs: count of cvrs for this contest
  * @parameter upperBound: upper bound on cards for this contest
  */
-class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upperBound: Int? = null) {
+open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upperBound: Int? = null) {
     val name = contest.name
     val id = contest.id
 
+    var minAssert: ComparisonAssertion? = null
     var sampleSize = 0 // Estimate the sample size required to confirm the contest at its risk limit
     var sampleThreshold = 0 // seems to be the highest sample.sampleNum used for this contest
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
     override fun toString() = buildString {
-        appendLine("contest = $contest")
+        appendLine("contest = ${contest.name}")
         appendLine("ncards = $upperBound ncvrs = $ncvrs")
     }
 
-    fun makeComparisonAssertions(cvrs : Iterable<CvrIF>) {
+    open fun makeComparisonAssertions(cvrs : Iterable<CvrUnderAudit>) {
         val assertions = when (contest.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(contest, cvrs)
@@ -71,7 +73,7 @@ class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upperBound
             mean2margin(assert.assorter.avgCvrAssortValue)
         }
         val minMargin = margins.min()
-        val minAssert = comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }
+        this.minAssert = comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }
         println("min = $minMargin minAssert = $minAssert")
     }
 }

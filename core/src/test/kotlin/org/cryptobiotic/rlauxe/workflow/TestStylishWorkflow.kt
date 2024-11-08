@@ -2,11 +2,8 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
 import org.cryptobiotic.rlauxe.core.AuditType
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.csv.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.BallotManifest
-import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -22,7 +19,9 @@ class TestStylishWorkflow {
         // //         'cvr_file':       './data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire',
         val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireCvrs(cvrFile)
-        val contests = raireCvrs.contests.map { it.toContest() }
+        // theres only one contest unfortunately.
+        // otherwise we have to matchg up the raireResults with the cvrs?
+        // which begs the question of the "original cvrs"
         val cvrs = raireCvrs.contests.first().cvrs
 
         // data class AuditParams(val riskLimit: Double, val seed: Long, val auditType: AuditType)
@@ -33,8 +32,10 @@ class TestStylishWorkflow {
         //    val ballotManifest: BallotManifest,
         //    val cvrs: List<Cvr>,
         //    val upperBounds: Map<Int, Int>
-        val workflow = StylishWorkflow(contests, auditParams, BallotManifest(), cvrs, mapOf(339 to cvrs.size))
+        val workflow = StylishWorkflow(emptyList(),  raireResults.contests, auditParams, BallotManifest(), cvrs, mapOf(339 to cvrs.size))
 
-        workflow.generateAssertions()
+        workflow.generateSampleSizes()
+        workflow.chooseSamples()
+        workflow.runAudit(mvrs = emptyList())
     }
 }

@@ -15,11 +15,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.core.makePollingAudit
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
@@ -49,7 +46,7 @@ class CreatePollingDiffMeans {
     val N = 50000
 
     // theta is the true mean
-    data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<Cvr>)
+    data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<CvrIF>)
 
     @Test
     fun plotOver() {
@@ -205,7 +202,7 @@ class CreatePollingDiffMeans {
 
     fun runAlphaMartWithMeanDiff(
         theta: Double,
-        cvrs: List<Cvr>,
+        cvrs: List<CvrIF>,
         reportedMeanDiff: Double,
         nrepeat: Int,
         d: Int = 500,

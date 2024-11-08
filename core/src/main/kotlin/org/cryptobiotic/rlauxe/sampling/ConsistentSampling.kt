@@ -271,8 +271,8 @@ fun consistentSampling(
 
 // first time only, we'll add the subsequent rounds later. KISS
 fun consistentSampling(
-    cvrList: List<CvrUnderAudit>,
     contests: List<ContestUnderAudit>,
+    cvrList: List<CvrUnderAudit>,
 ): List<Int> {
     val currentSizes = mutableMapOf<String, Int>()
     fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.name] ?: 0) < c.sampleSize

@@ -16,7 +16,7 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
@@ -46,7 +46,7 @@ class CompareAuditTypeWithErrors {
     val showPctPlots = false
     val showGeoMeanPlots = false
 
-    data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val eta0Factor: Double, val cvrs: List<Cvr>)
+    data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val eta0Factor: Double, val cvrs: List<CvrIF>)
 
     @Test
     fun plotAuditTypesNT() {
@@ -351,7 +351,7 @@ class CompareAuditTypeWithErrors {
 
     fun runDiffAuditTypes(
         cvrMean: Double,
-        cvrs: List<Cvr>,
+        cvrs: List<CvrIF>,
         cvrMeanDiff: Double,
         ntrials: Int,
         eta0Factor: Double,

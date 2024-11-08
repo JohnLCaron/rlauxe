@@ -12,7 +12,7 @@ data class PollingTask(
     val cvrMean: Double,
     val cvrMeanDiff: Double,
     val d: Int, // parameter for shrinkTruncate
-    val cvrs: List<Cvr>,
+    val cvrs: List<CvrIF>,
     val withoutReplacement: Boolean = true,
     val useFixedEstimFn: Boolean = false
 ): RepeatedTask {

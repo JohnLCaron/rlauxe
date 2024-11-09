@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.makeRaireComparisonAudit
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.ceil
 import kotlin.math.max
@@ -112,9 +111,8 @@ class FindSampleSize(
         //         'error_rate_2':   0.0,
         //         'reps':           100,
 
-        val auditComparison = makeRaireComparisonAudit(contests, cvrs)
-        val comparisonAssertions = auditComparison.assertions.values.first()
-        val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+        val contest = contests.first()
+        val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
 
         val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter) // assume no errors
 

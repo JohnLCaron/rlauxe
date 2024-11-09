@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.core
 
 enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
 
+// TODO propably dont need any Audit class anymore.
+// Now that ContestUnderAudit has its assertions contained
 data class AuditPolling(
     val auditType: AuditType,
     val riskLimit: Double,
@@ -33,6 +35,7 @@ fun makePollingAssertions(contest: Contest, cvrs: Iterable<CvrIF>): Pair<Int, Li
         else -> throw RuntimeException(" choice function ${contest.choiceFunction} is not supported")
     }
 
+// needed
 fun makePluralityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
     // test that every winner beats every loser. SHANGRLA 2.1
     val assertions = mutableListOf<Assertion>()
@@ -46,6 +49,7 @@ fun makePluralityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Asser
     return assertions
 }
 
+// needed
 fun makeSuperMajorityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
     // each winner generates 1 assertion. SHANGRLA 2.3
     val assertions = mutableListOf<Assertion>()

@@ -37,13 +37,15 @@ open class Cvr(
     }
 }
 
+// Mutable form of Cvr.
 class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: Int = 0): CvrIF {
     override val id = cvr.id
     override val votes = cvr.votes
+
     var sampled = false //  # is this CVR in the sample?
     var p: Double = 0.0
 
-    override fun hasContest(want: Int) = cvr.hasContest(want)
+    override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun hasMarkFor(contestId: Int, candidateId: Int) = cvr.hasMarkFor(contestId, candidateId)
     override fun hasOneVote(contestId: Int, candidates: List<Int>) = cvr.hasOneVote(contestId, candidates)
 

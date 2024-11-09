@@ -63,6 +63,37 @@ class PollWithoutReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunct
 //// For comparison audits
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
+class ComparisonSampler(val mvrs : List<CvrIF>, val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter): GenSampleFn {
+    val N = cvrs.size
+    val welford = Welford()
+    var idx = 0
+
+    init {
+        require( mvrs.size == cvrs.size)
+    }
+
+    override fun sample(): Double {
+        if( idx >= N) {
+            println("heya")
+        }
+        require( idx < N)
+        val result =  cassorter.bassort(mvrs[idx], cvrs[idx])
+        welford.update(result)
+        idx++
+        return result
+    }
+
+    override fun reset() {
+        throw RuntimeException("reset not allowed")
+    }
+
+    override fun sampleMean() = welford.mean
+
+    override fun sampleCount() = welford.count.toDouble()
+
+    override fun N() = N
+}
+
 // the mvr and cvr always agree.
 class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter): GenSampleFn {
     val N = cvrs.size
@@ -96,8 +127,7 @@ class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssort
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
 // to make mvrs have mvrMean.
 data class ComparisonWithErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter, val mvrMean: Double,
-                                val withoutReplacement: Boolean = true):
-    GenSampleFn {
+                                val withoutReplacement: Boolean = true): GenSampleFn {
     val N = cvrs.size
     val mvrs : List<CvrIF>
     val permutedIndex = MutableList(N) { it }

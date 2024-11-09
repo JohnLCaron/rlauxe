@@ -48,11 +48,12 @@ data class Assertion(
     val margin = mean2margin(avgCvrAssortValue)
     val winner = assorter.winner()
     val loser = assorter.loser()
+    var proved = false // TODO is it ok to have this state ??
+
     override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()}"
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-
 
 fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
     val margin = 2.0 * assortAvgValue - 1.0 // reported assorter margin
@@ -159,5 +160,6 @@ class ComparisonAssertion(
 ) {
     val avgCvrAssortValue = assorter.avgCvrAssortValue
     val margin = assorter.margin
+    var proved = false // TODO is it ok to have this state ??
     override fun toString() = "ComparisonAssertion for ${contest.name} assorter=${assorter.desc()}"
 }

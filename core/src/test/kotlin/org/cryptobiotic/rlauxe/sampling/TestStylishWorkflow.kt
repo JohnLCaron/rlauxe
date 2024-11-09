@@ -1,16 +1,14 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
 import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.raire.*
-import org.cryptobiotic.rlauxe.sampling.BallotManifest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TestStylishWorkflow {
 
     @Test
-    fun workflow() {
+    fun testWorkflow() {
         val rr = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
         val raireResults = rr.import()
         println(raireResults.show())
@@ -34,8 +32,7 @@ class TestStylishWorkflow {
         //    val upperBounds: Map<Int, Int>
         val workflow = StylishWorkflow(emptyList(),  raireResults.contests, auditParams, BallotManifest(), cvrs, mapOf(339 to cvrs.size))
 
-        workflow.generateSampleSizes()
-        workflow.chooseSamples()
-        workflow.runAudit(mvrs = emptyList())
+        val indices = workflow.chooseSamples()
+        workflow.runAudit(indices, mvrs = emptyList())
     }
 }

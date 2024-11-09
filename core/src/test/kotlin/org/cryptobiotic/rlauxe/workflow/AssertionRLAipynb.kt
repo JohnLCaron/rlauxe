@@ -618,9 +618,13 @@ fun replicate_p_values(
     //   We could do our own simulation, dont need to follow SHANGLRA's convolutions.
     val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
 
-    val auditComparison = makeRaireComparisonAudit(contests, cvrs)
-    val comparisonAssertions = auditComparison.assertions.values.first()
-    val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+    //val auditComparison = makeRaireComparisonAudit(contests, cvrs)
+   // val comparisonAssertions = auditComparison.assertions.values.first()
+    //val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+
+
+    val contest = contests.first()
+    val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
 
     val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
 
@@ -646,11 +650,14 @@ fun calc_sample_sizes(
 ): RunTestRepeatedResult {
 
     val N = cvrs.size
-    val auditComparison = makeRaireComparisonAudit(contests, cvrs)
-    val comparisonAssertions = auditComparison.assertions.values.first()
+    //val auditComparison = makeRaireComparisonAudit(contests, cvrs)
+    //val comparisonAssertions = auditComparison.assertions.values.first()
     // val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
-    val minAssertion = comparisonAssertions.minBy { it.margin }
-    val minAssorter = minAssertion.assorter
+    //val minAssertion = comparisonAssertions.minBy { it.margin }
+    //val minAssorter = minAssertion.assorter
+
+    val contest = contests.first()
+    val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
 
     val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
 
@@ -685,7 +692,7 @@ fun calc_sample_sizes(
         maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2" to optimal.p2, "margin" to minAssertion.margin),
+        testParameters = mapOf("p2" to optimal.p2, "margin" to minAssorter.margin),
         showDetails = false,
     )
 }

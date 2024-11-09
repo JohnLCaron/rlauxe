@@ -31,6 +31,7 @@ data class Contest(
 }
 
 /**
+ * Mutable form of Contest.
  * Assume Comparison Audit, use_styles == true
  * @parameter ncvrs: count of cvrs for this contest
  * @parameter upperBound: upper bound on cards for this contest
@@ -54,7 +55,6 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upper
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(contest, cvrs)
             SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(contest, cvrs)
-            // SocialChoiceFunction.IRV -> readIRVAssertions(contest, cvrs)
             else -> throw RuntimeException(" choice function ${contest.choiceFunction} is not supported")
         }
 

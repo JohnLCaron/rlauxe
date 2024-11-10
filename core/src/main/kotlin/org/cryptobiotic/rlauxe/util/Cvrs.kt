@@ -4,6 +4,9 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import java.security.SecureRandom
+
+val secureRandom = SecureRandom.getInstanceStrong()!!
 
 // for testing, here to share between modules
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {

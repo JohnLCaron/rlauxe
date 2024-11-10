@@ -7,10 +7,11 @@ import org.cryptobiotic.rlauxe.sampling.consistentSampling
 import org.cryptobiotic.rlauxe.sampling.makePhantoms
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.CvrBuilders
+import org.cryptobiotic.rlauxe.util.Prng
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// from shangrla test_CVR
+//// from shangrla test_CVR
 class TestCvr {
     // TODO assign idx
     val contests: List<Contest> = listOf(
@@ -80,13 +81,14 @@ class TestCvr {
         //assertEquals(cvrs[0].sample_num, 100208482908198438057700745423243738999845662853049614266130533283921761365671)
         //assertEquals(cvrs[5].sample_num, 93838330019164869717966768063938259297046489853954854934402443181124696542865)
     }
-    
+
     @Test
     fun test_make_phantoms() {
         val cvras = cvrs.map { CvrUnderAudit.fromCvrIF(it, phantom = false) }
         val contestas: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         contestas["measure_1"]?.upperBound = 5
 
+        val prng = Prng(12345678901L)
         val prefix = "phantom-"
 
         //// use_style = true
@@ -94,7 +96,8 @@ class TestCvr {
             cvras = cvras,
             contestas = contestas.values.toList(),
             maxCards=8, // used when useStyles = false, or ncards hasnt been assigned
-            prefix = prefix
+            prefix = prefix,
+            prng=prng,
         )
         assertEquals(9, result.size)
         assertEquals(3, nphantoms)
@@ -113,12 +116,14 @@ class TestCvr {
         val cvrasf = cvrs.map { CvrUnderAudit.fromCvrIF(it, phantom = false) }
         val contestasf: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         // contestasf["measure_1"]?.ncards = 5 // LOOK
+
         val (resultf: List<CvrUnderAudit>, nphantomsf: Int) = makePhantoms(
             cvras = cvrasf,
             contestas = contestasf.values.toList(),
             useStyles = false,
             maxCards=8, // used when useStyles = false, or ncards hasnt been assigned
-            prefix = prefix
+            prefix = prefix,
+            prng = prng
         )
         assertEquals(8, resultf.size)
         assertEquals(2, nphantomsf)
@@ -184,7 +189,7 @@ def test_consistent_sampling(self):
         // TODO following SHANGRLA test, there are no phantoms here
         val cvras = cvrs.map { CvrUnderAudit.fromCvrIF(it, phantom = false) }
         for ((index, cvra) in cvras.withIndex()) {
-            cvra.sampleNum = index
+            cvra.sampleNum = index.toLong()
         }
         val contestas: Map<String, ContestUnderAudit> = contests.map { it.name to ContestUnderAudit(it) }.toMap()
         contestas["city_council"]?.sampleSize = 3

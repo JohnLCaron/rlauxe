@@ -35,6 +35,8 @@ data class RaireCvrContest(
     }
 }
 
+// TODO relation to the original CVRs ??
+//    these are the summaries passed to raire to make the assertions?? or these are the originals ???
 // "RaireCvr is always for one contest" probably an artifact of raire processing
 class RaireCvr(
     cvrId: String,

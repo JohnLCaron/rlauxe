@@ -11,26 +11,26 @@ data class AuditParams(val riskLimit: Double, val seed: Long, val auditType: Aud
 // STYLISH 2.1
 //Card-level Comparison Audits and Card-Style Data
 
-// TODO, what about when you start an audit, then more CVRs arrive?
-// or even just check what your sample sizes are, based on info you have ??
+// 1. Set up the audit
+//	a) Read contest descriptors, candidate names, social choice functions, and reported winners.
+//     Read upper bounds on the number of cards that contain each contest:
+//	     Let 𝑁_𝑐 denote the upper bound on the number of cards that contain contest 𝑐, 𝑐 = 1, . . . , 𝐶.
+//	b) Read audit parameters (risk limit for each contest, risk-measuring function to use for each contest,
+//	   assumptions about errors for computing initial sample sizes), and seed for pseudo-random sampling.
+//	c) Read ballot manifest.
+//	d) Read CVRs.
 class StylishWorkflow(
     contests: List<Contest>, // the contests you want to audit
-    raireContests: List<RaireContestUnderAudit>,
+    raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val auditParams: AuditParams,
     val ballotManifest: BallotManifest,
     val cvrs: List<Cvr>,
-    val upperBounds: Map<Int, Int>, // Let 𝑁_𝑐 denote the upper bound on the number of cards that contain contest
+    val upperBounds: Map<Int, Int>, // 𝑁_𝑐. Or should this be part of Contest?
 ) {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
+    val prng = Prng(auditParams.seed)
 
-    // 1. Set up the audit
-    //	a) Read contest descriptors, candidate names, social choice functions, upper bounds on the number of cards that contain each contest, and reported winners.
-    //	     Let 𝑁_𝑐 denote the upper bound on the number of cards that contain contest 𝑐, 𝑐 = 1, . . . , 𝐶.
-    //	b) Read audit parameters (risk limit for each contest, risk-measuring function to use for each contest,
-    //	   assumptions about errors for computing initial sample sizes), and seed for pseudo-random sampling.
-    //	c) Read ballot manifest.
-    //	d) Read CVRs.
     // 2. Pre-processing and consistency checks
     // 	a) Check that the winners according to the CVRs are the reported winners.
     //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
@@ -39,6 +39,7 @@ class StylishWorkflow(
     //	d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
     //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
     init {
+
         contestsUA = tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)
         contestsUA.forEach {
             it.upperBound = upperBounds[it.contest.id]!!
@@ -50,12 +51,12 @@ class StylishWorkflow(
 
         // 3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
         //      (including “phantom” CVRs), using a high-quality PRNG [OS19].
-        val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-")
-        cvrsUA = cvrs.map { CvrUnderAudit(it, false, secureRandom.nextInt()) } + phantomCVRs
+        val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
+        cvrsUA = cvrs.map { CvrUnderAudit(it, false, prng.next()) } + phantomCVRs
 
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
-        //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. TODO just notation?
+        //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
         contestsUA.forEach { contest ->
             contest.makeComparisonAssertions(cvrsUA)
         }
@@ -100,111 +101,22 @@ class StylishWorkflow(
         //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
         //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
-        val cvrs = sampleIndices.map { cvrs[it] }
+        val sampledCvrs = sampleIndices.map { cvrsUA[it] }
+        val useMvrs = if (mvrs.isEmpty()) sampledCvrs else mvrs
 
-        val useMvrs = if (mvrs.isEmpty()) cvrs else mvrs
+        // prove that sampledCvrs correspond to mvrs
+        require(sampledCvrs.size == useMvrs.size)
+        val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = useMvrs.zip(sampledCvrs)
+        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize
         var allDone = true
         contestsUA.forEach { contestUA ->
             contestUA.comparisonAssertions.forEach { assertion ->
-                allDone = allDone && runAudit(assertion, useMvrs, cvrs)
+                allDone = allDone && runAudit(contestUA, assertion, cvrPairs)
             }
         }
         return allDone
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////
-    fun runAudit(assertion: ComparisonAssertion, mvrs: List<CvrIF>, cvrs: List<CvrIF>): Boolean {
-        val assorter = assertion.assorter
-        val sampler: GenSampleFn = ComparisonSampler(mvrs, cvrs, assorter)
-        val N = mvrs.size
-
-        // TODO could pass the testFn into the workflow
-        // note that you need the assorter for the sampler
-        // need the upperBound and noerror for the AdaptiveComparison bettingFn
-        // the testFn is independent, it assumes drawSample already does the assort.
-
-        // class AdaptiveComparison(
-        //    val N: Int,
-        //    val withoutReplacement: Boolean = true,
-        //    val upperBound: Double, // compareAssorter.upperBound
-        //    val a: Double, // noerror
-        //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
-        //    val d2: Int, // weight p2, p4
-        //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-        //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-        //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-        //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
-        //    val eps: Double = .00001
-        val optimal = AdaptiveComparison(
-            N = N,
-            withoutReplacement = true,
-            upperBound = assorter.upperBound,
-            a = assorter.noerror,
-            d1 = 100,  // TODO set params
-            d2 = 100,
-            p1 = .01,
-            p2 = .001,
-            p3 = 0.0,
-            p4 = 0.0,
-        )
-        val testFn = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
-
-        val testH0Result = testFn.testH0(mvrs.size, terminateOnNullReject = false) { sampler.sample() }
-        if (testH0Result.status == TestH0Status.StatRejectNull) {
-            assertion.proved = true
-        }
-        println(" assertion $assertion finished, status = ${testH0Result.status} ")
-        return (testH0Result.status == TestH0Status.StatRejectNull)
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////
-    // SHANGRLA.make_phantoms(). Probably 2.d ?
-    fun makePhantomCvrs(
-        contestas: List<ContestUnderAudit>,
-        prefix: String = "phantom-",
-    ): List<CvrUnderAudit> {
-        // code assertRLA.ipynb
-        // + Prepare ~2EZ:
-        //    - `N_phantoms = max_cards - cards_in_manifest`
-        //    - If `N_phantoms < 0`, complain
-        //    - Else create `N_phantoms` phantom cards
-        //    - For each contest `c`:
-        //        + `N_c` is the input upper bound on the number of cards that contain `c`
-        //        + if `N_c is None`, `N_c = max_cards - non_c_cvrs`, where `non_c_cvrs` is #CVRs that don't contain `c`
-        //        + `C_c` is the number of CVRs that contain the contest
-        //        + if `C_c > N_c`, complain
-        //        + else if `N_c - C_c > N_phantoms`, complain
-        //        + else:
-        //            - Consider contest `c` to be on the first `N_c - C_c` phantom CVRs
-        //            - Consider contest `c` to be on the first `N_c - C_c` phantom ballots
-
-        // 3.4 SHANGRLA
-        // If N_c > ncvrs, create N − n “phantom ballots” and N − n “phantom CVRs.”
-
-        // create phantom CVRs as needed for each contest
-        val phantombs = mutableListOf<PhantomBuilder>()
-
-        for (contest in contestas) {
-            val phantoms_needed = contest.upperBound!! - contest.ncvrs
-            while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
-                phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
-            }
-            // list contest on the first n phantom CVRs
-            repeat(phantoms_needed) {
-                phantombs[it].contests.add(contest.id)
-            }
-        }
-        return phantombs.map { it.build() }
-    }
-
-    private class PhantomBuilder(val id: String) {
-        val contests = mutableListOf<Int>()
-        fun build(): CvrUnderAudit {
-            val votes = contests.map { it to IntArray(0) }.toMap()
-            return CvrUnderAudit(Cvr(id, votes), phantom = true, secureRandom.nextInt())
-        }
     }
 }
 
@@ -352,3 +264,55 @@ fun calcSampleSizesBySimulation(
         println(" that took $stopwatch")
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+// run audit for one assorter; could be parallel
+fun runAudit(
+    contestUA: ContestUnderAudit,
+    assertion: ComparisonAssertion,
+    cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>,
+): Boolean {
+    val assorter = assertion.assorter
+    // each assorted needs their own sampler
+    val sampler: GenSampleFn = ComparisonSampler(cvrPairs, contestUA, assorter)
+    val sampleSize = cvrPairs.size
+
+    // TODO could pass the testFn into the workflow
+    // note that you need the assorter for the sampler
+    // need the upperBound and noerror for the AdaptiveComparison bettingFn
+    // the testFn is independent, it assumes drawSample already does the assort.
+
+    // class AdaptiveComparison(
+    //    val N: Int,
+    //    val withoutReplacement: Boolean = true,
+    //    val upperBound: Double, // compareAssorter.upperBound
+    //    val a: Double, // noerror
+    //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
+    //    val d2: Int, // weight p2, p4
+    //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
+    //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
+    //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
+    //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
+    //    val eps: Double = .00001
+    val optimal = AdaptiveComparison(
+        N = sampleSize,
+        withoutReplacement = true,
+        upperBound = assorter.upperBound,
+        a = assorter.noerror,
+        d1 = 100,  // TODO set params
+        d2 = 100,
+        p1 = .01,
+        p2 = .001,
+        p3 = 0.0,
+        p4 = 0.0,
+    )
+    val testFn = BettingMart(bettingFn = optimal, N = sampleSize, noerror = 0.0, withoutReplacement = false)
+
+    val testH0Result = testFn.testH0(sampleSize, terminateOnNullReject = false) { sampler.sample() }
+    if (testH0Result.status == TestH0Status.StatRejectNull) {
+        assertion.proved = true
+    }
+    println(" assertion $assertion finished, status = ${testH0Result.status} ")
+    return (testH0Result.status == TestH0Status.StatRejectNull)
+}
+

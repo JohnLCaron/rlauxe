@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.AssorterFunction
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.core.*
 import kotlin.math.ln
 import kotlin.random.Random
 
@@ -63,32 +60,35 @@ class PollWithoutReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunct
 //// For comparison audits
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
-class ComparisonSampler(val mvrs : List<CvrIF>, val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter): GenSampleFn {
-    val N = cvrs.size
+class ComparisonSampler(val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, val contestUA: ContestUnderAudit, val cassorter: ComparisonAssorter): GenSampleFn {
+    val N = cvrPairs.size
     val welford = Welford()
     var idx = 0
 
     init {
-        require( mvrs.size == cvrs.size)
+        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id)  }
     }
 
     override fun sample(): Double {
-        if( idx >= N) {
-            println("heya")
+        while (idx < N) {
+            val (mvr, cvr) = cvrPairs[idx]
+            if (cvr.hasContest(contestUA.id) && cvr.sampleNum <= contestUA.sampleThreshold!!) {
+                val result = cassorter.bassort(mvr, cvr) // not sure of cvr vs cvr.cvr, w/re raire
+                welford.update(result)
+                idx++
+                return result
+            }
+            idx++
         }
-        require( idx < N)
-        val result =  cassorter.bassort(mvrs[idx], cvrs[idx])
-        welford.update(result)
-        idx++
-        return result
+        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
 
     override fun reset() {
         throw RuntimeException("reset not allowed")
     }
 
+    // running values, not population values
     override fun sampleMean() = welford.mean
-
     override fun sampleCount() = welford.count.toDouble()
 
     override fun N() = N

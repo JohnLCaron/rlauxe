@@ -6,10 +6,7 @@ import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
 import org.cryptobiotic.rlauxe.csv.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.*
-import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.util.GenSampleFn
-import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.secureRandom
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -436,7 +433,8 @@ class AssertionRLA {
 //prng = SHA256(audit.seed)
 //CVR.assign_sample_nums(cvr_list, prng)
         // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
-        val cvras = rcvrs.map { CvrUnderAudit(it, phantom = false, secureRandom.nextInt()) }
+        val prng = Prng(secureRandom.nextLong())
+        val cvras = rcvrs.map { CvrUnderAudit(it, phantom = false, prng.next()) }
         println("calc_sample_sizes = $results")
 
 //#%%
@@ -618,9 +616,13 @@ fun replicate_p_values(
     //   We could do our own simulation, dont need to follow SHANGLRA's convolutions.
     val sample_size = 372 // just use this from SHANGRLA for now, see if we can replicate the p-values
 
-    val auditComparison = makeRaireComparisonAudit(contests, cvrs)
-    val comparisonAssertions = auditComparison.assertions.values.first()
-    val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+    //val auditComparison = makeRaireComparisonAudit(contests, cvrs)
+   // val comparisonAssertions = auditComparison.assertions.values.first()
+    //val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
+
+
+    val contest = contests.first()
+    val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
 
     val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
 
@@ -646,11 +648,14 @@ fun calc_sample_sizes(
 ): RunTestRepeatedResult {
 
     val N = cvrs.size
-    val auditComparison = makeRaireComparisonAudit(contests, cvrs)
-    val comparisonAssertions = auditComparison.assertions.values.first()
+    //val auditComparison = makeRaireComparisonAudit(contests, cvrs)
+    //val comparisonAssertions = auditComparison.assertions.values.first()
     // val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
-    val minAssertion = comparisonAssertions.minBy { it.margin }
-    val minAssorter = minAssertion.assorter
+    //val minAssertion = comparisonAssertions.minBy { it.margin }
+    //val minAssorter = minAssertion.assorter
+
+    val contest = contests.first()
+    val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
 
     val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
 
@@ -685,7 +690,7 @@ fun calc_sample_sizes(
         maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2" to optimal.p2, "margin" to minAssertion.margin),
+        testParameters = mapOf("p2" to optimal.p2, "margin" to minAssorter.margin),
         showDetails = false,
     )
 }

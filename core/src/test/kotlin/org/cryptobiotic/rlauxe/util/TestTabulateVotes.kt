@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.workflow.tabulateVotes
+import org.cryptobiotic.rlauxe.sampling.tabulateVotes
 import org.junit.jupiter.api.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertContains

@@ -101,6 +101,7 @@ data class RaireAssertion(
     val assertionType: String,
     val explanation: String,
 )  {
+    // TODO is it ok to have this state ??
     var assorter: RaireAssorter? = null  // TODO bit of a kludge, added after construction
 
     fun show() = buildString {
@@ -120,7 +121,7 @@ data class RaireAssertion(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO is this a comparison assorter ??
+// TODO this a primitive assorter.
 class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAssertion): AssorterFunction {
     val contestName = contest.name
     val contestId = contest.name.toInt()
@@ -133,8 +134,12 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     override fun loser() = assertion.loser
 
     override fun assort(mvr: CvrIF): Double {
-        val cvrUA = mvr as CvrUnderAudit
-        val rcvr = cvrUA.cvr as RaireCvr
+        // TODO clumsy
+        val rcvr: RaireCvr = when (mvr) {
+            is CvrUnderAudit -> mvr.cvr as RaireCvr
+            is RaireCvr -> mvr
+            else -> throw RuntimeException()
+        }
         return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
         else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")
@@ -161,7 +166,7 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     }
 }
 
-// TODO eliminate I think
+/* TODO eliminate I think
 fun makeRaireComparisonAudit(rcontests: List<RaireContestUnderAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
     val comparisonAssertions = mutableMapOf<Int, List<ComparisonAssertion>>()
 
@@ -181,3 +186,5 @@ fun makeRaireComparisonAudit(rcontests: List<RaireContestUnderAudit>, cvrs : Ite
 
     return AuditComparison(AuditType.CARD_COMPARISON, riskLimit, contests, comparisonAssertions)
 }
+
+ */

@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.util.Prng
 
 //// Adapted from SHANGRLA Audit.py
 
@@ -88,7 +88,8 @@ fun makePhantoms(
     useStyles: Boolean = true,
     maxCards: Int,  // used when useStyle = false
     prefix: String = "phantom-",
-)
+    prng: Prng,
+    )
         : Pair<List<CvrUnderAudit>, Int> {
 
     val phantombs = mutableListOf<PhantomBuilder>()
@@ -117,18 +118,61 @@ fun makePhantoms(
         }
         n_phantoms = phantombs.size
     }
-    val result = cvras + phantombs.map { it.build() }
+    val result = cvras + phantombs.map { it.build(prng) }
     return Pair(result, n_phantoms)
 }
 
-private class PhantomBuilder(val id: String) {
-    val contests = mutableListOf<Int>()
-    fun build(): CvrUnderAudit {
-        val votes = contests.map { it to IntArray(0) }.toMap()
-        return CvrUnderAudit(Cvr(id, votes), phantom = true)
+/////////////////////////////////////////////////////////////////////////////////
+// SHANGRLA.make_phantoms(). Probably 2.d ?
+fun makePhantomCvrs(
+    contestas: List<ContestUnderAudit>,
+    prefix: String = "phantom-",
+    prng: Prng,
+): List<CvrUnderAudit> {
+
+
+
+    // code assertRLA.ipynb
+    // + Prepare ~2EZ:
+    //    - `N_phantoms = max_cards - cards_in_manifest`
+    //    - If `N_phantoms < 0`, complain
+    //    - Else create `N_phantoms` phantom cards
+    //    - For each contest `c`:
+    //        + `N_c` is the input upper bound on the number of cards that contain `c`
+    //        + if `N_c is None`, `N_c = max_cards - non_c_cvrs`, where `non_c_cvrs` is #CVRs that don't contain `c`
+    //        + `C_c` is the number of CVRs that contain the contest
+    //        + if `C_c > N_c`, complain
+    //        + else if `N_c - C_c > N_phantoms`, complain
+    //        + else:
+    //            - Consider contest `c` to be on the first `N_c - C_c` phantom CVRs
+    //            - Consider contest `c` to be on the first `N_c - C_c` phantom ballots
+
+    // 3.4 SHANGRLA
+    // If N_c > ncvrs, create N − n “phantom ballots” and N − n “phantom CVRs.”
+
+    // create phantom CVRs as needed for each contest
+    val phantombs = mutableListOf<PhantomBuilder>()
+
+    for (contest in contestas) {
+        val phantoms_needed = contest.upperBound!! - contest.ncvrs
+        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
+            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
+        }
+        // include this contest on the first n phantom CVRs
+        repeat(phantoms_needed) {
+            phantombs[it].contests.add(contest.id)
+        }
     }
+    return phantombs.map { it.build(prng) }
 }
 
+class PhantomBuilder(val id: String) {
+    val contests = mutableListOf<Int>()
+    fun build(prng: Prng): CvrUnderAudit {
+        val votes = contests.map { it to IntArray(0) }.toMap()
+        return CvrUnderAudit(Cvr(id, votes), phantom = true, prng.next())
+    }
+}
 ///////////////////////////////////////////////////////////////////////
 
 /*
@@ -166,6 +210,7 @@ fun sortCvrSampleNum(cvrList: MutableList<CvrUnderAudit>): Boolean {
 }
 
 /*
+    CVR.consistent_sampling() in Audit.py
     Sample CVR ids for contests to attain contests.sampleSize samples in sampledCvrIndices
 
     Assumes that phantoms have already been generated and sampleSize calculated,
@@ -181,7 +226,10 @@ fun sortCvrSampleNum(cvrList: MutableList<CvrUnderAudit>): Boolean {
     -------
     sampled_cvr_indices: indices of CVRs to sample
 */
+// TestCvr.testConsistentSampling()
 // Also see https://github.com/votingworks/consistent_sampler/blob/master/consistent_sampler/consistent_sampler.py
+// It seems like a lot of complications come from sampling with replacement.
+// here: sampling without replacement
 fun consistentSampling(
     cvrList: List<CvrUnderAudit>,
     contests: Map<String, ContestUnderAudit>,
@@ -269,7 +317,10 @@ fun consistentSampling(
     return sampledIndices
 }
 
+// StylishWorkflow.chooseSamples()
+// AssertionRLAipynb.workflow()
 // first time only, we'll add the subsequent rounds later. KISS
+// sampling without replacement only
 fun consistentSampling(
     contests: List<ContestUnderAudit>,
     cvrList: List<CvrUnderAudit>,
@@ -280,11 +331,11 @@ fun consistentSampling(
     // get list of cvr indexes sorted by sampleNum
     val sortedCvrIndices = cvrList.indices.sortedBy { cvrList[it].sampleNum }
 
-    // go through the sortedCvrIndices, starting after the existing sampledIndices
     val sampledIndices = mutableListOf<Int>()
     var inx = 0
-    // do we need more samples?
+    // while we need more samples
     while (contests.any { contestInProgress(it) }) {
+        // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
         val cvr = cvrList[sidx]
         // does this cvr contribute to one or more contests that need more samples?
@@ -302,16 +353,6 @@ fun consistentSampling(
         inx++
     }
 
-    //        for i in range(len(cvr_list)):
-    //            if i in sampled_cvr_indices:
-    //                cvr_list[i].sampled = True
-    //        return sampled_cvr_indices
-    // mark that cvr is sampled. TODO seems inefficient
-    /* cvrList.forEachIndexed { idx, cvr ->
-        if (sampledIndices.contains(idx)) {
-            cvr.sampled = true
-        }
-    } */
     return sampledIndices
 }
 

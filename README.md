@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/08/2024
+last update: 11/10/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -24,7 +24,7 @@ Table of Contents
     * [Implementation](#implementation)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Simulation Results](#simulation-results)
-  * [RLA Options](#rla-options)
+  * [Development Notes](#development-notes)
 <!-- TOC -->
 
 ## Reference Papers
@@ -348,6 +348,7 @@ null mean is 1/2 once again, which reproduces the original assorter.
 * [ALPHA testing statistic](docs/AlphaMart.md)
 * [Notes on Corla](docs/Corla.md)
 
-## RLA Options
+## Development Notes
 
 * [RLA Options](docs/RlaOptions.md)
+* [TODO](docs/Development.md)

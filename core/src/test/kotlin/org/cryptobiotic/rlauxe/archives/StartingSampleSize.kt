@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.archives
 
 import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction

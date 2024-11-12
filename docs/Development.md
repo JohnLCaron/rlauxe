@@ -1,5 +1,5 @@
 # Development
-last changed: 11/10/2024
+last changed: 11/12/2024
 
 ## TODO
 
@@ -8,16 +8,18 @@ last changed: 11/10/2024
 * hybrid audits
 
 ### sampling
-* Consistent sampling - wtf and doc, test against shangrla (1)
-* Run Audits for all assertions (2)
-* Estimate sample sizes for all assertions (3)
-* Parallelization
-* SecureRandom must be deterministic using a given seed, so verifiers can test
+* Estimate sample sizes with fixed formula (1)
+* Estimate sample sizes with simulation reps and quantile (2)
+* Parallelization (?)
+* SecureRandom must be deterministic using a given seed, so verifiers can test. 
+  Make a version that agrees exactly with SHANGRLA's version. (3)
+  BigIntegers? Strings? Maybe hex strings?
+* Polling
+* without CSD ?
 
 ### multiple rounds
 * Serialization of intermediate stages
-* Consistent sampling 
-* Estimate sample sizes for all assertions
+* Re-estimate sample sizes for all assertions, using previous MVRs
 
 ### interface
 * CLI
@@ -25,7 +27,6 @@ last changed: 11/10/2024
 
 
 ## Clients
-
 We need interfaces for testing. How elaborate should we make those?
 
 * remote clients
@@ -40,14 +41,22 @@ We need interfaces for testing. How elaborate should we make those?
 What is effect of overestimating N_c, the bound on the number of cards for contest c?
 If each of these gets conveerted to a 2-vote overstatement, which the sampleSize is highly sensisitive to.
 
+
 ### Check sample size
 
 What about when you start an audit, then more CVRs arrive?
-Or even just check what your sample sizes are, based on info you have ??
+
+I _think_ its fine if more ballots come in between rounds. Just add to the "all cvrs list". Ideally N_c doesnt change,
+so it just makes less evil zombies. Then the consistent sampling is just rerun.
+
+Add feature to run the sample size estimates by contest, but not the full audit.
+DONE: FindSampleSize.computeSampleSize()
+
 
 ### Compare alternatives
 
 Running the workflow with other RiskTestingFn, BettingFn, etc.
+
 
 ### Databases
 

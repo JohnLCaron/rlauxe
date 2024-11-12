@@ -42,13 +42,24 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upper
 
     var minAssert: ComparisonAssertion? = null
     var sampleSize = 0 // Estimate the sample size required to confirm the contest
-    var sampleThreshold = 0L // seems to be the highest sample.sampleNum needed for this contest
-                                       // this is used when running the audit, to include only mvrs needed
+    var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
+
+    var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
     override fun toString() = buildString {
-        appendLine("contest = ${contest.name}")
-        appendLine("ncards = $upperBound ncvrs = $ncvrs")
+        appendLine("   contest = ${contest.name}")
+        appendLine("   ncards = $upperBound ncvrs = $ncvrs")
+    }
+
+    fun makePollingAssertions(cvrs: Iterable<CvrIF>) {
+        val cvrsForMe = cvrs.filter { it.hasContest(contest.id) }
+        this.pollingAssertions = when (contest.choiceFunction) {
+            SocialChoiceFunction.APPROVAL,
+            SocialChoiceFunction.PLURALITY -> makePluralityAssertions(contest, cvrsForMe)
+            SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(contest, cvrsForMe)
+            else -> throw RuntimeException(" choice function ${contest.choiceFunction} is not supported")
+        }
     }
 
     open fun makeComparisonAssertions(cvrs : Iterable<CvrUnderAudit>) {

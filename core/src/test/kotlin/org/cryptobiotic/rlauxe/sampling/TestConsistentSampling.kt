@@ -15,7 +15,7 @@ class TestConsistentSampling {
                 winnerNames= listOf("Alice"), choiceFunction = SocialChoiceFunction.PLURALITY),
             Contest("measure_1", 1, candidateNames= listToMap("yes", "no"),
                 winnerNames= listOf("yes"), SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
-            Contest("dont_care", 1, candidateNames= listToMap("yes", "no"),
+            Contest("dont_care", 2, candidateNames= listToMap("yes", "no"),
                 winnerNames= listOf("yes"), SocialChoiceFunction.PLURALITY),
         )
 
@@ -38,7 +38,7 @@ class TestConsistentSampling {
         val cards =  cardsPerContest(cvrs)
 
         val contestsUA = contests.mapIndexed { idx, it ->
-            val ncards = cards[it.id]!!
+            val ncards = cards[it.id] ?: 0
             ContestUnderAudit( it, ncards, ncards)
         }
         contestsUA[0].sampleSize = 3
@@ -60,7 +60,7 @@ class TestConsistentSampling {
                 winnerNames= listOf("Alice"), choiceFunction = SocialChoiceFunction.PLURALITY),
             Contest("measure_1", 1, candidateNames= listToMap("yes", "no"),
                 winnerNames= listOf("yes"), SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
-            Contest("measure_2", 1, candidateNames= listToMap("yes", "no"),
+            Contest("measure_2", 2, candidateNames= listToMap("yes", "no"),
                 winnerNames= listOf("no"), SocialChoiceFunction.PLURALITY),
         )
 
@@ -86,7 +86,7 @@ class TestConsistentSampling {
         val cards =  cardsPerContest(cvrs)
 
         val contestsUA = contests.mapIndexed { idx, it ->
-            val ncards = cards[it.id]!!
+            val ncards = cards[it.id] ?: 0
             ContestUnderAudit( it, ncards, ncards+2)
         }
         contestsUA[0].sampleSize = 3
@@ -98,11 +98,11 @@ class TestConsistentSampling {
         assertEquals(11, cvrsUAP.size)
 
         val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
-        assertEquals(4, sample_cvr_indices.size)
-        assertEquals(listOf(2, 3, 5, 1), sample_cvr_indices)
+        assertEquals(6, sample_cvr_indices.size)
+        assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
 
         assertEquals(6461562665860220490, contestsUA[0].sampleThreshold)
         assertEquals(6461562665860220490, contestsUA[1].sampleThreshold)
-        assertEquals(5277299285729679461, contestsUA[2].sampleThreshold)
+        assertEquals(2182043544522574371, contestsUA[2].sampleThreshold)
     }
 }

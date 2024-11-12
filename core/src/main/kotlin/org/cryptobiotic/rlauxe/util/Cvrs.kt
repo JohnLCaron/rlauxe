@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.sampling.flipExactVotes
 import java.security.SecureRandom
 
 val secureRandom = SecureRandom.getInstanceStrong()!!

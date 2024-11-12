@@ -31,15 +31,15 @@ class StylishWorkflow(
     val cvrsUA: List<CvrUnderAudit>
     val prng = Prng(auditParams.seed)
 
-    // 2. Pre-processing and consistency checks
-    // 	a) Check that the winners according to the CVRs are the reported winners.
-    //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
-    //	c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
-    //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
-    //	d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
-    //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
     init {
 
+        // 2. Pre-processing and consistency checks
+        // 	a) Check that the winners according to the CVRs are the reported winners.
+        //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
+        //	c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
+        //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
+        //	d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
+        //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
         contestsUA = tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)
         contestsUA.forEach {
             it.upperBound = upperBounds[it.contest.id]!!
@@ -63,22 +63,24 @@ class StylishWorkflow(
     }
 
     // 4. Main audit loop. While A is not empty:
+    //   chooseSamples()
+    //   runAudit()
 
     fun chooseSamples(): List<Int> {
         //4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
         //	    The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
-        // set the needed sizes on each contestsUA
-        calcSampleSizes(contestsUA, cvrsUA)
-
-        // 4.a)    The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
+        //      The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
         //	      for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
         //	    The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
         //	      𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
         //	b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
-        //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
+        val computeSize = calcSampleSizes(contestsUA, cvrsUA, auditParams.riskLimit) // set contestUA.sampleSize
 
-        // choose Cvr samples, return their ids / indices / names ??
-        return consistentSampling(contestsUA, cvrsUA)
+        //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
+        // draws random ballots by consistent sampling, and returns their locations to the auditors.
+        val samples = consistentSampling(contestsUA, cvrsUA)
+        println(" computeSize=$computeSize consistentSamplingSize= ${samples.size}")
+        return samples// set contestUA.sampleThreshold
 
         // n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
         //print(f'The sample includes {n_sampled_phantoms} phantom cards.')
@@ -90,6 +92,7 @@ class StylishWorkflow(
         //Dominion.write_cards_sampled(audit.sample_file, cards_to_retrieve, print_phantoms=False)
     }
 
+    //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
     fun runAudit(sampleIndices: List<Int>, mvrs: List<CvrIF>): Boolean {
         //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
         // 	e) Import the MVRs.
@@ -113,7 +116,7 @@ class StylishWorkflow(
         var allDone = true
         contestsUA.forEach { contestUA ->
             contestUA.comparisonAssertions.forEach { assertion ->
-                allDone = allDone && runAudit(contestUA, assertion, cvrPairs)
+                allDone = allDone && runOneAudit(contestUA, assertion, cvrPairs)
             }
         }
         return allDone
@@ -193,16 +196,28 @@ fun checkWinners(contest: Contest, accumVotes: Map<Int, Int>): Boolean {
     return true
 }
 
-fun calcSampleSizes(contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>) {
-    // TODO get sample size for all contests and assertions
+// expect these parameters
+// SHANGRLA Nonneg_mean.sample_size
+//                    'test':             NonnegMean.alpha_mart,
+//                   'estim':            NonnegMean.optimal_comparison
+//          'quantile':       0.8,
+//         'error_rate_1':   0.001,
+//         'error_rate_2':   0.0,
+//         'reps':           100,
+fun calcSampleSizes(contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, alpha: Double): Int {
     // TODO could parellelize
-    var allDone = true
+    val finder = FindSampleSize(alpha, error_rate_1 = .01, error_rate_2 = .001, reps = 100, quantile = .90)
     contestsUA.forEach { contestUA ->
-        contestUA.sampleSize = 1000
-        //contestUA.comparisonAssertions.forEach { assertion ->
-        //    assertion.
-        //}
+        val sampleSizes = contestUA.comparisonAssertions.map { assert ->
+            finder.estimateSampleSize(contestUA, assert.assorter, cvrs,)
+        }
+        contestUA.sampleSize = sampleSizes.max()
     }
+
+    // AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is when you just want the
+    // total_size estimate, but not do the consistent sampling.
+    val computeSize = finder.computeSampleSize(contestsUA, cvrs)
+    return computeSize
 }
 
 // TODO sample size is always the same, when testing without errors
@@ -267,7 +282,7 @@ fun calcSampleSizesBySimulation(
 
 /////////////////////////////////////////////////////////////////////////////////
 // run audit for one assorter; could be parallel
-fun runAudit(
+fun runOneAudit(
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
     cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>,

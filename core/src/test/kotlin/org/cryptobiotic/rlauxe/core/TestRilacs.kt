@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.util.GenSampleFn
-import org.cryptobiotic.rlauxe.util.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.sampling.SampleFromArrayWithoutReplacement
 import org.junit.jupiter.api.Test
 import kotlin.math.max
 import kotlin.test.assertTrue

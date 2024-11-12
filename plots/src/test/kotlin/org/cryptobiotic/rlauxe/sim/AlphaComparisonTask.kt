@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
-import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.util.GenSampleFn
+import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.sampling.GenSampleFn
 import kotlin.math.max
 
 data class AlphaComparisonTask(

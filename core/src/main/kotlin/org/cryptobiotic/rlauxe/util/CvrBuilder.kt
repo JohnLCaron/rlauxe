@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
@@ -20,6 +21,15 @@ class CvrBuilders {
     var id = 0
     val contests = mutableMapOf<String, CvrContest>()
     var contestId = 0
+
+    fun addContests(rcontests: List<Contest>): CvrBuilders {
+        rcontests.forEach {
+            val c = CvrContest(it.name, it.id)
+            c.candidates.putAll(it.candidateNames)
+            contests[it.name] = c
+        }
+        return this
+    }
 
     fun getContest(contestName: String): CvrContest {
         return contests.getOrPut(contestName) { CvrContest( contestName, contestId++) }
@@ -57,10 +67,12 @@ class CvrBuilder(
         return contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
     }
 
-    fun addContest(contestName: String, candName: String): ContestBuilder {
+    fun addContest(contestName: String, candName: String?): ContestBuilder {
         val contest = builders.getContest(contestName)
         val cb = contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
-        cb.addCandidate(candName)
+        if (candName != null) {
+            cb.addCandidate(candName)
+        }
         return cb
     }
 

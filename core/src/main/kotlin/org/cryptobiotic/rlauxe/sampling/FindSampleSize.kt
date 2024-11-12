@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.ceil
 import kotlin.math.max
 
@@ -20,7 +19,6 @@ class AssertionUnderAudit(val assertion: org.cryptobiotic.rlauxe.core.Comparison
 
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
 class FindSampleSize(
-    val N: Int,
     val alpha: Double,
     val error_rate_1: Double,
     val error_rate_2: Double,
@@ -61,10 +59,9 @@ class FindSampleSize(
                 max_size = max(
                     max_size,
                     estimateSampleSize(
-                        rcontests,
+                        contest,
+                        asn.assorter,
                         cvrs.map { it.cvr },
-                        reps = this.reps,
-                        quantile = this.quantile,
                     )
                 )
                 // }
@@ -72,7 +69,7 @@ class FindSampleSize(
             contest.sampleSize = max_size
         }
 
-        // setting p TODO whats this doing here? shouldnt it be in consistent sampling ??
+        // setting p TODO whats this doing here? shouldnt it be in consistent sampling ?? MoreStyle section 3 ??
         for (cvr in cvrs) {
             if (cvr.sampled) {
                 cvr.p = 1.0
@@ -92,45 +89,64 @@ class FindSampleSize(
         // TODO total size is the sum of the p's over the cvrs (!wtf)
         val summ: Double = cvrs.filter { !it.phantom }.map { it.p }.sum()
         val total_size = ceil(summ).toInt()
-        return total_size
+        return total_size // TODO what is this? doesnt consistent sampling decide this ??
+    }
+
+    fun computeSampleSize(
+        rcontests: List<ContestUnderAudit>,
+        cvrs: List<CvrUnderAudit>,
+    ): Int {
+        // unless style information is being used, the sample size is the same for every contest.
+        val old_sizes: MutableMap<Int, Int> =
+            rcontests.associate { it.id to 0 }.toMutableMap()
+
+        // setting p TODO whats this doing here? shouldnt it be in consistent sampling ?? MoreStyle section 3 ??
+        for (cvr in cvrs) {
+            if (cvr.sampled) {
+                cvr.p = 1.0
+            } else {
+                cvr.p = 0.0
+                for (con in rcontests) {
+                    if (cvr.hasContest(con.id) && !cvr.sampled) {
+                        val p1 = con.sampleSize.toDouble() / (con.upperBound!! - old_sizes[con.id]!!)
+                        cvr.p = max(p1, cvr.p) // TODO nullability
+                    }
+                }
+            }
+        }
+
+        // when old_sizes == 0, total_size should be con.sample_size (61); python has roundoff to get 62
+        // total_size = ceil(np.sum([x.p for x in cvrs if !x.phantom))
+        // TODO total size is the sum of the p's over the cvrs (!wtf)
+        val summ: Double = cvrs.filter { !it.phantom }.map { it.p }.sum()
+        val total_size = ceil(summ).toInt()
+        return total_size // TODO what is this? doesnt consistent sampling decide this ??
     }
 
     fun estimateSampleSize(
-        contests: List<RaireContestUnderAudit>,
-        cvrs: List<Cvr>,
-        reps: Int,
-        quantile: Double
+        contest: ContestUnderAudit, // not needed??
+        assorter: ComparisonAssorter,
+        cvrs: List<CvrIF>,
     ): Int {
-
-        // expect these parameters
-        // SHANGRLA Nonneg_mean.sample_size
-        //                    'test':             NonnegMean.alpha_mart,
-        //                   'estim':            NonnegMean.optimal_comparison
-        //          'quantile':       0.8,
-        //         'error_rate_1':   0.001,
-        //         'error_rate_2':   0.0,
-        //         'reps':           100,
-
-        val contest = contests.first()
-        val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
-
-        val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter) // assume no errors
+        val sampler: GenSampleFn = ComparisonNoErrors(cvrs, assorter) // assume no errors
+        val N = cvrs.size
 
         val optimal = OptimalComparisonNoP1(
             N = N,
             withoutReplacement = true,
-            upperBound = minAssorter.upperBound,
+            upperBound = assorter.upperBound,
             p2 = error_rate_2, // 0.000! really ??
         )
 
         val betting = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
         val result = betting.testH0(N, true, showDetails = false) { sampler.sample() }
         println(result)
-        println("pvalues = ${result.pvalues}")
+        //println("pvalues = ${result.pvalues}")
         return result.sampleCount
     }
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // from python
 
@@ -256,3 +272,11 @@ eta: estimated alternative mean to use in alpha
     val result = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
     return result
 }
+
+// MoreStyle footnote 5
+// The number of draws S4 needs to confirm results depends on the diluted margin and
+// the number and nature of discrepancies the sample uncovers.4 The initial sample size can be
+// written as a constant (denoted ρ) divided by the “diluted margin.”
+// In general, ρ = − log(α)/[ 2γ + λ log(1 − 2γ)], where γ is an error inflation factor and λ is the anticipated rate of
+// one-vote overstatements in the initial sample as a percentage of the diluted margin [17]. We define γ and λ as in
+// https://www.stat.berkeley.edu/~stark/Vote/auditTools.htm.

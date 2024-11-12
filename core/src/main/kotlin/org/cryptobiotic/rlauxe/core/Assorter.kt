@@ -50,7 +50,7 @@ data class Assertion(
     val loser = assorter.loser()
     var proved = false // TODO is it ok to have this state ??
 
-    override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()}"
+    override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()} margin=$margin"
 }
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.core.ComparisonAssertion
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.PluralityAssorter

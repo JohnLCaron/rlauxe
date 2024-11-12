@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.util.ComparisonWithErrorRates
-import org.cryptobiotic.rlauxe.util.GenSampleFn
+import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.sampling.GenSampleFn
 
 data class BettingTask(
     val idx: Int,

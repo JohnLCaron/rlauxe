@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.ceilDiv
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.util.GenSampleFn
 import org.cryptobiotic.rlauxe.util.quantile
 import kotlin.math.sqrt
 

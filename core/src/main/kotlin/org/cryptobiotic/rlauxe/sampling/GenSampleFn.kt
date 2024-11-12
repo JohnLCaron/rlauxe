@@ -1,6 +1,8 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.ln
 import kotlin.random.Random
 
@@ -60,7 +62,8 @@ class PollWithoutReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunct
 //// For comparison audits
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
-class ComparisonSampler(val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, val contestUA: ContestUnderAudit, val cassorter: ComparisonAssorter): GenSampleFn {
+class ComparisonSampler(val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, val contestUA: ContestUnderAudit, val cassorter: ComparisonAssorter):
+    GenSampleFn {
     val N = cvrPairs.size
     val welford = Welford()
     var idx = 0

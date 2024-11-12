@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/10/2024
+last update: 11/12/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -19,9 +19,11 @@ Table of Contents
       * [SUPERMAJORITY](#supermajority)
       * [IRV (In Progress)](#irv-in-progress)
     * [Comparison audits](#comparison-audits)
+  * [Sampling](#sampling)
+    * [Estimating Sample sizes (in progress)](#estimating-sample-sizes-in-progress)
+    * [Consistent Sampling](#consistent-sampling)
+    * [Use Styles](#use-styles)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
-  * [Use Styles](#use-styles)
-    * [Implementation](#implementation)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Simulation Results](#simulation-results)
   * [Development Notes](#development-notes)
@@ -56,7 +58,7 @@ Table of Contents
 ## SHANGRLA framework
 
 SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
-It uses an _assorter_ to assign a number to each ballot, and a _statistical test function_ that allows an audit to statistically
+It uses an _assorter_ to assign a number to each ballot, and a _statistical risk testing function_ that allows an audit to statistically
 prove that an election outcome is correct (or not) to within a _risk level_, for example with 95% probability.
 
 It checks outcomes by testing _half-average assertions_, each of which claims that the mean of a finite list of numbers 
@@ -70,15 +72,15 @@ This formulation unifies polling audits and comparison audits, with or without r
 be divided into _strata_, each of which is sampled independently (_stratified sampling_), or to use
 batches of ballot cards instead of individual cards (_cluster sampling_).
 
-| term      | definition                                                                                     |
-|-----------|------------------------------------------------------------------------------------------------|
-| N         | the number of ballot cards validly cast in the contest                                         |
-| risk	     | we want to confirm or reject the null hypothesis with risk level α.                            |
-| assorter  | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
-| assertion | the mean of assorter values is > 1/2: "half-average assertion"                                 |
-| estimator | estimates the true population mean from the sampled assorter values.                           |
-| test      | is the statistical method to test if the assertion is true. aka "risk function".               |
-| audit     | iterative process of picking ballots and checking if all the assertions are true.              |
+| term          | definition                                                                                     |
+|---------------|------------------------------------------------------------------------------------------------|
+| N             | the number of ballot cards validly cast in the contest                                         |
+| risk	         | we want to confirm or reject the null hypothesis with risk level α.                            |
+| assorter      | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
+| assertion     | the mean of assorter values is > 1/2: "half-average assertion"                                 |
+| estimator     | estimates the true population mean from the sampled assorter values.                           |
+| riskTestingFn | is the statistical method to test if the assertion is true.                                    |
+| audit         | iterative process of picking ballots and checking if all the assertions are true.              |
 
 
 ### Assorters and supported SocialChoices
@@ -211,6 +213,71 @@ Notes
   See [Ballot Comparison using Betting Martingales](docs/Betting.md) that uses betting strategies to do so.
   See BettingMart and related code for current implementation.
 
+## Sampling
+
+Implementation can be divided between the riskTestingFn and the sampling. SHANGRLA provides a very elegant separations
+between the two.
+
+### Estimating Sample sizes (in progress)
+
+The STYLISH paper has as part of its workflow:
+
+        4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
+        The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
+        The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
+            for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
+        The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
+            𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
+        4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
+
+For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
+
+Consistent Sampling then figures out which CVRs are chosen to satisfy all of the contests being audited.
+
+AFAICT, the calculation of the total_size using the probabilities as described above in 4.b) is when you just want the 
+total_size estimate, but not do the consistent sampling.
+
+### Consistent Sampling
+
+We implement only sampling without replacement. See ConsistentSampling.kt.
+
+When there are additional rounds, each round does its own consistent sampling without regards to the previous
+rounds. Since the seed remains the same, the sort is the same, and so previously founds MVRS are used as much as possible.
+
+Note that the code in SHANGRLA Audit.py CVR.consistent_sampling() never uses sampled_cvr_indices, so adopts the
+same strategy. Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt
+just use the first n sorted samples, which the code seems to assume. But I think the question is moot.
+
+I _think_ its fine if more ballots come in between rounds. Just add to the "all cvrs list". Ideally N_c doesnt change,
+so it just makes less evil zombies.
+
+### Use Styles
+
+See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020
+See "Stylish Risk-Limiting Audits in Practice" Glazer, Spertus, Stark;  16 Sep 2023
+
+This gets a much tighter bound when you know what ballots have which contests.
+
+"Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling"
+
+Without CSD "you basically have to pull 20 times the sample size". And yet all the CSD information is there in
+the election system. I'm inclined to say "you have to have CSD" to use our library (effectively).
+Then work with the vendors to make that a reality. We can do the work ourselves and give it to them.
+If the practical difference is so big, a production library can be more assertive in telling the user what they have to do.
+
+We implement only with CSD currently.
+
+See overstatement_assorter() in core/Assertion
+
+    assorter that corresponds to normalized overstatement error for an assertion
+
+    If `use_style == true`, then if the CVR contains the contest but the MVR does not,
+    that is considered to be an overstatement, because the ballot is presumed to contain
+    the contest .
+
+    If `use_style == False`, then if the CVR contains the contest but the MVR does not,
+    the MVR is considered to be a non-vote in the contest .
+
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
@@ -255,35 +322,6 @@ From SHANGRLA, section 3.4:
     the overstatement error.
 
 _In the code for ballot comparison but not polling yet TODO. See ComparisonAssorter.bassort()._
-
-## Use Styles
-
-_In the code but not tested yet TODO._
-
-See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020
-See "Stylish Risk-Limiting Audits in Practice" Glazer, Spertus, Stark;  16 Sep 2023
-
-This gets a much tighter bound when you know what ballots have which contests.
-
-"Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling"
-
-Without CSD "you basically have to pull 20 times the sample size". And yet all the CSD information is there in 
-the election system. I'm inclined to say "you have to have CSD" to use our library (effectively). 
-Then work with the vendors to make that a reality. We can do the work ourselves and give it to them. 
-If the practical difference is so big, a production library can be more assertive in telling the user what they have to do.
-
-### Implementation
-
-see overstatement_assorter() in core/Assertion
-
-    assorter that corresponds to normalized overstatement error for an assertion
-
-    If `use_style == true`, then if the CVR contains the contest but the MVR does not,
-    that is considered to be an overstatement, because the ballot is presumed to contain
-    the contest .
-
-    If `use_style == False`, then if the CVR contains the contest but the MVR does not,
-    the MVR is considered to be a non -vote in the contest .
 
 
 ## Stratified audits using OneAudit (TODO)

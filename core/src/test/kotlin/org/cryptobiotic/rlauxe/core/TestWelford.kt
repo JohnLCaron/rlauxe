@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.Bernoulli
+import org.cryptobiotic.rlauxe.sampling.Bernoulli
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.sqrt
 import kotlin.test.Test

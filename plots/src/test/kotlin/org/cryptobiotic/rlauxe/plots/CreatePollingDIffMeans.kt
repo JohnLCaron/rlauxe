@@ -16,7 +16,7 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT

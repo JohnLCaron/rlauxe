@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.util.GenSampleMeanWithReplacement
-import org.cryptobiotic.rlauxe.util.GenSampleMeanWithoutReplacement
+import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithReplacement
+import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithoutReplacement
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)

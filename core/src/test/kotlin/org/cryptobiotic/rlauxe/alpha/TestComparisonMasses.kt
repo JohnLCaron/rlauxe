@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
-import org.cryptobiotic.rlauxe.util.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.util.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.util.ArrayAsGenSampleFn
-import org.cryptobiotic.rlauxe.util.SampleFromArrayWithoutReplacement
-import org.cryptobiotic.rlauxe.core.comparisonAssorterCalc
-import org.cryptobiotic.rlauxe.util.generateUniformSample
+import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.sampling.ArrayAsGenSampleFn
+import org.cryptobiotic.rlauxe.sampling.SampleFromArrayWithoutReplacement
+import org.cryptobiotic.rlauxe.sampling.generateUniformSample
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun

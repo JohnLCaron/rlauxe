@@ -27,7 +27,6 @@ data class BettingTask(
         val adaptive = AdaptiveComparison(
             N = N,
             withoutReplacement = true,
-            upperBound = compareAssorter.upperBound,
             a = compareAssorter.noerror,
             d1 = 0,
             d2 = d2,

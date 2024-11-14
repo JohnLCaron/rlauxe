@@ -1,18 +1,16 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.ln
 import kotlin.random.Random
 
+
 //// abstraction for creating a sequence of samples
-interface GenSampleFn { // TODO could be an Iterator
-    fun sample(): Double // get next in sample
-    fun reset()          // start over again with different permutation
-    fun sampleMean(): Double // for simulations
+interface GenSampleFn : SampleFn {
+    fun reset()                 // start over again with different permutation
+    fun sampleMean(): Double
     fun sampleCount(): Double
-    fun N(): Int  // population size
 }
 
 //// For polling audits.
@@ -61,41 +59,6 @@ class PollWithoutReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunct
 
 //// For comparison audits
 // the values produced here are the B assort values, SHANGRLA section 3.2.
-
-class ComparisonSampler(val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, val contestUA: ContestUnderAudit, val cassorter: ComparisonAssorter):
-    GenSampleFn {
-    val N = cvrPairs.size
-    val welford = Welford()
-    var idx = 0
-
-    init {
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id)  }
-    }
-
-    override fun sample(): Double {
-        while (idx < N) {
-            val (mvr, cvr) = cvrPairs[idx]
-            if (cvr.hasContest(contestUA.id) && cvr.sampleNum <= contestUA.sampleThreshold!!) {
-                val result = cassorter.bassort(mvr, cvr) // not sure of cvr vs cvr.cvr, w/re raire
-                welford.update(result)
-                idx++
-                return result
-            }
-            idx++
-        }
-        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
-    }
-
-    override fun reset() {
-        throw RuntimeException("reset not allowed")
-    }
-
-    // running values, not population values
-    override fun sampleMean() = welford.mean
-    override fun sampleCount() = welford.count.toDouble()
-
-    override fun N() = N
-}
 
 // the mvr and cvr always agree.
 class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter): GenSampleFn {
@@ -244,12 +207,14 @@ fun flipExactVotes(cvrs: MutableList<CvrIF>, wantAvg: Double): Int {
     return add2voteOverstatements(cvrs, needToChangeVotesFromA)
 }
 
-// change cvrs to add the given number of two-vote overstatements.
+// change cvrs to add the given number of two-vote over/understatements.
 // Note that we replace the Cvr in the list when we change it
-fun add2voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int): Int {
+private fun add2voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int): Int {
+    if (needToChangeVotesFromA == 0) return 0
     val ncards = cvrs.size
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0
+
     // we need more A votes, needToChangeVotesFromA < 0>
     if (needToChangeVotesFromA < 0) {
         while (changed > needToChangeVotesFromA) {
@@ -282,7 +247,8 @@ fun add2voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int
 }
 
 // change cvrs to add the given number of one-vote overstatements.
-fun add1voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int): Int {
+private fun add1voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int): Int {
+    if (needToChangeVotesFromA == 0) return 0
     val ncards = cvrs.size
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterFunction {
@@ -50,7 +51,7 @@ data class Assertion(
     val loser = assorter.loser()
     var proved = false // TODO is it ok to have this state ??
 
-    override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()} margin=$margin"
+    override fun toString() = "Assertion for '${contest.name}' assorter=${assorter.desc()} margin=$margin"
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -99,8 +100,8 @@ data class ComparisonAssorter(
         val tau = (1.0 - overstatement / this.assorter.upperBound())
         val denom =  (2.0 - margin/this.assorter.upperBound())
         val result1 =  tau * noerror
-        val result2 =  tau /denom
-        require(result1 == result2)
+        val result2 =  tau / denom
+        require(doubleIsClose(result1, result2))
         return result1
     }
 
@@ -151,7 +152,7 @@ data class ComparisonAssorter(
         return cvr_assort - mvr_assort
     }
 
-    fun desc() = "ComparisonAssorter has assorter=${assorter.desc()}"
+    fun desc() = " avgCvrAssortValue=${avgCvrAssortValue}"
 }
 
 class ComparisonAssertion(
@@ -161,5 +162,5 @@ class ComparisonAssertion(
     val avgCvrAssortValue = assorter.avgCvrAssortValue
     val margin = assorter.margin
     var proved = false // TODO is it ok to have this state ??
-    override fun toString() = "ComparisonAssertion for ${contest.name} assorter=${assorter.desc()}"
+    override fun toString() = "ComparisonAssertion for '${contest.name}' ComparisonAssorter avg=${assorter.margin}"
 }

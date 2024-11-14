@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TestConsistentSampling {
 
@@ -104,5 +105,44 @@ class TestConsistentSampling {
         assertEquals(6461562665860220490, contestsUA[0].sampleThreshold)
         assertEquals(6461562665860220490, contestsUA[1].sampleThreshold)
         assertEquals(2182043544522574371, contestsUA[2].sampleThreshold)
+    }
+
+    // the cvrs include all the contests, and always have a vote in that contest
+    @Test
+    fun testSamplingWithFuzz() {
+        TestSamplingWithFuzz(0).runTest()
+    }
+
+    // the cvrs include all the contests, but dont always have a vote in that contest
+    @Test
+    fun testSamplingSkipSome() {
+        TestSamplingWithFuzz(1).runTest()
+    }
+
+    class TestSamplingWithFuzz(val skipSomeContests: Int) {
+
+        fun runTest() {
+            val (contestsUA, cvrsUAP) = makeTestData(skipSomeContests)
+
+            val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
+            println("nsamples = ${sample_cvr_indices.size}\n")
+            contestsUA.forEach {
+                print(it)
+                it.pollingAssertions.forEach { ass ->
+                    println("      $ass")
+                }
+                println()
+            }
+
+            // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
+            println("contest.name (id) == sampleSize")
+            contestsUA.forEach { contest ->
+                val cvrs = cvrsUAP.filter { it.hasContest(contest.id) && it.sampleNum <= contest.sampleThreshold }
+                cvrs.forEach { assertTrue(it.sampled) }
+                val count = cvrs.size
+                assertEquals(contest.sampleSize, count)
+                println(" ${contest.name} (${contest.id}) == ${contest.sampleSize}")
+            }
+        }
     }
 }

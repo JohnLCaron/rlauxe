@@ -31,6 +31,8 @@ data class RunTestRepeatedResult(
         if (status != null) appendLine("  status:${status}")
         if (sampleCount.isNotEmpty()) appendLine("  $sampleCount: 90% quantile:${quantile(sampleCount, .90)}")
     }
+
+    fun findQuantile(quantile: Double): Int = quantile(sampleCount, quantile)
 }
 
 fun runTestRepeated(

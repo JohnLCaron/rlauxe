@@ -61,7 +61,7 @@ class PhantomBuilder(val id: String) {
 // otoh, why bother? maybe just complicates things.
 // note that SHANGRLA assertion_RLA.ipynb doesnt pass in the previously sampled indices.
 // Nor anywhere else in SHANGRLA esp. *.ipynb
-// so then, do we even need cvr.sampled ?? used in find_smaple_size()
+// so then, do we even need cvr.sampled ?? used in find_sample_size()
 
 // StylishWorkflow.chooseSamples()
 // AssertionRLAipynb.workflow()

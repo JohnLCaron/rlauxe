@@ -48,8 +48,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upper
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
     override fun toString() = buildString {
-        appendLine("   contest = ${contest.name}")
-        appendLine("   ncards = $upperBound ncvrs = $ncvrs")
+        append("contest: ${contest.name} ncards = $upperBound ncvrs = $ncvrs")
     }
 
     fun makePollingAssertions(cvrs: Iterable<CvrIF>) {
@@ -81,11 +80,9 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upper
             ComparisonAssertion(contest, comparisonAssorter)
         }
 
-        val margins = comparisonAssertions.map { assert ->
-            mean2margin(assert.assorter.avgCvrAssortValue)
-        }
-        val minMargin = margins.min()
+        val margins = comparisonAssertions.map { it.assorter.margin }
+        val minMargin = if (comparisonAssertions.isEmpty()) 0.0 else margins.min()
         this.minAssert = comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }
-        println("min = $minMargin minAssert = $minAssert")
+        // println("min = $minMargin minAssert = $minAssert")
     }
 }

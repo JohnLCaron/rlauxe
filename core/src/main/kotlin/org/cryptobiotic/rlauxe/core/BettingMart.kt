@@ -13,7 +13,7 @@ class BettingMart(
     val withoutReplacement: Boolean = true,
     val noerror: Double, // for comparison assorters who need rate counting
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
-    val upperBound: Double = 1.0,  // aka u
+    val upperBound: Double,  // aka u
 ): RiskTestingFn {
     private val showDetail = false
 
@@ -45,6 +45,8 @@ class BettingMart(
             sampleNumber++ // j <- j + 1
             xs.add(xj)
             require(xj >= 0.0)
+            if (xj > upperBound)
+                println("why")
             require(xj <= upperBound)
 
             // AlphaMart val etaj = estimFn.eta(prevSamples)

@@ -632,14 +632,12 @@ fun replicate_p_values(
         p2 = 0.01
     )
 
-    val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
     val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
     println(result)
     println("pvalues = ${result.pvalues}")
 }
 
-// TODO sample size is always the same, so no need to make repeated runs
-// artifact of testing without errors
 fun calc_sample_sizes(
     ntrials: Int,
     contests: List<RaireContestUnderAudit>,
@@ -681,7 +679,7 @@ fun calc_sample_sizes(
         p3 = 0.0,
         p4 = 0.0,
     )
-    val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampler,

@@ -64,7 +64,7 @@ class FindSampleSize(
         val N = cvrs.size
 
         val optimal = AdaptiveComparison(
-            N = N,
+            N = contest.ncvrs,
             withoutReplacement = true,
             a = assorter.noerror,
             d1 = 100,
@@ -74,16 +74,16 @@ class FindSampleSize(
             p3 = p3,
             p4 = p4,
         )
-        val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
+        val betta = BettingMart(bettingFn = optimal, N = N, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
         // TODO use coroutines
         val result: RunTestRepeatedResult = runTestRepeated(
             drawSample = sampler,
-            maxSamples = N,
+            maxSamples = contest.ncvrs,
             ntrials = ntrials,
             testFn = betta,
             testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
-            showDetails = true,
+            showDetails = false,
         )
 
         return result.findQuantile(quantile)

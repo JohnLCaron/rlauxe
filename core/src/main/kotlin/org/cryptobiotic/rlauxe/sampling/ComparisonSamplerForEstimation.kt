@@ -4,11 +4,10 @@ import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
-// pass in the cvr, create an internal mvr with the correct under/over statements.
+// create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerForEstimation(
     cvras: List<CvrUnderAudit>,
@@ -45,28 +44,15 @@ class ComparisonSamplerForEstimation(
         ccvrs.addAll(cvras)
 
         flippedVotes1 = flip1votes(mmvrs, changeWinnerToOther = (N * p1).toInt())
-        findProblem(mmvrs, ccvrs)
         flippedVotes2 = flip2votes(mmvrs, needToChangeWinnerToLoser = (N * p2).toInt())
-        findProblem(mmvrs, ccvrs)
         flippedVotes4 = flip4votes(mmvrs, needToChangeLoserToWinner = (N * p4).toInt())
-        findProblem(mmvrs, ccvrs)
         flippedVotes3 = flip3votes(mmvrs, ccvrs, changeCvrToOther = (N * p3).toInt())
-        findProblem(mmvrs, ccvrs)
 
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
 
-        sampleCount = cvras.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
+        sampleCount = cvras.filter { it.hasContest(contestUA.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
         sampleMean = sampleCount / N
-    }
-
-    fun findProblem(mvrs: List<CvrUnderAudit>, cvrs: List<CvrUnderAudit>) {
-        cvrs.forEachIndexed { idx, cvr ->
-            val mvr = mvrs[idx]
-            val result = cassorter.bassort(mvr, cvr)
-            if (doubleIsClose(result, cassorter.noerror / 2))
-                print("")
-        }
     }
 
     override fun sampleMean() = sampleMean
@@ -81,16 +67,14 @@ class ComparisonSamplerForEstimation(
         while (idx < N) {
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id) && cvr.sampleNum <= contestUA.sampleThreshold!!) {
+            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
                 val result = cassorter.bassort(mvr, cvr) // TODO not sure of cvr vs cvr.cvr, w/re raire; not sure of permute
-                if (doubleIsClose(result, cassorter.noerror / 2))
-                    print("")
                 idx++
                 return result
             }
             idx++
         }
-        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
+        throw RuntimeException("no samples left for contest=${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
 
     // voted for loser, cvr has winner

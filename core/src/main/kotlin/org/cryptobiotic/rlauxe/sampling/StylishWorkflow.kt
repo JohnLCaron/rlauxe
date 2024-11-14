@@ -220,68 +220,6 @@ fun calcSampleSizes(contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudi
     return computeSize
 }
 
-/* TODO sample size is always the same, when testing without errors
-fun calcSampleSizesBySimulation(
-    ntrials: Int,
-    contests: List<ContestUnderAudit>,
-    cvrs: List<CvrUnderAudit>,
-    p1: Double = .01,
-    p2: Double = .001,
-) {
-    val N = cvrs.size // or is this N_c ??
-
-    contests.forEach { contestUA ->
-        val stopwatch = Stopwatch()
-        val minAssertion = contestUA.minAssert!!
-        val minAssorter = minAssertion.assorter
-
-        // TODO this assumes winner == 0
-        val sampler: GenSampleFn = ComparisonWithErrorRates(cvrs, minAssorter, p2 = p2, p1 = p1)
-        println("sampleCount= ${sampler.sampleCount()}  sampleMean= ${sampler.sampleMean()}")
-
-        // class AdaptiveComparison(
-        //    val N: Int,
-        //    val withoutReplacement: Boolean = true,
-        //    val upperBound: Double, // compareAssorter.upperBound
-        //    val a: Double, // noerror
-        //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
-        //    val d2: Int, // weight p2, p4
-        //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-        //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-        //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-        //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
-        //    val eps: Double = .00001
-        val optimal = AdaptiveComparison(
-            N = N,
-            withoutReplacement = true,
-            upperBound = minAssorter.upperBound,
-            a = minAssorter.noerror,
-            d1 = 100,
-            d2 = 100,
-            p1 = .01,
-            p2 = .001,
-            p3 = 0.0,
-            p4 = 0.0,
-        )
-        val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
-
-        // TODO use coroutines
-        val result: RunTestRepeatedResult = runTestRepeated(
-            drawSample = sampler,
-            maxSamples = N,
-            ntrials = ntrials,
-            testFn = betta,
-            testParameters = mapOf("p2" to optimal.p2, "margin" to minAssertion.margin),
-            showDetails = true,
-        )
-        // TODO             sam_size = int(np.quantile(sams, quantile))
-        contestUA.sampleSize = result.avgSamplesNeeded()
-        println(" that took $stopwatch")
-    }
-}
-
- */
-
 /////////////////////////////////////////////////////////////////////////////////
 // run audit for one assertion; could be parallel
 fun runOneAssertion(
@@ -292,7 +230,7 @@ fun runOneAssertion(
     val assorter = assertion.assorter
     // each assorted needs their own sampler
     val sampler: SampleFn = ComparisonSampler(cvrPairs, contestUA, assorter)
-    val sampleSize = cvrPairs.size
+    // val sampleSize = cvrPairs.size
 
     // TODO could pass the testFn into the workflow
     // note that you need the assorter for the sampler
@@ -312,7 +250,7 @@ fun runOneAssertion(
     //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     //    val eps: Double = .00001
     val optimal = AdaptiveComparison(
-        N = sampleSize,
+        N = contestUA.ncvrs,
         withoutReplacement = true,
         a = assorter.noerror,
         d1 = 100,  // TODO set params
@@ -322,9 +260,9 @@ fun runOneAssertion(
         p3 = 0.0,
         p4 = 0.0,
     )
-    val testFn = BettingMart(bettingFn = optimal, N = sampleSize, noerror = 0.0, withoutReplacement = false)
+    val testFn = BettingMart(bettingFn = optimal, N = contestUA.ncvrs, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
-    val testH0Result = testFn.testH0(sampleSize, terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(contestUA.ncvrs, terminateOnNullReject = false) { sampler.sample() }
     if (testH0Result.status == TestH0Status.StatRejectNull) {
         assertion.proved = true
     }

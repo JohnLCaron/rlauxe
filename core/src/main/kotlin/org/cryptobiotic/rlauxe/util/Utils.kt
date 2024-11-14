@@ -37,6 +37,8 @@ fun listToMap(vararg names: String): Map<String, Int> {
     return names.mapIndexed { idx, value -> value to idx }.toMap()
 }
 
+fun df(d: Double) = "%6.4f".format(d)
+
 /////////////////////////////////////////////////////////////////////////////
 // covers for numpy: will be replaced
 
@@ -129,6 +131,8 @@ fun numpy_quantile(a: IntArray, q: Double): Int {
 // this one assumes you cant change data array
 // https://softwareengineering.stackexchange.com/questions/195652/how-to-calculate-percentile-in-java-without-using-library/453902
 fun quantile(data: List<Int>, quantile: Double): Int {
+    if (data.isEmpty())
+        return 0
 
     require (quantile in 0.0..1.0)
     val total = data.sum() * quantile
@@ -137,10 +141,11 @@ fun quantile(data: List<Int>, quantile: Double): Int {
     sortedData.addAll(data) // or sort in place, which changes data
     sortedData.sort()
 
-    var i = 0
+    var i = -1
     var runningTotal = 0
     while (runningTotal < total) {
-        runningTotal += sortedData[i++]
+        i++
+        runningTotal += sortedData[i]
     }
     return sortedData[i]
 }

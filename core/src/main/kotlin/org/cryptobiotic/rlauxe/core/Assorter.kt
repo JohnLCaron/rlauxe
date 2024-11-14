@@ -51,7 +51,7 @@ data class Assertion(
     val loser = assorter.loser()
     var proved = false // TODO is it ok to have this state ??
 
-    override fun toString() = "Assertion for ${contest.name} assorter=${assorter.desc()} margin=$margin"
+    override fun toString() = "Assertion for '${contest.name}' assorter=${assorter.desc()} margin=$margin"
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ data class ComparisonAssorter(
         return cvr_assort - mvr_assort
     }
 
-    fun desc() = "ComparisonAssorter has assorter=${assorter.desc()}"
+    fun desc() = " avgCvrAssortValue=${avgCvrAssortValue}"
 }
 
 class ComparisonAssertion(
@@ -162,5 +162,5 @@ class ComparisonAssertion(
     val avgCvrAssortValue = assorter.avgCvrAssortValue
     val margin = assorter.margin
     var proved = false // TODO is it ok to have this state ??
-    override fun toString() = "ComparisonAssertion for ${contest.name} assorter=${assorter.desc()}"
+    override fun toString() = "ComparisonAssertion for '${contest.name}' ComparisonAssorter avg=${assorter.margin}"
 }

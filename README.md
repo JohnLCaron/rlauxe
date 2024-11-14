@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/12/2024
+last update: 11/13/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -18,6 +18,7 @@ Table of Contents
       * [APPROVAL](#approval)
       * [SUPERMAJORITY](#supermajority)
       * [IRV (In Progress)](#irv-in-progress)
+    * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
   * [Sampling](#sampling)
     * [Estimating Sample sizes (in progress)](#estimating-sample-sizes-in-progress)
@@ -167,6 +168,8 @@ and possibly
 ````
 See code in raire package for current implementation.
 
+### Polling audits
+
 ### Comparison audits
 
 See SHANGRLA Section 3.2.
@@ -215,12 +218,19 @@ Notes
 
 ## Sampling
 
-Implementation can be divided between the riskTestingFn and the sampling. SHANGRLA provides a very elegant separations
-between the two.
+SHANGRLA provides a very elegant separation between the implementation of risk testing (mostly described
+above) and sampling.
 
 ### Estimating Sample sizes (in progress)
 
-The STYLISH paper has as part of its workflow:
+For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
+
+Consistent Sampling then figures out which CVRs are chosen to satisfy all of the contests being audited.
+
+Note 1: "The software offers several options for picking {𝑆_𝑐}, including some based on simulation."
+SHANGRLA doesnt seem to have any non-simulation options. May be a terminology issue.
+
+Note 2: From STYLISH paper:
 
         4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
         The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
@@ -230,11 +240,7 @@ The STYLISH paper has as part of its workflow:
             𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
         4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
 
-For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
-
-Consistent Sampling then figures out which CVRs are chosen to satisfy all of the contests being audited.
-
-AFAICT, the calculation of the total_size using the probabilities as described above in 4.b) is when you just want the 
+AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
 total_size estimate, but not do the consistent sampling.
 
 ### Consistent Sampling

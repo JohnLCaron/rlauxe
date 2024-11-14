@@ -77,7 +77,6 @@ class TestCorla {
                         val adaptive = AdaptiveComparison(
                             N = N,
                             withoutReplacement = false,
-                            upperBound = upperBound,
                             a = compareAssorter.noerror,
                             d1 = d1,
                             d2 = d1,

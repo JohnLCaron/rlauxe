@@ -90,8 +90,7 @@ class OracleComparison(
 class AdaptiveComparison(
     val N: Int,
     val withoutReplacement: Boolean = true,
-    val upperBound: Double, // compareAssorter.upperBound
-    val a: Double, // noerror
+    val a: Double, // compareAssorter.noerror
     val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
     val d2: Int, // weight p2, p4
     val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
@@ -100,9 +99,6 @@ class AdaptiveComparison(
     val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     val eps: Double = .00001
 ): BettingFn {
-    init {
-        require(upperBound > 1.0)
-    }
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastj = prevSamples.numberOfSamples()
@@ -133,7 +129,7 @@ class AdaptiveComparison(
  * Not completely sure of the relationship to COBRA section 3.2.
  * Has been generalized to allow p3 and p4 errors and sampling without replacement (WoR) by setting mui.
  * Note if (lam < 1.0) "**** betting against"
- *
+ * a := compareAssorter.noerror
  * a := 1 / (2 − v/au)
  *    v := 2Āc − 1 is the diluted margin: the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
  *   au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority

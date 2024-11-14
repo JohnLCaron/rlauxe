@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterFunction {
@@ -99,8 +100,8 @@ data class ComparisonAssorter(
         val tau = (1.0 - overstatement / this.assorter.upperBound())
         val denom =  (2.0 - margin/this.assorter.upperBound())
         val result1 =  tau * noerror
-        val result2 =  tau /denom
-        require(result1 == result2)
+        val result2 =  tau / denom
+        require(doubleIsClose(result1, result2))
         return result1
     }
 

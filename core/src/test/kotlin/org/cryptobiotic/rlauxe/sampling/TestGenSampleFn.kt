@@ -130,24 +130,6 @@ class TestGenSampleFn {
         }
     }
 
-    fun testLimits(sampler: GenSampleFn, nsamples: Int, upper: Double) {
-        repeat(nsamples) {
-            val ss = sampler.sample()
-            assertTrue(ss >= 0)
-            assertTrue(ss <= upper)
-        }
-    }
-
-    fun countAssortValues(sampler: GenSampleFn, nsamples: Int, assortValue: Double): Int {
-        sampler.reset()
-        var count = 0
-        repeat(nsamples) {
-            val ss = sampler.sample()
-            if (doubleIsClose(ss, assortValue)) count++
-        }
-        return count
-    }
-
     @Test
     fun testComparisonWithErrorsLimits() {
         val N = 20000
@@ -220,4 +202,23 @@ class TestGenSampleFn {
         }
     }
 
+}
+
+fun testLimits(sampler: GenSampleFn, nsamples: Int, upper: Double) {
+    repeat(nsamples) {
+        val ss = sampler.sample()
+        assertTrue(ss >= 0)
+        assertTrue(ss <= upper)
+    }
+}
+
+fun countAssortValues(sampler: GenSampleFn, nsamples: Int, assortValue: Double): Int {
+    sampler.reset()
+    var count = 0
+    repeat(nsamples) {
+        val ss = sampler.sample()
+        if (doubleIsClose(ss, assortValue))
+            count++
+    }
+    return count
 }

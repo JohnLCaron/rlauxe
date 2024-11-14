@@ -1,97 +1,25 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.lang.Math.pow
 import kotlin.math.ceil
+import kotlin.math.ln
 import kotlin.math.max
-
-class AssertionUnderAudit(val assertion: org.cryptobiotic.rlauxe.core.ComparisonAssertion, var ncards: Int? = null) {
-    var sample_size = 0
-    var margin = 0.0
-
-    fun make_overstatement(overs: Double): Double {
-        // TODO reference in paper
-        val upper = assertion.assorter.upperBound()
-        val result = (1 - overs / upper) / (2 - this.margin / upper)
-        return result
-    }
-}
 
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
 class FindSampleSize(
     val alpha: Double,
-    val error_rate_1: Double,
-    val error_rate_2: Double,
-    val reps: Int,
+    val p1: Double,
+    val p2: Double,
+    val p3: Double = 0.0,
+    val p4: Double = 0.0,
+    val ntrials: Int,
     val quantile: Double,
 ) {
 
-    // SHANGRLA Audit.find_sample_size
-    // StartingSampleSize.Audit.find_sample_size
-
-    // expect these parameters
-    // SHANGRLA Nonneg_mean.sample_size
-    //                    'test':             NonnegMean.alpha_mart,
-    //                   'estim':            NonnegMean.optimal_comparison
-    //          'quantile':       0.8,
-    //         'error_rate_1':   0.001,
-    //         'error_rate_2':   0.0,
-    //         'reps':           100,
-
-    fun find_sample_size(
-        audit: AuditComparison,
-        rcontests: List<RaireContestUnderAudit>,
-        cvrs: List<CvrUnderAudit>,
-    ): Int {
-        // unless style information is being used, the sample size is the same for every contest.
-        val old_sizes: MutableMap<Int, Int> =
-            rcontests.associate { it.id to 0 }.toMutableMap()
-
-        for (contest in rcontests) {
-            val contestId = contest.id
-            old_sizes[contestId] = cvrs.filter { it.hasContest(contestId) }.map { if (it.sampled) 1 else 0 }.sum()
-
-            // max sample size over all assertions in this contest
-            var max_size = 0
-            val assertions = audit.assertions[contestId]!!
-            assertions.forEach { asn ->
-                // if (!asn.proved) {
-                max_size = max(
-                    max_size,
-                    estimateSampleSize(
-                        contest,
-                        asn.assorter,
-                        cvrs.map { it.cvr },
-                    )
-                )
-                // }
-            }
-            contest.sampleSize = max_size
-        }
-
-        // setting p TODO whats this doing here? shouldnt it be in consistent sampling ?? MoreStyle section 3 ??
-        for (cvr in cvrs) {
-            if (cvr.sampled) {
-                cvr.p = 1.0
-            } else {
-                cvr.p = 0.0
-                for (con in rcontests) {
-                    if (cvr.hasContest(con.id) && !cvr.sampled) {
-                        val p1 = con.sampleSize.toDouble() / (con.upperBound!! - old_sizes[con.id]!!)
-                        cvr.p = max(p1, cvr.p) // TODO nullability
-                    }
-                }
-            }
-        }
-
-        // when old_sizes == 0, total_size should be con.sample_size (61); python has roundoff to get 62
-        // total_size = ceil(np.sum([x.p for x in cvrs if !x.phantom))
-        // TODO total size is the sum of the p's over the cvrs (!wtf)
-        val summ: Double = cvrs.filter { !it.phantom }.map { it.p }.sum()
-        val total_size = ceil(summ).toInt()
-        return total_size // TODO what is this? doesnt consistent sampling decide this ??
-    }
-
+    // given the contest.sampleSize, we can calculate the total number of ballots.
+    // however, we get this from consistent sampling, which actually picks which ballots to sample.
     fun computeSampleSize(
         rcontests: List<ContestUnderAudit>,
         cvrs: List<CvrUnderAudit>,
@@ -123,160 +51,157 @@ class FindSampleSize(
         return total_size // TODO what is this? doesnt consistent sampling decide this ??
     }
 
-    fun estimateSampleSize(
-        contest: ContestUnderAudit, // not needed??
+    fun simulateSampleSize(
+        contest: ContestUnderAudit,
         assorter: ComparisonAssorter,
-        cvrs: List<CvrIF>,
+        cvrs: List<CvrUnderAudit>,
     ): Int {
-        val sampler: GenSampleFn = ComparisonNoErrors(cvrs, assorter) // assume no errors
+        val sampler: GenSampleFn = ComparisonSamplerForEstimation(cvrs, contest, assorter,
+            p1 = p1,
+            p2 = p2,
+            p3 = p3,
+            p4 = p4,)
         val N = cvrs.size
 
-        val optimal = OptimalComparisonNoP1(
+        val optimal = AdaptiveComparison(
             N = N,
             withoutReplacement = true,
-            upperBound = assorter.upperBound,
-            p2 = error_rate_2, // 0.000! really ??
+            a = assorter.noerror,
+            d1 = 100,
+            d2 = 100,
+            p1 = p1,
+            p2 = p2,
+            p3 = p3,
+            p4 = p4,
+        )
+        val betta = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
+
+        // TODO use coroutines
+        val result: RunTestRepeatedResult = runTestRepeated(
+            drawSample = sampler,
+            maxSamples = N,
+            ntrials = ntrials,
+            testFn = betta,
+            testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
+            showDetails = true,
         )
 
-        val betting = BettingMart(bettingFn = optimal, N = N, noerror = 0.0, withoutReplacement = false)
-        val result = betting.testH0(N, true, showDetails = false) { sampler.sample() }
-        println(result)
-        //println("pvalues = ${result.pvalues}")
-        return result.sampleCount
+        return result.findQuantile(quantile)
     }
 
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// from python
-
-/* fun estimateSampleSizePolling(
-    asn: Assertion,
-    N: Int,
-    prefix: Boolean = false,
-    reps: Int,
-    quantile: Double = 0.5, // quantile of the distribution of sample sizes to return
-): Int {
-
-    val big = this.assorter.upperBound
-
-    val n_0 = this.contest.tally[this.loser]!! // LOOK nullability
-    val n_big = this.contest.tally[this.winner]!! // LOOK nullability
-    val n_half = N - n_0 - n_big
-    //         fun interleave_values(n_small: Int, n_med: Int, n_big: Int, small: Double, med: Double, big: Double): DoubleArray {
-    val x = interleave_values(n_0, n_half, n_big, big = big)
-
-    // this is the simulation
-    val sample_size = this.test.estimateSampleSize(
-        x = x,
-        alpha = this.contest.risk_limit,
-        reps = reps,
-        prefix = prefix,
-        quantile = quantile, // seed = seed
-    )
-    this.sample_size = sample_size
-    return sample_size
-}
-
- */
-
-// SHANGRLA Assertion.find_sample_size
-// StartingSampleSize.Assertion.estimateSampleSizeComparision
-
-/*
-    fun estimateSampleSizeComparision(
-        asn: AssertionUnderAudit,
-        prefix: Boolean = false,
-        rate1: Double? = null,
-        rate2: Double? = null,
-        reps: Int,
-        quantile: Double = 0.5, // quantile of the distribution of sample sizes to return
-    ): Int {
-        val big = asn.make_overstatement(overs = 0.0)
-        val small = asn.make_overstatement(overs = 0.5)
-        println("  Assertion ${asn} big = ${big} small = ${small}")
-
-        val rate_1 = rate1 ?: ((1.0 - asn.margin) / 2.0)   // rate of small values
-        val x = DoubleArray(this.N) { big } // array N floats, all equal to big
-
-        val rate_1_i = numpy_arange(0, this.N, step = (1.0 / rate_1).toInt())
-        val rate_2_i =
-            if (rate2 != null && rate2 != 0.0) numpy_arange(0, this.N, step = (1.0 / rate2).toInt()) else IntArray(0)
-        rate_1_i.forEach { x[it] = small }
-        rate_2_i.forEach { x[it] = 0.0 }
-
-        // this is the simulation
-        val sample_size = estimateSampleSize(
-            x = x,
-            alpha = this.alpha,
-            reps = reps,
-            prefix = prefix,
-            quantile = quantile, // seed = seed
-        )
-        asn.sample_size = sample_size
-        return sample_size
-    }
-
-    fun estimateSampleSize(x: DoubleArray, alpha: Double, reps: Int, prefix: Boolean, quantile: Double): Int {
-
-        val sams = IntArray(reps)
-        val pfx = if (prefix) x else DoubleArray(0)
-        val ran_len = if (prefix) (N - x.size) else N
-        repeat(reps) {
-            val choices = python_choice(x, size = ran_len)
-            val pop = numpy_append(pfx, choices) // tile data to make the population
-            val (_, p_history) = this.testFn.test(pop)
-            val crossed = p_history.map { it <= alpha }
-            val crossedCount = crossed.filter { it }.count()
-            sams[it] = if (crossedCount == 0) N else (indexFirstTrue(crossed) + 1)
-        }
-        sams.sort() // sort in place
-        val sam_size = numpy_quantile(sams, quantile)
-        return sam_size
-    }
-
- */
-
-
-// this is optimal_comparison_noP1
-fun optimal_comparison(u: Double, rate_error_2: Double = 1e-4): Double {
+// this is optimal_comparison_noP1, a bet, not a sample estimate.
+// see cobra p 5
+fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): Double {
     /*
-The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
-for which overstatement assorters take a small number of possible values and are concentrated
-on a single value when the CVRs have no errors.
+    The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
+    for which overstatement assorters take a small number of possible values and are concentrated
+    on a single value when the CVRs have no errors.
 
-Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
-and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
+    Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
+    and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
 
-eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
+    eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
 
-Translating to p2=1-p0 gives:
+    Translating to p2=1-p0 gives:
 
-eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+    eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
 
-Parameters
-----------
-x: input data
-rate_error_2: hypothesized rate of two-vote overstatements
+    Parameters
+    ----------
+    x: input data
+    rate_error_2: hypothesized rate of two-vote overstatements
 
-Returns
--------
-eta: estimated alternative mean to use in alpha
-*/
+    Returns
+    -------
+    eta: estimated alternative mean to use in alpha
+    */
 
     // TODO python doesnt check (2 - 2 * self.u) != 0; self.u = 1
     if (u == 1.0)
         throw RuntimeException("optimal_comparison: u ${u} must != 1")
 
     val p2 = rate_error_2 // getattr(self, "rate_error_2", 1e-4)  // rate of 2-vote overstatement errors
-    val result = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
-    return result
+    val bet = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
+    // 1 / alpha = bet ^ size
+    val term1 = -ln(alpha)
+    val term2 = ln(bet)
+    val size = -ln(alpha) / ln(bet)
+    return size
 }
 
 // MoreStyle footnote 5
 // The number of draws S4 needs to confirm results depends on the diluted margin and
-// the number and nature of discrepancies the sample uncovers.4 The initial sample size can be
+// the number and nature of discrepancies the sample uncovers. The initial sample size can be
 // written as a constant (denoted ρ) divided by the “diluted margin.”
 // In general, ρ = − log(α)/[ 2γ + λ log(1 − 2γ)], where γ is an error inflation factor and λ is the anticipated rate of
 // one-vote overstatements in the initial sample as a percentage of the diluted margin [17]. We define γ and λ as in
 // https://www.stat.berkeley.edu/~stark/Vote/auditTools.htm.
+
+/**
+ * From colorado-rla Audit.optimistic().
+ * Based on SuperSimple paper, generalization of equations in section 2.
+ *
+ * @param gamma the "error inflator" parameter. error inflation factor γ ≥ 100%.
+ *   γ controls a tradeoff between initial sample size and the amount of additional counting required when the
+ *   sample finds too many overstatements, especially two-vote overstatements.
+ *   The larger γ is, the larger the initial sample needs to be, but the less additional counting will be required
+ *   if the sample finds a two-vote overstatement or a large number of one-vote maximum overstatements. (paper has 1.1)
+ * @param twoUnder the number of two-vote understatements
+ * @param oneUnder the number of one-vote understatements
+ * @param oneOver the number of one-vote overstatements
+ * @param twoOver the number of two-vote overstatements
+ */
+fun estimateSampleSizeSimple(
+    riskLimit: Double,
+    dilutedMargin: Double,
+    gamma: Double = 1.03,
+    oneOver: Int = 0,   // p1
+    twoOver: Int = 0,   // p2
+    oneUnder: Int = 0,  // p3
+    twoUnder: Int = 0,  // p4
+): Int {
+    val two_under_term = twoUnder * ln( 1 + 1 / gamma) // log or ln ?
+    val one_under_term = oneUnder * ln( 1 + 1 / (2 * gamma)) // log or ln ?
+    val one_over_term = oneOver * ln( 1 - 1 / (2 * gamma)) // log or ln ?
+    val two_over_term = twoOver * ln( 1 - 1 / gamma) // log or ln ?
+
+    // "sample-size multiplier" rho is independent of margin
+    val rho: Double = -(2.0 * gamma) * (ln(riskLimit) + two_under_term + one_under_term + one_over_term + two_over_term)
+    val r = ceil(rho / dilutedMargin)  // round up
+    val over_under_sum = (twoUnder + oneUnder + oneOver + twoOver).toDouble()
+    // println("   rho=$rho r=$r")
+    return max(r, over_under_sum).toInt()
+}
+
+
+// COBRA equation 1 is a deterministic lower bound on sample size, dependent on margin and risk limit.
+// COBRA equation 2 has the maximum expected value for given over/understatement rates. See OptimalLambda class for implementation.
+
+fun estimateSampleSizeOptimalLambda(
+    alpha: Double, // risk
+    dilutedMargin: Double, // the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
+    upperBound: Double, // assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
+    p1: Double, p2: Double, p3: Double = 0.0, p4: Double = 0.0
+): Int {
+
+    //  a := 1 / (2 − v/au)
+    //  v := 2Āc − 1 is the diluted margin
+    //  au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
+
+    val a = 1 / (2 - dilutedMargin / upperBound)
+    val kelly = OptimalLambda(a, p1=p1, p2=p2, p3=p3, p4=p4)
+    val lam = kelly.solve()
+
+    // 1 / alpha = bet ^ size
+    val term1 = -ln(alpha)
+    val term2 = ln(lam)
+    val r = term1 / term2 // round up
+
+    val T = pow(lam, r)
+    val size = ceil(r)
+    // println("   lam=$lam r=$r T=$T size=$size")
+
+    return size.toInt()
+}

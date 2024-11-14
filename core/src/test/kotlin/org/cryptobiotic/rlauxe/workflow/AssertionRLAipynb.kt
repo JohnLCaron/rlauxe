@@ -673,7 +673,6 @@ fun calc_sample_sizes(
     val optimal = AdaptiveComparison(
         N = N,
         withoutReplacement = true,
-        upperBound = minAssorter.upperBound,
         a = minAssorter.noerror,
         d1 = 100,
         d2 = 100,

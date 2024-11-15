@@ -383,7 +383,7 @@ class AssertionRLA {
         // these are the averages of the polling plurality assorters; use this to set the margins
         var count = 0
         val rrContest: RaireContestUnderAudit = raireResults.contests.first()
-        val assorts: List<RaireAssorter> = rrContest.addAssorters()
+        val assorts: List<RaireAssorter> = rrContest.makeAssorters()
         val rcvrs = raireCvrs.contests.first().cvrs
         val margins = assorts.map { assort ->
             val mean = rcvrs.map { assort.assort(it) }.average()

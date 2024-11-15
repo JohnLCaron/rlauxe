@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.mean2margin
 
 // The ouput of RAIRE assertion generator, read from JSON files
 data class RaireResults(
@@ -21,56 +20,48 @@ data class RaireResults(
 
 class RaireContestUnderAudit(
     contest: Contest,
-    val winner: Int,  // the sum of winner and eliminated must be all the candiates
+    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
     val eliminated: List<Int>,
     val expectedPollsNumber : Int,
     val expectedPollsPercent : Double,
     val assertions: List<RaireAssertion>,
 ): ContestUnderAudit(contest) {
+    val candidates =  listOf(winner) + eliminated
 
-    val candidates =  listOf(winner) + eliminated // seems likely
-
-    fun show() = buildString {
-        appendLine("  contest $name winner $winner eliminated $eliminated")
-        assertions.forEach { append(it.show()) }
-    }
-
-    // add assorters to the assertions
-    fun addAssorters(): List<RaireAssorter> {
+    // TODO eliminate
+    fun makeAssorters(): List<RaireAssorter> {
         return this.assertions.map {
-            val assort = RaireAssorter(this, it)
-            it.assorter = assort
-            assort
+            RaireAssorter(this, it)
         }
     }
 
     override fun makeComparisonAssertions(cvrs : Iterable<CvrUnderAudit>) {
-        this.assertions.forEach {
-            val assort = RaireAssorter(this, it)
-            it.assorter = assort
-        }
 
         // TODO coroutines ??
         val stopwatch = Stopwatch()
         this.comparisonAssertions = assertions.map { assertion ->
+            val assorter = RaireAssorter(this, assertion)
             val welford = Welford()
             cvrs.forEach { cvr ->
                 if (cvr.hasContest(contest.id)) {
-                    welford.update(assertion.assorter!!.assort(cvr))
+                    welford.update(assorter.assort(cvr))
                 }
             }
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter!!, welford.mean)
-            println(" assertion ${assertion} has margin ${comparisonAssorter.margin}")
+            val comparisonAssorter = ComparisonAssorter(contest, assorter, welford.mean)
+            println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
             ComparisonAssertion(contest, comparisonAssorter)
         }
-        println(" that took $stopwatch")
+        // println(" that took $stopwatch")
 
-        val margins = comparisonAssertions.map { assert ->
-            mean2margin(assert.assorter.avgCvrAssortValue)
-        }
+        val margins = comparisonAssertions.map { assert -> assert.assorter.margin }
         val minMargin = margins.min()
         this.minAssert = comparisonAssertions.find { it.assorter.margin == minMargin }
-        println("min = $minMargin minAssert = $minAssert")
+        // println("min = $minMargin minAssert = $minAssert")
+    }
+
+    fun show() = buildString {
+        appendLine("  contest $name winner $winner eliminated $eliminated")
+        assertions.forEach { append(it.show()) }
     }
 
     companion object {
@@ -101,31 +92,18 @@ data class RaireAssertion(
     val assertionType: String,
     val explanation: String,
 )  {
-    // TODO is it ok to have this state ??
-    var assorter: RaireAssorter? = null  // TODO bit of a kludge, added after construction
-
     fun show() = buildString {
         appendLine("    assertion type '$assertionType' winner $winner loser $loser alreadyEliminated $alreadyEliminated explanation: '$explanation'")
-    }
-
-    // testing
-    fun match(winner: Int, loser: Int, winnerType: Boolean, already: List<Int> = emptyList()): Boolean {
-        if (this.winner != winner || this.loser != loser) return false
-        if (winnerType && (assertionType != "WINNER_ONLY")) return false
-        if (!winnerType && (assertionType == "WINNER_ONLY")) return false
-        if (winnerType) return true
-        return already == alreadyEliminated
     }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO this a primitive assorter.
+// This a primitive assorter.
 class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAssertion): AssorterFunction {
     val contestName = contest.name
     val contestId = contest.name.toInt()
-    // I believe this doesnt change in the course of the audit
     val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
 
     override fun upperBound() = 1.0
@@ -134,6 +112,10 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     override fun loser() = assertion.loser
 
     override fun assort(mvr: CvrIF): Double {
+        if (mvr.phantom) {
+            return 0.5
+        }
+
         // TODO clumsy
         val rcvr: RaireCvr = when (mvr) {
             is CvrUnderAudit -> mvr.cvr as RaireCvr
@@ -151,7 +133,6 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
         val aloser = rcvr.rcv_lfunc_wo( contestId, assertion.winner, assertion.loser)
 
-        //     An assorter must either have an `assort` method or both `winner` and `loser` must be defined
         //    (in which case assort(c) = (winner(c) - loser(c) + 1)/2. )
         return (awinner - aloser + 1) * 0.5
     }
@@ -165,26 +146,3 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
         return (awinner - aloser + 1) * 0.5
     }
 }
-
-/* TODO eliminate I think
-fun makeRaireComparisonAudit(rcontests: List<RaireContestUnderAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
-    val comparisonAssertions = mutableMapOf<Int, List<ComparisonAssertion>>()
-
-    val contests = mutableListOf<Contest>()
-    rcontests.forEach { rcontest ->
-        rcontest.addAssorters()
-        val contest = rcontest.contest
-        contests.add(contest)
-
-        val clist = rcontest.assertions.map { assertion ->
-            val avgCvrAssortValue = cvrs.map { assertion.assorter!!.assort(it) }.average()
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter!!, avgCvrAssortValue)
-            ComparisonAssertion(contest, comparisonAssorter)
-        }
-        comparisonAssertions[contest.id] = clist
-    }
-
-    return AuditComparison(AuditType.CARD_COMPARISON, riskLimit, contests, comparisonAssertions)
-}
-
- */

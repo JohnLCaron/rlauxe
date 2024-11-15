@@ -8,6 +8,10 @@ import org.cryptobiotic.rlauxe.util.*
 
 data class AuditParams(val riskLimit: Double, val seed: Long, val auditType: AuditType)
 
+data class AuditRound(val riskLimit: Double, val seed: Long, val auditType: AuditType)
+
+data class ExecutiveFunction(val riskLimit: Double, val seed: Long, val auditType: AuditType)
+
 // STYLISH 2.1
 //Card-level Comparison Audits and Card-Style Data
 
@@ -74,7 +78,7 @@ class StylishWorkflow(
         //	    The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
         //	      𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
         //	b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
-        val computeSize = calcSampleSizes(contestsUA, cvrsUA, auditParams.riskLimit) // set contestUA.sampleSize
+        val computeSize = estimateSampleSizes(contestsUA, cvrsUA, auditParams.riskLimit) // set contestUA.sampleSize
 
         //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         // draws random ballots by consistent sampling, and returns their locations to the auditors.
@@ -204,7 +208,7 @@ fun checkWinners(contest: Contest, accumVotes: Map<Int, Int>): Boolean {
 //         'error_rate_1':   0.001,
 //         'error_rate_2':   0.0,
 //         'reps':           100,
-fun calcSampleSizes(contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, alpha: Double): Int {
+fun estimateSampleSizes(contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, alpha: Double): Int {
     // TODO could parellelize
     val finder = FindSampleSize(alpha, p1 = .01, p2 = .001, ntrials = 100, quantile = .90)
     contestsUA.forEach { contestUA ->
@@ -228,7 +232,7 @@ fun runOneAssertion(
     cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>,
 ): Boolean {
     val assorter = assertion.assorter
-    // each assorted needs their own sampler
+    // each assorter needs their own sampler
     val sampler: SampleFn = ComparisonSampler(cvrPairs, contestUA, assorter)
     // val sampleSize = cvrPairs.size
 
@@ -250,7 +254,7 @@ fun runOneAssertion(
     //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     //    val eps: Double = .00001
     val optimal = AdaptiveComparison(
-        N = contestUA.ncvrs,
+        N = contestUA.sampleSize,
         withoutReplacement = true,
         a = assorter.noerror,
         d1 = 100,  // TODO set params
@@ -260,9 +264,9 @@ fun runOneAssertion(
         p3 = 0.0,
         p4 = 0.0,
     )
-    val testFn = BettingMart(bettingFn = optimal, N = contestUA.ncvrs, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
+    val testFn = BettingMart(bettingFn = optimal, N = contestUA.sampleSize, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
-    val testH0Result = testFn.testH0(contestUA.ncvrs, terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(contestUA.sampleSize, terminateOnNullReject = false) { sampler.sample() }
     if (testH0Result.status == TestH0Status.StatRejectNull) {
         assertion.proved = true
     }

@@ -56,13 +56,12 @@ class FindSampleSize(
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,
     ): Int {
-        val sampler: GenSampleFn = ComparisonSamplerForEstimation(cvrs, contest, assorter,
-            p1 = p1,
-            p2 = p2,
-            p3 = p3,
-            p4 = p4,)
-        val N = cvrs.size
+        val sampler: GenSampleFn = if (contest.contest.choiceFunction == SocialChoiceFunction.IRV)
+            ComparisonSamplerForRaire(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
+        else
+            ComparisonSamplerForEstimation(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
 
+        val N = cvrs.size
         val optimal = AdaptiveComparison(
             N = contest.ncvrs,
             withoutReplacement = true,
@@ -88,7 +87,6 @@ class FindSampleSize(
 
         return result.findQuantile(quantile)
     }
-
 }
 
 // this is optimal_comparison_noP1, a bet, not a sample estimate.

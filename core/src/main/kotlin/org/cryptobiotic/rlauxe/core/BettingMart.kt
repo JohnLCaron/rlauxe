@@ -45,8 +45,6 @@ class BettingMart(
             sampleNumber++ // j <- j + 1
             xs.add(xj)
             require(xj >= 0.0)
-            if (xj > upperBound)
-                println("why")
             require(xj <= upperBound)
 
             // AlphaMart val etaj = estimFn.eta(prevSamples)

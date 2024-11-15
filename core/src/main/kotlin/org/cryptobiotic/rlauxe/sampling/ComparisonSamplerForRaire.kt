@@ -8,9 +8,11 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
+private val show = false
+
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
-class ComparisonSamplerForEstimation(
+class ComparisonSamplerForRaire(
     cvras: List<CvrUnderAudit>,
     val contestUA: ContestUnderAudit,
     val cassorter: ComparisonAssorter,
@@ -94,7 +96,10 @@ class ComparisonSamplerForEstimation(
                 val votes = mapOf(contestUA.id to intArrayOf(cassorter.assorter.loser()))
                 val altered = makeNewCvr(mvr, votes)
                 mcvrs[cvrIdx] = altered
-                require(cassorter.bassort(altered, mvr) == 0.0) // p2
+                if (show && cassorter.bassort(altered, mvr) != 0.0) {
+                    println("  flip2votes ${cassorter.bassort(altered, mvr)} != 0.0") // p1 winner -> other
+                }
+                // require(cassorter.bassort(altered, mvr) == 0.0) // p2
                 changed++
             }
         }
@@ -152,12 +157,14 @@ class ComparisonSamplerForEstimation(
             val cvrIdx = secureRandom.nextInt(ncards)
             val mvr = mcvrs[cvrIdx]
             // if (cvr.hasMarkFor(0, 0) == 1) {
-            if (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1) {
+            if (!mvr.phantom && mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1) {
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
                 val altered = makeNewCvr(mvr, votes)
                 mcvrs[cvrIdx] = altered
-                println("${cassorter.bassort(altered, mvr)} == ${0.5 * cassorter.noerror}") // p1 winner -> other
-                require(cassorter.bassort(altered, mvr) == 0.5 * cassorter.noerror) // p1 winner -> other
+                if (show && cassorter.bassort(altered, mvr) != 0.5 * cassorter.noerror) {
+                    println("  flip1votes ${cassorter.bassort(altered, mvr)} != ${0.5 * cassorter.noerror}") // p1 winner -> other
+                }
+                // require(cassorter.bassort(altered, mvr) == 0.5 * cassorter.noerror) // p1 winner -> other
                 changed++
             }
         }

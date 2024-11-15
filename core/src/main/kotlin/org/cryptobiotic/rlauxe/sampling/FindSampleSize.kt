@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -15,7 +14,6 @@ class FindSampleSize(
     val p3: Double = 0.0,
     val p4: Double = 0.0,
     val ntrials: Int,
-    val quantile: Double,
 ) {
 
     // given the contest.sampleSize, we can calculate the total number of ballots.
@@ -55,7 +53,7 @@ class FindSampleSize(
         contest: ContestUnderAudit,
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,
-    ): Int {
+    ): RunTestRepeatedResult {
         val sampler: GenSampleFn = if (contest.contest.choiceFunction == SocialChoiceFunction.IRV)
             ComparisonSamplerForRaire(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
         else
@@ -84,8 +82,7 @@ class FindSampleSize(
             testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
             showDetails = false,
         )
-
-        return result.findQuantile(quantile)
+        return result
     }
 }
 

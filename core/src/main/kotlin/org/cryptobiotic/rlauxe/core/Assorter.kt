@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.mean2margin
 
@@ -162,5 +163,8 @@ class ComparisonAssertion(
     val avgCvrAssortValue = assorter.avgCvrAssortValue
     val margin = assorter.margin
     var proved = false // TODO is it ok to have this state ??
-    override fun toString() = "ComparisonAssertion for '${contest.name}' ComparisonAssorter avg=${assorter.margin}"
+    var pvalue = 0.0
+    var samplesEst = 0
+    var samplesNeeded = 0
+    override fun toString() = "ComparisonAssertion for '${contest.name}' margin=${df(assorter.margin)} samplesEst=$samplesEst samplesNeeded=$samplesNeeded proved=$proved pvalue=$pvalue"
 }

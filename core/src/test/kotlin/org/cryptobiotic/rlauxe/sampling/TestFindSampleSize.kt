@@ -32,13 +32,13 @@ class TestFindSampleSize {
 
         val gamma = 1.2
         val riskLimit = .05
-        val finder = FindSampleSize(riskLimit, p1=p1, p2=p2, p3=p3, p4=p4, 1000, .90)
+        val finder = FindSampleSize(riskLimit, p1=p1, p2=p2, p3=p3, p4=p4, 100)
 
         contestsUA.forEach { contestUA ->
             val cn = contestUA.ncvrs
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
-                val simSize = finder.simulateSampleSize(contestUA, assert.assorter, cvrsUAP,)
+                val result = finder.simulateSampleSize(contestUA, assert.assorter, cvrsUAP,)
                 //     riskLimit: Double,
                 //    dilutedMargin: Double,
                 //    gamma: Double = 1.03,
@@ -46,6 +46,7 @@ class TestFindSampleSize {
                 //    twoOver: Int = 0,   // p2
                 //    oneUnder: Int = 0,  // p3
                 //    twoUnder: Int = 0,  // p4
+                val simSize = result.findQuantile(.90)
                 val estSize = estimateSampleSizeSimple(riskLimit, assert.assorter.margin, gamma,
                     oneOver = ceil(cn*p1).toInt(),
                     twoOver = ceil(cn*p2).toInt(),

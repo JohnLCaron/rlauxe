@@ -21,21 +21,15 @@ data class RaireResults(
 
 class RaireContestUnderAudit(
     contest: Contest,
-    val winner: Int,  // the sum of winner and eliminated must be all the candiates
+    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
     val eliminated: List<Int>,
     val expectedPollsNumber : Int,
     val expectedPollsPercent : Double,
     val assertions: List<RaireAssertion>,
 ): ContestUnderAudit(contest) {
+    val candidates =  listOf(winner) + eliminated
 
-    val candidates =  listOf(winner) + eliminated // seems likely
-
-    fun show() = buildString {
-        appendLine("  contest $name winner $winner eliminated $eliminated")
-        assertions.forEach { append(it.show()) }
-    }
-
-    // add assorters to the assertions
+    // add assorters to the assertions, could be in the constructor?
     fun addAssorters(): List<RaireAssorter> {
         return this.assertions.map {
             val assort = RaireAssorter(this, it)
@@ -71,6 +65,11 @@ class RaireContestUnderAudit(
         val minMargin = margins.min()
         this.minAssert = comparisonAssertions.find { it.assorter.margin == minMargin }
         println("min = $minMargin minAssert = $minAssert")
+    }
+
+    fun show() = buildString {
+        appendLine("  contest $name winner $winner eliminated $eliminated")
+        assertions.forEach { append(it.show()) }
     }
 
     companion object {
@@ -121,11 +120,10 @@ data class RaireAssertion(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO this a primitive assorter.
+// This a primitive assorter.
 class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAssertion): AssorterFunction {
     val contestName = contest.name
     val contestId = contest.name.toInt()
-    // I believe this doesnt change in the course of the audit
     val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
 
     override fun upperBound() = 1.0
@@ -136,7 +134,11 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     override fun assort(mvr: CvrIF): Double {
         // TODO clumsy
         val rcvr: RaireCvr = when (mvr) {
-            is CvrUnderAudit -> mvr.cvr as RaireCvr
+            is CvrUnderAudit -> {
+                if (!(mvr.cvr is RaireCvr))
+                    println("hey")
+                mvr.cvr as RaireCvr
+            }
             is RaireCvr -> mvr
             else -> throw RuntimeException()
         }
@@ -165,26 +167,3 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
         return (awinner - aloser + 1) * 0.5
     }
 }
-
-/* TODO eliminate I think
-fun makeRaireComparisonAudit(rcontests: List<RaireContestUnderAudit>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05): AuditComparison {
-    val comparisonAssertions = mutableMapOf<Int, List<ComparisonAssertion>>()
-
-    val contests = mutableListOf<Contest>()
-    rcontests.forEach { rcontest ->
-        rcontest.addAssorters()
-        val contest = rcontest.contest
-        contests.add(contest)
-
-        val clist = rcontest.assertions.map { assertion ->
-            val avgCvrAssortValue = cvrs.map { assertion.assorter!!.assort(it) }.average()
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter!!, avgCvrAssortValue)
-            ComparisonAssertion(contest, comparisonAssorter)
-        }
-        comparisonAssertions[contest.id] = clist
-    }
-
-    return AuditComparison(AuditType.CARD_COMPARISON, riskLimit, contests, comparisonAssertions)
-}
-
- */

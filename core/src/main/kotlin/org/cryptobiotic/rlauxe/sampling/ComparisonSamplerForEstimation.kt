@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -129,8 +130,11 @@ class ComparisonSamplerForEstimation(
     }
 
     fun makeNewCvr(old: CvrUnderAudit, votes: Map<Int, IntArray>): CvrUnderAudit {
-        return CvrUnderAudit(Cvr(old.id, votes), old.phantom, old.sampleNum)
-        // raire ??
+        return if (old.cvr is RaireCvr) {
+            CvrUnderAudit(RaireCvr(old.cvr, votes), old.phantom, old.sampleNum)
+        } else {
+            CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
+        }
     }
 
     // voted for other, cvr has winner
@@ -152,6 +156,7 @@ class ComparisonSamplerForEstimation(
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
                 val altered = makeNewCvr(mvr, votes)
                 mcvrs[cvrIdx] = altered
+                println("${cassorter.bassort(altered, mvr)} == ${0.5 * cassorter.noerror}") // p1 winner -> other
                 require(cassorter.bassort(altered, mvr) == 0.5 * cassorter.noerror) // p1 winner -> other
                 changed++
             }

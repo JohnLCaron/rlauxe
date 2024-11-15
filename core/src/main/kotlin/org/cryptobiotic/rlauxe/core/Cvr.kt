@@ -13,10 +13,12 @@ interface CvrIF {
 
 open class Cvr(
     override val id: String,
-    override val votes: Map<Int, IntArray>, // contest : list of candidates voted for
+    override val votes: Map<Int, IntArray>, // contest : list of candidates voted for, for IRV, in order
 ): CvrIF {
     override val phantom = false
     override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
+
+    constructor(oldCvr: CvrIF, votes: Map<Int, IntArray>) : this(oldCvr.id, votes)
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {

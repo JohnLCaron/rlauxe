@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import java.io.Reader
 import java.nio.file.Files
@@ -36,18 +37,18 @@ data class RaireCvrContest(
 }
 
 // TODO relation to the original CVRs ??
-//    these are the summaries passed to raire to make the assertions?? or these are the originals ???
 // "RaireCvr is always for one contest" probably an artifact of raire processing
+// probably doesnt have to be seperate class, exept for method override hasMarkFor / hasOveVote ?
 class RaireCvr(
     cvrId: String,
-    contestId: Int,
-    rankedChoices: IntArray, // could be Map<Int, IntArray>
-): Cvr(cvrId, mapOf(contestId to rankedChoices)) {
+    votes: Map<Int, IntArray>,
+): Cvr(cvrId, votes) {
 
-    constructor(contest: Int, ranks: List<Int>): this( "", contest, ranks.toIntArray()) // for quick testing
-    constructor(contest: Int, id: String, ranks: List<Int>): this( id, contest, ranks.toIntArray()) // for quick testing
+    constructor(oldCvr: RaireCvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes)
+    constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
+    constructor(contest: Int, id: String, ranks: List<Int>): this( id, mapOf(contest to ranks.toIntArray())) // for quick testing
 
-    /** if candidate not ranked, 0 , else rank (1 based) */
+    /** if candidate not ranked, 0, else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {
         val rankedChoices = votes[contest]
         return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
@@ -107,7 +108,8 @@ class RaireCvr(
 /////////////////////////////////////////////////////////////////////
 // From SFDA2019_PrelimReport12VBMJustDASheets.raire
 // TODO Colorado may be very different, see corla
-
+//
+// This reads:
 // 1
 // Contest,339,4,15,16,17,18
 // 339,99813_1_1,17

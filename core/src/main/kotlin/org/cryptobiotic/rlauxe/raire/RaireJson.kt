@@ -9,7 +9,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-// reading RAIRE JSON cvr files
+// reading RAIRE JSON assertion files
+// TestRcvAssorter reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json"
+// TEstStylishWorkshop reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json"
+
 @Serializable
 data class RaireResultsJson(
     @SerialName("Overall Expected Polls (#)")

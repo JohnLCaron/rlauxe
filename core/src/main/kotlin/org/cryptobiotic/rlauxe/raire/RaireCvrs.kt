@@ -39,6 +39,7 @@ data class RaireCvrContest(
 // TODO relation to the original CVRs ??
 // "RaireCvr is always for one contest" probably an artifact of raire processing
 // probably doesnt have to be seperate class, exept for method override hasMarkFor / hasOveVote ?
+/** Duplicating the math from SHANGRLA CVR */
 class RaireCvr(
     cvrId: String,
     votes: Map<Int, IntArray>,
@@ -48,6 +49,12 @@ class RaireCvr(
     constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
     constructor(contest: Int, id: String, ranks: List<Int>): this( id, mapOf(contest to ranks.toIntArray())) // for quick testing
 
+    //     def get_vote_for(self, contest_id: str, candidate: str):
+    //        return (
+    //            False
+    //            if (contest_id not in self.votes or candidate not in self.votes[contest_id])
+    //            else self.votes[contest_id][candidate]
+    //        )
     /** if candidate not ranked, 0, else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {
         val rankedChoices = votes[contest]
@@ -55,6 +62,15 @@ class RaireCvr(
                else rankedChoices.indexOf(candidate) + 1
     }
 
+    //        rank_winner = self.get_vote_for(contest_id, winner)
+    //        rank_loser = self.get_vote_for(contest_id, loser)
+    //
+    //        if not bool(rank_winner) and bool(rank_loser):
+    //            return 1
+    //        elif bool(rank_winner) and bool(rank_loser) and rank_loser < rank_winner:
+    //            return 1
+    //        else:
+    //            return 0
     /**
      * Check whether vote is a vote for the loser with respect to a 'winner only'
      * assertion between the given 'winner' and 'loser'.
@@ -74,6 +90,19 @@ class RaireCvr(
         }
     }
 
+    //         if not cand in remaining:
+    //            return 0
+    //
+    //        if not bool(rank_cand := self.get_vote_for(contest_id, cand)):
+    //            return 0
+    //        else:
+    //            for altc in remaining:
+    //                if altc == cand:
+    //                    continue
+    //                rank_altc = self.get_vote_for(contest_id, altc)
+    //                if bool(rank_altc) and rank_altc <= rank_cand:
+    //                    return 0
+    //            return 1
     /**
      * Check whether 'vote' is a vote for the given candidate in the context
      * where only candidates in 'remaining' remain standing.
@@ -93,9 +122,8 @@ class RaireCvr(
         if (rank_cand == 0) return 0
 
         for (altc in remaining) {
-            if (altc == cand) {
-                continue
-            }
+            if (altc == cand) continue
+
             val rank_altc = get_vote_for(contest, altc)
             if (rank_altc != 0 && rank_altc <= rank_cand) {
                 return 0

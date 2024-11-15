@@ -1,6 +1,7 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
-// TODO test_rcv_assorter
+// SHANGRLA test_Assertion.py
+// TODO move useful tests over to TestAssertionsFromShangrla
 
 class TestAssertion {
     /*
@@ -93,112 +94,6 @@ class TestAssertion {
         val target = raw_AvB_asrtn.copy().set_margin_from_cvrs(comparison_audit, plur_cvr_list)
         assertEquals(0.5, target.margin )
     }
-
-    @Test
-    fun test_make_plurality_assertions() {
-        val winner = listOf("Alice", "Bob")
-        val loser = listOf("Candy", "Dan")
-        val asrtns = Assertion.make_plurality_assertions(plur_contest, winner, loser)
-
-        // these test Assorter.assort()
-        var target = asrtns["Alice v Candy"]!!
-        assertEquals(1.0, target.assorter.assort(cvrFromVote("Alice")))
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Bob")))
-        assertEquals(0.0, target.assorter.assort(cvrFromVote("Candy")))
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Dan")))
-
-        target = asrtns["Alice v Dan"]!!
-        assertEquals(1.0, target.assorter.assort(cvrFromVote("Alice")))
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Bob")))
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Candy")))
-        assertEquals(0.0, target.assorter.assort(cvrFromVote("Dan")))
-
-        target = asrtns["Bob v Candy"]!!
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Alice")))
-        assertEquals(1.0, target.assorter.assort(cvrFromVote("Bob")))
-        assertEquals(0.0, target.assorter.assort(cvrFromVote("Candy")))
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Dan")))
-
-        target = asrtns["Bob v Dan"]!!
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Alice")))
-        assertEquals(1.0, target.assorter.assort(cvrFromVote("Bob")))
-        assertEquals(0.5, target.assorter.assort(cvrFromVote("Candy")))
-        assertEquals(0.0, target.assorter.assort(cvrFromVote("Dan")))
-
-        /*
-        assert asrtns["Alice v Candy"].assorter.assort(CVR.from_vote({"Alice": 1})) == 1, \
-               f"{asrtns["Alice v Candy"].assorter.assort(CVR.from_vote({"Alice": 1}))=}"
-        assert asrtns["Alice v Candy"].assorter.assort(CVR.from_vote({"Bob": 1})) == 1/2
-        assert asrtns["Alice v Candy"].assorter.assort(CVR.from_vote({"Candy": 1})) == 0
-        assert asrtns["Alice v Candy"].assorter.assort(CVR.from_vote({"Dan": 1})) == 1/2
-
-        assert asrtns ["Alice v Dan"].assorter.assort(CVR.from_vote({ "Alice": 1 })) == 1
-        assert asrtns ["Alice v Dan"].assorter.assort(CVR.from_vote({ "Bob": 1 })) == 1 / 2
-        assert asrtns ["Alice v Dan"].assorter.assort(CVR.from_vote({ "Candy": 1 })) == 1 / 2
-        assert asrtns ["Alice v Dan"].assorter.assort(CVR.from_vote({ "Dan": 1 })) == 0
-
-        assert asrtns ["Bob v Candy"].assorter.assort(CVR.from_vote({ "Alice": 1 })) == 1 / 2
-        assert asrtns ["Bob v Candy"].assorter.assort(CVR.from_vote({ "Bob": 1 })) == 1
-        assert asrtns ["Bob v Candy"].assorter.assort(CVR.from_vote({ "Candy": 1 })) == 0
-        assert asrtns ["Bob v Candy"].assorter.assort(CVR.from_vote({ "Dan": 1 })) == 1 / 2
-
-        assert asrtns ["Bob v Dan"].assorter.assort(CVR.from_vote({ "Alice": 1 })) == 1 / 2
-        assert asrtns ["Bob v Dan"].assorter.assort(CVR.from_vote({ "Bob": 1 })) == 1
-        assert asrtns ["Bob v Dan"].assorter.assort(CVR.from_vote({ "Candy": 1 })) == 1 / 2
-        assert asrtns ["Bob v Dan"].assorter.assort(CVR.from_vote({ "Dan": 1 })) == 0
-
-         */
-    }
-
-    @Test
-    fun test_supermajority_assorter() {
-        val loser = listOf("Bob", "Candy")
-        val assn = Assertion.make_supermajority_assertion(
-            contest = this.superContest,
-            winner = "Alice",
-            loser = loser
-        )
-
-        val label = "Alice v " + Candidates.ALL_OTHERS.name
-        val target = assn[label]!!
-        var votes = cvrFromVote("Alice")
-        assertEquals(0.75, target.assorter.assort(votes), "wrong value for vote for winner")
-
-        votes = cvrFromVote( "Bob")
-        assertEquals(0.0, target.assorter.assort(votes), "wrong value for vote for loser")
-
-        votes = cvrFromVote( "Dan")
-        assertEquals(0.5, target.assorter.assort(votes), "wrong value for vote for invalid vote--Dan")
-
-        votes = CvrBuilder("1").addVote( "AvB","Alice").addVote("AvB","Bob").build()
-        assertEquals(0.5, target.assorter.assort(votes), "wrong value for vote for invalid vote--Alice & Bob")
-
-        votes = CvrBuilder("1").addVote("AvB","Bob").addVote("AvB","Candy").build()
-        // votes = cvrFromVote( "Alice": False, "Bob": true, "Candy": true })
-        assertEquals(0.5, target.assorter.assort(votes), "wrong value for vote for invalid vote--Bob & Candy")
-
-        //     def test_supermajority_assorter(self):
-        //        loser = ["Bob","Candy"]
-        //        assn = Assertion.make_supermajority_assertion(contest=self.con_test, winner="Alice",
-        //                                                      loser=loser)
-        //
-        //        label = "Alice v " + Contest.CANDIDATES.ALL_OTHERS
-        //        votes = CVR.from_vote({"Alice": 1})
-        //        assert assn[label].assorter.assort(votes) == 3/4, "wrong value for vote for winner"
-        //
-        //        votes = CVR.from_vote({"Bob": true})
-        //        assert assn[label].assorter.assort(votes) == 0, "wrong value for vote for loser"
-        //
-        //        votes = CVR.from_vote({"Dan": true})
-        //        assert assn[label].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Dan"
-        //
-        //        votes = CVR.from_vote({"Alice": true, "Bob": true})
-        //        assert assn[label].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Alice & Bob"
-        //
-        //        votes = CVR.from_vote({"Alice": False, "Bob": true, "Candy": true})
-        //        assert assn[label].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Bob & Candy"
-    }
-
     @Test
     fun test_set_tally_pool_means() {
 

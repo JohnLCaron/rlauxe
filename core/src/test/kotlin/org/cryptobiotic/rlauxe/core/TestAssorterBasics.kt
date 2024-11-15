@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
-class TestAssorters {
+class TestAssorterBasics {
     val cvrs = CvrBuilders()
         .addCrv().addContest("AvB", "0").ddone()
         .addCrv().addContest("AvB", "1").ddone()

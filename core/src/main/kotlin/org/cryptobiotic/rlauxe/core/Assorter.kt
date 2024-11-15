@@ -68,7 +68,7 @@ data class ComparisonAssorter(
     val contest: Contest,
     val assorter: AssorterFunction,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
-    val check: Boolean = true,
+    val check: Boolean = true, // TODO get rid of
 ) {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error

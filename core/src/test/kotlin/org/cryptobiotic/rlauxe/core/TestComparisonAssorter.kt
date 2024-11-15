@@ -149,7 +149,6 @@ class TestComparisonAssorter {
         // (2, 1)= 0.41269841269842567
     }
 
-
     @Test
     fun testNCandidatePluralityAvg() {
         val contest = Contest(

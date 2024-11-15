@@ -232,7 +232,7 @@ fun runOneAssertion(
     cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>,
 ): Boolean {
     val assorter = assertion.assorter
-    // each assorted needs their own sampler
+    // each assorter needs their own sampler
     val sampler: SampleFn = ComparisonSampler(cvrPairs, contestUA, assorter)
     // val sampleSize = cvrPairs.size
 
@@ -254,7 +254,7 @@ fun runOneAssertion(
     //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     //    val eps: Double = .00001
     val optimal = AdaptiveComparison(
-        N = contestUA.ncvrs,
+        N = contestUA.sampleSize,
         withoutReplacement = true,
         a = assorter.noerror,
         d1 = 100,  // TODO set params
@@ -264,9 +264,9 @@ fun runOneAssertion(
         p3 = 0.0,
         p4 = 0.0,
     )
-    val testFn = BettingMart(bettingFn = optimal, N = contestUA.ncvrs, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
+    val testFn = BettingMart(bettingFn = optimal, N = contestUA.sampleSize, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
-    val testH0Result = testFn.testH0(contestUA.ncvrs, terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(contestUA.sampleSize, terminateOnNullReject = false) { sampler.sample() }
     if (testH0Result.status == TestH0Status.StatRejectNull) {
         assertion.proved = true
     }

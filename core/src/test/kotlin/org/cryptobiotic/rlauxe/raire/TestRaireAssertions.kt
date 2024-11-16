@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
 import org.cryptobiotic.rlauxe.sampling.tabulateRaireVotes
@@ -14,8 +13,8 @@ class TestRaireAssertions {
     val raireResults = rr.import()
 
     val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
-    val raireCvrs = readRaireCvrs(cvrFile)
-    val cvrs = raireCvrs.contests.first().cvrs
+    val raireCvrs = readRaireBallots(cvrFile)
+    val cvrs = raireCvrs.cvrs
 
     @Test
     fun testRaireAssertions() {

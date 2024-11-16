@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.mean2margin
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 
@@ -32,16 +31,14 @@ data class Contest(
 
 /**
  * Mutable form of Contest.
- * Assume Comparison Audit, use_styles == true
  * @parameter ncvrs: count of cvrs for this contest
- * @parameter upperBound: upper bound on cards for this contest
+ * @parameter upperBound: upper bound on number of cards for this contest.
  */
-open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upperBound: Int? = null) {
+open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upperBound: Int = 0) {
     val name = contest.name
     val id = contest.id
 
-    var minAssert: ComparisonAssertion? = null
-    var sampleSize = 0 // Estimate the sample size required to confirm the contest
+    var sampleSize = 0 // Estimate of the sample size required to confirm the contest
     var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
 
     var pollingAssertions: List<Assertion> = emptyList()
@@ -79,10 +76,11 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upper
             val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, welford.mean)
             ComparisonAssertion(contest, comparisonAssorter)
         }
+    }
 
+    fun minComparisonAssertion(): ComparisonAssertion {
         val margins = comparisonAssertions.map { it.assorter.margin }
         val minMargin = if (comparisonAssertions.isEmpty()) 0.0 else margins.min()
-        this.minAssert = comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }
-        // println("min = $minMargin minAssert = $minAssert")
+        return comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }!!
     }
 }

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option java_package = "org.cryptobiotic.protogen";
+option java_outer_classname = "RlauxeProto";
+
+message AuditConfig {
+  enum AuditType {
+    unknown = 0;
+    polling = 1;
+    comparison = 2;
+    one_audit = 3;
+  }
+
+  string spec_version = 1;
+  AuditType audit_type = 2;
+  double risk_limit = 3;
+  bytes seed = 4;
+  map<string, string> contest_max_cards = 5;
+}
+
+message Contest {
+  enum SocialChoiceType {
+    unknown = 0;
+    plurality = 1;
+    approval = 2;
+    super_majority = 3;
+    irv = 4;
+  }
+
+  string name = 1;
+  int32 id = 2;
+  map<string, int32> candidates = 3;
+  repeated string winnerNames = 4;
+  SocialChoiceType choiceFunction = 5;
+  double minFraction = 6; // supermajority only.
+
+  int32 ncvrs = 7;
+  int32 upperBound = 8;
+  int32 estSampleSize = 9;
+  bytes thresholdSampleNumber = 10;
+}
+
+// The constants for mathematical functions during the election.
+message Cvr {
+  string id = 1;
+  map<int32, bytes> votes = 2; // more than 255 candidates ? could switch to base 128 encoding
+  bool phantom = 3;
+  bytes sampleNumber = 4; // randomly assigned
+}

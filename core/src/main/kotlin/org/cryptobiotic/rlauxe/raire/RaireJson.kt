@@ -74,7 +74,7 @@ fun RaireAssertionJson.import() =
     RaireAssertion(
         this.winner.toInt(),
         this.loser.toInt(),
-        this.already_eliminated .map { it.toInt() },
-        this.assertion_type,
+        this.already_eliminated.map { it.toInt() },
+        RaireAssertionType.fromString(this.assertion_type),
         this.explanation,
     )

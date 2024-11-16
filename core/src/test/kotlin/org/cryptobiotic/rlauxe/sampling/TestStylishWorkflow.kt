@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
 import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.raire.*
@@ -13,18 +12,16 @@ class TestStylishWorkflow {
     @Test
     fun testWorkflow() {
         val stopwatch = Stopwatch()
-        val rr = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
-        val raireResults = rr.import()
+        val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         // println(raireResults.show())
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
-        // //         'cvr_file':       './data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire',
         val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
-        val raireCvrs = readRaireCvrs(cvrFile)
+        val raireCvrs = readRaireBallots(cvrFile)
         // theres only one contest unfortunately.
         // otherwise we have to match up the raireResults with the cvrs?
-        // which begs the question of the "original cvrs"
-        val cvrs = raireCvrs.contests.first().cvrs
+        // which begs the question of where are the "original cvrs"
+        val cvrs = raireCvrs.cvrs
 
         // data class AuditParams(val riskLimit: Double, val seed: Long, val auditType: AuditType)
         val auditParams = AuditParams(0.05, seed = 1234567890L, AuditType.CARD_COMPARISON)
@@ -43,7 +40,7 @@ class TestStylishWorkflow {
         val allMvrs = mutableListOf<CvrIF>()
         var round = 0
         while (!done) {
-            // currently way overestimating sample size, possibly because its raire
+            // currently overestimating sample size, possibly because its raire
             val indices = workflow.chooseSamples(allMvrs, round)
             println("$round chooseSamples took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             stopwatch.start()

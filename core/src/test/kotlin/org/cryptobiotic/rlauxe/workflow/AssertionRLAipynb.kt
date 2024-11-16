@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlaux.core.raire.readRaireCvrs
 import org.cryptobiotic.rlauxe.csv.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.*
@@ -312,9 +311,9 @@ class AssertionRLA {
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
         // //         'cvr_file':       './data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire',
-        val raireCvrs = readRaireCvrs(audit.cvrFile)
+        val raireCvrs = readRaireBallots(audit.cvrFile)
         val rcContest = raireCvrs.contests.first()
-        val N = rcContest.cvrs.size // ??
+        val N = raireCvrs.cvrs.size // ??
         println(" raireCvrs contests=${raireCvrs.contests.size} ncards =${N}")
         assertEquals(1, raireCvrs.contests.size)
         assertEquals(146662, N)
@@ -384,7 +383,7 @@ class AssertionRLA {
         var count = 0
         val rrContest: RaireContestUnderAudit = raireResults.contests.first()
         val assorts: List<RaireAssorter> = rrContest.makeAssorters()
-        val rcvrs = raireCvrs.contests.first().cvrs
+        val rcvrs = raireCvrs.cvrs
         val margins = assorts.map { assort ->
             val mean = rcvrs.map { assort.assort(it) }.average()
             println(" ${assort.desc()} mean=$mean margin = ${mean2margin(mean)}")
@@ -407,7 +406,7 @@ class AssertionRLA {
 // sample_size=372
 //[('339', 372)]
 
-        val results = calc_sample_sizes(10, raireResults.contests, rcContest.cvrs)
+        val results = calc_sample_sizes(10, raireResults.contests, raireCvrs.cvrs)
         println("calc_sample_sizes = $results")
         val sampleSize = results.sampleCount[0] // TODO
 
@@ -621,7 +620,7 @@ fun replicate_p_values(
 
 
     val contest = contests.first()
-    val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
+    val minAssorter = contest.minComparisonAssertion().assorter // the one with the smallest margin
 
     val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
 
@@ -652,7 +651,7 @@ fun calc_sample_sizes(
     //val minAssorter = minAssertion.assorter
 
     val contest = contests.first()
-    val minAssorter = contest.minAssert!!.assorter // the one with the smallest margin
+    val minAssorter = contest.minComparisonAssertion().assorter // the one with the smallest margin
 
     val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
 

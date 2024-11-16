@@ -24,7 +24,7 @@ class StylishWorkflow(
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val auditParams: AuditParams,
     val cvrs: List<Cvr>,
-    val upperBounds: Map<Int, Int>, // 𝑁_𝑐. Or should this be part of Contest?
+    val upperBounds: Map<Int, Int>, // 𝑁_𝑐.
 ) {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
@@ -79,6 +79,10 @@ class StylishWorkflow(
         // set contestUA.sampleSize
         contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
         val computeSize = simulateSampleSizes(auditParams.riskLimit, contestsUA, cvrsUA, mvrs, round)
+
+        // TODO should we know max sampling percent? or is it an absolute number?
+        //   should there be a minimum increment?? esp if its going to end up hand-counted?
+        //   user should be able to force a total count size.
 
         //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         // draws random ballots by consistent sampling, and returns their locations to the auditors.
@@ -195,6 +199,7 @@ fun checkWinners(contest: Contest, accumVotes: Map<Int, Int>): Boolean {
 }
 
 // TODO what forces this to a higher count on subsequent rounds ??
+//   the overstatements in the mvrs ??
 fun simulateSampleSizes(alpha: Double, contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, mvrs: List<CvrIF>, round: Int): Int {
     // TODO could parellelize
     val finder = FindSampleSize(alpha, p1 = .01, p2 = .001, ntrials = 100)

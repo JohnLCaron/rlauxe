@@ -12,8 +12,8 @@ class TestRcvAssorter {
     // testing
     fun RaireAssorter.match(winner: Int, loser: Int, winnerType: Boolean, already: List<Int> = emptyList()): Boolean {
         if (this.winner() != winner || this.loser() != loser) return false
-        if (winnerType && (this.assertion.assertionType != "WINNER_ONLY")) return false
-        if (!winnerType && (this.assertion.assertionType == "WINNER_ONLY")) return false
+        if (winnerType && (this.assertion.assertionType != RaireAssertionType.winner_only)) return false
+        if (!winnerType && (this.assertion.assertionType == RaireAssertionType.winner_only)) return false
         if (winnerType) return true
         return already == this.assertion.alreadyEliminated
     }

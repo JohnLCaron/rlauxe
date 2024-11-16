@@ -13,7 +13,7 @@ interface CvrIF {
 
 open class Cvr(
     override val id: String,
-    override val votes: Map<Int, IntArray>, // contest : list of candidates voted for, for IRV, in order
+    override val votes: Map<Int, IntArray>, // contest : list of candidates voted for; for IRV, ranked hi to lo
 ): CvrIF {
     override val phantom = false
     override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
@@ -44,6 +44,7 @@ class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: 
     override val id = cvr.id
     override val votes = cvr.votes
 
+    // dont really need, just used by computeTotalSampleSize
     var sampled = false //  # is this CVR in the sample?
     var p: Double = 0.0
 

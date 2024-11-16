@@ -18,6 +18,7 @@ class FindSampleSize(
 
     // given the contest.sampleSize, we can calculate the total number of ballots.
     // however, we get this from consistent sampling, which actually picks which ballots to sample.
+    // so dont really need
     fun computeSampleSize(
         rcontests: List<ContestUnderAudit>,
         cvrs: List<CvrUnderAudit>,

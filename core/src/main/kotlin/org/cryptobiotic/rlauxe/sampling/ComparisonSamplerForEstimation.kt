@@ -8,6 +8,13 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
+/*
+  two vote overstatement: cvr has winner, mvr has loser
+  one vote overstatement: cvr has winner, mvr has other
+  two vote understatement: cvr has loser, mvr has winner
+  one vote understatement: cvr has other, mvr has winner
+ */
+
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerForEstimation(
@@ -78,7 +85,7 @@ class ComparisonSamplerForEstimation(
         throw RuntimeException("no samples left for contest=${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
 
-    // voted for loser, cvr has winner
+    //   two vote overstatement: cvr has winner, mvr has loser
     fun flip2votes(mcvrs: MutableList<CvrUnderAudit>, needToChangeWinnerToLoser: Int): Int {
         if (needToChangeWinnerToLoser == 0) return 0
         val ncards = mcvrs.size
@@ -103,7 +110,7 @@ class ComparisonSamplerForEstimation(
         return changed
     }
 
-    // voted for winner, cvr has loser
+    //  two vote understatement: cvr has loser, mvr has winner
     fun flip4votes(mcvrs: MutableList<CvrUnderAudit>, needToChangeLoserToWinner: Int): Int {
         if (needToChangeLoserToWinner == 0) return 0
         val ncards = mcvrs.size
@@ -137,7 +144,7 @@ class ComparisonSamplerForEstimation(
         }
     }
 
-    // voted for other, cvr has winner
+    //  one vote overstatement: cvr has winner, mvr has other
     fun flip1votes(mcvrs: MutableList<CvrUnderAudit>, changeWinnerToOther: Int): Int {
         if (changeWinnerToOther == 0) return 0
         val ncards = mcvrs.size
@@ -167,7 +174,7 @@ class ComparisonSamplerForEstimation(
         return changed
     }
 
-    // voted for winner, cvr has other. have to change cvr to other
+    //  one vote understatement: cvr has other, mvr has winner. have to change cvr to other
     fun flip3votes(mcvrs: MutableList<CvrUnderAudit>, cvrs: MutableList<CvrUnderAudit>, changeCvrToOther: Int): Int {
         if (changeCvrToOther == 0) return 0
         val ncards = mcvrs.size

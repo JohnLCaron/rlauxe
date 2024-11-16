@@ -5,26 +5,64 @@ import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
 private val show = false
 
+/*
+Not Eliminated Next (NEN) Assertions. "IRV Elimination"
+NEN assertions compare the tallies of two candidates under the assumption that a specific set of
+candidates have been eliminated. An instance of this kind of assertion could look like this:
+  NEN: Alice > Bob if only {Alice, Bob, Diego} remain.
+
+Not Eliminated Before (NEB) Assertions. "Winner Only"
+Alice NEB Bob is an assertion saying that Alice cannot be eliminated before Bob, irrespective of which
+other candidates are continuing.
+ */
+
+/*
+Assertion                   RaireScore  ShangrlaScore            Notes
+NEB (winner_only)
+  c1 NEB ck where k > 1           1       1                 Supports 1st prefs for c1
+  cj NEB ck where k > j > 1       0       1/2               cj precedes ck but is not first
+  cj NEB ck where k < j          -1       0                 a mention of ck preceding cj
+
+NEN(irv_elimination): ci > ck if only {S} remain
+  where ci = first(pS(b))           1     1                 counts for ci (expected)
+  where first(pS(b)) !∈ {ci , ck }  0     1/2               counts for neither cj nor ck
+  where ck = first(pS(b))         -1     0                 counts for ck (unexpected)
+ */
+
+/*
+  NEB two vote overstatement: cvr has winner as first pref, mvr has loser preceeding winner
+  NEB one vote overstatement: cvr has winner as first pref, mvr has winner preceding loser, but not first
+  NEB two vote understatement: cvr has loser preceeding winner, mvr has winner as first pref
+  NEB one vote understatement: cvr has winner preceding loser, but not first, mvr has winner as first pref
+
+  NEN two vote overstatement: cvr has winner as first pref among remaining, mvr has loser as first pref among remaining
+  NEN one vote overstatement: cvr has winner as first pref among remaining, mvr has neither winner nor loser as first pref among remaining
+  NEN two vote understatement: cvr has loser as first pref among remaining, mvr has winner as first pref among remaining
+  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining, mvr has winner as first pref among remaining
+ */
+
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerForRaire(
-    cvras: List<CvrUnderAudit>,
+    rcvrs: List<RaireCvr>,
     val contestUA: ContestUnderAudit,
     val cassorter: ComparisonAssorter,
+    val raireAssertionType: RaireAssertionType,
     val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; voted for other, cvr has winner
     val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
     val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; voted for winner, cvr has other
     val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; voted for winner, cvr has loser
     ): GenSampleFn {
 
-    val N = cvras.size
-    val mvrs: List<CvrUnderAudit>
-    val cvrs: List<CvrUnderAudit>
+    val N = rcvrs.size
+    val mvrs: List<RaireCvr>
+    val cvrs: List<RaireCvr>
 
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -41,10 +79,10 @@ class ComparisonSamplerForRaire(
 
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
-        val mmvrs = mutableListOf<CvrUnderAudit>()
-        mmvrs.addAll(cvras)
-        val ccvrs = mutableListOf<CvrUnderAudit>()
-        ccvrs.addAll(cvras)
+        val mmvrs = mutableListOf<RaireCvr>()
+        mmvrs.addAll(rcvrs)
+        val ccvrs = mutableListOf<RaireCvr>()
+        ccvrs.addAll(rcvrs)
 
         flippedVotes1 = flip1votes(mmvrs, changeWinnerToOther = (N * p1).toInt())
         flippedVotes2 = flip2votes(mmvrs, needToChangeWinnerToLoser = (N * p2).toInt())
@@ -54,7 +92,7 @@ class ComparisonSamplerForRaire(
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
 
-        sampleCount = cvras.filter { it.hasContest(contestUA.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
+        sampleCount = rcvrs.filter { it.hasContest(contestUA.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
         sampleMean = sampleCount / N
     }
 
@@ -80,8 +118,16 @@ class ComparisonSamplerForRaire(
         throw RuntimeException("no samples left for contest=${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
 
-    // voted for loser, cvr has winner
-    fun flip2votes(mcvrs: MutableList<CvrUnderAudit>, needToChangeWinnerToLoser: Int): Int {
+    //  NEB two vote overstatement: cvr has winner as first pref, mvr has loser preceeding winner
+    //  NEB one vote overstatement: cvr has winner as first pref, mvr has winner preceding loser, but not first
+    //  NEB two vote understatement: cvr has loser preceeding winner, mvr has winner as first pref
+    //  NEB one vote understatement: cvr has winner preceding loser, but not first, mvr has winner as first pref
+    //
+    //  NEN two vote overstatement: cvr has winner as first pref among remaining, mvr has loser as first pref among remaining
+    //  NEN one vote overstatement: cvr has winner as first pref among remaining, mvr has neither winner nor loser as first pref among remaining
+    //  NEN two vote understatement: cvr has loser as first pref among remaining, mvr has winner as first pref among remaining
+    //  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining, mvr has winner as first pref among remaining
+    fun flip2votes(mcvrs: MutableList<RaireCvr>, needToChangeWinnerToLoser: Int): Int {
         if (needToChangeWinnerToLoser == 0) return 0
         val ncards = mcvrs.size
         val startingAvotes = mcvrs.sumOf { it.hasMarkFor(contestUA.id, cassorter.assorter.winner()) }
@@ -109,7 +155,7 @@ class ComparisonSamplerForRaire(
     }
 
     // voted for winner, cvr has loser
-    fun flip4votes(mcvrs: MutableList<CvrUnderAudit>, needToChangeLoserToWinner: Int): Int {
+    fun flip4votes(mcvrs: MutableList<RaireCvr>, needToChangeLoserToWinner: Int): Int {
         if (needToChangeLoserToWinner == 0) return 0
         val ncards = mcvrs.size
         val startingAvotes = mcvrs.sumOf { it.hasMarkFor(contestUA.id, cassorter.assorter.winner()) }
@@ -143,7 +189,7 @@ class ComparisonSamplerForRaire(
     }
 
     // voted for other, cvr has winner
-    fun flip1votes(mcvrs: MutableList<CvrUnderAudit>, changeWinnerToOther: Int): Int {
+    fun flip1votes(mcvrs: MutableList<RaireCvr>, changeWinnerToOther: Int): Int {
         if (changeWinnerToOther == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -175,7 +221,7 @@ class ComparisonSamplerForRaire(
     }
 
     // voted for winner, cvr has other. have to change cvr to other
-    fun flip3votes(mcvrs: MutableList<CvrUnderAudit>, cvrs: MutableList<CvrUnderAudit>, changeCvrToOther: Int): Int {
+    fun flip3votes(mcvrs: MutableList<RaireCvr>, cvrs: MutableList<RaireCvr>, changeCvrToOther: Int): Int {
         if (changeCvrToOther == 0) return 0
         val ncards = mcvrs.size
         var changed = 0

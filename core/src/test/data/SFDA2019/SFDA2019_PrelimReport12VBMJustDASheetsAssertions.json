@@ -96,7 +96,7 @@
                 {
                     "winner": "15",
                     "loser": "16",
-                    "already_eliminated": "",
+                    "already_eliminated": [],
                     "assertion_type": "IRV_ELIMINATION",
                     "explanation": "Rules out outcomes with tail [... 15 16 17 18]"
                 },

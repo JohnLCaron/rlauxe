@@ -120,13 +120,7 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
         if (mvr.phantom) {
             return 0.5
         }
-
-        // TODO clumsy
-        val rcvr: RaireCvr = when (mvr) {
-            is CvrUnderAudit -> mvr.cvr as RaireCvr
-            is RaireCvr -> mvr
-            else -> throw RuntimeException()
-        }
+        val rcvr = RaireCvr(mvr)
         return if (assertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
         else  if (assertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")

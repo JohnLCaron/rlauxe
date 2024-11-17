@@ -12,12 +12,13 @@ class TestStylishWorkflow {
     @Test
     fun testWorkflow() {
         val stopwatch = Stopwatch()
-        val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
+        val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json").import()
         // println(raireResults.show())
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallots(cvrFile)
+        // TODO check consistencey
         // theres only one contest unfortunately.
         // otherwise we have to match up the raireResults with the cvrs?
         // which begs the question of where are the "original cvrs"

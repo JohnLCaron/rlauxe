@@ -19,6 +19,8 @@ open class Cvr(
     override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
 
     constructor(oldCvr: CvrIF, votes: Map<Int, IntArray>) : this(oldCvr.id, votes)
+    constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
+    constructor(contest: Int, id: String, ranks: List<Int>): this( id, mapOf(contest to ranks.toIntArray())) // for quick testing
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
@@ -47,6 +49,7 @@ class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: 
     // dont really need, just used by computeTotalSampleSize
     var sampled = false //  # is this CVR in the sample?
     var p: Double = 0.0
+    var used = false
 
     override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun hasMarkFor(contestId: Int, candidateId: Int) = cvr.hasMarkFor(contestId, candidateId)

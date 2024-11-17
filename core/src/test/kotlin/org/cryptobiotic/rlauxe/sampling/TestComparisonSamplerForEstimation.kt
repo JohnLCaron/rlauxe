@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestSampleFn {
+class TestComparisonSamplerForEstimation {
 
     @Test
     fun testComparisonSamplerForEstimation() {

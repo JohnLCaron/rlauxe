@@ -1,17 +1,11 @@
 package org.cryptobiotic.rlaux.core.raire
 
-import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVParser
-import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.Cvr
-import java.io.Reader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import org.cryptobiotic.rlauxe.core.CvrIF
 
 data class RaireCvrs(
     val contests: List<RaireCvrContest>,
-    val cvrs: List<RaireCvr>,
+    val cvrs: List<Cvr>,
     val filename: String,
 )
 
@@ -30,14 +24,7 @@ data class RaireCvrContest(
 // "RaireCvr is always for one contest" probably an artifact of raire processing
 // probably doesnt have to be seperate class, exept for method override hasMarkFor / hasOveVote ?
 /** Duplicating the math from SHANGRLA CVR */
-class RaireCvr(
-    cvrId: String,
-    votes: Map<Int, IntArray>, // contestNumber -> ranked candidate numbers
-): Cvr(cvrId, votes) {
-
-    constructor(oldCvr: RaireCvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes)
-    constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
-    constructor(contest: Int, id: String, ranks: List<Int>): this( id, mapOf(contest to ranks.toIntArray())) // for quick testing
+class RaireCvr(val cvr: CvrIF) {
 
     //     def get_vote_for(self, contest_id: str, candidate: str):
     //        return (
@@ -47,7 +34,7 @@ class RaireCvr(
     //        )
     /** if candidate not ranked, 0, else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {
-        val rankedChoices = votes[contest]
+        val rankedChoices = cvr.votes[contest]
         return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
                else rankedChoices.indexOf(candidate) + 1
     }
@@ -138,6 +125,7 @@ class RaireCvr(
 // 339,99813_1_6,18,17,15,16
 // ...
 
+/*
 fun readRaireSfdaCvrs(filename: String): RaireCvrs {
     val path: Path = Paths.get(filename)
     val reader: Reader = Files.newBufferedReader(path)
@@ -193,3 +181,5 @@ private fun readVariableListOfInt(line: CSVRecord, startPos: Int): List<Int> {
     }
     return result
 }
+
+ */

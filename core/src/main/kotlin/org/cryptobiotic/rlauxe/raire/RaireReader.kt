@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlaux.core.raire.RaireCvrContest
 import org.cryptobiotic.rlaux.core.raire.RaireCvrs
+import org.cryptobiotic.rlauxe.core.Cvr
 import java.io.File
 
 data class ContestInfo(val candidates: List<String>, val winner: String, val order: List<Int>)
@@ -99,7 +100,7 @@ fun readRaireBallots(fileName: String): RaireCvrs {
         val ncvrs = ncvrsMap.getOrPut(contestNumber) { 0 }
         ncvrsMap[contestNumber] = ncvrs + 1
     }
-    val cvrs = ballots.map { (key, votes) -> RaireCvr(key, votes) }
+    val cvrs = ballots.map { (key, votes) -> Cvr(key, votes) }
 
     val raireContests = mutableListOf<RaireCvrContest>()
     for ((cid, trip) in contest_info) {

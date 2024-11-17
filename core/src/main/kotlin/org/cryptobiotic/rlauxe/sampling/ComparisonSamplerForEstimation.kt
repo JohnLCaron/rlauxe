@@ -137,11 +137,7 @@ class ComparisonSamplerForEstimation(
     }
 
     fun makeNewCvr(old: CvrUnderAudit, votes: Map<Int, IntArray>): CvrUnderAudit {
-        return if (old.cvr is RaireCvr) {
-            CvrUnderAudit(RaireCvr(old.cvr, votes), old.phantom, old.sampleNum)
-        } else {
-            CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
-        }
+        return CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
     }
 
     //  one vote overstatement: cvr has winner, mvr has other
@@ -192,7 +188,7 @@ class ComparisonSamplerForEstimation(
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
                 val altered = makeNewCvr(cvr, votes)
                 cvrs[cvrIdx] = altered // Note we are changing the cvr, not the mvr
-                require(cassorter.bassort(mvr, altered) == 3.0 * cassorter.noerror / 2) // p3 loser -> other
+                require(cassorter.bassort(mvr, altered) == 1.5 * cassorter.noerror) // p3 loser -> other
                 changed++
             }
         }

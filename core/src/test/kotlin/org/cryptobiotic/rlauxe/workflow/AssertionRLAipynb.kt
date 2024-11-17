@@ -599,7 +599,7 @@ class AssertionRLA {
 fun replicate_p_values(
     N: Int,
     contests: List<RaireContestUnderAudit>,
-    cvrs: List<RaireCvr>,
+    cvrs: List<Cvr>,
 ) {
     // TODO SHANGRLA doing complicated stuff. I think trying to audit simultaneous contests (dont understand the rules for that)
     //   Has strata but not using them. What are they?
@@ -640,7 +640,7 @@ fun replicate_p_values(
 fun calc_sample_sizes(
     ntrials: Int,
     contests: List<RaireContestUnderAudit>,
-    cvrs: List<RaireCvr>,
+    cvrs: List<Cvr>,
 ): RunTestRepeatedResult {
 
     val N = cvrs.size

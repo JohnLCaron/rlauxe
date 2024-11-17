@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -9,10 +8,10 @@ import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
 /*
-  two vote overstatement: cvr has winner, mvr has loser
-  one vote overstatement: cvr has winner, mvr has other
-  two vote understatement: cvr has loser, mvr has winner
-  one vote understatement: cvr has other, mvr has winner
+  two vote overstatement: cvr has winner (1), mvr has loser (0)
+  one vote overstatement: cvr has winner (1), mvr has other (1/2)
+  two vote understatement: cvr has loser (0), mvr has winner (1)
+  one vote understatement: cvr has other (1/2), mvr has winner (1)
  */
 
 // create internal cvr and mvr with the correct under/over statements.

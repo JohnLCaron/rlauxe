@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.test.Test
@@ -31,8 +32,8 @@ class TestFindSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val riskLimit = .05
-        val finder = FindSampleSize(riskLimit, p1=p1, p2=p2, p3=p3, p4=p4, 100)
+        val auditParams = AuditParams(0.05, seed = 1234567890L, AuditType.CARD_COMPARISON)
+        val finder = FindSampleSize(auditParams)
 
         contestsUA.forEach { contestUA ->
             val cn = contestUA.ncvrs
@@ -47,7 +48,7 @@ class TestFindSampleSize {
                 //    oneUnder: Int = 0,  // p3
                 //    twoUnder: Int = 0,  // p4
                 val simSize = result.findQuantile(.90)
-                val estSize = estimateSampleSizeSimple(riskLimit, assert.assorter.margin, gamma,
+                val estSize = estimateSampleSizeSimple(auditParams.riskLimit, assert.assorter.margin, gamma,
                     oneOver = ceil(cn*p1).toInt(),
                     twoOver = ceil(cn*p2).toInt(),
                     oneUnder = ceil(cn*p3).toInt(),

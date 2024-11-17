@@ -36,8 +36,9 @@ open class Cvr(
         return (totalVotes == 1)
     }
 
-    override fun toString(): String {
-        return "$id: $votes $phantom"
+    override fun toString() = buildString {
+        append("$id ($phantom)")
+        votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 }
 
@@ -56,6 +57,11 @@ class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: 
     override fun hasOneVote(contestId: Int, candidates: List<Int>) = cvr.hasOneVote(contestId, candidates)
 
     constructor(id: String, contestIdx: Int) : this( Cvr(id, mapOf(contestIdx to IntArray(0))), false)
+
+    override fun toString() = buildString {
+        append("$id ($phantom)")
+        votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
+    }
 
     companion object {
         fun fromCvrIF(cvr: CvrIF, phantom: Boolean) = if (cvr is CvrUnderAudit) cvr else CvrUnderAudit( cvr as Cvr, phantom)

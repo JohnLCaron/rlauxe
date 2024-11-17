@@ -94,7 +94,9 @@ class TestRcvAssorter {
         val assorters = rrContest.makeAssorters() // adds assorts to the assertion
         val wassorter = assorters.find { it.match(28, 50, true) }
         assertNotNull(wassorter)
-        
+        println("wassorter = ${wassorter.assertion}")
+        // wassorter = RaireAssertion(winner=28, loser=50, alreadyEliminated=[], assertionType=winner_only, explanation=Rules out case where 28 is eliminated before 50)
+
         ////            # winner-only assertion
         ////            assorter = assertions['361']['28 v 50'].assorter
         ////
@@ -168,6 +170,8 @@ class TestRcvAssorter {
 
         val eassorter = assorters.find { it.match(27, 26, false, listOf(28, 50)) }
         assertNotNull(eassorter)
+        println("eassorter = ${eassorter.assertion}")
+        //eassorter = RaireAssertion(winner=27, loser=26, alreadyEliminated=[28, 50], assertionType=irv_elimination, explanation=Rules out outcomes with tail [... 27 26])
 
         assertEquals(1.0, eassorter.assort(Cvr(contest, listOf(27))))
         assertEquals(1.0, eassorter.assort(Cvr(contest, listOf(50, 27))))
@@ -181,5 +185,15 @@ class TestRcvAssorter {
         assertEquals(0.5, eassorter.assort(Cvr(contest, listOf())))
         assertEquals(0.5, eassorter.assort(Cvr(contest, listOf(50, 28))))
         assertEquals(0.5, eassorter.assort(Cvr(contest, listOf(28, 50))))
+
+        // testing for ComparisonSamplerForRaire
+
+        // RaireAssorter contest 339 type= irv_elimination winner=15 loser=18 alreadyElim=[16, 17]
+        //  flip1votes 0.0 != 0.5}
+        //    cvr=99813_1_11 (false) 339: [16, 17, 15, 18]
+        //    alteredMvr=99813_1_11 (false) 339: [18, 15]
+        assertEquals(1.0, eassorter.assort(Cvr(contest, listOf(28, 50, 27, 26))))
+        assertEquals(0.0, eassorter.assort(Cvr(contest, listOf(26, 27))))
+        assertEquals(0.5, eassorter.assort(Cvr(contest, listOf())))
     }
 }

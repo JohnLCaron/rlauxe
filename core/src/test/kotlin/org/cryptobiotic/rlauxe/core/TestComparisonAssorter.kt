@@ -1,15 +1,16 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
+import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /*
 Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
@@ -295,8 +296,20 @@ class TestComparisonAssorter {
         val compareAssertion = compareAudit.assertions[contest.id]!!.first()
         val compareAssorter1 = compareAssertion.assorter
 
+        // check the same
         val compareAssorter2 = makeStandardComparisonAssorter(cvrMean)
-
         assertEquals(compareAssorter1, compareAssorter2)
+
+        // check assort values for ComparisonSamplerSimulation
+
+        // PluralityAssorter winner=0 loser=1
+        //  flip2votes 0.5 != 0.0
+        //    cvr=card-379 (false) 0: [0]
+        //    alteredMvr=card-379 (false) 0: [1, 0]
+        val passorter = compareAssorter1.assorter
+        assertEquals(1.0, passorter.assort(Cvr(contest.id, listOf(0))))
+        assertEquals(0.0, passorter.assort(Cvr(contest.id, listOf(1))))
+        assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf(1,0))))
+        assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf())))
     }
 }

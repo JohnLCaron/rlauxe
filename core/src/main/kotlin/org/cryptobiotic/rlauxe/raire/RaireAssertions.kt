@@ -112,7 +112,10 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
 
     override fun upperBound() = 1.0
-    override fun desc() = "RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}"
+    override fun desc() = buildString {
+        append("RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}")
+        if (assertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${assertion.alreadyEliminated}")
+    }
     override fun winner() = assertion.winner
     override fun loser() = assertion.loser
 

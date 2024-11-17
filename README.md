@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/13/2024
+last update: 11/17/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -26,7 +26,8 @@ Table of Contents
     * [Use Styles](#use-styles)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
-  * [Simulation Results](#simulation-results)
+  * [Sample Size Simulation](#sample-size-simulation)
+    * [Notes](#notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
 
@@ -385,7 +386,39 @@ constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
 
-## Simulation Results
+## Sample Size Simulation
+
+The assumptions that one makes about the error rates greatly affect the sample size estimation.
+
+ComparisonSamplerSimulation creates modified mvrs from a set of cvrs, with possibly non-zero valeus for errors p1, p2, p3, and p4.
+This works for both Plurality and IRV audits.
+If p1 == p3, and p2 == p4, the margin stays the same. Call this fuzzed simulation.
+Current defaults rather arbitrarily chosen are:
+
+        val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; voted for other, cvr has winner
+        val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
+        val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; voted for winner, cvr has other
+        val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; voted for winner, cvr has loser
+
+FOr IRV, the corresponding decriptions of the errror rates are:
+
+    NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
+    NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
+    NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
+    NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
+    
+    NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
+    NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
+    NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
+    NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
+
+TODO: Compare the sample sizes of fuzzed simulations with the case of all errors == 0, at different margins.
+We expect the spread to increase, but also shift to larger samples sizes, since the cost of overstatement is higher than understatements.
+
+If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates 
+are more likely to be affected than others. 
+
+### Notes
 
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)

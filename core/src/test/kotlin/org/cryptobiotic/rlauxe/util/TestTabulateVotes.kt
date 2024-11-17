@@ -36,13 +36,13 @@ class TestTabulateVotes {
             .addCrv().addContest("AvB", "4").ddone()
             .addCrv().addContest("AvB", "4").ddone()
             .build()
-        val cvras = tabulateVotes(listOf(contest), cvrs)
-        cvras.forEach { println(it) }
-        assertEquals(1, cvras.size)
-        val cvra = cvras.first()
-        assertEquals(11, cvra.ncvrs)
-        assertEquals(2, cvra.contest.winners.size)
-        assertNull(cvra.upperBound)
+        val contestsUA = tabulateVotes(listOf(contest), cvrs)
+        contestsUA.forEach { println(it) }
+        assertEquals(1, contestsUA.size)
+        val contestUA = contestsUA.first()
+        assertEquals(11, contestUA.ncvrs)
+        assertEquals(2, contestUA.contest.winners.size)
+        assertEquals(0, contestUA.upperBound)
     }
 
     @Test
@@ -55,13 +55,13 @@ class TestTabulateVotes {
         val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
         val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
 
-        val cvras = tabulateVotes(contests, cvrs) // contest -> candidate -> count
-        cvras.forEach { println(it) }
-        assertEquals(1, cvras.size)
-        val cvra = cvras.first()
-        assertEquals(111, cvra.ncvrs)
-        assertEquals(1, cvra.contest.winners.size)
-        assertNull(cvra.upperBound)
+        val contestsUA = tabulateVotes(contests, cvrs) // contest -> candidate -> count
+        contestsUA.forEach { println(it) }
+        assertEquals(1, contestsUA.size)
+        val contestUA = contestsUA.first()
+        assertEquals(111, contestUA.ncvrs)
+        assertEquals(1, contestUA.contest.winners.size)
+        assertEquals(0, contestUA.upperBound)
     }
 
     @Test

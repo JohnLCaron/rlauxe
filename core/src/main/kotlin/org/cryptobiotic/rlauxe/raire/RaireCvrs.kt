@@ -1,38 +1,22 @@
 package org.cryptobiotic.rlaux.core.raire
 
-import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVParser
-import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import java.io.Reader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
-// this is (apparently) RAIRE CSV format for ranked choice CVRs from SFDA2019
-// input to RAIRE, not sure where these are produced, somewhere in SFDA2019
 data class RaireCvrs(
     val contests: List<RaireCvrContest>,
+    val cvrs: List<Cvr>,
     val filename: String,
 )
 
 data class RaireCvrContest(
     val contestNumber: Int,
-    val choices: List<Int>,
-    val cvrs: List<RaireCvr>,
+    val candidates: List<Int>,
+    val ncvrs: Int,
+    val winner: Int = -1,
 ) {
-    //     val name: String,
-    //    val id: Int,
-    //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    //    val winnerNames: List<String>,
-    //    val choiceFunction: SocialChoiceFunction,
-    fun toContest(): Contest {
-        val candidateNames = choices.associate { "cand$it" to it }.toMap()
-        val winnerNames = listOf("cand15")
-        return Contest("RaireCvrContest", contestNumber, candidateNames, winnerNames, SocialChoiceFunction.IRV)
+    fun show() = buildString {
+        appendLine(" ncvrs=${ncvrs} RaireCvrContest $contestNumber candidates=$candidates} winner=$winner")
     }
 }
 
@@ -40,14 +24,7 @@ data class RaireCvrContest(
 // "RaireCvr is always for one contest" probably an artifact of raire processing
 // probably doesnt have to be seperate class, exept for method override hasMarkFor / hasOveVote ?
 /** Duplicating the math from SHANGRLA CVR */
-class RaireCvr(
-    cvrId: String,
-    votes: Map<Int, IntArray>,
-): Cvr(cvrId, votes) {
-
-    constructor(oldCvr: RaireCvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes)
-    constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
-    constructor(contest: Int, id: String, ranks: List<Int>): this( id, mapOf(contest to ranks.toIntArray())) // for quick testing
+class RaireCvr(val cvr: CvrIF) {
 
     //     def get_vote_for(self, contest_id: str, candidate: str):
     //        return (
@@ -57,7 +34,7 @@ class RaireCvr(
     //        )
     /** if candidate not ranked, 0, else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {
-        val rankedChoices = votes[contest]
+        val rankedChoices = cvr.votes[contest]
         return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
                else rankedChoices.indexOf(candidate) + 1
     }
@@ -72,8 +49,8 @@ class RaireCvr(
     //        else:
     //            return 0
     /**
-     * Check whether vote is a vote for the loser with respect to a 'winner only'
-     * assertion between the given 'winner' and 'loser'.
+     * Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
+     * Its a vote for the loser if they appear and the winner does not, or they appear before the winner
      *
      * @param winner identifier for winning candidate
      * @param loser identifier for losing candidate
@@ -134,7 +111,10 @@ class RaireCvr(
 }
 
 /////////////////////////////////////////////////////////////////////
-// From SFDA2019_PrelimReport12VBMJustDASheets.raire
+// DO NOT USE, use readRaireBallots()
+// this is (apparently) RAIRE CSV format for ranked choice CVRs from SFDA2019
+// input to RAIRE, not sure where these are produced, somewhere in SFDA2019
+// eg SFDA2019_PrelimReport12VBMJustDASheets.raire
 // TODO Colorado may be very different, see corla
 //
 // This reads:
@@ -145,7 +125,8 @@ class RaireCvr(
 // 339,99813_1_6,18,17,15,16
 // ...
 
-fun readRaireCvrs(filename: String): RaireCvrs {
+/*
+fun readRaireSfdaCvrs(filename: String): RaireCvrs {
     val path: Path = Paths.get(filename)
     val reader: Reader = Files.newBufferedReader(path)
     val parser = CSVParser(reader, CSVFormat.DEFAULT)
@@ -153,6 +134,8 @@ fun readRaireCvrs(filename: String): RaireCvrs {
 
     // we expect the first line to be the number of contests
     val ncontests = records.next().get(0).toInt()
+    if (ncontests != 1) throw RuntimeException("readRaireSfdaCvrs only allows one contest")
+
     val contests = mutableListOf<RaireCvrContest>()
     var cvrs = mutableListOf<RaireCvr>()
     var contestId = 0
@@ -164,7 +147,7 @@ fun readRaireCvrs(filename: String): RaireCvrs {
         val first = line.get(0)
         if (first.equals("Contest")) {
             if (cvrs.isNotEmpty()) {
-                contests.add(RaireCvrContest(contestId, choices, cvrs))
+                contests.add(RaireCvrContest(contestId, choices, cvrs.size))
             }
             // start a new contest
             contestId = line.get(1).toInt()
@@ -182,10 +165,10 @@ fun readRaireCvrs(filename: String): RaireCvrs {
         }
     }
     if (cvrs.isNotEmpty()) {
-        contests.add(RaireCvrContest(contestId, choices, cvrs))
+        contests.add(RaireCvrContest(contestId, choices, cvrs.size)) // dont know the winner
     }
 
-    return RaireCvrs(contests, filename)
+    return RaireCvrs(contests, cvrs, filename)
 }
 
 private fun readVariableListOfInt(line: CSVRecord, startPos: Int): List<Int> {
@@ -193,7 +176,10 @@ private fun readVariableListOfInt(line: CSVRecord, startPos: Int): List<Int> {
     while (startPos + result.size < line.size()) {
         val s = line.get(startPos + result.size)
         if (s.isEmpty()) break
-        result.add(line.get(startPos + result.size).toInt())
+        val sn = line.get(startPos + result.size)
+        result.add(sn.toInt())
     }
     return result
 }
+
+ */

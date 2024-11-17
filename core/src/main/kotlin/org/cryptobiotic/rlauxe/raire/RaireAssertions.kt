@@ -36,10 +36,7 @@ class RaireContestUnderAudit(
     }
 
     override fun makeComparisonAssertions(cvrs : Iterable<CvrUnderAudit>) {
-
-        // TODO coroutines ??
-        val stopwatch = Stopwatch()
-        this.comparisonAssertions = assertions.map { assertion ->
+            this.comparisonAssertions = assertions.map { assertion ->
             val assorter = RaireAssorter(this, assertion)
             val welford = Welford()
             cvrs.forEach { cvr ->
@@ -51,12 +48,6 @@ class RaireContestUnderAudit(
             println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
             ComparisonAssertion(contest, comparisonAssorter)
         }
-        // println(" that took $stopwatch")
-
-        val margins = comparisonAssertions.map { assert -> assert.assorter.margin }
-        val minMargin = margins.min()
-        this.minAssert = comparisonAssertions.find { it.assorter.margin == minMargin }
-        // println("min = $minMargin minAssert = $minAssert")
     }
 
     fun show() = buildString {
@@ -85,18 +76,32 @@ class RaireContestUnderAudit(
     }
 }
 
+enum class RaireAssertionType(val aname:String) {
+    winner_only("NEB"),
+    irv_elimination("NEN");
+
+    companion object {
+        fun fromString(s:String) : RaireAssertionType {
+            return when (s.lowercase()) {
+                "winner_only" -> winner_only
+                "irv_elimination" -> irv_elimination
+                else -> throw RuntimeException("Unknown RaireAssertionType '$s'")
+            }
+        }
+    }
+}
+
 data class RaireAssertion(
     val winner: Int,
     val loser: Int,
     val alreadyEliminated: List<Int>, // already eliminated for the purpose of this assertion
-    val assertionType: String,
+    val assertionType: RaireAssertionType,
     val explanation: String,
 )  {
     fun show() = buildString {
         appendLine("    assertion type '$assertionType' winner $winner loser $loser alreadyEliminated $alreadyEliminated explanation: '$explanation'")
     }
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,34 +120,27 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
         if (mvr.phantom) {
             return 0.5
         }
-
-        // TODO clumsy
-        val rcvr: RaireCvr = when (mvr) {
-            is CvrUnderAudit -> mvr.cvr as RaireCvr
-            is RaireCvr -> mvr
-            else -> throw RuntimeException()
-        }
-        return if (assertion.assertionType == "WINNER_ONLY") assortWinnerOnly(rcvr)
-        else  if (assertion.assertionType == "IRV_ELIMINATION") assortIrvElimination(rcvr)
+        val rcvr = RaireCvr(mvr)
+        return if (assertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
+        else  if (assertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")
     }
 
+    // aka NEB
     fun assortWinnerOnly(rcvr: RaireCvr): Double {
-        // CVR is a vote for the winner only if it has the winner as its first preference
+        // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
         val awinner = if (rcvr.get_vote_for(contestId, assertion.winner) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
         val aloser = rcvr.rcv_lfunc_wo( contestId, assertion.winner, assertion.loser)
-
-        //    (in which case assort(c) = (winner(c) - loser(c) + 1)/2. )
-        return (awinner - aloser + 1) * 0.5
+        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
+    // aka NEN
     fun assortIrvElimination(rcvr: RaireCvr): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
         val awinner = rcvr.rcv_votefor_cand(contestId, assertion.winner, remaining)
         val aloser = rcvr.rcv_votefor_cand(contestId, assertion.loser, remaining)
-
-        return (awinner - aloser + 1) * 0.5
+        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 }

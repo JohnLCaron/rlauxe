@@ -8,6 +8,13 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
+/*
+  two vote overstatement: cvr has winner, mvr has loser
+  one vote overstatement: cvr has winner, mvr has other
+  two vote understatement: cvr has loser, mvr has winner
+  one vote understatement: cvr has other, mvr has winner
+ */
+
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerForEstimation(
@@ -78,7 +85,7 @@ class ComparisonSamplerForEstimation(
         throw RuntimeException("no samples left for contest=${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
 
-    // voted for loser, cvr has winner
+    //   two vote overstatement: cvr has winner, mvr has loser
     fun flip2votes(mcvrs: MutableList<CvrUnderAudit>, needToChangeWinnerToLoser: Int): Int {
         if (needToChangeWinnerToLoser == 0) return 0
         val ncards = mcvrs.size
@@ -103,7 +110,7 @@ class ComparisonSamplerForEstimation(
         return changed
     }
 
-    // voted for winner, cvr has loser
+    //  two vote understatement: cvr has loser, mvr has winner
     fun flip4votes(mcvrs: MutableList<CvrUnderAudit>, needToChangeLoserToWinner: Int): Int {
         if (needToChangeLoserToWinner == 0) return 0
         val ncards = mcvrs.size
@@ -130,14 +137,10 @@ class ComparisonSamplerForEstimation(
     }
 
     fun makeNewCvr(old: CvrUnderAudit, votes: Map<Int, IntArray>): CvrUnderAudit {
-        return if (old.cvr is RaireCvr) {
-            CvrUnderAudit(RaireCvr(old.cvr, votes), old.phantom, old.sampleNum)
-        } else {
-            CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
-        }
+        return CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
     }
 
-    // voted for other, cvr has winner
+    //  one vote overstatement: cvr has winner, mvr has other
     fun flip1votes(mcvrs: MutableList<CvrUnderAudit>, changeWinnerToOther: Int): Int {
         if (changeWinnerToOther == 0) return 0
         val ncards = mcvrs.size
@@ -167,7 +170,7 @@ class ComparisonSamplerForEstimation(
         return changed
     }
 
-    // voted for winner, cvr has other. have to change cvr to other
+    //  one vote understatement: cvr has other, mvr has winner. have to change cvr to other
     fun flip3votes(mcvrs: MutableList<CvrUnderAudit>, cvrs: MutableList<CvrUnderAudit>, changeCvrToOther: Int): Int {
         if (changeCvrToOther == 0) return 0
         val ncards = mcvrs.size
@@ -185,7 +188,7 @@ class ComparisonSamplerForEstimation(
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
                 val altered = makeNewCvr(cvr, votes)
                 cvrs[cvrIdx] = altered // Note we are changing the cvr, not the mvr
-                require(cassorter.bassort(mvr, altered) == 3.0 * cassorter.noerror / 2) // p3 loser -> other
+                require(cassorter.bassort(mvr, altered) == 1.5 * cassorter.noerror) // p3 loser -> other
                 changed++
             }
         }

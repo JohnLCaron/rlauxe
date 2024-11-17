@@ -108,17 +108,11 @@ class BettingMart(
         }
 
         val status = when {
-            (sampleNumber == maxSample) -> {
-                TestH0Status.LimitReached
-            }
-            (mj < 0.0) -> {
-                TestH0Status.SampleSum
-            }
-            (mj > upperBound) -> {
-                TestH0Status.AcceptNull
-            }
+            (mj < 0.0) -> TestH0Status.SampleSum
+            (mj > upperBound) -> TestH0Status.AcceptNull
             else -> {
-                TestH0Status.StatRejectNull
+                val pvalue = pvalues.last()
+                if (pvalue < riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
             }
         }
 

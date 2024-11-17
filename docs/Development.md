@@ -10,7 +10,7 @@ last changed: 11/15/2024
 ### sampling
 * Estimate sample sizes with fixed formula (1)
 * Estimate sample sizes with simulation reps and quantile (2)
-* Raire error rates
+* DONE Raire error rates
 * Parallelization (?)
 * SecureRandom must be deterministic using a given seed, so verifiers can test. 
   Make a version that agrees exactly with SHANGRLA's version. (3)

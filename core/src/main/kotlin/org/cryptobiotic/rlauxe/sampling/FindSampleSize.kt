@@ -7,14 +7,7 @@ import kotlin.math.ln
 import kotlin.math.max
 
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
-class FindSampleSize(
-    val alpha: Double,
-    val p1: Double,
-    val p2: Double,
-    val p3: Double = 0.0,
-    val p4: Double = 0.0,
-    val ntrials: Int,
-) {
+class FindSampleSize(val auditParams: AuditParams) {
 
     // given the contest.sampleSize, we can calculate the total number of ballots.
     // however, we get this from consistent sampling, which actually picks which ballots to sample.
@@ -55,19 +48,20 @@ class FindSampleSize(
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,
     ): RunTestRepeatedResult {
-        val sampler: GenSampleFn = ComparisonSamplerSimulation(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
+        val sampler: GenSampleFn = ComparisonSamplerSimulation(cvrs, contest, assorter,
+            p1 = auditParams.p1, p2 = auditParams.p2, p3 = auditParams.p3, p4 = auditParams.p4)
 
         val N = cvrs.size
         val optimal = AdaptiveComparison(
             N = contest.ncvrs,
             withoutReplacement = true,
             a = assorter.noerror,
-            d1 = 100,
-            d2 = 100,
-            p1 = p1,
-            p2 = p2,
-            p3 = p3,
-            p4 = p4,
+            d1 = auditParams.d1,
+            d2 = auditParams.d2,
+            p1 = auditParams.p1,
+            p2 = auditParams.p2,
+            p3 = auditParams.p3,
+            p4 = auditParams.p4,
         )
         val betta = BettingMart(bettingFn = optimal, N = N, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
@@ -75,7 +69,7 @@ class FindSampleSize(
         val result: RunTestRepeatedResult = runTestRepeated(
             drawSample = sampler,
             maxSamples = contest.ncvrs,
-            ntrials = ntrials,
+            ntrials = auditParams.ntrials,
             testFn = betta,
             testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
             showDetails = false,

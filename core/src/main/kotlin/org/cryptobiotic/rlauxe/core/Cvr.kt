@@ -36,8 +36,9 @@ open class Cvr(
         return (totalVotes == 1)
     }
 
-    override fun toString(): String {
-        return "$id: $votes $phantom"
+    override fun toString() = buildString {
+        append("$id ($phantom)")
+        votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 }
 

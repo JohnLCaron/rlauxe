@@ -55,10 +55,7 @@ class FindSampleSize(
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,
     ): RunTestRepeatedResult {
-        val sampler: GenSampleFn = if (contest.contest.choiceFunction == SocialChoiceFunction.IRV)
-            ComparisonSamplerForRaire(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
-        else
-            ComparisonSamplerForEstimation(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
+        val sampler: GenSampleFn = ComparisonSamplerSimulation(cvrs, contest, assorter, p1 = p1, p2 = p2, p3 = p3, p4 = p4)
 
         val N = cvrs.size
         val optimal = AdaptiveComparison(

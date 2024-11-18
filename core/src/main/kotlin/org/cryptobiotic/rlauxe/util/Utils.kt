@@ -149,3 +149,20 @@ fun quantile(data: List<Int>, quantile: Double): Int {
     }
     return sortedData[i]
 }
+
+fun cumul(data: List<Int>, value: Int): Double {
+    if (data.isEmpty())
+        return 0.0
+
+    val sortedData = mutableListOf<Int>()
+    sortedData.addAll(data)
+    sortedData.sort()
+
+    var i = -1
+    var runningValue = 0
+    while (runningValue < value && i < sortedData.size - 1) {
+        i++
+        runningValue = sortedData[i]
+    }
+    return 100.0 * i / data.size
+}

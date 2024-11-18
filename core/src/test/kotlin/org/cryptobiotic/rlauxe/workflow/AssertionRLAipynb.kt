@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.csv.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.raire.*
@@ -631,7 +630,7 @@ fun replicate_p_values(
         p2 = 0.01
     )
 
-    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
     val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
     println(result)
     println("pvalues = ${result.pvalues}")
@@ -668,7 +667,7 @@ fun calc_sample_sizes(
     //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     //    val eps: Double = .00001
     val optimal = AdaptiveComparison(
-        N = N,
+        Nc = N,
         withoutReplacement = true,
         a = minAssorter.noerror,
         d1 = 100,
@@ -678,7 +677,7 @@ fun calc_sample_sizes(
         p3 = 0.0,
         p4 = 0.0,
     )
-    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampler,

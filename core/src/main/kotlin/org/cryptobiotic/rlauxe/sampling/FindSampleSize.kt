@@ -9,6 +9,14 @@ import kotlin.math.max
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
 class FindSampleSize(val auditParams: AuditParams) {
 
+    //4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
+    //	    The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
+    //      The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
+    //	      for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
+    //	    The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
+    //	      𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
+    //	b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
+
     // given the contest.sampleSize, we can calculate the total number of ballots.
     // however, we get this from consistent sampling, which actually picks which ballots to sample.
     // so dont really need
@@ -28,7 +36,7 @@ class FindSampleSize(val auditParams: AuditParams) {
                 cvr.p = 0.0
                 for (con in rcontests) {
                     if (cvr.hasContest(con.id) && !cvr.sampled) {
-                        val p1 = con.sampleSize.toDouble() / (con.upperBound!! - old_sizes[con.id]!!)
+                        val p1 = con.sampleSize.toDouble() / (con.Nc!! - old_sizes[con.id]!!)
                         cvr.p = max(p1, cvr.p) // TODO nullability
                     }
                 }
@@ -48,12 +56,16 @@ class FindSampleSize(val auditParams: AuditParams) {
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,
     ): RunTestRepeatedResult {
-        val sampler: GenSampleFn = ComparisonSamplerSimulation(cvrs, contest, assorter,
+        val sampler = ComparisonSamplerSimulation(cvrs, contest, assorter,
             p1 = auditParams.p1, p2 = auditParams.p2, p3 = auditParams.p3, p4 = auditParams.p4)
+        // println("${sampler.showFlips()}")
 
-        val N = cvrs.size
+        // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros
+        // at the beginning
+        sampler.reset()
+
         val optimal = AdaptiveComparison(
-            N = contest.ncvrs,
+            Nc = contest.Nc,
             withoutReplacement = true,
             a = assorter.noerror,
             d1 = auditParams.d1,
@@ -63,7 +75,7 @@ class FindSampleSize(val auditParams: AuditParams) {
             p3 = auditParams.p3,
             p4 = auditParams.p4,
         )
-        val betta = BettingMart(bettingFn = optimal, N = N, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
+        val betta = BettingMart(bettingFn = optimal, Nc = contest.Nc, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
         // TODO use coroutines
         val result: RunTestRepeatedResult = runTestRepeated(

@@ -153,7 +153,7 @@ data class ComparisonAssorter(
         return cvr_assort - mvr_assort
     }
 
-    fun desc() = " avgCvrAssortValue=${avgCvrAssortValue}"
+    fun name() = assorter.desc()
 }
 
 class ComparisonAssertion(
@@ -166,5 +166,5 @@ class ComparisonAssertion(
     var pvalue = 0.0
     var samplesEst = 0
     var samplesNeeded = 0
-    override fun toString() = "ComparisonAssertion for '${contest.name}' margin=${df(assorter.margin)} samplesEst=$samplesEst samplesNeeded=$samplesNeeded proved=$proved pvalue=$pvalue"
+    override fun toString() = "${assorter.name()} margin=${df(assorter.margin)} samplesEst=$samplesEst samplesNeeded=$samplesNeeded"
 }

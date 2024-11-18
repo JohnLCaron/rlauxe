@@ -25,7 +25,7 @@ data class BettingTask(
 
     override fun makeTestFn(): RiskTestingFn {
         val adaptive = AdaptiveComparison(
-            N = N,
+            Nc = N,
             withoutReplacement = true,
             a = compareAssorter.noerror,
             d1 = 0,
@@ -36,7 +36,7 @@ data class BettingTask(
             p4 = 0.0,
         )
         return BettingMart(
-            bettingFn = adaptive, N = N, noerror = compareAssorter.noerror,
+            bettingFn = adaptive, Nc = N, noerror = compareAssorter.noerror,
             upperBound = compareAssorter.upperBound, withoutReplacement = true
         )
     }

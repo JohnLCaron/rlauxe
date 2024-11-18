@@ -8,7 +8,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
 
 class TestTabulateVotes {
 
@@ -42,7 +41,7 @@ class TestTabulateVotes {
         val contestUA = contestsUA.first()
         assertEquals(11, contestUA.ncvrs)
         assertEquals(2, contestUA.contest.winners.size)
-        assertEquals(0, contestUA.upperBound)
+        assertEquals(0, contestUA.Nc)
     }
 
     @Test
@@ -61,7 +60,7 @@ class TestTabulateVotes {
         val contestUA = contestsUA.first()
         assertEquals(111, contestUA.ncvrs)
         assertEquals(1, contestUA.contest.winners.size)
-        assertEquals(0, contestUA.upperBound)
+        assertEquals(0, contestUA.Nc)
     }
 
     @Test

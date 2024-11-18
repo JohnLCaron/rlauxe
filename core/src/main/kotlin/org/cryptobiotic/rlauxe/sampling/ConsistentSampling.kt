@@ -35,7 +35,7 @@ fun makePhantomCvrs(
     val phantombs = mutableListOf<PhantomBuilder>()
 
     for (contest in contestas) {
-        val phantoms_needed = contest.upperBound!! - contest.ncvrs
+        val phantoms_needed = contest.Nc - contest.ncvrs
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
         }

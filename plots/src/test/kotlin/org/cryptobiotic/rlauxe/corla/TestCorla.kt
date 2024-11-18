@@ -75,7 +75,7 @@ class TestCorla {
 
                         // pass the prior rates to the betting function
                         val adaptive = AdaptiveComparison(
-                            N = N,
+                            Nc = N,
                             withoutReplacement = false,
                             a = compareAssorter.noerror,
                             d1 = d1,
@@ -87,7 +87,7 @@ class TestCorla {
                             eps=eps,
                         )
                         val betting =
-                            BettingMart(bettingFn = adaptive, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = adaptive, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
                         val bettingResult = runTestRepeated(
                             drawSample = sampler,

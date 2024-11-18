@@ -72,5 +72,7 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
         if (doubleIsClose(sample, noerror * 1.5)) countP3++
         if (doubleIsClose(sample, noerror * 2.0)) countP4++
     }
+
+    fun samplingErrors() = listOf(countP0,countP1,countP2,countP3,countP4)
 }
 

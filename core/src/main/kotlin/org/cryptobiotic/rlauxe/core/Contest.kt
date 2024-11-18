@@ -32,9 +32,9 @@ data class Contest(
 /**
  * Mutable form of Contest.
  * @parameter ncvrs: count of cvrs for this contest
- * @parameter upperBound: upper bound on number of cards for this contest.
+ * @parameter Nc: upper bound on number of cards for this contest.
  */
-open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upperBound: Int = 0) {
+open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var Nc: Int = 0) {
     val name = contest.name
     val id = contest.id
 
@@ -45,7 +45,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0, var upper
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
     override fun toString() = buildString {
-        append("contest: ${contest.name} ncards = $upperBound ncvrs = $ncvrs")
+        append("contest: ${contest.name} Nc = $Nc ncvrs = $ncvrs")
     }
 
     fun makePollingAssertions(cvrs: Iterable<CvrIF>) {

@@ -88,7 +88,7 @@ class OracleComparison(
 // and set equal to 0 to obtain the bet λi .
 //
 class AdaptiveComparison(
-    val N: Int,
+    val Nc: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
     val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
@@ -107,7 +107,7 @@ class AdaptiveComparison(
         val p3est = if (p3 == 0.0) 0.0 else estimateRate(d1, p3, prevSamples.sampleP3count().toDouble() / lastj, lastj, eps)
         val p4est = if (p4 == 0.0) 0.0 else estimateRate(d2, p4, prevSamples.sampleP4count().toDouble() / lastj, lastj, eps)
 
-        val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, p1est, p2est, p3est, p4est, mui)
         return kelly.solve()
     }

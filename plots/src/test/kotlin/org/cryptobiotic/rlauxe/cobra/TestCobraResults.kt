@@ -45,7 +45,7 @@ class TestCobraResults {
                 val fixed = FixedBet(2.0)
                 val betting =
                     BettingMart(
-                        riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
+                        riskLimit = alpha, bettingFn = fixed, Nc = N, withoutReplacement = false,
                         noerror = compareAssorter.noerror, upperBound = upperBound
                     )
 
@@ -100,7 +100,7 @@ class TestCobraResults {
                     p2 = p2,
                 )
                 val betting =
-                    BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
+                    BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
                 val result = runTestRepeated(
                     drawSample = sampleWithErrors,
@@ -164,7 +164,7 @@ class TestCobraResults {
                             p2 = p2,
                         )
                         val betting =
-                            BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
                             drawSample = sampleWithErrors,
@@ -233,7 +233,7 @@ class TestCobraResults {
 
                         // pass the prior rates to the betting function
                         val adaptive = AdaptiveComparison(
-                            N = N,
+                            Nc = N,
                             withoutReplacement = false,
                             a = compareAssorter.noerror,
                             d1 = d1,
@@ -245,7 +245,7 @@ class TestCobraResults {
                             eps=eps,
                         )
                         val betting =
-                            BettingMart(bettingFn = adaptive, N = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = adaptive, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
                             drawSample = sampler,

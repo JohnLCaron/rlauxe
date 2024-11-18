@@ -32,7 +32,7 @@ class TestFindSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val auditParams = AuditParams(0.05, seed = 1234567890L, AuditType.CARD_COMPARISON)
+        val auditParams = AuditParams(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 1234567890L, quantile=.50)
         val finder = FindSampleSize(auditParams)
 
         contestsUA.forEach { contestUA ->

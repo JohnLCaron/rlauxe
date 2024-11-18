@@ -4,12 +4,12 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /**
  * Finds the betting martingale for the hypothesis that the population
- * mean is less than or equal to t using a martingale method,
- * for a population of size N, based on a series of draws x.
+ * mean is less than or equal to t,
+ * for a population of size Nc, based on a series of draws x.
  */
 class BettingMart(
     val bettingFn : BettingFn,
-    val N: Int,             // number of ballot cards
+    val Nc: Int,             // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val noerror: Double, // for comparison assorters who need rate counting
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
@@ -25,7 +25,7 @@ class BettingMart(
     // TODO merge with alpha_mart?
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
     override fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean, drawSample : () -> Double) : TestH0Result {
-        require(maxSample <= N)
+        require(maxSample <= Nc)
 
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = 1.0     // – T ← 1: test statistic
@@ -53,7 +53,7 @@ class BettingMart(
             bets.add(lamj)
 
             // population mean under the null hypothesis
-            mj = populationMeanIfH0(N, withoutReplacement, prevSamples)
+            mj = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
             mjs.add(mj)
 
             // TODO
@@ -116,6 +116,6 @@ class BettingMart(
             }
         }
 
-        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, mjs)
+        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, mjs, prevSamples.samplingErrors())
     }
 }

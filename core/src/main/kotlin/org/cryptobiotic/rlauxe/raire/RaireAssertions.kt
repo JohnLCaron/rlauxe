@@ -45,7 +45,7 @@ class RaireContestUnderAudit(
                 }
             }
             val comparisonAssorter = ComparisonAssorter(contest, assorter, welford.mean)
-            println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
+            // println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
             ComparisonAssertion(contest, comparisonAssorter)
         }
     }
@@ -112,8 +112,12 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
 
     override fun upperBound() = 1.0
-    override fun desc() = buildString {
+    override fun toString() = buildString {
         append("RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}")
+        if (assertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${assertion.alreadyEliminated}")
+    }
+    override fun desc() = buildString {
+        append("RaireAssorter winner/loser=${assertion.winner}/${assertion.loser}")
         if (assertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${assertion.alreadyEliminated}")
     }
     override fun winner() = assertion.winner

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
 
@@ -70,7 +71,7 @@ class ComparisonSamplerSimulation(
     var idx = 0
 
     init {
-        reset()
+        // reset() we use the original order unless reset() is called, then we use a permutation
 
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
@@ -96,7 +97,7 @@ class ComparisonSamplerSimulation(
     override fun sampleCount() = sampleCount
     override fun N() = N
     override fun reset() {
-        permutedIndex.shuffle(secureRandom) // TODO ok to permute?
+        permutedIndex.shuffle(secureRandom)
         idx = 0
     }
 
@@ -105,13 +106,20 @@ class ComparisonSamplerSimulation(
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
-                val result = cassorter.bassort(mvr, cvr) // TODO not sure of cvr vs cvr.cvr, w/re raire; not sure of permute
+                val result = cassorter.bassort(mvr, cvr)
                 idx++
                 return result
             }
             idx++
         }
         throw RuntimeException("no samples left for contest=${contestUA.id} and ComparisonAssorter ${cassorter}")
+    }
+
+    fun showFlips() = buildString {
+        appendLine(" flippedVotes1 = $flippedVotes1 = ${df(100.0*flippedVotes1/N)}")
+        appendLine(" flippedVotes2 = $flippedVotes2 = ${df(100.0*flippedVotes2/N)}")
+        appendLine(" flippedVotes3 = $flippedVotes3 = ${df(100.0*flippedVotes3/N)}")
+        appendLine(" flippedVotes4 = $flippedVotes4 = ${df(100.0*flippedVotes4/N)}")
     }
 
     //  plurality:  two vote overstatement: cvr has winner (1), mvr has loser (0)

@@ -19,7 +19,7 @@ class TestRaireAssertions {
     @Test
     fun testRaireAssertions() {
         val contestsUA = tabulateRaireVotes(raireResults.contests, cvrs) // in styleish workflow
-        contestsUA.forEach { it.upperBound = it.ncvrs + 2 }
+        contestsUA.forEach { it.Nc = it.ncvrs + 2 }
 
         val prng = Prng(123456789011L)
         val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)

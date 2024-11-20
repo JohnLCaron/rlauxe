@@ -109,20 +109,20 @@ class TestConsistentSampling {
 
     // the cvrs include all the contests, and always have a vote in that contest
     @Test
-    fun testSamplingWithFuzz() {
-        TestSamplingWithFuzz(0).runTest()
+    fun testSamplingNoSkip() {
+        TestSamplingWithSkip(0).runTest()
     }
 
     // the cvrs include all the contests, but dont always have a vote in that contest
     @Test
     fun testSamplingSkipSome() {
-        TestSamplingWithFuzz(1).runTest()
+        TestSamplingWithSkip(1).runTest()
     }
 
-    class TestSamplingWithFuzz(val skipSomeContests: Int) {
+    class TestSamplingWithSkip(val skipSomeContests: Int) {
 
         fun runTest() {
-            val (contestsUA, cvrsUAP) = makeTestData(skipSomeContests)
+            val (contestsUA, cvrsUAP) = makeRandomTestData(skipSomeContests)
 
             val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
             println("nsamples = ${sample_cvr_indices.size}\n")

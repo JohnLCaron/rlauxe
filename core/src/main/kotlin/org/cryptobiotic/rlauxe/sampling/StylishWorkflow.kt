@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 private val showQuantiles = false
 
-data class AuditParams(val auditType: AuditType,
+data class AuditConfig(val auditType: AuditType,
                        val riskLimit: Double,
                        val seed: Long,
                        val ntrials: Int = 100,
@@ -36,13 +36,13 @@ data class AuditParams(val auditType: AuditType,
 class StylishWorkflow(
     contests: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
-    val auditParams: AuditParams,
+    val auditConfig: AuditConfig,
     val cvrs: List<Cvr>,
     val upperBounds: Map<Int, Int>, // 𝑁_𝑐.
 ) {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
-    val prng = Prng(auditParams.seed)
+    val prng = Prng(auditConfig.seed)
 
     init {
         // 2. Pre-processing and consistency checks
@@ -85,7 +85,7 @@ class StylishWorkflow(
     fun chooseSamples(mvrs: List<CvrIF>, round: Int): List<Int> {
         // set contestUA.sampleSize
         contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
-        val maxContestSize = simulateSampleSizes(auditParams, contestsUA, cvrsUA, mvrs, round)
+        val maxContestSize = simulateSampleSizes(auditConfig, contestsUA, cvrsUA, mvrs, round)
 
         // TODO should we know max sampling percent? or is it an absolute number?
         //   should there be a minimum increment?? esp if its going to end up hand-counted?
@@ -123,9 +123,9 @@ class StylishWorkflow(
         contestsUA.forEach { contestUA ->
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    val done = runOneAssertionAudit(auditParams, contestUA, assertion, cvrPairs)
+                    val done = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs)
                     allDone = allDone && done
-                    simulateSampleSize(auditParams, contestUA, assertion, cvrPairs)
+                    simulateSampleSize(auditConfig, contestUA, assertion, cvrPairs)
                     // println()
                 }
             }
@@ -209,10 +209,10 @@ fun checkWinners(contest: Contest, accumVotes: Map<Int, Int>): Boolean {
 
 // TODO somehow est is much higher than actual
 // TODO what forces this to a higher count on subsequent rounds ?? the overstatements in the mvrs ??
-fun simulateSampleSizes(auditParams: AuditParams, contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, mvrs: List<CvrIF>, round: Int): Int {
+fun simulateSampleSizes(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, mvrs: List<CvrIF>, round: Int): Int {
     val stopwatch = Stopwatch()
     // TODO could parellelize
-    val finder = FindSampleSize(auditParams)
+    val finder = FindSampleSize(auditConfig)
     contestsUA.forEach { contestUA ->
         val sampleSizes = mutableListOf<Int>()
         contestUA.comparisonAssertions.map { assert ->
@@ -226,10 +226,10 @@ fun simulateSampleSizes(auditParams: AuditParams, contestsUA: List<ContestUnderA
                     }
                     println()
                 }
-                val size = result.findQuantile(auditParams.quantile)
+                val size = result.findQuantile(auditConfig.quantile)
                 assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
                 sampleSizes.add(assert.samplesEst)
-                println("simulateSampleSizes at ${100*auditParams.quantile}% quantile: ${assert} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
+                println("simulateSampleSizes at ${100*auditConfig.quantile}% quantile: ${assert} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
                 // println("  errorRates % = [${result.errorRates()}]")
             }
         }
@@ -252,7 +252,7 @@ fun simulateSampleSizes(auditParams: AuditParams, contestsUA: List<ContestUnderA
 // the testFn is independent, it assumes drawSample already does the assort.
 
 fun runOneAssertionAudit(
-    auditParams: AuditParams,
+    auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
     cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
@@ -263,19 +263,18 @@ fun runOneAssertionAudit(
     cvrPairs.forEach { (mvr, cvr) -> samples.addSample(assorter.bassort(mvr,cvr)) }
     println("runOneAssertionAudit ${assorter.name()} samplingErrors= ${samples.samplingErrors()}")
 
-    // each assorter needs their own sampler
     val sampler: SampleFn = ComparisonSampler(cvrPairs, contestUA, assorter)
 
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,
         withoutReplacement = true,
         a = assorter.noerror,
-        d1 = auditParams.d1,
-        d2 = auditParams.d2,
-        p1 = auditParams.p1,
-        p2 = auditParams.p2,
-        p3 = auditParams.p3,
-        p4 = auditParams.p4,
+        d1 = auditConfig.d1,
+        d2 = auditConfig.d2,
+        p1 = auditConfig.p1,
+        p2 = auditConfig.p2,
+        p3 = auditConfig.p3,
+        p4 = auditConfig.p4,
     )
     val testFn = BettingMart(
         bettingFn = optimal,
@@ -296,7 +295,7 @@ fun runOneAssertionAudit(
 }
 
 fun simulateSampleSize(
-    auditParams: AuditParams,
+    auditConfig: AuditConfig,
     contest: ContestUnderAudit,
     assertion: ComparisonAssertion,
     cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
@@ -310,7 +309,7 @@ fun simulateSampleSize(
     val cvrs = cvrPairs.map { it.second }
     val sampler = ComparisonSamplerSimulation(
         cvrs, contest, assorter,
-        p1 = auditParams.p1, p2 = auditParams.p2, p3 = auditParams.p3, p4 = auditParams.p4
+        p1 = auditConfig.p1, p2 = auditConfig.p2, p3 = auditConfig.p3, p4 = auditConfig.p4
     )
     // println("${sampler.showFlips()}")
 
@@ -318,12 +317,12 @@ fun simulateSampleSize(
         Nc = contest.Nc,
         withoutReplacement = true,
         a = assorter.noerror,
-        d1 = auditParams.d1,
-        d2 = auditParams.d2,
-        p1 = auditParams.p1,
-        p2 = auditParams.p2,
-        p3 = auditParams.p3,
-        p4 = auditParams.p4,
+        d1 = auditConfig.d1,
+        d2 = auditConfig.d2,
+        p1 = auditConfig.p1,
+        p2 = auditConfig.p2,
+        p3 = auditConfig.p3,
+        p4 = auditConfig.p4,
     )
     val testFn = BettingMart(
         bettingFn = optimal,
@@ -336,7 +335,7 @@ fun simulateSampleSize(
     val result: RunTestRepeatedResult = runTestRepeated(
         drawSample = sampler,
         maxSamples = cvrPairs.size,
-        ntrials = auditParams.ntrials,
+        ntrials = auditConfig.ntrials,
         testFn = testFn,
         testParameters = mapOf(
             "p1" to optimal.p1,
@@ -347,8 +346,8 @@ fun simulateSampleSize(
         ),
         showDetails = false,
     )
-    val size = result.findQuantile(auditParams.quantile)
-    println("simulateSampleSize: ${assorter.name()} margin=${df(assorter.margin)} ${100*auditParams.quantile}% quantile = $size " +
+    val size = result.findQuantile(auditConfig.quantile)
+    println("simulateSampleSize: ${assorter.name()} margin=${df(assorter.margin)} ${100*auditConfig.quantile}% quantile = $size " +
             "actual= ${assertion.samplesNeeded} ${cumul(result.sampleCount, assertion.samplesNeeded)}%")
     // println("  errorRate % = [${result.errorRates()}]")
 }

@@ -158,7 +158,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip2votes could only flip $changed, wanted $needToChange")
-        // require(checkAvotes == startingAvotes - needToChangeWinnerToLoser)
+        require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
 
@@ -198,7 +198,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip4votes could only flip $changed, wanted $needToChange")
-        // require(checkAvotes == startingAvotes - needToChangeLoserToWinner)
+        require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
 
@@ -237,7 +237,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip1votes could only flip $changed, wanted $needToChange")
-        // require(checkAvotes == startingAvotes - changeWinnerToOther)
+        require(checkAvotes == startingAvotes - needToChange)
 
         return changed
     }
@@ -271,7 +271,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.5 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votes could only flip $changed, wanted $needToChange")
-        // require(checkAvotes == startingAvotes - changeCvrToOther)
+        require(checkAvotes == startingAvotes - needToChange)
 
         return changed
     }
@@ -283,16 +283,12 @@ class ComparisonSamplerSimulation(
         val otherCandidate = max(cassorter.assorter.winner(), cassorter.assorter.loser()) + 1
         var changed = 0
 
-        val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val startingAvotes = cvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val mvr = mcvrs[cardIdx]
             if (!mvr.used && (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
-
-            //val cvr = mcvrs[cardIdx]
-            //if (!cvr.used && cassorter.assorter.assort(cvr) == 0.5) {
-            //    val votes = moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
 
                 val alteredCvr = makeNewCvr(mvr, votes)
                 require(cassorter.assorter.assort(alteredCvr) == 0.5)
@@ -306,10 +302,10 @@ class ComparisonSamplerSimulation(
             }
             cardIdx++
         }
-        val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val checkAvotes = cvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flip3votes could only flip $changed, wanted $needToChange")
-        // require(checkAvotes == startingAvotes - changeCvrToOther)
+            println("flip3votesP could only flip $changed, wanted $needToChange")
+        require(checkAvotes == startingAvotes - needToChange)
 
         return changed
     }

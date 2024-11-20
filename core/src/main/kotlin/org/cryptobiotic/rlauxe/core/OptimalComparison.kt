@@ -101,7 +101,7 @@ class AdaptiveComparison(
 ): BettingFn {
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
-        val lastj = prevSamples.numberOfSamples()
+        val lastj = prevSamples.numberOfSamples() // TODO lastj = 0
         val p1est = if (p1 == 0.0) 0.0 else estimateRate(d1, p1, prevSamples.sampleP1count().toDouble() / lastj, lastj, eps)
         val p2est = if (p2 == 0.0) 0.0 else estimateRate(d2, p2, prevSamples.sampleP2count().toDouble() / lastj, lastj, eps)
         val p3est = if (p3 == 0.0) 0.0 else estimateRate(d1, p3, prevSamples.sampleP3count().toDouble() / lastj, lastj, eps)

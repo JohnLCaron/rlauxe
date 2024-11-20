@@ -157,7 +157,7 @@ data class ComparisonAssorter(
 }
 
 class ComparisonAssertion(
-    val contest: Contest,
+    val contest: Contest, // TODO dont need, its in the assorter
     val assorter: ComparisonAssorter,
 ) {
     val avgCvrAssortValue = assorter.avgCvrAssortValue

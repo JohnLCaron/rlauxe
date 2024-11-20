@@ -44,3 +44,13 @@ fun makeStandardContest() = Contest("standard", 0, listToMap("A", "B"), listOf("
 fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
     ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)
+
+
+fun makeStandardContest(ncands: Int): Contest {
+    val candidateNames: List<String> = IntArray(ncands).map { "cand$it" }
+    return Contest("standard$ncands", 0, candidateNames = listToMap(candidateNames), listOf("cand0"), choiceFunction = SocialChoiceFunction.PLURALITY)
+}
+fun makeStandardComparisonAssorter(ncands: Int, avgCvrAssortValue: Double) =
+    ComparisonAssorter(makeStandardContest(ncands), makeStandardPluralityAssorter(), avgCvrAssortValue)
+
+

@@ -8,10 +8,10 @@ fun main() {
     ac.plotSuccess20VsThetaNarrow()
 }
 
-
 class CorlaPlot {
     val dir = "/home/stormy/temp/corla"
     val filename = "$dir/plotCorla10000.csv"
+
     fun plotSuccessVsTheta() {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.500001.. 1.0
 

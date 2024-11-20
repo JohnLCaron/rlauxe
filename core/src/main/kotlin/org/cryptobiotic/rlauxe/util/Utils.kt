@@ -37,7 +37,12 @@ fun listToMap(vararg names: String): Map<String, Int> {
     return names.mapIndexed { idx, value -> value to idx }.toMap()
 }
 
+fun listToMap(names: List<String>): Map<String, Int> {
+    return names.mapIndexed { idx, value -> value to idx }.toMap()
+}
+
 fun df(d: Double) = "%6.4f".format(d)
+fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 
 /////////////////////////////////////////////////////////////////////////////
 // covers for numpy: will be replaced

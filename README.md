@@ -21,7 +21,7 @@ Table of Contents
     * [Betting martingales](#betting-martingales)
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
-      * [Comparison Betting](#comparison-betting)
+      * [Comparison Betting Payoffs](#comparison-betting-payoffs)
   * [Sampling](#sampling)
     * [Estimating Sample sizes (in progress)](#estimating-sample-sizes-in-progress)
     * [Consistent Sampling](#consistent-sampling)
@@ -284,22 +284,23 @@ Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates and t
 
 Plots 1-5 shows the betting payoffs when all 4 error rates equal {0.0, 0.0001, .001, .005, .01}:
 
-* [BettingPayoff error=0.0](plots/betting/BettingPayoff0.0.html)
-* [BettingPayoff error=0.0001](plots/betting/BettingPayoff1.0E-4.html)
-* [BettingPayoff error=0.001](plots/betting/BettingPayoff0.001.html)
-* [BettingPayoff error=0.005](plots/betting/BettingPayoff0.005.html)
-* [BettingPayoff error=0.01](plots/betting/BettingPayoff0.01.html)
+* [BettingPayoff error=0.0](docs/plots/betting/BettingPayoff0.0.html)
+* [BettingPayoff error=0.0001](docs/plots/betting/BettingPayoff1.0E-4.html)
+* [BettingPayoff error=0.001](docs/plots/betting/BettingPayoff0.001.html)
+* [BettingPayoff error=0.005](docs/plots/betting/BettingPayoff0.005.html)
+* [BettingPayoff error=0.01](docs/plots/betting/BettingPayoff0.01.html)
 
-Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror)
+Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror):
 
-* [BettingPayoff when MVR matches the CVR](plots/betting/BettingPayoffAssort1.0.html)
+* [BettingPayoff when MVR matches the CVR](docs/plots/betting/BettingPayoffAssort1.0.html)
 
 Plot 7 translates the payoff into a sample size, when there are no errors, using (payoff)^sampleSize = 1 / riskLimit and
 solving for sampleSize = -ln(riskLimit) / ln ( payoff).
 
-* [Betting SampleSize](plots/betting/BettingPayoffSampleSize.html)
+* [Betting SampleSize](docs/plots/betting/BettingPayoffSampleSize.html)
 
-The plot error=0.0 is the equivilent to COBRA Fig 1, p 6. This is the best that can be done, the minimum sampling size for the RLA.
+The plot "error=0.0" is the equivilent to COBRA Fig 1, p 6 for risk=.05. This is the best that can be done, 
+the minimum sampling size for the RLA.
 Note that this value is independent of N, the number of ballots.
 
 ## Sampling

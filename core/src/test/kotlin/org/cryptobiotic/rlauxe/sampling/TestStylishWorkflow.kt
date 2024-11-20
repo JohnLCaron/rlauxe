@@ -12,7 +12,7 @@ class TestStylishWorkflow {
     @Test
     fun testWorkflow() {
         val stopwatch = Stopwatch()
-        val auditParams = AuditParams(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.50)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.50)
 
          // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
@@ -31,7 +31,7 @@ class TestStylishWorkflow {
             rrc.ncvrs = rc.ncvrs
         }
 
-        val workflow = StylishWorkflow(emptyList(), raireResults.contests, auditParams, cvrs, mapOf(339 to cvrs.size))
+        val workflow = StylishWorkflow(emptyList(), raireResults.contests, auditConfig, cvrs, mapOf(339 to cvrs.size))
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 
@@ -40,7 +40,7 @@ class TestStylishWorkflow {
         val assorter = contestUA.comparisonAssertions.first().assorter // take the one with the smallest margin??
         // dont permute
         val sampler = ComparisonSamplerSimulation(workflow.cvrsUA, contestUA, assorter,
-            p1=auditParams.p1, p2=auditParams.p2, p3=auditParams.p3, p4=auditParams.p4, )
+            p1=auditConfig.p1, p2=auditConfig.p2, p3=auditConfig.p3, p4=auditConfig.p4, )
         println(sampler.showFlips())
 
         val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = sampler.mvrs.zip(sampler.cvrs)

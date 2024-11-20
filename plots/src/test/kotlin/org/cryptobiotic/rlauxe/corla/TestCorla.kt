@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.*
 import org.cryptobiotic.rlauxe.util.*
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class TestCorla {
 

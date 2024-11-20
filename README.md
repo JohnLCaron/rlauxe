@@ -1,12 +1,12 @@
 # rlauxe
-last update: 11/17/2024
+last update: 11/20/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
 **WORK IN PROGRESS**
 
-Read this on github.io : https://johnlcaron.github.io/rlauxe/
+Read this on [github.io](https://johnlcaron.github.io/rlauxe/) in order to see the rendered plots.
 
 Table of Contents
 <!-- TOC -->
@@ -17,9 +17,11 @@ Table of Contents
       * [PLURALITY](#plurality)
       * [APPROVAL](#approval)
       * [SUPERMAJORITY](#supermajority)
-      * [IRV (In Progress)](#irv-in-progress)
+      * [IRV](#irv)
+    * [Betting martingales](#betting-martingales)
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
+      * [Comparison Betting](#comparison-betting)
   * [Sampling](#sampling)
     * [Estimating Sample sizes (in progress)](#estimating-sample-sizes-in-progress)
     * [Consistent Sampling](#consistent-sampling)
@@ -27,7 +29,7 @@ Table of Contents
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Sample Size Simulation](#sample-size-simulation)
-    * [Notes](#notes)
+  * [Notes](#notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
 
@@ -155,23 +157,68 @@ Notes
 * multiple winners are allowed
 
 
-#### IRV (In Progress)
+#### IRV
 
-See
-````
-    Blom, M., Stuckey, P.J., Teague, V.: Risk-limiting audits for irv elections. 
-    arXiv:1903.08804 (2019), https://arxiv.org/abs/1903.08804
-````
-and possibly
-````
-    Ek, Stark, Stuckey, Vukcevic: Adaptively Weighted Audits of Instant-Runoff Voting Elections: AWAIRE
-    5 Oct 2023
-````
-See code in raire package for current implementation.
+We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate the assertions needed by SHANGRLA. 
+
+See the RAIRE guides for details:
+* [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)
+* [Part 2: Generating Assertions with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_2.pdf)
+
+### Betting martingales
+
+Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using 
+betting martingales of the form
+
+    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
+
+where, µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
+(For large N, µ_i is very close to 1/2.)
+
+The sequence (M_j) can be viewed as the fortune of a gambler in a series of wagers.
+The gambler starts with a stake of 1 unit and bets a fraction λi of their current wealth on
+the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
+gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
+losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
+
+See BettingMart.kt and related code for current implementation.
 
 ### Polling audits
 
+For the risk function, we use AlphaMart (or equivilent BettingMart) with ShrinkTrunkage, which estimates the true
+population mean (theta) using a weighted average of an initial estimate (eta0) with the actual sampled mean.
+
+Use the reported winner's mean as eta0. 
+
+The only settable parameter is d, which is used for estimating theta at the ith sample:
+
+    estTheta_i = (d*eta0 + sampleSum_i) / (d + sampleSize_i)
+
+this trades off smaller sample sizes when theta = eta0 (large d) vs quickly adapting to when theta < eta0 (smaller d).
+
+To use BettingMart rather than AlphaMart, we just have to set
+
+    λ_i = (estTheta_i/µ_i − 1) / (upper − µ_i)
+
+where upper is the upper bound of the assorter (1 for plurality, 1/2f for supermajority), and µ_i := E(Xi | Xi−1) as above.
+
+A few representative plots showing the effect of d are at [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629).
+* High values of d do significantly better when the reported mean is close to the true mean. 
+* When the true mean < reported mean, high d may force a full hand count unnecessarily.
+* Low values of d are much better when true mean < reported mean, at the cost of larger samples sizes.
+* Tentatively, we will use d = 100 as default, and allow the user to override.
+
 ### Comparison audits
+
+The requirements for Comparison audits:
+
+* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot.
+* Assign unique identifier to each physical ballot, and put on the CVR. This is used to find the physical ballot from the sampled CVR. 
+* Must have independent upper bound on the number of cast cards that contain the contest.
+
+For the risk function, we use BettingMart with AdaptiveComparison. AdaptiveComparison needs estimates of the rates of 
+over(under)statements. If these estimates are correct, one gets optimal sample sizes. 
+AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 
 See SHANGRLA Section 3.2.
 
@@ -215,7 +262,45 @@ Notes
 * When cvr = mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
 * However the convergence is slower than for polling (!), unless one "amplifies" the estimate function.
   See [Ballot Comparison using Betting Martingales](docs/Betting.md) that uses betting strategies to do so.
-  See BettingMart and related code for current implementation.
+
+#### Comparison Betting Payoffs
+
+For the jth sample with bet λ_i, the BettingMart payoff is
+
+    t_i = 1 + λ_i * (X_i − µ_i)
+
+where
+
+    λ_i in [0, 1/u_i]
+    X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
+    µ_i ~= 1/2
+    λ_i ~in [0, 2]
+
+then 
+
+    payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
+
+Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates and the margin. 
+
+Plots 1-5 shows the betting payoffs when all 4 error rates equal {0.0, 0.0001, .001, .005, .01}:
+
+* [BettingPayoff error=0.0](plots/betting/BettingPayoff0.0.html)
+* [BettingPayoff error=0.0001](plots/betting/BettingPayoff1.0E-4.html)
+* [BettingPayoff error=0.001](plots/betting/BettingPayoff0.001.html)
+* [BettingPayoff error=0.005](plots/betting/BettingPayoff0.005.html)
+* [BettingPayoff error=0.01](plots/betting/BettingPayoff0.01.html)
+
+Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror)
+
+* [BettingPayoff when MVR matches the CVR](plots/betting/BettingPayoffAssort1.0.html)
+
+Plot 7 translates the payoff into a sample size, when there are no errors, using (payoff)^sampleSize = 1 / riskLimit and
+solving for sampleSize = -ln(riskLimit) / ln ( payoff).
+
+* [Betting SampleSize](plots/betting/BettingPayoffSampleSize.html)
+
+The plot error=0.0 is the equivilent to COBRA Fig 1, p 6. This is the best that can be done, the minimum sampling size for the RLA.
+Note that this value is independent of N, the number of ballots.
 
 ## Sampling
 
@@ -418,7 +503,7 @@ We expect the spread to increase, but also shift to larger samples sizes, since 
 If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates 
 are more likely to be affected than others. 
 
-### Notes
+## Notes
 
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)

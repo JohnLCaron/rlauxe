@@ -1,0 +1,139 @@
+package org.cryptobiotic.rlauxe.core
+
+import org.cryptobiotic.rlauxe.rlaplots.BettingPayoff
+import org.cryptobiotic.rlauxe.rlaplots.BettingPayoffData
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sim.CorlaTask
+import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import kotlin.test.Test
+
+class TestBettingPayoff {
+
+    @Test
+    fun showAdaptiveComparisonBet() {
+        val N = 10000
+        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+
+        for (error in listOf(0.0, 0.0001, .001, .01)) {
+            println("errors = $error")
+            for (margin in margins) {
+                val noerror = 1 / (2 - margin)
+
+                //    val Nc: Int, // max number of cards for this contest
+                //    val withoutReplacement: Boolean = true,
+                //    val a: Double, // compareAssorter.noerror
+                //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
+                //    val d2: Int, // weight p2, p4
+                //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
+                //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
+                //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
+                //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
+                //    val eps: Double = .00001
+                val optimal = AdaptiveComparison(
+                    Nc = N,
+                    a = noerror,
+                    d1 = 10000,
+                    d2 = 10000,
+                    p1 = error,
+                    p2 = error,
+                    p3 = error,
+                    p4 = error
+                )
+                val samples = PrevSamplesWithRates(noerror)
+                repeat(100) { samples.addSample(noerror) }
+                println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")
+            }
+        }
+    }
+
+    @Test
+    fun showBettingPayoff() {
+        val N = 10000
+        val margins = listOf(.01)
+
+        for (error in listOf(0.0, 0.0001, .001, .01)) {
+            println("errors = $error")
+            for (margin in margins) {
+                val noerror = 1 / (2 - margin)
+
+                val bettingFn = AdaptiveComparison(
+                    Nc = N,
+                    a = noerror,
+                    d1 = 10000,
+                    d2 = 10000,
+                    p1 = error,
+                    p2 = error,
+                    p3 = error,
+                    p4 = error
+                )
+                val samples = PrevSamplesWithRates(noerror)
+                repeat(100) { samples.addSample(noerror) }
+                val bet = bettingFn.bet(samples)
+                println("margin=$margin, noerror=$noerror bet = $bet}")
+
+                println("2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")
+                //     X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
+                val payoff = listOf(0.0, 0.5, 1.0, 1.5, 2.0).map { x ->
+                    // 1 + λ_i (X_i − µ_i)
+                    1.0 + bet * (noerror * x - .5)
+                }
+                payoff.forEach{ print("${dfn(it, 6)}, ")}
+                println()
+            }
+        }
+    }
+
+    @Test
+    fun genBettingPayoffPlot() {
+        val results = mutableListOf<BettingPayoffData>()
+        val assortValue = listOf(0.0, 0.5, 1.0, 1.5, 2.0)
+        val errorRates = listOf(0.0, 0.0001, .001, .005, .01)
+
+        val N = 10000
+        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+
+        errorRates.forEach { error ->
+            println("errors = $error")
+            for (margin in margins) {
+                val noerror = 1 / (2 - margin)
+
+                val bettingFn = AdaptiveComparison(
+                    Nc = N,
+                    a = noerror,
+                    d1 = 10000,
+                    d2 = 10000,
+                    p1 = error,
+                    p2 = error,
+                    p3 = error,
+                    p4 = error
+                )
+                val samples = PrevSamplesWithRates(noerror)
+                repeat(10) { samples.addSample(noerror) }
+                val bet = bettingFn.bet(samples)
+                println("margin=$margin, noerror=$noerror bet = $bet}")
+
+                println("2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")
+                //     X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
+                val payoffs = assortValue.map { x ->
+                    // 1 + λ_i (X_i − µ_i)
+                    val payoff = 1.0 + bet * (noerror * x - .5)
+                    results.add(BettingPayoffData(N, margin, error, bet, payoff, x))
+                    payoff
+                }
+                payoffs.forEach{ print("${dfn(it, 6)}, ")}
+                println()
+            }
+        }
+
+        val plotter = BettingPayoff("/home/stormy/temp/core2/", "bettingPayoff.csv")
+        errorRates.forEach { error ->
+            plotter.plotOneErrorRate(results, error)
+        }
+        plotter.plotOneAssortValue(results, 1.0)
+        plotter.plotSampleSize(results, 1.0)
+    }
+}

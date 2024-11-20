@@ -1,5 +1,5 @@
 # Development
-last changed: 11/15/2024
+last changed: 11/20/2024
 
 ## TODO
 
@@ -16,7 +16,8 @@ last changed: 11/15/2024
   Make a version that agrees exactly with SHANGRLA's version. (3)
   BigIntegers? Strings? Maybe hex strings?
 * Polling
-* without CSD 
+* without CSD?
+* COBRA 4.3 Diversified betting
 
 ### multiple rounds
 * Serialization of intermediate stages

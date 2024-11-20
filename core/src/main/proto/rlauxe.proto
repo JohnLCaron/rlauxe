@@ -3,6 +3,17 @@ syntax = "proto3";
 option java_package = "org.cryptobiotic.protogen";
 option java_outer_classname = "RlauxeProto";
 
+// data class AuditConfig(val auditType: AuditType,
+//                       val riskLimit: Double,
+//                       val seed: Long,
+//                       val ntrials: Int = 100,
+//                       val quantile: Double = .80,
+//                       val p1: Double = 1.0e-2,
+//                       val p2: Double = 1.0e-4,
+//                       val p3: Double = 1.0e-2,
+//                       val p4: Double = 1.0e-4,
+//                       val d1: Int = 100,  // for trunc_shrinkage
+//                       val d2: Int = 100,
 message AuditConfig {
   enum AuditType {
     unknown = 0;
@@ -15,9 +26,19 @@ message AuditConfig {
   AuditType audit_type = 2;
   double risk_limit = 3;
   bytes seed = 4;
-  map<string, string> contest_max_cards = 5;
+  int32 ntrials = 5;
+  double quantile = 6;
+  repeated double errorRates = 7;
+  repeated double trunc_shrinkae_params = 8;
+  map<string, string> contest_max_cards = 10;
 }
 
+//     val name: String,
+//    val id: Int,
+//    val candidateNames: Map<String, Int>, // candidate name -> candidate id
+//    val winnerNames: List<String>,
+//    val choiceFunction: SocialChoiceFunction,
+//    val minFraction: Double? = null, // supermajority only.
 message Contest {
   enum SocialChoiceType {
     unknown = 0;

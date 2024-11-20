@@ -7,7 +7,7 @@ import kotlin.math.ln
 import kotlin.math.max
 
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
-class FindSampleSize(val auditParams: AuditParams) {
+class FindSampleSize(val auditConfig: AuditConfig) {
 
     //4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
     //	    The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
@@ -57,7 +57,7 @@ class FindSampleSize(val auditParams: AuditParams) {
         cvrs: List<CvrUnderAudit>,
     ): RunTestRepeatedResult {
         val sampler = ComparisonSamplerSimulation(cvrs, contest, assorter,
-            p1 = auditParams.p1, p2 = auditParams.p2, p3 = auditParams.p3, p4 = auditParams.p4)
+            p1 = auditConfig.p1, p2 = auditConfig.p2, p3 = auditConfig.p3, p4 = auditConfig.p4)
         // println("${sampler.showFlips()}")
 
         // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros
@@ -68,12 +68,12 @@ class FindSampleSize(val auditParams: AuditParams) {
             Nc = contest.Nc,
             withoutReplacement = true,
             a = assorter.noerror,
-            d1 = auditParams.d1,
-            d2 = auditParams.d2,
-            p1 = auditParams.p1,
-            p2 = auditParams.p2,
-            p3 = auditParams.p3,
-            p4 = auditParams.p4,
+            d1 = auditConfig.d1,
+            d2 = auditConfig.d2,
+            p1 = auditConfig.p1,
+            p2 = auditConfig.p2,
+            p3 = auditConfig.p3,
+            p4 = auditConfig.p4,
         )
         val betta = BettingMart(bettingFn = optimal, Nc = contest.Nc, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
 
@@ -81,7 +81,7 @@ class FindSampleSize(val auditParams: AuditParams) {
         val result: RunTestRepeatedResult = runTestRepeated(
             drawSample = sampler,
             maxSamples = contest.ncvrs,
-            ntrials = auditParams.ntrials,
+            ntrials = auditConfig.ntrials,
             testFn = betta,
             testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
             showDetails = false,

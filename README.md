@@ -172,7 +172,7 @@ betting martingales of the form
 
     M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
 
-where, µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
+where µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
 (For large N, µ_i is very close to 1/2.)
 
 The sequence (M_j) can be viewed as the fortune of a gambler in a series of wagers.
@@ -200,7 +200,7 @@ To use BettingMart rather than AlphaMart, we just have to set
 
     λ_i = (estTheta_i/µ_i − 1) / (upper − µ_i)
 
-where upper is the upper bound of the assorter (1 for plurality, 1/2f for supermajority), and µ_i := E(Xi | Xi−1) as above.
+where upper is the upper bound of the assorter (1 for plurality, 1/(2f) for supermajority), and µ_i := E(Xi | Xi−1) as above.
 
 A few representative plots showing the effect of d are at [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629).
 * High values of d do significantly better when the reported mean is close to the true mean. 
@@ -295,7 +295,7 @@ Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (a
 * [BettingPayoff when MVR matches the CVR](docs/plots/betting/BettingPayoffAssort1.0.html)
 
 Plot 7 translates the payoff into a sample size, when there are no errors, using (payoff)^sampleSize = 1 / riskLimit and
-solving for sampleSize = -ln(riskLimit) / ln ( payoff).
+solving for sampleSize = -ln(riskLimit) / ln(payoff).
 
 * [Betting SampleSize](docs/plots/betting/BettingPayoffSampleSize.html)
 
@@ -346,10 +346,10 @@ so it just makes less evil zombies.
 
 ### Use Styles
 
-See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020
-See "Stylish Risk-Limiting Audits in Practice" Glazer, Spertus, Stark;  16 Sep 2023
+* See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020
+* See "Stylish Risk-Limiting Audits in Practice" Glazer, Spertus, Stark;  16 Sep 2023
 
-This gets a much tighter bound when you know what ballots have which contests.
+This gives a much tighter bound when you know what ballots have which contests.
 
 "Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling"
 

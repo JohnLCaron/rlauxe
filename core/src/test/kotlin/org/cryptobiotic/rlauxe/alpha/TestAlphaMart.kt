@@ -105,7 +105,7 @@ class TestAlphaMart {
         }
         assertTrue(alpha2.status == TestH0Status.LimitReached)
         assertEquals(alpha2.sampleCount, x2.size)
-        assertEquals(alpha2.sampleMean, 0.42857142857142855)
+        assertEquals(alpha2.sampleMean, 0.42857142857142855, doublePrecision)
     }
 
     @Test
@@ -197,24 +197,16 @@ class TestAlphaMart {
         val etas = listOf(.51, .55, .6) // alternative means
         for (eta in etas) {
             for (x: List<Double> in v) {
-                compareAlphaWithShrinkTrunc(
-                    eta,
-                    x)
+                compareAlphaWithShrinkTrunc(eta, x)
             }
             println()
         }
     }
 
     fun compareAlphaWithShrinkTrunc(eta0: Double, x: List<Double>) {
-        val algoValues: TestH0Result = testAlphaMartWithTermination(
-            eta0,
-            x
-        )
+        val algoValues: TestH0Result = testAlphaMartWithTermination(eta0, x)
 
-        val martValues: TestH0Result = testAlphaMartBatch(
-            eta0,
-            x
-        )
+        val martValues: TestH0Result = testAlphaMartBatch(eta0, x)
 
         // both failed or both succeeded
         val limit1 = algoValues.status == TestH0Status.LimitReached
@@ -264,10 +256,7 @@ class TestAlphaMart {
     fun testAlphaAlgoWithShrinkTruncProblem() {
         val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
         val eta0 = x.average()
-        val algoValues = testAlphaMartWithTermination(
-            eta0,
-            x
-        )
+        val algoValues = testAlphaMartWithTermination(eta0, x)
         println("testAlphaAlgoWithShrinkTruncProblem = $algoValues")
     }
 

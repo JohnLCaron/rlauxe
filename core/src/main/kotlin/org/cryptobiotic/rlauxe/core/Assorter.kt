@@ -51,6 +51,8 @@ data class Assertion(
     val winner = assorter.winner()
     val loser = assorter.loser()
     var proved = false // TODO is it ok to have this state ??
+    var samplesEst = 0
+    var samplesNeeded = 0
 
     override fun toString() = "Assertion for '${contest.name}' assorter=${assorter.desc()} margin=$margin"
 }

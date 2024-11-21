@@ -208,24 +208,3 @@ class OptimalComparisonNoP1(
     }
 
 }
-
-/** Turn EstimFn into a BettingFn */
-class EstimAdapter(
-    val N: Int,
-    val withoutReplacement: Boolean = true,
-    val upperBound: Double,
-    val estimFn : EstimFn,  // estimator of the population mean
-): BettingFn {
-    init {
-        require(upperBound > 1.0)
-    }
-
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
-        val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
-        require (upperBound > mu)
-        val eta = estimFn.eta(prevSamples)
-        require (upperBound > eta)
-        return etaToLam(eta, mu, upperBound)
-    }
-
-}

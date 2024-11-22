@@ -1,12 +1,10 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeCvr
+import org.cryptobiotic.rlauxe.util.makeFakeContest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -59,14 +57,13 @@ class TestOverstatementsFromShangrla {
 
     @Test
     fun test_overstatement_assorter_margin() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
-            winnerNames = listOf("Alice"),
         )
-
+        val contest = makeFakeContest(info, 100)
         val assort = PluralityAssorter(contest, 0, 1)
         var margin = 0.5
         var aVb = ComparisonAssorter(contest, assort, (margin + 1) / 2)
@@ -129,13 +126,13 @@ class TestOverstatementsFromShangrla {
 
     @Test
     fun test_overstatement_assorter_mean() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
-            winnerNames = listOf("Alice"),
         )
+        val contest = makeFakeContest(info, 100)
 
         val assort = PluralityAssorter(contest, 0, 1)
         var margin = 0.5
@@ -201,16 +198,19 @@ class TestOverstatementsFromShangrla {
         //                        + 1)/2), upper_bound=1))
         //        aVb.margin=0.2
 
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob"),
-            winnerNames = listOf("Alice"),
         )
+        val contest = makeFakeContest(info, 100)
+        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val asrtns = contestUA.pollingAssertions
+        val assort = asrtns.first().assorter
+
         val margin = 0.2
 
-        val assort = PluralityAssorter(contest, 0, 1)
         var aVb = ComparisonAssorter(contest, assort, (margin + 1.0)/2)
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
@@ -302,15 +302,16 @@ class TestOverstatementsFromShangrla {
         //
         //        winner = ["Alice"]
         //        loser = ["Bob", "Candy"]
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
-            winnerNames = listOf("Alice"),
         )
-
-        val assort = PluralityAssorter(contest, 0, 1)
+        val contest = makeFakeContest(info, 100)
+        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val asrtns = contestUA.pollingAssertions
+        val assort = asrtns.first().assorter
 
         // python
         //

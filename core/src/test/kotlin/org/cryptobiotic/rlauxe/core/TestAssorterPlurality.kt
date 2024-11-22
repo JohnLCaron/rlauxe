@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeCvr
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,18 +10,18 @@ class TestAssorterPlurality {
 
     @Test
     fun testBasics() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C"),
-            winnerNames = listOf("A"),
         )
-        val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
         val cvr0 = makeCvr(0)
         val cvr1 = makeCvr(1)
         val cvr2 = makeCvr(2)
+        val contest = makeContestFromCvrs(info, listOf(cvr0, cvr1, cvr2))
 
+        val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
         val avalue0 = assorter.assort(cvr0)
         val avalue1 = assorter.assort(cvr1)
         val avalue2 = assorter.assort(cvr2)
@@ -35,14 +32,14 @@ class TestAssorterPlurality {
 
     @Test
     fun testTwoCandidatePlurality() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B"),
-            winnerNames = listOf("A"),
         )
         val cvrs = makeCvrsByExactMean(ncards = 100, mean = .55)
+        val contest = makeContestFromCvrs(info, cvrs)
 
         val winner = PluralityAssorter(contest, winner = 0, loser = 1)
         val winnerAvg = cvrs.map { winner.assort(it) }.average()
@@ -55,16 +52,17 @@ class TestAssorterPlurality {
 
     @Test
     fun testThreeCandidatePluralityAssorter() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C"),
-            winnerNames = listOf("A"),
         )
         val cvr0 = makeCvr(0)
         val cvr1 = makeCvr(1)
         val cvr2 = makeCvr(2)
+        val contest = makeContestFromCvrs(info, listOf(cvr0, cvr1, cvr2))
+
         val winner12 = PluralityAssorter(contest, winner = 1, loser = 2)
         assertEquals(0.5, winner12.assort(cvr0))
         assertEquals(1.0, winner12.assort(cvr1))
@@ -73,15 +71,15 @@ class TestAssorterPlurality {
 
     @Test
     fun testThreeCandidatePluralityAvg() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C"),
-            winnerNames = listOf("A"),
         )
         val counts = listOf(1000, 980, 100)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+        val contest = makeContestFromCvrs(info, cvrs)
 
         test3way(contest, cvrs, counts, 0, 1, 2)
         test3way(contest, cvrs, counts, 0, 2, 1)
@@ -122,16 +120,16 @@ class TestAssorterPlurality {
 
     @Test
     fun testNCandidatePluralityAvg() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("E"),
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val ncandidates = counts.size
+        val contest = makeContestFromCvrs(info, cvrs)
 
         repeat(ncandidates) { winner ->
             var allPass = true
@@ -168,15 +166,16 @@ class TestAssorterPlurality {
 
     @Test
     fun testMultipleWinners() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
+            nwinners = 2,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+        val contest = makeContestFromCvrs(info, cvrs)
 
         // this is the test one makes in production
         // there are nwinners * (ncandidates - nwinners) assertions = 2 x 3 = 6
@@ -198,15 +197,16 @@ class TestAssorterPlurality {
 
     @Test
     fun testNoMissingMultipleWinners() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
+            nwinners = 2,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+        val contest = makeContestFromCvrs(info, cvrs)
 
         val ncandidates = counts.size
         repeat(ncandidates) { cand1 ->

@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.flipExactVotes
 import java.security.SecureRandom
+import kotlin.random.Random
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
 
@@ -63,8 +61,29 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<CvrIF> {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// old, deprecated TODO get rid of?
 
+fun makeContestFromCvrs(info: ContestInfo, cvrs: List<CvrIF>): Contest {
+    val votes = tabulateVotes(cvrs)
+    val ncards = cardsPerContest(cvrs)
+
+    if ((votes[info.id] == null) || (ncards[info.id] == null)) {
+        print("")
+    }
+
+    return Contest(
+        info,
+        votes[info.id] ?: emptyMap(),
+        ncards[info.id] ?: 0
+    )
+}
+
+fun makeContestsFromCvrs(cvrs: List<CvrIF>, choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY): List<Contest> {
+    val votes = tabulateVotes(cvrs)
+    val ncards = cardsPerContest(cvrs)
+    return makeContestsFromCvrs(votes, ncards, choiceFunction)
+}
+
+// Number of votes in each contest, return contestId -> candidateId -> nvotes
 fun tabulateVotes(cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
     val r = mutableMapOf<Int, MutableMap<Int, Int>>()
     for (cvr in cvrs) {
@@ -101,18 +120,32 @@ fun makeContestsFromCvrs(
 
     for ((contestId, candidateMap) in svotes.toSortedMap()) {
         val scandidateMap = candidateMap.toSortedMap()
-        val winner = scandidateMap.maxBy { it.value }.key
 
         contests.add(
             Contest(
-                name = "contest$contestId",
-                id = contestId,
-                choiceFunction = choiceFunction,
-                candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
-                winnerNames = listOf("candidate$winner"),
+                ContestInfo(
+                    name = "contest$contestId",
+                    id = contestId,
+                    choiceFunction = choiceFunction,
+                    candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
+                    nwinners=1,
+                ),
+                votes[contestId]!!,
+                cards[contestId]!!
             )
         )
     }
 
     return contests
+}
+
+fun makeFakeContest(info: ContestInfo, ncvrs: Int): Contest {
+    val cvrs = mutableListOf<Cvr>()
+    repeat(ncvrs) {
+        val votes = mutableMapOf<Int, IntArray>()
+        val choice = Random.nextInt(info.nwinners)
+        votes[0] = intArrayOf(choice)
+        cvrs.add(Cvr("card-$it", votes))
+    }
+    return makeContestFromCvrs(info, cvrs)
 }

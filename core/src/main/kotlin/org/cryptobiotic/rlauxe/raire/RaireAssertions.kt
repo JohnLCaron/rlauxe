@@ -35,7 +35,7 @@ class RaireContestUnderAudit(
         }
     }
 
-    override fun makeComparisonAssertions(cvrs : Iterable<CvrUnderAudit>) {
+    override fun makeComparisonAssertions(cvrs : Iterable<CvrIF>): ContestUnderAudit {
             this.comparisonAssertions = assertions.map { assertion ->
             val assorter = RaireAssorter(this, assertion)
             val welford = Welford()
@@ -48,10 +48,11 @@ class RaireContestUnderAudit(
             // println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
             ComparisonAssertion(contest, comparisonAssorter)
         }
+        return this
     }
 
     fun show() = buildString {
-        appendLine("  contest $name winner $winner eliminated $eliminated")
+        appendLine("  contest ${contest.info.name} winner $winner eliminated $eliminated")
         assertions.forEach { append(it.show()) }
     }
 
@@ -65,11 +66,14 @@ class RaireContestUnderAudit(
 
             val candidates =  listOf(winner) + eliminated // the sum of winner and eliminated must be all the candiates
             val contest = Contest(
-                name,
-                name.toInt(), // ??
-                candidates.associate{ it.toString() to it },
-                listOf(winner.toString()),
-                SocialChoiceFunction.IRV,
+                ContestInfo(
+                    name,
+                    name.toInt(), // ??
+                    candidates.associate{ it.toString() to it },
+                    SocialChoiceFunction.IRV,
+                ),
+                emptyMap(), // TODO
+                Nc = 0,
             )
             return RaireContestUnderAudit(contest, winner, eliminated, expectedPollsNumber, expectedPollsPercent, assertions)
         }
@@ -107,8 +111,8 @@ data class RaireAssertion(
 
 // This a primitive assorter.
 class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAssertion): AssorterFunction {
-    val contestName = contest.name
-    val contestId = contest.name.toInt()
+    val contestName = contest.contest.info.name
+    val contestId = contest.id
     val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
 
     override fun upperBound() = 1.0
@@ -122,6 +126,8 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     }
     override fun winner() = assertion.winner
     override fun loser() = assertion.loser
+
+    override fun reportedMargin(): Double = 0.0 // TODO
 
     override fun assort(mvr: CvrIF): Double {
         if (mvr.phantom) {

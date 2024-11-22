@@ -30,9 +30,9 @@ class TestPollingWorkflow {
         }
 
         // make contests from cvrs
-        val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+        val contests: List<Contest> = makeContestsFromCvrs(cvrs, SocialChoiceFunction.PLURALITY)
 
-        val workflow = PollingWorkflow(auditConfig, contests, cvrs, mapOf(339 to cvrs.size))
+        val workflow = PollingWorkflow(auditConfig, contests)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 

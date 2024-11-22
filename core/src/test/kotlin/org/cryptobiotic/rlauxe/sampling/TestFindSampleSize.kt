@@ -13,7 +13,7 @@ class TestFindSampleSize {
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
 
-            contest.makePollingAssertions(cvrsUAP)
+            contest.makePollingAssertions()
             contest.pollingAssertions.forEach {
                 println("  polling assertion = ${it}")
             }

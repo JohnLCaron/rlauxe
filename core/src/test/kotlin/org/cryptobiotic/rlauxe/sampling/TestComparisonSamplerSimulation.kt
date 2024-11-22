@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.makeStandardContest
 import org.cryptobiotic.rlauxe.raire.import
 import org.cryptobiotic.rlauxe.raire.readRaireBallots
 import org.cryptobiotic.rlauxe.raire.readRaireResults
@@ -20,9 +18,10 @@ class TestComparisonSamplerSimulation {
             val theta = margin2mean(margin)
             val cvrs: List<CvrIF> = makeCvrsByExactMean(N, theta)
             val cvrsUA = cvrs.map { CvrUnderAudit(it as Cvr, false) }
-            val contest = makeStandardContest()
-            val contestUA = ContestUnderAudit(contest)
-            val compareAssorter = makeStandardComparisonAssorter(theta)
+
+            val contest = makeContestsFromCvrs(cvrs).first()
+            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+            val compareAssorter = contestUA.comparisonAssertions.first().assorter
 
             val sampler = ComparisonSamplerSimulation(cvrsUA, contestUA, compareAssorter)
             testLimits(sampler, N, compareAssorter.upperBound)
@@ -50,9 +49,11 @@ class TestComparisonSamplerSimulation {
             val theta = margin2mean(margin)
             val cvrs: List<CvrIF> = makeCvrsByExactMean(N, theta)
             val cvrsUA = cvrs.map { CvrUnderAudit(it as Cvr, false) }
-            val contest = makeStandardContest()
-            val contestUA = ContestUnderAudit(contest)
-            val compareAssorter = makeStandardComparisonAssorter(theta)
+
+            val contest = makeContestsFromCvrs(cvrs).first()
+            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+            val compareAssorter = contestUA.comparisonAssertions.first().assorter
+
             run(cvrsUA, contestUA, compareAssorter)
         }
     }

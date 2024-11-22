@@ -11,26 +11,24 @@ private val showQuantiles = false
 class PollingWorkflow(
     val auditConfig: AuditConfig,
     contests: List<Contest>, // the contests you want to audit
-    val cvrs: List<CvrIF>,
-    val upperBounds: Map<Int, Int>, // 𝑁_𝑐.
+    // val cvrs: List<CvrIF>, // what is this ??
 ) {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it) }
-    val cvrsUA: List<CvrUnderAudit>
+    // val cvrsUA: List<CvrUnderAudit>
     val prng = Prng(auditConfig.seed)
 
     init {
         contestsUA.forEach {
-            it.Nc = upperBounds[it.contest.id]!!
             if (it.Nc < it.ncvrs) throw RuntimeException(
                 "upperBound ${it.Nc} < ncvrs ${it.ncvrs} for contest ${it.contest.id}"
             )
         }
 
         val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
-        cvrsUA = cvrs.map { CvrUnderAudit(it as Cvr, false, prng.next()) } + phantomCVRs
+        // cvrsUA = cvrs.map { CvrUnderAudit(it as Cvr, false, prng.next()) } + phantomCVRs
 
         contestsUA.forEach { contest ->
-            contest.makePollingAssertions(cvrsUA)
+            contest.makePollingAssertions()
         }
     }
 
@@ -40,10 +38,13 @@ class PollingWorkflow(
      */
     fun chooseSamples(prevMvrs: List<CvrIF>, round: Int): List<Int> {
         // set contestUA.sampleSize
-        contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
+        contestsUA.forEach {
+            it.sampleSize = 10
+            it.sampleThreshold = 0L
+        } // need to reset this each round
         val maxContestSize = simulateSampleSizes(auditConfig, contestsUA, prevMvrs, round)
 
-        val samples = consistentSampling(contestsUA, cvrsUA)
+        val samples = consistentSampling(contestsUA, emptyList()) // TODO
         println(" maxContestSize=$maxContestSize consistentSamplingSize= ${samples.size}")
         return samples// set contestUA.sampleThreshold
     }
@@ -51,13 +52,13 @@ class PollingWorkflow(
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
     fun runAudit(sampleIndices: List<Int>, mvrs: List<CvrIF>): Boolean {
 
-        val sampledCvrs = sampleIndices.map { cvrsUA[it] }
+        val sampledCvrs = sampleIndices.map { mvrs[it] } // TODO
         val useMvrs = if (mvrs.isEmpty()) sampledCvrs else mvrs
 
         // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == useMvrs.size)
-        val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = useMvrs.zip(sampledCvrs)
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
+        //require(sampledCvrs.size == useMvrs.size)
+        //val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = useMvrs.zip(sampledCvrs)
+        //cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize across assertions
         var allDone = true
@@ -74,8 +75,10 @@ class PollingWorkflow(
         return allDone
     }
 
-    // TODO somehow est is much higher than actual
-    // TODO what forces this to a higher count on subsequent rounds ?? the overstatements in the mvrs ??
+    // SHANGRLA does a simulation with a sample with same margin. So we need the margin.
+    // TODO whats the closed form estimate?
+    // SuperSimple has "divide a constant by the diluted  margin.”
+    // Bravo has Wald estimate for 2 candidate plurality
     fun simulateSampleSizes(
         auditConfig: AuditConfig,
         contestsUA: List<ContestUnderAudit>,
@@ -89,7 +92,7 @@ class PollingWorkflow(
             val sampleSizes = mutableListOf<Int>()
             contestUA.comparisonAssertions.map { assert ->
                 if (!assert.proved) {
-                    val result = finder.simulateSampleSize(contestUA, assert.assorter, cvrs)
+                    val result = finder.simulateSampleSize(contestUA, assert.assorter, emptyList()) // TODO
                     if (showQuantiles) {
                         print("   quantiles: ")
                         repeat(9) {
@@ -111,7 +114,7 @@ class PollingWorkflow(
                     // println("  errorRates % = [${result.errorRates()}]")
                 }
             }
-            contestUA.sampleSize = sampleSizes.max()
+            contestUA.sampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
         }
 
         // AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is when you just want the
@@ -133,7 +136,7 @@ class PollingWorkflow(
         val assorter = assertion.assorter
         val sampler: SampleFn = PollWithoutReplacement(cvrs, assorter)
 
-        val eta0 = assertion.avgCvrAssortValue
+        val eta0 = margin2mean(assertion.margin)
         val minsd = 1.0e-6
         val t = 0.5
         val c = (eta0 - t) / 2

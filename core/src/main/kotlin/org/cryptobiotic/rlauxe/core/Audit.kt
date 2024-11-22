@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
 
-// TODO propably dont need any Audit class anymore.
+// TODO dont need Audit class anymore.
 // Now that ContestUnderAudit has its assertions contained
 data class AuditPolling(
     val auditType: AuditType,
@@ -34,32 +34,6 @@ fun makePollingAssertions(contest: Contest, cvrs: Iterable<CvrIF>): Pair<Int, Li
         SocialChoiceFunction.SUPERMAJORITY -> Pair(contest.id, makeSuperMajorityAssertions(contest, cvrs))
         else -> throw RuntimeException(" choice function ${contest.choiceFunction} is not supported")
     }
-
-// needed
-fun makePluralityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
-    // test that every winner beats every loser. SHANGRLA 2.1
-    val assertions = mutableListOf<Assertion>()
-    contest.winners.forEach { winner ->
-        contest.losers.forEach { loser ->
-            val assorter = PluralityAssorter(contest, winner, loser)
-            val avgAssortValue = cvrs.map { assorter.assort(it) }.average()
-            assertions.add(Assertion(contest, assorter, avgAssortValue))
-        }
-    }
-    return assertions
-}
-
-// needed
-fun makeSuperMajorityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
-    // each winner generates 1 assertion. SHANGRLA 2.3
-    val assertions = mutableListOf<Assertion>()
-    contest.winners.forEach { winner ->
-        val assorter = SuperMajorityAssorter(contest, winner, contest.minFraction!!)
-        val avgAssortValue = cvrs.map { assorter.assort(it) }.average()
-        assertions.add(Assertion(contest, assorter, avgAssortValue))
-    }
-    return assertions
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,4 +75,30 @@ fun makeComparisonAudit(contests: List<Contest>, cvrs : Iterable<CvrIF>, riskLim
     }
 
     return AuditComparison(AuditType.CARD_COMPARISON, riskLimit, contests, comparisonAssertions)
+}
+
+// needed
+fun makePluralityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
+    // test that every winner beats every loser. SHANGRLA 2.1
+    val assertions = mutableListOf<Assertion>()
+    contest.winners.forEach { winner ->
+        contest.losers.forEach { loser ->
+            val assorter = PluralityAssorter(contest, winner, loser)
+            val avgAssortValue = cvrs.map { assorter.assort(it) }.average()
+            assertions.add(Assertion(contest, assorter))
+        }
+    }
+    return assertions
+}
+
+// needed
+fun makeSuperMajorityAssertions(contest: Contest, cvrs: Iterable<CvrIF>): List<Assertion> {
+    // each winner generates 1 assertion. SHANGRLA 2.3
+    val assertions = mutableListOf<Assertion>()
+    contest.winners.forEach { winner ->
+        val assorter = SuperMajorityAssorter(contest, winner, contest.info.minFraction!!)
+        val avgAssortValue = cvrs.map { assorter.assort(it) }.average()
+        assertions.add(Assertion(contest, assorter))
+    }
+    return assertions
 }

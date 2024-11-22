@@ -24,6 +24,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import kotlin.test.Test
 
 import kotlin.text.format
@@ -129,7 +130,7 @@ class CreatePollingDiffMeans {
                     repeat(nthreads) {
                         calcJobs.add(
                             launchCalculations(taskProducer) { task ->
-                                calculate(task, nrepeat, d=d, reportedMeanDiff=reportedMeanDiff)
+                                calculate(task, nrepeat, d = d, reportedMeanDiff = reportedMeanDiff)
                             })
                     }
 
@@ -166,7 +167,14 @@ class CreatePollingDiffMeans {
 
     fun calculate(task: AlphaMartTask, nrepeat: Int, d: Int, reportedMeanDiff: Double): SRT {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
-        val rr = runAlphaMartWithMeanDiff(task.theta, task.cvrs, reportedMeanDiff=reportedMeanDiff, nrepeat = nrepeat, d = d, silent = true).first()
+        val rr = runAlphaMartWithMeanDiff(
+            task.theta,
+            task.cvrs,
+            reportedMeanDiff = reportedMeanDiff,
+            nrepeat = nrepeat,
+            d = d,
+            silent = true
+        ).first()
         val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
         val sr = rr.makeSRT(task.N, reportedMean, reportedMeanDiff)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, $sr")
@@ -206,43 +214,41 @@ class CreatePollingDiffMeans {
         reportedMeanDiff: Double,
         nrepeat: Int,
         d: Int = 500,
-        silent: Boolean = true
+        silent: Boolean = true,
     ): List<RunTestRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
-        val audit = makePollingAudit(contests = listOf(contest), cvrs)
+        val info = ContestInfo("contest0", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contestUA = ContestUnderAudit(info, cvrs).makePollingAssertions()
 
         val results = mutableListOf<RunTestRepeatedResult>()
-        audit.assertions.map { (contestId, assertions) ->
-            if (!silent && showContests) println("Assertions for Contest ${contest.name}")
-            assertions.forEach { assert ->
-                if (!silent && showContests) println("  ${assert}")
+        contestUA.pollingAssertions.map { assert ->
+            if (!silent && showContests) println("Assertions for Contest ${contestUA.name}")
+            if (!silent && showContests) println("  ${assert}")
 
-                val cvrSampler = PollWithoutReplacement(cvrs, assert.assorter)
+            val cvrSampler = PollWithoutReplacement(cvrs, assert.assorter)
 
-                val result = runAlphaMartRepeated(
-                    drawSample = cvrSampler,
-                    maxSamples = N,
-                    eta0 = reportedMean, // use the reportedMean for the initial guess
-                    d = d,
-                    ntrials = nrepeat,
-                    withoutReplacement = true,
-                    upperBound = assert.assorter.upperBound()
+            val result = runAlphaMartRepeated(
+                drawSample = cvrSampler,
+                maxSamples = N,
+                eta0 = reportedMean, // use the reportedMean for the initial guess
+                d = d,
+                ntrials = nrepeat,
+                withoutReplacement = true,
+                upperBound = assert.assorter.upperBound()
+            )
+            if (!silent) {
+                println(result)
+                println(
+                    "truePopulationCount=${ff.format(cvrSampler.sampleCount())} truePopulationMean=${
+                        ff.format(cvrSampler.sampleMean())
+                    } failPct=${result.failPct()} status=${result.status}"
                 )
-                if (!silent) {
-                    println(result)
-                    println(
-                        "truePopulationCount=${ff.format(cvrSampler.sampleCount())} truePopulationMean=${
-                            ff.format(cvrSampler.sampleMean())
-                        } failPct=${result.failPct()} status=${result.status}"
-                    )
-                }
-                results.add(result)
             }
+            results.add(result)
         }
         return results
     }

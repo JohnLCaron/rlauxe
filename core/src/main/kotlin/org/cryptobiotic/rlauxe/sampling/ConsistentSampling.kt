@@ -71,8 +71,8 @@ fun consistentSampling(
     contests: List<ContestUnderAudit>, // all the contests you want to sample
     cvrList: List<CvrUnderAudit>, // all the cvrs available to sample
 ): List<Int> {
-    val currentSizes = mutableMapOf<String, Int>()
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.name] ?: 0) < c.sampleSize
+    val currentSizes = mutableMapOf<Int, Int>()
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
 
     // get list of cvr indexes sorted by sampleNum
     val sortedCvrIndices = cvrList.indices.sortedBy { cvrList[it].sampleNum }
@@ -92,7 +92,7 @@ fun consistentSampling(
             contests.forEach { contest ->
                 if (contestInProgress(contest) && cvr.hasContest(contest.id)) {
                     contest.sampleThreshold = cvr.sampleNum // track the largest sample used
-                    currentSizes[contest.name] = currentSizes[contest.name]?.plus(1) ?: 1
+                    currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
                 }
             }
         }

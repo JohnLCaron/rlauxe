@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
@@ -15,11 +15,11 @@ class TestComparisonFuzzed {
         val avgCvrAssortValue = .505
         val ncvrs = 10000
         val cvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
+        val contest = makeContestsFromCvrs(cvrs).first()
+        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val assort = contestUA.comparisonAssertions.first().assorter
+
         val cvrsUI = cvrs.map { CvrUnderAudit(it as Cvr, false) }
-        val assort = makeStandardComparisonAssorter(avgCvrAssortValue)
-        val contestUA = ContestUnderAudit(assort.contest)
-        contestUA.ncvrs = ncvrs
-        contestUA.Nc = ncvrs
 
         // flip
         val mvrsFuzzed = cvrsUI.map { it.flip() }
@@ -44,10 +44,10 @@ class TestComparisonFuzzed {
         val ncvrs = 10000
         val cvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
         val cvrsUI = cvrs.map { CvrUnderAudit(it as Cvr, false) }
-        val assort = makeStandardComparisonAssorter(3, avgCvrAssortValue)
-        val contestUA = ContestUnderAudit(assort.contest)
-        contestUA.ncvrs = ncvrs
-        contestUA.Nc = ncvrs
+
+        val contest = makeContestsFromCvrs(cvrs).first()
+        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val assort = contestUA.comparisonAssertions.first().assorter
 
         // flip
         val mvrsFlip = cvrsUI.map { it.flip() }

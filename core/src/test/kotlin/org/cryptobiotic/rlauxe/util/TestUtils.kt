@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.doubleIsClose
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import kotlin.math.abs
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TestUtils {
 

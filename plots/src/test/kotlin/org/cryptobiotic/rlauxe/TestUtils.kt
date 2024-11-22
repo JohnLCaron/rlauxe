@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.*
 import kotlin.math.abs
 
 val doublePrecision = 1.0e-8
@@ -16,7 +13,14 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
     //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
     return abs(a - b) <= atol + rtol * abs(b)
 }
-fun makeStandardContest() = Contest("standard", 0, mapOf("A" to 0,"B" to 1), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+
+
+fun makeStandardContest() =
+    Contest(
+        ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
+        emptyMap(), // TODO
+        Nc = 0,
+    )
 fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
     ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)

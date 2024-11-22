@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,7 +34,7 @@ class TestGenSampleFn {
         }
 
         // make contests from cvrs
-        val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
+        val contests: List<Contest> = makeContestsFromCvrs(cvrs)
         if (!silent && showContests) {
             println("Contests")
             contests.forEach { println("  ${it}") }
@@ -80,21 +79,21 @@ class TestGenSampleFn {
 
     @Test
     fun testComparisonWithErrors() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
-            winnerNames = listOf("Alice"),
         )
-        val assorter = PluralityAssorter(contest, winner = 0, loser = 1)
+
         val cvrMean = .51
         val meanDiff = -.015
         val N = 10000
         println("testComparisonWithErrors N=$N cvrMean=$cvrMean meanDiff=$meanDiff")
         repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
-            val bassorter = ComparisonAssorter(contest, assorter, cvrMean)
+            val contest = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
+            val bassorter = contest.comparisonAssertions.first().assorter
             assertEquals(.02, bassorter.margin, doublePrecision)
             assertEquals(0.5050505050505051, bassorter.noerror, doublePrecision)
             assertEquals(1.0101010101010102, bassorter.upperBound, doublePrecision)
@@ -108,6 +107,7 @@ class TestGenSampleFn {
             assertEquals(noerror, bassorter.noerror, doublePrecision)
             assertEquals(upperBound, bassorter.upperBound, doublePrecision)
 
+            val assorter = bassorter.assorter
             val cvrVotes = cs.cvrs.map { assorter.assort(it) }.sum()
             val mvrVotes = cs.mvrs.map { assorter.assort(it) }.sum()
             assertEquals(cvrVotes - cs.flippedVotes, mvrVotes, doublePrecision)
@@ -136,7 +136,10 @@ class TestGenSampleFn {
         val reportedMargin = .05
         val reportedAvg = margin2mean(reportedMargin)
         val cvrs = makeCvrsByExactMean(N, reportedAvg)
-        val compareAssorter = makeStandardComparisonAssorter(reportedAvg)
+        val contest = makeContestsFromCvrs(cvrs).first()
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val compareAssorter = contestUA.comparisonAssertions.first().assorter
+
         val meanDiff = .01
         val sampler = ComparisonWithErrors(cvrs, compareAssorter, reportedAvg-meanDiff)
         testLimits(sampler, N, compareAssorter.upperBound)
@@ -159,7 +162,10 @@ class TestGenSampleFn {
 
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val contest = makeContestsFromCvrs(cvrs).first()
+                val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+                val compareAssorter = contestUA.comparisonAssertions.first().assorter
+
                 val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2)
                 testLimits(sampler, N, compareAssorter.upperBound)
 
@@ -184,7 +190,10 @@ class TestGenSampleFn {
                 for (p1 in p1s) {
                     val theta = margin2mean(margin)
                     val cvrs = makeCvrsByExactMean(N, theta)
-                    val compareAssorter = makeStandardComparisonAssorter(theta)
+                    val contest = makeContestsFromCvrs(cvrs).first()
+                    val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+                    val compareAssorter = contestUA.comparisonAssertions.first().assorter
+
                     val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2, p1, true) // false just makes the numbers imprecise
                     testLimits(sampler, N, compareAssorter.upperBound)
                     println("\nmargin=$margin p2 = $p2 p1= $p1")

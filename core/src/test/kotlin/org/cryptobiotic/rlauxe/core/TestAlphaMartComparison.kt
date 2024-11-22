@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import kotlin.math.max
 import kotlin.test.Test
@@ -16,8 +16,9 @@ class TestAlphaMartComparison {
         val N = 10000
         val cvrMean = .52
         val cvrs = makeCvrsByExactMean(N, cvrMean)
-
-        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+        val contest = makeContestsFromCvrs(cvrs).first()
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val compareAssorter = contestUA.comparisonAssertions.first().assorter
 
         val sampler = ComparisonNoErrors(cvrs, compareAssorter)
         val theta = sampler.sampleMean()

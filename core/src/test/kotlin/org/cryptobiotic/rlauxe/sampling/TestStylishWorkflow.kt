@@ -29,9 +29,10 @@ class TestStylishWorkflow {
             requireNotNull(rc)
             require(rc.candidates == rrc.candidates)
             rrc.ncvrs = rc.ncvrs
+            rrc.Nc = rc.ncvrs
         }
 
-        val workflow = StylishWorkflow(emptyList(), raireResults.contests, auditConfig, cvrs, mapOf(339 to cvrs.size))
+        val workflow = StylishWorkflow(emptyList(), raireResults.contests, auditConfig, cvrs)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 
@@ -68,7 +69,7 @@ class TestStylishWorkflow {
 
             val sampledMvrs = indices.map { sampler.mvrs[it] }
 
-            done = workflow.runAudit(indices, sampledMvrs, sampler)
+            done = workflow.runAudit(indices, sampledMvrs)
             println("$round runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             round++

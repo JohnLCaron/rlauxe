@@ -21,7 +21,7 @@ Table of Contents
     * [Betting martingales](#betting-martingales)
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
-      * [Comparison Betting Payoffs](#comparison-betting-payoffs)
+      * [Comparison Betting Payoffs](#cinitomparison-betting-payoffs)
   * [Sampling](#sampling)
     * [Estimating Sample sizes (in progress)](#estimating-sample-sizes-in-progress)
     * [Consistent Sampling](#consistent-sampling)

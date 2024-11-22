@@ -1,18 +1,14 @@
 package org.cryptobiotic.rlauxe.comparison
 
-import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.core.ComparisonAssertion
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.makeComparisonAudit
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.junit.jupiter.api.Test
 
 // TODO
@@ -27,13 +23,13 @@ class TestAuditComparison {
         val cvrs = makeCvrsByExactMean(N, theta)
         println("ncvrs = ${cvrs.size} theta=$theta")
 
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B"),
-            winnerNames = listOf("A"),
         )
+        val contest = makeContestFromCvrs(info, cvrs)
 
         val assort = PluralityAssorter(contest, 0, 1)
         val assortAvg = cvrs.map { assort.assort(it) }.average()

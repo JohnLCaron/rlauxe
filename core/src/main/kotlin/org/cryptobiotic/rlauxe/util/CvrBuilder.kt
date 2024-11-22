@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.core.*
 
 // for testing, here to share between modules
 
@@ -22,7 +19,7 @@ class CvrBuilders {
     val contests = mutableMapOf<String, CvrContest>()
     var contestId = 0
 
-    fun addContests(rcontests: List<Contest>): CvrBuilders {
+    fun addContests(rcontests: List<ContestInfo>): CvrBuilders {
         rcontests.forEach {
             val c = CvrContest(it.name, it.id)
             c.candidates.putAll(it.candidateNames)
@@ -67,11 +64,20 @@ class CvrBuilder(
         return contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
     }
 
-    fun addContest(contestName: String, candName: String?): ContestBuilder {
+    fun addContest(contestName: String, candidateId: Int?): ContestBuilder {
         val contest = builders.getContest(contestName)
         val cb = contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
-        if (candName != null) {
-            cb.addCandidate(candName)
+        if (candidateId != null) {
+            cb.addCandidate(candidateId)
+        }
+        return cb
+    }
+
+    fun addContest(contestName: String, candidateName: String?): ContestBuilder {
+        val contest = builders.getContest(contestName)
+        val cb = contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
+        if (candidateName != null) {
+            cb.addCandidate(candidateName)
         }
         return cb
     }
@@ -94,6 +100,11 @@ class ContestBuilder(
     fun addCandidate(candName: String, addVote: Int = 1): ContestBuilder {
         val candIdx =  contest.getCandidateIdx(candName)
         if (addVote == 1) votes.add(candIdx)
+        return this
+    }
+
+    fun addCandidate(candId: Int, addVote: Int = 1): ContestBuilder {
+        if (addVote == 1) votes.add(candId) // TODO WRONG
         return this
     }
 

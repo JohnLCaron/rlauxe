@@ -26,6 +26,8 @@ import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.util.makeFakeContest
 import kotlin.test.Test
 
 // PlotSampleSizes
@@ -209,7 +211,8 @@ class CompareAuditType {
         // ignore the "reported winner". just focus on d vs reportedMeanDiff
         val reportedMean = theta + reportedMeanDiff
 
-        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val contest = makeContestFromCvrs(info, cvrs)
 
         // polling
         val pollingAudit = makePollingAudit(contests = listOf(contest), cvrs)
@@ -259,12 +262,13 @@ class CompareAuditType {
         val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
 
-        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         val pollingSrs = mutableListOf<SRT>()
         val compareSrs = mutableListOf<SRT>()
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
+            val contest = makeContestFromCvrs(info, cvrs)
 
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
             val compareAssertion = compareAudit.assertions[contest.id]!!.first()

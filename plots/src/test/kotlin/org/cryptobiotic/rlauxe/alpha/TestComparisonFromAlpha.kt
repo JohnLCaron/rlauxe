@@ -476,11 +476,13 @@ class TestComparisonFromAlpha {
 
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
 
-        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
+            val contest = makeContestFromCvrs(info, cvrs)
+            val contestUA = ContestUnderAudit(info, cvrs)
             val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
             val compareAssertions = compareAudit.assertions[contest.id]
             require(compareAssertions!!.size == 1)
@@ -539,7 +541,13 @@ class TestComparisonFromAlpha {
         val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
         assertEquals(1.009081735, u, doublePrecision)
          */
-        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val info = ContestInfo(
+            "contest0",
+            0,
+            listToMap("A", "B"),
+            choiceFunction = SocialChoiceFunction.PLURALITY
+        )
+        val contest = makeFakeContest(info, 100)
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
@@ -630,14 +638,13 @@ class TestComparisonFromAlpha {
         val d = 10000
         val ntrials = 100
 
-        val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
 
         for (factor in factors) {
             val srs = mutableListOf<SRT>()
             val cvrs = makeCvrsByExactMean(N, theta)
-            val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-            val compareAssertion = compareAudit.assertions[contest.id]!!.first()
-
+            val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
+            val compareAssertion = contestUA.comparisonAssertions.first()
             val margin = compareAssertion.assorter.margin
             val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
             val etaActual = drawSample.sampleMean()

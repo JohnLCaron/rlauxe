@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.sampling.ArrayAsGenSampleFn
@@ -9,7 +10,7 @@ import org.cryptobiotic.rlauxe.sampling.generateUniformSample
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
@@ -99,7 +100,9 @@ class TestComparisonMasses {
         println("\nN=$N cvrMean=$cvrMean cvrMeanDiff=$cvrMeanDiff theta=${theta}")
 
         val cvrs = makeCvrsByExactMean(N, cvrMean)
-        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+        val contest = makeContestsFromCvrs(cvrs).first()
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val compareAssorter = contestUA.comparisonAssertions.first().assorter
 
         // sanity checks
         val sampler = ComparisonWithErrors(cvrs, compareAssorter, theta, withoutReplacement = true)
@@ -121,8 +124,10 @@ class TestComparisonMasses {
         val N = 100
         val cvrMean = .55
         val cvrs = makeCvrsByExactMean(N, cvrMean)
+        val contest = makeContestsFromCvrs(cvrs).first()
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val compareAssorter = contestUA.comparisonAssertions.first().assorter
 
-        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
         val sampler = ComparisonNoErrors(cvrs, compareAssorter)
         val assorterMean = sampler.sampleMean()
 

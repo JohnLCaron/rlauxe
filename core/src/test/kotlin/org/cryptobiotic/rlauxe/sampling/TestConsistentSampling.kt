@@ -11,13 +11,13 @@ class TestConsistentSampling {
     // SHANGRLA test_CVR.py
     @Test
     fun test_consistent_sampling() {
-        val contests: List<Contest> = listOf(
-            Contest("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
-                winnerNames= listOf("Alice"), choiceFunction = SocialChoiceFunction.PLURALITY),
-            Contest("measure_1", 1, candidateNames= listToMap("yes", "no"),
-                winnerNames= listOf("yes"), SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
-            Contest("dont_care", 2, candidateNames= listToMap("yes", "no"),
-                winnerNames= listOf("yes"), SocialChoiceFunction.PLURALITY),
+        val contestInfos: List<ContestInfo> = listOf(
+            ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
+                choiceFunction = SocialChoiceFunction.PLURALITY),
+            ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
+                SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
+            ContestInfo("dont_care", 2, candidateNames= listToMap("yes", "no"),
+                SocialChoiceFunction.PLURALITY),
         )
 
         val cvrs = CvrBuilders()
@@ -36,11 +36,8 @@ class TestConsistentSampling {
         val cvrsUA = cvrs.mapIndexed { idx, it ->
             CvrUnderAudit( it as Cvr, false, prng.next()) // here we assign sample number deterministically
         }
-        val cards =  cardsPerContest(cvrs)
-
-        val contestsUA = contests.mapIndexed { idx, it ->
-            val ncards = cards[it.id] ?: 0
-            ContestUnderAudit( it, ncards, ncards)
+        val contestsUA = contestInfos.mapIndexed { idx, it ->
+            ContestUnderAudit( it, cvrs)
         }
         contestsUA[0].sampleSize = 3
         contestsUA[1].sampleSize = 4
@@ -56,13 +53,13 @@ class TestConsistentSampling {
 
     @Test
     fun testSamplingWithPhantoms() {
-        val contests: List<Contest> = listOf(
-            Contest("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
-                winnerNames= listOf("Alice"), choiceFunction = SocialChoiceFunction.PLURALITY),
-            Contest("measure_1", 1, candidateNames= listToMap("yes", "no"),
-                winnerNames= listOf("yes"), SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
-            Contest("measure_2", 2, candidateNames= listToMap("yes", "no"),
-                winnerNames= listOf("no"), SocialChoiceFunction.PLURALITY),
+        val contestInfos: List<ContestInfo> = listOf(
+            ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
+                choiceFunction = SocialChoiceFunction.PLURALITY),
+            ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
+                SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
+            ContestInfo("measure_2", 2, candidateNames= listToMap("yes", "no"),
+                SocialChoiceFunction.PLURALITY),
         )
 
         val cvrs = CvrBuilders()
@@ -84,11 +81,9 @@ class TestConsistentSampling {
         val cvrsUA = cvrs.mapIndexed { idx, it ->
             CvrUnderAudit( it as Cvr, false, prng.next())
         }
-        val cards =  cardsPerContest(cvrs)
 
-        val contestsUA = contests.mapIndexed { idx, it ->
-            val ncards = cards[it.id] ?: 0
-            ContestUnderAudit( it, ncards, ncards+2)
+        val contestsUA = contestInfos.mapIndexed { idx, it ->
+            ContestUnderAudit( it, cvrs)
         }
         contestsUA[0].sampleSize = 3
         contestsUA[1].sampleSize = 3
@@ -96,7 +91,7 @@ class TestConsistentSampling {
 
         val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val cvrsUAP = cvrsUA + phantomCVRs
-        assertEquals(11, cvrsUAP.size)
+        assertEquals(9, cvrsUAP.size)
 
         val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
         assertEquals(6, sample_cvr_indices.size)
@@ -126,9 +121,9 @@ class TestConsistentSampling {
 
             val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
             println("nsamples = ${sample_cvr_indices.size}\n")
-            contestsUA.forEach {
-                print(it)
-                it.pollingAssertions.forEach { ass ->
+            contestsUA.forEach { contestUA ->
+                println(contestUA)
+                contestUA.pollingAssertions.forEach { ass ->
                     println("      $ass")
                 }
                 println()
@@ -138,7 +133,11 @@ class TestConsistentSampling {
             println("contest.name (id) == sampleSize")
             contestsUA.forEach { contest ->
                 val cvrs = cvrsUAP.filter { it.hasContest(contest.id) && it.sampleNum <= contest.sampleThreshold }
-                cvrs.forEach { assertTrue(it.sampled) }
+                cvrs.forEachIndexed { idx, it ->
+                    if (!it.sampled)
+                        print("")
+                    assertTrue(it.sampled)
+                }
                 val count = cvrs.size
                 assertEquals(contest.sampleSize, count)
                 println(" ${contest.name} (${contest.id}) == ${contest.sampleSize}")

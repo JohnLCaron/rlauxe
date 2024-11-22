@@ -10,6 +10,24 @@ interface AssorterFunction {
     fun desc(): String
     fun winner(): Int
     fun loser(): Int
+
+    // not sure if this is the diluted margin. might just be the margin.
+    // from SuperSimple:
+    // The number µ is the “diluted margin”: the smallest margin of victory in votes among the contests, divided by the
+    // total number of ballots cast across all the contests.
+    // The diluted margin µ is the smallest margin in votes among the contests under audit, divided by the total
+    // number of ballots cast across all the contests under audit.
+
+    // The reported margin of reported winner w ∈ Wc over reported loser l ∈ Lc in contest c is
+    //    Vwl ≡ Sum (vpw − vpl ), p=1..N = Sum (vpw) − Sum( vpl ) = votes(winner) - votes(loser)
+
+    // Define v ≡ 2Āc − 1, the reported assorter margin. In a two-candidate plurality contest, v
+    // is the fraction of ballot cards with valid votes for the reported winner, minus the fraction
+    // with valid votes for the reported loser. This is the diluted margin of [22,12]. (Margins are
+    // traditionally calculated as the difference in votes divided by the number of valid votes.
+    // Diluted refers to the fact that the denominator is the number of ballot cards, which is
+    // greater than or equal to the number of valid votes.)
+    fun reportedMargin(): Double
 }
 
 /** See SHANGRLA, section 2.1. */
@@ -24,6 +42,12 @@ data class PluralityAssorter(val contest: Contest, val winner: Int, val loser: I
     override fun desc() = "PluralityAssorter winner=$winner loser=$loser"
     override fun winner() = winner
     override fun loser() = loser
+
+    override fun reportedMargin(): Double {
+        val winnerVotes = contest.votes[winner] ?: 0
+        val loserVotes = contest.votes[loser] ?: 0
+        return (winnerVotes - loserVotes) / contest.Nc.toDouble()  // or divide by total votes ??
+    }
 }
 
 /** See SHANGRLA, section 2.3. */
@@ -33,26 +57,41 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
     // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: CvrIF): Double {
         val w = mvr.hasMarkFor(contest.id, winner)
-        return if (mvr.hasOneVote(contest.id, contest.candidates)) (w / (2 * minFraction)) else .5
+        return if (mvr.hasOneVote(contest.id, contest.info.candidateIds)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound
     override fun desc() = "SuperMajorityAssorter winner=$winner minFraction=$minFraction"
     override fun winner() = winner
     override fun loser() = -1 // TODO
+
+    // TODO how to derive the assort mean for estimation ??
+    override fun reportedMargin(): Double {
+        val winnerVotes = contest.votes[winner] ?: 0
+        val loserVotes = contest.votes.filter { it.key != winner }.values.sum()
+        val nuetralVotes = contest.Nc - winnerVotes - loserVotes
+
+        // i think this works when theres only 1 vote allowed ??
+        val weight = 1 / (2 * minFraction)
+        val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
+        return mean2margin(mean)
+    }
 }
 
 data class Assertion(
     val contest: Contest,
     val assorter: AssorterFunction,
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
+    // val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
 ) {
-    val margin = mean2margin(avgCvrAssortValue)
     val winner = assorter.winner()
     val loser = assorter.loser()
-    var proved = false // TODO is it ok to have this state ??
+    val margin = assorter.reportedMargin()
 
-    override fun toString() = "Assertion for '${contest.name}' assorter=${assorter.desc()} margin=$margin"
+    var proved = false // TODO is it ok to have this state ??
+    var samplesEst = 0
+    var samplesNeeded = 0
+
+    override fun toString() = "Assertion for '${contest.info.name}' (${contest.id}) assorter=${assorter.desc()} margin=$margin"
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +118,11 @@ data class ComparisonAssorter(
 
     init {
         if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
+            if (avgCvrAssortValue <= 0.5)
+                print("wht")
             require(avgCvrAssortValue > 0.5) { "($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            if (noerror <= 0.5)
+                print("wht")
             require(noerror > 0.5) { "($noerror) noerror must be > .5" }
         }
     }
@@ -126,7 +169,7 @@ data class ComparisonAssorter(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
         if (useStyle and !cvr.hasContest(contest.id)) {
-            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.name}")
+            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.info.name} (${contest.id})")
         }
 
         //        If use_style, then if the CVR contains the contest but the MVR does

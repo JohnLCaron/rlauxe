@@ -1,12 +1,10 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.makeCvr
-import org.cryptobiotic.rlauxe.core.makePluralityAssertions
-import org.cryptobiotic.rlauxe.core.makeSuperMajorityAssertions
 import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.makeFakeContest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -42,15 +40,16 @@ class TestAssertionsFromShangrla {
 
     @Test
     fun test_make_plurality_assertions() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "ABCs",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy", "Dan"),
-            winnerNames = listOf("Alice", "Bob"),
+            nwinners = 2,
         )
-
-        val asrtns = makePluralityAssertions(contest = contest, emptyList())
+        val contest = makeFakeContest(info, 100)
+        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val asrtns = contestUA.pollingAssertions
 
         val aliceVsCandy = asrtns.find { it.assorter.desc().contains("winner=0 loser=2") }!!
 
@@ -119,16 +118,17 @@ class TestAssertionsFromShangrla {
 
     @Test
     fun test_supermajority_assorter() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "ABCs",
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
-            winnerNames = listOf("Alice"),
             minFraction = 2.0 / 3.0,
         )
-
-        val target = makeSuperMajorityAssertions(contest = contest, emptyList()).first()
+        val contest = makeFakeContest(info, 100)
+        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val asrtns = contestUA.pollingAssertions
+        val target = asrtns.first()
 
         var votes = makeCvr(0)
         assertEquals(0.75, target.assorter.assort(votes), "wrong value for vote for winner")

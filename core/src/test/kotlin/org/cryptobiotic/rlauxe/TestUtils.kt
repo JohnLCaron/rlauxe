@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.math.abs
 import kotlin.test.assertEquals
@@ -40,6 +37,7 @@ class SampleFromList(val list: List<Double>) {
     fun sample() = list[index++]
 }
 
+/*
 fun makeStandardContest() = Contest("standard", 0, listToMap("A", "B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
 fun makeStandardPluralityAssorter() = PluralityAssorter(makeStandardContest(), 0, 1)
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
@@ -52,5 +50,6 @@ fun makeStandardContest(ncands: Int): Contest {
 }
 fun makeStandardComparisonAssorter(ncands: Int, avgCvrAssortValue: Double) =
     ComparisonAssorter(makeStandardContest(ncands), makeStandardPluralityAssorter(), avgCvrAssortValue)
+*/
 
 

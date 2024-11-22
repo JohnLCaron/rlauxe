@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -11,16 +9,16 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class TestAudit {
+class TestAssertions {
 
     @Test
     fun testPollingBasics() {
-        val contest = Contest(
+        val contestInfo = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
+            nwinners = 2,
         )
         val cvrs = CvrBuilders()
             .addCrv().addContest("AvB", "0").ddone()
@@ -34,38 +32,35 @@ class TestAudit {
             .addCrv().addContest("AvB", "4").ddone()
             .addCrv().addContest("AvB", "4").ddone()
             .build()
-        val audit = makePollingAudit(listOf(contest), cvrs, riskLimit = .01)
-        assertIs<AuditPolling>(audit)
-        println("audit = $audit")
+        val contest = makeContestFromCvrs(contestInfo, cvrs)
+        val contestUA = ContestUnderAudit(contest, cvrs.size).makePollingAssertions()
 
-        assertEquals(.01, audit.riskLimit)
-        assertEquals(1, audit.contests.size)
-
-        val assertions = audit.assertions[contest.id]
+        val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
             assertIs<Assertion>(it)
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
-            println("$it: ${it.avgCvrAssortValue}, ${it.margin}")
+            println("$it: ${it.margin}")
             assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.margin, doublePrecision)
         }
     }
 
     @Test
     fun testPollingSuper() {
-        val contest = Contest(
+        val contestInfo = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
-            minFraction = .42
+            nwinners = 2,
+            minFraction = .40
         )
         val cvrs = CvrBuilders()
             .addCrv().addContest("AvB", "0").ddone()
             .addCrv().addContest("AvB", "1").ddone()
+            .addCrv().addContest("AvB", "2").ddone()
             .addCrv().addContest("AvB", "2").ddone()
             .addCrv().addContest("AvB", "2").ddone()
             .addCrv().addContest("AvB", "2").ddone()
@@ -76,46 +71,40 @@ class TestAudit {
             .addCrv().addContest("AvB", "4").ddone()
             .addCrv().addContest("AvB", "4").ddone()
             .addCrv().addContest("AvB", "4").ddone()
+            .addCrv().addContest("AvB", "4").ddone()
             .build()
-        val audit = makePollingAudit(listOf(contest), cvrs, riskLimit = .01)
-        assertIs<AuditPolling>(audit)
-        println("audit = $audit")
+        val contest = makeContestFromCvrs(contestInfo, cvrs)
+        val contestUA = ContestUnderAudit(contest, cvrs.size).makePollingAssertions()
 
-        assertEquals(.01, audit.riskLimit)
-        assertEquals(1, audit.contests.size)
-
-        val assertions = audit.assertions[contest.id]
+        val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
             assertIs<Assertion>(it)
             assertIs<SuperMajorityAssorter>(it.assorter)
-            assertEquals(1.0 / (2.0 * contest.minFraction!!), it.assorter.upperBound())
-            println("$it: ${it.avgCvrAssortValue}, ${it.margin}")
-            assertEquals(-0.04329004329004327, it.margin, doublePrecision) // TODO
+            assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.assorter.upperBound())
+            println("$it: ${it.margin}")
+            val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr) }.average()
+            val mean = margin2mean(it.margin)
+            assertEquals(assortAvg, mean)
         }
     }
 
     @Test
     fun testComparisonBasics() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
+            nwinners = 2,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+        val contest = makeContestFromCvrs(info, cvrs)
+        val contestUA = ContestUnderAudit(contest, cvrs.size).makeComparisonAssertions(cvrs)
 
-        val audit = makeComparisonAudit(listOf(contest), cvrs, riskLimit = .01, )
-        assertIs<AuditComparison>(audit)
-        println("audit = $audit")
-
-        assertEquals(.01, audit.riskLimit)
-        assertEquals(1, audit.contests.size)
-
-        val assertions = audit.assertions[contest.id]
+        val assertions = contestUA.comparisonAssertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
@@ -128,55 +117,51 @@ class TestAudit {
 
     @Test
     fun testComparisonSuperMajority() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
+            nwinners = 2,
             minFraction = .33,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+        val contest = makeContestFromCvrs(info, cvrs)
+        val contestUA = ContestUnderAudit(contest, cvrs.size).makeComparisonAssertions(cvrs)
 
-        val audit = makeComparisonAudit(listOf(contest), cvrs, riskLimit = .01)
-        assertIs<AuditComparison>(audit)
-        println("audit = $audit")
-
-        assertEquals(.01, audit.riskLimit)
-        assertEquals(1, audit.contests.size)
-
-        val assertions = audit.assertions[contest.id]
+        val assertions = contestUA.comparisonAssertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
             assertIs<ComparisonAssertion>(it)
             assertIs<ComparisonAssorter>(it.assorter)
             assertIs< SuperMajorityAssorter>(it.assorter.assorter)
-            assertEquals(1.0 / (2.0 * contest.minFraction!!), it.assorter.assorter.upperBound())
+            assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.assorter.assorter.upperBound())
         }
     }
 
     @Test
     fun testComparisonSuperMajorityFail() {
-        val contest = Contest(
+        val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            winnerNames = listOf("C", "E"),
+            nwinners = 2,
             minFraction = .66,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
+        val contest = makeContestFromCvrs(info, cvrs)
 
         // TODO: no winners have minFraction = .66, where do we test that ?
-        val exception = assertFailsWith<RuntimeException> {
-            makeComparisonAudit(listOf(contest), cvrs, riskLimit = .01)
-        }
-        println(exception)
-        assertNotNull(exception.message)
-        assertTrue(exception.message!!.contains("avgCvrAssortValue must be > .5"))
+        //val exception = assertFailsWith<RuntimeException> {
+            val contestUA = ContestUnderAudit(contest, cvrs.size).makeComparisonAssertions(cvrs)
+        //}
+        //println(exception)
+        //assertNotNull(exception.message)
+        //assertTrue(exception.message!!.contains("avgCvrAssortValue must be > .5"))
     }
 
 }

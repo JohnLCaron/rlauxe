@@ -38,7 +38,7 @@ class StylishWorkflow(
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val auditConfig: AuditConfig,
     val cvrs: List<Cvr>,
-    val upperBounds: Map<Int, Int>, // 𝑁_𝑐.
+    // val upperBounds: Map<Int, Int>, // 𝑁_𝑐.
 ) {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
@@ -54,7 +54,7 @@ class StylishWorkflow(
         //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
         contestsUA = tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)
         contestsUA.forEach {
-            it.Nc = upperBounds[it.contest.id]!!
+            // it.Nc = upperBounds[it.contest.id]!!
             //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
             if (it.Nc < it.ncvrs) throw RuntimeException(
                 "upperBound ${it.Nc} < ncvrs ${it.ncvrs} for contest ${it.contest.id}"
@@ -99,7 +99,7 @@ class StylishWorkflow(
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<CvrIF>, sampler: ComparisonSamplerSimulation): Boolean {
+    fun runAudit(sampleIndices: List<Int>, mvrs: List<CvrIF>): Boolean {
         //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
         // 	e) Import the MVRs.
         //	f) For each MVR 𝑖:
@@ -281,7 +281,7 @@ fun runOneAssertionAudit(
         Nc = contestUA.Nc,
         noerror = assorter.noerror,
         upperBound = assorter.upperBound,
-        withoutReplacement = false
+        withoutReplacement = true  // TODO WTF was false??
     )
 
     val testH0Result = testFn.testH0(contestUA.sampleSize, terminateOnNullReject = true) { sampler.sample() }

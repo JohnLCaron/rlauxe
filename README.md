@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/20/2024
+last update: 11/22/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -22,13 +22,13 @@ Table of Contents
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
       * [Comparison Betting Payoffs](#comparison-betting-payoffs)
+      * [Comparison error rates](#comparison-error-rates)
   * [Sampling](#sampling)
     * [Estimating Sample sizes (in progress)](#estimating-sample-sizes-in-progress)
     * [Consistent Sampling](#consistent-sampling)
     * [Use Styles](#use-styles)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
-  * [Sample Size Simulation](#sample-size-simulation)
   * [Notes](#notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
@@ -185,6 +185,9 @@ See BettingMart.kt and related code for current implementation.
 
 ### Polling audits
 
+A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
+The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
+
 For the risk function, we use AlphaMart (or equivilent BettingMart) with ShrinkTrunkage, which estimates the true
 population mean (theta) using a weighted average of an initial estimate (eta0) with the actual sampled mean.
 
@@ -212,7 +215,7 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 
 The requirements for Comparison audits:
 
-* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot.
+* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot, which is compared to the MVR during the audit.
 * Assign unique identifier to each physical ballot, and put on the CVR. This is used to find the physical ballot from the sampled CVR. 
 * Must have independent upper bound on the number of cast cards that contain the contest.
 
@@ -222,11 +225,7 @@ AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average
 
 See SHANGRLA Section 3.2.
 
-A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
-The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
-
-For comparison audits, the system has already created a CVR (cast vote record) for each ballot, which is compared to the MVR.
-The overstatement error for the ith ballot is
+The overstatement error for the ith ballot is:
 ````
     ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper    "overstatement error" (SHANGRLA eq 2, p 9)
       bi is the manual voting record (MVR) for the ith ballot
@@ -244,12 +243,10 @@ and so B is an half-average assorter.
 ````
 
 Notes 
-
-* polling vs comparison audits differ in the assorter function and the testing function.
 * The comparison assorter B needs Ā(c) ≡ the average CVR assort value > 0.5.
 * Ā(c) should have the diluted margin as the denominator. 
     (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
-    Diluted refers to the fact that the denominator is the number of ballot cards, which is
+    Diluted refers to the fact that the denominator is the number of ballot cards containing that contest, which is
     greater than or equal to the number of valid votes.)
 * If overstatement error is always zero (no errors in CRV), the assort value is always
   ````
@@ -259,9 +256,7 @@ Notes
   ````
 * The possible values of the bassort function are:
       {0, .5, 1, 1.5, 2} * noerror
-* When cvr = mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
-* However the convergence is slower than for polling (!), unless one "amplifies" the estimate function.
-  See [Ballot Comparison using Betting Martingales](docs/Betting.md) that uses betting strategies to do so.
+* When the cvrs always equal the corresponfing mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
 
 #### Comparison Betting Payoffs
 
@@ -299,9 +294,45 @@ solving for sampleSize = -ln(riskLimit) / ln(payoff).
 
 * [Betting SampleSize](docs/plots/betting/BettingPayoffSampleSize.html)
 
-The plot "error=0.0" is the equivilent to COBRA Fig 1, p 6 for risk=.05. This is the best that can be done, 
+The plot "error=0.0" is the equivilent to COBRA Fig 1, p. 6 for risk=.05. This is the best that can be done, 
 the minimum sampling size for the RLA.
 Note that this value is independent of N, the number of ballots.
+
+#### Comparison error rates
+
+The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+
+ComparisonSamplerSimulation creates modified mvrs from a set of cvrs, with possibly non-zero valeus for errors p1, p2, p3, and p4.
+This works for both Plurality and IRV comparison audits.
+If p1 == p3, and p2 == p4, the margin stays the same. Call this fuzzed simulation.
+Current defaults rather arbitrarily chosen are:
+
+        val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; voted for other, cvr has winner
+        val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
+        val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; voted for winner, cvr has other
+        val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; voted for winner, cvr has loser
+
+FOr IRV, the corresponding decriptions of the errror rates are:
+
+    NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
+    NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
+    NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
+    NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
+    
+    NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
+    NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
+    NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
+    NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
+
+TODO: Compare the sample sizes of fuzzed simulations with the case of all errors == 0, at different margins.
+We expect the spread to increase, but also shift to larger samples sizes, since the cost of overstatement is higher than understatements.
+
+If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
+are more likely to be affected than others. Itw worth noting that these rates combine machine errors with human errors of
+fetching and interpreting ballots.
+
+In any case, currrently all assumptions on the a-priori error rates are arbitrary. These need to be measured for existing
+machines and practices. While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
 ## Sampling
 
@@ -312,7 +343,7 @@ above) and sampling.
 
 For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
 
-Consistent Sampling then figures out which CVRs are chosen to satisfy all of the contests being audited.
+Consistent sampling (see below) then figures out which CVRs are chosen to satisfy all of the contests being audited.
 
 Note 1: "The software offers several options for picking {𝑆_𝑐}, including some based on simulation."
 SHANGRLA doesnt seem to have any non-simulation options. May be a terminology issue.
@@ -332,14 +363,16 @@ total_size estimate, but not do the consistent sampling.
 
 ### Consistent Sampling
 
+TODO: describe algorithm.
+
 We implement only sampling without replacement. See ConsistentSampling.kt.
 
 When there are additional rounds, each round does its own consistent sampling without regards to the previous
 rounds. Since the seed remains the same, the sort is the same, and so previously founds MVRS are used as much as possible.
 
 Note that the code in SHANGRLA Audit.py CVR.consistent_sampling() never uses sampled_cvr_indices, so adopts the
-same strategy. Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt
-just use the first n sorted samples, which the code seems to assume. But I think the question is moot.
+same strategy (sampling without regards to the previous rounds). Its possible that the code is wrong when sampled_cvr_indices 
+is passed in, since the sampling doesnt just use the first n sorted samples, which the code seems to assume. But I think the question is moot.
 
 I _think_ its fine if more ballots come in between rounds. Just add to the "all cvrs list". Ideally N_c doesnt change,
 so it just makes less evil zombies.
@@ -349,7 +382,8 @@ so it just makes less evil zombies.
 * See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020
 * See "Stylish Risk-Limiting Audits in Practice" Glazer, Spertus, Stark;  16 Sep 2023
 
-This gives a much tighter bound when you know what ballots have which contests.
+This gives a much tighter bound when you know what cards/ballots have which contests, since you can restrict your sampling
+to just those contests that are being audited.
 
 "Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling"
 
@@ -471,38 +505,6 @@ An affine transformation of the overstatement assorter values can move them back
 constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
-
-## Sample Size Simulation
-
-The assumptions that one makes about the error rates greatly affect the sample size estimation.
-
-ComparisonSamplerSimulation creates modified mvrs from a set of cvrs, with possibly non-zero valeus for errors p1, p2, p3, and p4.
-This works for both Plurality and IRV audits.
-If p1 == p3, and p2 == p4, the margin stays the same. Call this fuzzed simulation.
-Current defaults rather arbitrarily chosen are:
-
-        val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; voted for winner, cvr has loser
-
-FOr IRV, the corresponding decriptions of the errror rates are:
-
-    NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
-    NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
-    NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
-    NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
-    
-    NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
-    NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
-    NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
-    NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
-
-TODO: Compare the sample sizes of fuzzed simulations with the case of all errors == 0, at different margins.
-We expect the spread to increase, but also shift to larger samples sizes, since the cost of overstatement is higher than understatements.
-
-If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates 
-are more likely to be affected than others. 
 
 ## Notes
 

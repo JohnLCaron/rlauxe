@@ -103,6 +103,8 @@ class BettingMart(
             (mj < 0.0) -> TestH0Status.SampleSum // 5
             (mj > upperBound) -> TestH0Status.AcceptNull
             else -> {
+                if (pvalues.isEmpty())
+                    print("empty")
                 val pvalue = pvalues.last()
                 if (pvalue < riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
             }

@@ -118,7 +118,11 @@ data class ComparisonAssorter(
 
     init {
         if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
+            if (avgCvrAssortValue <= 0.5)
+                print("wht")
             require(avgCvrAssortValue > 0.5) { "($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            if (noerror <= 0.5)
+                print("wht")
             require(noerror > 0.5) { "($noerror) noerror must be > .5" }
         }
     }

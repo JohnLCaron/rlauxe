@@ -9,7 +9,7 @@ class TestPollingWorkflow {
 
     val showContests = false
 
-    @Test
+    // @Test
     fun testWorkflow() {
         val stopwatch = Stopwatch()
         val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.50)

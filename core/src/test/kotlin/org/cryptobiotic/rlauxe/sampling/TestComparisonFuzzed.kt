@@ -16,7 +16,7 @@ class TestComparisonFuzzed {
         val ncvrs = 10000
         val cvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
         val assort = contestUA.comparisonAssertions.first().assorter
 
         val cvrsUI = cvrs.map { CvrUnderAudit(it as Cvr, false) }
@@ -46,7 +46,7 @@ class TestComparisonFuzzed {
         val cvrsUI = cvrs.map { CvrUnderAudit(it as Cvr, false) }
 
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
         val assort = contestUA.comparisonAssertions.first().assorter
 
         // flip

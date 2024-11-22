@@ -25,8 +25,8 @@ data class ContestInfo(
 
 /**
  * Contest and the reported results
- * @parameter votes: candidateId -> reported number of votes. must match contest.candidateIds, though zeros may be ommitted
- * @parameter Nc: maximum ballots/cards that contain this contest, independently verified
+ * @parameter votes: candidateId -> reported number of votes. keys must be in contest.candidateIds, though zeros may be ommitted
+ * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  */
 data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int) {
     val id = info.id
@@ -38,6 +38,9 @@ data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int)
     val losers: List<Int>
 
     init {
+        votes.forEach {
+            require(info.candidateIds.contains(it.key))
+        }
         // find winners, check that the minimum value is satisfied
         //val sortedVotes: List<Pair<Int, Int>> = votes.toList().sortedBy{ it.second }.reversed() // could keep the sorted list
         //winners = sortedVotes.subList(0, info.nwinners).map { it.first }
@@ -59,12 +62,6 @@ data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int)
         }
         losers = mlosers.toList()
     }
-
-    // fun makeStandardContest() = Contest("standard", 0, listToMap("A", "B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
-    //constructor(name:String, id: Int, candidateNames: Map< String, Int>, winnerNames: List<String>, choiceFunction: SocialChoiceFunction, minFraction: Double? = null):
-    //    this( ContestInfo(name, id, candidateNames=candidateNames, choiceFunction, minFraction=minFraction), emptyMap(), 0)
-        // val contest = Contest("contest0", 0, listToMap("A","B"), listOf("A"), choiceFunction = SocialChoiceFunction.PLURALITY)
-
 }
 
 /**

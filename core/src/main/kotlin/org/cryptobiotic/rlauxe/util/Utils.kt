@@ -1,9 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import java.nio.ByteOrder
-import java.util.concurrent.atomic.AtomicInteger
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 import kotlin.math.abs
 
 fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {

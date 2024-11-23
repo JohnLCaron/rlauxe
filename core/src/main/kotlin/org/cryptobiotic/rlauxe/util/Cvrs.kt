@@ -59,6 +59,72 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<CvrIF> {
     return randomCvrs
 }
 
+class SimContest(val contest: Contest, val assorter: AssorterFunction, val debug: Boolean = false) {
+    val info = contest.info
+    val ncands = info.candidateIds.size
+    val margin = assorter.reportedMargin()
+    val ncards = contest.votes.map { it.value }.sum()
+
+    val votes: Map<Int, Int> = contest.votes
+    var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
+    var votesLeft = 0
+
+    fun resetTracker() {
+        trackVotesRemaining = mutableListOf()
+        trackVotesRemaining.addAll(votes.toList())
+        votesLeft = ncards
+    }
+
+    fun makeCvrs(): List<CvrIF> {
+        resetTracker()
+        val cvrbs = CvrBuilders().addContests(listOf(this.info))
+        val result = mutableListOf<CvrIF>()
+        repeat(this.ncards) {
+            val cvrb = cvrbs.addCrv()
+            cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
+            result.add(cvrb.build())
+        }
+        return result.toList()
+    }
+
+    // choice is a number from 0..votesLeft
+    // shrink the partition as votes are taken from it
+    fun chooseCandidate(choice: Int): Int {
+        val check = trackVotesRemaining.map { it.second }.sum()
+        require(check == votesLeft)
+
+        var sum = 0
+        var nvotes = 0
+        var idx = 0
+        while (idx < ncands) {
+            nvotes = trackVotesRemaining[idx].second
+            sum += nvotes
+            if (choice < sum) break
+            idx++
+        }
+        val candidateId = trackVotesRemaining[idx].first
+        require(nvotes > 0)
+        trackVotesRemaining[idx] = Pair(candidateId, nvotes-1)
+        votesLeft--
+        return candidateId
+    }
+
+    // doesnt need to repeat I think
+    fun adjust(svotes: MutableMap<Int, Int>) {
+        val winner = svotes[assorter.winner()]!!
+        val loser = svotes[assorter.loser()]!!
+        val wantMarginDiff = (margin * ncards).toInt()
+        val haveMarginDiff = (winner - loser)
+        val adjust: Int = (wantMarginDiff - haveMarginDiff)/2 // can be positive or negetive
+        require(winner + adjust >= 0)
+        require(loser - adjust >= 0)
+        svotes[assorter.winner()] = winner + adjust
+        svotes[assorter.loser()] = loser - adjust
+
+    }
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -57,7 +57,7 @@ fun comparison99(saveFile: String, thetaFilter: ClosedRange<Double>? = null, rep
         "theta", "pctSuccess", "reportedMeanDiff",
         xfld = { it.theta },
         yfld = { extractDecile(it, 40) },
-        catfld = { it.reportedMeanDiff },
+        catfld = { dd(it.reportedMeanDiff) },
     )
 }
 
@@ -79,7 +79,7 @@ fun testChooseDF(input: String, saveFile: String,
         "theta", "pctSuccess", "reportedMeanDiff",
         xfld = { it.theta },
         yfld = { extractDecile(it, 20) },
-        catfld = { it.reportedMeanDiff },
+        catfld = { dd(it.reportedMeanDiff) },
     )
 }
 
@@ -98,7 +98,7 @@ fun testChooseD(input: String, saveFile: String, thetaFilter: ClosedRange<Double
         "theta", "pctSuccess", "d",
         xfld = { it.theta },
         yfld = { extractDecile(it, 20) },
-        catfld = { it.d.toDouble() },
+        catfld = { di(it.d) },
     )
 }
 
@@ -117,6 +117,6 @@ fun testChooseF(input: String, saveFile: String, thetaFilter: ClosedRange<Double
         "theta", "pctSuccess", "eta0Factor",
         xfld = { it.theta },
         yfld = { extractDecile(it, 20) },
-        catfld = { it.eta0Factor },
+        catfld = { dd(it.eta0Factor) },
     )
 }

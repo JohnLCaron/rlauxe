@@ -85,9 +85,9 @@ class TestBettingMart {
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
                 println("  ${result}")
-                println("   bets=  ${result.etajs}") // these are the bets, despite the name
+                println("   bets=  ${result.bets}")
 
-                result.etajs.forEachIndexed { index, bet ->
+                result.bets.forEachIndexed { index, bet ->
                     val expected = if (index == 0) lam else max(0.0, min(c_g_0 / t, 1.0 / (value - t)))
                     assertEquals(expected, bet, 1e-6)
 
@@ -123,9 +123,9 @@ class TestBettingMart {
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
                 println("  ${result}")
-                println("   bets=  ${result.etajs}") // these are the bets, despite the name
+                println("   bets=  ${result.bets}")
 
-                result.etajs.forEachIndexed { index, bet ->
+                result.bets.forEachIndexed { index, bet ->
                     // (N * t - prevSamples.sum()) / ( N - lastSampleNumber)
                     val t_adj = (N * t - index * value) / (N - index)
 
@@ -192,7 +192,7 @@ class TestBettingMart {
         val sampler = SampleFromList(x)
         val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
         println("  ${result}")
-        println("   bets=  ${result.etajs}") // these are the bets, despite the name
+        println("   bets=  ${result.bets}") // these are the bets, despite the name
 
         // from SHANGRLAorg.test_agrapa_with_variance()
         val expected = listOf(
@@ -208,7 +208,7 @@ class TestBettingMart {
             1.84834123
         )
         expected.forEachIndexed { idx, it ->
-            assertEquals(it, result.etajs[idx], doublePrecision)
+            assertEquals(it, result.bets[idx], doublePrecision)
         }
     }
 

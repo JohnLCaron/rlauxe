@@ -154,7 +154,7 @@ One only needs one assorter for each winner, not one for each winner/loser pair.
 
 Notes
 * Someone has to enforce that each CVR has <= number of allowed votes.
-* multiple winners are allowed
+* multiple winners are not yet supported for auditing.
 
 
 #### IRV
@@ -189,15 +189,16 @@ A polling audit retrieves a physical ballot and the auditors manually agree on w
 The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
 
 For the risk function, we use AlphaMart (or equivilent BettingMart) with ShrinkTrunkage, which estimates the true
-population mean (theta) using a weighted average of an initial estimate (eta0) with the actual sampled mean.
+population mean (theta) using a weighted average of an initial estimate (eta0) with the actual sampled mean. 
+The average assort value is used as the initial estimate (eta0) when testing each assertion. These assort values
+are specified in SHANGRLA, section 2. See Assorter.kt for our implementation.
 
-Use the reported winner's mean as eta0. 
-
-The only settable parameter is d, which is used for estimating theta at the ith sample:
+The only settable parameter for the risk function is d, which is used for estimating theta (the true population assort value average) 
+at the ith sample:
 
     estTheta_i = (d*eta0 + sampleSum_i) / (d + sampleSize_i)
 
-this trades off smaller sample sizes when theta = eta0 (large d) vs quickly adapting to when theta < eta0 (smaller d).
+which trades off smaller sample sizes when theta = eta0 (large d) vs quickly adapting to when theta < eta0 (smaller d).
 
 To use BettingMart rather than AlphaMart, we just have to set
 
@@ -216,8 +217,8 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 The requirements for Comparison audits:
 
 * The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot, which is compared to the MVR during the audit.
-* Assign unique identifier to each physical ballot, and put on the CVR. This is used to find the physical ballot from the sampled CVR. 
-* Must have independent upper bound on the number of cast cards that contain the contest.
+* Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR. 
+* There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
 For the risk function, we use BettingMart with AdaptiveComparison. AdaptiveComparison needs estimates of the rates of 
 over(under)statements. If these estimates are correct, one gets optimal sample sizes. 
@@ -348,18 +349,6 @@ Consistent sampling (see below) then figures out which CVRs are chosen to satisf
 Note 1: "The software offers several options for picking {𝑆_𝑐}, including some based on simulation."
 SHANGRLA doesnt seem to have any non-simulation options. May be a terminology issue.
 
-Note 2: From STYLISH paper:
-
-        4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
-        The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
-        The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
-            for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
-        The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
-            𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
-        4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
-
-AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
-total_size estimate, but not do the consistent sampling.
 
 ### Consistent Sampling
 
@@ -505,9 +494,33 @@ An affine transformation of the overstatement assorter values can move them back
 constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
+## Differences with SHANGRLA
+
+### Limit audit to estimated samples
+
+SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample size. However, in multiple
+contest audits, additional ballots may be in the sample because they are needed by another contest. Since theres no 
+guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
+
+# compute sample size
+
+From STYLISH paper:
+
+        4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
+        The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
+        The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
+            for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
+        The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
+            𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
+        4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
+
+AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
+total_size estimate, but not do the consistent sampling. Also maybe only works whne you use sampleThreshold ??
+
 
 ## Notes
 
+* [Polling Vs Comparison Estimated Sample sizes](docs/plots/EstimateSampleSize.html)
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)
 * [ALPHA testing statistic](docs/AlphaMart.md)

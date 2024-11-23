@@ -45,21 +45,18 @@ class TestGenSampleFn {
             }
             assertEquals(contest.winners, listOf(0))
         }
+        val contestsUA = contests.map { ContestUnderAudit(it).makePollingAssertions() }
 
-
-        // Polling Audit
-        val audit = makePollingAudit(contests = contests, cvrs)
-
-        audit.assertions.map { (contestId, assertions) ->
-            assertions.forEach { ass ->
+        contestsUA.forEach { contestUA ->
+            contestUA.pollingAssertions.forEach { ass ->
                 assertEquals(0, (ass.assorter as PluralityAssorter).winner)
             }
 
-            if (!silent && showContests) println("Assertions for Contest ${contestId}")
-            assertions.forEach {
+            if (!silent && showContests) println("Assertions for Contest ${contestUA.id}")
+            contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = PollWithoutReplacement(cvrs, it.assorter)
+                val cvrSampler = PollWithoutReplacement(contestUA, cvrs, it.assorter)
                 println("truePopulationCount = ${cvrSampler.sampleCount()}")
                 println("truePopulationMean = ${cvrSampler.sampleMean()}")
                 assertEquals((N * theta).toInt(), cvrSampler.sampleCount().toInt())

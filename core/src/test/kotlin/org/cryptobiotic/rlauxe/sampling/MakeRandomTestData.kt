@@ -6,8 +6,6 @@ import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class BallotStyle(val contests: List<String>, val ncards: Int)
-
 val contestInfo: List<ContestInfo> = listOf(
     ContestInfo(
         "city_council", 0, candidateNames = listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
@@ -36,10 +34,10 @@ val contestInfo: List<ContestInfo> = listOf(
 )
 
 val ballotStyles = listOf(
-    BallotStyle(listOf("city_council", "mayor", "measure_1", "measure_2", "measure_3"), 1111),
-    BallotStyle(listOf("city_council", "measure_3"), 111),
-    BallotStyle(listOf("dog_catcher", "measure_1", "measure_2"), 555),
-    BallotStyle(listOf("city_council", "mayor"), 666),
+    BallotStyle.make(listOf("city_council", "mayor", "measure_1", "measure_2", "measure_3"), contestInfo, 1111),
+    BallotStyle.make(listOf("city_council", "measure_3"), contestInfo, 111),
+    BallotStyle.make(listOf("dog_catcher", "measure_1", "measure_2"), contestInfo, 555),
+    BallotStyle.make(listOf("city_council", "mayor"), contestInfo, 666),
 )
 
 fun makeRandomTestData(skipSomeContests: Int, show: Boolean = false): Pair<List<ContestUnderAudit>, List<CvrUnderAudit>> {
@@ -77,7 +75,7 @@ private fun randomSample(contestInfos: List<ContestInfo>, styles: List<BallotSty
     val cvrbs = CvrBuilders().addContests(contestInfos)
     val result = mutableListOf<CvrIF>()
     styles.forEach { ballotStyle ->
-        val scontests = contestInfos.filter { ballotStyle.contests.contains(it.name) }
+        val scontests = contestInfos.filter { ballotStyle.contestNames.contains(it.name) }
         repeat(ballotStyle.ncards) {
             result.add(randomSample(cvrbs, scontests, skipSomeContests))
         }

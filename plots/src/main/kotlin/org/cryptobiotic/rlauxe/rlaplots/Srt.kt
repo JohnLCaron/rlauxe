@@ -25,6 +25,7 @@ data class SRT(val N: Int,
     val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val failPct = 100.0 * (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val nsamples = totalSamplesNeeded.toDouble() / (if (nsuccess == 0) 1 else nsuccess) // avg number of samples for successes
+    val wsamples = (successPct * nsamples + failPct * N) /100 // nsamples weighted by success/failure
     val pctSamples = 100.0 * nsamples / (if (N == 0) 1 else N)
     val d : Int = testParameters["d"]?.toInt() ?: 0
     val eta0 = testParameters["eta0"] ?: 0.0
@@ -32,6 +33,7 @@ data class SRT(val N: Int,
     val p2prior = testParameters["p2prior"] ?: 0.0
     val p2oracle = testParameters["p2oracle"] ?: 0.0
     val d2 : Int = testParameters["d2"]?.toInt() ?: 0
+    val isPolling : Boolean = (testParameters["polling"] != null)
 }
 
 // simple serialization to csv files

@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-// the contest contains the candidate name -> candidate id
-
 interface CvrIF {
     val id: String
     val phantom: Boolean
@@ -11,6 +9,7 @@ interface CvrIF {
     fun hasOneVote(contestId: Int, candidates: List<Int>): Boolean
 }
 
+// there must be an entry in votes for every contest on the ballot, even if no candidate was voted for
 open class Cvr(
     override val id: String,
     override val votes: Map<Int, IntArray>, // contest : list of candidates voted for; for IRV, ranked hi to lo
@@ -67,3 +66,31 @@ class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: 
         fun fromCvrIF(cvr: CvrIF, phantom: Boolean) = if (cvr is CvrUnderAudit) cvr else CvrUnderAudit( cvr as Cvr, phantom)
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+data class BallotStyle(val contestNames: List<String>, val contestIds: List<Int>, val ncards: Int) {
+    fun hasContest(contestId: Int) = contestIds.contains(contestId)
+
+    override fun toString() = buildString {
+        append(" BallotStyle(contestNames=$contestNames, contestIds=$contestIds, ncards=$ncards")
+    }
+
+    companion object {
+        fun make(contestNames: List<String>, contests: List<ContestInfo>, ncards: Int): BallotStyle {
+            val contestIds = contestNames.map { name -> contests.find { contest -> contest.name == name} ?.id ?: throw RuntimeException("Cant find $name") }
+            return BallotStyle(contestNames, contestIds, ncards)
+        }
+    }
+}
+
+// id should probably be String
+open class BallotUnderAudit(val id: Int, val ballotStyle: BallotStyle) {
+    var sampleNum: Long = 0L
+    var sampled: Boolean = false // needed?
+    var p = 0.0
+    var phantom = false
+
+    fun hasContest(contestId: Int): Boolean = ballotStyle.hasContest(contestId)
+}
+

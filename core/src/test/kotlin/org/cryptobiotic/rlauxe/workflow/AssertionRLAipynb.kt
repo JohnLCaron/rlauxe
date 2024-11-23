@@ -441,7 +441,7 @@ class AssertionRLA {
             it.sampleSize = sampleSize
             it
         }
-        val sampled_cvr_indices = consistentSampling(contestUA, cvras)
+        val sampled_cvr_indices = consistentCvrSampling(contestUA, cvras)
         println("sampled = ${sampled_cvr_indices.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)

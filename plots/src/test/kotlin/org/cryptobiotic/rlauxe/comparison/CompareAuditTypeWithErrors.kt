@@ -15,12 +15,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.colHeader
@@ -32,6 +31,8 @@ import org.cryptobiotic.rlauxe.plots.plotTFdiffSuccessDecile
 import org.cryptobiotic.rlauxe.plots.plotTFsuccessDecile
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 
 // PlotSampleSizes
@@ -41,11 +42,6 @@ import kotlin.test.Test
 // compare ballot polling to card comparison
 class CompareAuditTypeWithErrors {
     val showCalculation = false
-    val showContests = false
-    val showAllPlots = false
-    val showPctPlots = false
-    val showGeoMeanPlots = false
-
     data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val eta0Factor: Double, val cvrs: List<CvrIF>)
 
     @Test
@@ -270,45 +266,6 @@ class CompareAuditTypeWithErrors {
         )
     }
 
-    /*
-    fun showTF(srts: List<SRT>) {
-        colHeader(srts, "theta", colf = "%6.3f") { it.theta }
-        plotNTsuccessPct(srts, "", colTitle = "cvrMean")
-
-        plotSRS(srts, "successes", true, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.nsuccess.toDouble() }
-        )
-
-        plotSRS(srts, "successPct", false, colf = "%6.3f", rowf = "%6.2f", ff = "%6.1f", colTitle = "theta",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.successPct }
-        )
-
-        plotSRS(srts, "nsamples", true, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.nsamples.toDouble() }
-        )
-
-        plotSRS(srts, "pct nsamples", false, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
-            colFld = { srt: SRT -> srt.theta },
-            rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> srt.pctSamples}
-        )
-
-        plotTFsuccess(srts, "", sampleMaxPct = 10, colTitle = "theta")
-        plotTFsuccess(srts, "", sampleMaxPct = 20, colTitle = "theta")
-        plotTFsuccess(srts, "", sampleMaxPct = 30, colTitle = "theta")
-        plotTFsuccess(srts, "", sampleMaxPct = 40, colTitle = "theta")
-        plotTFsuccess(srts, "", sampleMaxPct = 50, colTitle = "theta")
-        plotTFsuccess(srts, "", sampleMaxPct = 100, colTitle = "theta")
-    }
-
-     */
-
     fun calculate(task: AlphaMartTask, ntrials: Int, cvrMeanDiff: Double, d: Int): Pair<SRT, SRT> {
         // if (margin2theta(task.margin) + reportedMeanDiff <= .5) return null
         val prr = runDiffAuditTypes(
@@ -362,13 +319,21 @@ class CompareAuditTypeWithErrors {
         val theta = cvrMean + cvrMeanDiff // the true mean
         if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")
 
-        val pollingAssorter = makeStandardPluralityAssorter()
-        val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+
+        contestUA.makePollingAssertions()
+        val pollingAssertion = contestUA.pollingAssertions.first()
+        val pollingAssorter = pollingAssertion.assorter
+
+        contestUA.makeComparisonAssertions(cvrs)
+        val compareAssertion = contestUA.comparisonAssertions.first()
+        val compareAssorter = compareAssertion.assorter
+
         val comparisonSample = ComparisonWithErrors(cvrs, compareAssorter, theta)
         val mvrs = comparisonSample.mvrs
 
         val pollingResult = runAlphaMartRepeated(
-            drawSample = PollWithoutReplacement(mvrs, pollingAssorter),
+            drawSample = PollWithoutReplacement(contestUA, mvrs, pollingAssorter),
             maxSamples = N,
             eta0 = cvrMean, // use the reportedMean for the initial guess
             d = d,

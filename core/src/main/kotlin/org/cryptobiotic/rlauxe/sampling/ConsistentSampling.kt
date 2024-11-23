@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Prng
 
 //// Adapted from SHANGRLA Audit.py
@@ -67,10 +65,12 @@ class PhantomBuilder(val id: String) {
 // AssertionRLAipynb.workflow()
 // first time only, we'll add the subsequent rounds later. KISS
 // sampling without replacement only
-fun consistentSampling(
+fun consistentCvrSampling(
     contests: List<ContestUnderAudit>, // all the contests you want to sample
     cvrList: List<CvrUnderAudit>, // all the cvrs available to sample
 ): List<Int> {
+    if (cvrList.isEmpty()) return emptyList()
+
     val currentSizes = mutableMapOf<Int, Int>()
     fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
 
@@ -100,5 +100,50 @@ fun consistentSampling(
     }
     return sampledIndices
 }
+
+fun consistentPollingSampling(
+    contests: List<ContestUnderAudit>, // all the contests you want to sample
+    ballots: List<BallotUnderAudit>, // all the ballots available to sample
+): List<Int> {
+    if (ballots.isEmpty()) return emptyList()
+
+    val currentSizes = mutableMapOf<Int, Int>()
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+
+    // get list of cvr indexes sorted by sampleNum
+    val sortedCvrIndices = ballots.indices.sortedBy { ballots[it].sampleNum }
+
+    val sampledIndices = mutableListOf<Int>()
+    var inx = 0
+    // while we need more samples
+    while (contests.any { contestInProgress(it) }) {
+        // get the next sorted cvr
+        val sidx = sortedCvrIndices[inx]
+        val ballot = ballots[sidx]
+        // does this cvr contribute to one or more contests that need more samples?
+        if (contests.any { contestInProgress(it) && ballot.hasContest(it.id) }) {
+            // then use it
+            sampledIndices.add(sidx)
+            ballot.sampled = true
+            // contests.forEach { contest ->
+                ballot.ballotStyle.contestIds.forEach {
+                    currentSizes[it] = currentSizes[it]?.plus(1) ?: 1
+                }
+               /* if (contestInProgress(contest) && ballot.hasContest(contest.id)) {
+                    contest.sampleThreshold = ballot.sampleNum // track the largest sample used. TODO WHY?
+                    currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
+                } */
+            //}
+        }
+        inx++
+    }
+    contests.forEach { contest ->
+        if (show) println("${contest.name} wanted= ${contest.sampleSize} actual=${currentSizes[contest.id]}")
+        contest.actualAvailable = currentSizes[contest.id]!!
+    }
+    return sampledIndices
+}
+
+private val show = true
 
 

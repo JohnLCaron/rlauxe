@@ -13,7 +13,7 @@ import org.jetbrains.kotlinx.kandy.util.color.Color
 fun srtPlot(
     titleS: String, subtitleS: String, srts: List<SRT>, saveFile: String,
     xname: String, yname: String, catName: String,
-    xfld: (SRT) -> Double, yfld: (SRT) -> Double, catfld: (SRT) -> Double,
+    xfld: (SRT) -> Double, yfld: (SRT) -> Double, catfld: (SRT) -> String,
     bravoGroup: List<SRT>? = null, // optional
 ) {
 
@@ -31,7 +31,7 @@ fun srtPlot(
         yvalues.addAll(yvalue)
 
         repeat(ssrtList.size) {
-            category.add(dd(cat))
+            category.add(cat)
         }
     }
 
@@ -113,8 +113,8 @@ fun readFilterTN(filename: String, theta: Double, N: Int): List<SRT> {
 /////////////////////////////////////////////////////////////////////////////////
 
 // make a map of all SRTS for each catFld
-fun makeGroups(srs: List<SRT>, catfld: (SRT) -> Double): Map<Double, List<SRT>> {
-    val result = mutableMapOf<Double, MutableList<SRT>>()
+fun makeGroups(srs: List<SRT>, catfld: (SRT) -> String): Map<String, List<SRT>> {
+    val result = mutableMapOf<String, MutableList<SRT>>()
     srs.forEach {
         val imap: MutableList<SRT> = result.getOrPut(catfld(it)) { mutableListOf() }
         imap.add(it)
@@ -123,6 +123,7 @@ fun makeGroups(srs: List<SRT>, catfld: (SRT) -> Double): Map<Double, List<SRT>> 
 }
 
 fun dd(d: Double) = "%5.3f".format(d)
+fun di(d: Int) = "%5d".format(d)
 
 fun extractDecile(srt: SRT, sampleMaxPct: Int) =
     if (srt.percentHist == null || srt.percentHist!!.cumul(sampleMaxPct) == 0.0) 0.0 else {

@@ -1,16 +1,13 @@
 package org.cryptobiotic.rlauxe.comparison
 
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.FixedEstimFn
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.GenSampleFn
-import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.math.max
 import kotlin.test.Test
 
@@ -22,7 +19,9 @@ class CompareShrinkTrunkWithFixed {
         val N = 10000
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val sampleFn = PollWithoutReplacement(cvrs, makeStandardPluralityAssorter())
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+
+            val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter())
 
             println("\neta0 = $eta")
             val fixResult = testAlphaMartFixed(eta, sampleFn)
@@ -64,7 +63,9 @@ class CompareShrinkTrunkWithFixed {
 
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val sampleFn = PollWithoutReplacement(cvrs, makeStandardPluralityAssorter())
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+
+            val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter())
 
             println("\neta0 = $eta")
             val fixResult = runAlphaMartFixedRepeated(eta, sampleFn, ntrials)

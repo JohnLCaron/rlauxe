@@ -14,8 +14,7 @@ data class TestH0Result(
     val sampleCount: Int,   // number of samples used
     val sampleMean: Double, // average of the assort values in the sample
     val pvalues: List<Double>,  // set of pvalues
-    val etajs: List<Double>,  // ni
-    val mujs: List<Double>,  // mi
+    val bets: List<Double>,  // ni
     val samplingErrors: List<Int> = emptyList(),  // p0,p1,p2,p3,p4 count
 ) {
     override fun toString() = buildString {

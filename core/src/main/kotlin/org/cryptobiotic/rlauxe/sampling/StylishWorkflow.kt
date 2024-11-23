@@ -93,7 +93,7 @@ class StylishWorkflow(
 
         //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         // draws random ballots by consistent sampling, and returns their locations to the auditors.
-        val samples = consistentSampling(contestsUA, cvrsUA)
+        val samples = consistentCvrSampling(contestsUA, cvrsUA)
         println(" maxContestSize=$maxContestSize consistentSamplingSize= ${samples.size}")
         return samples// set contestUA.sampleThreshold
     }

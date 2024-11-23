@@ -27,7 +27,7 @@ class AdaptiveComparison {
             "theta", "nsamples", "p2oracle",
             xfld = { it.theta },
             yfld = { it.nsamples },
-            catfld = { it.p2oracle },
+            catfld = { dd(it.p2oracle) },
         )
     }
 
@@ -46,7 +46,7 @@ class AdaptiveComparison {
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
-            catfld = { it.p2oracle },
+            catfld = { dd(it.p2oracle) },
         )
     }
 
@@ -67,7 +67,7 @@ class AdaptiveComparison {
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
-            catfld = { it.p2oracle },
+            catfld = { dd(it.p2oracle) },
         )
     }
 
@@ -87,7 +87,7 @@ class AdaptiveComparison {
             "theta", "falsePositives%", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
-            catfld = { it.p2oracle },
+            catfld = { dd(it.p2oracle) },
         )
     }
 }

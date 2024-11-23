@@ -25,6 +25,7 @@ import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 
 import kotlin.text.format
@@ -229,7 +230,8 @@ class CreatePollingDiffMeans {
             if (!silent && showContests) println("Assertions for Contest ${contestUA.name}")
             if (!silent && showContests) println("  ${assert}")
 
-            val cvrSampler = PollWithoutReplacement(cvrs, assert.assorter)
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+            val cvrSampler = PollWithoutReplacement(contestUA, cvrs, assert.assorter)
 
             val result = runAlphaMartRepeated(
                 drawSample = cvrSampler,

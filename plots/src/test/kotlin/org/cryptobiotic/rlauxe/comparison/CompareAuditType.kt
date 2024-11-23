@@ -213,16 +213,12 @@ class CompareAuditType {
 
         val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val contest = makeContestFromCvrs(info, cvrs)
+        val contestUA = ContestUnderAudit(contest, cvrs.size)
 
-        // polling
-        val pollingAudit = makePollingAudit(contests = listOf(contest), cvrs)
-        val pollingAssertions = pollingAudit.assertions[contest.id]
-        require(pollingAssertions!!.size == 1)
-        val pollingAssertion = pollingAssertions.first()
-        val pollingSampler = PollWithoutReplacement(cvrs, pollingAssertion.assorter)
-        //println("pollingSampler mean=${pollingSampler.truePopulationMean()} count=${pollingSampler.truePopulationCount()}")
+        contestUA.makePollingAssertions()
+        val pollingAssertion = contestUA.pollingAssertions.first()
         val pollingResult = runAlphaMartRepeated(
-            drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
+            drawSample = PollWithoutReplacement(contestUA, cvrs, pollingAssertion.assorter),
             maxSamples = N,
             eta0 = reportedMean, // use the reportedMean for the initial guess
             d = d,
@@ -232,13 +228,8 @@ class CompareAuditType {
         )
 
         // comparison
-        val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-        val compareAssertions = compareAudit.assertions[contest.id]
-        require(compareAssertions!!.size == 1)
-        val compareAssertion = compareAssertions.first()
-        // val compareSampler = ComparisonNoErrors(cvrs, compareAssertion.assorter)
-        // println("compareSampler mean=${compareSampler.truePopulationMean()} count=${compareSampler.truePopulationCount()}")
-
+        contestUA.makeComparisonAssertions(cvrs)
+        val compareAssertion = contestUA.comparisonAssertions.first()
         val compareResult = runAlphaMartRepeated(
             drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
             maxSamples = N,
@@ -269,12 +260,13 @@ class CompareAuditType {
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
             val contest = makeContestFromCvrs(info, cvrs)
+            val contestUA = ContestUnderAudit(contest, cvrs.size)
 
-            val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-            val compareAssertion = compareAudit.assertions[contest.id]!!.first()
+            contestUA.makePollingAssertions()
+            val pollingAssertion = contestUA.pollingAssertions.first()
 
-            val pollingAudit = makePollingAudit(contests = listOf(contest), cvrs)
-            val pollingAssertion = pollingAudit.assertions[contest.id]!!.first()
+            contestUA.makeComparisonAssertions(cvrs)
+            val compareAssertion = contestUA.comparisonAssertions.first()
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
@@ -288,7 +280,7 @@ class CompareAuditType {
                 compareSrs.add(compareResult.makeSRT(N, theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
-                    drawSample = PollWithoutReplacement(cvrs, pollingAssertion.assorter),
+                    drawSample = PollWithoutReplacement(contestUA, cvrs, pollingAssertion.assorter),
                     maxSamples = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

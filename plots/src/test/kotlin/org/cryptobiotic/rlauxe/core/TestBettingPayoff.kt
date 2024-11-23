@@ -2,13 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.rlaplots.BettingPayoff
 import org.cryptobiotic.rlauxe.rlaplots.BettingPayoffData
-import org.cryptobiotic.rlauxe.rlaplots.SRT
-import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.CorlaTask
-import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import kotlin.test.Test
 
 class TestBettingPayoff {

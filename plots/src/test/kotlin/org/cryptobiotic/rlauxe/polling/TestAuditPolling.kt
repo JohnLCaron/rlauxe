@@ -66,18 +66,16 @@ class TestAuditPolling {
             println("Contests")
             contests.forEach { println("  ${it}") }
         }
-
-        // Polling Audit
-        val audit = makePollingAudit(contests = contests, cvrs)
+        val contestsUA = contests.map { ContestUnderAudit(it).makePollingAssertions() }
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()
-        audit.assertions.map { (contestId, assertions) ->
-            if (!silent && showContests) println("Assertions for Contest ${contestId}")
-            assertions.forEach {
+        contestsUA.forEach { contestUA ->
+            if (!silent && showContests) println("Assertions for Contest ${contestUA.id}")
+            contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(cvrs, it.assorter) else PollWithReplacement(cvrs, it.assorter)
+                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(contestUA, cvrs, it.assorter) else PollWithReplacement(contestUA, cvrs, it.assorter)
 
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,

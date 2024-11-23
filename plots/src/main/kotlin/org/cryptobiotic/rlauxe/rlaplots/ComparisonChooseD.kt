@@ -23,7 +23,7 @@ fun plotSuccessVsTheta() {
         "theta", "pctSuccess", "reportedMeanDiff",
         xfld = { it.theta },
         yfld = { extractDecile(it, 20) },
-        catfld = { it.reportedMeanDiff },
+        catfld = { dd(it.reportedMeanDiff) },
     )
 }
 
@@ -44,7 +44,7 @@ fun plotFailuresVsTheta() {
         "theta", "falsePositives%", "reportedMeanDiff",
         xfld = { it.theta },
         yfld = { extractDecile(it, 20) },
-        catfld = { it.reportedMeanDiff },
+        catfld = { dd(it.reportedMeanDiff) },
     )
 }
 
@@ -66,6 +66,6 @@ fun plotNSvsMD() {
         "reportedMeanDiff", "nsamples", "theta",
         xfld = { it.reportedMeanDiff },
         yfld = { it.nsamples },
-        catfld = { it.theta },
+        catfld = { dd(it.theta) },
     )
 }

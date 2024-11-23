@@ -42,7 +42,7 @@ class TestConsistentSampling {
         contestsUA[0].sampleSize = 3
         contestsUA[1].sampleSize = 4
 
-        val sample_cvr_indices = consistentSampling(contestsUA, cvrsUA)
+        val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUA)
         assertEquals(5, sample_cvr_indices.size)
 
         assertEquals(listOf(3, 2, 1, 5, 0), sample_cvr_indices)
@@ -93,7 +93,7 @@ class TestConsistentSampling {
         val cvrsUAP = cvrsUA + phantomCVRs
         assertEquals(9, cvrsUAP.size)
 
-        val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
+        val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
         assertEquals(6, sample_cvr_indices.size)
         assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
 
@@ -119,7 +119,7 @@ class TestConsistentSampling {
         fun runTest() {
             val (contestsUA, cvrsUAP) = makeRandomTestData(skipSomeContests)
 
-            val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
+            val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
             println("nsamples = ${sample_cvr_indices.size}\n")
             contestsUA.forEach { contestUA ->
                 println(contestUA)

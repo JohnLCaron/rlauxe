@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.sampling.GenSampleFn
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.math.max
 
 data class PollingTask(
@@ -25,7 +26,8 @@ data class PollingTask(
     }
 
     override fun makeSampler(): GenSampleFn {
-        return PollWithoutReplacement(cvrs, pollingAssorter)
+        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+        return PollWithoutReplacement(contestUA, cvrs, pollingAssorter)
     }
 
     override fun makeTestFn(): RiskTestingFn {

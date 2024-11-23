@@ -36,6 +36,7 @@ data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int)
     val winnerNames: List<String>
     val winners: List<Int>
     val losers: List<Int>
+    // var margin = 0.0 // temp debug
 
     init {
         votes.forEach {
@@ -81,6 +82,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
 
     var sampleSize = 0 // Estimate of the sample size required to confirm the contest
     var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
+    var actualAvailable = 0 // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()

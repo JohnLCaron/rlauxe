@@ -7,32 +7,20 @@ import kotlin.test.Test
 
 class TestPollingWorkflow {
 
-    val showContests = false
-
-    // @Test
+    @Test
     fun testWorkflow() {
         val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.50)
+        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.90)
 
-        val margin = .01
-        val N = 20000
+        val test = MultiContestTestData(20, 11, 20000)
+        val contests: List<Contest> = test.makeContests()
+        // contests.forEach { println(it) }
 
-        // hmmm, use these for simulation? in practice, we dont actually have any cvrs.
-        val cvrs = makeCvrsByExactMean(N, margin2mean(margin))
+        // in practice, we dont actually have any cvrs. But will let these be the mvrs
+        val testCvrs = test.makeCvrsFromContests()
+        val ballots = test.makeBallots()
 
-        // count actual votes
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
-        if (showContests) {
-            votes.forEach { key, cands ->
-                println("contest ${key} ")
-                cands.forEach { println("  ${it} ${it.value.toDouble() / cvrs.size}") }
-            }
-        }
-
-        // make contests from cvrs
-        val contests: List<Contest> = makeContestsFromCvrs(cvrs, SocialChoiceFunction.PLURALITY)
-
-        val workflow = PollingWorkflow(auditConfig, contests)
+        val workflow = PollingWorkflow(auditConfig, contests, ballots)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 
@@ -45,7 +33,9 @@ class TestPollingWorkflow {
             // println("$round samples=${indices}")
             stopwatch.start()
 
-            val sampledMvrs = indices.map { cvrs[it] }
+            val sampledMvrs = indices.map {
+                testCvrs[it]
+            }
 
             done = workflow.runAudit(indices, sampledMvrs)
             println("$round runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")

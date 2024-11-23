@@ -34,7 +34,6 @@ class BettingMart(
 
         // keep series for debugging, remove for production
         val xs = mutableListOf<Double>()
-        val mjs = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
         val bets = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
@@ -52,7 +51,6 @@ class BettingMart(
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
-            mjs.add(mj)
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
@@ -93,7 +91,6 @@ class BettingMart(
 
         if (showDetails) {
             println("xs = ${xs}")
-            println("mujs = ${mjs}")
             println("bets = ${bets}")
             println("tjs = ${tjs}")
             println("Tjs = ${testStatistics}")
@@ -103,13 +100,11 @@ class BettingMart(
             (mj < 0.0) -> TestH0Status.SampleSum // 5
             (mj > upperBound) -> TestH0Status.AcceptNull
             else -> {
-                if (pvalues.isEmpty())
-                    print("empty")
                 val pvalue = pvalues.last()
                 if (pvalue < riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
             }
         }
 
-        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, mjs, prevSamples.samplingErrors())
+        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.samplingErrors())
     }
 }

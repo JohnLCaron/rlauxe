@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.SimContest
+import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.margin2mean
 import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -50,6 +53,106 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         val total_size = ceil(summ).toInt()
         return total_size // TODO what is this? doesnt consistent sampling decide this ??
     }
+
+    // STYLISH 4 a,b. I think maybe only works when you use sampleThreshold ??
+    fun computeSampleSizePolling(
+        rcontests: List<ContestUnderAudit>,
+        ballots: List<BallotUnderAudit>,
+    ): Int {
+        ballots.forEach { ballot ->
+            if (ballot.sampled) {
+                ballot.p = 1.0
+            } else {
+                ballot.p = 0.0
+                for (con in rcontests) {
+                    if (ballot.hasContest(con.id) && !ballot.sampled) {
+                        val p1 = con.sampleSize.toDouble() / con.Nc
+                        ballot.p = max(p1, ballot.p)
+                    }
+                }
+            }
+        }
+        val summ: Double = ballots.filter { !it.phantom }.map { it.p }.sum()
+        return ceil(summ).toInt()
+    }
+
+    fun simulateSampleSizePolling(
+        contestUA: ContestUnderAudit,
+        prevMvrs: List<CvrIF>, // TODO should be used for subsequent round estimation
+        maxSamples: Int,
+        round: Int,
+    ): Int {
+        val sampleSizes = mutableListOf<Int>()
+        contestUA.pollingAssertions.map { assert ->
+            if (!assert.proved) {
+                val result = simulateSampleSizePolling(contestUA, assert.assorter, maxSamples)
+                val size = result.findQuantile(auditConfig.quantile)
+                assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
+                sampleSizes.add(assert.samplesEst)
+                println(" simulateSampleSizes ${assert} est=$size failed=${df(result.failPct())}")
+            }
+        }
+        contestUA.sampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: contest ${contestUA.name} est=${contestUA.sampleSize}")
+        return contestUA.sampleSize
+    }
+
+    fun simulateSampleSizePolling(
+        contestUA: ContestUnderAudit,
+        assorter: AssorterFunction,
+        maxSamples: Int,
+    ): RunTestRepeatedResult {
+        val margin = assorter.reportedMargin()
+        val simContest = SimContest(contestUA.contest, assorter, true)
+        val cvrs = simContest.makeCvrs()
+        require(cvrs.size == contestUA.ncvrs)
+        val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
+        // TODO fuzz data from the reported mean. Isnt this number fixed by the margin ??
+
+        return simulateSampleSizePolling(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc)
+    }
+
+    fun simulateSampleSizePolling(
+        sampleFn: GenSampleFn,
+        margin: Double,
+        upperBound: Double,
+        maxSamples: Int,
+        Nc: Int,
+    ): RunTestRepeatedResult {
+        val eta0 = margin2mean(margin)
+        val minsd = 1.0e-6
+        val t = 0.5
+        val c = (eta0 - t) / 2
+
+        val estimFn = TruncShrinkage(
+            N = Nc,
+            withoutReplacement = true,
+            upperBound = upperBound,
+            d = auditConfig.d1,
+            eta0 = eta0,
+            minsd = minsd,
+            c = c,
+        )
+        val testFn = AlphaMart(
+            estimFn = estimFn,
+            N = Nc,
+            upperBound = upperBound,
+            withoutReplacement = true
+        )
+
+        // TODO use coroutines
+        val result: RunTestRepeatedResult = runTestRepeated(
+            drawSample = sampleFn,
+            maxSamples = maxSamples,
+            ntrials = auditConfig.ntrials,
+            testFn = testFn,
+            testParameters = mapOf("margin" to margin, "ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0),
+            showDetails = false,
+        )
+        return result
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     fun simulateSampleSize(
         contest: ContestUnderAudit,

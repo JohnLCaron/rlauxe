@@ -15,14 +15,17 @@ interface GenSampleFn : SampleFn {
 
 //// For polling audits.
 
-class PollWithReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunction): GenSampleFn {
+class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<CvrIF>, val assorter: AssorterFunction): GenSampleFn {
     val N = cvrs.size
     val sampleMean = cvrs.map { assorter.assort(it) }.average()
     val sampleCount = cvrs.sumOf { assorter.assort(it) }
 
     override fun sample(): Double {
-        val idx = secureRandom.nextInt(N) // with Replacement
-        return assorter.assort(cvrs[idx])
+        while (true) {
+            val idx = secureRandom.nextInt(N) // with Replacement
+            val cvr = cvrs[idx]
+            if (cvr.hasContest(contest.id)) return assorter.assort(cvr)
+        }
     }
 
     override fun reset() {}
@@ -31,7 +34,7 @@ class PollWithReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunction
     override fun N() = N
 }
 
-class PollWithoutReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunction): GenSampleFn {
+class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<CvrIF>, val assorter: AssorterFunction): GenSampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0
@@ -41,10 +44,11 @@ class PollWithoutReplacement(val cvrs : List<CvrIF>, val assorter: AssorterFunct
     }
 
     override fun sample(): Double {
-        require (idx < cvrs.size)
-        require (permutedIndex[idx] < cvrs.size)
-        val curr = cvrs[permutedIndex[idx++]]
-        return assorter.assort(curr)
+        while (idx < N) {
+            val cvr = cvrs[permutedIndex[idx++]]
+            if (cvr.hasContest(contest.id)) return assorter.assort(cvr)
+        }
+        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
     }
 
     override fun reset() {

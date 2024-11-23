@@ -21,7 +21,7 @@ fun showTNwithBravo(filename: String, theta: Double, N: Int, saveFile: String) {
         "reportedMeanDiff", "pctSamples", "d",
         xfld = { it.reportedMeanDiff },
         yfld = { it.pctSamples },
-        catfld = { it.d.toDouble() },
+        catfld = { di(it.d) },
         readFilterTN("/home/stormy/temp/sim/dvalues/pollingBravo.csv", theta, N).sortedBy { it.reportedMeanDiff },
     )
 }

@@ -114,7 +114,9 @@ class TestComparisonFuzzed {
 
     @Test
     fun testComparisonFuzzed() {
-        val (contestsUA, cvrsUAP) = makeRandomTestData(0, true)
+        val test = MultiContestTestData(20, 11, 20000)
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
+        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
             contest.makeComparisonAssertions(cvrsUAP)

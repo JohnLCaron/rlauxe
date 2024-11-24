@@ -103,7 +103,18 @@ data class FuzzedContest(val contestId: Int, val ncands: Int, val margin: Double
     }
 }
 
-data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val totalBallots: Int, val debug: Boolean = false, val minMargin: Double = 0.005) {
+/*
+    val test = MultiContestTestData(20, 11, 20000)
+    val contests: List<Contest> = test.makeContests()
+    val testCvrs = test.makeCvrsFromContests()
+    val ballots = test.makeBallots()
+
+    val test = MultiContestTestData(20, 11, 20000)
+    val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
+    val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
+ */
+data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
+                                val debug: Boolean = false, val minMargin: Double = 0.005) {
     val fcontests: List<FuzzedContest>
     val ballotStyles: List<BallotStyle>
     var countBallots = 0
@@ -141,7 +152,7 @@ data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val t
     }
 
     fun makeContests(): List<Contest> {
-        return fcontests.map {it.makeContest() }
+        return fcontests.map { it.makeContest() }
     }
 
     fun makeBallots(): List<BallotUnderAudit> {

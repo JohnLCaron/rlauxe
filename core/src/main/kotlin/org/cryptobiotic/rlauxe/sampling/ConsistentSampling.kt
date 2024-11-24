@@ -65,9 +65,10 @@ class PhantomBuilder(val id: String) {
 // AssertionRLAipynb.workflow()
 // first time only, we'll add the subsequent rounds later. KISS
 // sampling without replacement only
+
 fun consistentCvrSampling(
-    contests: List<ContestUnderAudit>, // all the contests you want to sample
-    cvrList: List<CvrUnderAudit>, // all the cvrs available to sample
+    contests: List<ContestUnderAudit>, // must have sampleSizes set
+    cvrList: List<CvrUnderAudit>, // must have sampleNums assigned
 ): List<Int> {
     if (cvrList.isEmpty()) return emptyList()
 

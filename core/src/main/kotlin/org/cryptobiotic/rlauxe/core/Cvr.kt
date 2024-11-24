@@ -42,7 +42,7 @@ open class Cvr(
 }
 
 /** Mutable version of Cvr. sampleNum >= 0  */
-class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: Long = 0L): CvrIF {
+class CvrUnderAudit (val cvr: Cvr, override val phantom: Boolean, var sampleNum: Long = 0L): CvrIF {
     override val id = cvr.id
     override val votes = cvr.votes
 

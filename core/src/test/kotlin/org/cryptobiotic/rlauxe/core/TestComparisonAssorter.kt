@@ -233,7 +233,7 @@ class TestComparisonAssorter {
             name = "ABCs",
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listToMap( "A", "B", "C", "D", "E"),
+            candidateNames = listToMap( "A", "B", "C", "D", "E", "F", "G"),
             nwinners = 3,
             minFraction = 0.25,
         )

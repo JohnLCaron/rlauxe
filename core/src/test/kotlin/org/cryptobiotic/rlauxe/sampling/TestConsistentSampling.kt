@@ -117,7 +117,12 @@ class TestConsistentSampling {
     class TestSamplingWithSkip(val skipSomeContests: Int) {
 
         fun runTest() {
-            val (contestsUA, cvrsUAP) = makeRandomTestData(skipSomeContests)
+            val test = MultiContestTestData(20, 11, 20000)
+            val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc).makePollingAssertions() }
+            contestsUA.forEach { it.sampleSize - it.Nc / 11 }
+
+            val prng = Prng(secureRandom.nextLong())
+            val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it as Cvr, false, prng.next()) }
 
             val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
             println("nsamples = ${sample_cvr_indices.size}\n")
@@ -134,8 +139,6 @@ class TestConsistentSampling {
             contestsUA.forEach { contest ->
                 val cvrs = cvrsUAP.filter { it.hasContest(contest.id) && it.sampleNum <= contest.sampleThreshold }
                 cvrs.forEachIndexed { idx, it ->
-                    if (!it.sampled)
-                        print("")
                     assertTrue(it.sampled)
                 }
                 val count = cvrs.size

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestMakeSampleData {
+class TestMultiContestTestData {
     @Test
     fun testMakeSampleData() {
         val test = MultiContestTestData(20, 11, 20000)

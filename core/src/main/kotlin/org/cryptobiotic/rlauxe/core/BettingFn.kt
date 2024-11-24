@@ -19,6 +19,11 @@ class FixedBet(val lam: Double): BettingFn {
     override fun bet(prevSamples: PrevSamplesWithRates) = lam
 }
 
+fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
+    val sampleNum = prevSamples.numberOfSamples()
+    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
+}
+
 /*
 Alpha eq 12. Choosing λi is equivalent to choosing ηi :
        λi = (ηi /µi − 1) / (u − µi )
@@ -29,49 +34,10 @@ The difference is only in how λi is chosen. However, see section 4 for a genera
 and to allow u to vary by draw.
  */
 
-/* original python
-    def lam_to_eta(self, lam: np.array, mu: np.array) -> np.array:
-        """
-        Convert bets (lam) for betting martingale to their implied estimates of the mean, eta, for ALPHA
-
-        Parameters
-        ----------
-        lam: float or numpy array
-            the value(s) of lam (the fraction of the current fortune to bet on the next draw)
-        mu: float or numpy array
-            sequence of population mean(s) if the null is true, adjusted for values already seen
-
-        Returns
-        -------
-        eta: float or numpy array
-            the corresponding value(s) of the mean
-        """
-        return mu * (1 + lam * (self.u - mu))
- */
-
 fun lamToEta(lam: Double, mu: Double, upper: Double): Double {
     return mu * (1 + lam * (upper - mu))
 }
 
-/* original python
-    def eta_to_lam(self, eta: np.array, mu: np.array) -> np.array:
-        """
-        Convert eta for ALPHA to corresponding bet lam for the betting martingale parametrization
-
-        Parameters
-        ----------
-        eta: float or numpy array
-            the value(s) of lam (the fraction of the current fortune to bet on the next draw)
-        mu: float or numpy array
-            sequence of population mean(s) if the null is true, adjusted for values already seen
-
-        Returns
-        -------
-        lam: float or numpy array
-            the corresponding betting fractions
-        """
-        return (eta / mu - 1) / (self.u - mu)
- */
 fun etaToLam(eta: Double, mu: Double, upper: Double): Double {
     return (eta / mu - 1) / (upper - mu)
 }

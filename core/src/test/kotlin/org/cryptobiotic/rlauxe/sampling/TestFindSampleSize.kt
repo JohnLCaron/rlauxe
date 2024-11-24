@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.AuditConfig
 import org.cryptobiotic.rlauxe.core.AuditType
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.test.Test
@@ -9,7 +12,10 @@ import kotlin.test.Test
 class TestFindSampleSize {
     @Test
     fun testFindSampleSize() {
-        val (contestsUA, cvrsUAP) = makeRandomTestData(2, true)
+        val test = MultiContestTestData(20, 11, 20000)
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
+        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
+
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
 

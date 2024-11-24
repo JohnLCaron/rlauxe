@@ -481,14 +481,8 @@ class TestComparisonFromAlpha {
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
-            val contest = makeContestFromCvrs(info, cvrs)
-            val contestUA = ContestUnderAudit(info, cvrs)
-            val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-            val compareAssertions = compareAudit.assertions[contest.id]
-            require(compareAssertions!!.size == 1)
-            val compareAssertion = compareAssertions.first()
-            val compareAssorter = compareAssertion.assorter
-            // println("theta = $theta upperBound = ${compareAssorter.upperBound()}")
+            val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
+            val compareAssertion = contestUA.comparisonAssertions.first()
 
             for (eta in etas) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
@@ -497,7 +491,7 @@ class TestComparisonFromAlpha {
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareAssorter.upperBound(),
+                    upperBound = compareAssertion.assorter.upperBound(),
                 )
                 srs.add(mart.makeSRT(N, theta, 0.0))
             }
@@ -553,12 +547,13 @@ class TestComparisonFromAlpha {
         for (theta in thetas) {
             for (N in nlist) {
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAudit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-                val compareAssertion = compareAudit.assertions[contest.id]!!.first()
+                val contest = makeContestsFromCvrs(cvrs).first()
+                val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+                val assorter = contestUA.comparisonAssertions.first().assorter
 
-                val margin = compareAssertion.assorter.margin
+                val margin = assorter.margin
                 val compareUpper = 2.0/(2-margin)
-                val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+                val drawSample = ComparisonNoErrors(cvrs, assorter)
                 val etaActual = drawSample.sampleMean()
                 val etaExpect =  1.0/(2-margin)
                 val same = doubleIsClose(etaActual, etaExpect)

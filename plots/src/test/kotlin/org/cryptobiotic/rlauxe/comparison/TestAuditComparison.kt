@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.junit.jupiter.api.Test
 
 // TODO
@@ -29,34 +28,19 @@ class TestAuditComparison {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B"),
         )
-        val contest = makeContestFromCvrs(info, cvrs)
+        val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
+        val assertion = contestUA.comparisonAssertions.first()
 
-        val assort = PluralityAssorter(contest, 0, 1)
-        val assortAvg = cvrs.map { assort.assort(it) }.average()
-        val cwinner = ComparisonAssorter(contest, assort, assortAvg)
-        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
-
-        // Comparison Audit
-        val audit = makeComparisonAudit(contests = listOf(contest), cvrs = cvrs)
-
-        // this has to be run separately for each assorter, but we want to combine them in practice
-        audit.assertions.map { (contestId, assertions) ->
-            println("Assertions for Contest ${contestId}")
-            assertions.forEach { it: ComparisonAssertion ->
-                println("  ${it}")
-
-                val cvrSampler = ComparisonNoErrors(cvrs, it.assorter)
-                val result = runAlphaMartRepeated(
-                    drawSample = cvrSampler,
-                    maxSamples = N,
-                    eta0 = cvrSampler.sampleMean(),
-                    d = 100,
-                    ntrials = 100,
-                    upperBound = it.assorter.upperBound()
-                )
-                println(result)
-            }
-        }
+        val cvrSampler = ComparisonNoErrors(cvrs, assertion.assorter)
+        val result = runAlphaMartRepeated(
+            drawSample = cvrSampler,
+            maxSamples = N,
+            eta0 = cvrSampler.sampleMean(),
+            d = 100,
+            ntrials = 100,
+            upperBound = assertion.assorter.upperBound()
+        )
+        println(result)
     }
 
     // TODO setting the eta0Factor by hand

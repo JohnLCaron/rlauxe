@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.AuditConfig
 import org.cryptobiotic.rlauxe.core.AuditType
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.test.Test
@@ -9,7 +12,10 @@ import kotlin.test.Test
 class TestFindSampleSize {
     @Test
     fun testFindSampleSize() {
-        val (contestsUA, cvrsUAP) = makeRandomTestData(2, true)
+        val test = MultiContestTestData(20, 11, 20000)
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
+        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
+
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
 
@@ -41,7 +47,8 @@ class TestFindSampleSize {
             val cn = contestUA.ncvrs
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
-                val result = finder.simulateSampleSize(contestUA, assert.assorter, cvrsUAP,)
+                //         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round) }
+                val result = finder.simulateSampleSizeAssorter(contestUA, assert.assorter, cvrsUAP,)
                 //     riskLimit: Double,
                 //    dilutedMargin: Double,
                 //    gamma: Double = 1.03,
@@ -61,8 +68,8 @@ class TestFindSampleSize {
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()
-            contestUA.sampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contestUA.name} estSize=$estSize  simSize=${contestUA.sampleSize}\n")
+            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            println("${contestUA.name} estSize=$estSize  simSize=${contestUA.estSampleSize}\n")
         }
     }
 }

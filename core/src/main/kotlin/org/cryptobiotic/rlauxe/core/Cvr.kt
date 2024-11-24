@@ -42,7 +42,7 @@ open class Cvr(
 }
 
 /** Mutable version of Cvr. sampleNum >= 0  */
-class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: Long = 0L): CvrIF {
+class CvrUnderAudit (val cvr: Cvr, override val phantom: Boolean, var sampleNum: Long = 0L): CvrIF {
     override val id = cvr.id
     override val votes = cvr.votes
 
@@ -64,6 +64,7 @@ class CvrUnderAudit(val cvr: Cvr, override val phantom: Boolean, var sampleNum: 
 
     companion object {
         fun fromCvrIF(cvr: CvrIF, phantom: Boolean) = if (cvr is CvrUnderAudit) cvr else CvrUnderAudit( cvr as Cvr, phantom)
+        fun makePhantom(cvrId: String, contestId: Int) = CvrUnderAudit(Cvr(contestId, cvrId, emptyList()), true)
     }
 }
 
@@ -93,4 +94,20 @@ open class BallotUnderAudit(val id: Int, val ballotStyle: BallotStyle) {
 
     fun hasContest(contestId: Int): Boolean = ballotStyle.hasContest(contestId)
 }
+
+/*
+fun makeBallots(cvrs: List<Cvr>): List<BallotUnderAudit> {
+    val ballotStyles: List<BallotStyle> = makeBallotStyles(cvrs)
+    val result = mutableListOf<BallotUnderAudit>()
+    var ballotId = 0
+    ballotStyles.forEach { ballotStyle ->
+        repeat(ballotStyle.ncards) {
+            result.add(BallotUnderAudit(ballotId, ballotStyle))
+            ballotId++
+        }
+    }
+    return result
+}
+
+ */
 

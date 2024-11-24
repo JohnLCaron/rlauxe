@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.AuditConfig
 import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.rlaplots.*
-import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.margin2mean
 import java.util.concurrent.TimeUnit
@@ -33,7 +33,7 @@ class PlotFindSampleSize {
             // polling
             contestUA.makePollingAssertions()
             val assort = contestUA.pollingAssertions.first().assorter
-            val result = finder.simulateSampleSizePolling(contestUA, assort, N)
+            val result = finder.simulateSampleSizePollingAssorter(contestUA, assort, N)
             // RunTestRepeatedResult.makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double)
             srts.add(result.makeSRT(N, margin2mean(margin), 0.0))
 
@@ -41,7 +41,7 @@ class PlotFindSampleSize {
             val cvrs = fcontest.makeCvrs().map { CvrUnderAudit.fromCvrIF(it, false)}
             contestUA.makeComparisonAssertions(cvrs)
             val cassort = contestUA.comparisonAssertions.first().assorter
-            val cresult = finder.simulateSampleSize(contestUA, cassort, cvrs)
+            val cresult = finder.simulateSampleSizeAssorter(contestUA, cassort, cvrs)
             // RunTestRepeatedResult.makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double)
             srts.add(cresult.makeSRT(N, margin2mean(margin), 0.0))
             println(" took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")

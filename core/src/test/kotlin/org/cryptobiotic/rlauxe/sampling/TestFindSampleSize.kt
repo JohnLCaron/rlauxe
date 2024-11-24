@@ -47,7 +47,8 @@ class TestFindSampleSize {
             val cn = contestUA.ncvrs
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
-                val result = finder.simulateSampleSize(contestUA, assert.assorter, cvrsUAP,)
+                //         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round) }
+                val result = finder.simulateSampleSizeAssorter(contestUA, assert.assorter, cvrsUAP,)
                 //     riskLimit: Double,
                 //    dilutedMargin: Double,
                 //    gamma: Double = 1.03,
@@ -67,8 +68,8 @@ class TestFindSampleSize {
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()
-            contestUA.sampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contestUA.name} estSize=$estSize  simSize=${contestUA.sampleSize}\n")
+            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            println("${contestUA.name} estSize=$estSize  simSize=${contestUA.estSampleSize}\n")
         }
     }
 }

@@ -166,10 +166,10 @@ class TestOverstatementsFromShangrla {
             .addCrv().addContest("AvB", "Bob").ddone()
             .addCrv().addContest("AvB").ddone()
             .addCrv().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
-            .addCrv(phantom=true).addContest("AvB").ddone()
+            // .addCrv(phantom=true).addContest("AvB").ddone() // TODO
 
         println(mvrb.show())
-        val mvrs = mvrb.build()
+        val mvrs = mvrb.build()  + CvrUnderAudit.makePhantom("Phantastic", 0)
 
         //
         //        cvr_dict = [{'id': 1, 'votes': {'AvB': {'Alice':True}}},
@@ -183,9 +183,9 @@ class TestOverstatementsFromShangrla {
             .addCrv().addContest("AvB", "Bob").ddone()
             .addCrv().addContest("AvB").ddone()
             .addCrv().addContest("CvD", "Elvis").ddone()
-            .addCrv(phantom=true).addContest("AvB").ddone()
+            // .addCrv(phantom=true).addContest("AvB").ddone() // TODO
         println(cvrb.show())
-        val cvrs = cvrb.build()
+        val cvrs = cvrb.build() + CvrUnderAudit.makePhantom("Phantastic", 0)
 
         //
         //        winner = ["Alice"]

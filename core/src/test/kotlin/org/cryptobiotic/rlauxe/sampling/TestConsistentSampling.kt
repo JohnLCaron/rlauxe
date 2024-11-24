@@ -39,8 +39,8 @@ class TestConsistentSampling {
         val contestsUA = contestInfos.mapIndexed { idx, it ->
             ContestUnderAudit( it, cvrs)
         }
-        contestsUA[0].sampleSize = 3
-        contestsUA[1].sampleSize = 4
+        contestsUA[0].estSampleSize = 3
+        contestsUA[1].estSampleSize = 4
 
         val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUA)
         assertEquals(5, sample_cvr_indices.size)
@@ -85,9 +85,9 @@ class TestConsistentSampling {
         val contestsUA = contestInfos.mapIndexed { idx, it ->
             ContestUnderAudit( it, cvrs)
         }
-        contestsUA[0].sampleSize = 3
-        contestsUA[1].sampleSize = 3
-        contestsUA[2].sampleSize = 2
+        contestsUA[0].estSampleSize = 3
+        contestsUA[1].estSampleSize = 3
+        contestsUA[2].estSampleSize = 2
 
         val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val cvrsUAP = cvrsUA + phantomCVRs
@@ -119,7 +119,7 @@ class TestConsistentSampling {
         fun runTest() {
             val test = MultiContestTestData(20, 11, 20000)
             val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc).makePollingAssertions() }
-            contestsUA.forEach { it.sampleSize - it.Nc / 11 }
+            contestsUA.forEach { it.estSampleSize - it.Nc / 11 }
 
             val prng = Prng(secureRandom.nextLong())
             val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it as Cvr, false, prng.next()) }
@@ -142,8 +142,8 @@ class TestConsistentSampling {
                     assertTrue(it.sampled)
                 }
                 val count = cvrs.size
-                assertEquals(contest.sampleSize, count)
-                println(" ${contest.name} (${contest.id}) == ${contest.sampleSize}")
+                assertEquals(contest.estSampleSize, count)
+                println(" ${contest.name} (${contest.id}) == ${contest.estSampleSize}")
             }
         }
     }

@@ -7,7 +7,7 @@ import kotlin.random.Random
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
 
-// for testing, here to share between modules
+// making CVRs for simulations and testing
 fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
     var total = 0
@@ -59,7 +59,10 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<CvrIF> {
     return randomCvrs
 }
 
-class SimContest(val contest: Contest, val assorter: AssorterFunction, val debug: Boolean = false) {
+// For Polling, single contest and assorter.
+// ported from MultiContestTestData, doesnt need to adjust votes, just use them as is from Contest
+// TODO fuzz data from the reported mean.
+class SimContest(val contest: Contest, val assorter: AssorterFunction) {
     val info = contest.info
     val ncands = info.candidateIds.size
     val margin = assorter.reportedMargin()
@@ -75,6 +78,7 @@ class SimContest(val contest: Contest, val assorter: AssorterFunction, val debug
         votesLeft = ncards
     }
 
+    // makes a new, independent set of Cvrs.
     fun makeCvrs(): List<CvrIF> {
         resetTracker()
         val cvrbs = CvrBuilders().addContests(listOf(this.info))
@@ -108,21 +112,6 @@ class SimContest(val contest: Contest, val assorter: AssorterFunction, val debug
         votesLeft--
         return candidateId
     }
-
-    // doesnt need to repeat I think
-    fun adjust(svotes: MutableMap<Int, Int>) {
-        val winner = svotes[assorter.winner()]!!
-        val loser = svotes[assorter.loser()]!!
-        val wantMarginDiff = (margin * ncards).toInt()
-        val haveMarginDiff = (winner - loser)
-        val adjust: Int = (wantMarginDiff - haveMarginDiff)/2 // can be positive or negetive
-        require(winner + adjust >= 0)
-        require(loser - adjust >= 0)
-        svotes[assorter.winner()] = winner + adjust
-        svotes[assorter.loser()] = loser - adjust
-
-    }
-
 }
 
 

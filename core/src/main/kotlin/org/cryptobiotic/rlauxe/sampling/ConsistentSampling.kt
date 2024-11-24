@@ -73,7 +73,7 @@ fun consistentCvrSampling(
     if (cvrList.isEmpty()) return emptyList()
 
     val currentSizes = mutableMapOf<Int, Int>()
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.estSampleSize
 
     // get list of cvr indexes sorted by sampleNum
     val sortedCvrIndices = cvrList.indices.sortedBy { cvrList[it].sampleNum }
@@ -109,7 +109,7 @@ fun consistentPollingSampling(
     if (ballots.isEmpty()) return emptyList()
 
     val currentSizes = mutableMapOf<Int, Int>()
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.sampleSize
+    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.estSampleSize
 
     // get list of cvr indexes sorted by sampleNum
     val sortedCvrIndices = ballots.indices.sortedBy { ballots[it].sampleNum }
@@ -139,7 +139,7 @@ fun consistentPollingSampling(
         inx++
     }
     contests.forEach { contest ->
-        if (show) println("${contest.name} wanted= ${contest.sampleSize} actual=${currentSizes[contest.id]}")
+        if (show) println("${contest.name} wanted= ${contest.estSampleSize} actual=${currentSizes[contest.id]}")
         contest.actualAvailable = currentSizes[contest.id]!!
     }
     return sampledIndices

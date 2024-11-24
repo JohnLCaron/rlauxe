@@ -128,7 +128,7 @@ data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val t
 
         // between 1 and ncontest contests, randomly chosen
         ballotStyles = List(nballotStyles) { it }.map {
-            val ncInStyle = 1 + Random.nextInt(ncontest - 1)
+            val ncInStyle = 1 + Random.nextInt(ncontest - 1) // TODO use a power law distribution (weighted to small values) ? more realistic ??
             val contestIndexes = mutableSetOf<Int>()
             while (contestIndexes.size < ncInStyle) {
                 contestIndexes.add(Random.nextInt(ncontest))
@@ -173,10 +173,10 @@ data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val t
         ballotStyles.forEach { appendLine(it) }
     }
 
-    fun makeCvrsFromContests(): List<CvrIF> {
+    fun makeCvrsFromContests(): List<Cvr> {
         fcontests.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(fcontests.map { it.info })
-        val result = mutableListOf<CvrIF>()
+        val result = mutableListOf<Cvr>()
         ballotStyles.forEach { ballotStyle ->
             val fcontests = fcontests.filter { ballotStyle.contestNames.contains(it.info.name) }
             repeat(ballotStyle.ncards) {
@@ -186,7 +186,7 @@ data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val t
         return result.toList()
     }
 
-    private fun randomSample(cvrbs: CvrBuilders, fcontests: List<FuzzedContest>): CvrIF {
+    private fun randomSample(cvrbs: CvrBuilders, fcontests: List<FuzzedContest>): Cvr {
         val cvrb = cvrbs.addCrv()
         fcontests.forEach { fcontest ->
             cvrb.addContest(fcontest.info.name, fcontest.chooseCandidate(Random.nextInt(fcontest.votesLeft))).done()

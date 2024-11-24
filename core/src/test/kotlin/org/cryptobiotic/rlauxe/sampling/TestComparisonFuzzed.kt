@@ -141,8 +141,8 @@ class TestComparisonFuzzed {
                 assertion.samplesEst = size
                 sampleSizes.add(assertion.samplesEst)
             }
-            contestUA.sampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contestUA.name} estSize=${contestUA.sampleSize}")
+            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            println("${contestUA.name} estSize=${contestUA.estSampleSize}")
         }
     }
 }

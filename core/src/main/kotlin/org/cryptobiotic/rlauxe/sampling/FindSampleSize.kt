@@ -39,7 +39,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
                 cvr.p = 0.0
                 for (con in rcontests) {
                     if (cvr.hasContest(con.id) && !cvr.sampled) {
-                        val p1 = con.sampleSize.toDouble() / (con.Nc!! - old_sizes[con.id]!!)
+                        val p1 = con.estSampleSize.toDouble() / (con.Nc!! - old_sizes[con.id]!!)
                         cvr.p = max(p1, cvr.p) // TODO nullability
                     }
                 }
@@ -66,7 +66,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
                 ballot.p = 0.0
                 for (con in rcontests) {
                     if (ballot.hasContest(con.id) && !ballot.sampled) {
-                        val p1 = con.sampleSize.toDouble() / con.Nc
+                        val p1 = con.estSampleSize.toDouble() / con.Nc
                         ballot.p = max(p1, ballot.p)
                     }
                 }
@@ -76,43 +76,49 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         return ceil(summ).toInt()
     }
 
-    fun simulateSampleSizePolling(
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // called from PollingWorkflow
+    fun simulateSampleSizePollingContest(
         contestUA: ContestUnderAudit,
         prevMvrs: List<CvrIF>, // TODO should be used for subsequent round estimation
         maxSamples: Int,
         round: Int,
+        show: Boolean = false
     ): Int {
         val sampleSizes = mutableListOf<Int>()
         contestUA.pollingAssertions.map { assert ->
             if (!assert.proved) {
-                val result = simulateSampleSizePolling(contestUA, assert.assorter, maxSamples)
+                val result = simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples)
                 val size = result.findQuantile(auditConfig.quantile)
                 assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
                 sampleSizes.add(assert.samplesEst)
-                println(" simulateSampleSizes ${assert} est=$size failed=${df(result.failPct())}")
+                if (show) println(" simulateSampleSizes ${assert} est=$size failed=${df(result.failPct())}")
             }
         }
-        contestUA.sampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: contest ${contestUA.name} est=${contestUA.sampleSize}")
-        return contestUA.sampleSize
+        contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        if (show) println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: contest ${contestUA.name} est=${contestUA.estSampleSize}")
+        return contestUA.estSampleSize
     }
 
-    fun simulateSampleSizePolling(
+    // also called from plotter testFindSampleSize
+    fun simulateSampleSizePollingAssorter(
         contestUA: ContestUnderAudit,
         assorter: AssorterFunction,
         maxSamples: Int,
     ): RunTestRepeatedResult {
         val margin = assorter.reportedMargin()
-        val simContest = SimContest(contestUA.contest, assorter, true)
+        val simContest = SimContest(contestUA.contest, assorter)
         val cvrs = simContest.makeCvrs()
         require(cvrs.size == contestUA.ncvrs)
-        val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
-        // TODO fuzz data from the reported mean. Isnt this number fixed by the margin ??
 
-        return simulateSampleSizePolling(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc)
+        // TODO fuzz data from the reported mean. Isnt this number fixed by the margin ??
+        val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
+
+        return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc)
     }
 
-    fun simulateSampleSizePolling(
+    fun simulateSampleSizeAlphaMart(
         sampleFn: GenSampleFn,
         margin: Double,
         upperBound: Double,
@@ -153,8 +159,31 @@ class FindSampleSize(val auditConfig: AuditConfig) {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
+    // Comparison
 
-    fun simulateSampleSize(
+    fun simulateSampleSizeComparisonContest(
+        contestUA: ContestUnderAudit,
+        cvrs: List<CvrUnderAudit>,
+        mvrs: List<CvrIF>, // TODO use previosu samples
+        round: Int,
+        show: Boolean = false): Int {
+
+        val sampleSizes = mutableListOf<Int>()
+        contestUA.comparisonAssertions.map { assert ->
+            if (!assert.proved) {
+                val result = simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
+                val size = result.findQuantile(auditConfig.quantile)
+                assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
+                sampleSizes.add(assert.samplesEst)
+                if (show) println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: ${assert}")
+            }
+        }
+        contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        if (show) println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: contest ${contestUA.name} est=${contestUA.estSampleSize}")
+        return  contestUA.estSampleSize
+    }
+
+    fun simulateSampleSizeAssorter(
         contest: ContestUnderAudit,
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,

@@ -74,7 +74,7 @@ class PollingWorkflow(
         cvrs: List<CvrIF>,
     ): Boolean {
         val assorter = assertion.assorter
-        val sampler: SampleFn = PollWithoutReplacement(contestUA, cvrs, assorter)
+        val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
 
         val eta0 = margin2mean(assertion.margin)
         val minsd = 1.0e-6

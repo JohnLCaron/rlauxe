@@ -250,14 +250,7 @@ fun runOneAssertionAudit(
 ): Boolean {
     val assorter = assertion.assorter
 
-    /*
-    val samples = PrevSamplesWithRates(assorter.noerror)
-    cvrPairs.forEach { (mvr, cvr) -> samples.addSample(assorter.bassort(mvr,cvr)) }
-    println("runOneAssertionAudit ${assorter.name()} samplingErrors= ${samples.samplingErrors()}")
-
-     */
-
-    val sampler: SampleFn = ComparisonSampler(cvrPairs, contestUA, assorter)
+    val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = false)
 
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,

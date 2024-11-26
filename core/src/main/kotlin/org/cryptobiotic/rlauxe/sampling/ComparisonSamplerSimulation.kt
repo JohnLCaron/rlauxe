@@ -58,8 +58,8 @@ class ComparisonSamplerSimulation(
         sampleMean = sampleCount / N
     }
 
-    override fun sampleMean() = sampleMean
-    override fun sampleCount() = sampleCount
+    fun sampleMean() = sampleMean
+    fun sampleCount() = sampleCount
     override fun N() = N
     override fun reset() {
         permutedIndex.shuffle(secureRandom)

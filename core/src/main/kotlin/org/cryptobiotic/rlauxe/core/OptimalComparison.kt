@@ -9,6 +9,8 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.lang.Math.pow
+import kotlin.math.ceil
 import kotlin.math.ln
 import kotlin.math.max
 
@@ -218,3 +220,83 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
                 p4 * (a*2.0 - mui) / (1.0 + lam * (a*2.0 - mui))
     }
 }
+
+// COBRA equation 1 is a deterministic lower bound on sample size, dependent on margin and risk limit.
+// COBRA equation 2 has the maximum expected value for given over/understatement rates. See OptimalLambda class for implementation.
+
+fun estimateSampleSizeOptimalLambda(
+    alpha: Double, // risk
+    dilutedMargin: Double, // the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
+    upperBound: Double, // assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
+    p1: Double, p2: Double, p3: Double = 0.0, p4: Double = 0.0
+): Int {
+
+    //  a := 1 / (2 − v/au)
+    //  v := 2Āc − 1 is the diluted margin
+    //  au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
+
+    val a = 1 / (2 - dilutedMargin / upperBound)
+    val kelly = OptimalLambda(a, p1=p1, p2=p2, p3=p3, p4=p4)
+    val lam = kelly.solve()
+
+    // 1 / alpha = bet ^ size
+    val term1 = -ln(alpha)
+    val term2 = ln(lam)
+    val r = term1 / term2 // round up
+
+    val T = pow(lam, r)
+    val size = ceil(r)
+    // println("   lam=$lam r=$r T=$T size=$size")
+
+    return size.toInt()
+}
+
+
+// this is optimal_comparison_noP1, a bet, not a sample estimate.
+// see cobra p 5
+fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): Double {
+    /*
+    The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
+    for which overstatement assorters take a small number of possible values and are concentrated
+    on a single value when the CVRs have no errors.
+
+    Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
+    and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
+
+    eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
+
+    Translating to p2=1-p0 gives:
+
+    eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+
+    Parameters
+    ----------
+    x: input data
+    rate_error_2: hypothesized rate of two-vote overstatements
+
+    Returns
+    -------
+    eta: estimated alternative mean to use in alpha
+    */
+
+    // TODO python doesnt check (2 - 2 * self.u) != 0; self.u = 1
+    if (u == 1.0)
+        throw RuntimeException("optimal_comparison: u ${u} must != 1")
+
+    val p2 = rate_error_2 // getattr(self, "rate_error_2", 1e-4)  // rate of 2-vote overstatement errors
+    val bet = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
+    // 1 / alpha = bet ^ size
+    val term1 = -ln(alpha)
+    val term2 = ln(bet)
+    val size = -ln(alpha) / ln(bet)
+    return size
+}
+
+// MoreStyle footnote 5
+// The number of draws S4 needs to confirm results depends on the diluted margin and
+// the number and nature of discrepancies the sample uncovers. The initial sample size can be
+// written as a constant (denoted ρ) divided by the “diluted margin.”
+// In general, ρ = − log(α)/[ 2γ + λ log(1 − 2γ)], where γ is an error inflation factor and λ is the anticipated rate of
+// one-vote overstatements in the initial sample as a percentage of the diluted margin [17]. We define γ and λ as in
+// https://www.stat.berkeley.edu/~stark/Vote/auditTools.htm.
+

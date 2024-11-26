@@ -18,11 +18,13 @@ private val debug = false
     val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
     val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
  */
+// creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
+// It can create cvrs that reflect the contests' exact votes.
 data class MultiContestTestData(
     val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
     val debug: Boolean = false, val minMargin: Double = 0.005,
 ) {
-    val fcontests: List<FuzzedContest>
+    val fcontests: List<TestContest>
     val ballotStyles: List<BallotStyle>
     var countBallots = 0
 
@@ -30,7 +32,7 @@ data class MultiContestTestData(
         // between 2 and 4 candidates, margin random number between minMargin and minMargin + .02
         fcontests = List(ncontest) { it }.map {
             val ncands = max(Random.nextInt(5), 2)
-            FuzzedContest(it, ncands, minMargin + Random.nextDouble(0.2))
+            TestContest(it, ncands, minMargin + Random.nextDouble(0.2))
         }
 
         // between 1 and ncontest contests, randomly chosen
@@ -94,7 +96,7 @@ data class MultiContestTestData(
         return result.toList()
     }
 
-    private fun randomSample(cvrbs: CvrBuilders, fcontests: List<FuzzedContest>): Cvr {
+    private fun randomSample(cvrbs: CvrBuilders, fcontests: List<TestContest>): Cvr {
         val cvrb = cvrbs.addCrv()
         fcontests.forEach { fcontest ->
             cvrb.addContest(fcontest.info.name, fcontest.chooseCandidate(Random.nextInt(fcontest.votesLeft))).done()
@@ -103,7 +105,10 @@ data class MultiContestTestData(
     }
 }
 
-data class FuzzedContest(
+// This creates a multicandidate contest with the two closest candidates having exactly the given margin.
+// It can create cvrs that reflect this contest's vote; so can be used in simulating the audit.
+// The cvrs are not multicontest.
+data class TestContest(
     val contestId: Int,
     val ncands: Int,
     val margin: Double,
@@ -164,10 +169,11 @@ data class FuzzedContest(
         return Contest(this.info, svotes.toMap(), this.ncards)
     }
 
-    fun makeCvrs(): List<CvrIF> {
+    // used for standalone contest
+    fun makeCvrs(): List<Cvr> {
         resetTracker()
         val cvrbs = CvrBuilders().addContests(listOf(this.info))
-        val result = mutableListOf<CvrIF>()
+        val result = mutableListOf<Cvr>()
         repeat(this.ncards) {
             val cvrb = cvrbs.addCrv()
             cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()

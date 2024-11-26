@@ -19,14 +19,15 @@ Table of Contents
       * [SUPERMAJORITY](#supermajority)
       * [IRV](#irv)
     * [Betting martingales](#betting-martingales)
+    * [Polling Vs Comparison Estimated Sample sizes](#polling-vs-comparison-estimated-sample-sizes)
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
       * [Comparison Betting Payoffs](#comparison-betting-payoffs)
       * [Comparison error rates](#comparison-error-rates)
+      * [Estimating Sample sizes with fuzz](#estimating-sample-sizes-with-fuzz)
+      * [Comparison fuzz effect on under/overstatement error rates](#comparison-fuzz-effect-on-underoverstatement-error-rates)
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
-      * [Polling Vs Comparison Estimated Sample sizes](#polling-vs-comparison-estimated-sample-sizes)
-      * [Comparison Sample sizes with fuzz](#comparison-sample-sizes-with-fuzz)
     * [Consistent Sampling](#consistent-sampling)
     * [Use Styles](#use-styles)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
@@ -188,6 +189,13 @@ losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exc
 
 See BettingMart.kt and related code for current implementation.
 
+
+### Polling Vs Comparison Estimated Sample sizes
+
+This shows the large difference between a polling audit and a comparison audit at the same margin:
+
+* [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
+
 ### Polling audits
 
 A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
@@ -330,7 +338,7 @@ FOr IRV, the corresponding decriptions of the errror rates are:
     NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
     NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
 
-TODO: Compare the sample sizes of fuzzed simulations with the case of all errors == 0, at different margins.
+See _Estimated Sample sizes with fuzz_ (below) for a different error simulation.
 We expect the spread to increase, but also shift to larger samples sizes, since the cost of overstatement is higher than understatements.
 
 If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
@@ -340,6 +348,44 @@ fetching and interpreting ballots.
 In any case, currrently all assumptions on the a-priori error rates are arbitrary. These need to be measured for existing
 machines and practices. While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
+#### Estimating Sample sizes with fuzz
+
+Estimated sample size vs margin at different "fuzz" percentages. The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
+and randomly changing the candidate voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
+When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. Note that this method of generating
+errors doesnt change the reported mean, on average.
+
+The first plot shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
+have greater spread, but on average are not much affected.
+
+* [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzConcurrent.html)
+* [Polling Sample sizes with fuzz](docs/plots/PollingFuzzConcurrent.html)
+
+#### Comparison fuzz effect on under/overstatement error rates
+
+With a mixture of contests with different candidate sizes, and empty votes allowed, here is a representative table of
+how the fuzzing generates p1, p2, p3 and p4 error rates:
+
+````
+fuzzPct = 0.001
+avgRates = [2.845617895122841E-4, 1.386138613861406E-4, 2.1763843050971667E-4, 1.4319765309864335E-4]
+error% = [0.2845617895122841, 0.1386138613861406, 0.21763843050971668, 0.14319765309864335]
+fuzzPct = 0.005
+avgRates = [0.0017207554088742374, 0.0010907590759075846, 0.0012455078841217438, 8.756875687568617E-4]
+error% = [0.3441510817748475, 0.21815181518151694, 0.24910157682434875, 0.17513751375137235]
+fuzzPct = 0.01
+avgRates = [0.0030907590759076255, 0.0019191419141913585, 0.0024609460946094313, 0.001622112211221137]
+error% = [0.30907590759076253, 0.19191419141913585, 0.24609460946094314, 0.1622112211221137]
+fuzzPct = 0.02
+avgRates = [0.006589842317564948, 0.0038734873487348905, 0.00507059039237249, 0.003099193252658597]
+error% = [0.3294921158782474, 0.19367436743674454, 0.2535295196186245, 0.15495966263292985]
+fuzzPct = 0.05
+avgRates = [0.016377887788778477, 0.010581591492482438, 0.012896773010634483, 0.008374587458745916]
+error% = [0.32755775577556956, 0.21163182984964876, 0.25793546021268965, 0.16749174917491833]
+````
+A two-candidate contest has significantly higher two-vote error rates, since its more likely to flip a vote between winenr and loser,
+than switch a vote to/from other.
+
 ## Sampling
 
 SHANGRLA provides a very elegant separation between the implementation of risk testing (mostly described
@@ -348,39 +394,6 @@ above) and sampling.
 ### Estimating Sample sizes
 
 For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
-
-#### Polling Vs Comparison Estimated Sample sizes
-
-1. [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
-
-#### Comparison Sample sizes with fuzz
-
-Estimated sample size vs margin. The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots and randomly
-changing the candidate voted for. fuzzPct = 0.0 means the cvrs and mvrs agree.
-
-2. [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzConcurrent.html)
-3. [Polling Sample sizes with fuzz](docs/plots/PollingFuzzConcurrent.html)
-
-This result is a mixture of contest sizes. empty votes are allowed.
-````
-fuzzPct = 0.001
-avgRates = [0.9992159882654829, 2.845617895122841E-4, 1.386138613861406E-4, 2.1763843050971667E-4, 1.4319765309864335E-4]
-error% = [999.2159882654829, 0.2845617895122841, 0.1386138613861406, 0.21763843050971668, 0.14319765309864335]
-fuzzPct = 0.005
-avgRates = [0.9950672900623334, 0.0017207554088742374, 0.0010907590759075846, 0.0012455078841217438, 8.756875687568617E-4]
-error% = [199.01345801246669, 0.3441510817748475, 0.21815181518151694, 0.24910157682434875, 0.17513751375137235]
-fuzzPct = 0.01
-avgRates = [0.9909070407040654, 0.0030907590759076255, 0.0019191419141913585, 0.0024609460946094313, 0.001622112211221137]
-error% = [99.09070407040655, 0.30907590759076253, 0.19191419141913585, 0.24609460946094314, 0.1622112211221137]
-fuzzPct = 0.02
-avgRates = [0.9813668866886412, 0.006589842317564948, 0.0038734873487348905, 0.00507059039237249, 0.003099193252658597]
-error% = [49.06834433443206, 0.3294921158782474, 0.19367436743674454, 0.2535295196186245, 0.15495966263292985]
-fuzzPct = 0.05
-avgRates = [0.9517691602493656, 0.016377887788778477, 0.010581591492482438, 0.012896773010634483, 0.008374587458745916]
-error% = [19.035383204987312, 0.32755775577556956, 0.21163182984964876, 0.25793546021268965, 0.16749174917491833]
-````
-A two-candidate contest has significantly higher two-vote error rates, since its more likely to flip a vote than vote for other.
-
 
 ### Consistent Sampling
 

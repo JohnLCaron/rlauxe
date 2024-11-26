@@ -43,7 +43,8 @@ class ConcurrentTaskRunner {
         }
 
         // doesnt return until all tasks are done
-        println("that ${stopwatch.tookPer(tasks.size, "task")}")
+        println("that took $stopwatch")
+        // println("that ${stopwatch.tookPer(tasks.size, "task")}")
         return results
     }
 

@@ -61,7 +61,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<CvrIF> {
 
 // For Polling, single contest and assorter.
 // ported from MultiContestTestData, doesnt need to adjust votes, just use them as is from Contest
-// TODO fuzz data from the reported mean.
+// TODO allow empty votes
 class SimContest(val contest: Contest, val assorter: AssorterFunction) {
     val info = contest.info
     val ncands = info.candidateIds.size
@@ -78,7 +78,7 @@ class SimContest(val contest: Contest, val assorter: AssorterFunction) {
         votesLeft = ncards
     }
 
-    // makes a new, independent set of Cvrs.
+    // makes a new, independent set of Cvrs with the contest votes
     fun makeCvrs(): List<CvrIF> {
         resetTracker()
         val cvrbs = CvrBuilders().addContests(listOf(this.info))

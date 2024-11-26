@@ -167,7 +167,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
     fun simulateSampleSizeComparisonContest(
         contestUA: ContestUnderAudit,
         cvrs: List<CvrUnderAudit>,
-        mvrs: List<CvrIF>, // TODO use previosu samples
+        mvrs: List<CvrIF>, // TODO use previous samples
         round: Int,
         show: Boolean = false): Int {
 
@@ -196,6 +196,9 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         // val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = mvrsFuzzed.zip(cvrsUAP)
         // cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
         // val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter)
+
+        // this uses auditConfig p1,,p4 to set apriori error rates. should be based on fuzzPct i think
+        // val sampleFn = ComparisonSamplerRegen(auditConfig.fuzzPct, cvrs, contestUA, assorter)
 
         // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.
         val sampler = ComparisonSamplerSimulation(cvrs, contestUA, assorter,

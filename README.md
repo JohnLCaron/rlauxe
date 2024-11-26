@@ -525,7 +525,7 @@ total_size estimate, but not do the consistent sampling. Also maybe only works w
 
 ## Plots
 
-These plots has only two-person ballots.
+These plots have only two-person ballots.
 
 ### Polling Vs Comparison Estimated Sample sizes
 
@@ -538,6 +538,7 @@ changing the candidate voted for. fuzzPct = 0.0 means the cvrs and mvrs agree.
 
 * [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzSampleSizeConcurrent.html)
 
+This result is a mixture of contest sizes. empty votes are allowed.
 ````
 fuzzPct = 0.001
 avgRates = [0.9992159882654829, 2.845617895122841E-4, 1.386138613861406E-4, 2.1763843050971667E-4, 1.4319765309864335E-4]
@@ -555,6 +556,7 @@ fuzzPct = 0.05
 avgRates = [0.9517691602493656, 0.016377887788778477, 0.010581591492482438, 0.012896773010634483, 0.008374587458745916]
 error% = [19.035383204987312, 0.32755775577556956, 0.21163182984964876, 0.25793546021268965, 0.16749174917491833]
 ````
+A two-candidate contest has significantly higher two-vote error rates, since its more likely to flip a vote than vote for other.
 
 ## Notes
 

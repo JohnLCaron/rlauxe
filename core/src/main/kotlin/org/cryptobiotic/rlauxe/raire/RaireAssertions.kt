@@ -80,6 +80,41 @@ class RaireContestUnderAudit(
     }
 }
 
+/*
+Not Eliminated Next (NEN) Assertions. "IRV Elimination"
+NEN assertions compare the tallies of two candidates under the assumption that a specific set of
+candidates have been eliminated. An instance of this kind of assertion could look like this:
+  NEN: Alice > Bob if only {Alice, Bob, Diego} remain.
+
+Not Eliminated Before (NEB) Assertions. "Winner Only"
+Alice NEB Bob is an assertion saying that Alice cannot be eliminated before Bob, irrespective of which
+other candidates are continuing.
+ */
+
+/*
+Assertion                   RaireScore  ShangrlaScore            Notes
+NEB (winner_only)
+  c1 NEB ck where k > 1           1       1                 Supports 1st prefs for c1
+  cj NEB ck where k > j > 1       0       1/2               cj precedes ck but is not first
+  cj NEB ck where k < j          -1       0                 a mention of ck preceding cj
+
+NEN(irv_elimination): ci > ck if only {S} remain
+  where ci = first(pS(b))           1     1                 counts for ci (expected)
+  where first(pS(b)) !∈ {ci , ck }  0     1/2               counts for neither cj nor ck
+  where ck = first(pS(b))          -1     0                 counts for ck (unexpected)
+ */
+
+/*
+  NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
+  NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
+  NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
+  NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
+
+  NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
+  NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
+  NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
+  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
+ */
 enum class RaireAssertionType(val aname:String) {
     winner_only("NEB"),
     irv_elimination("NEN");

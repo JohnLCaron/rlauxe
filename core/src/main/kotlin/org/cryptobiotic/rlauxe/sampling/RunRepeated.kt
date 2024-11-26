@@ -38,15 +38,16 @@ data class RunTestRepeatedResult(
 }
 
 fun runTestRepeated(
-    drawSample: GenSampleFn,
-    maxSamples: Int,
-    ntrials: Int,
-    testFn: RiskTestingFn,
-    testParameters: Map<String, Double>,
-    terminateOnNullReject: Boolean = true,
-    showDetails: Boolean = false,
-    margin: Double?,
+        drawSample: GenSampleFn,
+        maxSamples: Int,
+        ntrials: Int,
+        testFn: RiskTestingFn,
+        testParameters: Map<String, Double>,
+        terminateOnNullReject: Boolean = true,
+        showDetails: Boolean = false,
+        margin: Double?,
     ): RunTestRepeatedResult {
+
     val showH0Result = false
     val N = drawSample.N()
 

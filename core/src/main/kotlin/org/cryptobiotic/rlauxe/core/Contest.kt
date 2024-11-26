@@ -143,7 +143,13 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
 
     fun minComparisonAssertion(): ComparisonAssertion {
         val margins = comparisonAssertions.map { it.assorter.margin }
-        val minMargin = if (comparisonAssertions.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }!!
+        val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
+        return comparisonAssertions.find { it.assorter.margin == minMargin }!!
+    }
+
+    fun minPollingAssertion(): Assertion {
+        val margins = pollingAssertions.map { it.margin }
+        val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
+        return pollingAssertions.find { it.margin == minMargin }!!
     }
 }

@@ -1,5 +1,5 @@
 # Development
-last changed: 11/20/2024
+last changed: 11/25/2024
 
 ## TODO
 
@@ -8,20 +8,20 @@ last changed: 11/20/2024
 * hybrid audits
 
 ### sampling
-* Estimate sample sizes with fixed formula (1)
-* Estimate sample sizes with simulation reps and quantile (2)
+* Estimate sample sizes with fixed formula
+* DONE Estimate sample sizes with simulation reps and quantile
 * DONE Raire error rates
 * Parallelization (?)
 * SecureRandom must be deterministic using a given seed, so verifiers can test. 
   Make a version that agrees exactly with SHANGRLA's version. (3)
   BigIntegers? Strings? Maybe hex strings?
-* Polling
+* DONE Polling
 * without CSD?
 * COBRA 4.3 Diversified betting
 
 ### multiple rounds
 * Serialization of intermediate stages
-* Re-estimate sample sizes for all assertions, using previous MVRs
+* Re-estimate sample sizes for all assertions, using previous MVRs. What causes sample size to get larger?
 
 ### interface
 * CLI

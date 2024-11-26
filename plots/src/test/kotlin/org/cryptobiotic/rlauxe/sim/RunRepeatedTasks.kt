@@ -22,6 +22,7 @@ import org.cryptobiotic.rlauxe.sampling.GenSampleFn
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface RepeatedTask {
     fun makeSampler() : GenSampleFn
@@ -88,7 +89,8 @@ class RepeatedTaskRunner {
             testFn = task.makeTestFn(),
             testParameters = task.makeTestParameters(),
             showDetails = false,
-        )
+            margin = mean2margin(task.reportedMean()),
+            )
     }
 
     private fun CoroutineScope.produceTasks(producer: Iterable<RepeatedTask>): ReceiveChannel<RepeatedTask> =

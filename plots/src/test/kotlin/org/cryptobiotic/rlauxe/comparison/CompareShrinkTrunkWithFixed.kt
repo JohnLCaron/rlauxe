@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.mean2margin
+
 import kotlin.math.max
 import kotlin.test.Test
 
@@ -117,7 +119,8 @@ class CompareShrinkTrunkWithFixed {
             ntrials = ntrials,
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
-        )
+            margin = mean2margin(eta0),
+            )
     }
 
     fun runAlphaMartFixedRepeated(eta0: Double, genSampleFn: GenSampleFn, ntrials: Int): RunTestRepeatedResult {
@@ -132,6 +135,7 @@ class CompareShrinkTrunkWithFixed {
             ntrials = ntrials,
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0),
-        )
+            margin = mean2margin(eta0),
+            )
     }
 }

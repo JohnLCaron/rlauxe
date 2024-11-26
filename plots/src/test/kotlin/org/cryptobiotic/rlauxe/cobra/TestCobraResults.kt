@@ -54,8 +54,9 @@ class TestCobraResults {
                     maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
-                    testParameters = mapOf("alpha" to alpha, "margin" to margin)
-                )
+                    testParameters = mapOf("alpha" to alpha),
+                    margin = margin,
+                    )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
 
                 val expected = ln(1 / alpha) / ln(2 * compareAssorter.noerror)
@@ -107,8 +108,9 @@ class TestCobraResults {
                     maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
-                    testParameters = mapOf("p2" to p2, "margin" to margin)
-                )
+                    testParameters = mapOf("p2" to p2),
+                    margin = margin,
+                    )
                 println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
 
                 val expected = findTable1Entry(margin, p2)
@@ -171,8 +173,9 @@ class TestCobraResults {
                             maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
-                            testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin)
-                        )
+                            testParameters = mapOf("p1" to p1, "p2" to p2),
+                            margin = margin,
+                            )
                         println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
                         val expected = findTable2Entry(p2 = p2, p1 = p1, p2prior = p2m, p1prior = p1m)
                         if (expected != null) {
@@ -252,9 +255,10 @@ class TestCobraResults {
                             maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
-                            testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
+                            testParameters = mapOf("p1" to p1o, "p2" to p2o),
                             showDetails = false,
-                        )
+                            margin = margin,
+                            )
                         println("  result = ${result.avgSamplesNeeded()} hist:${result.percentHist}")
                         val expected = findTable2Entry(p2 = p2o, p1 = p1o, p2prior = p2prior, p1prior = p1prior)
                         if (expected != null) {

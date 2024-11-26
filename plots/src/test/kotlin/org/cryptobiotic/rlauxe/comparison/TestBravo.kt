@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithReplacement
 import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithoutReplacement
+import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
@@ -66,7 +67,8 @@ class TestBravo  {
                 testParameters = mapOf("eta0" to eta0),
                 ntrials = ntrials,
                 testFn=alpha,
-            )
+                margin = mean2margin(eta0),
+                )
 
             //val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
             // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult

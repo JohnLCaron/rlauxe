@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import java.io.BufferedReader
 import java.io.File
@@ -11,7 +12,7 @@ import kotlin.math.sqrt
 
 // data class for capturing results from repeated audit trials.
 data class SRT(val N: Int,
-               val reportedMean: Double,
+               val reportedMargin: Double,
                val reportedMeanDiff: Double,
                val testParameters: Map<String, Double>,
                val nsuccess: Int,
@@ -20,7 +21,7 @@ data class SRT(val N: Int,
                val stddev: Double,
                val percentHist: Deciles?) {
 
-    val reportedMargin = mean2margin(reportedMean)
+    val reportedMean = margin2mean(reportedMargin)
     val theta = reportedMean + reportedMeanDiff // the true mean
     val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val failPct = 100.0 * (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
@@ -34,6 +35,7 @@ data class SRT(val N: Int,
     val p2oracle = testParameters["p2oracle"] ?: 0.0
     val d2 : Int = testParameters["d2"]?.toInt() ?: 0
     val isPolling : Boolean = (testParameters["polling"] != null)
+    val fuzzPct : Double = (testParameters["fuzzPct"]?.toDouble() ?: 0.0)
 }
 
 // simple serialization to csv files
@@ -200,7 +202,8 @@ class SRTcsvReaderVersion1(filename: String) {
 
 
 fun RunTestRepeatedResult.makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double): SRT {
-    return SRT(N, reportedMean, reportedMeanDiff,
+    return SRT(N, this.margin ?: mean2margin(reportedMean),
+        reportedMeanDiff,
         this.testParameters,
         this.nsuccess, this.ntrials, this.totalSamplesNeeded,
         sqrt(this.variance), this.percentHist)

@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 
 data class AlphaComparisonTask(
@@ -99,5 +100,6 @@ fun runAlphaMartRepeated(
         testFn = alpha,
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
         showDetails = showDetails,
+        margin = mean2margin(eta0),
     )
 }

@@ -4,18 +4,9 @@ import org.cryptobiotic.rlauxe.core.*
 
 // for testing, here to share between modules
 
-class CvrContest(val name: String, val id: Int) {
-    val candidates = mutableMapOf<String, Int>()
-    var candidateId = 0
-
-    fun getCandidateIdx(name: String): Int {
-        return candidates.getOrPut(name) { candidateId++ }
-    }
-}
-
 class CvrBuilders {
     val builders = mutableListOf<CvrBuilder>()
-    var id = 0
+    var nextCvrId = 0
     val contests = mutableMapOf<String, CvrContest>()
     var contestId = 0
 
@@ -32,8 +23,19 @@ class CvrBuilders {
         return contests.getOrPut(contestName) { CvrContest( contestName, contestId++) }
     }
 
+    fun getContest(contestId: Int): CvrContest {
+        return contests.values.find { it.id == contestId }!!
+    }
+
     fun addCrv(): CvrBuilder {
-        val cb = CvrBuilder(this, ++id)
+        this.nextCvrId++
+        val cb = CvrBuilder(this, "card${nextCvrId}")
+        builders.add(cb)
+        return cb
+    }
+
+    fun addCvr(cvrId: String): CvrBuilder {
+        val cb = CvrBuilder(this, cvrId)
         builders.add(cb)
         return cb
     }
@@ -50,59 +52,93 @@ class CvrBuilders {
         })
     }
 
+    companion object {
+        fun convertCvrs(contests:List<ContestInfo>, cvrs: List<Cvr>): List<CvrBuilder> {
+            val cvrsbs = CvrBuilders()
+            cvrsbs.addContests( contests)
+            cvrs.forEach { CvrBuilder.fromCvr(cvrsbs, it) }
+            return cvrsbs.builders
+        }
+    }
+}
+
+class CvrContest(val name: String, val id: Int) {
+    val candidates = mutableMapOf<String, Int>()
+    var candidateId = 0
+
+    val candidateIds: List<Int> by lazy { candidates.values.toList() }
+
+    fun getCandidateIdx(name: String): Int {
+        return candidates.getOrPut(name) { candidateId++ }
+    }
 }
 
 class CvrBuilder(
     val builders: CvrBuilders,
-    val id: Int,
-    // val phantom: Boolean = false
+    val id: String,
 ) {
-    val contests = mutableMapOf<Int, ContestBuilder>()
+    val contests = mutableMapOf<Int, ContestVoteBuilder>() // contestId -> ContestVoteBuilder
 
-    fun addContest(contestName: String): ContestBuilder {
+    fun addContest(contestName: String): ContestVoteBuilder {
         val contest = builders.getContest(contestName)
-        return contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
+        return contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
     }
 
-    fun addContest(contestName: String, candidateId: Int?): ContestBuilder {
+    fun addContest(contestName: String, candidateId: Int?): ContestVoteBuilder {
         val contest = builders.getContest(contestName)
-        val cb = contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
+        val cb = contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
         if (candidateId != null) {
             cb.addCandidate(candidateId)
         }
         return cb
     }
 
-    fun addContest(contestName: String, candidateName: String?): ContestBuilder {
+    fun addContest(contestName: String, candidateName: String?): ContestVoteBuilder {
         val contest = builders.getContest(contestName)
-        val cb = contests.getOrPut(contest.id) { ContestBuilder(this, contest) }
+        val cb = contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
         if (candidateName != null) {
             cb.addCandidate(candidateName)
         }
         return cb
     }
 
+    fun addContest(contestId: Int, votes: IntArray) {
+        val contest: CvrContest = builders.getContest(contestId)
+        val cvb: ContestVoteBuilder = contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
+        votes.forEach { cvb.votes.add(it) }
+    }
+
     fun done() = builders
 
     fun build() : Cvr {
         val votes: Map<Int, IntArray> = contests.values.map { it.build() }.toMap()
-        return Cvr("card$id", votes)
+        return Cvr(id, votes)
+    }
+
+    companion object {
+        fun fromCvr(builders: CvrBuilders, cvr: Cvr): CvrBuilder {
+            val cvrb: CvrBuilder = builders.addCvr( cvr.id)
+            cvr.votes.forEach { contestId, votes ->
+                cvrb.addContest(contestId, votes)
+            }
+            return cvrb
+        }
     }
 }
 
-class ContestBuilder(
+class ContestVoteBuilder(
     val builder: CvrBuilder,
     val contest: CvrContest,
 ) {
     val votes = mutableListOf<Int>() // List(candidateId))
 
-    fun addCandidate(candName: String, addVote: Int = 1): ContestBuilder {
+    fun addCandidate(candName: String, addVote: Int = 1): ContestVoteBuilder {
         val candIdx =  contest.getCandidateIdx(candName)
         if (addVote == 1) votes.add(candIdx)
         return this
     }
 
-    fun addCandidate(candId: Int, addVote: Int = 1): ContestBuilder {
+    fun addCandidate(candId: Int, addVote: Int = 1): ContestVoteBuilder {
         if (addVote == 1) votes.add(candId) // TODO WRONG
         return this
     }
@@ -115,6 +151,8 @@ class ContestBuilder(
     fun ddone() = builder.builders
 }
 
+
+/*
 data class ContestVotes(val contestId: String, val votes: List<Vote>) {
     constructor(contestId: String) : this(contestId, emptyList())
     constructor(contestId: String, candidateId: String) : this(contestId, listOf(Vote(candidateId, 1)))
@@ -134,3 +172,5 @@ data class ContestVotes(val contestId: String, val votes: List<Vote>) {
 data class Vote(val candidateId: String, val vote: Int = 1) {
     constructor(candidateId: String, vote: Boolean): this(candidateId, if (vote) 1 else 0)
 }
+
+ */

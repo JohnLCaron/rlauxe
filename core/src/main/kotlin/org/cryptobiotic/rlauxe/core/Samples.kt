@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /** keeps track of the latest sample, number of samples, and the sample sum. */
@@ -74,5 +75,13 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
     }
 
     fun samplingErrors() = listOf(countP0,countP1,countP2,countP3,countP4)
+
+    fun samplingErrors(denom:Double) = buildString {
+        //append("[${dfn(countP0/denom, 4)},")
+        append("${dfn(countP1/denom, 4)},")
+        append("${dfn(countP2/denom, 4)},")
+        append("${dfn(countP3/denom, 4)},")
+        append("${dfn(countP4/denom, 4)}]")
+    }
 }
 

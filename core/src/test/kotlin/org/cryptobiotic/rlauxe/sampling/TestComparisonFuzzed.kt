@@ -151,7 +151,7 @@ fun CvrUnderAudit.fuzzed(): CvrUnderAudit {
     return this
 }
 
-fun runRepeatedAudit(
+private fun runRepeatedAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
@@ -186,6 +186,7 @@ fun runRepeatedAudit(
         testFn = testFn,
         testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
         showDetails = false,
+        margin = assorter.margin,
     )
     return result
 }

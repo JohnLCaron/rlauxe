@@ -16,6 +16,7 @@ data class RunTestRepeatedResult(
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
     val errorRate: List<Double> = emptyList(), // error rates percent
+    val margin: Double?,
 ) {
 
     fun successPct(): Double = 100.0 * nsuccess / (if (ntrials == 0) 1 else ntrials)
@@ -44,7 +45,8 @@ fun runTestRepeated(
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     showDetails: Boolean = false,
-): RunTestRepeatedResult {
+    margin: Double?,
+    ): RunTestRepeatedResult {
     val showH0Result = false
     val N = drawSample.N()
 
@@ -87,5 +89,5 @@ fun runTestRepeated(
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, status, sampleCounts, errorCounts.map { 100.0 * it / ntrials})
+        ntrials=ntrials, variance, percentHist, status, sampleCounts, errorCounts.map { 100.0 * it / ntrials}, margin = margin)
 }

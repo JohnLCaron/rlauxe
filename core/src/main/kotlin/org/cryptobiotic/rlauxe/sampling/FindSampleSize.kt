@@ -77,6 +77,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
+    //// Polling
 
     // called from PollingWorkflow
     fun simulateSampleSizePollingContest(
@@ -124,6 +125,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         upperBound: Double,
         maxSamples: Int,
         Nc: Int,
+        moreParameters: Map<String, Double> = emptyMap(),
     ): RunTestRepeatedResult {
         val eta0 = margin2mean(margin)
         val minsd = 1.0e-6
@@ -152,14 +154,15 @@ class FindSampleSize(val auditConfig: AuditConfig) {
             maxSamples = maxSamples,
             ntrials = auditConfig.ntrials,
             testFn = testFn,
-            testParameters = mapOf("margin" to margin, "ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0),
+            testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
             showDetails = false,
-        )
+            margin = margin,
+            )
         return result
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
-    // Comparison
+    //// Comparison
 
     fun simulateSampleSizeComparisonContest(
         contestUA: ContestUnderAudit,
@@ -184,11 +187,18 @@ class FindSampleSize(val auditConfig: AuditConfig) {
     }
 
     fun simulateSampleSizeAssorter(
-        contest: ContestUnderAudit,
+        contestUA: ContestUnderAudit,
         assorter: ComparisonAssorter,
         cvrs: List<CvrUnderAudit>,
     ): RunTestRepeatedResult {
-        val sampler = ComparisonSamplerSimulation(cvrs, contest, assorter,
+        // from TestComparisonFuzzed.
+        // val mvrsFuzzed = cvrsUAP.map { it.fuzzed() }
+        // val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = mvrsFuzzed.zip(cvrsUAP)
+        // cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
+        // val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter)
+
+        // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.
+        val sampler = ComparisonSamplerSimulation(cvrs, contestUA, assorter,
             p1 = auditConfig.p1, p2 = auditConfig.p2, p3 = auditConfig.p3, p4 = auditConfig.p4)
         // println("${sampler.showFlips()}")
 
@@ -196,10 +206,23 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         // at the beginning
         sampler.reset()
 
+        return simulateSampleSizeBetaMart(sampler, assorter.margin, assorter.noerror, assorter.upperBound(), contestUA.ncvrs, contestUA.Nc)
+    }
+
+    fun simulateSampleSizeBetaMart(
+        sampleFn: GenSampleFn,
+        margin: Double,
+        noerror: Double,
+        upperBound: Double,
+        maxSamples: Int,
+        Nc: Int,
+        moreParameters: Map<String, Double> = emptyMap(),
+    ): RunTestRepeatedResult {
+
         val optimal = AdaptiveComparison(
-            Nc = contest.Nc,
+            Nc = Nc,
             withoutReplacement = true,
-            a = assorter.noerror,
+            a = noerror,
             d1 = auditConfig.d1,
             d2 = auditConfig.d2,
             p1 = auditConfig.p1,
@@ -207,16 +230,22 @@ class FindSampleSize(val auditConfig: AuditConfig) {
             p3 = auditConfig.p3,
             p4 = auditConfig.p4,
         )
-        val betta = BettingMart(bettingFn = optimal, Nc = contest.Nc, noerror = assorter.noerror, upperBound = assorter.upperBound, withoutReplacement = false)
+        val testFn = BettingMart(
+            bettingFn = optimal,
+            Nc = Nc,
+            noerror = noerror,
+            upperBound = upperBound,
+            withoutReplacement = false)
 
         // TODO use coroutines
         val result: RunTestRepeatedResult = runTestRepeated(
-            drawSample = sampler,
-            maxSamples = contest.ncvrs,
+            drawSample = sampleFn,
+            maxSamples = maxSamples,
             ntrials = auditConfig.ntrials,
-            testFn = betta,
-            testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
+            testFn = testFn,
+            testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4) + moreParameters,
             showDetails = false,
+            margin = margin,
         )
         return result
     }

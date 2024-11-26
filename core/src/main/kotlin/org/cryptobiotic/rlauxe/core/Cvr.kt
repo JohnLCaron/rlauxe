@@ -39,6 +39,28 @@ open class Cvr(
         append("$id ($phantom)")
         votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Cvr
+
+        if (phantom != other.phantom) return false
+        if (id != other.id) return false
+        for ((contestId, candidates) in votes) {
+            if (!candidates.contentEquals(other.votes[contestId])) return false
+        }
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = phantom.hashCode()
+        result = 31 * result + id.hashCode()
+        result = 31 * result + votes.hashCode()
+        return result
+    }
 }
 
 /** Mutable version of Cvr. sampleNum >= 0  */
@@ -46,10 +68,10 @@ class CvrUnderAudit (val cvr: Cvr, override val phantom: Boolean, var sampleNum:
     override val id = cvr.id
     override val votes = cvr.votes
 
-    // dont really need, just used by computeTotalSampleSize
     var sampled = false //  # is this CVR in the sample?
-    var p: Double = 0.0
-    var used = false
+
+    var p: Double = 0.0 // dont really need, just used by computeTotalSampleSize
+    var used = false // // dont really need, just used by ComparisonSamplerSimulation
 
     override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun hasMarkFor(contestId: Int, candidateId: Int) = cvr.hasMarkFor(contestId, candidateId)
@@ -108,6 +130,5 @@ fun makeBallots(cvrs: List<Cvr>): List<BallotUnderAudit> {
     }
     return result
 }
-
  */
 

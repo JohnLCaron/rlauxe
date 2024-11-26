@@ -36,9 +36,10 @@ class TestCorla {
             maxSamples = N,
             ntrials = ntrials,
             testFn = corla,
-            testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin),
+            testParameters = mapOf("p1" to p1, "p2" to p2),
             showDetails = false,
-        )
+            margin = margin,
+            )
         println("  corla = ${corlaResult}")
     }
 
@@ -94,8 +95,9 @@ class TestCorla {
                             maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
-                            testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
+                            testParameters = mapOf("p1" to p1o, "p2" to p2o),
                             showDetails = false,
+                            margin = margin,
                         )
                         println(" bettingResult = ${bettingResult}")
 
@@ -107,9 +109,10 @@ class TestCorla {
                             maxSamples = N,
                             ntrials = ntrials,
                             testFn = corla,
-                            testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
+                            testParameters = mapOf("p1" to p1o, "p2" to p2o),
                             showDetails = false,
-                        )
+                            margin = margin,
+                            )
                         val ratio = bettingResult.avgSamplesNeeded().toDouble() / corlaResult.avgSamplesNeeded()
                         val ratioSuccess = corlaResult.successPct() / bettingResult.successPct()
                         println(" corlaResult = ${corlaResult} ratio bet/corla=$ratio ratio success=$ratioSuccess")

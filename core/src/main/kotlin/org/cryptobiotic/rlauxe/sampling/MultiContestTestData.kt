@@ -8,8 +8,13 @@ import kotlin.random.Random
 
 private val debug = false
 
-data class FuzzedContest(val contestId: Int, val ncands: Int, val margin: Double, val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY) {
-    val candidateNames: List<String> = List(ncands) { it}.map { "cand$it" }
+data class FuzzedContest(
+    val contestId: Int,
+    val ncands: Int,
+    val margin: Double,
+    val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
+) {
+    val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
     val info = ContestInfo("contest$contestId", contestId, candidateNames = listToMap(candidateNames), choiceFunction)
 
     var ncards = 0
@@ -22,7 +27,7 @@ data class FuzzedContest(val contestId: Int, val ncands: Int, val margin: Double
         val loser = svotes[1]
         val wantMarginDiff = (margin * ncards).toInt()
         val haveMarginDiff = (winner.second - loser.second)
-        val adjust: Int = (wantMarginDiff - haveMarginDiff)/2 // can be positive or negetive
+        val adjust: Int = (wantMarginDiff - haveMarginDiff) / 2 // can be positive or negetive
         svotes.set(0, Pair(winner.first, winner.second + adjust))
         svotes[1] = Pair(loser.first, loser.second - adjust)
         return adjust // will be 0 when done
@@ -93,7 +98,7 @@ data class FuzzedContest(val contestId: Int, val ncands: Int, val margin: Double
         }
         val candidateId = trackVotesRemaining[idx].first
         require(nvotes > 0)
-        trackVotesRemaining[idx] = Pair(candidateId, nvotes-1)
+        trackVotesRemaining[idx] = Pair(candidateId, nvotes - 1)
         votesLeft--
         return candidateId
     }
@@ -113,8 +118,10 @@ data class FuzzedContest(val contestId: Int, val ncands: Int, val margin: Double
     val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
     val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
  */
-data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
-                                val debug: Boolean = false, val minMargin: Double = 0.005) {
+data class MultiContestTestData(
+    val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
+    val debug: Boolean = false, val minMargin: Double = 0.005,
+) {
     val fcontests: List<FuzzedContest>
     val ballotStyles: List<BallotStyle>
     var countBallots = 0
@@ -128,7 +135,8 @@ data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val t
 
         // between 1 and ncontest contests, randomly chosen
         ballotStyles = List(nballotStyles) { it }.map {
-            val ncInStyle = 1 + Random.nextInt(ncontest - 1) // TODO use a power law distribution (weighted to small values) ? more realistic ??
+            val ncInStyle = if (ncontest == 1) 1 else
+                1 + Random.nextInt(ncontest - 1) // TODO use a power law distribution (weighted to small values) ? more realistic ??
             val contestIndexes = mutableSetOf<Int>()
             while (contestIndexes.size < ncInStyle) {
                 contestIndexes.add(Random.nextInt(ncontest))
@@ -193,5 +201,94 @@ data class MultiContestTestData(val ncontest: Int, val nballotStyles: Int, val t
         }
         return cvrb.build()
     }
+
+    fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
+        var count = 0
+        var countf = 0
+        val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
+        cvrbs.forEach { cvrb: CvrBuilder ->
+            val r = secureRandom.nextDouble(1.0)
+            cvrb.contests.forEach { (contestId, cvb) ->
+                if (r < fuzzPct) {
+                    countf++
+                    val ccontest: CvrContest = cvb.contest
+                    val currId = cvb.votes[0] // TODO only one vote allowed
+                    cvb.votes.clear()
+
+                    // choose a different candidate, or none.
+                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
+                    if (ncandId != null) {
+                        cvb.votes.add(ncandId)
+                    }
+                }
+            }
+            count++
+        }
+        // println("makeFuzzedCvrsFrom $countf/ $count")
+        return cvrbs.map { it.build() }
+    }
+}
+
+fun chooseNewCandidate(currId: Int, candidateIds: List<Int>): Int? {
+    val size = candidateIds.size
+    while (true) {
+        val ncandIdx = secureRandom.nextInt(size + 1)
+        if (ncandIdx == size) return null
+        val candId = candidateIds[ncandIdx]
+        if (candId != currId) {
+            return candId
+        }
+    }
+}
+
+class ComparisonSamplerRegen(
+    val test: MultiContestTestData,
+    val fuzzPct: Double,
+    val cvrs: List<Cvr>, // (mvr, cvr)
+    val contestUA: ContestUnderAudit,
+    val cassorter: ComparisonAssorter
+): GenSampleFn {
+    val N = cvrs.size
+    val cvrsUA = cvrs.map { CvrUnderAudit(it, false) }
+
+    val permutedIndex = MutableList(N) { it }
+    var cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> // (mvr, cvr)
+    var idx = 0
+
+    init {
+        val mvrs = remakeFuzzed()
+        cvrPairs = mvrs.zip(cvrsUA)
+        //sampleMean = cvrPairs.filter{it.first.hasContest(contestUA.id)}.map { (mvr, cvr) -> cassorter.bassort(mvr, cvr) }.average()
+        //sampleCount = cvrPairs.filter{it.first.hasContest(contestUA.id)}.map { (mvr, cvr) -> cassorter.bassort(mvr, cvr) }.sum() // wtf?
+    }
+
+    override fun sample(): Double {
+        while (idx < cvrPairs.size) {
+            val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
+            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
+                val result = cassorter.bassort(mvr, cvr)
+                idx++
+                return result
+            }
+            idx++
+        }
+        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
+    }
+
+    override fun reset() {
+        val mvrs = remakeFuzzed()
+        cvrPairs = mvrs.zip(cvrsUA)
+        permutedIndex.shuffle(secureRandom)
+        idx = 0
+    }
+
+    fun remakeFuzzed(): List<Cvr> {
+        return test.makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct)
+    }
+
+    // TODO where needed ?
+    override fun sampleMean() = 0.0
+    override fun sampleCount() = 0.0
+    override fun N() = N
 }
 

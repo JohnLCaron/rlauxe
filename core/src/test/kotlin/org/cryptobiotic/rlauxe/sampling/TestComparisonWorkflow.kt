@@ -14,9 +14,9 @@ class TestComparisonWorkflow {
         val stopwatch = Stopwatch()
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80)
 
-        val test = MultiContestTestData(20, 11, 20000)
-        val contests: List<Contest> = test.makeContests()
-        val cvrs = test.makeCvrsFromContests()
+        val testData = MultiContestTestData(20, 11, 20000)
+        val contests: List<Contest> = testData.makeContests()
+        val cvrs = testData.makeCvrsFromContests()
 
         val workflow = StylishWorkflow(contests, emptyList(), auditConfig, cvrs)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
@@ -26,6 +26,7 @@ class TestComparisonWorkflow {
         val contestUA = workflow.contestsUA.first()
         val assorter = contestUA.comparisonAssertions.first().assorter // take the one with the smallest margin??
         // dont permute
+        // also using default error rates
         val sampler = ComparisonSamplerSimulation(workflow.cvrsUA, contestUA, assorter,
             p1=auditConfig.p1, p2=auditConfig.p2, p3=auditConfig.p3, p4=auditConfig.p4, )
         println(sampler.showFlips())
@@ -43,7 +44,6 @@ class TestComparisonWorkflow {
         val samples = PrevSamplesWithRates(assorter.noerror)
         cvrPairs.forEach { (mvr, cvr) -> samples.addSample(assorter.bassort(mvr,cvr)) }
         println("samplingErrors= ${samples.samplingErrors()}")
-
  */
 
         var done = false

@@ -150,6 +150,7 @@ class TestComparisonFromAlpha {
                             ntrials = reps,
                             testFn = alpha,
                             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
+                            margin = mean2margin(eta0),
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
                         al.add(result.makeSRT(N, theta, 0.0))

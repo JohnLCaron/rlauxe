@@ -684,8 +684,9 @@ fun calc_sample_sizes(
         maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2" to optimal.p2, "margin" to minAssorter.margin),
+        testParameters = mapOf("p2" to optimal.p2),
         showDetails = false,
+        margin = minAssorter.margin,
     )
 }
 

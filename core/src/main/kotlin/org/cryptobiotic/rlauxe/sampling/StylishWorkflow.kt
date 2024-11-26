@@ -288,7 +288,7 @@ fun runOneAssertionAudit(
     println("runOneAssertionAudit: $assertion, status = ${testH0Result.status}")
     return (testH0Result.status == TestH0Status.StatRejectNull)
 }
-
+/*
 fun simulateSampleSize(
     auditConfig: AuditConfig,
     contest: ContestUnderAudit,
@@ -346,3 +346,5 @@ fun simulateSampleSize(
             "actual= ${assertion.samplesNeeded} ${cumul(result.sampleCount, assertion.samplesNeeded)}%")
     // println("  errorRate % = [${result.errorRates()}]")
 }
+
+ */

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/22/2024
+last update: 11/25/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -29,6 +29,12 @@ Table of Contents
     * [Use Styles](#use-styles)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
+  * [Differences with SHANGRLA](#differences-with-shangrla)
+    * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
+    * [compute sample size](#compute-sample-size)
+  * [Plots](#plots)
+    * [Polling Vs Comparison Estimated Sample sizes](#polling-vs-comparison-estimated-sample-sizes)
+    * [Comparison Sample sizes with fuzz](#comparison-sample-sizes-with-fuzz)
   * [Notes](#notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
@@ -502,7 +508,7 @@ SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample
 contest audits, additional ballots may be in the sample because they are needed by another contest. Since theres no 
 guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
 
-# compute sample size
+### compute sample size
 
 From STYLISH paper:
 
@@ -517,10 +523,41 @@ From STYLISH paper:
 AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
 total_size estimate, but not do the consistent sampling. Also maybe only works whne you use sampleThreshold ??
 
+## Plots
+
+These plots has only two-person ballots.
+
+### Polling Vs Comparison Estimated Sample sizes
+
+1. [Polling Vs Comparison Estimated Sample sizes](docs/plots/EstimateSampleSize.html)
+
+### Comparison Sample sizes with fuzz
+
+Estimated sample size for Comparison Audits. The MVRs are "fuzzed" by taking fuzzPct of the ballopts and randomly 
+changing the candidate voted for. fuzzPct = 0.0 means the cvrs and mvrs agree.
+
+* [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzSampleSizeConcurrent.html)
+
+````
+fuzzPct = 0.001
+avgRates = [0.9992159882654829, 2.845617895122841E-4, 1.386138613861406E-4, 2.1763843050971667E-4, 1.4319765309864335E-4]
+error% = [999.2159882654829, 0.2845617895122841, 0.1386138613861406, 0.21763843050971668, 0.14319765309864335]
+fuzzPct = 0.005
+avgRates = [0.9950672900623334, 0.0017207554088742374, 0.0010907590759075846, 0.0012455078841217438, 8.756875687568617E-4]
+error% = [199.01345801246669, 0.3441510817748475, 0.21815181518151694, 0.24910157682434875, 0.17513751375137235]
+fuzzPct = 0.01
+avgRates = [0.9909070407040654, 0.0030907590759076255, 0.0019191419141913585, 0.0024609460946094313, 0.001622112211221137]
+error% = [99.09070407040655, 0.30907590759076253, 0.19191419141913585, 0.24609460946094314, 0.1622112211221137]
+fuzzPct = 0.02
+avgRates = [0.9813668866886412, 0.006589842317564948, 0.0038734873487348905, 0.00507059039237249, 0.003099193252658597]
+error% = [49.06834433443206, 0.3294921158782474, 0.19367436743674454, 0.2535295196186245, 0.15495966263292985]
+fuzzPct = 0.05
+avgRates = [0.9517691602493656, 0.016377887788778477, 0.010581591492482438, 0.012896773010634483, 0.008374587458745916]
+error% = [19.035383204987312, 0.32755775577556956, 0.21163182984964876, 0.25793546021268965, 0.16749174917491833]
+````
 
 ## Notes
 
-* [Polling Vs Comparison Estimated Sample sizes](docs/plots/EstimateSampleSize.html)
 * [Simulations](docs/Simulations.md)
 * [Ballot Comparison using Betting Martingales](docs/Betting.md)
 * [ALPHA testing statistic](docs/AlphaMart.md)

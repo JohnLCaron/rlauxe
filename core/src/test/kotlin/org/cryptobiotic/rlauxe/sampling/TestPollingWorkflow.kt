@@ -10,15 +10,17 @@ class TestPollingWorkflow {
     @Test
     fun testPollingWorkflow() {
         val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80)
+        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
 
         val test = MultiContestTestData(20, 11, 20000)
         val contests: List<Contest> = test.makeContests()
         // contests.forEach { println(it) }
 
-        // in practice, we dont actually have any cvrs. But will let these be the mvrs
+        // in practice, we dont actually have any cvrs.
         val testCvrs = test.makeCvrsFromContests()
         val ballots = test.makeBallots()
+
+        val testMvrs: List<Cvr> = test.makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
 
         val workflow = PollingWorkflow(auditConfig, contests, ballots)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
@@ -34,7 +36,7 @@ class TestPollingWorkflow {
             stopwatch.start()
 
             val sampledMvrs = indices.map {
-                testCvrs[it]
+                testMvrs[it]
             }
 
             done = workflow.runAudit(sampledMvrs)

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.rlaplots
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -51,7 +52,9 @@ class TestSrt {
         //               val status: Map<TestH0Status, Int>? = null, // count of the trial status
         val parameters = mapOf("p1" to .01, "p2" to .001, "lam" to 1.1)
         val betta = RunTestRepeatedResult(parameters, N=43, totalSamplesNeeded=112, nsuccess=12,
-            ntrials=ntrials, variance=11.5, percentHist=hist, status)
+            ntrials=ntrials, variance=11.5, percentHist=hist, status,
+            margin = .01,
+        )
 
         // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0
         val target = betta.makeSRT(N=1000, reportedMean=.505, reportedMeanDiff=.005)

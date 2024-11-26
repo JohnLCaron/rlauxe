@@ -74,11 +74,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     val name = contest.name
     var Nc = contest.Nc
 
-    constructor(info: ContestInfo, cvrs: List<CvrIF>) :
-            this(
-                makeContestFromCvrs(info, cvrs),
-                cvrs.filter { it.hasContest(info.id) }.count()
-            )
+    constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
     var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed

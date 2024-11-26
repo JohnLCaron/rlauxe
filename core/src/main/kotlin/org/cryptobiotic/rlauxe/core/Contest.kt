@@ -77,8 +77,8 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
-    var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
-    var actualAvailable = 0 // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
+    // var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
+    var actualAvailable = 0 // number of samples available in the current consistent sampling based on estSampleSize
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
@@ -143,7 +143,13 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
 
     fun minComparisonAssertion(): ComparisonAssertion {
         val margins = comparisonAssertions.map { it.assorter.margin }
-        val minMargin = if (comparisonAssertions.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.assorter.avgCvrAssortValue == minMargin }!!
+        val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
+        return comparisonAssertions.find { it.assorter.margin == minMargin }!!
+    }
+
+    fun minPollingAssertion(): Assertion {
+        val margins = pollingAssertions.map { it.margin }
+        val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
+        return pollingAssertions.find { it.margin == minMargin }!!
     }
 }

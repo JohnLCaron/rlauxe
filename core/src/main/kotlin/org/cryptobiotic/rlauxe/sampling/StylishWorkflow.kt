@@ -68,8 +68,7 @@ class StylishWorkflow(
      * @parameter mvrs: use existing mvrs to estimate samples. may be empty.
      */
     fun chooseSamples(prevMvrs: List<CvrIF>, round: Int): List<Int> {
-        // set contestUA.sampleSize
-        contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
+        // contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
         // val maxContestSize = simulateSampleSizes(auditConfig, contestsUA, cvrsUA, prevMvrs, round)
 
         val finder = FindSampleSize(auditConfig)

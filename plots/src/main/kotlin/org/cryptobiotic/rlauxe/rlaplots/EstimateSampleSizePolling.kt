@@ -14,7 +14,7 @@ class EstimateSampleSize(val dir: String, val filename: String) {
         val N = data[0].N
 
         srtPlot(
-            titleS = "sample size needed for audit",
+            titleS = "$filename estimated sample sizes",
             subtitleS = "for ntrials=$ntrials, N=$N",
             data,
             "$dir/${filename}.html",
@@ -35,7 +35,7 @@ class EstimateSampleSize(val dir: String, val filename: String) {
         val N = data[0].N
 
         srtPlot(
-            titleS = "sample sizes with fuzzed sampling",
+            titleS = "$filename estimated sample sizes with fuzzed sampling",
             subtitleS = "for ntrials=$ntrials, N=$N",
             data,
             "$dir/${filename}.html",

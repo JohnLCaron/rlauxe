@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -36,14 +37,13 @@ class TestCvrBuilders {
         val ntrials = 100
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = test.makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
+            val fcvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")
             val avgRates = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             contests.forEach { contest ->
                 repeat(ntrials) {
                     val contestUA = ContestUnderAudit(contest.info, cvrs).makeComparisonAssertions(cvrs)
-                    val minMargin = contestUA.comparisonAssertions.map { it.margin }.min()
-                    val minAssort = contestUA.comparisonAssertions.find { it.margin == minMargin }!!.assorter
+                    val minAssort = contestUA.minComparisonAssertion().assorter
                     val samples = PrevSamplesWithRates(minAssort.noerror)
                     var ccount = 0
                     var count = 0

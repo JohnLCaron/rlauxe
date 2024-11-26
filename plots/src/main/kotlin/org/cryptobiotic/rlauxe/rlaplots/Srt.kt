@@ -38,6 +38,15 @@ data class SRT(val N: Int,
     val fuzzPct : Double = (testParameters["fuzzPct"]?.toDouble() ?: 0.0)
 }
 
+
+fun RunTestRepeatedResult.makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double): SRT {
+    return SRT(N, this.margin ?: mean2margin(reportedMean),
+        reportedMeanDiff,
+        this.testParameters,
+        this.nsuccess, this.ntrials, this.totalSamplesNeeded,
+        sqrt(this.variance), this.percentHist)
+}
+
 // simple serialization to csv files
 class SRTcsvWriter(val filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
@@ -119,7 +128,7 @@ class SRTcsvReader(filename: String) {
         val stddev = ttokens[idx++].toDouble()
         val percentHist = if (idx < tokens.size) Deciles.Companion.fromString(ttokens[idx++]) else null
 
-        return SRT(N, reportedMean, reportedMeanDiff,
+        return SRT(N, mean2margin(reportedMean), reportedMeanDiff,
             readParameters(testParameters),
             nsuccess, ntrials, nsamples, stddev, percentHist)
     }
@@ -198,13 +207,4 @@ class SRTcsvReaderVersion1(filename: String) {
             mapOf("d" to d.toDouble(), "eta0" to eta0, "eta0Factor" to eta0Factor),
             nsuccess, ntrials, nsamples, stddev, percentHist)
     }
-}
-
-
-fun RunTestRepeatedResult.makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double): SRT {
-    return SRT(N, this.margin ?: mean2margin(reportedMean),
-        reportedMeanDiff,
-        this.testParameters,
-        this.nsuccess, this.ntrials, this.totalSamplesNeeded,
-        sqrt(this.variance), this.percentHist)
 }

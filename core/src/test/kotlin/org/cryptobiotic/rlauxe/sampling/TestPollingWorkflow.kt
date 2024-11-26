@@ -20,7 +20,7 @@ class TestPollingWorkflow {
         val testCvrs = test.makeCvrsFromContests()
         val ballots = test.makeBallots()
 
-        val testMvrs: List<Cvr> = test.makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
+        val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
 
         val workflow = PollingWorkflow(auditConfig, contests, ballots)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")

@@ -7,42 +7,6 @@ import kotlin.math.max
 
 private val show = true
 
-/*
-Not Eliminated Next (NEN) Assertions. "IRV Elimination"
-NEN assertions compare the tallies of two candidates under the assumption that a specific set of
-candidates have been eliminated. An instance of this kind of assertion could look like this:
-  NEN: Alice > Bob if only {Alice, Bob, Diego} remain.
-
-Not Eliminated Before (NEB) Assertions. "Winner Only"
-Alice NEB Bob is an assertion saying that Alice cannot be eliminated before Bob, irrespective of which
-other candidates are continuing.
- */
-
-/*
-Assertion                   RaireScore  ShangrlaScore            Notes
-NEB (winner_only)
-  c1 NEB ck where k > 1           1       1                 Supports 1st prefs for c1
-  cj NEB ck where k > j > 1       0       1/2               cj precedes ck but is not first
-  cj NEB ck where k < j          -1       0                 a mention of ck preceding cj
-
-NEN(irv_elimination): ci > ck if only {S} remain
-  where ci = first(pS(b))           1     1                 counts for ci (expected)
-  where first(pS(b)) !∈ {ci , ck }  0     1/2               counts for neither cj nor ck
-  where ck = first(pS(b))          -1     0                 counts for ck (unexpected)
- */
-
-/*
-  NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
-  NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
-  NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
-  NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
-
-  NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
-  NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
-  NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
-  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
- */
-
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerSimulation(
@@ -59,6 +23,7 @@ class ComparisonSamplerSimulation(
     val isIRV = contestUA.contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<CvrUnderAudit>
     val cvrs: List<CvrUnderAudit>
+    val usedCvrs = mutableSetOf<String>()
 
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -105,7 +70,7 @@ class ComparisonSamplerSimulation(
         while (idx < N) {
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
+            if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
                 return result
@@ -134,7 +99,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx] // this is the cvr
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 1.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
                 val votes = if (isIRV) moveToFront(cvr.votes, contestUA.id, cassorter.assorter.loser())
                             else mapOf(contestUA.id to intArrayOf(cassorter.assorter.loser()))
 
@@ -174,7 +139,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 0.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.0) {
                 val votes = if (isIRV) moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
                             else mapOf(contestUA.id to intArrayOf(cassorter.assorter.winner()))
                 val alteredMvr = makeNewCvr(cvr, votes)
@@ -215,7 +180,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 1.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
                 val votes = emptyList(cvr.votes, contestUA.id)
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
@@ -254,7 +219,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 0.5) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.5) {
                 val votes = moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
@@ -287,7 +252,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val mvr = mcvrs[cardIdx]
-            if (!mvr.used && (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
+            if (!usedCvrs.contains(mvr.id) && (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
 
                 val alteredCvr = makeNewCvr(mvr, votes)
@@ -355,8 +320,7 @@ class ComparisonSamplerSimulation(
     }
 
     fun makeNewCvr(old: CvrUnderAudit, votes: Map<Int, IntArray>): CvrUnderAudit {
-        val result = CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
-        result.used =  true
-        return result
+        usedCvrs.add(old.id)
+        return CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
     }
 }

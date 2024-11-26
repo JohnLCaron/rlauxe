@@ -31,7 +31,7 @@ class ComparisonSampler(
     override fun sample(): Double {
         while (idx < cvrPairs.size) {
             val (mvr, cvr) = cvrPairs[idx]
-            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
+            if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 welford.update(result)
                 idx++
@@ -68,7 +68,7 @@ class ComparisonSamplerGen(
     override fun sample(): Double {
         while (idx < cvrPairs.size) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
+            if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
                 return result

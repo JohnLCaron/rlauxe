@@ -65,14 +65,10 @@ open class Cvr(
 
 /** Mutable version of Cvr. sampleNum >= 0  */
 class CvrUnderAudit (val cvr: Cvr, override val phantom: Boolean, var sampleNum: Long = 0L): CvrIF {
-    override val id = cvr.id
-    override val votes = cvr.votes
-
     var sampled = false //  # is this CVR in the sample?
 
-    var p: Double = 0.0 // dont really need, just used by computeTotalSampleSize
-    var used = false // // dont really need, just used by ComparisonSamplerSimulation
-
+    override val id = cvr.id
+    override val votes = cvr.votes
     override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun hasMarkFor(contestId: Int, candidateId: Int) = cvr.hasMarkFor(contestId, candidateId)
     override fun hasOneVote(contestId: Int, candidates: List<Int>) = cvr.hasOneVote(contestId, candidates)

@@ -34,7 +34,6 @@ class PollingWorkflow(
         // need to reset this each round
         contestsUA.forEach {
             it.estSampleSize = 0
-            // it.sampleThreshold = 0L // TODO needed?
         }
 
         // set contest.sampleSize through simulation. Uses SimContest to simulate a contest with the same vote totals.

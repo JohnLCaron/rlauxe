@@ -141,7 +141,10 @@ data class TestContest(
 
     fun makeContest(): Contest {
         val nvotes = this.ncards
-        require(nvotes > 0)
+        if (nvotes == 0) {
+            return Contest(this.info, emptyMap(), this.ncards)
+        }
+
         // pick (ncands - 1) numbers to partition the votes
         val partition = List(ncands - 1) { it }.map { Pair(it, Random.nextInt(nvotes)) }.toMutableList()
         partition.add(Pair(ncands - 1, nvotes)) // add the end point

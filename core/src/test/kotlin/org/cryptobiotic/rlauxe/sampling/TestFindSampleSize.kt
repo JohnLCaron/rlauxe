@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.AuditConfig
 import org.cryptobiotic.rlauxe.core.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.corla.estimateSampleSizeSimple
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.test.Test

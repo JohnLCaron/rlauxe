@@ -16,27 +16,6 @@ import kotlin.math.max
 
 // betting functions that use Kelly optimization of lambda parameter for the BettingFn
 
-// We know the true rate of p1 and p2 errors
-class OracleComparison(
-    val N: Int, // not used
-    val withoutReplacement: Boolean = true,  // not used
-    val upperBound: Double,  // not used
-    val a: Double, // noerror
-    val p1: Double = 1.0e-2, // the rate of 1-vote overstatements
-    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
-): BettingFn {
-    val lam: Double
-    init {
-        require(upperBound > 1.0)
-        val kelly = OptimalLambda(a, p1, p2)
-        lam = kelly.solve()
-    }
-    // note lam is a constant
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
-        return lam
-    }
-}
-
 // https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R
 //   if(strategy == "adaptive"){
 //    if(is.null(pars)){stop("Need to specify pars$prior_p_k, pars$d_k, pars$eps_k for k in 1,2")}
@@ -93,7 +72,7 @@ class AdaptiveComparison(
     val Nc: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
-    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
+    val d1: Int,  // weight p1, p3
     val d2: Int, // weight p2, p4
     val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
     val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
@@ -221,6 +200,27 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     }
 }
 
+// We know the true rate of p1 and p2 errors
+class OracleComparison(
+    val N: Int, // not used
+    val withoutReplacement: Boolean = true,  // not used
+    val upperBound: Double,  // not used
+    val a: Double, // noerror
+    val p1: Double = 1.0e-2, // the rate of 1-vote overstatements
+    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
+): BettingFn {
+    val lam: Double
+    init {
+        require(upperBound > 1.0)
+        val kelly = OptimalLambda(a, p1, p2)
+        lam = kelly.solve()
+    }
+    // note lam is a constant
+    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+        return lam
+    }
+}
+
 // COBRA equation 1 is a deterministic lower bound on sample size, dependent on margin and risk limit.
 // COBRA equation 2 has the maximum expected value for given over/understatement rates. See OptimalLambda class for implementation.
 
@@ -279,7 +279,7 @@ fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): D
     eta: estimated alternative mean to use in alpha
     */
 
-    // TODO python doesnt check (2 - 2 * self.u) != 0; self.u = 1
+    // python doesnt check (2 - 2 * self.u) != 0; self.u = 1
     if (u == 1.0)
         throw RuntimeException("optimal_comparison: u ${u} must != 1")
 

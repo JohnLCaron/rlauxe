@@ -87,7 +87,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
         append("contest: ${contest.info.name} ($id) ncvrs = $ncvrs")
     }
 
-    fun makePollingAssertions(): ContestUnderAudit {
+    open fun makePollingAssertions(): ContestUnderAudit {
         this.pollingAssertions = when (contest.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions()

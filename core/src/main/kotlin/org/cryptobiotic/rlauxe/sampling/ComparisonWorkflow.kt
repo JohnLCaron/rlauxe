@@ -268,7 +268,7 @@ fun runOneAssertionAudit(
         Nc = contestUA.Nc,
         noerror = assorter.noerror,
         upperBound = assorter.upperBound,
-        withoutReplacement = true  // TODO WTF was false??
+        withoutReplacement = true
     )
 
     val testH0Result = testFn.testH0(contestUA.estSampleSize, terminateOnNullReject = true) { sampler.sample() }

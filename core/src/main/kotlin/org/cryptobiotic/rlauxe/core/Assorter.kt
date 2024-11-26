@@ -63,7 +63,7 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
     override fun upperBound() = upperBound
     override fun desc() = "SuperMajorityAssorter winner=$winner minFraction=$minFraction"
     override fun winner() = winner
-    override fun loser() = -1 // TODO
+    override fun loser() = -1 // everyone else is a loser
 
     // TODO how to derive the assort mean for estimation ??
     override fun reportedMargin(): Double {
@@ -71,7 +71,7 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
         val loserVotes = contest.votes.filter { it.key != winner }.values.sum()
         val nuetralVotes = contest.Nc - winnerVotes - loserVotes
 
-        // i think this works when theres only 1 vote allowed ??
+        // TODO i think this works when theres only 1 vote allowed ??
         val weight = 1 / (2 * minFraction)
         val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
         return mean2margin(mean)
@@ -81,7 +81,6 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
 data class Assertion(
     val contest: Contest,
     val assorter: AssorterFunction,
-    // val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
 ) {
     val winner = assorter.winner()
     val loser = assorter.loser()
@@ -201,6 +200,7 @@ class ComparisonAssertion(
 ) {
     val avgCvrAssortValue = assorter.avgCvrAssortValue
     val margin = assorter.margin
+
     var proved = false // TODO is it ok to have this state ??
     var pvalue = 0.0
     var samplesEst = 0

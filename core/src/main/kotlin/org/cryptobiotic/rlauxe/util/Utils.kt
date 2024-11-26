@@ -72,11 +72,6 @@ fun np_cumsum(a: DoubleArray) : DoubleArray {
     return result
 }
 
-// Return an array of ones with the same shape and type as a given array.
-fun numpy_ones_like(a: DoubleArray): DoubleArray {
-    return DoubleArray(a.size) { 1.0 }
-}
-
 // Return the cumulative product of elements
 fun numpy_repeat(a: DoubleArray, nrepeat: Int) : DoubleArray {
     val result = DoubleArray(a.size * nrepeat )
@@ -86,20 +81,6 @@ fun numpy_repeat(a: DoubleArray, nrepeat: Int) : DoubleArray {
         start += nrepeat
     }
     return result
-}
-
-// Returns the indices of the maximum values along an axis.
-// TODO what happens if theres a tie? Should return a list?
-fun numpy_argmax(a: List<Double>) : Int {
-    var max = Double.MIN_VALUE
-    var maxIdx = -1
-    a.forEachIndexed { idx, it ->
-        if (it > max) {
-            maxIdx = idx
-            max = it
-        }
-    }
-    return maxIdx
 }
 
 // Returns the first index thats true. Dont know why

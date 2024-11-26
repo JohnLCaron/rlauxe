@@ -150,27 +150,3 @@ class ContestVoteBuilder(
     fun done() = builder
     fun ddone() = builder.builders
 }
-
-
-/*
-data class ContestVotes(val contestId: String, val votes: List<Vote>) {
-    constructor(contestId: String) : this(contestId, emptyList())
-    constructor(contestId: String, candidateId: String) : this(contestId, listOf(Vote(candidateId, 1)))
-    constructor(contestId: String, candidateId: String, vote: Int) : this(contestId, listOf(Vote(candidateId, vote)))
-    constructor(contestId: String, candidateId: String, vote: Boolean) : this(contestId, listOf(Vote(candidateId, vote)))
-    constructor(contestId: String, vararg votes: Vote) : this(contestId, votes.toList())
-
-    companion object {
-        // TODO test we dont have duplicate candidates
-        fun add(contestId: String, vararg vs: Vote): ContestVotes {
-            return ContestVotes(contestId, vs.toList())
-        }
-    }
-}
-
-// TODO vote count vs true/false
-data class Vote(val candidateId: String, val vote: Int = 1) {
-    constructor(candidateId: String, vote: Boolean): this(candidateId, if (vote) 1 else 0)
-}
-
- */

@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.core.estimateSampleSizeOptimalLambda
 import kotlin.test.Test
 
 class TestOptimalEstimate {

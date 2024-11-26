@@ -13,21 +13,19 @@ class ComparisonSamplerRegen(
     val cassorter: ComparisonAssorter
 ): GenSampleFn {
     val N = cvrs.size
-    val cvrsUA = cvrs.map { CvrUnderAudit(it, false) } // if you dont need sampleNum, you dont need CvrUnderAudit
-
     val permutedIndex = MutableList(N) { it }
-    var cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> // (mvr, cvr)
+    var cvrPairs: List<Pair<Cvr, Cvr>> // (mvr, cvr)
     var idx = 0
 
     init {
         val mvrs = remakeFuzzed()
-        cvrPairs = mvrs.zip(cvrsUA)
+        cvrPairs = mvrs.zip(cvrs)
     }
 
     override fun sample(): Double {
         while (idx < N) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
+            if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
                 return result
@@ -39,7 +37,7 @@ class ComparisonSamplerRegen(
 
     override fun reset() {
         val mvrs = remakeFuzzed()
-        cvrPairs = mvrs.zip(cvrsUA)
+        cvrPairs = mvrs.zip(cvrs)
         permutedIndex.shuffle(secureRandom)
         idx = 0
     }
@@ -61,8 +59,6 @@ class PollingSamplerRegen(
     val assorter: AssorterFunction
 ): GenSampleFn {
     val N = cvrs.size
-    val cvrsUA = cvrs.map { CvrUnderAudit(it, false) } // if you dont need sampleNum, you dont need CvrUnderAudit
-
     val permutedIndex = MutableList(N) { it }
     var mvrs: List<CvrIF>
     var idx = 0
@@ -106,7 +102,7 @@ fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
     cvrbs.forEach { cvrb: CvrBuilder ->
         val r = secureRandom.nextDouble(1.0)
-        cvrb.contests.forEach { (contestId, cvb) ->
+        cvrb.contests.forEach { (_, cvb) ->
             if (r < fuzzPct) {
                 countf++
                 val ccontest: CvrContest = cvb.contest
@@ -122,7 +118,6 @@ fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double
         }
         count++
     }
-    // println("makeFuzzedCvrsFrom $countf/ $count")
     return cvrbs.map { it.build() }
 }
 

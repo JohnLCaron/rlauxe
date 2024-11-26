@@ -77,8 +77,8 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
-    var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
-    var actualAvailable = 0 // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
+    // var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
+    var actualAvailable = 0 // number of samples available in the current consistent sampling based on estSampleSize
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()

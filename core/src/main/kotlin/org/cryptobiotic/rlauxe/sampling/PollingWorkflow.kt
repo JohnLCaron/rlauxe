@@ -34,7 +34,7 @@ class PollingWorkflow(
         // need to reset this each round
         contestsUA.forEach {
             it.estSampleSize = 0
-            it.sampleThreshold = 0L // TODO needed?
+            // it.sampleThreshold = 0L // TODO needed?
         }
 
         // set contest.sampleSize through simulation. Uses SimContest to simulate a contest with the same vote totals.
@@ -42,12 +42,12 @@ class PollingWorkflow(
         contestsUA.forEach { contestUA -> finder.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.ncvrs, round) }
         val maxContestSize =  contestsUA.map { it.estSampleSize }.max()
 
-        // choose samples, not setting contestUA.sampleThreshold
+        // choose samples
         val sampleIndices = consistentPollingSampling(contestsUA, ballots)
 
         // STYLISH 4 a,b; maybe only works when sampleThreshold is set. In any case, not needed here, since we have sampleIndices
-        val computeSize = finder.computeSampleSizePolling(contestsUA, ballots)
-        println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size} computeSize=$computeSize")
+        // val computeSize = finder.computeSampleSizePolling(contestsUA, ballots)
+        println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
 
         return sampleIndices
     }

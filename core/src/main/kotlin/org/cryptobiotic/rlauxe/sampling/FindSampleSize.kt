@@ -22,7 +22,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
 
     // given the contest.sampleSize, we can calculate the total number of ballots.
     // however, we get this from consistent sampling, which actually picks which ballots to sample.
-    // so dont really need
+    /* dont really need
     fun computeSampleSize(
         rcontests: List<ContestUnderAudit>,
         cvrs: List<CvrUnderAudit>,
@@ -75,6 +75,8 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         val summ: Double = ballots.filter { !it.phantom }.map { it.p }.sum()
         return ceil(summ).toInt()
     }
+
+     */
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //// Polling

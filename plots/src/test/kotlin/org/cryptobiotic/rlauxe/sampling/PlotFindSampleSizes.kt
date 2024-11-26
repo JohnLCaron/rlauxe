@@ -44,8 +44,8 @@ class PlotFindSampleSizes {
             println(" took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
         }
 
-        val dirname = "/home/stormy/temp/polling"
-        val filename = "EstimateSampleSize"
+        val dirname = "/home/stormy/temp/estimate"
+        val filename = "ComparisonVsPoll"
         val writer = SRTcsvWriter("$dirname/${filename}.cvs")
         writer.writeCalculations(srts)
         writer.close()
@@ -104,7 +104,7 @@ class PlotFindSampleSizes {
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, ntrials = 1000)
         val finder = FindSampleSize(auditConfig)
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 

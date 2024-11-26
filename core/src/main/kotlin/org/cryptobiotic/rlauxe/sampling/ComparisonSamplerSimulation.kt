@@ -23,6 +23,7 @@ class ComparisonSamplerSimulation(
     val isIRV = contestUA.contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<CvrUnderAudit>
     val cvrs: List<CvrUnderAudit>
+    val usedCvrs = mutableSetOf<String>()
 
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -69,7 +70,7 @@ class ComparisonSamplerSimulation(
         while (idx < N) {
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id) && (cvr.sampleNum <= contestUA.sampleThreshold || contestUA.sampleThreshold == 0L)) {
+            if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
                 return result
@@ -98,7 +99,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx] // this is the cvr
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 1.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
                 val votes = if (isIRV) moveToFront(cvr.votes, contestUA.id, cassorter.assorter.loser())
                             else mapOf(contestUA.id to intArrayOf(cassorter.assorter.loser()))
 
@@ -138,7 +139,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 0.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.0) {
                 val votes = if (isIRV) moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
                             else mapOf(contestUA.id to intArrayOf(cassorter.assorter.winner()))
                 val alteredMvr = makeNewCvr(cvr, votes)
@@ -179,7 +180,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 1.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
                 val votes = emptyList(cvr.votes, contestUA.id)
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
@@ -218,7 +219,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!cvr.used && cassorter.assorter.assort(cvr) == 0.5) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.5) {
                 val votes = moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
@@ -251,7 +252,7 @@ class ComparisonSamplerSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val mvr = mcvrs[cardIdx]
-            if (!mvr.used && (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
+            if (!usedCvrs.contains(mvr.id) && (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
                 val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
 
                 val alteredCvr = makeNewCvr(mvr, votes)
@@ -319,8 +320,7 @@ class ComparisonSamplerSimulation(
     }
 
     fun makeNewCvr(old: CvrUnderAudit, votes: Map<Int, IntArray>): CvrUnderAudit {
-        val result = CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
-        result.used =  true
-        return result
+        usedCvrs.add(old.id)
+        return CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
     }
 }

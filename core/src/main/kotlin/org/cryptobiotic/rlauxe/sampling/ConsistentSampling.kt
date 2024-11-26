@@ -92,7 +92,7 @@ fun consistentCvrSampling(
             cvr.sampled = true
             contests.forEach { contest ->
                 if (contestInProgress(contest) && cvr.hasContest(contest.id)) {
-                    contest.sampleThreshold = cvr.sampleNum // track the largest sample used
+                    // contest.sampleThreshold = cvr.sampleNum // track the largest sample used
                     currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
                 }
             }
@@ -131,7 +131,7 @@ fun consistentPollingSampling(
                     currentSizes[it] = currentSizes[it]?.plus(1) ?: 1
                 }
                /* if (contestInProgress(contest) && ballot.hasContest(contest.id)) {
-                    contest.sampleThreshold = ballot.sampleNum // track the largest sample used. TODO WHY?
+                    contest.sampleThreshold = ballot.sampleNum // track the largest sample used.
                     currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
                 } */
             //}

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import java.util.concurrent.TimeUnit
 
 // adapted from Guava's Stopwatch
-class Stopwatch(running: Boolean = true) {
+class Stopwatch(running: Boolean = true, val timeUnit: TimeUnit = TimeUnit.MILLISECONDS) {
     private var isRunning = false
     private var elapsedNanos: Long = 0
     private var startTick: Long = 0

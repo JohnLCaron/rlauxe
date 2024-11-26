@@ -4,12 +4,12 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.log10
 
 class EstimateSampleSize(val dir: String, val filename: String) {
-    fun showSamples() {
+    fun showSamples(catfld: (SRT) -> String) {
         val reader = SRTcsvReader("$dir/${filename}.cvs")
-        showSamples(reader.readCalculations())
+        showSamples(reader.readCalculations(), catfld)
     }
 
-    fun showSamples(data: List<SRT>) {
+    fun showSamples(data: List<SRT>, catfld: (SRT) -> String) {
         val ntrials = data[0].ntrials
         val N = data[0].N
 
@@ -21,7 +21,7 @@ class EstimateSampleSize(val dir: String, val filename: String) {
             "margin", "log10(nsamples)", "type",
             xfld = { it.reportedMargin },
             yfld = { log10(it.wsamples) },
-            catfld = { if (it.isPolling) "polling" else "comparison"},
+            catfld = catfld,
         )
     }
 

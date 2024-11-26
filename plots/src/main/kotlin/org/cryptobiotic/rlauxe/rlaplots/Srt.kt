@@ -35,7 +35,7 @@ data class SRT(val N: Int,
     val p2oracle = testParameters["p2oracle"] ?: 0.0
     val d2 : Int = testParameters["d2"]?.toInt() ?: 0
     val isPolling : Boolean = (testParameters["polling"] != null)
-    val fuzzPct : Double = (testParameters["fuzzPct"]?.toDouble() ?: 0.0)
+    val fuzzPct : Double = (testParameters["fuzzPct"] ?: 0.0)
 }
 
 

@@ -5,12 +5,13 @@ import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.ln
 import kotlin.random.Random
 
+// TODO move as much as possible into testing
 
 //// abstraction for creating a sequence of samples
-interface GenSampleFn : SampleFn {
-    fun reset()                 // start over again with different permutation
-    fun sampleMean(): Double
-    fun sampleCount(): Double
+interface GenSampleFn {
+    fun sample(): Double // get next in sample
+    fun N(): Int  // population size
+    fun reset()   // start over again with different permutation (may be prohibited)
 }
 
 //// For polling audits.
@@ -29,8 +30,8 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<CvrIF>
     }
 
     override fun reset() {}
-    override fun sampleMean() = sampleMean
-    override fun sampleCount() = sampleCount
+    fun sampleMean() = sampleMean
+    fun sampleCount() = sampleCount
     override fun N() = N
 }
 
@@ -56,13 +57,49 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
         idx = 0
     }
 
-    override fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
-    override fun sampleCount() = cvrs.sumOf { assorter.assort(it) }
+    fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
+    fun sampleCount() = cvrs.sumOf { assorter.assort(it) }
     override fun N() = N
 }
 
 //// For comparison audits
 // the values produced here are the B assort values, SHANGRLA section 3.2.
+
+class ComparisonSamplerGen(
+    val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
+    val contestUA: ContestUnderAudit,
+    val cassorter: ComparisonAssorter,
+    val allowReset: Boolean,
+): GenSampleFn {
+    val N = cvrPairs.size
+    val permutedIndex = MutableList(N) { it }
+    var idx = 0
+
+    init {
+        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id)  }
+    }
+
+    override fun sample(): Double {
+        while (idx < cvrPairs.size) {
+            val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
+            if (cvr.hasContest(contestUA.id)) {
+                val result = cassorter.bassort(mvr, cvr)
+                idx++
+                return result
+            }
+            idx++
+        }
+        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
+    }
+
+    override fun reset() {
+        if (!allowReset) throw RuntimeException("ComparisonSamplerGen reset not allowed")
+        permutedIndex.shuffle(secureRandom)
+        idx = 0
+    }
+
+    override fun N() = N
+}
 
 // the mvr and cvr always agree.
 class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter): GenSampleFn {
@@ -89,8 +126,8 @@ class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssort
         idx = 0
     }
 
-    override fun sampleMean() = sampleMean
-    override fun sampleCount() = sampleCount
+    fun sampleMean() = sampleMean
+    fun sampleCount() = sampleCount
     override fun N() = N
 }
 
@@ -139,8 +176,8 @@ data class ComparisonWithErrors(val cvrs : List<CvrIF>, val cassorter: Compariso
         idx = 0
     }
 
-    override fun sampleMean() = sampleMean
-    override fun sampleCount() = sampleCount
+    fun sampleMean() = sampleMean
+    fun sampleCount() = sampleCount
     override fun N() = N
 }
 
@@ -195,8 +232,8 @@ data class ComparisonWithErrorRates(val cvrs : List<CvrIF>, val cassorter: Compa
         idx = 0
     }
 
-    override fun sampleMean() = sampleMean
-    override fun sampleCount() = sampleCount
+    fun sampleMean() = sampleMean
+    fun sampleCount() = sampleCount
     override fun N() = N
 }
 
@@ -308,11 +345,11 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): GenSampleFn {
         index = 0
     }
 
-    override fun sampleMean(): Double {
+    fun sampleMean(): Double {
         return assortValues.toList().average()
     }
 
-    override fun sampleCount(): Double {
+    fun sampleCount(): Double {
         return assortValues.toList().sum()
     }
 
@@ -331,8 +368,8 @@ class GenSampleMeanWithReplacement(val N: Int, ratio: Double): GenSampleFn {
     override fun reset() {
         // noop
     }
-    override fun sampleMean() = samples.average()
-    override fun sampleCount() = samples.sum()
+    fun sampleMean() = samples.average()
+    fun sampleCount() = samples.sum()
     override fun N() = N
 }
 
@@ -346,8 +383,8 @@ class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): GenSampleF
         samples = generateSampleWithMean(N, ratio)
         index = 0
     }
-    override fun sampleMean() = samples.average()
-    override fun sampleCount() = samples.sum()
+    fun sampleMean() = samples.average()
+    fun sampleCount() = samples.sum()
     override fun N() = N
 }
 
@@ -371,8 +408,8 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): GenSamp
         idx = 0
     }
 
-    override fun sampleCount() = assortValues.sum()
-    override fun sampleMean() = assortValues.average()
+    fun sampleCount() = assortValues.sum()
+    fun sampleMean() = assortValues.average()
     override fun N() = N
 }
 

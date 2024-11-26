@@ -46,9 +46,6 @@ class ComparisonSamplerRegen(
         return makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct)
     }
 
-    // TODO where needed ?
-    override fun sampleMean() = 0.0
-    override fun sampleCount() = 0.0
     override fun N() = N
 }
 
@@ -90,9 +87,6 @@ class PollingSamplerRegen(
         return makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct)
     }
 
-    // TODO where needed ?
-    override fun sampleMean() = 0.0
-    override fun sampleCount() = 0.0
     override fun N() = N
 }
 

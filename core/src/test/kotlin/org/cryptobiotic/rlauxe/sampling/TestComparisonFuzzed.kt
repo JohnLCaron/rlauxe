@@ -23,7 +23,7 @@ class TestComparisonFuzzed {
 
         // flip
         val mvrsFuzzed = cvrsUI.map { it.flip() }
-        var sampler = ComparisonSamplerGen(mvrsFuzzed.zip(cvrsUI), contestUA, assort)
+        var sampler = ComparisonSamplerGen(mvrsFuzzed.zip(cvrsUI), contestUA, assort, allowReset = true)
         var samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("samplingErrors = ${ samples.samplingErrors() }")
@@ -31,7 +31,7 @@ class TestComparisonFuzzed {
 
         // omit
         val mvrsOmit = cvrsUI.map { it.omit() }
-        sampler = ComparisonSamplerGen(mvrsOmit.zip(cvrsUI), contestUA, assort)
+        sampler = ComparisonSamplerGen(mvrsOmit.zip(cvrsUI), contestUA, assort, allowReset = true)
         samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("samplingErrors = ${ samples.samplingErrors() }")
@@ -51,7 +51,7 @@ class TestComparisonFuzzed {
 
         // flip
         val mvrsFlip = cvrsUI.map { it.flip() }
-        var sampler = ComparisonSamplerGen(mvrsFlip.zip(cvrsUI), contestUA, assort)
+        var sampler = ComparisonSamplerGen(mvrsFlip.zip(cvrsUI), contestUA, assort, allowReset = true)
         var samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("flip samplingErrors = ${ samples.samplingErrors() }")
@@ -59,7 +59,7 @@ class TestComparisonFuzzed {
 
         // omit
         val mvrsOmit = cvrsUI.map { it.omit() }
-        sampler = ComparisonSamplerGen(mvrsOmit.zip(cvrsUI), contestUA, assort)
+        sampler = ComparisonSamplerGen(mvrsOmit.zip(cvrsUI), contestUA, assort, allowReset = true)
         samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("omit samplingErrors = ${ samples.samplingErrors() }")
@@ -67,7 +67,7 @@ class TestComparisonFuzzed {
 
         // vote other
         val mvrsOther = cvrsUI.map { it.set(2) }
-        sampler = ComparisonSamplerGen(mvrsOther.zip(cvrsUI), contestUA, assort)
+        sampler = ComparisonSamplerGen(mvrsOther.zip(cvrsUI), contestUA, assort, allowReset = true)
         samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("mvrsOther samplingErrors = ${ samples.samplingErrors() }")
@@ -75,7 +75,7 @@ class TestComparisonFuzzed {
 
         // vote 1
         val mvrs1 = cvrsUI.map { it.set(1) }
-        sampler = ComparisonSamplerGen(mvrs1.zip(cvrsUI), contestUA, assort)
+        sampler = ComparisonSamplerGen(mvrs1.zip(cvrsUI), contestUA, assort, allowReset = true)
         samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("mvrs1 samplingErrors = ${ samples.samplingErrors() }")
@@ -83,7 +83,7 @@ class TestComparisonFuzzed {
 
         // vote 0
         val mvrs0 = cvrsUI.map { it.set(0) }
-        sampler = ComparisonSamplerGen(mvrs0.zip(cvrsUI), contestUA, assort)
+        sampler = ComparisonSamplerGen(mvrs0.zip(cvrsUI), contestUA, assort, allowReset = true)
         samples = PrevSamplesWithRates( assort.noerror)
         repeat(ncvrs) { samples.addSample( sampler.sample())}
         println("mvrs0 samplingErrors = ${ samples.samplingErrors() }")
@@ -158,7 +158,7 @@ private fun runRepeatedAudit(
     cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
 ): RunTestRepeatedResult {
     val assorter = assertion.assorter
-    val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter)
+    val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = true)
 
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,

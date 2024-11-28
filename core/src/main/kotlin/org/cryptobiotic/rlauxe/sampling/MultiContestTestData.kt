@@ -65,12 +65,12 @@ data class MultiContestTestData(
         return fcontests.map { it.makeContest() }
     }
 
-    fun makeBallots(): List<BallotUnderAudit> {
-        val result = mutableListOf<BallotUnderAudit>()
+    fun makeBallots(): List<BallotWithStyle> {
+        val result = mutableListOf<BallotWithStyle>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->
             repeat(ballotStyle.ncards) {
-                result.add(BallotUnderAudit(ballotId, ballotStyle))
+                result.add(BallotWithStyle("ballot$ballotId", ballotStyle))
                 ballotId++
             }
         }

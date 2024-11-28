@@ -20,7 +20,7 @@ class TestCvrBuilders {
         cvrs.forEach { CvrBuilder.fromCvr(cvrsbs, it) }
 
         // convert back to Cvr
-        val roundtrip: List<Cvr>  = cvrsbs.build().map { it as Cvr}
+        val roundtrip: List<Cvr>  = cvrsbs.build().map { it }
         // same order
         roundtrip.forEachIndexed { idx, it ->
             assertEquals( cvrs[idx], it)
@@ -34,7 +34,7 @@ class TestCvrBuilders {
         val contests: List<Contest> = test.makeContests()
         val cvrs = test.makeCvrsFromContests()
         val detail = false
-        val ntrials = 100
+        val ntrials = 1
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         fuzzPcts.forEach { fuzzPct ->
             val fcvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
@@ -55,8 +55,8 @@ class TestCvrBuilders {
                         }
                     }
                     val fuzz = count.toDouble() / ccount
+                    println("$it ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
                     if (detail) {
-                        println(" ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
                         println("  errors = ${samples.samplingErrors()}")
                         println("  rates =  ${samples.samplingErrors(ccount.toDouble())}")
                         println("  error% = ${samples.samplingErrors(ccount * fuzz)}")

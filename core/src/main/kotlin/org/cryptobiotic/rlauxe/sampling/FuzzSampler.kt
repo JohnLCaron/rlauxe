@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.CvrContest
 import org.cryptobiotic.rlauxe.util.secureRandom
 
-class ComparisonSamplerRegen(
+class ComparisonFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
     val contestUA: ContestUnderAudit,
@@ -49,7 +49,7 @@ class ComparisonSamplerRegen(
     override fun N() = N
 }
 
-class PollingSamplerRegen(
+class PollingFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
     val contestUA: ContestUnderAudit,

@@ -10,12 +10,12 @@ import kotlin.math.ceil
 import kotlin.test.Test
 
 
-class TestFindSampleSize {
+class TestEstimateSampleSize {
     @Test
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
-        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
+        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it) }
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
@@ -42,7 +42,7 @@ class TestFindSampleSize {
 
         val gamma = 1.2
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 1234567890L, quantile=.50)
-        val finder = FindSampleSize(auditConfig)
+        val finder = EstimateSampleSize(auditConfig)
 
         contestsUA.forEach { contestUA ->
             val cn = contestUA.ncvrs

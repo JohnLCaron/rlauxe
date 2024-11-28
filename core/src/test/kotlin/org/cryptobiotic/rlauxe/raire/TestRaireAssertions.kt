@@ -23,7 +23,7 @@ class TestRaireAssertions {
 
         val prng = Prng(123456789011L)
         val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
-        val cvrsUA = cvrs.map { CvrUnderAudit(it, false, prng.next()) } + phantomCVRs
+        val cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) } + phantomCVRs
 
         contestsUA.forEach { contest ->
             contest.makeComparisonAssertions(cvrsUA)

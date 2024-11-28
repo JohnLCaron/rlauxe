@@ -16,8 +16,8 @@ class TestComparisonSamplerSimulation {
         val margins = listOf(.017, .03, .05)
         for (margin in margins) {
             val theta = margin2mean(margin)
-            val cvrs: List<CvrIF> = makeCvrsByExactMean(N, theta)
-            val cvrsUA = cvrs.map { CvrUnderAudit(it as Cvr, false) }
+            val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
+            val cvrsUA = cvrs.map { CvrUnderAudit(it) }
 
             val contest = makeContestsFromCvrs(cvrs).first()
             val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
@@ -47,8 +47,8 @@ class TestComparisonSamplerSimulation {
         val margins = listOf(.017, .03, .05)
         for (margin in margins) {
             val theta = margin2mean(margin)
-            val cvrs: List<CvrIF> = makeCvrsByExactMean(N, theta)
-            val cvrsUA = cvrs.map { CvrUnderAudit(it as Cvr, false) }
+            val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
+            val cvrsUA = cvrs.map { CvrUnderAudit(it) }
 
             val contest = makeContestsFromCvrs(cvrs).first()
             val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
@@ -70,7 +70,7 @@ class TestComparisonSamplerSimulation {
             "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallots(cvrFile)
         val cvrs = raireCvrs.cvrs
-        val cvrsUA = cvrs.map { CvrUnderAudit(it, false) }
+        val cvrsUA = cvrs.map { CvrUnderAudit(it) }
 
         contestUA.makeComparisonAssertions(cvrsUA)
 
@@ -91,7 +91,7 @@ class TestComparisonSamplerSimulation {
 
         val before = cvrsUA.map { assorter.bassort(it, it) }.average()
         sampler.reset()
-        var welford = Welford()
+        val welford = Welford()
         repeat(cvrsUA.size) {
             welford.update(sampler.sample())
         }

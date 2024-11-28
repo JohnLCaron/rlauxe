@@ -7,7 +7,7 @@ data class AuditConfig(val auditType: AuditType,
                        val seed: Long,
                        val ntrials: Int = 100,
                        val quantile: Double = .80,
-                       val fuzzPct: Double = .001,
+                       val fuzzPct: Double? = null, // with or without mvr fuzz.
                        val p1: Double = 1.0e-2,
                        val p2: Double = 1.0e-4,
                        val p3: Double = 1.0e-2,

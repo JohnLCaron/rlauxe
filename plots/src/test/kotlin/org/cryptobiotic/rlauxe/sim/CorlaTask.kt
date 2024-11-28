@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sim
 
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
@@ -11,7 +12,7 @@ data class CorlaTask(
     val idx: Int,
     val N: Int,
     val cvrMean: Double,
-    val cvrs: List<CvrIF>,
+    val cvrs: List<Cvr>,
     val riskLimit: Double = 0.05,
     val p2: Double,      // oracle rate of 2-vote overstatements
     val p1: Double,     // oracle rate of 1-vote overstatements

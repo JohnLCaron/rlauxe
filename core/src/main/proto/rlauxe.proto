@@ -1,20 +1,12 @@
 syntax = "proto3";
 
-option java_package = "org.cryptobiotic.protogen";
+option java_package = "org.cryptobiotic.rlauxe.protogen";
 option java_outer_classname = "RlauxeProto";
 
-// data class AuditConfig(val auditType: AuditType,
-//                       val riskLimit: Double,
-//                       val seed: Long,
-//                       val ntrials: Int = 100,
-//                       val quantile: Double = .80,
-//                       val p1: Double = 1.0e-2,
-//                       val p2: Double = 1.0e-4,
-//                       val p3: Double = 1.0e-2,
-//                       val p4: Double = 1.0e-4,
-//                       val d1: Int = 100,  // for trunc_shrinkage
-//                       val d2: Int = 100,
-message AuditConfig {
+////////////////////////////////////////////////////////////////////////////////
+//// Pre Election Information
+
+message AuditInfo {
   enum AuditType {
     unknown = 0;
     polling = 1;
@@ -22,24 +14,15 @@ message AuditConfig {
     one_audit = 3;
   }
 
-  string spec_version = 1;
+  string audit_name = 1;
   AuditType audit_type = 2;
-  double risk_limit = 3;
-  bytes seed = 4;
-  int32 ntrials = 5;
-  double quantile = 6;
-  repeated double errorRates = 7;
-  repeated double trunc_shrinkae_params = 8;
-  map<string, string> contest_max_cards = 10;
+  repeated ContestInfo contest_info = 3;
+  double risk_limit = 4;
+  bool cvrs_are_complete = 5; // cvrs have an entry for all contests on that ballot, dont need ballot manifest
+  bool has_styles = 6; // implies cvrs_are_complete or BallotManifest not null
 }
 
-//     val name: String,
-//    val id: Int,
-//    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-//    val winnerNames: List<String>,
-//    val choiceFunction: SocialChoiceFunction,
-//    val minFraction: Double? = null, // supermajority only.
-message Contest {
+message ContestInfo {
   enum SocialChoiceType {
     unknown = 0;
     plurality = 1;
@@ -49,22 +32,137 @@ message Contest {
   }
 
   string name = 1;
-  int32 id = 2;
-  map<string, int32> candidates = 3;
-  repeated string winnerNames = 4;
-  SocialChoiceType choiceFunction = 5;
-  double minFraction = 6; // supermajority only.
-
-  int32 ncvrs = 7;
-  int32 upperBound = 8;
-  int32 estSampleSize = 9;
-  bytes thresholdSampleNumber = 10;
+  uint32 id = 2;
+  map<string, uint32> candidates = 3; // name -> candidate id
+  SocialChoiceType choiceFunction = 4;
+  uint32 nwinners = 5;
+  double minFraction = 6; // supermajority only. between 0 and 1.
 }
 
-// The constants for mathematical functions during the election.
+////////////////////////////////////////////////////////////////////////////////
+//// Election Information
+
+message Audit {
+  AuditInfo audit_info = 1;
+  AuditConfig audit_config = 2;
+  bytes sample_seed = 3;
+  ContestBounds contest_bounds = 4;
+  repeated Contest contests = 5;
+
+  Cvrs cvrs = 6; // must be present if AuditType.comparison. could use pointer instead of embedding.
+  BallotManifest ballot_manifest = 7;
+}
+
+message AuditConfig {
+  int32 ntrials = 1;
+  double quantile = 2;
+  repeated double errorRates = 3;
+  repeated double trunc_shrinkage_params = 4;
+}
+
+message ContestBounds {
+  map<string, uint32> bounds = 1; // contest name -> bound. B7. trustworthy upper bound on number of ballots for this contest
+}
+
+message Contest {
+  ContestInfo info = 1;
+  repeated string reported_winners = 2; // B8
+  repeated Votes reported_votes = 3; // B8
+
+  // assertions with their margins ??
+  // nphantoms ??
+}
+
+message Votes {
+    string contest_id = 1;
+    repeated uint32 candidate_ids = 2; // assume each candidate has 0 or 1 votes.
+                                       // for irv, the order of candidate_ids is their ranking
+}
+
+// used for polling, or with non-complete cvrs.
+message BallotManifest {
+  oneof bm {
+    BallotManifestWithIds ballot_manifest_with_ids = 1;
+    BallotManifestWithCount ballot_manifest_with_count = 2;
+  }
+}
+
+// if we have this, we can massage the cvrs so that cvrs_are_complete.
+// for polling, we can derive BallotManifestWithCount, whic i think is just as good.
+message BallotManifestWithIds  {
+  repeated BallotStyleWithIds bs = 1;
+}
+
+message BallotStyleWithIds {
+  string name = 1; // name of ballot style
+  repeated uint32 contests = 2;  // which contests are in this style
+  repeated string ballot_ids = 3; // list of ballots with this style; matches CVR.
+}
+
+
+message BallotManifestWithCount  {
+  repeated BallotStyleWithCount bs = 1;
+}
+
+message BallotStyleWithCount {
+  string name = 1; // name of ballot style
+  repeated uint32 contests = 2;  // which contests are on this ballot style
+  uint32 nballots = 3; // number of ballots that voted that have this style
+}
+
 message Cvr {
-  string id = 1;
-  map<int32, bytes> votes = 2; // more than 255 candidates ? could switch to base 128 encoding
+  string ballot_id = 1;
+  repeated Votes votes = 2; // one for each contest on the ballot.
+                            // cvrs_are_complete implies all contests have an entry, even if candidate_ids is empty
+  // phantom implies candidate_ids always empty
   bool phantom = 3;
-  bytes sampleNumber = 4; // randomly assigned
+  bytes sampleNum = 4; // deterministically generated from sample_seed.
+}
+
+message Cvrs {
+  repeated Cvr mvr = 1;
+}
+
+// options (pick one)
+// comparison
+//  cvrs_are_complete
+//  has ballot_manifest_with_ids. equivilent to cvrs_are_complete
+//  has ballot_manifest_with_count
+//  with_styles = false
+// polling
+//  has ballot_manifest_with_ids.
+//  has ballot_manifest_with_count
+//  with_styles = false
+
+////////////////////////////////////////////////////////////////////////////////
+//// Audit results
+
+message AuditResult {
+  string audit_name = 1;
+  repeated AuditedContest contests = 2;
+  Mvrs mvrs = 3; // could use pointer instead of embedding.
+}
+
+message AuditedContest {
+
+  enum AuditStatus {
+    Unknown = 0;
+    StatRejectNull = 1; // statistical rejection of H0
+    LimitReached = 2; // cant tell from the number of samples available
+
+    //// only when sampling without replacement all the way to N, in practice, this never happens.
+    SampleSumRejectNull = 3; // SampleSum > N * t, so we know H0 is false
+    AcceptNull = 4; // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
+  }
+
+  Contest contest = 1;
+  uint32 estSampleSize = 2;
+  uint32 actualSampleSize = 3;
+  AuditStatus status = 4;
+  double pvalue = 5;  // probability of null hypotheris (H0) being true
+  uint32 nrounds = 6; // how many rounds of sampling were done?
+}
+
+message Mvrs {
+  repeated Cvr mvr = 1;
 }

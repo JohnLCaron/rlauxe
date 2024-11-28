@@ -48,7 +48,7 @@ class CreatePollingDiffMeans {
     val N = 50000
 
     // theta is the true mean
-    data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<CvrIF>)
+    data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<Cvr>)
 
     @Test
     fun plotOver() {
@@ -211,7 +211,7 @@ class CreatePollingDiffMeans {
 
     fun runAlphaMartWithMeanDiff(
         theta: Double,
-        cvrs: List<CvrIF>,
+        cvrs: List<Cvr>,
         reportedMeanDiff: Double,
         nrepeat: Int,
         d: Int = 500,

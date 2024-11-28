@@ -6,6 +6,9 @@ last changed: 11/25/2024
 ### core
 * raire library
 * hybrid audits
+* DONE PollingWithStyles
+* PollingWithoutStyles
+* the effect of adding n worst-case ballots to an audit.
 
 ### sampling
 * Estimate sample sizes with fixed formula
@@ -15,8 +18,7 @@ last changed: 11/25/2024
 * SecureRandom must be deterministic using a given seed, so verifiers can test. 
   Make a version that agrees exactly with SHANGRLA's version. (3)
   BigIntegers? Strings? Maybe hex strings?
-* DONE Polling
-* without CSD?
+
 * COBRA 4.3 Diversified betting
 
 ### multiple rounds

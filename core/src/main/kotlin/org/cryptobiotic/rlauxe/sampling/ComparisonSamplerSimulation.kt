@@ -7,6 +7,7 @@ import kotlin.math.max
 
 private val show = true
 
+// TODO maybe lost the sampleNum?
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerSimulation(
@@ -21,7 +22,7 @@ class ComparisonSamplerSimulation(
 
     val N = rcvrs.size
     val isIRV = contestUA.contest.choiceFunction == SocialChoiceFunction.IRV
-    val mvrs: List<CvrUnderAudit>
+    val mvrs: List<Cvr>
     val cvrs: List<CvrUnderAudit>
     val usedCvrs = mutableSetOf<String>()
 
@@ -40,8 +41,8 @@ class ComparisonSamplerSimulation(
 
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
-        val mmvrs = mutableListOf<CvrUnderAudit>()
-        mmvrs.addAll(rcvrs)
+        val mmvrs = mutableListOf<Cvr>()
+        rcvrs.forEach{ mmvrs.add(it.cvr) }
         val ccvrs = mutableListOf<CvrUnderAudit>()
         ccvrs.addAll(rcvrs)
 
@@ -90,7 +91,7 @@ class ComparisonSamplerSimulation(
     //  plurality:  two vote overstatement: cvr has winner (1), mvr has loser (0)
     //  NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
     //  NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
-    fun flip2votes(mcvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
+    fun flip2votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
@@ -107,8 +108,8 @@ class ComparisonSamplerSimulation(
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter.assort(alteredMvr) != 0.0) {
                     println("  flip2votes ${cassorter.assorter.assort(alteredMvr)} != 0.0")
-                    println("    cvr=${cvr.cvr}")
-                    println("    alteredMvr=${alteredMvr.cvr}")
+                    println("    cvr=${cvr}")
+                    println("    alteredMvr=${alteredMvr}")
                 }
                 require(cassorter.assorter.assort(alteredMvr) == 0.0)
                 val bassort = cassorter.bassort(alteredMvr, cvr) // mvr, cvr
@@ -130,7 +131,7 @@ class ComparisonSamplerSimulation(
     //  plurality: two vote understatement: cvr has loser (0), mvr has winner (1)
     //  NEB two vote understatement: cvr has loser preceeding winner (0), mvr has winner as first pref (1)
     //  NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
-    fun flip4votes(mcvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
+    fun flip4votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.0 }.count()
@@ -146,8 +147,8 @@ class ComparisonSamplerSimulation(
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter.assort(alteredMvr) != 1.0) {
                     println("  flip4votes ${cassorter.assorter.assort(alteredMvr)} != 1.0")
-                    println("    cvr=${cvr.cvr}")
-                    println("    alteredMvr=${alteredMvr.cvr}")
+                    println("    cvr=${cvr}")
+                    println("    alteredMvr=${alteredMvr}")
                 }
                 require(cassorter.assorter.assort(alteredMvr) == 1.0)
                 val bassort = cassorter.bassort(alteredMvr, cvr)
@@ -170,7 +171,7 @@ class ComparisonSamplerSimulation(
     //  plurality: one vote overstatement: cvr has winner (1), mvr has other (1/2)
     //  NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
     //  NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
-    fun flip1votes(mcvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
+    fun flip1votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -186,8 +187,8 @@ class ComparisonSamplerSimulation(
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter.assort(alteredMvr) != 0.5) {
                     println("  flip1votes ${cassorter.assorter.assort(alteredMvr)} != 0.5")
-                    println("    cvr=${cvr.cvr}")
-                    println("    alteredMvr=${alteredMvr.cvr}")
+                    println("    cvr=${cvr}")
+                    println("    alteredMvr=${alteredMvr}")
                 }
                 require(cassorter.assorter.assort(alteredMvr) == 0.5)
                 val bassort = cassorter.bassort(alteredMvr, cvr)
@@ -210,7 +211,7 @@ class ComparisonSamplerSimulation(
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1)
     //  NEB one vote understatement: cvr has winner preceding loser (1/2), but not first, mvr has winner as first pref (1)
     //  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining (1)
-    fun flip3votes(mcvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
+    fun flip3votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -242,7 +243,7 @@ class ComparisonSamplerSimulation(
     }
 
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1). have to change cvr to other
-    fun flip3votesP(mcvrs: MutableList<CvrUnderAudit>, cvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
+    fun flip3votesP(mcvrs: MutableList<Cvr>, cvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val otherCandidate = max(cassorter.assorter.winner(), cassorter.assorter.loser()) + 1
@@ -262,7 +263,7 @@ class ComparisonSamplerSimulation(
                     cassorter.bassort(mvr, alteredCvr)
                 }
                 require(cassorter.bassort(mvr, alteredCvr) == 1.5 * cassorter.noerror)
-                cvrs[cardIdx] = alteredCvr // Note we are changing the cvr, not the mvr
+                cvrs[cardIdx] = CvrUnderAudit(alteredCvr) // Note we are changing the cvr, not the mvr
                 changed++
             }
             cardIdx++
@@ -271,34 +272,6 @@ class ComparisonSamplerSimulation(
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votesP could only flip $changed, wanted $needToChange")
         require(checkAvotes == startingAvotes - needToChange)
-
-        return changed
-    }
-
-    // previous
-    fun flip3votes(mcvrs: MutableList<CvrUnderAudit>, cvrs: MutableList<CvrUnderAudit>, changeCvrToOther: Int): Int {
-        if (changeCvrToOther == 0) return 0
-        val ncards = mcvrs.size
-        var changed = 0
-
-        // random other candidate, just cant be winner or loser
-        val otherCandidate = max(cassorter.assorter.winner(), cassorter.assorter.loser()) + 1
-
-        val startingAvotes = cvrs.sumOf { it.hasMarkFor(contestUA.id, cassorter.assorter.winner()) }
-        while (changed < changeCvrToOther) {
-            val cvrIdx = secureRandom.nextInt(ncards)
-            val mvr = mcvrs[cvrIdx]
-            val cvr = cvrs[cvrIdx]
-            if ((cvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1) && (mvr.votes == cvr.votes)) {
-                val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
-                val altered = makeNewCvr(cvr, votes)
-                cvrs[cvrIdx] = altered // Note we are changing the cvr, not the mvr
-                require(cassorter.bassort(mvr, altered) == 1.5 * cassorter.noerror) // p3 loser -> other
-                changed++
-            }
-        }
-        val checkAvotes = cvrs.sumOf { it.hasMarkFor(contestUA.id, cassorter.assorter.winner()) }
-        require(checkAvotes == startingAvotes - changeCvrToOther)
 
         return changed
     }
@@ -319,8 +292,8 @@ class ComparisonSamplerSimulation(
         return result
     }
 
-    fun makeNewCvr(old: CvrUnderAudit, votes: Map<Int, IntArray>): CvrUnderAudit {
+    fun makeNewCvr(old: Cvr, votes: Map<Int, IntArray>): Cvr {
         usedCvrs.add(old.id)
-        return CvrUnderAudit(Cvr(old.cvr, votes), old.phantom, old.sampleNum)
+        return Cvr(old, votes)
     }
 }

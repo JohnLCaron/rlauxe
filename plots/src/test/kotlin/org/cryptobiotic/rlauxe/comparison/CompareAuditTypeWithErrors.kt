@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
@@ -42,7 +43,7 @@ import kotlin.test.Test
 // compare ballot polling to card comparison
 class CompareAuditTypeWithErrors {
     val showCalculation = false
-    data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val eta0Factor: Double, val cvrs: List<CvrIF>)
+    data class AlphaMartTask(val idx: Int, val N: Int, val cvrMean: Double, val eta0Factor: Double, val cvrs: List<Cvr>)
 
     @Test
     fun plotAuditTypesNT() {
@@ -308,7 +309,7 @@ class CompareAuditTypeWithErrors {
 
     fun runDiffAuditTypes(
         cvrMean: Double,
-        cvrs: List<CvrIF>,
+        cvrs: List<Cvr>,
         cvrMeanDiff: Double,
         ntrials: Int,
         eta0Factor: Double,

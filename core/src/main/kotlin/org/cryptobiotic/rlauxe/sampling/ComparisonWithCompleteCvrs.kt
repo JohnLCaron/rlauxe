@@ -19,7 +19,8 @@ import org.cryptobiotic.rlauxe.util.*
 //	   assumptions about errors for computing initial sample sizes), and seed for pseudo-random sampling.
 //	c) Read ballot manifest.
 //	d) Read CVRs.
-class StylishWorkflow(
+
+class ComparisonWithCompleteCvrs(
     contests: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val auditConfig: AuditConfig,
@@ -49,7 +50,7 @@ class StylishWorkflow(
         // 3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
         //      (including “phantom” CVRs), using a high-quality PRNG [OS19].
         val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, false, prng.next()) } + phantomCVRs
+        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) } + phantomCVRs
 
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
@@ -71,7 +72,7 @@ class StylishWorkflow(
         // contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
         // val maxContestSize = simulateSampleSizes(auditConfig, contestsUA, cvrsUA, prevMvrs, round)
 
-        val finder = FindSampleSize(auditConfig)
+        val finder = EstimateSampleSize(auditConfig)
         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round, true) }
         val maxContestSize = contestsUA.map { it.estSampleSize }.max()
 
@@ -127,7 +128,7 @@ class StylishWorkflow(
      */
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<CvrIF>): Boolean {
+    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>): Boolean {
         //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
         // 	e) Import the MVRs.
         //	f) For each MVR 𝑖:
@@ -139,11 +140,10 @@ class StylishWorkflow(
         //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
         val sampledCvrs = sampleIndices.map { cvrsUA[it] }
-        val useMvrs = if (mvrs.isEmpty()) sampledCvrs else mvrs
 
         // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == useMvrs.size)
-        val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = useMvrs.zip(sampledCvrs)
+        require(sampledCvrs.size == mvrs.size)
+        val cvrPairs: List<Pair<Cvr, CvrUnderAudit>> = mvrs.zip(sampledCvrs)
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize across assertions
@@ -246,7 +246,7 @@ fun runOneAssertionAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
-    cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
+    cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
 ): Boolean {
     val assorter = assertion.assorter
 

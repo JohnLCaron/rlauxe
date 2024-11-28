@@ -1,9 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.csv.CastVoteRecord
-import org.cryptobiotic.rlauxe.csv.ContestInfo
-import org.cryptobiotic.rlauxe.csv.CvrExport
-import org.cryptobiotic.rlauxe.csv.readDominionCvrExport
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals

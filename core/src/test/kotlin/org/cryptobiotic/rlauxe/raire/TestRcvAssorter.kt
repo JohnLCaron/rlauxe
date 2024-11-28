@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.test.Test
 import kotlin.test.assertEquals

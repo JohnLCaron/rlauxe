@@ -34,7 +34,7 @@ class TestConsistentSampling {
 
         val prng = Prng(12345678901L)
         val cvrsUA = cvrs.mapIndexed { idx, it ->
-            CvrUnderAudit( it as Cvr, false, prng.next()) // here we assign sample number deterministically
+            CvrUnderAudit( it, prng.next()) // here we assign sample number deterministically
         }
         val contestsUA = contestInfos.mapIndexed { idx, it ->
             ContestUnderAudit( it, cvrs)
@@ -79,7 +79,7 @@ class TestConsistentSampling {
 
         val prng = Prng(123456789012L)
         val cvrsUA = cvrs.mapIndexed { idx, it ->
-            CvrUnderAudit( it as Cvr, false, prng.next())
+            CvrUnderAudit( it, prng.next())
         }
 
         val contestsUA = contestInfos.mapIndexed { idx, it ->
@@ -122,7 +122,7 @@ class TestConsistentSampling {
             contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
             val prng = Prng(secureRandom.nextLong())
-            val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it as Cvr, false, prng.next()) }
+            val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it, prng.next()) }
 
             val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
             println("nsamples = ${sample_cvr_indices.size}\n")

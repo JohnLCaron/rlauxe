@@ -40,7 +40,7 @@ class CvrBuilders {
         return cb
     }
 
-    fun build(): List<CvrIF> {
+    fun build(): List<Cvr> {
         return builders.map { it.build() }
     }
 

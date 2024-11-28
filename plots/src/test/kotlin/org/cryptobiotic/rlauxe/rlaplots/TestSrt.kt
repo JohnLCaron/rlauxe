@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.rlaplots
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -40,7 +39,7 @@ class TestSrt {
         val ntrials = 111
         val hist = Deciles(ntrials)
         repeat(ntrials) { hist.add(it + 1) }
-        val status = mapOf(TestH0Status.LimitReached to 1, TestH0Status.AcceptNull to 2, TestH0Status.StatRejectNull to 3, TestH0Status.SampleSum to 4 )
+        val status = mapOf(TestH0Status.LimitReached to 1, TestH0Status.AcceptNull to 2, TestH0Status.StatRejectNull to 3, TestH0Status.SampleSumRejectNull to 4 )
 
         //                val testParameters: Map<String, Double>, // various parameters, depends on the test
         //               val N: Int,                  // population size (eg number of ballots)

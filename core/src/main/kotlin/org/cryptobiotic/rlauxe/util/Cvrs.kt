@@ -46,8 +46,8 @@ fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
 fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 
-fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<CvrIF> {
-    val randomCvrs = mutableListOf<CvrIF>()
+fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
+    val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
         val random = secureRandom.nextDouble(1.0)
         val cand = if (random < mean) 0 else 1
@@ -79,10 +79,10 @@ class SimContest(val contest: Contest, val assorter: AssorterFunction) {
     }
 
     // makes a new, independent set of Cvrs with the contest votes
-    fun makeCvrs(): List<CvrIF> {
+    fun makeCvrs(): List<Cvr> {
         resetTracker()
         val cvrbs = CvrBuilders().addContests(listOf(this.info))
-        val result = mutableListOf<CvrIF>()
+        val result = mutableListOf<Cvr>()
         repeat(this.ncards) {
             val cvrb = cvrbs.addCrv()
             cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()

@@ -5,7 +5,7 @@ enum class TestH0Status(val fail: Boolean) {
     LimitReached(true), // cant tell from the number of samples available
 
     //// only when sampling without replacement all the way to N, in practice, this never happens I think
-    SampleSum(false), // SampleSum > N * t, so we know H0 is false
+    SampleSumRejectNull(false), // SampleSum > N * t, so we know H0 is false
     AcceptNull(true), // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
 }
 

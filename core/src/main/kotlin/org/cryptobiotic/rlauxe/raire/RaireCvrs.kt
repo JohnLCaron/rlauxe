@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlaux.core.raire
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF

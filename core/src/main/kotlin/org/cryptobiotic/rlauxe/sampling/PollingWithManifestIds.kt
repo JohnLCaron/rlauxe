@@ -4,12 +4,10 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 
-// Assume we have BallotStyles, which is equivilent to styles = true.
-// TODO what happens if we dont?
-class PollingWorkflow(
+class PollingWithManifestIds(
         val auditConfig: AuditConfig,
         contests: List<Contest>, // the contests you want to audit
-        val ballots: List<BallotUnderAudit>,
+        val ballots: List<BallotWithStyle>, // note that we set it.sampleNum here
     ) {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, it.Nc) }
 
@@ -21,6 +19,7 @@ class PollingWorkflow(
         }
 
         // TODO polling phantoms
+        // phantoms can be CVRs, so dont need CvrIF.
         // val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val prng = Prng(auditConfig.seed)
         ballots.forEach { it.sampleNum = prng.next() }
@@ -36,9 +35,12 @@ class PollingWorkflow(
             it.estSampleSize = 0
         }
 
-        // set contest.sampleSize through simulation. Uses SimContest to simulate a contest with the same vote totals.
-        val finder = FindSampleSize(auditConfig)
-        contestsUA.forEach { contestUA -> finder.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.ncvrs, round) }
+        // set contest.sampleSize through simulation.
+        // Uses SimContest to simulate a contest with the same vote totals.
+        // standard: Uses PollWithoutReplacement, then mvr = cvrs
+        // alternative: Uses SimContest to simulate a contest with the same vote totals.
+        val sampleSizer = EstimateSampleSize(auditConfig)
+        contestsUA.forEach { contestUA -> sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.ncvrs, round) }
         val maxContestSize =  contestsUA.map { it.estSampleSize }.max()
 
         // choose samples
@@ -53,7 +55,7 @@ class PollingWorkflow(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-    fun runAudit(mvrs: List<CvrIF>): Boolean {
+    fun runAudit(mvrs: List<Cvr>): Boolean {
         // TODO could parellelize across assertions
         var allDone = true
         contestsUA.forEach { contestUA ->
@@ -70,10 +72,16 @@ class PollingWorkflow(
     fun auditOneAssertion(
         contestUA: ContestUnderAudit,
         assertion: Assertion,
-        cvrs: List<CvrIF>,
+        cvrs: List<Cvr>,
     ): Boolean {
         val assorter = assertion.assorter
-        val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
+        val sampler = if (auditConfig.fuzzPct == null) {
+            PollWithoutReplacement(contestUA, cvrs, assorter)
+        } else {
+            PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contestUA, assorter)
+        }
+
+        // val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
 
         val eta0 = margin2mean(assertion.margin)
         val minsd = 1.0e-6

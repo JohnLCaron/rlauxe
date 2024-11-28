@@ -18,7 +18,7 @@ class TestComparisonWorkflow {
         val contests: List<Contest> = testData.makeContests()
         val cvrs = testData.makeCvrsFromContests()
 
-        val workflow = StylishWorkflow(contests, emptyList(), auditConfig, cvrs)
+        val workflow = ComparisonWithCompleteCvrs(contests, emptyList(), auditConfig, cvrs)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 
@@ -87,7 +87,7 @@ class TestComparisonWorkflow {
             rrc.Nc = rc.ncvrs
         }
 
-        val workflow = StylishWorkflow(emptyList(), raireResults.contests, auditConfig, cvrs)
+        val workflow = ComparisonWithCompleteCvrs(emptyList(), raireResults.contests, auditConfig, cvrs)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 

@@ -47,7 +47,7 @@ class TestAuditPolling {
         plotDDsample(srs, "PollingWithoutDD")
     }
 
-    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<CvrIF>, d: Int, silent: Boolean = true): List<RunTestRepeatedResult> {
+    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<RunTestRepeatedResult> {
         val N = cvrs.size
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 

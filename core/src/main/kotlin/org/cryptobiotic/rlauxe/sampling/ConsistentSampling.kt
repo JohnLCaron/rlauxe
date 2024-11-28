@@ -49,7 +49,7 @@ class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
     fun build(prng: Prng): CvrUnderAudit {
         val votes = contests.associateWith { IntArray(0) }
-        return CvrUnderAudit(Cvr(id, votes), phantom = true, prng.next())
+        return CvrUnderAudit(Cvr(id, votes, phantom = true), prng.next())
     }
 }
 ///////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ fun consistentCvrSampling(
 
 fun consistentPollingSampling(
     contests: List<ContestUnderAudit>, // all the contests you want to sample
-    ballots: List<BallotUnderAudit>, // all the ballots available to sample
+    ballots: List<BallotWithStyle>, // all the ballots available to sample
 ): List<Int> {
     if (ballots.isEmpty()) return emptyList()
 

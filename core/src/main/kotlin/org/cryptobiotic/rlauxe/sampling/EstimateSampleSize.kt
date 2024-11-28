@@ -4,13 +4,9 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.SimContest
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
-import java.lang.Math.pow
-import kotlin.math.ceil
-import kotlin.math.ln
-import kotlin.math.max
 
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
-class FindSampleSize(val auditConfig: AuditConfig) {
+class EstimateSampleSize(val auditConfig: AuditConfig) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //// Polling
@@ -49,12 +45,16 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         val cvrs = simContest.makeCvrs()
         require(cvrs.size == contestUA.ncvrs)
 
-        // TODO fuzz data from the reported mean. Isnt this number fixed by the margin ??
-        val sampler = PollWithoutReplacement(contestUA, cvrs, assorter)
+        val sampler = if (auditConfig.fuzzPct == null) {
+            PollWithoutReplacement(contestUA, cvrs, assorter)
+        } else {
+            PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contestUA, assorter)
+        }
 
         return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc)
     }
 
+    /*
     fun simulateSampleSizePollingAlt(
             fuzzPct: Double,
             contestUA: ContestUnderAudit,
@@ -67,10 +67,12 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         val cvrs = simContest.makeCvrs().map { it as Cvr }
         require(cvrs.size == contestUA.ncvrs)
 
-        val sampler = PollingSamplerRegen(fuzzPct, cvrs, contestUA, assorter)
+        val sampler = PollingFuzzSampler(fuzzPct, cvrs, contestUA, assorter)
 
         return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc, moreParameters)
     }
+
+     */
 
     fun simulateSampleSizeAlphaMart(
         sampleFn: GenSampleFn,
@@ -172,7 +174,7 @@ class FindSampleSize(val auditConfig: AuditConfig) {
         cvrs: List<Cvr>,
         moreParameters: Map<String, Double> = emptyMap(),
     ): RunTestRepeatedResult {
-        val sampler = ComparisonSamplerRegen(fuzzPct, cvrs, contestUA, assorter)
+        val sampler = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA, assorter)
         return simulateSampleSizeBetaMart(sampler, assorter.margin, assorter.noerror, assorter.upperBound(), contestUA.ncvrs, contestUA.Nc, moreParameters)
     }
 

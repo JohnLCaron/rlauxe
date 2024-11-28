@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
 
 // The ouput of RAIRE assertion generator, read from JSON files

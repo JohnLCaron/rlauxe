@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.csv.readDominionBallotManifest
+import org.cryptobiotic.rlauxe.corla.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
@@ -431,7 +431,7 @@ class AssertionRLA {
 //CVR.assign_sample_nums(cvr_list, prng)
         // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
         val prng = Prng(secureRandom.nextLong())
-        val cvras = rcvrs.map { CvrUnderAudit(it, phantom = false, prng.next()) }
+        val cvras = rcvrs.map { CvrUnderAudit(it, prng.next()) }
         println("calc_sample_sizes = $results")
 
 //#%%

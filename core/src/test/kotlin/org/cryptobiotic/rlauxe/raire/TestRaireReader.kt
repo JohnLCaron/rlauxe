@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvrs
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.File
 import kotlin.test.Test

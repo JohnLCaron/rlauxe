@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlaux.core.raire.RaireCvr
-import org.cryptobiotic.rlaux.core.raire.RaireCvrContest
-import org.cryptobiotic.rlaux.core.raire.RaireCvrs
 import org.cryptobiotic.rlauxe.core.Cvr
 import java.io.File
 

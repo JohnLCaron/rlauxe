@@ -5,24 +5,26 @@ import org.cryptobiotic.rlauxe.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestPollingWorkflow {
+class TestPollingWithManifestIds {
 
     @Test
     fun testPollingWorkflow() {
         val stopwatch = Stopwatch()
         val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
 
+        // each contest has a specific margin between the top two vote getters.
         val test = MultiContestTestData(20, 11, 20000)
         val contests: List<Contest> = test.makeContests()
-        // contests.forEach { println(it) }
 
-        // in practice, we dont actually have any cvrs.
+        // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests()
+        // However "polling with styles" requires that we know how many ballots each contest has.
         val ballots = test.makeBallots()
 
-        val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
+        // fuzzPct of the Mvrs have their votes randomly changes ("fuzzed")
+        val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
-        val workflow = PollingWorkflow(auditConfig, contests, ballots)
+        val workflow = PollingWithManifestIds(auditConfig, contests, ballots)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 

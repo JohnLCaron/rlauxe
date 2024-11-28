@@ -16,7 +16,7 @@ interface GenSampleFn {
 
 //// For polling audits.
 
-class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<CvrIF>, val assorter: AssorterFunction): GenSampleFn {
+class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): GenSampleFn {
     val N = cvrs.size
     val sampleMean = cvrs.map { assorter.assort(it) }.average()
     val sampleCount = cvrs.sumOf { assorter.assort(it) }
@@ -35,7 +35,7 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<CvrIF>
     override fun N() = N
 }
 
-class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<CvrIF>, val assorter: AssorterFunction): GenSampleFn {
+class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): GenSampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0
@@ -66,7 +66,7 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
 class ComparisonSamplerGen(
-    val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
+    val cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
     val contestUA: ContestUnderAudit,
     val cassorter: ComparisonAssorter,
     val allowReset: Boolean,
@@ -102,7 +102,7 @@ class ComparisonSamplerGen(
 }
 
 // the mvr and cvr always agree.
-class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter): GenSampleFn {
+class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter): GenSampleFn {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -133,10 +133,10 @@ class ComparisonNoErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssort
 
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
 // to make mvrs have mvrMean.
-data class ComparisonWithErrors(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter, val mvrMean: Double,
+data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
                                 val withoutReplacement: Boolean = true): GenSampleFn {
     val N = cvrs.size
-    val mvrs : List<CvrIF>
+    val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
     val sampleCount: Double
@@ -147,7 +147,7 @@ data class ComparisonWithErrors(val cvrs : List<CvrIF>, val cassorter: Compariso
         reset()
 
         // we want to flip the exact number of votes, for reproducibility
-        val mmvrs = mutableListOf<CvrIF>()
+        val mmvrs = mutableListOf<Cvr>()
         mmvrs.addAll(cvrs)
         flippedVotes = flipExactVotes(mmvrs, mvrMean)
         mvrs = mmvrs.toList()
@@ -183,11 +183,11 @@ data class ComparisonWithErrors(val cvrs : List<CvrIF>, val cassorter: Compariso
 
 // generate mvr by starting with cvrs and flipping (N * p2) votes (type 2 errors) and (N * p1) votes (type 1 errors)
 // TODO: generalize to p3, p4
-data class ComparisonWithErrorRates(val cvrs : List<CvrIF>, val cassorter: ComparisonAssorter,
+data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
                                     val p2: Double, val p1: Double = 0.0,
                                     val withoutReplacement: Boolean = true): GenSampleFn {
     val N = cvrs.size
-    val mvrs : List<CvrIF>
+    val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
     val sampleCount: Double
@@ -200,7 +200,7 @@ data class ComparisonWithErrorRates(val cvrs : List<CvrIF>, val cassorter: Compa
         reset()
 
         // we want to flip the exact number of votes, for reproducibility
-        val mmvrs = mutableListOf<CvrIF>()
+        val mmvrs = mutableListOf<Cvr>()
         mmvrs.addAll(cvrs)
         flippedVotes2 = add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2).toInt())
         flippedVotes1 =  if (p1 == 0.0) 0 else {
@@ -240,7 +240,7 @@ data class ComparisonWithErrorRates(val cvrs : List<CvrIF>, val cassorter: Compa
 ///////////////////////
 
 // change cvrs to have the exact number of votes for wantAvg
-fun flipExactVotes(cvrs: MutableList<CvrIF>, wantAvg: Double): Int {
+fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
     val ncards = cvrs.size
     val expectedAVotes = (ncards * wantAvg).toInt()
     val actualAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
@@ -250,7 +250,7 @@ fun flipExactVotes(cvrs: MutableList<CvrIF>, wantAvg: Double): Int {
 
 // change cvrs to add the given number of two-vote over/understatements.
 // Note that we replace the Cvr in the list when we change it
-private fun add2voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int): Int {
+private fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
     if (needToChangeVotesFromA == 0) return 0
     val ncards = cvrs.size
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
@@ -288,7 +288,7 @@ private fun add2voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFr
 }
 
 // change cvrs to add the given number of one-vote overstatements.
-private fun add1voteOverstatements(cvrs: MutableList<CvrIF>, needToChangeVotesFromA: Int): Int {
+private fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
     if (needToChangeVotesFromA == 0) return 0
     val ncards = cvrs.size
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }

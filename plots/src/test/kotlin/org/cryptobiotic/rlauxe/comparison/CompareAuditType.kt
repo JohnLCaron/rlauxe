@@ -38,7 +38,7 @@ import kotlin.test.Test
 class CompareAuditType {
     val N = 10000
 
-    data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<CvrIF>)
+    data class AlphaMartTask(val idx: Int, val N: Int, val theta: Double, val cvrs: List<Cvr>)
 
     @Test
     fun plotOver() {
@@ -199,7 +199,7 @@ class CompareAuditType {
 
     fun runDiffAuditTypes(
         theta: Double,
-        cvrs: List<CvrIF>,
+        cvrs: List<Cvr>,
         reportedMeanDiff: Double,
         nrepeat: Int,
         d: Int = 500,

@@ -64,6 +64,8 @@ Table of Contents
     STYLISH	    Stylish Risk-Limiting Audits in Practice.		Glazer, Spertus, Stark  16 Sep 2023
       https://github.com/pbstark/SHANGRLA
 
+    VERIFIABLE  Publicly Verifiable RLAs.     Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
+
 
 ## SHANGRLA framework
 

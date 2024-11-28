@@ -97,7 +97,7 @@ class BettingMart(
         }
 
         val status = when {
-            (mj < 0.0) -> TestH0Status.SampleSum // 5
+            (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
             (mj > upperBound) -> TestH0Status.AcceptNull
             else -> {
                 val pvalue = pvalues.last()

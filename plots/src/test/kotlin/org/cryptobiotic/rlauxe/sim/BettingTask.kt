@@ -9,7 +9,7 @@ data class BettingTask(
     val idx: Int,
     val N: Int,
     val cvrMean: Double,
-    val cvrs: List<CvrIF>,
+    val cvrs: List<Cvr>,
     val d2: Int, // weight p2, p4
     val p2oracle: Double, // oracle rate of 2-vote overstatements
     val p2prior: Double, // apriori rate of 2-vote overstatements; set to 0 to remove consideration

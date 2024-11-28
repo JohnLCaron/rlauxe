@@ -19,7 +19,7 @@ class TestComparisonFuzzed {
         val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
         val assort = contestUA.comparisonAssertions.first().assorter
 
-        val cvrsUI = cvrs.map { CvrUnderAudit(it as Cvr, false) }
+        val cvrsUI = cvrs.map { CvrUnderAudit(it) }
 
         // flip
         val mvrsFuzzed = cvrsUI.map { it.flip() }
@@ -43,7 +43,7 @@ class TestComparisonFuzzed {
         val avgCvrAssortValue = .505
         val ncvrs = 10000
         val cvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
-        val cvrsUI = cvrs.map { CvrUnderAudit(it as Cvr, false) }
+        val cvrsUI = cvrs.map { CvrUnderAudit(it) }
 
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
@@ -90,33 +90,33 @@ class TestComparisonFuzzed {
         assertEquals(listOf(5050, 0, 0, 0, 4950), samples.samplingErrors())
     }
 
-    fun CvrUnderAudit.flip(): CvrUnderAudit {
+    fun CvrUnderAudit.flip(): Cvr {
         val nvotes: Map<Int, IntArray> = this.votes.map { (key, value) ->
             val flip = if (value[0] == 0) 1 else 0
             Pair( key, IntArray(1) { flip })
         }.toMap()
-        return CvrUnderAudit( Cvr(this.id, nvotes), false)
+        return Cvr(this.id, nvotes)
     }
 
-    fun CvrUnderAudit.omit(): CvrUnderAudit {
+    fun CvrUnderAudit.omit(): Cvr {
         val nvotes: Map<Int, IntArray> = this.votes.map { (key, value) ->
             Pair( key, IntArray(value.size-1) { value[it-1] })
         }.toMap()
-        return CvrUnderAudit( Cvr(this.id, nvotes), false)
+        return Cvr(this.id, nvotes)
     }
 
-    fun CvrUnderAudit.set(votedFor: Int): CvrUnderAudit {
-        val nvotes: Map<Int, IntArray> = this.votes.map { (key, value) ->
+    fun CvrUnderAudit.set(votedFor: Int): Cvr {
+        val nvotes: Map<Int, IntArray> = this.votes.map { (key, _) ->
             Pair( key, IntArray(1) { votedFor })
         }.toMap()
-        return CvrUnderAudit( Cvr(this.id, nvotes), false)
+        return Cvr(this.id, nvotes)
     }
 
     @Test
     fun testComparisonFuzzed() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
-        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
+        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit(it) }
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
             contest.makeComparisonAssertions(cvrsUAP)
@@ -127,7 +127,7 @@ class TestComparisonFuzzed {
         println("total ncvrs = ${cvrsUAP.size}\n")
 
         val mvrsFuzzed = cvrsUAP.map { it.fuzzed() }
-        val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = mvrsFuzzed.zip(cvrsUAP)
+        val cvrPairs: List<Pair<Cvr, CvrUnderAudit>> = mvrsFuzzed.zip(cvrsUAP)
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = secureRandom.nextLong(), quantile=.50,
@@ -147,15 +147,15 @@ class TestComparisonFuzzed {
     }
 }
 
-fun CvrUnderAudit.fuzzed(): CvrUnderAudit {
-    return this
+fun CvrUnderAudit.fuzzed(): Cvr {
+    return this.cvr
 }
 
 private fun runRepeatedAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
-    cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
+    cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
 ): RunTestRepeatedResult {
     val assorter = assertion.assorter
     val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = true)

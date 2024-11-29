@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 enum class TestH0Status(val fail: Boolean) {
+    NotStarted(false),
     StatRejectNull(false), // statistical rejection of H0
     LimitReached(true), // cant tell from the number of samples available
 

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
-import org.cryptobiotic.rlauxe.sampling.tabulateRaireVotes
+import org.cryptobiotic.rlauxe.workflow.tabulateRaireVotes
 import org.cryptobiotic.rlauxe.util.Prng
 import kotlin.test.Test
 import kotlin.test.assertEquals

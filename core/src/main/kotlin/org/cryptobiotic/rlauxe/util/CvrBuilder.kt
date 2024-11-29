@@ -23,8 +23,8 @@ class CvrBuilders {
         return contests.getOrPut(contestName) { CvrContest( contestName, contestId++) }
     }
 
-    fun getContest(contestId: Int): CvrContest {
-        return contests.values.find { it.id == contestId }!!
+    fun getContest(contestId: Int): CvrContest? {
+        return contests.values.find { it.id == contestId }
     }
 
     fun addCrv(): CvrBuilder {
@@ -103,9 +103,12 @@ class CvrBuilder(
     }
 
     fun addContest(contestId: Int, votes: IntArray) {
-        val contest: CvrContest = builders.getContest(contestId)
-        val cvb: ContestVoteBuilder = contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
-        votes.forEach { cvb.votes.add(it) }
+        val contest: CvrContest? = builders.getContest(contestId)
+        // if contest not present, just skip
+        if (contest != null) {
+            val cvb: ContestVoteBuilder = contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
+            votes.forEach { cvb.votes.add(it) }
+        }
     }
 
     fun done() = builders

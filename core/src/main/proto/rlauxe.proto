@@ -18,8 +18,8 @@ message AuditInfo {
   AuditType audit_type = 2;
   repeated ContestInfo contest_info = 3;
   double risk_limit = 4;
-  bool cvrs_are_complete = 5; // cvrs have an entry for all contests on that ballot, dont need ballot manifest
-  bool has_styles = 6; // implies cvrs_are_complete or BallotManifest not null
+  bool cvrs_are_complete = 5; // cvrs have an entry for all contests on that ballot
+  bool has_styles = 6; // implies cvrs_are_complete or Ballots have ballot_style_id
 }
 
 message ContestInfo {
@@ -75,63 +75,47 @@ message Contest {
 
 message Votes {
     string contest_id = 1;
-    repeated uint32 candidate_ids = 2; // assume each candidate has 0 or 1 votes.
-                                       // for irv, the order of candidate_ids is their ranking
+    repeated uint32 candidate_ids = 2; // candidate has 1 vote.for irv, the order of candidate_ids is their ranking
 }
 
-// used for polling, or with non-complete cvrs.
 message BallotManifest {
-  oneof bm {
-    BallotManifestWithIds ballot_manifest_with_ids = 1;
-    BallotManifestWithCount ballot_manifest_with_count = 2;
-  }
+  repeated Ballot ballots = 1;
 }
 
-// if we have this, we can massage the cvrs so that cvrs_are_complete.
-// for polling, we can derive BallotManifestWithCount, whic i think is just as good.
-message BallotManifestWithIds  {
-  repeated BallotStyleWithIds bs = 1;
-}
-
-message BallotStyleWithIds {
-  string name = 1; // name of ballot style
-  repeated uint32 contests = 2;  // which contests are in this style
-  repeated string ballot_ids = 3; // list of ballots with this style; matches CVR.
-}
-
-
-message BallotManifestWithCount  {
-  repeated BallotStyleWithCount bs = 1;
-}
-
-message BallotStyleWithCount {
-  string name = 1; // name of ballot style
-  repeated uint32 contests = 2;  // which contests are on this ballot style
-  uint32 nballots = 3; // number of ballots that voted that have this style
-}
-
-message Cvr {
+// note similarity with Cvr
+message Ballot {
   string ballot_id = 1;
-  repeated Votes votes = 2; // one for each contest on the ballot.
-                            // cvrs_are_complete implies all contests have an entry, even if candidate_ids is empty
-  // phantom implies candidate_ids always empty
-  bool phantom = 3;
-  bytes sampleNum = 4; // deterministically generated from sample_seed.
+  bool phantom = 2;
+  bytes sampleNum = 3;
+  uint32 ballot_style_id = 4; // match BallotStyle.id, may be missing
 }
 
+message BallotStyle {
+  string name = 1; // name of ballot style
+  string id = 2; // id of ballot style
+  repeated uint32 contests = 3;  // which contests are in this style
+  uint32 nballots = 4; // number of ballots that voted that have this style; may be missing. present if has_styles
+}
+
+// acts as the BallotManifest
 message Cvrs {
   repeated Cvr mvr = 1;
 }
 
+// note similarity with Ballot
+message Cvr {
+  string ballot_id = 1;
+  bool phantom = 2;
+  bytes sampleNum = 3;
+  repeated Votes votes = 4; // has_styles: one for each contest on the ballot.
+}
+
 // options (pick one)
 // comparison
-//  cvrs_are_complete
-//  has ballot_manifest_with_ids. equivilent to cvrs_are_complete
-//  has ballot_manifest_with_count
+//  with_styles = true (cvrs_are_complete)
 //  with_styles = false
 // polling
-//  has ballot_manifest_with_ids.
-//  has ballot_manifest_with_count
+//  with_styles = true (ballots have ballot_style)
 //  with_styles = false
 
 ////////////////////////////////////////////////////////////////////////////////

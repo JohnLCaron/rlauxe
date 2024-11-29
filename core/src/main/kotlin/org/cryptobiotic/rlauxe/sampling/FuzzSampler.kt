@@ -100,7 +100,7 @@ fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double
             if (r < fuzzPct) {
                 countf++
                 val ccontest: CvrContest = cvb.contest
-                val currId = cvb.votes[0] // TODO only one vote allowed
+                val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
                 cvb.votes.clear()
 
                 // choose a different candidate, or none.
@@ -115,7 +115,7 @@ fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double
     return cvrbs.map { it.build() }
 }
 
-fun chooseNewCandidate(currId: Int, candidateIds: List<Int>): Int? {
+fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
         val ncandIdx = secureRandom.nextInt(size + 1)

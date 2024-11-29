@@ -1,15 +1,17 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 
-class PollingWithManifestIds(
-        val auditConfig: AuditConfig,
-        contests: List<Contest>, // the contests you want to audit
-        val ballots: List<BallotWithStyle>, // note that we set it.sampleNum here
+class PollingWithStyle(
+    val auditConfig: AuditConfig,
+    contests: List<Contest>, // the contests you want to audit
+    val ballotManifest: BallotManifest,
     ) {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, it.Nc) }
+    val ballotsUA: List<BallotUnderAudit>
 
     init {
         contestsUA.forEach {
@@ -22,7 +24,7 @@ class PollingWithManifestIds(
         // phantoms can be CVRs, so dont need CvrIF.
         // val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val prng = Prng(auditConfig.seed)
-        ballots.forEach { it.sampleNum = prng.next() }
+        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit( it, prng.next()) }
 
         contestsUA.forEach { contest ->
             contest.makePollingAssertions()
@@ -40,15 +42,15 @@ class PollingWithManifestIds(
         // standard: Uses PollWithoutReplacement, then mvr = cvrs
         // alternative: Uses SimContest to simulate a contest with the same vote totals.
         val sampleSizer = EstimateSampleSize(auditConfig)
-        contestsUA.forEach { contestUA -> sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.ncvrs, round) }
+        contestsUA.filter{ !it.done }.forEach { contestUA -> sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.ncvrs, round) }
         val maxContestSize =  contestsUA.map { it.estSampleSize }.max()
 
         // choose samples
-        val sampleIndices = consistentPollingSampling(contestsUA, ballots)
+        val sampleIndices = consistentPollingSampling(contestsUA.filter{ !it.done }, ballotsUA, ballotManifest)
 
         // STYLISH 4 a,b; maybe only works when sampleThreshold is set. In any case, not needed here, since we have sampleIndices
         // val computeSize = finder.computeSampleSizePolling(contestsUA, ballots)
-        println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+        println(" chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
 
         return sampleIndices
     }
@@ -56,15 +58,18 @@ class PollingWithManifestIds(
 /////////////////////////////////////////////////////////////////////////////////
 
     fun runAudit(mvrs: List<Cvr>): Boolean {
-        // TODO could parellelize across assertions
         var allDone = true
         contestsUA.forEach { contestUA ->
-            contestUA.pollingAssertions.forEach { assertion ->
+            var allAssertionsDone = true
+            contestUA.pollingAssertions.forEach {
+                assertion ->
                 if (!assertion.proved) {
-                    val done = auditOneAssertion(contestUA, assertion, mvrs)
-                    allDone = allDone && done
+                    assertion.status = auditOneAssertion(contestUA, assertion, mvrs)
+                    allAssertionsDone = allAssertionsDone && (assertion.status != TestH0Status.LimitReached)
                 }
             }
+            contestUA.done = allAssertionsDone
+            allDone = allDone && contestUA.done
         }
         return allDone
     }
@@ -73,7 +78,7 @@ class PollingWithManifestIds(
         contestUA: ContestUnderAudit,
         assertion: Assertion,
         cvrs: List<Cvr>,
-    ): Boolean {
+    ): TestH0Status {
         val assorter = assertion.assorter
         val sampler = if (auditConfig.fuzzPct == null) {
             PollWithoutReplacement(contestUA, cvrs, assorter)
@@ -110,7 +115,7 @@ class PollingWithManifestIds(
             assertion.samplesNeeded = testH0Result.sampleCount
         }
         println("runOneAssertionAudit: $assertion, status = ${testH0Result.status}")
-        return (testH0Result.status == TestH0Status.StatRejectNull)
+        return testH0Result.status
     }
 
 }

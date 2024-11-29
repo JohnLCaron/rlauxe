@@ -1,9 +1,13 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.sampling.ComparisonSamplerGen
+import org.cryptobiotic.rlauxe.sampling.EstimateSampleSize
+import org.cryptobiotic.rlauxe.sampling.consistentCvrSampling
+import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 
 // STYLISH 2.1

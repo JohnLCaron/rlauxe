@@ -1,13 +1,15 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.sampling.ComparisonSamplerSimulation
+import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestComparisonWorkflow {
+class TestComparisonWithCompleteCvrs {
 
     @Test
     fun testComparisonWorkflow() {

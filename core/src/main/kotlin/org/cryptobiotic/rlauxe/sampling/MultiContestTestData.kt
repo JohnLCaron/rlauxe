@@ -47,7 +47,7 @@ data class MultiContestTestData(
             val contestIds = contestIndexes.map { fcontests[it].info.id }
             val ncards = (totalBallots.toDouble() / nballotStyles).toInt()
             countBallots += ncards
-            BallotStyle(contestList, contestIds, ncards)
+            BallotStyle.make(contestList, contestIds, ncards)
         }
         countCards()
     }
@@ -65,12 +65,12 @@ data class MultiContestTestData(
         return fcontests.map { it.makeContest() }
     }
 
-    fun makeBallots(): List<BallotWithStyle> {
-        val result = mutableListOf<BallotWithStyle>()
+    fun makeBallots(): List<Ballot> {
+        val result = mutableListOf<Ballot>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->
             repeat(ballotStyle.ncards) {
-                result.add(BallotWithStyle("ballot$ballotId", ballotStyle))
+                result.add(Ballot("ballot$ballotId", false, ballotStyle.id))
                 ballotId++
             }
         }

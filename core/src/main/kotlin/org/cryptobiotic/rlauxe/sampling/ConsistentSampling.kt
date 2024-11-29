@@ -104,7 +104,8 @@ fun consistentCvrSampling(
 
 fun consistentPollingSampling(
     contests: List<ContestUnderAudit>, // all the contests you want to sample
-    ballots: List<BallotWithStyle>, // all the ballots available to sample
+    ballots: List<BallotUnderAudit>, // all the ballots available to sample
+    ballotManifest: BallotManifest,
 ): List<Int> {
     if (ballots.isEmpty()) return emptyList()
 
@@ -121,13 +122,14 @@ fun consistentPollingSampling(
         // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
         val ballot = ballots[sidx]
+        val ballotStyle = ballotManifest.getBallotStyleFor(ballot.ballot.ballotStyleId!!)
         // does this cvr contribute to one or more contests that need more samples?
-        if (contests.any { contestInProgress(it) && ballot.hasContest(it.id) }) {
+        if (contests.any { contestInProgress(it) && ballotStyle.hasContest(it.id) }) {
             // then use it
             sampledIndices.add(sidx)
             ballot.sampled = true
             // contests.forEach { contest ->
-                ballot.ballotStyle.contestIds.forEach {
+                ballotStyle.contestIds.forEach {
                     currentSizes[it] = currentSizes[it]?.plus(1) ?: 1
                 }
                /* if (contestInProgress(contest) && ballot.hasContest(contest.id)) {
@@ -139,7 +141,7 @@ fun consistentPollingSampling(
         inx++
     }
     contests.forEach { contest ->
-        if (show) println("${contest.name} wanted= ${contest.estSampleSize} actual=${currentSizes[contest.id]}")
+        if (show) println("${contest.name} margin=${contest.minPollingAssertion().margin} wanted=${contest.estSampleSize} actual=${currentSizes[contest.id]}")
         contest.actualAvailable = currentSizes[contest.id]!!
     }
     return sampledIndices

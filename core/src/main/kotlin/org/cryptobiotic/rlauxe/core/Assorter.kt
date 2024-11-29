@@ -86,7 +86,9 @@ data class Assertion(
     val loser = assorter.loser()
     val margin = assorter.reportedMargin()
 
-    var proved = false // TODO is it ok to have this state ??
+    // TODO is it ok to have this state ??
+    var status = TestH0Status.NotStarted
+    var proved = false
     var samplesEst = 0
     var samplesNeeded = 0
 

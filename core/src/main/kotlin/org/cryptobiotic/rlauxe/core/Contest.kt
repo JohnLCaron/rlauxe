@@ -73,6 +73,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     val id = contest.id
     val name = contest.name
     var Nc = contest.Nc
+    var done = false
 
     constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
 

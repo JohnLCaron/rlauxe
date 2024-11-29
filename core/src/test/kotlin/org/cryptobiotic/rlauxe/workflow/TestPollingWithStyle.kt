@@ -1,14 +1,17 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.sampling.BallotManifest
+import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestPollingWithManifestIds {
+class TestPollingWithStyle {
 
     @Test
-    fun testPollingWorkflow() {
+    fun testPollingWithStyle() {
         val stopwatch = Stopwatch()
         val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
 
@@ -24,7 +27,7 @@ class TestPollingWithManifestIds {
         // fuzzPct of the Mvrs have their votes randomly changes ("fuzzed")
         val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
-        val workflow = PollingWithManifestIds(auditConfig, contests, ballots)
+        val workflow = PollingWithStyle(auditConfig, contests, BallotManifest(ballots, test.ballotStyles))
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 
@@ -33,7 +36,7 @@ class TestPollingWithManifestIds {
         var round = 0
         while (!done) {
             val indices = workflow.chooseSamples(prevMvrs, round)
-            println("$round chooseSamples ${indices.size} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)}\n")
+            println("round $round took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             // println("$round samples=${indices}")
             stopwatch.start()
 
@@ -42,7 +45,7 @@ class TestPollingWithManifestIds {
             }
 
             done = workflow.runAudit(sampledMvrs)
-            println("$round runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            println("round $round runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             round++
         }

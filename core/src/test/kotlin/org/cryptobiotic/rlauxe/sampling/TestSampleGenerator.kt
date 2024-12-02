@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestGenSampleFn {
+class TestSampleGenerator {
 
     @Test
     fun testSampleMeans() {
@@ -210,7 +210,7 @@ class TestGenSampleFn {
 
 }
 
-fun testLimits(sampler: GenSampleFn, nsamples: Int, upper: Double) {
+fun testLimits(sampler: SampleGenerator, nsamples: Int, upper: Double) {
     repeat(nsamples) {
         val ss = sampler.sample()
         assertTrue(ss >= 0)
@@ -218,7 +218,7 @@ fun testLimits(sampler: GenSampleFn, nsamples: Int, upper: Double) {
     }
 }
 
-fun countAssortValues(sampler: GenSampleFn, nsamples: Int, assortValue: Double): Int {
+fun countAssortValues(sampler: SampleGenerator, nsamples: Int, assortValue: Double): Int {
     sampler.reset()
     var count = 0
     repeat(nsamples) {

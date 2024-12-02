@@ -130,4 +130,11 @@ class TestCvrs {
 //        assertContains(m, "wrong contest winners= [1]")
     }
 
+    @Test
+    fun testMargin2mean() {
+        //  contest1 margin=0.1573 wanted=571 sample=10823
+        val margin = .1575
+        assertEquals(.578, margin2mean(margin), .01)
+    }
+
 }

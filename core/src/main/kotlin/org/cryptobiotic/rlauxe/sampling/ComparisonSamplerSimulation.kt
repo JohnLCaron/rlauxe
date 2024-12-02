@@ -11,19 +11,20 @@ private val show = true
 // create internal cvr and mvr with the correct under/over statements.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerSimulation(
-        rcvrs: List<CvrUnderAudit>,
+        rcvrs: List<Cvr>,
         val contestUA: ContestUnderAudit,
         val cassorter: ComparisonAssorter,
-        val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; voted for winner, cvr has loser
-    ): GenSampleFn {
+        errorRates: List<Double>,
+    ): SampleGenerator {
+    val p1: Double = errorRates[0] // apriori rate of 1-vote overstatements; voted for other, cvr has winner
+    val p2: Double = errorRates[1] // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
+    val p3: Double = errorRates[2] // apriori rate of 1-vote understatements; voted for winner, cvr has other
+    val p4: Double = errorRates[3] // apriori rate of 2-vote understatements; voted for winner, cvr has loser
 
     val N = rcvrs.size
     val isIRV = contestUA.contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
-    val cvrs: List<CvrUnderAudit>
+    val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()
 
     val permutedIndex = MutableList(N) { it }
@@ -42,8 +43,8 @@ class ComparisonSamplerSimulation(
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
         val mmvrs = mutableListOf<Cvr>()
-        rcvrs.forEach{ mmvrs.add(it.cvr) }
-        val ccvrs = mutableListOf<CvrUnderAudit>()
+        rcvrs.forEach{ mmvrs.add(it) }
+        val ccvrs = mutableListOf<Cvr>()
         ccvrs.addAll(rcvrs)
 
         flippedVotes1 = flip1votes(mmvrs, needToChange = (N * p1).toInt())
@@ -243,7 +244,7 @@ class ComparisonSamplerSimulation(
     }
 
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1). have to change cvr to other
-    fun flip3votesP(mcvrs: MutableList<Cvr>, cvrs: MutableList<CvrUnderAudit>, needToChange: Int): Int {
+    fun flip3votesP(mcvrs: MutableList<Cvr>, cvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val otherCandidate = max(cassorter.assorter.winner(), cassorter.assorter.loser()) + 1
@@ -263,7 +264,7 @@ class ComparisonSamplerSimulation(
                     cassorter.bassort(mvr, alteredCvr)
                 }
                 require(cassorter.bassort(mvr, alteredCvr) == 1.5 * cassorter.noerror)
-                cvrs[cardIdx] = CvrUnderAudit(alteredCvr) // Note we are changing the cvr, not the mvr
+                cvrs[cardIdx] = alteredCvr // Note we are changing the cvr, not the mvr
                 changed++
             }
             cardIdx++

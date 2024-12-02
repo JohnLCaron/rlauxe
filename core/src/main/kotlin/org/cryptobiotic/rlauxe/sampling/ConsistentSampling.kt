@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Prng
+import org.cryptobiotic.rlauxe.util.df
 
 //// Adapted from SHANGRLA Audit.py
 
@@ -80,8 +81,8 @@ fun consistentCvrSampling(
 
     val sampledIndices = mutableListOf<Int>()
     var inx = 0
-    // while we need more samples
-    while (contests.any { contestInProgress(it) }) {
+    // while we need more samples TODO detect when we run out of samples
+    while (contests.any { contestInProgress(it) } && inx < sortedCvrIndices.size) {
         // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
         val cvr = cvrList[sidx]
@@ -91,13 +92,22 @@ fun consistentCvrSampling(
             sampledIndices.add(sidx)
             cvr.sampled = true
             contests.forEach { contest ->
-                if (contestInProgress(contest) && cvr.hasContest(contest.id)) {
-                    // contest.sampleThreshold = cvr.sampleNum // track the largest sample used
+                if (cvr.hasContest(contest.id)) {
                     currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
                 }
             }
         }
         inx++
+    }
+    if (inx == sortedCvrIndices.size) {
+        println("ran out of samples!!")
+    }
+    contests.forEach { contest ->
+        if (currentSizes[contest.id] == null)
+            println("hey")
+        contest.availableInSample = currentSizes[contest.id]!!
+        if (show) println(" ${contest} minMargin=${df(contest.minComparisonAssertion()?.margin ?: 0.0)} " +
+                "availableInSample=${contest.availableInSample}")
     }
     return sampledIndices
 }
@@ -128,21 +138,16 @@ fun consistentPollingSampling(
             // then use it
             sampledIndices.add(sidx)
             ballot.sampled = true
-            // contests.forEach { contest ->
-                ballotStyle.contestIds.forEach {
-                    currentSizes[it] = currentSizes[it]?.plus(1) ?: 1
-                }
-               /* if (contestInProgress(contest) && ballot.hasContest(contest.id)) {
-                    contest.sampleThreshold = ballot.sampleNum // track the largest sample used.
-                    currentSizes[contest.id] = currentSizes[contest.id]?.plus(1) ?: 1
-                } */
-            //}
+            ballotStyle.contestIds.forEach {
+                currentSizes[it] = currentSizes[it]?.plus(1) ?: 1
+            }
         }
         inx++
     }
     contests.forEach { contest ->
-        if (show) println("${contest.name} margin=${contest.minPollingAssertion().margin} wanted=${contest.estSampleSize} actual=${currentSizes[contest.id]}")
-        contest.actualAvailable = currentSizes[contest.id]!!
+        contest.availableInSample = currentSizes[contest.id]!!
+        if (show) println(" consistentPollingSampling ${contest} margin=${df(contest.minPollingAssertion()?.margin ?: 0.0)} " +
+                "sample=${contest.availableInSample}")
     }
     return sampledIndices
 }

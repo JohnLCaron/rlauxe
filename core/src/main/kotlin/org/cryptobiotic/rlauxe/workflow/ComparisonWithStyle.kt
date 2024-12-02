@@ -4,10 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.sampling.ComparisonSamplerGen
-import org.cryptobiotic.rlauxe.sampling.EstimateSampleSize
-import org.cryptobiotic.rlauxe.sampling.consistentCvrSampling
-import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
+import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 
 // STYLISH 2.1
@@ -24,7 +21,7 @@ import org.cryptobiotic.rlauxe.util.*
 //	c) Read ballot manifest.
 //	d) Read CVRs.
 
-class ComparisonWithCompleteCvrs(
+class ComparisonWithStyle(
     contests: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val auditConfig: AuditConfig,
@@ -42,7 +39,8 @@ class ComparisonWithCompleteCvrs(
         //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
         //	d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
         //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
-        contestsUA = tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)
+
+        contestsUA = (tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
             // it.Nc = upperBounds[it.contest.id]!!
             //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
@@ -59,8 +57,9 @@ class ComparisonWithCompleteCvrs(
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
-        contestsUA.forEach { contest ->
+        contestsUA.filter{ !it.done }.forEach { contest ->
             contest.makeComparisonAssertions(cvrsUA)
+            // TODO apply minMargin ?? maybe handled by failPct?
         }
     }
 
@@ -73,12 +72,15 @@ class ComparisonWithCompleteCvrs(
      * @parameter mvrs: use existing mvrs to estimate samples. may be empty.
      */
     fun chooseSamples(prevMvrs: List<CvrIF>, round: Int): List<Int> {
-        // contestsUA.forEach { it.sampleThreshold = 0L } // need to reset this each round
-        // val maxContestSize = simulateSampleSizes(auditConfig, contestsUA, cvrsUA, prevMvrs, round)
 
-        val finder = EstimateSampleSize(auditConfig)
-        contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round, true) }
-        val maxContestSize = contestsUA.map { it.estSampleSize }.max()
+        println("EstimateSampleSize.simulateSampleSizeComparisonContest round $round")
+        val sampleSizer = EstimateSampleSize(auditConfig)
+        val contestsNotDone = contestsUA.filter{ !it.done }
+        contestsNotDone.forEach { contestUA ->
+            sampleSizer.simulateSampleSizeComparisonContest(contestUA, cvrs, prevMvrs, round, show=true)
+        }
+        println()
+        val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
 
         // TODO should we know max sampling percent? or is it an absolute number?
         //   should there be a minimum increment?? esp if its going to end up hand-counted?
@@ -86,50 +88,12 @@ class ComparisonWithCompleteCvrs(
 
         //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         //     draws random ballots by consistent sampling, and returns their locations to the auditors.
-        val sampleIndices = consistentCvrSampling(contestsUA, cvrsUA)
-        println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+        println("consistentCvrSampling round $round")
+        val sampleIndices = consistentCvrSampling(contestsUA.filter{ !it.done }, cvrsUA)
+        println(" ComparisonWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
 
         return sampleIndices
     }
-
-    /* TODO somehow est is much higher than actual
-    // TODO what forces this to a higher count on subsequent rounds ?? the overstatements in the mvrs ??
-    fun simulateSampleSizesOld(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>, mvrs: List<CvrIF>, round: Int): Int {
-        val stopwatch = Stopwatch()
-        // TODO could parellelize
-        val finder = FindSampleSize(auditConfig)
-        contestsUA.forEach { contestUA ->
-            val sampleSizes = mutableListOf<Int>()
-            contestUA.comparisonAssertions.map { assert ->
-                if (!assert.proved) {
-                    val result = finder.simulateSampleSize(contestUA, assert.assorter, cvrs,)
-                    if (showQuantiles) {
-                        print("   quantiles: ")
-                        repeat(9) {
-                            val quantile = .1 * (1 + it)
-                            print("${df(quantile)} = ${result.findQuantile(quantile)}, ")
-                        }
-                        println()
-                    }
-                    val size = result.findQuantile(auditConfig.quantile)
-                    assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
-                    sampleSizes.add(assert.samplesEst)
-                    println("simulateSampleSizes at ${100*auditConfig.quantile}% quantile: ${assert} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
-                    // println("  errorRates % = [${result.errorRates()}]")
-                }
-            }
-            contestUA.estSampleSize = sampleSizes.max()
-        }
-
-        // AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is when you just want the
-        // total_size estimate, but not do the consistent sampling.
-        //val computeSize = finder.computeSampleSize(contestsUA, cvrs)
-        //println(" computeSize=$computeSize consistentSamplingSize= ${samples.size}")
-
-        return contestsUA.map { it.estSampleSize }.max()
-    }
-
-     */
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>): Boolean {
@@ -143,6 +107,7 @@ class ComparisonWithCompleteCvrs(
         //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
         //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
+        val contestsNotDone = contestsUA.filter{ !it.done }
         val sampledCvrs = sampleIndices.map { cvrsUA[it] }
 
         // prove that sampledCvrs correspond to mvrs
@@ -151,18 +116,31 @@ class ComparisonWithCompleteCvrs(
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize across assertions
+        println("runOneAssertionAudit")
         var allDone = true
-        contestsUA.forEach { contestUA ->
+        contestsNotDone.forEach { contestUA ->
+            var allAssertionsDone = true
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    val done = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs)
-                    allDone = allDone && done
-                    // simulateSampleSize(auditConfig, contestUA, assertion, cvrPairs)
-                    // println()
+                    assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs)
+                    allAssertionsDone = allAssertionsDone && (assertion.status != TestH0Status.LimitReached)
                 }
+                if (allAssertionsDone) {
+                    contestUA.done = true
+                    contestUA.status = TestH0Status.StatRejectNull
+                }
+                allDone = allDone && contestUA.done
             }
         }
         return allDone
+    }
+
+    fun showResults() {
+        println("Audit results")
+        contestsUA.forEach{ contest ->
+            println(" $contest minMargin=${df(contest.minComparisonAssertion()?.margin ?: 0.0)} status=${contest.status}")
+        }
+        println()
     }
 }
 
@@ -192,8 +170,9 @@ fun tabulateVotes(contests: List<Contest>, cvrs: List<CvrIF>): List<ContestUnder
         if (contest == null) throw RuntimeException("no contest for contest id= $conId")
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
-        checkWinners(contest, accumVotes)
-        ContestUnderAudit(contest, nc)// nc vs ncvrs ??
+        val contestUA = ContestUnderAudit(contest, nc)// nc vs ncvrs ??
+        checkWinners(contestUA, accumVotes)
+        contestUA
     }
 }
 
@@ -216,27 +195,53 @@ fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>
         }
     }
     return allVotes.keys.map { conId ->
-        val contest = contests.find { it.id == conId }
-        if (contest == null) throw RuntimeException("no contest for contest id= $conId")
+        val contestUA = contests.find { it.id == conId }
+        if (contestUA == null) throw RuntimeException("no contest for contest id= $conId")
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
-        checkWinners(contest.contest, accumVotes)
-        contest.ncvrs = nc
-        contest
+        checkWinners(contestUA, accumVotes)
+        contestUA.ncvrs = nc
+        contestUA
     }
 }
 
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
-fun checkWinners(contest: Contest, accumVotes: Map<Int, Int>): Boolean {
-    val sortedMap: List<Map.Entry<Int, Int>> = accumVotes.entries.sortedByDescending { it.value }
+fun checkWinners(contestUA: ContestUnderAudit, accumVotes: Map<Int, Int>) {
+    val sortedVotes: List<Map.Entry<Int, Int>> = accumVotes.entries.sortedByDescending { it.value }
+    val contest = contestUA.contest
     val nwinners = contest.winners.size
-    contest.winners.forEach { candidate -> // TODO clumsy
-        val s = sortedMap.find { it.key == candidate }
-        val si = sortedMap.indexOf(s)
-        if (si < 0) throw RuntimeException("contest winner= ${candidate} not found in cvrs")
-        if (si >= nwinners) throw RuntimeException("wrong contest winners= ${contest.winners}")
+
+    // make sure that the winners are unique
+    val winnerSet = mutableSetOf<Int>()
+    winnerSet.addAll(contest.winners)
+    if (winnerSet.size != contest.winners.size) {
+        println("winners in contest ${contest} have duplicates")
+        contestUA.done = true
+        contestUA.status = TestH0Status.ContestMisformed
+        return
     }
-    return true
+
+    // see if theres a tie
+    val winnerMin: Int = sortedVotes.take(nwinners).map{ it.value }.min()
+    if (sortedVotes.size > nwinners) {
+        val firstLoser = sortedVotes[nwinners]
+        if (firstLoser.value == winnerMin ) {
+            println("tie in contest ${contest}")
+            contestUA.done = true
+            contestUA.status = TestH0Status.MinMargin
+            return
+        }
+    }
+
+    // check that the top nwinners are in winners list
+    sortedVotes.take(nwinners).forEach { (candId, vote) ->
+        if (!contest.winners.contains(candId)) {
+            println("winners ${contest.winners} does not contain candidateId $candId")
+            contestUA.done = true
+            contestUA.status = TestH0Status.ContestMisformed
+            return
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -251,21 +256,21 @@ fun runOneAssertionAudit(
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
     cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
-): Boolean {
+): TestH0Status {
     val assorter = assertion.assorter
-
     val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = false)
 
+    val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,
         withoutReplacement = true,
         a = assorter.noerror,
         d1 = auditConfig.d1,
         d2 = auditConfig.d2,
-        p1 = auditConfig.p1,
-        p2 = auditConfig.p2,
-        p3 = auditConfig.p3,
-        p4 = auditConfig.p4,
+        p1 = errorRates[0],
+        p2 = errorRates[1],
+        p3 = errorRates[2],
+        p4 = errorRates[3],
     )
     val testFn = BettingMart(
         bettingFn = optimal,
@@ -275,72 +280,18 @@ fun runOneAssertionAudit(
         withoutReplacement = true
     )
 
-    val testH0Result = testFn.testH0(contestUA.estSampleSize, terminateOnNullReject = true) { sampler.sample() }
-    if (testH0Result.status == TestH0Status.StatRejectNull) {
+    // do not terminate on null retject, continue to use all samples
+    val testH0Result = testFn.testH0(contestUA.availableInSample, terminateOnNullReject = false) { sampler.sample() }
+    if (!testH0Result.status.fail) {
         assertion.proved = true
-        assertion.samplesNeeded = testH0Result.sampleCount
+    } else {
+        println("testH0Result.status = ${testH0Result.status}")
     }
+    assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit }
+    assertion.samplesUsed = testH0Result.sampleCount
     assertion.pvalue = testH0Result.pvalues.last()
-    println("runOneAssertionAudit: $assertion, status = ${testH0Result.status}")
-    return (testH0Result.status == TestH0Status.StatRejectNull)
+
+    println(" ${contestUA.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue = ${assertion.pvalue} status = ${testH0Result.status}")
+
+    return testH0Result.status
 }
-/*
-fun simulateSampleSize(
-    auditConfig: AuditConfig,
-    contest: ContestUnderAudit,
-    assertion: ComparisonAssertion,
-    cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
-) {
-    val assorter = assertion.assorter
-
-    val samples = PrevSamplesWithRates(assorter.noerror)
-    cvrPairs.forEach { (mvr, cvr) -> samples.addSample(assorter.bassort(mvr,cvr)) }
-    println("simulateSampleSize ${assorter.name()} samplingErrors= ${samples.samplingErrors()}")
-
-    val cvrs = cvrPairs.map { it.second }
-    val sampler = ComparisonSamplerSimulation(
-        cvrs, contest, assorter,
-        p1 = auditConfig.p1, p2 = auditConfig.p2, p3 = auditConfig.p3, p4 = auditConfig.p4
-    )
-    // println("${sampler.showFlips()}")
-
-    val optimal = AdaptiveComparison(
-        Nc = contest.Nc,
-        withoutReplacement = true,
-        a = assorter.noerror,
-        d1 = auditConfig.d1,
-        d2 = auditConfig.d2,
-        p1 = auditConfig.p1,
-        p2 = auditConfig.p2,
-        p3 = auditConfig.p3,
-        p4 = auditConfig.p4,
-    )
-    val testFn = BettingMart(
-        bettingFn = optimal,
-        Nc = contest.Nc,
-        noerror = assorter.noerror,
-        upperBound = assorter.upperBound,
-        withoutReplacement = false,
-    )
-
-    val result: RunTestRepeatedResult = runTestRepeated(
-        drawSample = sampler,
-        maxSamples = cvrPairs.size,
-        ntrials = auditConfig.ntrials,
-        testFn = testFn,
-        testParameters = mapOf(
-            "p1" to optimal.p1,
-            "p2" to optimal.p2,
-            "p3" to optimal.p3,
-            "p4" to optimal.p4,
-            "margin" to assorter.margin
-        ),
-        showDetails = false,
-    )
-    val size = result.findQuantile(auditConfig.quantile)
-    println("simulateSampleSize: ${assorter.name()} margin=${df(assorter.margin)} ${100*auditConfig.quantile}% quantile = $size " +
-            "actual= ${assertion.samplesNeeded} ${cumul(result.sampleCount, assertion.samplesNeeded)}%")
-    // println("  errorRate % = [${result.errorRates()}]")
-}
-
- */

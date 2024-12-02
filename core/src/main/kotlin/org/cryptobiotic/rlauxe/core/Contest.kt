@@ -6,7 +6,7 @@ import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
 
-/** pre election information **/
+/** pre-election information **/
 data class ContestInfo(
     val name: String,
     val id: Int,
@@ -21,10 +21,14 @@ data class ContestInfo(
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
         candidateIds = candidateNames.toList().map { it.second }
     }
+
+    override fun toString() = buildString {
+        append("${name} ($id) ncands=${candidateIds.size}")
+    }
 }
 
 /**
- * Contest and the reported results
+ * Contest with the reported results
  * @parameter votes: candidateId -> reported number of votes. keys must be in contest.candidateIds, though zeros may be ommitted
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  */
@@ -36,7 +40,6 @@ data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int)
     val winnerNames: List<String>
     val winners: List<Int>
     val losers: List<Int>
-    // var margin = 0.0 // temp debug
 
     init {
         votes.forEach {
@@ -63,29 +66,35 @@ data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int)
         }
         losers = mlosers.toList()
     }
+
+    override fun toString() = buildString {
+        append("${info} Nc= $Nc votes=${votes}")
+    }
 }
 
 /**
  * Mutable form of Contest.
- * @parameter ncvrs: count of cvrs for this contest // WHY?
+ * @parameter ncvrs: count of cvrs for this contest
  */
 open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     val id = contest.id
     val name = contest.name
-    var Nc = contest.Nc
-    var done = false
+    val ncandidates = contest.info.candidateIds.size
 
-    constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
-
-    var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
-    // var sampleThreshold = 0L // highest sample.sampleNum for this contest, used when running the audit, to include only mvrs needed
-    var actualAvailable = 0 // number of samples available in the current consistent sampling based on estSampleSize
+    var Nc = contest.Nc // TODO
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
+    var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
+    var availableInSample = 0 // number of samples available in the current consistent sampling based on estSampleSize
+    var done = false
+    var status = TestH0Status.NotStarted // or its own enum ??
+
+    constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
+
     override fun toString() = buildString {
-        append("contest: ${contest.info.name} ($id) ncvrs = $ncvrs")
+        append("${contest.info.name} ($id) ncvrs=$ncvrs est=$estSampleSize")
     }
 
     open fun makePollingAssertions(): ContestUnderAudit {
@@ -110,7 +119,6 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
         return assertions
     }
 
-    // needed
     fun makeSuperMajorityAssertions(): List<Assertion> {
         // each winner generates 1 assertion. SHANGRLA 2.3
         val assertions = mutableListOf<Assertion>()
@@ -142,15 +150,15 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
         return this
     }
 
-    fun minComparisonAssertion(): ComparisonAssertion {
+    fun minComparisonAssertion(): ComparisonAssertion? {
         val margins = comparisonAssertions.map { it.assorter.margin }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.assorter.margin == minMargin }!!
+        return comparisonAssertions.find { it.assorter.margin == minMargin }
     }
 
-    fun minPollingAssertion(): Assertion {
+    fun minPollingAssertion(): Assertion? {
         val margins = pollingAssertions.map { it.margin }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return pollingAssertions.find { it.margin == minMargin }!!
+        return pollingAssertions.find { it.margin == minMargin }
     }
 }

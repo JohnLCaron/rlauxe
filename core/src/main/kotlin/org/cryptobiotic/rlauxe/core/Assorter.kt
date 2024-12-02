@@ -91,8 +91,9 @@ data class Assertion(
     var proved = false
     var samplesEst = 0
     var samplesNeeded = 0
+    var pvalue = 0.0
 
-    override fun toString() = "Assertion for '${contest.info.name}' (${contest.id}) assorter=${assorter.desc()} margin=$margin"
+    override fun toString() = "'${contest.info.name}' (${contest.id}) ${assorter.desc()} margin=$margin"
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -119,6 +120,9 @@ data class ComparisonAssorter(
 
     init {
         if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
+            if (avgCvrAssortValue <= 0.5) {
+                println("avgCvrAssortValue")
+            }
             require(avgCvrAssortValue > 0.5) { "($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "($noerror) noerror must be > .5" }
         }
@@ -203,9 +207,13 @@ class ComparisonAssertion(
     val avgCvrAssortValue = assorter.avgCvrAssortValue
     val margin = assorter.margin
 
-    var proved = false // TODO is it ok to have this state ??
+    // TODO is it ok to have this state ??
+    var status = TestH0Status.NotStarted
+    var proved = false
+    var estSampleSize = 0  // estimated sample size
+    var samplesNeeded = 0 // sample count when pvalue < riskLimit
+    var samplesUsed = 0 // sample count when testH0 terminates
     var pvalue = 0.0
-    var samplesEst = 0
-    var samplesNeeded = 0
-    override fun toString() = "${assorter.name()} margin=${df(assorter.margin)} samplesEst=$samplesEst samplesNeeded=$samplesNeeded"
+
+    override fun toString() = "${assorter.name()} margin=${df(assorter.margin)} estSampleSize=$estSampleSize"
 }

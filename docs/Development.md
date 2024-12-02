@@ -1,5 +1,5 @@
 # Development
-last changed: 11/25/2024
+last changed: 12/02/2024
 
 ## TODO
 
@@ -71,3 +71,17 @@ A PostGres DB that you have to trust.
 Theres not a problem using a DB, but you should be able to recreate it from the raw data.
 
 OTOH the RLA should detect a compromised DB?
+
+## Classes
+
+### core
+Samples       // keeps track of the latest sample, number of samples, and the sample sum.
+
+### sampling
+ComparisonSamplerSimulation // create internal cvr and mvr with the correct under/over statements. specific to a contest. only used for estimating the sample size
+ConstistentSampling
+EstimateSampleSize
+FuzzSampler           // this takes a list of cvrs and fuzzes them. Version for Sampling and Polling. 
+                      // fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
+MultiContestTestData  // creates a set of contests and ballotStyles, with randomly chosen candidates and margins. create cvrs that reflect the contests' exact votes.
+SampleGenerator           // abstraction for creating a sequence of samples. mostly superceded, mostly for testing.

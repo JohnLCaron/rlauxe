@@ -34,10 +34,11 @@ class BettingMart(
 
         // keep series for debugging, remove for production
         val xs = mutableListOf<Double>()
-        val pvalues = mutableListOf<Double>()
+        val etas = mutableListOf<Double>()
         val bets = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
         val testStatistics = mutableListOf<Double>()
+        val pvalues = mutableListOf<Double>()
 
         while (sampleNumber < maxSample) {
             val xj: Double = drawSample()
@@ -51,6 +52,11 @@ class BettingMart(
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
+            val eta = lamToEta(lamj, upperBound, mj)
+            if (etaToLam(eta, upperBound, mj) != lamj) {
+                etaToLam(eta, upperBound, mj)
+            }
+            etas.add(eta)
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
@@ -96,12 +102,18 @@ class BettingMart(
             println("Tjs = ${testStatistics}")
         }
 
+        val pvalue = pvalues.last()
         val status = when {
+            (pvalue < riskLimit) -> TestH0Status.StatRejectNull
             (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
             (mj > upperBound) -> TestH0Status.AcceptNull
             else -> {
-                val pvalue = pvalues.last()
-                if (pvalue < riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
+                val xr = xs.reversed() // debugging
+                val retas = etas.reversed()
+                val rbets = bets.reversed()
+                val rtjs = tjs.reversed()
+                val rTjs = testStatistics.reversed()
+                TestH0Status.LimitReached
             }
         }
 

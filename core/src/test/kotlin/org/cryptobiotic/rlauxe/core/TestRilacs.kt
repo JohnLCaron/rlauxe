@@ -1,11 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.sampling.GenSampleFn
-import org.cryptobiotic.rlauxe.sampling.SampleFromArrayWithoutReplacement
-import org.cryptobiotic.rlauxe.util.*
-import org.junit.jupiter.api.Test
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import kotlin.math.max
-import kotlin.test.assertTrue
 
 class TestRilacs {
 
@@ -70,7 +66,7 @@ class TestRilacs {
      */
 
     fun doOne(
-        drawSample: GenSampleFn,
+        drawSample: SampleGenerator,
         maxSamples: Int,
         eta0: Double,
         d: Int = 100,

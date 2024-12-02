@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import kotlin.math.max
@@ -38,7 +38,7 @@ class TestAlphaMartComparison {
 }
 
 fun doOneAlphaMartRun(
-    drawSample: GenSampleFn,
+    drawSample: SampleGenerator,
     maxSamples: Int,
     eta0: Double,
     d: Int,

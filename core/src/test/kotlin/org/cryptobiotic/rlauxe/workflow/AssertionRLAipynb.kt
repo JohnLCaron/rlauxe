@@ -619,9 +619,9 @@ fun replicate_p_values(
 
 
     val contest = contests.first()
-    val minAssorter = contest.minComparisonAssertion().assorter // the one with the smallest margin
+    val minAssorter = contest.minComparisonAssertion()!!.assorter // the one with the smallest margin
 
-    val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
+    val sampler: SampleGenerator = ComparisonNoErrors(cvrs, minAssorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
@@ -650,9 +650,9 @@ fun calc_sample_sizes(
     //val minAssorter = minAssertion.assorter
 
     val contest = contests.first()
-    val minAssorter = contest.minComparisonAssertion().assorter // the one with the smallest margin
+    val minAssorter = contest.minComparisonAssertion()!!.assorter // the one with the smallest margin
 
-    val sampler: GenSampleFn = ComparisonNoErrors(cvrs, minAssorter)
+    val sampler: SampleGenerator = ComparisonNoErrors(cvrs, minAssorter)
 
     // class AdaptiveComparison(
     //    val N: Int,

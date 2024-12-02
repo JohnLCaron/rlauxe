@@ -22,32 +22,42 @@ private val debug = false
 // It can create cvrs that reflect the contests' exact votes.
 data class MultiContestTestData(
     val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
-    val debug: Boolean = false, val minMargin: Double = 0.005,
+    val debug: Boolean = false, val minMargin: Double = 0.01,
 ) {
     val fcontests: List<TestContest>
     val ballotStyles: List<BallotStyle>
+    val partition = partition(totalBallots, nballotStyles) // ncards in each ballot style
     var countBallots = 0
 
     init {
-        // between 2 and 4 candidates, margin random number between minMargin and minMargin + .02
+        require(ncontest > 0)
+        require(nballotStyles > 0)
+        require(totalBallots > nballotStyles * ncontest) // TODO
+
+        // between 2 and 4 candidates, margin is a random number between minMargin and minMargin + .02
         fcontests = List(ncontest) { it }.map {
             val ncands = max(Random.nextInt(5), 2)
             TestContest(it, ncands, minMargin + Random.nextDouble(0.2))
         }
 
-        // between 1 and ncontest contests, randomly chosen
-        ballotStyles = List(nballotStyles) { it }.map {
-            val ncInStyle = if (ncontest == 1) 1 else
-                1 + Random.nextInt(ncontest - 1) // TODO use a power law distribution (weighted to small values) ? more realistic ??
-            val contestIndexes = mutableSetOf<Int>()
-            while (contestIndexes.size < ncInStyle) {
-                contestIndexes.add(Random.nextInt(ncontest))
+        // every contest is in between 1 and nballotStyles/4 ballot styles, randomly chosen
+        val contestBs = mutableMapOf<TestContest, Set<Int>>()
+        fcontests.forEach{
+            val nbs = if (nballotStyles < 4) 1 + Random.nextInt(nballotStyles) else 1 + Random.nextInt(nballotStyles/4)
+            val bset = mutableSetOf<Int>() // the ballot style id, 0 based
+            while (bset.size < nbs) { // randomly choose nbs ballot styles
+                bset.add(Random.nextInt(nballotStyles))
             }
-            val contestList = contestIndexes.map { fcontests[it].info.name }
-            val contestIds = contestIndexes.map { fcontests[it].info.id }
-            val ncards = (totalBallots.toDouble() / nballotStyles).toInt()
+            contestBs[it] = bset
+        }
+
+        ballotStyles = List(nballotStyles) { it }.map {
+            val contestsForThisBs = contestBs.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
+            val contestList = contestsForThisBs.map { it.info.name }
+            val contestIds = contestsForThisBs.map { it.info.id }
+            val ncards = partition[it]!!
             countBallots += ncards
-            BallotStyle.make(contestList, contestIds, ncards)
+            BallotStyle.make(it, contestList, contestIds, ncards)
         }
         countCards()
     }
@@ -65,7 +75,7 @@ data class MultiContestTestData(
         return fcontests.map { it.makeContest() }
     }
 
-    fun makeBallots(): List<Ballot> {
+    fun makeBallotsForPolling(): List<Ballot> {
         val result = mutableListOf<Ballot>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->
@@ -185,6 +195,7 @@ data class TestContest(
         return result.toList()
     }
 
+    // TODO allow that no candidate is selected
     // choice is a number from 0..votesLeft
     // shrink the partition as votes are taken from it
     fun chooseCandidate(choice: Int): Int {
@@ -210,4 +221,23 @@ data class TestContest(
     override fun toString() = buildString {
         append(" FuzzedContest(contestId=$contestId, ncands=$ncands, margin=${df(margin)}, choiceFunction=$choiceFunction countCards=$ncards")
     }
+}
+
+// TODO use this for the vote allocation
+// partition nthings into npartitions randomly
+fun partition(nthings: Int, npartitions: Int): Map<Int, Int> {
+    val cutoffs = List(npartitions - 1) { it }.map { Pair(it, Random.nextInt(nthings)) }.toMutableList()
+    cutoffs.add(Pair(npartitions - 1, nthings)) // add the end point
+
+    // put in order
+    val sortedCutoffs = cutoffs.sortedBy { it.second }
+
+    // turn that into a partition
+    var last = 0
+    val partition = mutableListOf<Pair<Int, Int>>()
+    sortedCutoffs.forEach { ps ->
+        partition.add(Pair(ps.first, ps.second - last))
+        last = ps.second
+    }
+    return partition.toMap()
 }

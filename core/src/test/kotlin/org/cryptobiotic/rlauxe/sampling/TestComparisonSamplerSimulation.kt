@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.raire.import
 import org.cryptobiotic.rlauxe.raire.readRaireBallots
 import org.cryptobiotic.rlauxe.raire.readRaireResults
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,7 +24,12 @@ class TestComparisonSamplerSimulation {
             val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
             val compareAssorter = contestUA.comparisonAssertions.first().assorter
 
-            val sampler = ComparisonSamplerSimulation(cvrsUA, contestUA, compareAssorter)
+            val sampler = ComparisonSamplerSimulation(cvrs,
+                contestUA,
+                compareAssorter,
+                ComparisonErrorRates.standard,
+            )
+
             testLimits(sampler, N, compareAssorter.upperBound)
 
             assertEquals(sampler.p1 * N, sampler.flippedVotes1.toDouble())
@@ -54,7 +60,7 @@ class TestComparisonSamplerSimulation {
             val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
             val compareAssorter = contestUA.comparisonAssertions.first().assorter
 
-            run(cvrsUA, contestUA, compareAssorter)
+            run(cvrs, contestUA, compareAssorter)
         }
     }
 
@@ -75,24 +81,24 @@ class TestComparisonSamplerSimulation {
         contestUA.makeComparisonAssertions(cvrsUA)
 
         contestUA.comparisonAssertions.forEach { assert ->
-            run(cvrsUA, contestUA, assert.assorter)
+            run(cvrs, contestUA, assert.assorter)
         }
     }
 
-    fun run(cvrsUA: List<CvrUnderAudit>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
+    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val sampler = ComparisonSamplerSimulation(cvrsUA, contestUA, assorter)
+        val sampler = ComparisonSamplerSimulation(cvrs, contestUA, assorter, ComparisonErrorRates.standard)
 
-        val orgCvrs = cvrsUA.map { assorter.assorter.assort(it) }.average()
+        val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleMvrs = sampler.mvrs.map { assorter.assorter.assort(it) }.average()
         println(" orgCvrs=${df(orgCvrs)} sampleCvrs=${df(sampleCvrs)} sampleMvrs=${df(sampleMvrs)}")
 
-        val before = cvrsUA.map { assorter.bassort(it, it) }.average()
+        val before = cvrs.map { assorter.bassort(it, it) }.average()
         sampler.reset()
         val welford = Welford()
-        repeat(cvrsUA.size) {
+        repeat(cvrs.size) {
             welford.update(sampler.sample())
         }
 

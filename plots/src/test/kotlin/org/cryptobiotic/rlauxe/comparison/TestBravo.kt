@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
-import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithReplacement
 import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithoutReplacement

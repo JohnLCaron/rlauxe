@@ -1,19 +1,19 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.CvrBuilder
-import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.util.CvrContest
-import org.cryptobiotic.rlauxe.util.secureRandom
+import org.cryptobiotic.rlauxe.util.*
 
+// this takes a list of cvrs and fuzzes them
 class ComparisonFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
     val contestUA: ContestUnderAudit,
     val cassorter: ComparisonAssorter
-): GenSampleFn {
+): SampleGenerator, Iterator<Double> {
+
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
+    val welford = Welford()
     var cvrPairs: List<Pair<Cvr, Cvr>> // (mvr, cvr)
     var idx = 0
 
@@ -28,6 +28,7 @@ class ComparisonFuzzSampler(
             if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
+                welford.update(result)
                 return result
             }
             idx++
@@ -47,6 +48,10 @@ class ComparisonFuzzSampler(
     }
 
     override fun N() = N
+
+    override fun hasNext(): Boolean = (idx < N)
+
+    override fun next(): Double = sample()
 }
 
 class PollingFuzzSampler(
@@ -54,8 +59,9 @@ class PollingFuzzSampler(
     val cvrs: List<Cvr>,
     val contestUA: ContestUnderAudit,
     val assorter: AssorterFunction
-): GenSampleFn {
+): SampleGenerator {
     val N = cvrs.size
+    val welford = Welford()
     val permutedIndex = MutableList(N) { it }
     var mvrs: List<CvrIF>
     var idx = 0
@@ -70,6 +76,7 @@ class PollingFuzzSampler(
             if (mvr.hasContest(contestUA.id)) {
                 val result = assorter.assort(mvr)
                 idx++
+                welford.update(result)
                 return result
             }
             idx++

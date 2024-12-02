@@ -8,6 +8,11 @@ enum class TestH0Status(val fail: Boolean) {
     //// only when sampling without replacement all the way to N, in practice, this never happens I think
     SampleSumRejectNull(false), // SampleSum > N * t, so we know H0 is false
     AcceptNull(true), // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
+
+    // contest status
+    MinMargin(true), // margin too small for RLA to efficiently work
+    ContestMisformed(true), // Contest incorrectly formed
+    FailPct(true), // Simulations fail
 }
 
 data class TestH0Result(

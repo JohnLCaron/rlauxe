@@ -66,18 +66,20 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
         sum += sample
         welford.update(sample)
 
-        // or just say which overstatement it is?
-        if (doubleIsClose(sample, noerror)) countP0++
-        if (doubleIsClose(sample, noerror * 0.5)) countP1++
-        if (doubleIsClose(sample, 0.0)) countP2++
-        if (doubleIsClose(sample, noerror * 1.5)) countP3++
-        if (doubleIsClose(sample, noerror * 2.0)) countP4++
+        if (noerror != 0.0) {
+            // or just say which overstatement it is?
+            if (doubleIsClose(sample, noerror)) countP0++
+            if (doubleIsClose(sample, noerror * 0.5)) countP1++
+            if (doubleIsClose(sample, 0.0)) countP2++
+            if (doubleIsClose(sample, noerror * 1.5)) countP3++
+            if (doubleIsClose(sample, noerror * 2.0)) countP4++
+        }
     }
 
     fun samplingErrors() = listOf(countP0,countP1,countP2,countP3,countP4)
 
     fun samplingErrors(denom:Double) = buildString {
-        //append("[${dfn(countP0/denom, 4)},")
+        append("[${dfn(countP0/denom, 4)},")
         append("${dfn(countP1/denom, 4)},")
         append("${dfn(countP2/denom, 4)},")
         append("${dfn(countP3/denom, 4)},")

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 11/26/2024
+last update: 12/01/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -24,8 +24,7 @@ Table of Contents
     * [Comparison audits](#comparison-audits)
       * [Comparison Betting Payoffs](#comparison-betting-payoffs)
       * [Comparison error rates](#comparison-error-rates)
-      * [Estimating Sample sizes with fuzz](#estimating-sample-sizes-with-fuzz)
-      * [Comparison fuzz effect on under/overstatement error rates](#comparison-fuzz-effect-on-underoverstatement-error-rates)
+      * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
     * [Consistent Sampling](#consistent-sampling)
@@ -316,19 +315,14 @@ Note that this value is independent of N, the number of ballots.
 
 #### Comparison error rates
 
-The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+The comparison error rates are:
 
-ComparisonSamplerSimulation creates modified mvrs from a set of cvrs, with possibly non-zero valeus for errors p1, p2, p3, and p4.
-This works for both Plurality and IRV comparison audits.
-If p1 == p3, and p2 == p4, the margin stays the same. Call this fuzzed simulation.
-Current defaults rather arbitrarily chosen are:
+        val p1: // apriori rate of 1-vote overstatements; voted for other, cvr has winner
+        val p2: // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
+        val p3: // apriori rate of 1-vote understatements; voted for winner, cvr has other
+        val p4: // apriori rate of 2-vote understatements; voted for winner, cvr has loser
 
-        val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; voted for winner, cvr has loser
-
-FOr IRV, the corresponding decriptions of the errror rates are:
+For IRV, the corresponding descriptions of the errror rates are:
 
     NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
     NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
@@ -340,22 +334,18 @@ FOr IRV, the corresponding decriptions of the errror rates are:
     NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
     NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
 
-See _Estimated Sample sizes with fuzz_ (below) for a different error simulation.
-We expect the spread to increase, but also shift to larger samples sizes, since the cost of overstatement is higher than understatements.
+The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+Currrently all assumptions on the apriori error rates are arbitrary. These rates should
+be empirically determined, and public tables for different voting machines should be published. 
+While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
-If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
-are more likely to be affected than others. Itw worth noting that these rates combine machine errors with human errors of
-fetching and interpreting ballots.
+#### Estimating Sample sizes and error rates with fuzz
 
-In any case, currrently all assumptions on the a-priori error rates are arbitrary. These need to be measured for existing
-machines and practices. While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
+Currently our strategy for generating comparison errors is as follows:
 
-#### Estimating Sample sizes with fuzz
-
-Estimated sample size vs margin at different "fuzz" percentages. The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
-and randomly changing the candidate voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
-When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. Note that this method of generating
-errors doesnt change the reported mean, on average.
+The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
+and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
+When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
 The first plot shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
 have greater spread, but on average are not much affected.
@@ -363,30 +353,35 @@ have greater spread, but on average are not much affected.
 * [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzConcurrent.html)
 * [Polling Sample sizes with fuzz](docs/plots/PollingFuzzConcurrent.html)
 
-#### Comparison fuzz effect on under/overstatement error rates
+We use this strategy for generating comparison error rate estimates, as a function of number of candidates in the contest.
+(see TestComparisonFuzzSampler.generateErrorTable()).
 
-With a mixture of contests with different candidate sizes, and empty votes allowed, here is a representative table of
-how the fuzzing generates p1, p2, p3 and p4 error rates:
+N=100000 ntrials = 1000
+generated 12/12024
 
-````
-fuzzPct = 0.001
-avgRates = [2.845617895122841E-4, 1.386138613861406E-4, 2.1763843050971667E-4, 1.4319765309864335E-4]
-error% = [0.2845617895122841, 0.1386138613861406, 0.21763843050971668, 0.14319765309864335]
-fuzzPct = 0.005
-avgRates = [0.0017207554088742374, 0.0010907590759075846, 0.0012455078841217438, 8.756875687568617E-4]
-error% = [0.3441510817748475, 0.21815181518151694, 0.24910157682434875, 0.17513751375137235]
-fuzzPct = 0.01
-avgRates = [0.0030907590759076255, 0.0019191419141913585, 0.0024609460946094313, 0.001622112211221137]
-error% = [0.30907590759076253, 0.19191419141913585, 0.24609460946094314, 0.1622112211221137]
-fuzzPct = 0.02
-avgRates = [0.006589842317564948, 0.0038734873487348905, 0.00507059039237249, 0.003099193252658597]
-error% = [0.3294921158782474, 0.19367436743674454, 0.2535295196186245, 0.15495966263292985]
-fuzzPct = 0.05
-avgRates = [0.016377887788778477, 0.010581591492482438, 0.012896773010634483, 0.008374587458745916]
-error% = [0.32755775577556956, 0.21163182984964876, 0.25793546021268965, 0.16749174917491833]
-````
-A two-candidate contest has significantly higher two-vote error rates, since its more likely to flip a vote between winenr and loser,
-than switch a vote to/from other.
+| ncand | r1     | r2     | r3     | r4     |
+|-------|--------|--------|--------|--------|
+| 2     | 0.2535 | 0.2524 | 0.2474 | 0.2480 |
+| 3     | 0.3367 | 0.1673 | 0.3300 | 0.1646 |
+| 4     | 0.3357 | 0.0835 | 0.3282 | 0.0811 |
+| 5     | 0.3363 | 0.0672 | 0.3288 | 0.0651 |
+| 6     | 0.3401 | 0.0575 | 0.3323 | 0.0557 |
+| 7     | 0.3240 | 0.0450 | 0.3158 | 0.0434 |
+| 8     | 0.2886 | 0.0326 | 0.2797 | 0.0314 |
+| 9     | 0.3026 | 0.0318 | 0.2938 | 0.0306 |
+| 10    | 0.2727 | 0.0244 | 0.2624 | 0.0233 |
+
+Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
+For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a 
+vote between winner and loser, than switch a vote to/from other.
+
+For now, we will use this table to generate the error rates when estimating the sample sizes, until better estimates are avalable.
+Currently the percentage of ballots with no votes cast for a contest is not well accounted for. 
+
+Possible refinement of this algorithm might measure:
+   1. percent time a mark is seen when its not there
+   2. percent time a mark is not seen when it is there
+   3. percent time a mark is given to the wrong candidate 
 
 ## Sampling
 

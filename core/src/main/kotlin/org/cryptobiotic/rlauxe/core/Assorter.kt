@@ -89,8 +89,9 @@ data class Assertion(
     // TODO is it ok to have this state ??
     var status = TestH0Status.NotStarted
     var proved = false
-    var samplesEst = 0
-    var samplesNeeded = 0
+    var estSampleSize = 0  // estimated sample size
+    var samplesNeeded = 0 // sample count when pvalue < riskLimit
+    var samplesUsed = 0 // sample count when testH0 terminates
     var pvalue = 0.0
 
     override fun toString() = "'${contest.info.name}' (${contest.id}) ${assorter.desc()} margin=$margin"

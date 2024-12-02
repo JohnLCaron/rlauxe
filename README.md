@@ -197,6 +197,9 @@ This shows the large difference between a polling audit and a comparison audit a
 
 * [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
 
+Except for large N > 50000, polling at margins < 3% needs prohibitively large sample sizes.
+Comparison audits are perhaps useful down to margins = .8% .
+
 ### Polling audits
 
 A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.

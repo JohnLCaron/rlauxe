@@ -12,7 +12,7 @@ class MakeSampleSizePlots {
     fun plotComparisonVsPoll() {
         val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 100)
         val finder = EstimateSampleSize(auditConfig)
-        val N = 10000
+        val N = 100000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
         val tasks = mutableListOf<ConcurrentTask>()
@@ -40,7 +40,7 @@ class MakeSampleSizePlots {
         val srts = results.map{ it.makeSRT(N, 0.0, 0.0)}
 
         val dirname = "/home/stormy/temp/estimate"
-        val filename = "ComparisonVsPoll10"
+        val filename = "ComparisonVsPoll100"
         val writer = SRTcsvWriter("$dirname/${filename}.cvs")
         writer.writeCalculations(srts)
         writer.close()
@@ -303,6 +303,7 @@ class ComparisonAltTask(
 ) : ConcurrentTask {
     override fun name() = name
     override fun run(): RunTestRepeatedResult {
+        // TODO stop using this
         return finder.simulateSampleSizeAssorterAlt(fuzzPct, contestUA, cassort, cvrs, mapOf("fuzzPct" to fuzzPct))
     }
 }

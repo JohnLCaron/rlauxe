@@ -19,10 +19,10 @@ class TestComparisonWithStyle {
 
     @Test
     fun testComparisonWorkflow() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .05)
 
         // each contest has a specific margin between the top two vote getters.
-        val testData = MultiContestTestData(20, 11, 20000)
+        val testData = MultiContestTestData(20, 11, 10000)
         val contests: List<Contest> = testData.makeContests()
         println("Start testComparisonWorkflow")
         contests.forEach{ println(" $it")}
@@ -37,23 +37,30 @@ class TestComparisonWithStyle {
         val workflow = ComparisonWithStyle(contests, emptyList(), auditConfig, cvrs)
         val stopwatch = Stopwatch()
 
-        var done = false
         var prevMvrs = emptyList<CvrIF>()
-        var round = 0
+        val previousSamples = mutableSetOf<Int>()
+        var rounds = mutableListOf<Round>()
+        var roundIdx = 1
+
+        var done = false
         while (!done) {
-            val indices = workflow.chooseSamples(prevMvrs, round)
-            println("chooseSamples round $round took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            val indices = workflow.chooseSamples(prevMvrs, roundIdx)
+            val currRound = Round(roundIdx, indices, previousSamples)
+            rounds.add(currRound)
+            previousSamples.addAll(indices)
+
+            println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             stopwatch.start()
 
-            // TODO determine and report number of new samples needed
             val sampledMvrs = indices.map { fuzzedMvrs[it] }
 
             done = workflow.runAudit(indices, sampledMvrs)
-            println("runAudit $round done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
-            round++
+            roundIdx++
         }
 
+        rounds.forEach { println(it) }
         workflow.showResults()
     }
 
@@ -105,21 +112,31 @@ class TestComparisonWithStyle {
         cvrPairs.forEach { (mvr, cvr) -> samples.addSample(assorter.bassort(mvr,cvr)) }
         println("samplingErrors= ${samples.samplingErrors()}")
 
-        var done = false
         var prevMvrs = emptyList<CvrIF>()
-        var round = 0
+        val previousSamples = mutableSetOf<Int>()
+        var rounds = mutableListOf<Round>()
+        var roundIdx = 1
+
+        var done = false
         while (!done) {
-            val indices = workflow.chooseSamples(prevMvrs, round)
-            println("$round chooseSamples ${indices.size} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)}\n")
-            // println("$round samples=${indices}")
+            val indices = workflow.chooseSamples(prevMvrs, roundIdx)
+            val currRound = Round(roundIdx, indices, previousSamples)
+            rounds.add(currRound)
+            previousSamples.addAll(indices)
+
+            println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             stopwatch.start()
+
+            println("$roundIdx chooseSamples ${indices.size} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)}\n")
+            stopwatch.start()
+
 
             val sampledMvrs = indices.map { sampler.mvrs[it] }
 
             done = workflow.runAudit(indices, sampledMvrs)
-            println("$round runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            println("$roundIdx runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
-            round++
+            roundIdx++
         }
     }
 

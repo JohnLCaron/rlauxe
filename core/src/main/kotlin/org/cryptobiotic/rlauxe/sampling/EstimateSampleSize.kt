@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.SimContest
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
@@ -21,21 +20,46 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         contestUA: ContestUnderAudit,
         prevMvrs: List<CvrIF>, // TODO should be used for subsequent round estimation
         maxSamples: Int,
-        round: Int,
+        roundIdx: Int,
         show: Boolean = false
     ): Int {
         val sampleSizes = mutableListOf<Int>()
         contestUA.pollingAssertions.map { assert ->
             if (!assert.proved) {
-                val result = simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples)
-                val size = result.findQuantile(auditConfig.quantile)
-                assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
-                sampleSizes.add(assert.samplesEst)
-                if (show) println(" simulateSampleSizes ${assert} est=$size failed=${df(result.failPct())}")
+                if (roundIdx > 1) {
+                    if (assert.samplesUsed == contestUA.Nc) {
+                        println("***LimitReached $contestUA")
+                        contestUA.done = true
+                        contestUA.status = TestH0Status.LimitReached
+                    }
+                    // TODO can we use the pvalue from last round to get better estimate? why 100? should be percent ??
+                    assert.estSampleSize = min(assert.samplesUsed + (roundIdx-1) * 100, contestUA.Nc)
+                    sampleSizes.add(assert.estSampleSize)
+                } else {
+                    val result = simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples)
+                    if (result.failPct() > 80.0) {
+                        assert.estSampleSize = result.findQuantile(auditConfig.quantile)
+                        println("***FailPct $contestUA ${result.failPct()} > 80% size=${assert.estSampleSize}")
+                        contestUA.done = true
+                        contestUA.status = TestH0Status.FailPct
+                    } else {
+                        val size = result.findQuantile(auditConfig.quantile)
+                        assert.estSampleSize = min(size, contestUA.Nc)
+                        sampleSizes.add(assert.estSampleSize)
+                    }
+                }
+                if (show) println("  ${contestUA.name} ${assert}")
             }
+
+ /*               val result = simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples)
+                val size = result.findQuantile(auditConfig.quantile)
+                assert.estSampleSize = size + (roundIdx - 1) * 100  // TODO how to increase sample size ??
+                sampleSizes.add(assert.estSampleSize)
+                if (show) println(" simulateSampleSizes ${assert} est=$size failed=${df(result.failPct())}")
+            } */
         }
         contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        if (show) println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: contest ${contestUA.name} est=${contestUA.estSampleSize}")
+        if (show) println(" ${contestUA}")
         return contestUA.estSampleSize
     }
 
@@ -58,26 +82,6 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
 
         return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc)
     }
-
-    /*
-    fun simulateSampleSizePollingAlt(
-            fuzzPct: Double,
-            contestUA: ContestUnderAudit,
-            assorter: AssorterFunction,
-            maxSamples: Int,
-            moreParameters: Map<String, Double> = emptyMap(),
-        ): RunTestRepeatedResult {
-        val margin = assorter.reportedMargin()
-        val simContest = SimContest(contestUA.contest, assorter)
-        val cvrs = simContest.makeCvrs().map { it as Cvr }
-        require(cvrs.size == contestUA.ncvrs)
-
-        val sampler = PollingFuzzSampler(fuzzPct, cvrs, contestUA, assorter)
-
-        return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, contestUA.Nc, moreParameters)
-    }
-
-     */
 
     fun simulateSampleSizeAlphaMart(
         sampleFn: SampleGenerator,
@@ -128,15 +132,21 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         contestUA: ContestUnderAudit,
         cvrs: List<Cvr>,
         mvrs: List<CvrIF>, // TODO use previous samples
-        round: Int,
+        roundIdx: Int,
         show: Boolean = false
     ): Int {
 
         val sampleSizes = mutableListOf<Int>()
         contestUA.comparisonAssertions.map { assert ->
             if (!assert.proved) {
-                if (round > 0) {
-                    assert.estSampleSize = min(assert.estSampleSize + round * 100, contestUA.Nc) // TODO why 100? should be percent ??
+                if (roundIdx > 1) {
+                    if (assert.samplesUsed == contestUA.Nc) {
+                        println("***LimitReached $contestUA")
+                        contestUA.done = true
+                        contestUA.status = TestH0Status.LimitReached
+                    }
+                    // TODO can we use the pvalue from last round to get better estimate?
+                    assert.estSampleSize = min(assert.samplesUsed + (roundIdx-1) * 100, contestUA.Nc) // TODO why 100? should be percent ??
                     sampleSizes.add(assert.estSampleSize)
                 } else {
                     val result = simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
@@ -164,15 +174,6 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         cassorter: ComparisonAssorter,
         cvrs: List<Cvr>,
     ): RunTestRepeatedResult {
-        // from TestComparisonFuzzed.
-        // val mvrsFuzzed = cvrsUAP.map { it.fuzzed() }
-        // val cvrPairs: List<Pair<CvrIF, CvrUnderAudit>> = mvrsFuzzed.zip(cvrsUAP)
-        // cvrPairs: List<Pair<CvrIF, CvrUnderAudit>>, // (mvr, cvr)
-        // val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter)
-
-        // this uses auditConfig p1,,p4 to set apriori error rates. should be based on fuzzPct i think
-        // val sampleFn = ComparisonSamplerRegen(auditConfig.fuzzPct, cvrs, contestUA, assorter)
-
         val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
         val sampler = if (auditConfig.fuzzPct == null) {
             // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.

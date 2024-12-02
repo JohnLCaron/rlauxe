@@ -42,11 +42,11 @@ class ComparisonWithStyle(
 
         contestsUA = (tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
-            // it.Nc = upperBounds[it.contest.id]!!
             //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
             if (it.Nc < it.ncvrs) throw RuntimeException(
                 "upperBound ${it.Nc} < ncvrs ${it.ncvrs} for contest ${it.contest.id}"
             )
+            checkWinners(it, it.contest.votes.entries.sortedByDescending { it.value })  // 2.a)
         }
 
         // 3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
@@ -71,13 +71,13 @@ class ComparisonWithStyle(
      * Choose lists of ballots to sample.
      * @parameter mvrs: use existing mvrs to estimate samples. may be empty.
      */
-    fun chooseSamples(prevMvrs: List<CvrIF>, round: Int): List<Int> {
+    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
+        println("EstimateSampleSize.simulateSampleSizeComparisonContest round $roundIdx")
 
-        println("EstimateSampleSize.simulateSampleSizeComparisonContest round $round")
         val sampleSizer = EstimateSampleSize(auditConfig)
         val contestsNotDone = contestsUA.filter{ !it.done }
         contestsNotDone.forEach { contestUA ->
-            sampleSizer.simulateSampleSizeComparisonContest(contestUA, cvrs, prevMvrs, round, show=true)
+            sampleSizer.simulateSampleSizeComparisonContest(contestUA, cvrs, prevMvrs, roundIdx, show=true)
         }
         println()
         val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
@@ -88,7 +88,7 @@ class ComparisonWithStyle(
 
         //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         //     draws random ballots by consistent sampling, and returns their locations to the auditors.
-        println("consistentCvrSampling round $round")
+        println("consistentCvrSampling round $roundIdx")
         val sampleIndices = consistentCvrSampling(contestsUA.filter{ !it.done }, cvrsUA)
         println(" ComparisonWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
 
@@ -123,7 +123,7 @@ class ComparisonWithStyle(
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
                     assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs)
-                    allAssertionsDone = allAssertionsDone && (assertion.status != TestH0Status.LimitReached)
+                    allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
                 if (allAssertionsDone) {
                     contestUA.done = true
@@ -171,7 +171,7 @@ fun tabulateVotes(contests: List<Contest>, cvrs: List<CvrIF>): List<ContestUnder
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
         val contestUA = ContestUnderAudit(contest, nc)// nc vs ncvrs ??
-        checkWinners(contestUA, accumVotes)
+        require(contestUA.contest.votes == accumVotes)
         contestUA
     }
 }
@@ -199,13 +199,13 @@ fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>
         if (contestUA == null) throw RuntimeException("no contest for contest id= $conId")
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
-        checkWinners(contestUA, accumVotes)
+        require(contestUA.contest.votes == accumVotes)
         contestUA.ncvrs = nc
         contestUA
     }
 }
 
-// 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
+/* 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
 fun checkWinners(contestUA: ContestUnderAudit, accumVotes: Map<Int, Int>) {
     val sortedVotes: List<Map.Entry<Int, Int>> = accumVotes.entries.sortedByDescending { it.value }
     val contest = contestUA.contest
@@ -243,6 +243,8 @@ fun checkWinners(contestUA: ContestUnderAudit, accumVotes: Map<Int, Int>) {
         }
     }
 }
+
+ */
 
 /////////////////////////////////////////////////////////////////////////////////
 // run audit for one assertion; could be parallel

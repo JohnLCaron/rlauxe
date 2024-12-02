@@ -81,7 +81,7 @@ fun consistentCvrSampling(
 
     val sampledIndices = mutableListOf<Int>()
     var inx = 0
-    // while we need more samples TODO detect when we run out of samples
+    // while we need more samples
     while (contests.any { contestInProgress(it) } && inx < sortedCvrIndices.size) {
         // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
@@ -128,7 +128,7 @@ fun consistentPollingSampling(
     val sampledIndices = mutableListOf<Int>()
     var inx = 0
     // while we need more samples
-    while (contests.any { contestInProgress(it) }) {
+    while (contests.any { contestInProgress(it) }  && (inx < sortedCvrIndices.size)) {
         // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
         val ballot = ballots[sidx]
@@ -144,10 +144,15 @@ fun consistentPollingSampling(
         }
         inx++
     }
+    if (inx == sortedCvrIndices.size) {
+        println("ran out of samples!!")
+    }
     contests.forEach { contest ->
+        if (currentSizes[contest.id] == null)
+            println("hey")
         contest.availableInSample = currentSizes[contest.id]!!
-        if (show) println(" consistentPollingSampling ${contest} margin=${df(contest.minPollingAssertion()?.margin ?: 0.0)} " +
-                "sample=${contest.availableInSample}")
+        if (show) println(" ${contest} minMargin=${df(contest.minPollingAssertion()?.margin ?: 0.0)} " +
+                "availableInSample=${contest.availableInSample}")
     }
     return sampledIndices
 }

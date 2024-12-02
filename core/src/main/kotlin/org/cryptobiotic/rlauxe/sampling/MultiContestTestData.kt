@@ -37,7 +37,7 @@ data class MultiContestTestData(
         // between 2 and 4 candidates, margin is a random number between minMargin and minMargin + .02
         fcontests = List(ncontest) { it }.map {
             val ncands = max(Random.nextInt(5), 2)
-            TestContest(it, ncands, minMargin + Random.nextDouble(0.2))
+            TestContest(it, ncands, minMargin + Random.nextDouble(0.02))
         }
 
         // every contest is in between 1 and nballotStyles/4 ballot styles, randomly chosen

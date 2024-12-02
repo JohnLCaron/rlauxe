@@ -8,7 +8,7 @@ import kotlin.random.Random
 // TODO move as much as possible into testing
 
 //// abstraction for creating a sequence of samples
-interface GenSampleFn {
+interface SampleGenerator {
     fun sample(): Double // get next in sample
     fun N(): Int  // population size
     fun reset()   // start over again with different permutation (may be prohibited)
@@ -16,7 +16,7 @@ interface GenSampleFn {
 
 //// For polling audits.
 
-class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): GenSampleFn {
+class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
     val N = cvrs.size
     val sampleMean = cvrs.map { assorter.assort(it) }.average()
     val sampleCount = cvrs.sumOf { assorter.assort(it) }
@@ -35,7 +35,7 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, 
     override fun N() = N
 }
 
-class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): GenSampleFn {
+class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0
@@ -70,7 +70,7 @@ class ComparisonSamplerGen(
     val contestUA: ContestUnderAudit,
     val cassorter: ComparisonAssorter,
     val allowReset: Boolean,
-): GenSampleFn {
+): SampleGenerator {
     val N = cvrPairs.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0
@@ -102,7 +102,7 @@ class ComparisonSamplerGen(
 }
 
 // the mvr and cvr always agree.
-class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter): GenSampleFn {
+class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter): SampleGenerator {
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
@@ -134,7 +134,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
 // to make mvrs have mvrMean.
 data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
-                                val withoutReplacement: Boolean = true): GenSampleFn {
+                                val withoutReplacement: Boolean = true): SampleGenerator {
     val N = cvrs.size
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
@@ -185,7 +185,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
 // TODO: generalize to p3, p4
 data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
                                     val p2: Double, val p1: Double = 0.0,
-                                    val withoutReplacement: Boolean = true): GenSampleFn {
+                                    val withoutReplacement: Boolean = true): SampleGenerator {
     val N = cvrs.size
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
@@ -334,7 +334,7 @@ fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
     }
 }
 
-class ArrayAsGenSampleFn(val assortValues : DoubleArray): GenSampleFn {
+class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
     var index = 0
 
     override fun sample(): Double {
@@ -359,7 +359,7 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): GenSampleFn {
 }
 
 // generate random values with given mean
-class GenSampleMeanWithReplacement(val N: Int, ratio: Double): GenSampleFn {
+class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
     val samples = generateSampleWithMean(N, ratio)
     override fun sample(): Double {
         val idx = secureRandom.nextInt(N) // with Replacement
@@ -373,7 +373,7 @@ class GenSampleMeanWithReplacement(val N: Int, ratio: Double): GenSampleFn {
     override fun N() = N
 }
 
-class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): GenSampleFn {
+class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGenerator {
     var samples = generateSampleWithMean(N, ratio)
     var index = 0
     override fun sample(): Double {
@@ -388,7 +388,7 @@ class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): GenSampleF
     override fun N() = N
 }
 
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): GenSampleFn {
+class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleGenerator {
     val N = assortValues.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0
@@ -434,3 +434,20 @@ class Bernoulli(p: Double) {
         }
     }
 }
+
+// https://www.baeldung.com/cs/sampling-exponential-distribution
+// probability density function (PDF): f_lambda(x) = lambda * e^(-lambda * x)
+// cumulative density function (CDF): F_lambda(x) =  1 - e^(-lambda * x)
+// inverse cumulative density function (CDF): F_lambda^(-1)(u) = -(1/lambda) * ln(1-u)
+// sample in [0, 1] with exponential distribution with decay lambda
+class Exponential(lambda: Double) {
+    val ilambda = 1.0 / lambda
+    val n = 1.0
+
+    fun next(): Double {
+        val u = Math.random()
+        val x = ilambda * ln(1.0-u)
+        return x
+    }
+}
+

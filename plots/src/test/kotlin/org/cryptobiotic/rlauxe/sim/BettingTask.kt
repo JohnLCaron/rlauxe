@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.sim
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
-import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 
 data class BettingTask(
     val idx: Int,
@@ -19,7 +19,7 @@ data class BettingTask(
         require( N == cvrs.size)
     }
 
-    override fun makeSampler(): GenSampleFn {
+    override fun makeSampler(): SampleGenerator {
         return ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2oracle, withoutReplacement = true)
     }
 

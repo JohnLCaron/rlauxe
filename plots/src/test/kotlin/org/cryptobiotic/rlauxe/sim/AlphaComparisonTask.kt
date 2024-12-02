@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 
@@ -28,7 +28,7 @@ data class AlphaComparisonTask(
         require( N == cvrs.size)
     }
 
-    override fun makeSampler(): GenSampleFn {
+    override fun makeSampler(): SampleGenerator {
         return ComparisonWithErrors(cvrs, compareAssorter, theta)
     }
 
@@ -66,7 +66,7 @@ data class AlphaComparisonTask(
 // run AlphaMart with TrunkShrinkage in repeated trials
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
-    drawSample: GenSampleFn,
+    drawSample: SampleGenerator,
     maxSamples: Int,
     eta0: Double,
     d: Int = 500,

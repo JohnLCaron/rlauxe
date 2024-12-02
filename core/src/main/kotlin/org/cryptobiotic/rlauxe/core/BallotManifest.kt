@@ -1,6 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
-
-import org.cryptobiotic.rlauxe.core.ContestInfo
+package org.cryptobiotic.rlauxe.core
 
 // The id must uniquely identify the paper ballot. Here it may be some simple thing (seq number) that points to
 // the paper ballot location. Its necessary that the system publically commit to that mapping before the Audit,
@@ -60,14 +58,7 @@ data class BallotStyle(
     }
 
     companion object {
-        private var styleId = 0;
-        fun makeWithInfo(contestNames: List<String>, contests: List<ContestInfo>, numberBallots: Int?): BallotStyle {
-            styleId++
-            val contestIds = contestNames.map { name -> contests.find { contest -> contest.name == name} ?.id ?: throw RuntimeException("Cant find $name") }
-            return BallotStyle("style$styleId", styleId, contestNames, contestIds, numberBallots)
-        }
-        fun make(contestNames: List<String>, contestIds: List<Int>, numberBallots: Int?): BallotStyle {
-            styleId++
+        fun make(styleId: Int, contestNames: List<String>, contestIds: List<Int>, numberBallots: Int?): BallotStyle {
             return BallotStyle("style$styleId", styleId, contestNames, contestIds, numberBallots)
         }
     }

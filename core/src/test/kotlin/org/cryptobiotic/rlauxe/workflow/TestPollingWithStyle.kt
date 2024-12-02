@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.BallotManifest
+import org.cryptobiotic.rlauxe.core.BallotManifest
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.*
@@ -21,10 +21,9 @@ class TestPollingWithStyle {
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests()
-        // However "polling with styles" requires that we know how many ballots each contest has.
-        val ballots = test.makeBallots()
+        val ballots = test.makeBallotsForPolling()
 
-        // fuzzPct of the Mvrs have their votes randomly changes ("fuzzed")
+        // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = PollingWithStyle(auditConfig, contests, BallotManifest(ballots, test.ballotStyles))
@@ -36,8 +35,7 @@ class TestPollingWithStyle {
         var round = 0
         while (!done) {
             val indices = workflow.chooseSamples(prevMvrs, round)
-            println("round $round took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            // println("$round samples=${indices}")
+            println("estimateSampleSizes round $round took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             stopwatch.start()
 
             val sampledMvrs = indices.map {
@@ -45,7 +43,7 @@ class TestPollingWithStyle {
             }
 
             done = workflow.runAudit(sampledMvrs)
-            println("round $round runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            println("runAudit round $round took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             round++
         }

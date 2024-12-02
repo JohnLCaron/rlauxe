@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,12 +18,16 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
+// assumes that the task returns RunTestRepeatedResult
+// TODO: other kinds of tasks that return maybe TestH0Status ?
+
 interface ConcurrentTask {
     fun name() : String
     fun run() : RunTestRepeatedResult
 }
 
 class ConcurrentTaskRunner {
+    private val show = true
     private val showTaskResult = true
     private val mutex = Mutex()
     private val results = mutableListOf<RunTestRepeatedResult>()
@@ -31,7 +35,7 @@ class ConcurrentTaskRunner {
     // run all the tasks concurrently
     fun run(tasks: List<ConcurrentTask>, nthreads: Int = 30): List<RunTestRepeatedResult> {
         val stopwatch = Stopwatch()
-        println("\nConcurrentTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads")
+        if (show) println("\nConcurrentTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -43,16 +47,14 @@ class ConcurrentTaskRunner {
         }
 
         // doesnt return until all tasks are done
-        println("that took $stopwatch")
+        if (show) println("that took $stopwatch")
         // println("that ${stopwatch.tookPer(tasks.size, "task")}")
         return results
     }
 
     fun runTask(
         task: ConcurrentTask,
-        silent: Boolean = false
     ): RunTestRepeatedResult {
-        if (!silent) println(" runTask=${task.name()}")
         val stopwatch = Stopwatch()
         val result =  task.run()
         if (showTaskResult) println("${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")

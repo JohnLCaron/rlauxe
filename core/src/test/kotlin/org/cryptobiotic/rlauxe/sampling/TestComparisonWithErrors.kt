@@ -1,14 +1,12 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.secureRandom
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-class TestComparisonFuzzed {
+class TestComparisonWithErrors {
 
     @Test
     fun testFuzzTwoPersonContest() {
@@ -111,82 +109,4 @@ class TestComparisonFuzzed {
         }.toMap()
         return Cvr(this.id, nvotes)
     }
-
-    @Test
-    fun testComparisonFuzzed() {
-        val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
-        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit(it) }
-        contestsUA.forEach { contest ->
-            println("contest = ${contest}")
-            contest.makeComparisonAssertions(cvrsUAP)
-            contest.comparisonAssertions.forEach {
-                println("  comparison assertion = ${it}")
-            }
-        }
-        println("total ncvrs = ${cvrsUAP.size}\n")
-
-        val mvrsFuzzed = cvrsUAP.map { it.fuzzed() }
-        val cvrPairs: List<Pair<Cvr, CvrUnderAudit>> = mvrsFuzzed.zip(cvrsUAP)
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
-
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = secureRandom.nextLong(), quantile=.50,
-            p1=0.0, p2=0.0, p3=0.0, p4=0.0, )
-
-        contestsUA.forEach { contestUA ->
-            val sampleSizes = mutableListOf<Int>()
-            contestUA.comparisonAssertions.map { assertion ->
-                val result: RunTestRepeatedResult = runRepeatedAudit(auditConfig, contestUA, assertion, cvrPairs)
-                val size = result.findQuantile(auditConfig.quantile)
-                assertion.samplesEst = size
-                sampleSizes.add(assertion.samplesEst)
-            }
-            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contestUA.name} estSize=${contestUA.estSampleSize}")
-        }
-    }
-}
-
-fun CvrUnderAudit.fuzzed(): Cvr {
-    return this.cvr
-}
-
-private fun runRepeatedAudit(
-    auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
-    assertion: ComparisonAssertion,
-    cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
-): RunTestRepeatedResult {
-    val assorter = assertion.assorter
-    val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = true)
-
-    val optimal = AdaptiveComparison(
-        Nc = contestUA.Nc,
-        withoutReplacement = true,
-        a = assorter.noerror,
-        d1 = auditConfig.d1,
-        d2 = auditConfig.d2,
-        p1 = auditConfig.p1,
-        p2 = auditConfig.p2,
-        p3 = auditConfig.p3,
-        p4 = auditConfig.p4,
-    )
-    val testFn = BettingMart(
-        bettingFn = optimal,
-        Nc = contestUA.Nc,
-        noerror = assorter.noerror,
-        upperBound = assorter.upperBound,
-        withoutReplacement = false
-    )
-
-    val result: RunTestRepeatedResult = runTestRepeated(
-        drawSample = sampler,
-        maxSamples = contestUA.ncvrs,
-        ntrials = auditConfig.ntrials,
-        testFn = testFn,
-        testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4, "margin" to assorter.margin),
-        showDetails = false,
-        margin = assorter.margin,
-    )
-    return result
 }

@@ -16,16 +16,16 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sampling.runTestRepeated
-import org.cryptobiotic.rlauxe.sampling.GenSampleFn
+import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.workflow.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface RepeatedTask {
-    fun makeSampler() : GenSampleFn
+    fun makeSampler() : SampleGenerator
     fun makeTestFn() : RiskTestingFn
     fun makeTestParameters() : Map<String, Double>
     fun maxSamples() : Int

@@ -4,6 +4,11 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.SimContest
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.workflow.AuditConfig
+import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
+import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.workflow.runTestRepeated
+import kotlin.math.min
 
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
 class EstimateSampleSize(val auditConfig: AuditConfig) {
@@ -75,7 +80,7 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
      */
 
     fun simulateSampleSizeAlphaMart(
-        sampleFn: GenSampleFn,
+        sampleFn: SampleGenerator,
         margin: Double,
         upperBound: Double,
         maxSamples: Int,
@@ -112,7 +117,7 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
             testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
             showDetails = false,
             margin = margin,
-            )
+        )
         return result
     }
 
@@ -121,30 +126,43 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
 
     fun simulateSampleSizeComparisonContest(
         contestUA: ContestUnderAudit,
-        cvrs: List<CvrUnderAudit>,
+        cvrs: List<Cvr>,
         mvrs: List<CvrIF>, // TODO use previous samples
         round: Int,
-        show: Boolean = false): Int {
+        show: Boolean = false
+    ): Int {
 
         val sampleSizes = mutableListOf<Int>()
         contestUA.comparisonAssertions.map { assert ->
             if (!assert.proved) {
-                val result = simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
-                val size = result.findQuantile(auditConfig.quantile)
-                assert.samplesEst = size + round * 100  // TODO how to increase sample size ??
-                sampleSizes.add(assert.samplesEst)
-                if (show) println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: ${assert}")
+                if (round > 0) {
+                    assert.estSampleSize = min(assert.estSampleSize + round * 100, contestUA.Nc) // TODO why 100? should be percent ??
+                    sampleSizes.add(assert.estSampleSize)
+                } else {
+                    val result = simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
+                    if (result.failPct() > 80.0) { // TODO what should this be? allow to proceed to round1 with max? TODO port to polling.
+                        assert.estSampleSize = result.findQuantile(auditConfig.quantile)
+                        println("***FailPct $contestUA ${result.failPct()} > 80% size=${assert.estSampleSize}")
+                        contestUA.done = true
+                        contestUA.status = TestH0Status.FailPct
+                    } else {
+                        val size = result.findQuantile(auditConfig.quantile)
+                        assert.estSampleSize = min(size, contestUA.Nc)
+                        sampleSizes.add(assert.estSampleSize)
+                    }
+                }
+                if (show) println("  ${contestUA.name} ${assert}")
             }
         }
         contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        if (show) println("simulateSampleSizes at ${100 * auditConfig.quantile}% quantile: contest ${contestUA.name} est=${contestUA.estSampleSize}")
-        return  contestUA.estSampleSize
+        if (show) println(" ${contestUA}")
+        return contestUA.estSampleSize
     }
 
     fun simulateSampleSizeAssorter(
         contestUA: ContestUnderAudit,
-        assorter: ComparisonAssorter,
-        cvrs: List<CvrUnderAudit>,
+        cassorter: ComparisonAssorter,
+        cvrs: List<Cvr>,
     ): RunTestRepeatedResult {
         // from TestComparisonFuzzed.
         // val mvrsFuzzed = cvrsUAP.map { it.fuzzed() }
@@ -155,16 +173,28 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         // this uses auditConfig p1,,p4 to set apriori error rates. should be based on fuzzPct i think
         // val sampleFn = ComparisonSamplerRegen(auditConfig.fuzzPct, cvrs, contestUA, assorter)
 
-        // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.
-        val sampler = ComparisonSamplerSimulation(cvrs, contestUA, assorter,
-            p1 = auditConfig.p1, p2 = auditConfig.p2, p3 = auditConfig.p3, p4 = auditConfig.p4)
-        // println("${sampler.showFlips()}")
+        val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
+        val sampler = if (auditConfig.fuzzPct == null) {
+            // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.
+            ComparisonSamplerSimulation(cvrs, contestUA, cassorter, errorRates)
+        } else {
+            ComparisonFuzzSampler(auditConfig.fuzzPct, cvrs, contestUA, cassorter)
+        }
 
         // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros
         // at the beginning
         sampler.reset()
 
-        return simulateSampleSizeBetaMart(sampler, assorter.margin, assorter.noerror, assorter.upperBound(), contestUA.ncvrs, contestUA.Nc)
+        return simulateSampleSizeBetaMart(
+            auditConfig,
+            sampler,
+            cassorter.margin,
+            cassorter.noerror,
+            cassorter.upperBound(),
+            contestUA.ncvrs,
+            contestUA.Nc,
+            ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
+        )
     }
 
     fun simulateSampleSizeAssorterAlt(
@@ -175,49 +205,61 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         moreParameters: Map<String, Double> = emptyMap(),
     ): RunTestRepeatedResult {
         val sampler = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA, assorter)
-        return simulateSampleSizeBetaMart(sampler, assorter.margin, assorter.noerror, assorter.upperBound(), contestUA.ncvrs, contestUA.Nc, moreParameters)
-    }
-
-    fun simulateSampleSizeBetaMart(
-        sampleFn: GenSampleFn,
-        margin: Double,
-        noerror: Double,
-        upperBound: Double,
-        maxSamples: Int,
-        Nc: Int,
-        moreParameters: Map<String, Double> = emptyMap(),
-    ): RunTestRepeatedResult {
-
-        val optimal = AdaptiveComparison(
-            Nc = Nc,
-            withoutReplacement = true,
-            a = noerror,
-            d1 = auditConfig.d1,
-            d2 = auditConfig.d2,
-            p1 = auditConfig.p1,
-            p2 = auditConfig.p2,
-            p3 = auditConfig.p3,
-            p4 = auditConfig.p4,
+        return simulateSampleSizeBetaMart(
+            auditConfig,
+            sampler,
+            assorter.margin,
+            assorter.noerror,
+            assorter.upperBound(),
+            contestUA.ncvrs,
+            contestUA.Nc,
+            ComparisonErrorRates.getErrorRates(contestUA.ncandidates, fuzzPct),
+            moreParameters
         )
-        val testFn = BettingMart(
-            bettingFn = optimal,
-            Nc = Nc,
-            noerror = noerror,
-            upperBound = upperBound,
-            withoutReplacement = false)
-
-        // TODO use coroutines
-        val result: RunTestRepeatedResult = runTestRepeated(
-            drawSample = sampleFn,
-            maxSamples = maxSamples,
-            ntrials = auditConfig.ntrials,
-            testFn = testFn,
-            testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4) + moreParameters,
-            showDetails = false,
-            margin = margin,
-        )
-        return result
     }
+}
+
+fun simulateSampleSizeBetaMart(
+    auditConfig: AuditConfig,
+    sampleFn: SampleGenerator,
+    margin: Double,
+    noerror: Double,
+    upperBound: Double,
+    maxSamples: Int,
+    Nc: Int,
+    errorRates: List<Double>,
+    moreParameters: Map<String, Double> = emptyMap(),
+): RunTestRepeatedResult {
+
+    val optimal = AdaptiveComparison(
+        Nc = Nc,
+        withoutReplacement = true,
+        a = noerror,
+        d1 = auditConfig.d1,
+        d2 = auditConfig.d2,
+        p1 = errorRates[0],
+        p2 = errorRates[1],
+        p3 = errorRates[2],
+        p4 = errorRates[3],
+    )
+    val testFn = BettingMart(
+        bettingFn = optimal,
+        Nc = Nc,
+        noerror = noerror,
+        upperBound = upperBound,
+        withoutReplacement = false)
+
+    // TODO use coroutines
+    val result: RunTestRepeatedResult = runTestRepeated(
+        drawSample = sampleFn,
+        maxSamples = maxSamples,
+        ntrials = auditConfig.ntrials,
+        testFn = testFn,
+        testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4) + moreParameters,
+        showDetails = false,
+        margin = margin,
+    )
+    return result
 }
 
 /////////////////////////////////////////////////////////////////////////////////

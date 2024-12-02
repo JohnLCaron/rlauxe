@@ -1,7 +1,8 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.sqrt
 
@@ -38,14 +39,14 @@ data class RunTestRepeatedResult(
 }
 
 fun runTestRepeated(
-        drawSample: GenSampleFn,
-        maxSamples: Int,
-        ntrials: Int,
-        testFn: RiskTestingFn,
-        testParameters: Map<String, Double>,
-        terminateOnNullReject: Boolean = true,
-        showDetails: Boolean = false,
-        margin: Double?,
+    drawSample: SampleGenerator,
+    maxSamples: Int,
+    ntrials: Int,
+    testFn: RiskTestingFn,
+    testParameters: Map<String, Double>,
+    terminateOnNullReject: Boolean = true,
+    showDetails: Boolean = false,
+    margin: Double?,
     ): RunTestRepeatedResult {
 
     val showH0Result = false
@@ -55,7 +56,7 @@ fun runTestRepeated(
     var fail = 0
     var nsuccess = 0
     val percentHist = Deciles(ntrials) // bins of 10%
-    val status = mutableMapOf<TestH0Status, Int>()
+    val statusMap = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
     val sampleCounts = mutableListOf<Int>()
     val errorCounts = mutableListOf(0.0,0.0,0.0,0.0,0.0)
@@ -67,8 +68,8 @@ fun runTestRepeated(
             terminateOnNullReject = terminateOnNullReject,
             showDetails = showDetails
         ) { drawSample.sample() }
-        val currCount = status.getOrPut(testH0Result.status) { 0 }
-        status[testH0Result.status] = currCount + 1
+        val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
+        statusMap[testH0Result.status] = currCount + 1
         if (testH0Result.status.fail) {
             fail++
         } else {
@@ -90,5 +91,5 @@ fun runTestRepeated(
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, status, sampleCounts, errorCounts.map { 100.0 * it / ntrials}, margin = margin)
+        ntrials=ntrials, variance, percentHist, statusMap, sampleCounts, errorCounts.map { 100.0 * it / ntrials}, margin = margin)
 }

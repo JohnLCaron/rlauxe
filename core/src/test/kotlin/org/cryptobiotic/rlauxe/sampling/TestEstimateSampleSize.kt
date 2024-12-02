@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.AuditConfig
-import org.cryptobiotic.rlauxe.core.AuditType
+import org.cryptobiotic.rlauxe.workflow.AuditConfig
+import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.corla.estimateSampleSizeSimple
@@ -15,7 +15,8 @@ class TestEstimateSampleSize {
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
-        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it) }
+        val cvrs = test.makeCvrsFromContests()
+        val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
@@ -41,7 +42,7 @@ class TestEstimateSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 1234567890L, quantile=.50)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 1234567890L, fuzzPct = null, quantile=.50)
         val finder = EstimateSampleSize(auditConfig)
 
         contestsUA.forEach { contestUA ->
@@ -49,7 +50,7 @@ class TestEstimateSampleSize {
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
                 //         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round) }
-                val result = finder.simulateSampleSizeAssorter(contestUA, assert.assorter, cvrsUAP,)
+                val result = finder.simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
                 //     riskLimit: Double,
                 //    dilutedMargin: Double,
                 //    gamma: Double = 1.03,

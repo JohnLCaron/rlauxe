@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestCvrBuilders {
@@ -41,17 +41,18 @@ class TestCvrBuilders {
             println("fuzzPct = $fuzzPct")
             val avgRates = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             contests.forEach { contest ->
-                repeat(ntrials) {
-                    val contestUA = ContestUnderAudit(contest.info, cvrs).makeComparisonAssertions(cvrs)
-                    val minAssort = contestUA.minComparisonAssertion().assorter
+                val contestUA = ContestUnderAudit(contest.info, cvrs).makeComparisonAssertions(cvrs)
+                val minAssert = contestUA.minComparisonAssertion()
+                if (minAssert != null) repeat(ntrials) {
+                    val minAssort = minAssert.assorter
                     val samples = PrevSamplesWithRates(minAssort.noerror)
                     var ccount = 0
                     var count = 0
-                    fcvrs.forEachIndexed { idx, it ->
-                        if (it.hasContest(contest.id)) {
-                            samples.addSample(minAssort.bassort(it, cvrs[idx]))
+                    fcvrs.forEachIndexed { idx, fcvr ->
+                        if (fcvr.hasContest(contest.id)) {
+                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx]))
                             ccount++
-                            if (cvrs[idx] != it) count++
+                            if (cvrs[idx] != fcvr) count++
                         }
                     }
                     val fuzz = count.toDouble() / ccount
@@ -70,5 +71,4 @@ class TestCvrBuilders {
             println("  error% = ${avgRates.map { it / (total * fuzzPct) }}")
         }
     }
-
 }

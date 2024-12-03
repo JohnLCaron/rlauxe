@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/01/2024
+last update: 12/02/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -199,6 +199,9 @@ This shows the large difference between a polling audit and a comparison audit a
 
 Except for large N > 50000, polling at margins < 3% needs prohibitively large sample sizes.
 Comparison audits are perhaps useful down to margins = .8% .
+
+"In a card-level comparison audit, the estimated sample size scales with
+the reciprocal of the diluted margin." (STYLISH p.4)
 
 ### Polling audits
 
@@ -419,7 +422,7 @@ so it just makes less evil zombies.
 This gives a much tighter bound when you know what cards/ballots have which contests, since you can restrict your sampling
 to just those contests that are being audited.
 
-"Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling"
+"Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling".
 
 Without CSD "you basically have to pull 20 times the sample size". And yet all the CSD information is there in
 the election system. I'm inclined to say "you have to have CSD" to use our library (effectively).
@@ -428,7 +431,7 @@ If the practical difference is so big, a production library can be more assertiv
 
 We implement only with CSD currently.
 
-See overstatement_assorter() in core/Assertion
+See ComparisonAssorter.overstatementError() in core/Assorter.kt:
 
     assorter that corresponds to normalized overstatement error for an assertion
 
@@ -438,6 +441,20 @@ See overstatement_assorter() in core/Assertion
 
     If `use_style == False`, then if the CVR contains the contest but the MVR does not,
     the MVR is considered to be a non-vote in the contest .
+
+### No Styles
+
+States that perform RLAs have so far drawn the sample of ballot cards to inspect from all the cards cast in the
+election, without regard for the contests those cards contain.
+
+If you dont know what ballots contains what contests, you dont know Nc. All you know is N, typically N >> Nc.
+This is why without CSD, "you basically have to pull 20 times the sample size".
+
+I think you use uniform sampling instead of consistent sampling.
+
+Assume we know Nc. Sample sizes are still huge, because you have to muliply by N / Nc.
+
+If you really dont know where any of the contests are, you cant even hand audit one contest. Seem totally unworkable.
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))

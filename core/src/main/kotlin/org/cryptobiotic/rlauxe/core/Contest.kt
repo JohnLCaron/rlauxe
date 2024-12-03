@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import kotlin.math.min
 
@@ -90,11 +91,12 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     var availableInSample = 0 // number of samples available in the current consistent sampling based on estSampleSize
     var done = false
     var status = TestH0Status.NotStarted // or its own enum ??
+    var estTotalSampleSize = 0 // number of total samples estimated needed (no style)
 
     constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
 
     override fun toString() = buildString {
-        append("${contest.info.name} ($id) ncvrs=$ncvrs est=$estSampleSize")
+        append("${contest.info.name} ($id) Nc=$Nc minMargin=${df(minPollingAssertion()?.margin ?: 0.0)} est=$estSampleSize")
     }
 
     open fun makePollingAssertions(): ContestUnderAudit {

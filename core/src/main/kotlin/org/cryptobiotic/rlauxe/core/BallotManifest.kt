@@ -43,6 +43,11 @@ class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) {
     val phantom = ballot.phantom
 }
 
+// The term ballot style generally refers to the set of contests on a given voter’s ballot. (Ballot
+// style can also encode precinct information, i.e., even if voters in two different precincts are
+// eligible to vote in the same set of contests, ballots for the two precincts are considered to
+// be of two different styles.) Here, we use card style to refer to the set of contests on a given
+// ballot card, and CSD to refer to card-style data for an election. (MoreStyle p.2)
 data class BallotStyle(
     val name: String,
     val id: Int,

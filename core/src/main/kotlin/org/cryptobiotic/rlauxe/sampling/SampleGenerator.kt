@@ -36,8 +36,8 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, 
 }
 
 class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
-    val N = cvrs.size
-    val permutedIndex = MutableList(N) { it }
+    val ncvrs = cvrs.size
+    val permutedIndex = MutableList(ncvrs) { it }
     var idx = 0
 
     init {
@@ -45,7 +45,7 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
     }
 
     override fun sample(): Double {
-        while (idx < N) {
+        while (idx < ncvrs) {
             val cvr = cvrs[permutedIndex[idx++]]
             if (cvr.hasContest(contest.id)) return assorter.assort(cvr)
         }
@@ -59,7 +59,7 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
 
     fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
     fun sampleCount() = cvrs.sumOf { assorter.assort(it) }
-    override fun N() = N
+    override fun N() = ncvrs
 }
 
 //// For comparison audits

@@ -10,7 +10,7 @@ class MakeSampleSizePlots {
 
     @Test
     fun plotComparisonVsPoll() {
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
         val finder = EstimateSampleSize(auditConfig)
         val N = 100000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
@@ -40,7 +40,7 @@ class MakeSampleSizePlots {
         val srts = results.map{ it.makeSRT(N, 0.0, 0.0)}
 
         val dirname = "/home/stormy/temp/estimate"
-        val filename = "ComparisonVsPoll100"
+        val filename = "ComparisonVsPoll1000"
         val writer = SRTcsvWriter("$dirname/${filename}.cvs")
         writer.writeCalculations(srts)
         writer.close()

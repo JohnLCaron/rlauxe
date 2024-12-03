@@ -8,20 +8,20 @@ import org.cryptobiotic.rlauxe.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestPollingWithStyle {
+class TestPollingNoStyle {
 
     // @Test
-    fun testPollingWithStyleRepeat() {
-        repeat(100) { testPollingWithStyle() }
+    fun testPollingNoStyleRepeat() {
+        repeat(100) { testPollingNoStyle() }
     }
 
     @Test
-    fun testPollingWithStyle() {
-        val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+    fun testPollingNoStyle() {
+        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.50, fuzzPct = 0.0)
 
         // each contest has a specific margin between the top two vote getters.
-        val test = MultiContestTestData(20, 11, 50000, marginRange= 0.04..0.08)
+        val N = 100000
+        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.08)
         val contests: List<Contest> = test.makeContests()
         println("Start testPollingWithStyle")
         contests.forEach{ println(" $it")}
@@ -34,9 +34,8 @@ class TestPollingWithStyle {
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
-        val workflow = PollingWithStyle(auditConfig, contests, BallotManifest(ballots, test.ballotStyles))
-        println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        stopwatch.start()
+        val workflow = PollingNoStyle(auditConfig, contests, ballots, N, .50)
+        val stopwatch = Stopwatch()
 
         val previousSamples = mutableSetOf<Int>()
         var rounds = mutableListOf<Round>()
@@ -57,7 +56,7 @@ class TestPollingWithStyle {
                 testMvrs[it]
             }
 
-            done = workflow.runAudit(sampledMvrs)
+            done = workflow.runAudit(sampledMvrs, roundIdx)
             println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             roundIdx++

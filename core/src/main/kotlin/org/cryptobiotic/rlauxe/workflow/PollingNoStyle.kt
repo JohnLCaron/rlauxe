@@ -5,16 +5,21 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 
-class PollingWithStyle(
+// TODO you really need to limit the estimated sample size.
+class PollingNoStyle(
         val auditConfig: AuditConfig,
         contests: List<Contest>, // the contests you want to audit
-        val ballotManifest: BallotManifest,
+        ballots: List<Ballot>,
+        val N: Int, // total number of ballots/cards
+        val maxSamplePercent: Double,
     ) {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, it.Nc) }
     val ballotsUA: List<BallotUnderAudit>
 
     init {
+        require(ballots.size <= N)
         contestsUA.forEach {
+            require(it.Nc <= N)
             checkWinners(it, it.contest.votes.entries.sortedByDescending { it.value })
         }
 
@@ -22,7 +27,7 @@ class PollingWithStyle(
         // phantoms can be CVRs, so dont need CvrIF.
         // val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val prng = Prng(auditConfig.seed)
-        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit( it, prng.next()) }
+        ballotsUA = ballots.map { BallotUnderAudit( it, prng.next()) }
 
         contestsUA.filter{ !it.done }.forEach { contest ->
             contest.makePollingAssertions()
@@ -30,31 +35,60 @@ class PollingWithStyle(
     }
 
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
-        println("EstimateSampleSize.simulateSampleSizePollingContest round $roundIdx")
+        println("PollingNoStyle.chooseSamples round $roundIdx")
 
-        // set contest.sampleSize through simulation.
-        // Uses SimContest to simulate a contest with the same vote totals.
-        // standard: Uses PollWithoutReplacement, then mvr = cvrs
-        // alternative: Uses SimContest to simulate a contest with the same vote totals.
+        // same as with style, depends only on margin
         val sampleSizer = EstimateSampleSize(auditConfig)
         val contestsNotDone = contestsUA.filter{ !it.done }
-
         contestsNotDone.filter{ !it.done }.forEach { contestUA ->
             sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.Nc, roundIdx, show=true)
         }
         val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
 
         // choose samples
-        println("\nconsistentPollingSampling round $roundIdx")
-        val sampleIndices = consistentPollingSampling(contestsUA.filter{ !it.done }, ballotsUA, ballotManifest)
-        println(" PollingWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+        println("\nuniformPollingSampling round $roundIdx")
+        val sampleIndices = uniformPollingSampling(contestsUA.filter{ !it.done }, ballotsUA, roundIdx)
 
+        println("maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
         return sampleIndices
     }
 
-/////////////////////////////////////////////////////////////////////////////////
+    fun uniformPollingSampling(
+        contests: List<ContestUnderAudit>,
+        ballots: List<BallotUnderAudit>, // all the ballots available to sample
+        roundIdx: Int,
+    ): List<Int> {
+        if (ballots.isEmpty()) return emptyList()
 
-    fun runAudit(mvrs: List<Cvr>): Boolean {
+        // scale by proportion of ballots that have this contest
+        contests.forEach {
+            val fac = N / it.Nc.toDouble()
+            val est = (it.estSampleSize * fac).toInt()
+            val estPct = (it.estSampleSize / it.Nc.toDouble())
+            println("  $it: scale=${df(fac)} estTotalNeeded=${est.toInt()}")
+            it.estTotalSampleSize = est
+            if (estPct > maxSamplePercent) {
+                it.done = true
+                it.status = TestH0Status.LimitReached
+            }
+        }
+
+        // get list of ballot indexes sorted by sampleNum
+        val sortedCvrIndices = ballots.indices.sortedBy { ballots[it].sampleNum }
+
+        // take the first estSampleSize of the sorted ballots
+        val simple = roundIdx * N / 10.0
+        //val sampledIndices = sortedCvrIndices.take(estSampleSize.toInt())
+        val sampledIndices = sortedCvrIndices.take(simple.toInt())
+
+        return sampledIndices
+    }
+
+
+/////////////////////////////////////////////////////////////////////////////////
+// same as PollingWithStyle
+
+    fun runAudit(mvrs: List<Cvr>, roundIdx: Int): Boolean {
         val contestsNotDone = contestsUA.filter{ !it.done }
 
         println("auditOneAssertion")
@@ -63,7 +97,7 @@ class PollingWithStyle(
             var allAssertionsDone = true
             contestUA.pollingAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    assertion.status = auditOneAssertion(contestUA, assertion, mvrs)
+                    assertion.status = auditOneAssertion(contestUA, assertion, mvrs, roundIdx)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
             }
@@ -80,13 +114,15 @@ class PollingWithStyle(
         contestUA: ContestUnderAudit,
         assertion: Assertion,
         mvrs: List<Cvr>,
+        roundIdx: Int,
     ): TestH0Status {
         val assorter = assertion.assorter
-        val sampler = if (auditConfig.fuzzPct == null) {
+        /* val sampler = if (auditConfig.fuzzPct == null) {
             PollWithoutReplacement(contestUA, mvrs, assorter)
         } else {
             PollingFuzzSampler(auditConfig.fuzzPct, mvrs, contestUA, assorter)
-        }
+        } */
+        val sampler = PollWithoutReplacement(contestUA, mvrs, assorter)
 
         val eta0 = margin2mean(assertion.margin)
         val minsd = 1.0e-6
@@ -110,14 +146,16 @@ class PollingWithStyle(
         )
 
         // do not terminate on null retject, continue to use all samples
-        val testH0Result = testFn.testH0(contestUA.availableInSample, terminateOnNullReject = false) { sampler.sample() }
+        val maxSamples = mvrs.count { it.hasContest(contestUA.id) }
+        assertion.samplesUsed = maxSamples
+        val testH0Result = testFn.testH0(maxSamples, terminateOnNullReject = false) { sampler.sample() }
         if (!testH0Result.status.fail)  {
             assertion.proved = true
+            assertion.round = roundIdx
         } else {
             println("testH0Result.status = ${testH0Result.status}")
         }
         assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit }
-        assertion.samplesUsed = testH0Result.sampleCount
         assertion.pvalue = testH0Result.pvalues.last()
 
         println(" ${contestUA.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue = ${assertion.pvalue} status = ${testH0Result.status}")
@@ -127,7 +165,9 @@ class PollingWithStyle(
     fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
-            println(" $contest status=${contest.status}")
+            val minAssertion = contest.minPollingAssertion()!!
+            println(" $contest samplesUsed=${minAssertion.samplesUsed} " +
+                    "estTotalSampleSize=${contest.estTotalSampleSize} round=${minAssertion.round} status=${contest.status}")
         }
         println()
     }

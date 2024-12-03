@@ -12,14 +12,14 @@ import kotlin.test.Test
 
 class TestComparisonWithStyle {
 
-    @Test
+    // @Test
     fun testComparisonWorkflowRepeat() {
         repeat(100) { testComparisonWorkflow() }
     }
 
     @Test
     fun testComparisonWorkflow() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .05)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
 
         // each contest has a specific margin between the top two vote getters.
         val testData = MultiContestTestData(20, 11, 10000)

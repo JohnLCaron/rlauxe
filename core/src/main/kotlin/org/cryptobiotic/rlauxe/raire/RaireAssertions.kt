@@ -160,7 +160,7 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     override fun winner() = assertion.winner
     override fun loser() = assertion.loser
 
-    override fun reportedMargin(): Double = 0.0 // TODO
+    override fun reportedAssorterMargin(): Double = 0.0 // TODO
 
     override fun assort(mvr: CvrIF): Double {
         if (mvr.phantom) {

@@ -138,7 +138,7 @@ class ComparisonWithStyle(
     fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
-            println(" $contest minMargin=${df(contest.minComparisonAssertion()?.margin ?: 0.0)} status=${contest.status}")
+            println(" $contest status=${contest.status}")
         }
         println()
     }

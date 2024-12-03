@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.df
 
 // SHANGRLA.make_phantoms(). Probably 2.d ?
 fun makePhantomCvrs(
-    contestas: List<ContestUnderAudit>,
+    contestsUA: List<ContestUnderAudit>,
     prefix: String = "phantom-",
     prng: Prng,
 ): List<CvrUnderAudit> {
@@ -33,7 +33,7 @@ fun makePhantomCvrs(
     // create phantom CVRs as needed for each contest
     val phantombs = mutableListOf<PhantomBuilder>()
 
-    for (contest in contestas) {
+    for (contest in contestsUA) {
         val phantoms_needed = contest.Nc - contest.ncvrs
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
@@ -131,7 +131,7 @@ fun consistentPollingSampling(
         // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
         val ballot = ballots[sidx]
-        val ballotStyle = ballotManifest.getBallotStyleFor(ballot.ballot.ballotStyleId!!)
+        val ballotStyle = ballotManifest.getBallotStyleFor(ballot.ballot.ballotStyleId!!)!!
         // does this cvr contribute to one or more contests that need more samples?
         if (contests.any { contestInProgress(it) && ballotStyle.hasContest(it.id) }) {
             // then use it
@@ -152,6 +152,45 @@ fun consistentPollingSampling(
         contest.availableInSample = currentSizes[contest.id]!!
         if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
     }
+    return sampledIndices
+}
+
+fun uniformPollingSampling(
+    contests: List<ContestUnderAudit>,
+    ballots: List<BallotUnderAudit>, // all the ballots available to sample
+    samplePctCutoff: Double,
+    N: Int,
+    roundIdx: Int,
+): List<Int> {
+    if (ballots.isEmpty()) return emptyList()
+
+    // est = rho / dilutedMargin
+    // dilutedMargin = (vw - vl)/ Nc
+    // est = rho * Nc / (vw - vl)
+    // totalEst = est * N / Nc = rho * N / (vw - vl) = rho / fullyDilutedMargin
+    // fullyDilutedMargin = (vw - vl)/ N
+
+    // scale by proportion of ballots that have this contest
+    contests.forEach {
+        val fac = N / it.Nc.toDouble()
+        val est = (it.estSampleSize * fac).toInt()
+        val estPct = (it.estSampleSize / it.Nc.toDouble())
+        println("  $it: scale=${df(fac)} estTotalNeeded=${est.toInt()}")
+        it.estTotalSampleSize = est
+        if (estPct > samplePctCutoff) {
+            it.done = true
+            it.status = TestH0Status.LimitReached
+        }
+    }
+
+    // get list of ballot indexes sorted by sampleNum
+    val sortedCvrIndices = ballots.indices.sortedBy { ballots[it].sampleNum }
+
+    // take the first estSampleSize of the sorted ballots
+    val simple = roundIdx * N / 10.0
+    //val sampledIndices = sortedCvrIndices.take(estSampleSize.toInt())
+    val sampledIndices = sortedCvrIndices.take(simple.toInt())
+
     return sampledIndices
 }
 

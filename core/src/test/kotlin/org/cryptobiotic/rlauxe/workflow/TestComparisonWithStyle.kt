@@ -19,7 +19,7 @@ class TestComparisonWithStyle {
 
     @Test
     fun testComparisonWorkflow() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = .01)
 
         // each contest has a specific margin between the top two vote getters.
         val testData = MultiContestTestData(20, 11, 10000)
@@ -67,7 +67,7 @@ class TestComparisonWithStyle {
     @Test
     fun testRaireWorkflow() {
         val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, fuzzPct=null, quantile=.80)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct=null, quantile=.80)
 
          // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"

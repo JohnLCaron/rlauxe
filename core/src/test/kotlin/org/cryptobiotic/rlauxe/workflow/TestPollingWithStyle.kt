@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class TestPollingWithStyle {
 
-    // @Test
+    @Test
     fun testPollingWithStyleRepeat() {
         repeat(100) { testPollingWithStyle() }
     }
@@ -18,12 +18,13 @@ class TestPollingWithStyle {
     @Test
     fun testPollingWithStyle() {
         val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, fuzzPct = .01)
 
         // each contest has a specific margin between the top two vote getters.
-        val test = MultiContestTestData(20, 11, 50000, marginRange= 0.04..0.08)
+        val N = 50000
+        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.10)
         val contests: List<Contest> = test.makeContests()
-        println("Start testPollingWithStyle")
+        println("Start testPollingWithStyle N=$N")
         contests.forEach{ println(" $it")}
         println()
 
@@ -34,8 +35,7 @@ class TestPollingWithStyle {
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
-        val workflow = PollingWithStyle(auditConfig, contests, BallotManifest(ballots, test.ballotStyles))
-        println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+        val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, test.ballotStyles), N)
         stopwatch.start()
 
         val previousSamples = mutableSetOf<Int>()
@@ -57,7 +57,7 @@ class TestPollingWithStyle {
                 testMvrs[it]
             }
 
-            done = workflow.runAudit(sampledMvrs)
+            done = workflow.runAudit(sampledMvrs, roundIdx)
             println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             roundIdx++

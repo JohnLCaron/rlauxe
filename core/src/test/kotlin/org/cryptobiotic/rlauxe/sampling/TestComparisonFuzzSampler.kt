@@ -10,7 +10,7 @@ class TestComparisonFuzzSampler {
 
     @Test
     fun generateErrorTable() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials = 1000)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials = 1000)
         val N = 100000
 
         val margins = listOf(.01) // listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
@@ -234,7 +234,7 @@ class TestComparisonFuzzSampler {
         }
         println("total ncvrs = ${cvrs.size}\n")
 
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = secureRandom.nextLong(), quantile=.50, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = secureRandom.nextLong(), quantile=.50, fuzzPct = .01)
 
         contestsUA.forEach { contestUA ->
             val sampleSizes = mutableListOf<Pair<Int, Double>>()

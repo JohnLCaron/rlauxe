@@ -10,7 +10,7 @@ class MakeSampleSizePlots {
 
     @Test
     fun plotComparisonVsPoll() {
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
         val finder = EstimateSampleSize(auditConfig)
         val N = 100000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
@@ -51,7 +51,7 @@ class MakeSampleSizePlots {
 
     @Test
     fun plotVsFuzz() {
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 100)
         val N = 10000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
@@ -92,8 +92,7 @@ class MakeSampleSizePlots {
 
     @Test
     fun compareVsFuzz() {
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 100)
-        val finder = EstimateSampleSize(auditConfig)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=null, ntrials = 100)
         val N = 100000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
@@ -109,12 +108,14 @@ class MakeSampleSizePlots {
             val cvrs = fcontest.makeCvrs()
             contestUA.makeComparisonAssertions(cvrs)
             val cassort = contestUA.minComparisonAssertion()!!.assorter
-            tasks.add( ComparisonTask("Comparison (standard): margin = $margin", finder, contestUA, cassort, cvrs))
+            tasks.add( ComparisonTask("Comparison (standard): margin = $margin", EstimateSampleSize(auditConfig), contestUA, cassort, cvrs))
 
             // alternative
-            tasks.add( ComparisonAltTask("Comparison fuzz=.01: margin = $margin", finder, fuzzPct=.01, contestUA, cassort, cvrs))
+            val configAlt1 = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 100)
+            tasks.add( ComparisonTask("Comparison fuzz=.01: margin = $margin", EstimateSampleSize(configAlt1), contestUA, cassort, cvrs))
 
-            tasks.add( ComparisonAltTask("Comparison fuzz=.001: margin = $margin", finder, fuzzPct=.001, contestUA, cassort, cvrs))
+            val configAlt2 = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=.001, ntrials = 100)
+            tasks.add( ComparisonTask("Comparison fuzz=.001: margin = $margin", EstimateSampleSize(configAlt2),  contestUA, cassort, cvrs))
         }
         // run tasks concurrently
         val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
@@ -133,7 +134,7 @@ class MakeSampleSizePlots {
     }
 
     @Test
-        fun readCompareVsFuzz() {
+    fun readCompareVsFuzz() {
         val dirname = "/home/stormy/temp/estimate"
         val filename = "ComparisonStandardVsFuzz"
 
@@ -149,7 +150,7 @@ class MakeSampleSizePlots {
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
         val finder = EstimateSampleSize(auditConfig)
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
@@ -193,7 +194,7 @@ class MakeSampleSizePlots {
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct=.01, ntrials = 1000)
         val finder = EstimateSampleSize(auditConfig)
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
@@ -234,6 +235,46 @@ class MakeSampleSizePlots {
         val plotter = EstimateSampleSize(dirName, filename)
         plotter.showFuzzedSamples()
     }
+
+    @Test
+    fun plotPollingNoStyle() {
+        val Nc = 10000
+        val Ns = listOf(10000, 20000, 50000, 100000)
+        val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 123556667890L, quantile=.50, fuzzPct=0.0, ntrials = 10)
+        val finder = EstimateSampleSize(auditConfig)
+        println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile}")
+
+        val tasks = mutableListOf<ConcurrentTask>()
+        Ns.forEach { N ->
+            margins.forEach { margin ->
+                val fcontest = TestContest(0, 4, margin)
+                fcontest.ncards = Nc
+                val contest = fcontest.makeContest()
+                val cvrs = fcontest.makeCvrs()
+
+                print("margin = $margin ${contest.votes} Nc=$Nc N=$N")
+                val contestUA = ContestUnderAudit(contest, Nc)
+                contestUA.makePollingAssertions()
+                val assort = contestUA.minPollingAssertion()!!.assorter
+                val standardEstimator = EstimateSampleSize(auditConfig)
+                tasks.add( PollingNoStyleTask("Polling (no styles): margin=$margin N=$N", standardEstimator, contestUA, assort, Nc, N))
+            }
+        }
+        // run tasks concurrently
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val srts = results.map{ it.makeSRT(Nc, 0.0, 0.0)}
+
+        val dirName = "/home/stormy/temp/estimate"
+        val filename = "PollingNoStyle"
+        val writer = SRTcsvWriter("$dirName/${filename}.cvs")
+        writer.writeCalculations(srts)
+        writer.close()
+
+        val plotter = EstimateSampleSize(dirName, filename)
+        plotter.showFuzzedSamples()
+    }
 }
 
 class BettingTask(val name: String,
@@ -265,7 +306,14 @@ class AlphaTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return finder.simulateSampleSizeAlphaMart(sampleFn, margin, upperBound, Nc, Nc, otherParameters)
+        //         sampleFn: SampleGenerator,
+        //        margin: Double,
+        //        upperBound: Double,
+        //        maxSamples: Int,
+        //        startingTestStatistic: Double = 1.0,
+        //        Nc: Int,
+        //        moreParameters: Map<String, Double> = emptyMap(),
+        return finder.simulateSampleSizeAlphaMart(sampleFn, margin, upperBound, maxSamples=Nc, Nc=Nc, moreParameters=otherParameters)
     }
 }
 
@@ -277,6 +325,27 @@ class PollingTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
+        //         sampleFn: SampleGenerator,
+        //        margin: Double,
+        //        upperBound: Double,
+        //        maxSamples: Int,
+        //        startingTestStatistic: Double = 1.0,
+        //        Nc: Int,
+        //        moreParameters: Map<String, Double> = emptyMap(),
+        return finder.simulateSampleSizePollingAssorter(contestUA, assort, Nc)
+    }
+}
+
+class PollingNoStyleTask(val name: String,
+                  val finder: EstimateSampleSize,
+                  val contestUA: ContestUnderAudit,
+                  val assort: AssorterFunction,
+                  val Nc: Int,
+    val N: Int
+): ConcurrentTask {
+    override fun name() = name
+    override fun run() : RunTestRepeatedResult {
+        // TODO
         return finder.simulateSampleSizePollingAssorter(contestUA, assort, Nc)
     }
 }
@@ -290,21 +359,6 @@ class ComparisonTask(val name: String,
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         return finder.simulateSampleSizeAssorter(contestUA, cassort, cvrs)
-    }
-}
-
-class ComparisonAltTask(
-    val name: String,
-    val finder: EstimateSampleSize,
-    val fuzzPct: Double,
-    val contestUA: ContestUnderAudit,
-    val cassort: ComparisonAssorter,
-    val cvrs: List<Cvr>,
-) : ConcurrentTask {
-    override fun name() = name
-    override fun run(): RunTestRepeatedResult {
-        // TODO stop using this
-        return finder.simulateSampleSizeAssorterAlt(fuzzPct, contestUA, cassort, cvrs, mapOf("fuzzPct" to fuzzPct))
     }
 }
 

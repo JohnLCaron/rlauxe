@@ -106,8 +106,7 @@ fun consistentCvrSampling(
         if (currentSizes[contest.id] == null)
             println("hey")
         contest.availableInSample = currentSizes[contest.id]!!
-        if (show) println(" ${contest} minMargin=${df(contest.minComparisonAssertion()?.margin ?: 0.0)} " +
-                "availableInSample=${contest.availableInSample}")
+        if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
     }
     return sampledIndices
 }
@@ -122,7 +121,7 @@ fun consistentPollingSampling(
     val currentSizes = mutableMapOf<Int, Int>()
     fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.estSampleSize
 
-    // get list of cvr indexes sorted by sampleNum
+    // get list of ballot indexes sorted by sampleNum
     val sortedCvrIndices = ballots.indices.sortedBy { ballots[it].sampleNum }
 
     val sampledIndices = mutableListOf<Int>()
@@ -151,8 +150,7 @@ fun consistentPollingSampling(
         if (currentSizes[contest.id] == null)
             println("hey")
         contest.availableInSample = currentSizes[contest.id]!!
-        if (show) println(" ${contest} minMargin=${df(contest.minPollingAssertion()?.margin ?: 0.0)} " +
-                "availableInSample=${contest.availableInSample}")
+        if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
     }
     return sampledIndices
 }

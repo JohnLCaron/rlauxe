@@ -11,23 +11,21 @@ interface AssorterFunction {
     fun winner(): Int
     fun loser(): Int
 
-    // not sure if this is the diluted margin. might just be the margin.
     // from SuperSimple:
     // The number µ is the “diluted margin”: the smallest margin of victory in votes among the contests, divided by the
-    // total number of ballots cast across all the contests.
+    // total number of ballots cast across all the contests. (p. 1)
     // The diluted margin µ is the smallest margin in votes among the contests under audit, divided by the total
-    // number of ballots cast across all the contests under audit.
-
+    // number of ballots cast across all the contests under audit. (p. 4)
     // The reported margin of reported winner w ∈ Wc over reported loser l ∈ Lc in contest c is
-    //    Vwl ≡ Sum (vpw − vpl ), p=1..N = Sum (vpw) − Sum( vpl ) = votes(winner) - votes(loser)
+    //    Vwl ≡ Sum (vpw − vpl ), p=1..N = Sum (vpw) − Sum( vpl ) = votes(winner) - votes(loser) (p. 5)
 
     // Define v ≡ 2Āc − 1, the reported assorter margin. In a two-candidate plurality contest, v
     // is the fraction of ballot cards with valid votes for the reported winner, minus the fraction
     // with valid votes for the reported loser. This is the diluted margin of [22,12]. (Margins are
     // traditionally calculated as the difference in votes divided by the number of valid votes.
     // Diluted refers to the fact that the denominator is the number of ballot cards, which is
-    // greater than or equal to the number of valid votes.)
-    fun reportedMargin(): Double
+    // greater than or equal to the number of valid votes.) (SHANGRLA p. 10)
+    fun reportedAssorterMargin(): Double
 }
 
 /** See SHANGRLA, section 2.1. */
@@ -43,7 +41,7 @@ data class PluralityAssorter(val contest: Contest, val winner: Int, val loser: I
     override fun winner() = winner
     override fun loser() = loser
 
-    override fun reportedMargin(): Double {
+    override fun reportedAssorterMargin(): Double {
         val winnerVotes = contest.votes[winner] ?: 0
         val loserVotes = contest.votes[loser] ?: 0
         return (winnerVotes - loserVotes) / contest.Nc.toDouble()  // or divide by total votes ??
@@ -66,7 +64,7 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
     override fun loser() = -1 // everyone else is a loser
 
     // TODO how to derive the assort mean for estimation ??
-    override fun reportedMargin(): Double {
+    override fun reportedAssorterMargin(): Double {
         val winnerVotes = contest.votes[winner] ?: 0
         val loserVotes = contest.votes.filter { it.key != winner }.values.sum()
         val nuetralVotes = contest.Nc - winnerVotes - loserVotes
@@ -84,15 +82,16 @@ data class Assertion(
 ) {
     val winner = assorter.winner()
     val loser = assorter.loser()
-    val margin = assorter.reportedMargin()
+    val margin = assorter.reportedAssorterMargin()
 
     // TODO is it ok to have this state ??
     var status = TestH0Status.NotStarted
     var proved = false
-    var estSampleSize = 0  // estimated sample size
+    var estSampleSize = 0  // estimated sample size; depends only on the margin
     var samplesNeeded = 0 // sample count when pvalue < riskLimit
     var samplesUsed = 0 // sample count when testH0 terminates
     var pvalue = 0.0
+    var round = 0
 
     override fun toString() = "'${contest.info.name}' (${contest.id}) ${assorter.desc()} margin=$margin"
 }

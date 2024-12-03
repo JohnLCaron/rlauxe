@@ -50,13 +50,6 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
                 }
                 if (show) println("  ${contestUA.name} ${assert}")
             }
-
- /*               val result = simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples)
-                val size = result.findQuantile(auditConfig.quantile)
-                assert.estSampleSize = size + (roundIdx - 1) * 100  // TODO how to increase sample size ??
-                sampleSizes.add(assert.estSampleSize)
-                if (show) println(" simulateSampleSizes ${assert} est=$size failed=${df(result.failPct())}")
-            } */
         }
         contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
         if (show) println(" ${contestUA}")
@@ -69,7 +62,7 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         assorter: AssorterFunction,
         maxSamples: Int,
     ): RunTestRepeatedResult {
-        val margin = assorter.reportedMargin()
+        val margin = assorter.reportedAssorterMargin()
         val simContest = SimContest(contestUA.contest, assorter)
         val cvrs = simContest.makeCvrs()
         require(cvrs.size == contestUA.ncvrs)

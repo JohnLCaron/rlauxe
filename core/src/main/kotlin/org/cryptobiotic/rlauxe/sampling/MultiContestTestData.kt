@@ -22,7 +22,7 @@ private val debug = false
 // It can create cvrs that reflect the contests' exact votes.
 data class MultiContestTestData(
     val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
-    val debug: Boolean = false, val minMargin: Double = 0.01,
+    val debug: Boolean = false, val marginRange: ClosedRange<Double> = 0.01..0.03,
 ) {
     val fcontests: List<TestContest>
     val ballotStyles: List<BallotStyle>
@@ -34,10 +34,10 @@ data class MultiContestTestData(
         require(nballotStyles > 0)
         require(totalBallots > nballotStyles * ncontest) // TODO
 
-        // between 2 and 4 candidates, margin is a random number between minMargin and minMargin + .02
+        // between 2 and 4 candidates, margin is a random number in marginRange
         fcontests = List(ncontest) { it }.map {
             val ncands = max(Random.nextInt(5), 2)
-            TestContest(it, ncands, minMargin + Random.nextDouble(0.02))
+            TestContest(it, ncands, marginRange.start + Random.nextDouble(marginRange.endInclusive - marginRange.start))
         }
 
         // every contest is in between 1 and nballotStyles/4 ballot styles, randomly chosen

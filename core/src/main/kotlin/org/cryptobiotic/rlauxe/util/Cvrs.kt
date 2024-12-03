@@ -65,7 +65,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 class SimContest(val contest: Contest, val assorter: AssorterFunction) {
     val info = contest.info
     val ncands = info.candidateIds.size
-    val margin = assorter.reportedMargin()
+    val margin = assorter.reportedAssorterMargin()
     val ncards = contest.votes.map { it.value }.sum()
 
     val votes: Map<Int, Int> = contest.votes

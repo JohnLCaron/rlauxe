@@ -22,13 +22,16 @@ class BettingMart(
         require(upperBound > 0.0)
     }
 
-    // TODO merge with alpha_mart
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
-    override fun testH0(maxSample: Int, terminateOnNullReject: Boolean, showDetails: Boolean, drawSample : () -> Double) : TestH0Result {
+    override fun testH0(maxSample: Int,
+                        terminateOnNullReject: Boolean,
+                        showDetails: Boolean,
+                        startingTestStatistic: Double,
+                        drawSample : () -> Double) : TestH0Result {
         require(maxSample <= Nc)
 
         var sampleNumber = 0        // – j ← 0: sample number
-        var testStatistic = 1.0     // – T ← 1: test statistic
+        var testStatistic = startingTestStatistic     // – T ← 1: test statistic
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
         val prevSamples = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
 

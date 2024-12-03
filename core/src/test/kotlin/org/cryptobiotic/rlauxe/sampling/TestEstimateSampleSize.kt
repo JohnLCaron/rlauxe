@@ -42,7 +42,7 @@ class TestEstimateSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, riskLimit=0.05, seed = 1234567890L, fuzzPct = null, quantile=.50)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 1234567890L, fuzzPct = null, quantile=.50)
         val finder = EstimateSampleSize(auditConfig)
 
         contestsUA.forEach { contestUA ->

@@ -24,17 +24,17 @@ package org.cryptobiotic.rlauxe.core
 
 data class BallotManifest(
     val ballots: List<Ballot>,
-    val ballotStyles: List<BallotStyle>
+    val ballotStyles: List<BallotStyle> // empty if style info not available, auditConfig.hasStyles = false
 ) {
-    fun getBallotStyleFor(ballotStyleId: Int): BallotStyle {
-        return ballotStyles.find { it.id == ballotStyleId }!!
+    fun getBallotStyleFor(ballotStyleId: Int): BallotStyle? {
+        return ballotStyles.find { it.id == ballotStyleId }
     }
 }
 
 data class Ballot(
     val id: String,
     val phantom: Boolean = false,
-    val ballotStyleId: Int?,
+    val ballotStyleId: Int?, // if hasStyles
 )
 
 class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) {

@@ -279,6 +279,7 @@ fun runOneAssertionAudit(
         Nc = contestUA.Nc,
         noerror = assorter.noerror,
         upperBound = assorter.upperBound,
+        riskLimit = auditConfig.riskLimit,
         withoutReplacement = true
     )
 

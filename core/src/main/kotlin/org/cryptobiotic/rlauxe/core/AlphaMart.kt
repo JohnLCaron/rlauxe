@@ -103,9 +103,10 @@ class AlphaMart(
         maxSample: Int,
         terminateOnNullReject: Boolean,
         showDetails: Boolean,
+        startingTestStatistic: Double,
         drawSample: () -> Double,
     ): TestH0Result {
-        return betting.testH0(maxSample, terminateOnNullReject, showDetails, drawSample)
+        return betting.testH0(maxSample, terminateOnNullReject, showDetails, startingTestStatistic, drawSample)
     }
 }
 

@@ -46,6 +46,7 @@ fun runTestRepeated(
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     showDetails: Boolean = false,
+    startingTestStatistic: Double = 1.0,
     margin: Double?,
     ): RunTestRepeatedResult {
 
@@ -63,11 +64,11 @@ fun runTestRepeated(
 
     repeat(ntrials) {
         drawSample.reset()
-        val testH0Result = testFn.testH0(
-            maxSamples,
-            terminateOnNullReject = terminateOnNullReject,
-            showDetails = showDetails
-        ) { drawSample.sample() }
+        val testH0Result = testFn.testH0(maxSamples,
+            terminateOnNullReject=terminateOnNullReject,
+            showDetails = showDetails,
+            startingTestStatistic = startingTestStatistic) { drawSample.sample() }
+
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
         if (testH0Result.status.fail) {

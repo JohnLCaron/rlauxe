@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/02/2024
+last update: 12/03/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -29,11 +29,13 @@ Table of Contents
     * [Estimating Sample sizes](#estimating-sample-sizes)
     * [Consistent Sampling](#consistent-sampling)
     * [Use Styles](#use-styles)
+    * [No Styles](#no-styles)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
+    * [estimate comparison error rates](#estimate-comparison-error-rates)
   * [Notes](#notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
@@ -450,9 +452,20 @@ election, without regard for the contests those cards contain.
 If you dont know what ballots contains what contests, you dont know Nc. All you know is N, typically N >> Nc.
 This is why without CSD, "you basically have to pull 20 times the sample size".
 
-I think you use uniform sampling instead of consistent sampling.
+In reality, we probably know Nc. Sample sizes are still huge, because you have to muliply by N / Nc. And then it works out
+that Nc cancels out:
 
-Assume we know Nc. Sample sizes are still huge, because you have to muliply by N / Nc.
+        sampleEstimate = rho / dilutedMargin                  // (SuperSimple p. 4)
+        dilutedMargin = (vw - vl)/ Nc
+        sampleEstimate = rho * Nc / (vw - vl)
+        totalEstimate = sampleEstimate * N / Nc               // must scale by proportion of ballots with that contest
+                      = rho * N / (vw - vl) 
+                      = rho / fullyDilutedMargin
+        fullyDilutedMargin = (vw - vl)/ N
+
+So sample sizes are still huge, because you have to multiply by N / Nc.
+
+Use uniform sampling instead of consistent sampling.
 
 If you really dont know where any of the contests are, you cant even hand audit one contest. Seem totally unworkable.
 
@@ -578,6 +591,10 @@ From STYLISH paper:
 
 AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
 total_size estimate, but not do the consistent sampling. Also maybe only works whne you use sampleThreshold ??
+
+### estimate comparison error rates
+
+SHANGRLA has guesses for p1,p2,p3,p4. We do a blanket fuzz, and simulate the errors by ncandidates in a contest, then use those.
 
 ## Notes
 

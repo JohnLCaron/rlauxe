@@ -10,20 +10,20 @@ import kotlin.test.Test
 
 class TestPollingNoStyle {
 
-    // @Test
+    @Test
     fun testPollingNoStyleRepeat() {
         repeat(100) { testPollingNoStyle() }
     }
 
     @Test
     fun testPollingNoStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, riskLimit=0.05, seed = 12356667890L, quantile=.50, fuzzPct = 0.0)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, fuzzPct = 0.0)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
-        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.08)
+        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.10)
         val contests: List<Contest> = test.makeContests()
-        println("Start testPollingWithStyle")
+        println("Start testPollingNoStyle N=$N")
         contests.forEach{ println(" $it")}
         println()
 
@@ -34,7 +34,7 @@ class TestPollingNoStyle {
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
-        val workflow = PollingNoStyle(auditConfig, contests, ballots, N, .50)
+        val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, emptyList()), N)
         val stopwatch = Stopwatch()
 
         val previousSamples = mutableSetOf<Int>()

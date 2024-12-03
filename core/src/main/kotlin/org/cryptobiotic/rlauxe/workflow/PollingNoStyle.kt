@@ -27,9 +27,9 @@ class PollingNoStyle(
         // phantoms can be CVRs, so dont need CvrIF.
         // val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val prng = Prng(auditConfig.seed)
-        ballotsUA = ballots.map { BallotUnderAudit( it, prng.next()) }
+        ballotsUA = ballots.map { BallotUnderAudit(it, prng.next()) }
 
-        contestsUA.filter{ !it.done }.forEach { contest ->
+        contestsUA.filter { !it.done }.forEach { contest ->
             contest.makePollingAssertions()
         }
     }
@@ -39,15 +39,15 @@ class PollingNoStyle(
 
         // same as with style, depends only on margin
         val sampleSizer = EstimateSampleSize(auditConfig)
-        val contestsNotDone = contestsUA.filter{ !it.done }
-        contestsNotDone.filter{ !it.done }.forEach { contestUA ->
-            sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, contestUA.Nc, roundIdx, show=true)
+        val contestsNotDone = contestsUA.filter { !it.done }
+        contestsNotDone.filter { !it.done }.forEach { contestUA ->
+            sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, roundIdx, show = true)
         }
         val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
 
         // choose samples
         println("\nuniformPollingSampling round $roundIdx")
-        val sampleIndices = uniformPollingSampling(contestsUA.filter{ !it.done }, ballotsUA, roundIdx)
+        val sampleIndices = uniformPollingSampling(contestsUA.filter { !it.done }, ballotsUA, roundIdx)
 
         println("maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
         return sampleIndices
@@ -59,6 +59,12 @@ class PollingNoStyle(
         roundIdx: Int,
     ): List<Int> {
         if (ballots.isEmpty()) return emptyList()
+
+        // est = rho / dilutedMargin
+        // dilutedMargin = (vw - vl)/ Nc
+        // est = rho * Nc / (vw - vl)
+        // totalEst = est * N / Nc = rho * N / (vw - vl) = rho / fullyDilutedMargin
+        // fullyDilutedMargin = (vw - vl)/ N
 
         // scale by proportion of ballots that have this contest
         contests.forEach {
@@ -84,9 +90,24 @@ class PollingNoStyle(
         return sampledIndices
     }
 
+    fun showResults() {
+        println("Audit results")
+        contestsUA.forEach{ contest ->
+            val minAssertion = contest.minPollingAssertion()!!
+            println(" $contest samplesUsed=${minAssertion.samplesUsed} " +
+                    "estTotalSampleSize=${contest.estTotalSampleSize} round=${minAssertion.round} status=${contest.status}")
+        }
+        println()
+    }
+
+    fun runAudit(mvrs: List<Cvr>, roundIdx: Int): Boolean {
+        return runAudit(auditConfig, contestsUA, mvrs, roundIdx)
+    }
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////
-// same as PollingWithStyle
+/* same as PollingWithStyle
 
     fun runAudit(mvrs: List<Cvr>, roundIdx: Int): Boolean {
         val contestsNotDone = contestsUA.filter{ !it.done }
@@ -162,13 +183,7 @@ class PollingNoStyle(
         return testH0Result.status
     }
 
-    fun showResults() {
-        println("Audit results")
-        contestsUA.forEach{ contest ->
-            val minAssertion = contest.minPollingAssertion()!!
-            println(" $contest samplesUsed=${minAssertion.samplesUsed} " +
-                    "estTotalSampleSize=${contest.estTotalSampleSize} round=${minAssertion.round} status=${contest.status}")
-        }
-        println()
-    }
+
 }
+
+ */

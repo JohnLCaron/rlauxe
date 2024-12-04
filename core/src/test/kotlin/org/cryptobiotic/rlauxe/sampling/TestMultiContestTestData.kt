@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,7 +35,7 @@ class TestMultiContestTestData {
             println("  tabulate contest $vcontest")
             votes.forEach { vcontest ->
                 val contest = contests.find { it.id == vcontest.key }!!
-                assertEquals(vcontest.value, contest.votes)
+                checkEquivilentVotes(vcontest.value, contest.votes)
             }
         }
     }

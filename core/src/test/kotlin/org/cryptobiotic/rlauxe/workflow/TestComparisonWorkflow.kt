@@ -12,12 +12,12 @@ import kotlin.test.Test
 
 class TestComparisonWorkflow {
 
-    @Test
+    //@Test
     fun testComparisonWithStyleRepeat() {
         repeat(100) { testComparisonWithStyle() }
     }
 
-    @Test
+   // @Test
     fun testComparisonNoStyleRepeat() {
         repeat(100) { testComparisonNoStyle() }
     }

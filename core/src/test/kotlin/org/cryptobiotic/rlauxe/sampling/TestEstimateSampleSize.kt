@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.test.Test
 
-
 class TestEstimateSampleSize {
     @Test
     fun testFindSampleSize() {

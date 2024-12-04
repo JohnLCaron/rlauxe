@@ -18,7 +18,6 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
@@ -32,7 +31,6 @@ import org.cryptobiotic.rlauxe.plots.plotTFdiffSuccessDecile
 import org.cryptobiotic.rlauxe.plots.plotTFsuccessDecile
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
-import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 
@@ -328,7 +326,7 @@ class CompareAuditTypeWithErrors {
 
         contestUA.makeComparisonAssertions(cvrs)
         val compareAssertion = contestUA.comparisonAssertions.first()
-        val compareAssorter = compareAssertion.assorter
+        val compareAssorter = compareAssertion.cassorter
 
         val comparisonSample = ComparisonWithErrors(cvrs, compareAssorter, theta)
         val mvrs = comparisonSample.mvrs

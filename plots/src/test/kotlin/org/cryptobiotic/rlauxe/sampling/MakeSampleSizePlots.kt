@@ -32,7 +32,7 @@ class MakeSampleSizePlots {
             // comparison
             val cvrs = fcontest.makeCvrs()
             contestUA.makeComparisonAssertions(cvrs)
-            val cassort = contestUA.minComparisonAssertion()!!.assorter
+            val cassort = contestUA.minComparisonAssertion()!!.cassorter
             tasks.add( ComparisonTask("Comparison: margin = $margin", finder, contestUA, cassort, cvrs))
         }
         // run tasks concurrently
@@ -45,7 +45,7 @@ class MakeSampleSizePlots {
         writer.writeCalculations(srts)
         writer.close()
 
-        val plotter = EstimateSampleSize(dirname, filename)
+        val plotter = PlotSampleSizes(dirname, filename)
         plotter.showSamples( catfld = { if (it.isPolling) "polling" else "comparison"})
     }
 
@@ -84,7 +84,7 @@ class MakeSampleSizePlots {
         writer.writeCalculations(srts)
         writer.close()
 
-        val plotter = EstimateSampleSize(dirname, filename)
+        val plotter = PlotSampleSizes(dirname, filename)
         plotter.showSamples( catfld = {
             if (it.fuzzPct == 0.0) "standard" else "fuzz=${it.fuzzPct}"}
         )
@@ -107,7 +107,7 @@ class MakeSampleSizePlots {
 
             val cvrs = fcontest.makeCvrs()
             contestUA.makeComparisonAssertions(cvrs)
-            val cassort = contestUA.minComparisonAssertion()!!.assorter
+            val cassort = contestUA.minComparisonAssertion()!!.cassorter
             tasks.add( ComparisonTask("Comparison (standard): margin = $margin", EstimateSampleSize(auditConfig), contestUA, cassort, cvrs))
 
             // alternative
@@ -127,7 +127,7 @@ class MakeSampleSizePlots {
         writer.writeCalculations(srts)
         writer.close()
 
-        val plotter = EstimateSampleSize(dirname, filename)
+        val plotter = PlotSampleSizes(dirname, filename)
         plotter.showSamples( catfld = {
             if (it.fuzzPct == 0.0) "standard" else "fuzz=${it.fuzzPct}"}
         )
@@ -138,7 +138,7 @@ class MakeSampleSizePlots {
         val dirname = "/home/stormy/temp/estimate"
         val filename = "ComparisonStandardVsFuzz"
 
-        val plotter = EstimateSampleSize(dirname, filename)
+        val plotter = PlotSampleSizes(dirname, filename)
         plotter.showSamples( catfld = {
             if (it.fuzzPct == 0.0) "standard" else "fuzz=${it.fuzzPct}"}
         )
@@ -184,7 +184,7 @@ class MakeSampleSizePlots {
         writer.writeCalculations(srts)
         writer.close()
 
-        val plotter = EstimateSampleSize(dirName, filename)
+        val plotter = PlotSampleSizes(dirName, filename)
         plotter.showFuzzedSamples()
     }
 
@@ -211,7 +211,7 @@ class MakeSampleSizePlots {
 
                 // comparison; regen mvrs each repition to smoothe things out
                 contestUA.makeComparisonAssertions(cvrs)
-                val minAssort = contestUA.minComparisonAssertion()!!.assorter
+                val minAssort = contestUA.minComparisonAssertion()!!.cassorter
                 val sampleFn = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
 
                 val otherParameters = mapOf("fuzzPct" to fuzzPct)
@@ -232,7 +232,7 @@ class MakeSampleSizePlots {
         writer.writeCalculations(srts)
         writer.close()
 
-        val plotter = EstimateSampleSize(dirName, filename)
+        val plotter = PlotSampleSizes(dirName, filename)
         plotter.showFuzzedSamples()
     }
 
@@ -272,7 +272,7 @@ class MakeSampleSizePlots {
         writer.writeCalculations(srts)
         writer.close()
 
-        val plotter = EstimateSampleSize(dirName, filename)
+        val plotter = PlotSampleSizes(dirName, filename)
         plotter.showFuzzedSamples()
     }
 }
@@ -291,7 +291,7 @@ class BettingTask(val name: String,
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         //  this uses auditConfig p1,,p4 to set apriori error rates. should be based on fuzzPct i think
-        return simulateSampleSizeBetaMart(finder.auditConfig, sampleFn, margin, noerror, upperBound, Nc, Nc, errorRates, otherParameters)
+        return simulateSampleSizeBetaMart(finder.auditConfig, sampleFn, margin, noerror, upperBound, Nc, Nc, errorRates, moreParameters=otherParameters)
     }
 }
 
@@ -358,7 +358,7 @@ class ComparisonTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return finder.simulateSampleSizeAssorter(contestUA, cassort, cvrs)
+        return finder.simulateSampleSizeComparisonAssorter(contestUA, cassort, cvrs)
     }
 }
 

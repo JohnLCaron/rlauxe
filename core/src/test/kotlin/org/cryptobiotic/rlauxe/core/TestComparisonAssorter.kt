@@ -291,10 +291,10 @@ class TestComparisonAssorter {
         val contest = ContestUnderAudit(info, cvrs)
         val contestAU = contest.makeComparisonAssertions(cvrs)
         val compareAssertion = contestAU.comparisonAssertions.first()
-        val compareAssorter1 = compareAssertion.assorter
+        val compareAssorter1 = compareAssertion.cassorter
 
         // check the same
-        val compareAssorter2 = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs).comparisonAssertions.first().assorter
+        val compareAssorter2 = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs).comparisonAssertions.first().cassorter
         assertEquals(compareAssorter1, compareAssorter2)
 
         // check assort values for ComparisonSamplerSimulation

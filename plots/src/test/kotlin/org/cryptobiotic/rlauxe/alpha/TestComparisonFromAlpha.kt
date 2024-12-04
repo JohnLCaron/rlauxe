@@ -489,12 +489,12 @@ class TestComparisonFromAlpha {
 
             for (eta in etas) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
+                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
                     maxSamples = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareAssertion.assorter.upperBound(),
+                    upperBound = compareAssertion.cassorter.upperBound(),
                 )
                 srs.add(mart.makeSRT(N, theta, 0.0))
             }
@@ -552,7 +552,7 @@ class TestComparisonFromAlpha {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
                 val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-                val assorter = contestUA.comparisonAssertions.first().assorter
+                val assorter = contestUA.comparisonAssertions.first().cassorter
 
                 val margin = assorter.margin
                 val compareUpper = 2.0/(2-margin)
@@ -643,8 +643,8 @@ class TestComparisonFromAlpha {
             val cvrs = makeCvrsByExactMean(N, theta)
             val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
             val compareAssertion = contestUA.comparisonAssertions.first()
-            val margin = compareAssertion.assorter.margin
-            val drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter)
+            val margin = compareAssertion.cassorter.margin
+            val drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter)
             val etaActual = drawSample.sampleMean()
             val eta0 = factor / (2 - margin)
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
@@ -655,7 +655,7 @@ class TestComparisonFromAlpha {
                 eta0 = eta0,
                 d = d,
                 ntrials = ntrials,
-                upperBound = compareAssertion.assorter.upperBound,
+                upperBound = compareAssertion.cassorter.upperBound,
             )
             srs.add(mart.makeSRT(N, theta, 0.0))
 

@@ -76,26 +76,6 @@ data class SuperMajorityAssorter(val contest: Contest, val winner: Int, val minF
     }
 }
 
-data class Assertion(
-    val contest: Contest,
-    val assorter: AssorterFunction,
-) {
-    val winner = assorter.winner()
-    val loser = assorter.loser()
-    val margin = assorter.reportedAssorterMargin()
-
-    // TODO is it ok to have this state ??
-    var status = TestH0Status.NotStarted
-    var proved = false
-    var estSampleSize = 0  // estimated sample size; depends only on the margin, fromEstimateSampleSize
-    var samplesNeeded = 0 // sample count when pvalue < riskLimit; from Audit
-    var samplesUsed = 0 // sample count when testH0 terminates
-    var pvalue = 0.0 // last pvalue when testH0 terminates
-    var round = 0    // round when set to proved
-
-    override fun toString() = "'${contest.info.name}' (${contest.id}) ${assorter.desc()} margin=${df(margin)}"
-}
-
 /////////////////////////////////////////////////////////////////////////////////
 
 fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
@@ -200,20 +180,34 @@ data class ComparisonAssorter(
     fun name() = assorter.desc()
 }
 
-class ComparisonAssertion(
-    val contest: Contest, // TODO dont need, its in the assorter
-    val assorter: ComparisonAssorter,
+///////////////////////////////////////////////////////////////////
+
+open class Assertion(
+    val contest: Contest,
+    val assorter: AssorterFunction,
 ) {
-    val avgCvrAssortValue = assorter.avgCvrAssortValue
-    val margin = assorter.margin
+    val winner = assorter.winner()
+    val loser = assorter.loser()
+    val margin = assorter.reportedAssorterMargin()
 
     // TODO is it ok to have this state ??
     var status = TestH0Status.NotStarted
     var proved = false
-    var estSampleSize = 0  // estimated sample size
-    var samplesNeeded = 0 // sample count when pvalue < riskLimit
+    var estSampleSize = 0  // estimated sample size; depends only on the margin, fromEstimateSampleSize
+    var samplesNeeded = 0 // sample count when pvalue < riskLimit; from Audit
     var samplesUsed = 0 // sample count when testH0 terminates
-    var pvalue = 0.0
+    var pvalue = 0.0 // last pvalue when testH0 terminates
+    var round = 0    // round when set to proved or disproved
 
-    override fun toString() = "${assorter.name()} margin=${df(assorter.margin)} estSampleSize=$estSampleSize"
+    override fun toString() = "'${contest.info.name}' (${contest.id}) ${assorter.desc()} margin=${df(margin)}"
+}
+
+class ComparisonAssertion(
+    contest: Contest,
+    val cassorter: ComparisonAssorter,
+): Assertion(contest, cassorter.assorter) {
+    val avgCvrAssortValue = cassorter.avgCvrAssortValue
+    val cmargin = cassorter.margin
+
+    override fun toString() = "${cassorter.name()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"
 }

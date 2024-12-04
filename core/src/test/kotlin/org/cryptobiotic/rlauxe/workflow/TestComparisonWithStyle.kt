@@ -22,9 +22,10 @@ class TestComparisonWithStyle {
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = .01)
 
         // each contest has a specific margin between the top two vote getters.
-        val testData = MultiContestTestData(20, 11, 10000)
+        val N = 20000
+        val testData = MultiContestTestData(20, 11, N)
         val contests: List<Contest> = testData.makeContests()
-        println("Start testComparisonWorkflow")
+        println("Start testComparisonWorkflow N=$N")
         contests.forEach{ println(" $it")}
         println()
 
@@ -54,7 +55,7 @@ class TestComparisonWithStyle {
 
             val sampledMvrs = indices.map { fuzzedMvrs[it] }
 
-            done = workflow.runAudit(indices, sampledMvrs)
+            done = workflow.runAudit(indices, sampledMvrs, roundIdx)
             println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             roundIdx++
@@ -93,7 +94,7 @@ class TestComparisonWithStyle {
 
         // form simulated mvrs. TODO kinda dicey because these are intended for a single assorter
         val contestUA = workflow.contestsUA.first()
-        val assorter = contestUA.comparisonAssertions.first().assorter // take the one with the smallest margin??
+        val assorter = contestUA.comparisonAssertions.first().cassorter // take the one with the smallest margin??
         // dont permute
         val sampler = ComparisonSamplerSimulation(workflow.cvrs, contestUA, assorter, ComparisonErrorRates.standard)
         println(sampler.showFlips())
@@ -133,7 +134,7 @@ class TestComparisonWithStyle {
 
             val sampledMvrs = indices.map { sampler.mvrs[it] }
 
-            done = workflow.runAudit(indices, sampledMvrs)
+            done = workflow.runAudit(indices, sampledMvrs, roundIdx)
             println("$roundIdx runAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs
             roundIdx++

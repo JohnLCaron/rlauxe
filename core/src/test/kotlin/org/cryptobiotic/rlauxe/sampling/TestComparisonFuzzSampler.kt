@@ -36,7 +36,7 @@ class TestComparisonFuzzSampler {
                         val contestUA = ContestUnderAudit(contest, N)
                         contestUA.makeComparisonAssertions(cvrs)
                         val minAssert = contestUA.minComparisonAssertion()!!
-                        val minAssort = minAssert.assorter
+                        val minAssort = minAssert.cassorter
 
                         val samples = PrevSamplesWithRates(minAssort.noerror)
                         val sampler = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
@@ -196,7 +196,7 @@ class TestComparisonFuzzSampler {
                 val contestUA = ContestUnderAudit(contest.info, cvrs).makeComparisonAssertions(cvrs)
                 val minAssert = contestUA.minComparisonAssertion()
                 if (minAssert != null) repeat(ntrials) {
-                    val minAssort = minAssert.assorter
+                    val minAssort = minAssert.cassorter
                     val samples = PrevSamplesWithRates(minAssort.noerror)
                     var ccount = 0
                     var count = 0
@@ -242,8 +242,8 @@ class TestComparisonFuzzSampler {
                 val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contestUA, assertion, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
                 assertion.estSampleSize = size
-                sampleSizes.add(Pair(size, assertion.margin))
-                println(" ${assertion.assorter.assorter.desc()} margin=${df(assertion.assorter.margin)} estSize=${size}}")
+                sampleSizes.add(Pair(size, assertion.cmargin))
+                println(" ${assertion.cassorter.assorter.desc()} margin=${df(assertion.cassorter.margin)} estSize=${size}}")
 
             }
             val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.map { it.first }.max() ?: 0
@@ -262,7 +262,7 @@ private fun runWithComparisonFuzzSampler(
         moreParameters: Map<String, Double> = emptyMap(),
     ): RunTestRepeatedResult {
 
-    val assorter = assertion.assorter
+    val assorter = assertion.cassorter
     val sampler = ComparisonFuzzSampler(auditConfig.fuzzPct!!, cvrs, contestUA, assorter)
 
     return simulateSampleSizeBetaMart(
@@ -274,6 +274,6 @@ private fun runWithComparisonFuzzSampler(
         contestUA.ncvrs,
         contestUA.Nc,
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct!!),
-        moreParameters
+        moreParameters=moreParameters,
     )
 }

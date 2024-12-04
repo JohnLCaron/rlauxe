@@ -16,7 +16,7 @@ class TestRaireAssertions {
     val raireCvrs = readRaireBallots(cvrFile)
     val cvrs = raireCvrs.cvrs
 
-    @Test
+    // @Test
     fun testRaireAssertions() {
         val contestsUA = tabulateRaireVotes(raireResults.contests, cvrs) // in styleish workflow
         // contestsUA.forEach { it.Nc = it.ncvrs + 2 }

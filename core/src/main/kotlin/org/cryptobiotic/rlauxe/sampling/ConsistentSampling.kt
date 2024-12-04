@@ -46,8 +46,9 @@ fun consistentCvrSampling(
     if (inx == sortedCvrIndices.size) {
         println("ran out of samples!!")
     }
-    contests.forEach { contest ->
-        contest.availableInSample = currentSizes[contest.id]!!
+    currentSizes.forEach { (contestId, size) ->
+        val contest = contests.find { it.id == contestId }!!
+        contest.availableInSample = size
         if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
     }
     return sampledIndices

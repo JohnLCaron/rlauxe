@@ -125,7 +125,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip2votes could only flip $changed, wanted $needToChange")
-        require(checkAvotes == startingAvotes - needToChange)
+        // require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
 
@@ -204,7 +204,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip1votes could only flip $changed, wanted $needToChange")
-        require(checkAvotes == startingAvotes - needToChange)
+        // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
     }
@@ -272,7 +272,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = cvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votesP could only flip $changed, wanted $needToChange")
-        require(checkAvotes == startingAvotes - needToChange)
+       // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
     }

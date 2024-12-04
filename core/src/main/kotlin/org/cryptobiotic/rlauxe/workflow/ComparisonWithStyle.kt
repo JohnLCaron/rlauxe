@@ -72,12 +72,12 @@ class ComparisonWithStyle(
      * @parameter mvrs: use existing mvrs to estimate samples. may be empty.
      */
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
-        println("EstimateSampleSize.simulateSampleSizeComparisonContest round $roundIdx")
+        println("EstimateSampleSize.simulateSampleSizeContest round $roundIdx")
 
         val sampleSizer = EstimateSampleSize(auditConfig)
         val contestsNotDone = contestsUA.filter{ !it.done }
         contestsNotDone.forEach { contestUA ->
-            sampleSizer.simulateSampleSizeComparisonContest(contestUA, cvrs, prevMvrs, roundIdx, show=true)
+            sampleSizer.simulateSampleSizeContest(contestUA, cvrs, prevMvrs, roundIdx, show=true)
         }
         println()
         val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
@@ -96,7 +96,7 @@ class ComparisonWithStyle(
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>): Boolean {
+    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
         // 	e) Import the MVRs.
         //	f) For each MVR 𝑖:
@@ -122,7 +122,7 @@ class ComparisonWithStyle(
             var allAssertionsDone = true
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs)
+                    assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
                 if (allAssertionsDone) {
@@ -135,10 +135,25 @@ class ComparisonWithStyle(
         return allDone
     }
 
-    fun showResults() {
+    fun showResultsOld() {
         println("Audit results")
         contestsUA.forEach{ contest ->
             println(" $contest status=${contest.status}")
+        }
+        println()
+    }
+
+    fun showResults() {
+        println("Audit results")
+        contestsUA.forEach{ contest ->
+            val minAssertion = contest.minComparisonAssertion()
+            if (minAssertion == null)
+                println(" $contest has no assertions; status=${contest.status}")
+            else if (auditConfig.hasStyles)
+                println(" $contest samplesUsed=${minAssertion.samplesUsed} round=${minAssertion.round} status=${contest.status}")
+            else
+                println(" $contest samplesUsed=${minAssertion.samplesUsed} " +
+                        "estTotalSampleSize=${contest.estTotalSampleSize} round=${minAssertion.round} status=${contest.status}")
         }
         println()
     }
@@ -171,6 +186,8 @@ fun tabulateVotes(contests: List<Contest>, cvrs: List<CvrIF>): List<ContestUnder
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
         val contestUA = ContestUnderAudit(contest, nc)// nc vs ncvrs ??
+        if (contestUA.contest.votes != accumVotes)
+            println("hey")
         require(contestUA.contest.votes == accumVotes)
         contestUA
     }
@@ -258,8 +275,9 @@ fun runOneAssertionAudit(
     contestUA: ContestUnderAudit,
     assertion: ComparisonAssertion,
     cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
+    roundIdx: Int,
 ): TestH0Status {
-    val assorter = assertion.assorter
+    val assorter = assertion.cassorter
     val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = false)
 
     val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
@@ -283,15 +301,18 @@ fun runOneAssertionAudit(
         withoutReplacement = true
     )
 
+    val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }
+    assertion.samplesUsed = maxSamples
+
     // do not terminate on null retject, continue to use all samples
     val testH0Result = testFn.testH0(contestUA.availableInSample, terminateOnNullReject = false) { sampler.sample() }
     if (!testH0Result.status.fail) {
         assertion.proved = true
+        assertion.round = roundIdx
     } else {
         println("testH0Result.status = ${testH0Result.status}")
     }
     assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit }
-    assertion.samplesUsed = testH0Result.sampleCount
     assertion.pvalue = testH0Result.pvalues.last()
 
     println(" ${contestUA.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue = ${assertion.pvalue} status = ${testH0Result.status}")

@@ -84,6 +84,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
 
     var Nc = contest.Nc // TODO
 
+    var isComparison = false
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
@@ -96,7 +97,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     constructor(info: ContestInfo, cvrs: List<CvrIF>) : this(makeContestFromCvrs(info, cvrs), cvrs.filter { it.hasContest(info.id) }.count())
 
     override fun toString() = buildString {
-        append("${contest.info.name} ($id) Nc=$Nc minMargin=${df(minPollingAssertion()?.margin ?: 0.0)} est=$estSampleSize")
+        append("${contest.info.name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
     }
 
     open fun makePollingAssertions(): ContestUnderAudit {
@@ -132,6 +133,7 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
     }
 
     open fun makeComparisonAssertions(cvrs : Iterable<CvrIF>): ContestUnderAudit {
+        isComparison = true // TODO awkward
         val assertions = when (contest.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY, -> makePluralityAssertions()
@@ -152,15 +154,24 @@ open class ContestUnderAudit(val contest: Contest, var ncvrs: Int = 0) {
         return this
     }
 
+    fun assertions(): List<Assertion> {
+        return if (isComparison) comparisonAssertions else pollingAssertions
+    }
+
+
     fun minComparisonAssertion(): ComparisonAssertion? {
-        val margins = comparisonAssertions.map { it.assorter.margin }
+        val margins = comparisonAssertions.map { it.cassorter.margin }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.assorter.margin == minMargin }
+        return comparisonAssertions.find { it.cassorter.margin == minMargin }
     }
 
     fun minPollingAssertion(): Assertion? {
         val margins = pollingAssertions.map { it.margin }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
         return pollingAssertions.find { it.margin == minMargin }
+    }
+
+    fun minMargin(): Double {
+        return if (isComparison) (minComparisonAssertion()?.margin ?: 0.0) else (minPollingAssertion()?.margin ?: 0.0)
     }
 }

@@ -15,7 +15,7 @@ class TestComparisonWithErrors {
         val cvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-        val assort = contestUA.comparisonAssertions.first().assorter
+        val assort = contestUA.comparisonAssertions.first().cassorter
 
         val cvrsUI = cvrs.map { CvrUnderAudit(it) }
 
@@ -45,7 +45,7 @@ class TestComparisonWithErrors {
 
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-        val assort = contestUA.comparisonAssertions.first().assorter
+        val assort = contestUA.comparisonAssertions.first().cassorter
 
         // flip
         val mvrsFlip = cvrsUI.map { it.flip() }

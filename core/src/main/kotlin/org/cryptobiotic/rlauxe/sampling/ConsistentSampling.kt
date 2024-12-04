@@ -55,17 +55,7 @@ class PhantomBuilder(val id: String) {
 }
 ///////////////////////////////////////////////////////////////////////
 
-// its possible that an already sampled cvr is not needed this round
-// but, we already have the mvr so theres no cost to including it.
-// otoh, why bother? maybe just complicates things.
-// note that SHANGRLA assertion_RLA.ipynb doesnt pass in the previously sampled indices.
-// Nor anywhere else in SHANGRLA esp. *.ipynb
-// so then, do we even need cvr.sampled ?? used in find_sample_size()
-
-// StylishWorkflow.chooseSamples()
-// AssertionRLAipynb.workflow()
-// first time only, we'll add the subsequent rounds later. KISS
-// sampling without replacement only
+// TODO not clear yet how to limit the sample size. maxFirstRoundSampleSize? maxPercent? show pvalue, let user intervene?
 
 fun consistentCvrSampling(
     contests: List<ContestUnderAudit>, // must have sampleSizes set
@@ -103,8 +93,6 @@ fun consistentCvrSampling(
         println("ran out of samples!!")
     }
     contests.forEach { contest ->
-        if (currentSizes[contest.id] == null)
-            println("hey")
         contest.availableInSample = currentSizes[contest.id]!!
         if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
     }
@@ -147,8 +135,6 @@ fun consistentPollingSampling(
         println("ran out of samples!!")
     }
     contests.forEach { contest ->
-        if (currentSizes[contest.id] == null)
-            println("hey")
         contest.availableInSample = currentSizes[contest.id]!!
         if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
     }
@@ -180,16 +166,22 @@ fun uniformPollingSampling(
         if (estPct > samplePctCutoff) {
             it.done = true
             it.status = TestH0Status.LimitReached
+            println("  ***$it estPct $estPct > samplePctCutoff $samplePctCutoff round $roundIdx")
+            val minAssert = it.minPollingAssertion()
+            if (minAssert != null)
+                minAssert.round = roundIdx
         }
     }
+    val estTotalSampleSizes = contests.filter { !it.done }.map { it.estTotalSampleSize }
+    if (estTotalSampleSizes.isEmpty()) return emptyList()
 
     // get list of ballot indexes sorted by sampleNum
     val sortedCvrIndices = ballots.indices.sortedBy { ballots[it].sampleNum }
 
     // take the first estSampleSize of the sorted ballots
-    val simple = roundIdx * N / 10.0
-    //val sampledIndices = sortedCvrIndices.take(estSampleSize.toInt())
-    val sampledIndices = sortedCvrIndices.take(simple.toInt())
+    // val simple = roundIdx * N / 10.0
+    // val sampledIndices = sortedCvrIndices.take(simple.toInt())
+    val sampledIndices = sortedCvrIndices.take(estTotalSampleSizes.max().toInt())
 
     return sampledIndices
 }

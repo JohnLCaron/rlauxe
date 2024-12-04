@@ -50,7 +50,7 @@ class TestEstimateSampleSize {
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
                 //         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round) }
-                val result = finder.simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
+                val result = finder.simulateSampleSizeComparisonAssorter(contestUA, assert.cassorter, cvrs,)
                 //     riskLimit: Double,
                 //    dilutedMargin: Double,
                 //    gamma: Double = 1.03,
@@ -59,14 +59,14 @@ class TestEstimateSampleSize {
                 //    oneUnder: Int = 0,  // p3
                 //    twoUnder: Int = 0,  // p4
                 val simSize = result.findQuantile(.90)
-                val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.assorter.margin, gamma,
+                val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.cassorter.margin, gamma,
                     oneOver = ceil(cn*p1).toInt(),
                     twoOver = ceil(cn*p2).toInt(),
                     oneUnder = ceil(cn*p3).toInt(),
                     twoUnder = ceil(cn*p4).toInt(),
                     )
                 estSizes.add(estSize)
-                println("  ${contestUA.name} margin=${df(assert.assorter.margin)} est=$estSize sim=$simSize")
+                println("  ${contestUA.name} margin=${df(assert.cassorter.margin)} est=$estSize sim=$simSize")
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()

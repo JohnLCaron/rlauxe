@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/03/2024
+last update: 12/04/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -195,7 +195,7 @@ See BettingMart.kt and related code for current implementation.
 
 ### Polling Vs Comparison Estimated Sample sizes
 
-This shows the large difference between a polling audit and a comparison audit at the same margin:
+This plot shows the large difference between a polling audit and a comparison audit at the same margin:
 
 * [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
 
@@ -204,6 +204,8 @@ Comparison audits are perhaps useful down to margins = .8% .
 
 "In a card-level comparison audit, the estimated sample size scales with
 the reciprocal of the diluted margin." (STYLISH p.4)
+
+Polling scales as square of 1/margin.
 
 ### Polling audits
 
@@ -399,6 +401,9 @@ above) and sampling.
 ### Estimating Sample sizes
 
 For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
+
+Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
+the previous audit's pvalue.
 
 ### Consistent Sampling
 

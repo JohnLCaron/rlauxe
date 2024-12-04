@@ -22,7 +22,7 @@ class TestComparisonSamplerSimulation {
 
             val contest = makeContestsFromCvrs(cvrs).first()
             val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-            val compareAssorter = contestUA.comparisonAssertions.first().assorter
+            val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
             val sampler = ComparisonSamplerSimulation(cvrs,
                 contestUA,
@@ -58,7 +58,7 @@ class TestComparisonSamplerSimulation {
 
             val contest = makeContestsFromCvrs(cvrs).first()
             val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-            val compareAssorter = contestUA.comparisonAssertions.first().assorter
+            val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
             run(cvrs, contestUA, compareAssorter)
         }
@@ -81,7 +81,7 @@ class TestComparisonSamplerSimulation {
         contestUA.makeComparisonAssertions(cvrsUA)
 
         contestUA.comparisonAssertions.forEach { assert ->
-            run(cvrs, contestUA, assert.assorter)
+            run(cvrs, contestUA, assert.cassorter)
         }
     }
 

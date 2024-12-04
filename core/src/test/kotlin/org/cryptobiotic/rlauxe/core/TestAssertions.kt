@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class TestAssertions {
 
@@ -109,9 +107,9 @@ class TestAssertions {
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
             assertIs<ComparisonAssertion>(it)
-            assertIs<ComparisonAssorter>(it.assorter)
-            assertIs< PluralityAssorter>(it.assorter.assorter)
-            assertEquals(1.0, it.assorter.assorter.upperBound())
+            assertIs<ComparisonAssorter>(it.cassorter)
+            assertIs< PluralityAssorter>(it.cassorter.assorter)
+            assertEquals(1.0, it.cassorter.assorter.upperBound())
         }
     }
 
@@ -135,9 +133,9 @@ class TestAssertions {
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
             assertIs<ComparisonAssertion>(it)
-            assertIs<ComparisonAssorter>(it.assorter)
-            assertIs< SuperMajorityAssorter>(it.assorter.assorter)
-            assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.assorter.assorter.upperBound())
+            assertIs<ComparisonAssorter>(it.cassorter)
+            assertIs< SuperMajorityAssorter>(it.cassorter.assorter)
+            assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.cassorter.assorter.upperBound())
         }
     }
 

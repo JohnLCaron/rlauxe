@@ -12,18 +12,18 @@ import kotlin.math.min
 // for the moment assume use_style = true, mvrs = null, so initial estimate only
 class EstimateSampleSize(val auditConfig: AuditConfig) {
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    //// Polling
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //// Both
 
-    // called from PollingWorkflow
-    fun simulateSampleSizePollingContest(
+    fun simulateSampleSizeContest(
         contestUA: ContestUnderAudit,
-        prevMvrs: List<CvrIF>, // TODO should be used for subsequent round estimation
+        cvrs: List<Cvr>,        // Comparison only
+        prevMvrs: List<CvrIF>,  // TODO should be used for subsequent round estimation
         roundIdx: Int,
         show: Boolean = false
     ): Int {
         val sampleSizes = mutableListOf<Int>()
-        contestUA.pollingAssertions.map { assert ->
+        contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
             if (!assert.proved) {
                 var maxSamples = contestUA.Nc
                 var prevSampleSize = 0
@@ -41,8 +41,9 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
                 }
 
                 if (!contestUA.done) {
-                    val result = simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples, startingTestStatistic=startingTestStatistic)
-                    if (result.failPct() > 80.0) {
+                    val result = if (contestUA.isComparison) simulateSampleSizeComparisonAssorter(contestUA, (assert as ComparisonAssertion).cassorter, cvrs, startingTestStatistic)
+                                else simulateSampleSizePollingAssorter(contestUA, assert.assorter, maxSamples, startingTestStatistic)
+                    if (result.failPct() > 80.0) { // TODO 80% ??
                         assert.estSampleSize = prevSampleSize + result.findQuantile(auditConfig.quantile)
                         println("***FailPct $contestUA ${result.failPct()} > 80% size=${assert.estSampleSize}")
                         contestUA.done = true
@@ -60,6 +61,10 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         if (show) println(" ${contestUA}")
         return contestUA.estSampleSize
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    //// Polling
 
     // also called from MakeSampleSizePlots
     fun simulateSampleSizePollingAssorter(
@@ -79,7 +84,7 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
             PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contestUA, assorter)
         }
 
-        return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, startingTestStatistic, Nc=contestUA.Nc)
+        return simulateSampleSizeAlphaMart(sampler, margin, assorter.upperBound(), maxSamples, Nc=contestUA.Nc, startingTestStatistic)
     }
 
     fun simulateSampleSizeAlphaMart(
@@ -87,8 +92,8 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         margin: Double,
         upperBound: Double,
         maxSamples: Int,
-        startingTestStatistic: Double = 1.0,
         Nc: Int,
+        startingTestStatistic: Double = 1.0,
         moreParameters: Map<String, Double> = emptyMap(),
     ): RunTestRepeatedResult {
         val eta0 = margin2mean(margin)
@@ -127,55 +132,15 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
         return result
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////
     //// Comparison
 
-    fun simulateSampleSizeComparisonContest(
-        contestUA: ContestUnderAudit,
-        cvrs: List<Cvr>,
-        mvrs: List<CvrIF>, // TODO use previous samples
-        roundIdx: Int,
-        show: Boolean = false
-    ): Int {
-
-        val sampleSizes = mutableListOf<Int>()
-        contestUA.comparisonAssertions.map { assert ->
-            if (!assert.proved) {
-                if (roundIdx > 1) {
-                    if (assert.samplesUsed == contestUA.Nc) {
-                        println("***LimitReached $contestUA")
-                        contestUA.done = true
-                        contestUA.status = TestH0Status.LimitReached
-                    }
-                    // TODO can we use the pvalue from last round to get better estimate?
-                    assert.estSampleSize = min(assert.samplesUsed + (roundIdx-1) * 100, contestUA.Nc) // TODO why 100? should be percent ??
-                    sampleSizes.add(assert.estSampleSize)
-                } else {
-                    val result = simulateSampleSizeAssorter(contestUA, assert.assorter, cvrs,)
-                    if (result.failPct() > 80.0) { // TODO what should this be? allow to proceed to round1 with max? TODO port to polling.
-                        assert.estSampleSize = result.findQuantile(auditConfig.quantile)
-                        println("***FailPct $contestUA ${result.failPct()} > 80% size=${assert.estSampleSize}")
-                        contestUA.done = true
-                        contestUA.status = TestH0Status.FailPct
-                    } else {
-                        val size = result.findQuantile(auditConfig.quantile)
-                        assert.estSampleSize = min(size, contestUA.Nc)
-                        sampleSizes.add(assert.estSampleSize)
-                    }
-                }
-                if (show) println("  ${contestUA.name} ${assert}")
-            }
-        }
-        contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        if (show) println(" ${contestUA}")
-        return contestUA.estSampleSize
-    }
-
-    fun simulateSampleSizeAssorter(
+    fun simulateSampleSizeComparisonAssorter(
         contestUA: ContestUnderAudit,
         cassorter: ComparisonAssorter,
         cvrs: List<Cvr>,
-    ): RunTestRepeatedResult {
+        startingTestStatistic: Double = 1.0,
+
+        ): RunTestRepeatedResult {
         val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
         val sampler = if (auditConfig.fuzzPct == null) {
             // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.
@@ -197,6 +162,7 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
             contestUA.ncvrs,
             contestUA.Nc,
             ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
+            startingTestStatistic,
         )
     }
 }
@@ -210,6 +176,7 @@ fun simulateSampleSizeBetaMart(
     maxSamples: Int,
     Nc: Int,
     errorRates: List<Double>,
+    startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
 
@@ -239,6 +206,7 @@ fun simulateSampleSizeBetaMart(
         testFn = testFn,
         testParameters = mapOf("p1" to optimal.p1, "p2" to optimal.p2, "p3" to optimal.p3, "p4" to optimal.p4) + moreParameters,
         showDetails = false,
+        startingTestStatistic = startingTestStatistic,
         margin = margin,
     )
     return result

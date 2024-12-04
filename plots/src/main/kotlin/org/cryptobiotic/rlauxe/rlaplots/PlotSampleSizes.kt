@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.rlaplots
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.log10
 
-class EstimateSampleSize(val dir: String, val filename: String) {
+class PlotSampleSizes(val dir: String, val filename: String) {
     fun showSamples(catfld: (SRT) -> String) {
         val reader = SRTcsvReader("$dir/${filename}.cvs")
         showSamples(reader.readCalculations(), catfld)

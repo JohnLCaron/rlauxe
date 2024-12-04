@@ -31,7 +31,7 @@ class PollingWorkflow(
     }
 
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
-        println("EstimateSampleSize.simulateSampleSizePollingContest round $roundIdx")
+        println("EstimateSampleSize.simulateSampleSizeContest round $roundIdx")
 
         // set contest.sampleSize through simulation.
         // Uses SimContest to simulate a contest with the same vote totals.
@@ -41,7 +41,7 @@ class PollingWorkflow(
         val contestsNotDone = contestsUA.filter { !it.done }
 
         contestsNotDone.filter { !it.done }.forEach { contestUA ->
-            sampleSizer.simulateSampleSizePollingContest(contestUA, prevMvrs, roundIdx, show = true)
+            sampleSizer.simulateSampleSizeContest(contestUA, emptyList(), prevMvrs, roundIdx, show = true)
         }
         val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
 
@@ -88,6 +88,10 @@ fun runAudit(
     roundIdx: Int,
 ): Boolean {
     val contestsNotDone = contestsUA.filter { !it.done }
+    if (contestsNotDone.isEmpty()) {
+        println("all done")
+        return true
+    }
 
     println("auditOneAssertion")
     var allDone = true

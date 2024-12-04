@@ -230,13 +230,13 @@ class CompareAuditType {
         contestUA.makeComparisonAssertions(cvrs)
         val compareAssertion = contestUA.comparisonAssertions.first()
         val compareResult = runAlphaMartRepeated(
-            drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
+            drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
             maxSamples = N,
             eta0 = reportedMean, // use the reportedMean for the initial guess
             d = d,
             ntrials = nrepeat,
             withoutReplacement = true,
-            upperBound = compareAssertion.assorter.upperBound()
+            upperBound = compareAssertion.cassorter.upperBound()
         )
 
         return Pair(pollingResult, compareResult)
@@ -269,12 +269,12 @@ class CompareAuditType {
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.assorter),
+                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
                     maxSamples = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareAssertion.assorter.upperBound,
+                    upperBound = compareAssertion.cassorter.upperBound,
                 )
                 compareSrs.add(compareResult.makeSRT(N, theta, 0.0))
 

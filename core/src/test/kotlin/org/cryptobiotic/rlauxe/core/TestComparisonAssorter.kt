@@ -48,17 +48,17 @@ class TestComparisonAssorter {
         assertEquals(0.5, assorter.assort(otherCvr))  // voted for someone else
         // so assort in {0, .5, 1}
 
-        assertEquals(0.0, bassorter.overstatementError(winnerCvr, winnerCvr))
-        assertEquals(-1.0, bassorter.overstatementError(winnerCvr, loserCvr))
-        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, otherCvr))
+        assertEquals(0.0, bassorter.overstatementError(winnerCvr, winnerCvr, true))
+        assertEquals(-1.0, bassorter.overstatementError(winnerCvr, loserCvr, true))
+        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, otherCvr, true))
 
-        assertEquals(1.0, bassorter.overstatementError(loserCvr, winnerCvr))
-        assertEquals(0.0, bassorter.overstatementError(loserCvr, loserCvr))
-        assertEquals(0.5, bassorter.overstatementError(loserCvr, otherCvr))
+        assertEquals(1.0, bassorter.overstatementError(loserCvr, winnerCvr, true))
+        assertEquals(0.0, bassorter.overstatementError(loserCvr, loserCvr, true))
+        assertEquals(0.5, bassorter.overstatementError(loserCvr, otherCvr, true))
 
-        assertEquals(0.5, bassorter.overstatementError(otherCvr, winnerCvr))
-        assertEquals(-0.5, bassorter.overstatementError(otherCvr, loserCvr))
-        assertEquals(0.0, bassorter.overstatementError(otherCvr, otherCvr))
+        assertEquals(0.5, bassorter.overstatementError(otherCvr, winnerCvr, true))
+        assertEquals(-0.5, bassorter.overstatementError(otherCvr, loserCvr, true))
+        assertEquals(0.0, bassorter.overstatementError(otherCvr, otherCvr, true))
         // overstatementError in [-1, -.5, 0, .5, 1]
 
         val noerror = 1.0 / (2.0 - margin)

@@ -121,7 +121,7 @@ data class ComparisonAssorter(
         //     B assigns nonnegative numbers to ballots, and the outcome is correct iff Bavg > 1/2
         //     So, B is an assorter.
 
-        val overstatement = overstatementError(mvr, cvr) // ωi
+        val overstatement = overstatementError(mvr, cvr, contest.useStyle) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
         val denom =  (2.0 - margin/this.assorter.upperBound())
         val result1 =  tau * noerror
@@ -141,7 +141,7 @@ data class ComparisonAssorter(
     //        Phantom CVRs and MVRs are treated specially:
     //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
     //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
-    fun overstatementError(mvr: CvrIF, cvr: CvrIF, useStyle: Boolean = true): Double {
+    fun overstatementError(mvr: CvrIF, cvr: CvrIF, useStyle: Boolean): Double {
 
 
         //        # sanity check

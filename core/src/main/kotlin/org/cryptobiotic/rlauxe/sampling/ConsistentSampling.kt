@@ -6,53 +6,7 @@ import org.cryptobiotic.rlauxe.util.df
 
 //// Adapted from SHANGRLA Audit.py
 
-// SHANGRLA.make_phantoms(). Probably 2.d ?
-fun makePhantomCvrs(
-    contestsUA: List<ContestUnderAudit>,
-    prefix: String = "phantom-",
-    prng: Prng,
-): List<CvrUnderAudit> {
-    // code assertRLA.ipynb
-    // + Prepare ~2EZ:
-    //    - `N_phantoms = max_cards - cards_in_manifest`
-    //    - If `N_phantoms < 0`, complain
-    //    - Else create `N_phantoms` phantom cards
-    //    - For each contest `c`:
-    //        + `N_c` is the input upper bound on the number of cards that contain `c`
-    //        + if `N_c is None`, `N_c = max_cards - non_c_cvrs`, where `non_c_cvrs` is #CVRs that don't contain `c`
-    //        + `C_c` is the number of CVRs that contain the contest
-    //        + if `C_c > N_c`, complain
-    //        + else if `N_c - C_c > N_phantoms`, complain
-    //        + else:
-    //            - Consider contest `c` to be on the first `N_c - C_c` phantom CVRs
-    //            - Consider contest `c` to be on the first `N_c - C_c` phantom ballots
 
-    // 3.4 SHANGRLA
-    // If N_c > ncvrs, create N − n “phantom ballots” and N − n “phantom CVRs.”
-
-    // create phantom CVRs as needed for each contest
-    val phantombs = mutableListOf<PhantomBuilder>()
-
-    for (contest in contestsUA) {
-        val phantoms_needed = contest.Nc - contest.ncvrs
-        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
-            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
-        }
-        // include this contest on the first n phantom CVRs
-        repeat(phantoms_needed) {
-            phantombs[it].contests.add(contest.id)
-        }
-    }
-    return phantombs.map { it.build(prng) }
-}
-
-class PhantomBuilder(val id: String) {
-    val contests = mutableListOf<Int>()
-    fun build(prng: Prng): CvrUnderAudit {
-        val votes = contests.associateWith { IntArray(0) }
-        return CvrUnderAudit(Cvr(id, votes, phantom = true), prng.next())
-    }
-}
 ///////////////////////////////////////////////////////////////////////
 
 // TODO not clear yet how to limit the sample size. maxFirstRoundSampleSize? maxPercent? show pvalue, let user intervene?

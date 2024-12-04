@@ -24,7 +24,7 @@ class TestComparisonFuzzSampler {
             ncands.forEach { ncand ->
                 val fcontest = TestContest(0, ncand, margin)
                 fcontest.ncards = N
-                val contest = fcontest.makeContest()
+                val contest = fcontest.makeContest(true) // TODO useStyle matters?
                 // print("contest votes = ${contest.votes} ")
 
                 val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)

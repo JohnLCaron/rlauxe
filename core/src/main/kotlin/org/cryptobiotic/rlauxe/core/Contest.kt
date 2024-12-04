@@ -33,7 +33,7 @@ data class ContestInfo(
  * @parameter votes: candidateId -> reported number of votes. keys must be in contest.candidateIds, though zeros may be ommitted
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  */
-data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int) {
+data class Contest(val info: ContestInfo, val votes: Map<Int, Int>, val Nc: Int, val useStyle: Boolean = true) {
     val id = info.id
     val name = info.name
     val choiceFunction = info.choiceFunction

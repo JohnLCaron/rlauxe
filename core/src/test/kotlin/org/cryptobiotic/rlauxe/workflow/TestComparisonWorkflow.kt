@@ -10,20 +10,35 @@ import org.cryptobiotic.rlauxe.util.df
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestComparisonWithStyle {
+class TestComparisonWorkflow {
 
-    // @Test
-    fun testComparisonWorkflowRepeat() {
-        repeat(100) { testComparisonWorkflow() }
+    @Test
+    fun testComparisonWithStyleRepeat() {
+        repeat(100) { testComparisonWithStyle() }
     }
 
     @Test
-    fun testComparisonWorkflow() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+    fun testComparisonNoStyleRepeat() {
+        repeat(100) { testComparisonNoStyle() }
+    }
 
-        // each contest has a specific margin between the top two vote getters.
+    @Test
+    fun testComparisonWithStyle() {
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = .01)
         val N = 20000
-        val testData = MultiContestTestData(20, 11, N)
+        val testData = MultiContestTestData(20, 11, N, useStyles=true)
+        testComparisonWorkflow(auditConfig, N, testData)
+    }
+
+    @Test
+    fun testComparisonNoStyle() {
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+        val N = 20000
+        val testData = MultiContestTestData(20, 11, N, useStyles=false)
+        testComparisonWorkflow(auditConfig, N, testData)
+    }
+
+    fun testComparisonWorkflow(auditConfig: AuditConfig, N: Int, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.makeContests()
         println("Start testComparisonWorkflow N=$N")
         contests.forEach{ println(" $it")}
@@ -35,7 +50,7 @@ class TestComparisonWithStyle {
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         val fuzzedMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, cvrs, auditConfig.fuzzPct!!)
 
-        val workflow = ComparisonWithStyle(contests, emptyList(), auditConfig, cvrs)
+        val workflow = ComparisonWorkflow(contests, emptyList(), auditConfig, cvrs)
         val stopwatch = Stopwatch()
 
         var prevMvrs = emptyList<CvrIF>()
@@ -88,7 +103,7 @@ class TestComparisonWithStyle {
             rrc.Nc = rc.ncvrs
         }
 
-        val workflow = ComparisonWithStyle(emptyList(), raireResults.contests, auditConfig, cvrs)
+        val workflow = ComparisonWorkflow(emptyList(), raireResults.contests, auditConfig, cvrs)
         println("initialize took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         stopwatch.start()
 

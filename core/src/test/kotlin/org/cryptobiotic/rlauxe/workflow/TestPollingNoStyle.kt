@@ -21,7 +21,7 @@ class TestPollingNoStyle {
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
-        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.10)
+        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.10, useStyles=false)
         val contests: List<Contest> = test.makeContests()
         println("Start testPollingNoStyle N=$N")
         contests.forEach{ println(" $it")}

@@ -7,6 +7,7 @@ import kotlin.test.Test
 
 
 class MakeSampleSizePlots {
+    val useStyles = true
 
     @Test
     fun plotComparisonVsPoll() {
@@ -20,7 +21,7 @@ class MakeSampleSizePlots {
         margins.forEach { margin ->
             val fcontest = TestContest(0, 2, margin)
             fcontest.ncards = N
-            val contest = fcontest.makeContest()
+            val contest = fcontest.makeContest(useStyles)
             print("margin = $margin ${contest.votes}")
             val contestUA = ContestUnderAudit(contest, N)
 
@@ -60,7 +61,7 @@ class MakeSampleSizePlots {
         margins.forEach { margin ->
             val fcontest = TestContest(0, 2, margin)
             fcontest.ncards = N
-            val contest = fcontest.makeContest()
+            val contest = fcontest.makeContest(useStyles)
             print("margin = $margin ${contest.votes}")
             val contestUA = ContestUnderAudit(contest, N)
 
@@ -101,7 +102,7 @@ class MakeSampleSizePlots {
         margins.forEach { margin ->
             val fcontest = TestContest(0, 2, margin)
             fcontest.ncards = N
-            val contest = fcontest.makeContest()
+            val contest = fcontest.makeContest(useStyles)
             print("margin = $margin ${contest.votes}")
             val contestUA = ContestUnderAudit(contest, N)
 
@@ -159,7 +160,7 @@ class MakeSampleSizePlots {
             margins.forEach { margin ->
                 val fcontest = TestContest(0, 4, margin)
                 fcontest.ncards = N
-                val contest = fcontest.makeContest()
+                val contest = fcontest.makeContest(useStyles)
                 val cvrs = fcontest.makeCvrs()
 
                 print("fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
@@ -203,7 +204,7 @@ class MakeSampleSizePlots {
             margins.forEach { margin ->
                 val fcontest = TestContest(0, 4, margin)
                 fcontest.ncards = N
-                val contest = fcontest.makeContest()
+                val contest = fcontest.makeContest(useStyles)
                 val cvrs = fcontest.makeCvrs().map { it }
 
                 print("fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
@@ -243,7 +244,6 @@ class MakeSampleSizePlots {
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 123556667890L, quantile=.50, fuzzPct=0.0, ntrials = 10)
-        val finder = EstimateSampleSize(auditConfig)
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile}")
 
         val tasks = mutableListOf<ConcurrentTask>()
@@ -251,8 +251,7 @@ class MakeSampleSizePlots {
             margins.forEach { margin ->
                 val fcontest = TestContest(0, 4, margin)
                 fcontest.ncards = Nc
-                val contest = fcontest.makeContest()
-                val cvrs = fcontest.makeCvrs()
+                val contest = fcontest.makeContest(useStyles)
 
                 print("margin = $margin ${contest.votes} Nc=$Nc N=$N")
                 val contestUA = ContestUnderAudit(contest, Nc)

@@ -438,7 +438,7 @@ If the practical difference is so big, a production library can be more assertiv
 
 We implement only with CSD currently.
 
-See ComparisonAssorter.overstatementError() in core/Assorter.kt:
+See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA Audit.py class Assorter):
 
     assorter that corresponds to normalized overstatement error for an assertion
 
@@ -448,6 +448,8 @@ See ComparisonAssorter.overstatementError() in core/Assorter.kt:
 
     If `use_style == False`, then if the CVR contains the contest but the MVR does not,
     the MVR is considered to be a non-vote in the contest .
+
+TODO: measure effects of useStyle = false
 
 ### No Styles
 

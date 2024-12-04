@@ -255,7 +255,7 @@ class TestOverstatementsFromShangrla {
         //        except ValueError:
         //            pass
         assertFailsWith<RuntimeException> {
-            assertEquals(0.0, aVb.overstatementError(mvrs[3], cvrs[3]))
+            assertEquals(0.0, aVb.overstatementError(mvrs[3], cvrs[3], true))
         }
 
         //        assert aVb.assorter.overstatement(mvrs[3], cvrs[3], use_style=False) == 0

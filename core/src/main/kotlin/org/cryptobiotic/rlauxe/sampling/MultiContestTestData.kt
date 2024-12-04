@@ -21,8 +21,12 @@ private val debug = false
 // creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
 // It can create cvrs that reflect the contests' exact votes.
 data class MultiContestTestData(
-    val ncontest: Int, val nballotStyles: Int, val totalBallots: Int,
-    val debug: Boolean = false, val marginRange: ClosedRange<Double> = 0.01..0.03,
+    val ncontest: Int,
+    val nballotStyles: Int,
+    val totalBallots: Int,
+    val debug: Boolean = false,
+    val marginRange: ClosedRange<Double> = 0.01..0.03,
+    val useStyles: Boolean = true
 ) {
     val fcontests: List<TestContest>
     val ballotStyles: List<BallotStyle>
@@ -72,7 +76,7 @@ data class MultiContestTestData(
     }
 
     fun makeContests(): List<Contest> {
-        return fcontests.map { it.makeContest() }
+        return fcontests.map { it.makeContest(this.useStyles) }
     }
 
     fun makeBallotsForPolling(): List<Ballot> {
@@ -149,10 +153,10 @@ data class TestContest(
         votesLeft = ncards
     }
 
-    fun makeContest(): Contest {
+    fun makeContest(useStyles: Boolean): Contest {
         val nvotes = this.ncards
         if (nvotes == 0) {
-            return Contest(this.info, emptyMap(), this.ncards)
+            return Contest(this.info, emptyMap(), this.ncards, useStyles)
         }
 
         // pick (ncands - 1) numbers to partition the votes

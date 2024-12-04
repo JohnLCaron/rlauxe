@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.util.*
 //	c) Read ballot manifest.
 //	d) Read CVRs.
 
-class ComparisonWithStyle(
+class ComparisonWorkflow(
     contests: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val auditConfig: AuditConfig,
@@ -186,11 +186,17 @@ fun tabulateVotes(contests: List<Contest>, cvrs: List<CvrIF>): List<ContestUnder
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
         val contestUA = ContestUnderAudit(contest, nc)// nc vs ncvrs ??
-        if (contestUA.contest.votes != accumVotes)
-            println("hey")
-        require(contestUA.contest.votes == accumVotes)
+        require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
         contestUA
     }
+}
+
+// ok if one has zero votes and the other doesnt
+fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {
+    if (votes1 == votes2) return true
+    val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
+    val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
+    return votes1z == votes2z
 }
 
 fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>): List<ContestUnderAudit> {

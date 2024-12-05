@@ -77,13 +77,6 @@ class TruncShrinkage(
     }
 }
 
-class FixedEstimFn(
-    val eta0: Double,
-) : EstimFn {
-    override fun eta(prevSamples: Samples) = eta0
-}
-
-
 // wrapper around BettingMart; only use for polling
 class AlphaMart(
     val estimFn : EstimFn,  // estimator of the population mean

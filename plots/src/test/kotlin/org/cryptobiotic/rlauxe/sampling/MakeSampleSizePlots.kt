@@ -19,7 +19,7 @@ class MakeSampleSizePlots {
         val tasks = mutableListOf<ConcurrentTask>()
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
-            val fcontest = TestContest(0, 2, margin)
+            val fcontest = ContestTestData(0, 2, margin)
             fcontest.ncards = N
             val contest = fcontest.makeContest(useStyles)
             print("margin = $margin ${contest.votes}")
@@ -27,7 +27,7 @@ class MakeSampleSizePlots {
 
             // polling
             contestUA.makePollingAssertions()
-            val assort = contestUA.minPollingAssertion()!!.assorter
+            val assort = contestUA.minAssertion()!!.assorter
             tasks.add( PollingTask("Polling: margin = $margin", finder, contestUA, assort, N))
 
             // comparison
@@ -59,7 +59,7 @@ class MakeSampleSizePlots {
         val tasks = mutableListOf<ConcurrentTask>()
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
-            val fcontest = TestContest(0, 2, margin)
+            val fcontest = ContestTestData(0, 2, margin)
             fcontest.ncards = N
             val contest = fcontest.makeContest(useStyles)
             print("margin = $margin ${contest.votes}")
@@ -67,7 +67,7 @@ class MakeSampleSizePlots {
 
             // polling
             contestUA.makePollingAssertions()
-            val assort = contestUA.minPollingAssertion()!!.assorter
+            val assort = contestUA.minAssertion()!!.assorter
             val standardEstimator = EstimateSampleSize(auditConfig)
             tasks.add( PollingTask("Polling (standard): margin = $margin", standardEstimator, contestUA, assort, N))
 
@@ -100,7 +100,7 @@ class MakeSampleSizePlots {
         val tasks = mutableListOf<ConcurrentTask>()
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
-            val fcontest = TestContest(0, 2, margin)
+            val fcontest = ContestTestData(0, 2, margin)
             fcontest.ncards = N
             val contest = fcontest.makeContest(useStyles)
             print("margin = $margin ${contest.votes}")
@@ -158,7 +158,7 @@ class MakeSampleSizePlots {
         val tasks = mutableListOf<AlphaTask>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                val fcontest = TestContest(0, 4, margin)
+                val fcontest = ContestTestData(0, 4, margin)
                 fcontest.ncards = N
                 val contest = fcontest.makeContest(useStyles)
                 val cvrs = fcontest.makeCvrs()
@@ -166,7 +166,7 @@ class MakeSampleSizePlots {
                 print("fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
                 val contestUA = ContestUnderAudit(contest, N)
                 contestUA.makePollingAssertions()
-                val minAssort = contestUA.minPollingAssertion()!!.assorter
+                val minAssort = contestUA.minAssertion()!!.assorter
                 val sampleFn = PollingFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
 
                 val otherParameters = mapOf("fuzzPct" to fuzzPct)
@@ -202,7 +202,7 @@ class MakeSampleSizePlots {
         val tasks = mutableListOf<BettingTask>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                val fcontest = TestContest(0, 4, margin)
+                val fcontest = ContestTestData(0, 4, margin)
                 fcontest.ncards = N
                 val contest = fcontest.makeContest(useStyles)
                 val cvrs = fcontest.makeCvrs().map { it }
@@ -249,14 +249,14 @@ class MakeSampleSizePlots {
         val tasks = mutableListOf<ConcurrentTask>()
         Ns.forEach { N ->
             margins.forEach { margin ->
-                val fcontest = TestContest(0, 4, margin)
+                val fcontest = ContestTestData(0, 4, margin)
                 fcontest.ncards = Nc
                 val contest = fcontest.makeContest(useStyles)
 
                 print("margin = $margin ${contest.votes} Nc=$Nc N=$N")
                 val contestUA = ContestUnderAudit(contest, Nc)
                 contestUA.makePollingAssertions()
-                val assort = contestUA.minPollingAssertion()!!.assorter
+                val assort = contestUA.minAssertion()!!.assorter
                 val standardEstimator = EstimateSampleSize(auditConfig)
                 tasks.add( PollingNoStyleTask("Polling (no styles): margin=$margin N=$N", standardEstimator, contestUA, assort, Nc, N))
             }

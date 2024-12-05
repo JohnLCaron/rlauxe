@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
+import org.cryptobiotic.rlauxe.sim.FixedEstimFn
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs

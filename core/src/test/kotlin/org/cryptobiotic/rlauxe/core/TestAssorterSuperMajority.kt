@@ -27,7 +27,7 @@ class TestAssorterSuperMajority {
         val contest = makeContestFromCvrs(info, listOf(cvr0, cvr1, cvr2))
 
         val minFraction = contest.info.minFraction!!
-        val winner12 = SuperMajorityAssorter(contest, winner = 1, minFraction)
+        val winner12 = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction)
         assertEquals(1.0 / (2 * winner12.minFraction), winner12.upperBound)
         assertEquals(0.0, winner12.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
         assertEquals(0.5 / minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
@@ -116,7 +116,7 @@ class TestAssorterSuperMajority {
 
 
     fun testNway(contest: Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
-        val assort = SuperMajorityAssorter(contest, winner, contest.info.minFraction!!)
+        val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!)
         assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         val n = counts.sum().toDouble()

@@ -7,16 +7,18 @@ import org.cryptobiotic.rlauxe.util.*
 
 class PollingWorkflow(
         val auditConfig: AuditConfig,
-        contests: List<Contest>, // the contests you want to audit
+        contests: List<ContestIF>, // the contests you want to audit
         val ballotManifest: BallotManifest,
         val N: Int, // total number of ballots/cards
 ) {
-    val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, it.Nc) }
+    val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, it.Nc, false, auditConfig.hasStyles) }
     val ballotsUA: List<BallotUnderAudit>
 
     init {
         contestsUA.forEach {
-            checkWinners(it, it.contest.votes.entries.sortedByDescending { it.value })
+            if (it.choiceFunction != SocialChoiceFunction.IRV) {
+                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })
+            }
         }
 
         // TODO polling phantoms
@@ -25,8 +27,9 @@ class PollingWorkflow(
         val prng = Prng(auditConfig.seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(emptyList())  // TODO
         contestsUA.filter { !it.done }.forEach { contest ->
-            contest.makePollingAssertions()
+            contest.makePollingAssertions(votes[contest.id]!!)
         }
     }
 
@@ -64,7 +67,7 @@ class PollingWorkflow(
     fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
-            val minAssertion = contest.minPollingAssertion()
+            val minAssertion = contest.minAssertion()
             if (minAssertion == null)
                 println(" $contest has no assertions; status=${contest.status}")
             else if (auditConfig.hasStyles)

@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.Bernoulli
 import org.cryptobiotic.rlauxe.util.Welford
+import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -197,4 +197,24 @@ fun welfordMeanVar(x: DoubleArray): Pair<DoubleArray, DoubleArray> {
     }
 
     return Pair(m.toDoubleArray(), v.toDoubleArray())
+}
+
+// generate Bernoulli with probability p.
+// TODO where did I get this? numpy?
+class Bernoulli(p: Double) {
+    val log_q = ln(1.0 - p)
+    val n = 1.0
+
+    fun get(): Double {
+        var x = 0.0
+        var sum = 0.0
+        while (true) {
+            val wtf = ln( Math.random()) / (n - x)
+            sum += wtf
+            if (sum < log_q) {
+                return x
+            }
+            x++
+        }
+    }
 }

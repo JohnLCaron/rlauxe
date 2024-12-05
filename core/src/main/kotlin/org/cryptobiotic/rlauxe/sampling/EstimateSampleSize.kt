@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import kotlin.math.min
 
-// for the moment assume use_style = true, mvrs = null, so initial estimate only
 class EstimateSampleSize(val auditConfig: AuditConfig) {
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,8 +72,8 @@ class EstimateSampleSize(val auditConfig: AuditConfig) {
             maxSamples: Int,
             startingTestStatistic: Double = 1.0,
         ): RunTestRepeatedResult {
-        val margin = assorter.reportedAssorterMargin()
-        val simContest = SimContest(contestUA.contest, assorter)
+        val margin = assorter.reportedMargin()
+        val simContest = SimContest(contestUA.contest as Contest, assorter)
         val cvrs = simContest.makeCvrs()
         require(cvrs.size == contestUA.ncvrs)
 

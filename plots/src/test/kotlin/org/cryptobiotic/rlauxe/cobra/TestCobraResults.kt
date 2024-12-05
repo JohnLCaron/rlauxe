@@ -12,7 +12,9 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
-import org.cryptobiotic.rlauxe.core.OracleComparison
+import org.cryptobiotic.rlauxe.core.BettingFn
+import org.cryptobiotic.rlauxe.core.OptimalLambda
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
@@ -349,4 +351,66 @@ data class CobraTable1Result(
 fun findTable1Entry(margin: Double, p2: Double): CobraTable1Result? {
     return table1.find { it.p2 == p2 && it.margin == margin }
         ?.let { return it }
+}
+
+// We know the true rate of p1 and p2 errors
+class OracleComparison(
+    val N: Int, // not used
+    val withoutReplacement: Boolean = true,  // not used
+    val upperBound: Double,  // not used
+    val a: Double, // noerror
+    val p1: Double = 1.0e-2, // the rate of 1-vote overstatements
+    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
+): BettingFn {
+    val lam: Double
+    init {
+        require(upperBound > 1.0)
+        val kelly = OptimalLambda(a, p1, p2)
+        lam = kelly.solve()
+    }
+    // note lam is a constant
+    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+        return lam
+    }
+}
+
+
+// this is optimal_comparison_noP1, a bet, not a sample estimate.
+// see cobra p 5
+fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): Double {
+    /*
+    The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
+    for which overstatement assorters take a small number of possible values and are concentrated
+    on a single value when the CVRs have no errors.
+
+    Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
+    and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
+
+    eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
+
+    Translating to p2=1-p0 gives:
+
+    eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+
+    Parameters
+    ----------
+    x: input data
+    rate_error_2: hypothesized rate of two-vote overstatements
+
+    Returns
+    -------
+    eta: estimated alternative mean to use in alpha
+    */
+
+    // python doesnt check (2 - 2 * self.u) != 0; self.u = 1
+    if (u == 1.0)
+        throw RuntimeException("optimal_comparison: u ${u} must != 1")
+
+    val p2 = rate_error_2 // getattr(self, "rate_error_2", 1e-4)  // rate of 2-vote overstatement errors
+    val bet = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
+    // 1 / alpha = bet ^ size
+    val term1 = -ln(alpha)
+    val term2 = ln(bet)
+    val size = -ln(alpha) / ln(bet)
+    return size
 }

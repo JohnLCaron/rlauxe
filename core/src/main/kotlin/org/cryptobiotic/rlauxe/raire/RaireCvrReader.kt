@@ -5,9 +5,11 @@ import java.io.File
 
 data class ContestInfo(val candidates: List<String>, val winner: String, val order: List<Int>)
 
-// Data file in .raire format.
-// first is the list of contests
-// second is a ballot (cvr) which is a map : contestId : candidateId : vote
+// Raire CVR file in csv .raire format.
+
+// TestRaireReader reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/raire/Aspen_2009_CityCouncil.raire"
+// TestRaireAssertions, TestRaireWorkflow reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
+
 fun readRaireBallots(fileName: String): RaireCvrs {
 
 //  A map between ballot id and the relevant CVR.
@@ -20,6 +22,7 @@ fun readRaireBallots(fileName: String): RaireCvrs {
 //  Map between contest id and the candidates & winner & order of that contest.
     val contest_info = mutableMapOf<String, ContestInfo>()
 
+    //  first is the list of contests
     repeat(ncontests) { contestIdx ->
         // toks = [line.strip() for line in lines[1 + i].strip().split(',')]
         // Contest,1,5,1,2,3,4,5,winner,4
@@ -76,6 +79,7 @@ fun readRaireBallots(fileName: String): RaireCvrs {
     //  Map between contest id and number of ballots involving that contest
     val ncvrsMap = mutableMapOf<Int, Int>()
 
+    //  second are the ballots (cvrs) which is a map : contestId : candidateId : vote
     val ballots = mutableMapOf<String, MutableMap<Int, IntArray>>() //  cvrId -> contestId -> candidate ranks
     while (lineIndex < lines.size) {
         // 1,1,4,1,2,3

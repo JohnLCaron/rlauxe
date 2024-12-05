@@ -12,8 +12,8 @@ class TestRaireReader {
     // ...
     @Test
     fun testReadAspenCityCouncilCvrs() {
-        val dataFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/raire/Aspen_2009_CityCouncil.raire"
-        val raireCvrs: RaireCvrs = readRaireBallots(dataFile)
+        val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/raire/Aspen_2009_CityCouncil.raire"
+        val raireCvrs: RaireCvrs = readRaireBallots(cvrFile)
         assertEquals(1, raireCvrs.contests.size)
         val contest = raireCvrs.contests.first()
         assertEquals(1, contest.contestNumber)
@@ -31,8 +31,8 @@ class TestRaireReader {
 
     @Test
     fun testReadSfdaCvrs() { // ??
-        val dataFile = "/home/stormy/dev/github/rla/shangrla-kotlin/src/test/data/rla/SFDA2019_PrelimReport12VBMJustDASheets.raire"
-        val raireCvrs: RaireCvrs = readRaireBallots(dataFile)
+        val cvrFile = "/home/stormy/dev/github/rla/shangrla-kotlin/src/test/data/rla/SFDA2019_PrelimReport12VBMJustDASheets.raire"
+        val raireCvrs: RaireCvrs = readRaireBallots(cvrFile)
         assertEquals(1, raireCvrs.contests.size)
         val contest = raireCvrs.contests.first()
         assertEquals(339, contest.contestNumber)

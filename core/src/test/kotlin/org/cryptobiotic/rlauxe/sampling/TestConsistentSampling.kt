@@ -118,7 +118,7 @@ class TestConsistentSampling {
 
         fun runTest() {
             val test = MultiContestTestData(20, 11, 20000)
-            val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc).makePollingAssertions() }
+            val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc, isComparison = false).makePollingAssertions() }
             contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
             val prng = Prng(secureRandom.nextLong())

@@ -60,12 +60,12 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 }
 
 // For Polling, single contest and assorter.
-// ported from MultiContestTestData, doesnt need to adjust votes, just use them as is from Contest
+// adapted from MultiContestTestData, doesnt need to adjust votes, just use them as is from Contest
 // TODO allow empty votes
 class SimContest(val contest: Contest, val assorter: AssorterFunction) {
     val info = contest.info
     val ncands = info.candidateIds.size
-    val margin = assorter.reportedAssorterMargin()
+    val margin = assorter.reportedMargin()
     val ncards = contest.votes.map { it.value }.sum()
 
     val votes: Map<Int, Int> = contest.votes
@@ -117,7 +117,10 @@ class SimContest(val contest: Contest, val assorter: AssorterFunction) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-fun makeContestFromCvrs(info: ContestInfo, cvrs: List<CvrIF>): Contest {
+fun makeContestFromCvrs(
+    info: ContestInfo,
+    cvrs: List<CvrIF>,
+): Contest {
     val votes = tabulateVotes(cvrs)
     val ncards = cardsPerContest(cvrs)
 
@@ -128,11 +131,14 @@ fun makeContestFromCvrs(info: ContestInfo, cvrs: List<CvrIF>): Contest {
     return Contest(
         info,
         votes[info.id] ?: emptyMap(),
-        ncards[info.id] ?: 0
+        ncards[info.id] ?: 0,
     )
 }
 
-fun makeContestsFromCvrs(cvrs: List<CvrIF>, choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY): List<Contest> {
+fun makeContestsFromCvrs(
+    cvrs: List<CvrIF>,
+    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
+): List<Contest> {
     val votes = tabulateVotes(cvrs)
     val ncards = cardsPerContest(cvrs)
     return makeContestsFromCvrs(votes, ncards, choiceFunction)
@@ -186,7 +192,7 @@ fun makeContestsFromCvrs(
                     nwinners=1,
                 ),
                 votes[contestId]!!,
-                cards[contestId]!!
+                cards[contestId]!!,
             )
         )
     }

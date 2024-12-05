@@ -18,10 +18,10 @@ class TestComparisonSamplerSimulation {
         for (margin in margins) {
             val theta = margin2mean(margin)
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
-            val cvrsUA = cvrs.map { CvrUnderAudit(it) }
+            val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)  // contestId -> candId, vote count (or rank?)
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs, votes[contest.id]!!)
             val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
             val sampler = ComparisonSamplerSimulation(cvrs,
@@ -54,10 +54,10 @@ class TestComparisonSamplerSimulation {
         for (margin in margins) {
             val theta = margin2mean(margin)
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
-            val cvrsUA = cvrs.map { CvrUnderAudit(it) }
+            val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)  // contestId -> candId, vote count (or rank?)
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs, votes[contest.id]!!)
             val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
             run(cvrs, contestUA, compareAssorter)

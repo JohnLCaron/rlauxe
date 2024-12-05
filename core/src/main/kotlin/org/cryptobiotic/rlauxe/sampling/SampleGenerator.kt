@@ -358,36 +358,6 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
     }
 }
 
-// generate random values with given mean
-class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
-    val samples = generateSampleWithMean(N, ratio)
-    override fun sample(): Double {
-        val idx = secureRandom.nextInt(N) // with Replacement
-        return samples[idx]
-    }
-    override fun reset() {
-        // noop
-    }
-    fun sampleMean() = samples.average()
-    fun sampleCount() = samples.sum()
-    override fun N() = N
-}
-
-class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGenerator {
-    var samples = generateSampleWithMean(N, ratio)
-    var index = 0
-    override fun sample(): Double {
-        return samples[index++]
-    }
-    override fun reset() {
-        samples = generateSampleWithMean(N, ratio)
-        index = 0
-    }
-    fun sampleMean() = samples.average()
-    fun sampleCount() = samples.sum()
-    override fun N() = N
-}
-
 class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleGenerator {
     val N = assortValues.size
     val permutedIndex = MutableList(N) { it }
@@ -413,41 +383,7 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleG
     override fun N() = N
 }
 
-///////////////////////////////////////////////////////////////
 
-// generate Bernoulli with probability p.
-// TODO where did I get this? numpy?
-class Bernoulli(p: Double) {
-    val log_q = ln(1.0 - p)
-    val n = 1.0
 
-    fun get(): Double {
-        var x = 0.0
-        var sum = 0.0
-        while (true) {
-            val wtf = ln( Math.random()) / (n - x)
-            sum += wtf
-            if (sum < log_q) {
-                return x
-            }
-            x++
-        }
-    }
-}
 
-// https://www.baeldung.com/cs/sampling-exponential-distribution
-// probability density function (PDF): f_lambda(x) = lambda * e^(-lambda * x)
-// cumulative density function (CDF): F_lambda(x) =  1 - e^(-lambda * x)
-// inverse cumulative density function (CDF): F_lambda^(-1)(u) = -(1/lambda) * ln(1-u)
-// sample in [0, 1] with exponential distribution with decay lambda
-class Exponential(lambda: Double) {
-    val ilambda = 1.0 / lambda
-    val n = 1.0
-
-    fun next(): Double {
-        val u = Math.random()
-        val x = ilambda * ln(1.0-u)
-        return x
-    }
-}
 

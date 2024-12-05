@@ -40,13 +40,15 @@ class ComparisonWorkflow(
         //	d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
         //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
 
-        contestsUA = (tabulateVotes(contests, cvrs) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
+        contestsUA = (makeContestsFromCvrs(contests, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
             //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
             if (it.Nc < it.ncvrs) throw RuntimeException(
-                "upperBound ${it.Nc} < ncvrs ${it.ncvrs} for contest ${it.contest.id}"
+                "upperBound ${it.Nc} < ncvrs ${it.ncvrs} for contest ${it.contest.info.id}"
             )
-            checkWinners(it, it.contest.votes.entries.sortedByDescending { it.value })  // 2.a)
+            if (it.choiceFunction != SocialChoiceFunction.IRV) {
+                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
+            }
         }
 
         // 3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
@@ -57,8 +59,10 @@ class ComparisonWorkflow(
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
+
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)  // contestId -> candId, vote count (or rank?)
         contestsUA.filter{ !it.done }.forEach { contest ->
-            contest.makeComparisonAssertions(cvrsUA)
+            contest.makeComparisonAssertions(cvrsUA, votes[contest.id]!!)
             // TODO apply minMargin ?? maybe handled by failPct?
         }
     }
@@ -146,7 +150,7 @@ class ComparisonWorkflow(
     fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
-            val minAssertion = contest.minComparisonAssertion()
+            val minAssertion = contest.minAssertion()
             if (minAssertion == null)
                 println(" $contest has no assertions; status=${contest.status}")
             else if (auditConfig.hasStyles)
@@ -162,7 +166,7 @@ class ComparisonWorkflow(
 ///////////////////////////////////////////////////////////////////////
 
 // tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
-fun tabulateVotes(contests: List<Contest>, cvrs: List<CvrIF>): List<ContestUnderAudit> {
+fun makeContestsFromCvrs(contests: List<Contest>, cvrs: List<CvrIF>, hasStyles: Boolean=true): List<ContestUnderAudit> {
     if (contests.isEmpty()) return emptyList()
 
     val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
@@ -185,8 +189,8 @@ fun tabulateVotes(contests: List<Contest>, cvrs: List<CvrIF>): List<ContestUnder
         if (contest == null) throw RuntimeException("no contest for contest id= $conId")
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, nc)// nc vs ncvrs ??
-        require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
+        val contestUA = ContestUnderAudit(contest, nc, true, hasStyles) // TODO nc vs ncvrs ??
+        require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }
 }

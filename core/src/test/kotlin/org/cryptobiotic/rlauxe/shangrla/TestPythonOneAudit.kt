@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.util.findFirstIndex
-import org.cryptobiotic.rlauxe.util.np_cumprod
-import org.cryptobiotic.rlauxe.util.np_cumsum
 import org.cryptobiotic.rlauxe.sampling.randomPermute
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.max
@@ -542,4 +540,74 @@ fun B(c: Double, b: Double, v: Double, u: Double = 1.0): Double {
     overstatement assorter value
     */
     return (u + b - c) / (2 * u - v)
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// covers for numpy: will be replaced
+
+// def arange(start=None, *args, **kwargs):
+// arange([start,] stop[, step,], dtype=None, *, like=None)
+// Return evenly spaced values within a given interval.
+fun numpy_arange(start: Int, stop: Int, step: Int): IntArray {
+    var size = (stop - start) / step
+    if (step * size != (stop - start)) size++
+    return IntArray(size) { start + step * it}
+}
+
+// Return the cumulative product of elements
+fun np_cumprod(a: DoubleArray) : DoubleArray {
+    val result = DoubleArray(a.size)
+    result[0] = a[0]
+    for (i in 1 until a.size) {
+        result[i] = result[i-1] * a[i]
+    }
+    return result
+}
+
+// Return the cumulative product of elements
+fun np_cumsum(a: DoubleArray) : DoubleArray {
+    val result = DoubleArray(a.size)
+    result[0] = a[0]
+    for (i in 1 until a.size) {
+        result[i] = result[i-1] + a[i]
+    }
+    return result
+}
+
+// Return the cumulative product of elements
+fun numpy_repeat(a: DoubleArray, nrepeat: Int) : DoubleArray {
+    val result = DoubleArray(a.size * nrepeat )
+    var start = 0
+    a.forEach { elem ->
+        repeat(nrepeat) { result[start + it] = elem }
+        start += nrepeat
+    }
+    return result
+}
+
+// Returns the first index thats true. Dont know why
+fun indexFirstTrue(a: List<Boolean>) : Int {
+    return a.indexOfFirst { it }
+}
+
+fun numpy_append(pfx: DoubleArray, a: DoubleArray) : DoubleArray {
+    val n = pfx.size
+    return DoubleArray(pfx.size + a.size) { if (it<n) pfx[it] else a[it-n] }
+}
+
+// computes the q-th quantile of data along the specified axis.
+// The q-th quantile represents the value below which q percent of the data falls.
+// i think a has to be sorted
+fun numpy_quantile(a: IntArray, q: Double): Int {
+    // for (i=0, sum=0; i<n; i++) sum += Number[i];
+    //tot = sum;
+    //for (i=0, sum=0; i<n && sum < 0.95*tot; i++) sum += Number[i];
+    //// i is about it
+    val total = a.sum() * q
+    var i = 0
+    var runningTotal = 0
+    while ( runningTotal < total) {
+        runningTotal += a[i++]
+    }
+    return a[i]
 }

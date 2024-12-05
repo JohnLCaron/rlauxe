@@ -101,7 +101,7 @@ class TestComparisonMasses {
 
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeComparisonAssertions(cvrs, contest.votes)
         val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
         // sanity checks
@@ -125,7 +125,7 @@ class TestComparisonMasses {
         val cvrMean = .55
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeComparisonAssertions(cvrs, contest.votes)
         val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
         val sampler = ComparisonNoErrors(cvrs, compareAssorter)

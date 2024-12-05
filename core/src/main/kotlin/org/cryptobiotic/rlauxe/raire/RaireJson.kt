@@ -11,7 +11,8 @@ import java.nio.file.StandardOpenOption
 
 // reading RAIRE JSON assertion files
 // TestRcvAssorter reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json"
-// TEstStylishWorkshop reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json"
+// TestRaireAssertions,AssertionRLAipynb  reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json"
+// TestRaireWorkflow reads   "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json"
 
 @Serializable
 data class RaireResultsJson(

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.junit.jupiter.api.Test
@@ -22,9 +23,9 @@ class GenerateComparisonErrorTable {
 
         margins.forEach { margin ->
             ncands.forEach { ncand ->
-                val fcontest = TestContest(0, ncand, margin)
+                val fcontest = ContestTestData(0, ncand, margin)
                 fcontest.ncards = N
-                val contest = fcontest.makeContest(true) // TODO useStyle matters?
+                val contest = fcontest.makeContest() // TODO useStyle matters?
                 // print("contest votes = ${contest.votes} ")
 
                 val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
@@ -33,8 +34,9 @@ class GenerateComparisonErrorTable {
 
                     repeat(auditConfig.ntrials) {
                         val cvrs = fcontest.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, N)
-                        contestUA.makeComparisonAssertions(cvrs)
+                        val contestUA = ContestUnderAudit(contest, N, true, true)
+                        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
+                        contestUA.makeComparisonAssertions(cvrs, votes[contest.id]!!)
                         val minAssert = contestUA.minComparisonAssertion()!!
                         val minAssort = minAssert.cassorter
 

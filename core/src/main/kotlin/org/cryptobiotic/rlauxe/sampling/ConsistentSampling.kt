@@ -1,13 +1,9 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.df
 
 //// Adapted from SHANGRLA Audit.py
-
-
-///////////////////////////////////////////////////////////////////////
 
 // TODO not clear yet how to limit the sample size. maxFirstRoundSampleSize? maxPercent? show pvalue, let user intervene?
 
@@ -122,7 +118,7 @@ fun uniformPollingSampling(
             it.done = true
             it.status = TestH0Status.LimitReached
             println("  ***$it estPct $estPct > samplePctCutoff $samplePctCutoff round $roundIdx")
-            val minAssert = it.minPollingAssertion()
+            val minAssert = it.minAssertion()
             if (minAssert != null)
                 minAssert.round = roundIdx
         }

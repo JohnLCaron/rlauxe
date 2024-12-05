@@ -55,7 +55,6 @@ class PrevSamplesWithRates(val noerror: Double) : Samples {
     override fun variance() = welford.variance()
 
     // these are the rates from the previous samples.
-    fun sampleP0count() = countP0
     fun sampleP1count() = countP1
     fun sampleP2count() = countP2
     fun sampleP3count() = countP3

@@ -11,6 +11,20 @@ import kotlin.test.Test
 
 class TestEstimateSampleSize {
     @Test
+    fun testFindSampleSizePolling() {
+        val test = MultiContestTestData(20, 11, 20000)
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc, isComparison = false) }
+
+        contestsUA.forEach { contest ->
+            println("contest = ${contest}")
+            contest.makePollingAssertions()
+            contest.pollingAssertions.forEach {
+                println("  polling assertion = ${it}")
+            }
+        }
+    }
+
+        @Test
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
@@ -19,11 +33,6 @@ class TestEstimateSampleSize {
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
-
-            contest.makePollingAssertions()
-            contest.pollingAssertions.forEach {
-                println("  polling assertion = ${it}")
-            }
             contest.makeComparisonAssertions(cvrsUAP)
             contest.comparisonAssertions.forEach {
                 println("  comparison assertion = ${it}")

@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.mean2margin
+import kotlin.math.min
 
 // The ouput of RAIRE assertion generator, read from JSON files
 data class RaireResults(
@@ -16,14 +18,32 @@ data class RaireResults(
     }
 }
 
+class RaireContest(
+    override val info: org.cryptobiotic.rlauxe.core.ContestInfo,
+    override val winnerNames: List<String>,
+    override val Nc: Int,
+) : ContestIF {
+    override val winners: List<Int>
+    override val losers: List<Int>
+
+    init {
+        winners = winnerNames.map { info.candidateNames[it]!! }
+        val mlosers = mutableListOf<Int>()
+        info.candidateNames.forEach { (_, id) ->
+            if (!winners.contains(id)) mlosers.add(id)
+        }
+        losers = mlosers.toList()
+    }
+}
+
 class RaireContestUnderAudit(
-    contest: Contest,
+    contest: RaireContest,
     val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
     val eliminated: List<Int>,
     val expectedPollsNumber : Int,
     val expectedPollsPercent : Double,
     val assertions: List<RaireAssertion>,
-): ContestUnderAudit(contest) {
+): ContestUnderAudit(contest, ncvrs=0, isComparison=true, hasStyle=true) {
     val candidates =  listOf(winner) + eliminated
 
     // TODO eliminate
@@ -33,15 +53,16 @@ class RaireContestUnderAudit(
         }
     }
 
-    override fun makeComparisonAssertions(cvrs : Iterable<CvrIF>): ContestUnderAudit {
+    override fun makeComparisonAssertions(cvrs : Iterable<CvrIF>, votes: Map<Int, Int>?): ContestUnderAudit {
             this.comparisonAssertions = assertions.map { assertion ->
             val assorter = RaireAssorter(this, assertion)
             val welford = Welford()
             cvrs.forEach { cvr ->
-                if (cvr.hasContest(contest.id)) {
+                if (cvr.hasContest(contest.info.id)) {
                     welford.update(assorter.assort(cvr))
                 }
             }
+            assorter.reportedMargin = mean2margin(welford.mean)
             val comparisonAssorter = ComparisonAssorter(contest, assorter, welford.mean)
             // println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
             ComparisonAssertion(contest, comparisonAssorter)
@@ -63,15 +84,15 @@ class RaireContestUnderAudit(
                  assertions: List<RaireAssertion>): RaireContestUnderAudit {
 
             val candidates =  listOf(winner) + eliminated // the sum of winner and eliminated must be all the candiates
-            val contest = Contest(
+            val contest = RaireContest(
                 ContestInfo(
                     name,
                     name.toInt(), // ??
                     candidates.associate{ it.toString() to it },
                     SocialChoiceFunction.IRV,
                 ),
-                emptyMap(), // TODO
-                Nc = 0,
+                listOf(winner.toString()),
+                Nc = 0, // TODO
             )
             return RaireContestUnderAudit(contest, winner, eliminated, expectedPollsNumber, expectedPollsPercent, assertions)
         }
@@ -147,6 +168,7 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     val contestName = contest.contest.info.name
     val contestId = contest.id
     val remaining = contest.candidates.filter { !assertion.alreadyEliminated.contains(it) }
+    var reportedMargin: Double = 0.0
 
     override fun upperBound() = 1.0
     override fun toString() = buildString {
@@ -159,8 +181,9 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     }
     override fun winner() = assertion.winner
     override fun loser() = assertion.loser
+    override fun reportedMargin() = reportedMargin
 
-    override fun reportedAssorterMargin(): Double = 0.0 // TODO
+    // override fun reportedAssorterMargin(votes: Map<Int, Int>): Double = 0.0 // TODO
 
     override fun assort(mvr: CvrIF): Double {
         if (mvr.phantom) {

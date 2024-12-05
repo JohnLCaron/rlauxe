@@ -17,7 +17,7 @@ class TestAlphaMartComparison {
         val cvrMean = .52
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs, contest.votes)
         val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
         val sampler = ComparisonNoErrors(cvrs, compareAssorter)

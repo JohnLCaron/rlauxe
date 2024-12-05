@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 class TestMultiContestTestData {
     @Test
     fun testMakeSampleData() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000, 0.011 .. 0.03)
         println("countBallots = ${test.countBallots}")
         println("partition = ${test.partition} total = ${test.partition.map{ it.value}.sum()} ")
         print(test)

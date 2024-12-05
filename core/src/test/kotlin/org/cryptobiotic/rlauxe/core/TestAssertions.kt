@@ -31,7 +31,7 @@ class TestAssertions {
             .addCrv().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false).makePollingAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -72,7 +72,7 @@ class TestAssertions {
             .addCrv().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false).makePollingAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import kotlin.math.abs
+import kotlin.math.ln
 
 fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
     //    For finite values, isclose uses the following equation to test whether
@@ -40,74 +41,20 @@ fun listToMap(names: List<String>): Map<String, Int> {
 fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 
-/////////////////////////////////////////////////////////////////////////////
-// covers for numpy: will be replaced
+// https://www.baeldung.com/cs/sampling-exponential-distribution
+// probability density function (PDF): f_lambda(x) = lambda * e^(-lambda * x)
+// cumulative density function (CDF): F_lambda(x) =  1 - e^(-lambda * x)
+// inverse cumulative density function (CDF): F_lambda^(-1)(u) = -(1/lambda) * ln(1-u)
+// sample in [0, 1] with exponential distribution with decay lambda
+class Exponential(lambda: Double) {
+    val ilambda = 1.0 / lambda
+    val n = 1.0
 
-// def arange(start=None, *args, **kwargs):
-// arange([start,] stop[, step,], dtype=None, *, like=None)
-// Return evenly spaced values within a given interval.
-fun numpy_arange(start: Int, stop: Int, step: Int): IntArray {
-    var size = (stop - start) / step
-    if (step * size != (stop - start)) size++
-    return IntArray(size) { start + step * it}
-}
-
-// Return the cumulative product of elements
-fun np_cumprod(a: DoubleArray) : DoubleArray {
-    val result = DoubleArray(a.size)
-    result[0] = a[0]
-    for (i in 1 until a.size) {
-        result[i] = result[i-1] * a[i]
+    fun next(): Double {
+        val u = Math.random()
+        val x = ilambda * ln(1.0-u)
+        return x
     }
-    return result
-}
-
-// Return the cumulative product of elements
-fun np_cumsum(a: DoubleArray) : DoubleArray {
-    val result = DoubleArray(a.size)
-    result[0] = a[0]
-    for (i in 1 until a.size) {
-        result[i] = result[i-1] + a[i]
-    }
-    return result
-}
-
-// Return the cumulative product of elements
-fun numpy_repeat(a: DoubleArray, nrepeat: Int) : DoubleArray {
-    val result = DoubleArray(a.size * nrepeat )
-    var start = 0
-    a.forEach { elem ->
-        repeat(nrepeat) { result[start + it] = elem }
-        start += nrepeat
-    }
-    return result
-}
-
-// Returns the first index thats true. Dont know why
-fun indexFirstTrue(a: List<Boolean>) : Int {
-    return a.indexOfFirst { it }
-}
-
-fun numpy_append(pfx: DoubleArray, a: DoubleArray) : DoubleArray {
-    val n = pfx.size
-    return DoubleArray(pfx.size + a.size) { if (it<n) pfx[it] else a[it-n] }
-}
-
-// computes the q-th quantile of data along the specified axis.
-// The q-th quantile represents the value below which q percent of the data falls.
-// i think a has to be sorted
-fun numpy_quantile(a: IntArray, q: Double): Int {
-    // for (i=0, sum=0; i<n; i++) sum += Number[i];
-    //tot = sum;
-    //for (i=0, sum=0; i<n && sum < 0.95*tot; i++) sum += Number[i];
-    //// i is about it
-    val total = a.sum() * q
-    var i = 0
-    var runningTotal = 0
-    while ( runningTotal < total) {
-        runningTotal += a[i++]
-    }
-    return a[i]
 }
 
 // this one assumes you cant change data array

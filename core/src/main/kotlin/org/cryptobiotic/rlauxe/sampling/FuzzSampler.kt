@@ -44,7 +44,7 @@ class ComparisonFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct)
+        return makeFuzzedCvrsFrom(listOf(contestUA.contest as Contest), cvrs, fuzzPct)
     }
 
     override fun N() = N
@@ -91,7 +91,7 @@ class PollingFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct)
+        return makeFuzzedCvrsFrom(listOf(contestUA.contest as Contest), cvrs, fuzzPct)
     }
 
     override fun N() = N

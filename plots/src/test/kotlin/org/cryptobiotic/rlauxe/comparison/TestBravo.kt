@@ -7,9 +7,10 @@ import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithReplacement
-import org.cryptobiotic.rlauxe.sampling.GenSampleMeanWithoutReplacement
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.generateSampleWithMean
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
@@ -173,4 +174,34 @@ class FixedMean(val eta0: Double): EstimFn {
     override fun eta(prevSamples: Samples): Double {
         return eta0
     }
+}
+
+// generate random values with given mean
+class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
+    val samples = generateSampleWithMean(N, ratio)
+    override fun sample(): Double {
+        val idx = secureRandom.nextInt(N) // with Replacement
+        return samples[idx]
+    }
+    override fun reset() {
+        // noop
+    }
+    fun sampleMean() = samples.average()
+    fun sampleCount() = samples.sum()
+    override fun N() = N
+}
+
+class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGenerator {
+    var samples = generateSampleWithMean(N, ratio)
+    var index = 0
+    override fun sample(): Double {
+        return samples[index++]
+    }
+    override fun reset() {
+        samples = generateSampleWithMean(N, ratio)
+        index = 0
+    }
+    fun sampleMean() = samples.average()
+    fun sampleCount() = samples.sum()
+    override fun N() = N
 }

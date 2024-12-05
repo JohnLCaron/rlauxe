@@ -33,7 +33,7 @@ class TestAssorterBasics {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false).makePollingAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -77,8 +77,8 @@ class TestAssorterBasics {
             minFraction = .42,
             )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size).makePollingAssertions()
-        println("votes: [${showVotes(contestUA.contest.votes)}]")
+        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false).makePollingAssertions()
+        println("votes: [${showVotes((contestUA.contest as Contest).votes)}]")
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)

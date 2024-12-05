@@ -74,7 +74,7 @@ class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): CvrIF {
     override fun hasMarkFor(contestId: Int, candidateId: Int) = cvr.hasMarkFor(contestId, candidateId)
     override fun hasOneVote(contestId: Int, candidates: List<Int>) = cvr.hasOneVote(contestId, candidates)
 
-    constructor(id: String, contestIdx: Int) : this( Cvr(id, mapOf(contestIdx to IntArray(0)), false))
+    // constructor(id: String, contestIdx: Int) : this( Cvr(id, mapOf(contestIdx to IntArray(0)), false))
 
     override fun toString() = buildString {
         append("$id ($phantom)")

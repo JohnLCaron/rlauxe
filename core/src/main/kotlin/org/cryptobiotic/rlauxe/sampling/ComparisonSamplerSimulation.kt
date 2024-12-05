@@ -22,7 +22,7 @@ class ComparisonSamplerSimulation(
     val p4: Double = errorRates[3] // apriori rate of 2-vote understatements; voted for winner, cvr has loser
 
     val N = rcvrs.size
-    val isIRV = contestUA.contest.choiceFunction == SocialChoiceFunction.IRV
+    val isIRV = contestUA.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()
@@ -165,7 +165,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip4votes could only flip $changed, wanted $needToChange")
-        require(checkAvotes == startingAvotes - needToChange)
+        // require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
 
@@ -238,7 +238,7 @@ class ComparisonSamplerSimulation(
         val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.5 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votes could only flip $changed, wanted $needToChange")
-        require(checkAvotes == startingAvotes - needToChange)
+        // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
     }

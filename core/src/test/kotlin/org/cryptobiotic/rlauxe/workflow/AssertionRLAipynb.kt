@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.corla.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // SHANGRLA examples/assertion-RLA.ipynb
@@ -204,7 +205,7 @@ data class ShangrlaContest(
 
 class AssertionRLA {
 
-    // @Test
+    @Test
     fun workflow() {
 
 //audit = Audit.from_dict({
@@ -649,7 +650,7 @@ fun calc_sample_sizes(
     //val minAssertion = comparisonAssertions.minBy { it.margin }
     //val minAssorter = minAssertion.assorter
 
-    val contest = contests.first()
+    val contest = contests.first().makeComparisonAssertions(cvrs)
     val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: SampleGenerator = ComparisonNoErrors(cvrs, minAssorter)

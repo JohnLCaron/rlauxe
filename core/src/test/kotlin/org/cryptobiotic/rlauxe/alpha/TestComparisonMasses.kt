@@ -4,12 +4,12 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.sampling.ArrayAsGenSampleFn
 import org.cryptobiotic.rlauxe.sampling.SampleFromArrayWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.generateUniformSample
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
+import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
@@ -152,7 +152,29 @@ class TestComparisonMasses {
         // it would seem that the idea of normalizing is wrong, the algorithm relies on alternative mean > 1/2.
         // probably violating the conditions of an assorter, namely B̄ ≡ Sum(B(bi, ci)) / N > 1/2
     }
+}
 
 
+class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
+    var index = 0
 
+    override fun sample(): Double {
+        return assortValues[index++]
+    }
+
+    override fun reset() {
+        index = 0
+    }
+
+    fun sampleMean(): Double {
+        return assortValues.toList().average()
+    }
+
+    fun sampleCount(): Double {
+        return assortValues.toList().sum()
+    }
+
+    override fun N(): Int {
+        return assortValues.size
+    }
 }

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import java.math.BigInteger
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.Mac
@@ -60,23 +59,4 @@ fun ByteArray.toLong(): Long {
 
 fun isBigEndian(): Boolean = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN
 
-////////////////////////////////////////////////////////////////////
-class Prng2(seed: BigInteger) {
-    val index = AtomicInteger(0)
-    val md: Mac = Mac.getInstance("HmacSHA256")
-
-    init {
-        val secretKey = SecretKeySpec((seed.toString(10) + ",").toByteArray(), "HmacSHA256")
-        md.init(secretKey)
-    }
-
-    fun next(): BigInteger {
-        val n = index.getAndIncrement() // appears that the first one has 0 bytes
-        val addto = ByteArray(n)
-        md.update(addto)
-        val result: ByteArray =  md.doFinal()
-        // maybe should be a BigInteger, then a String ??
-        return BigInteger(1, result) // positive
-    }
-}
 

@@ -27,26 +27,21 @@ class PollingWorkflow(
         val prng = Prng(auditConfig.seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(emptyList())  // TODO
         contestsUA.filter { !it.done }.forEach { contest ->
-            contest.makePollingAssertions(votes[contest.id]!!)
+            contest.makePollingAssertions(null)
         }
     }
 
-    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
-        println("EstimateSampleSize.simulateSampleSizeContest round $roundIdx")
+    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
+        println("estimateSampleSizes round $roundIdx")
 
-        // set contest.sampleSize through simulation.
-        // Uses SimContest to simulate a contest with the same vote totals.
-        // standard: Uses PollWithoutReplacement, then mvr = cvrs
-        // alternative: Uses SimContest to simulate a contest with the same vote totals.
-        val sampleSizer = EstimateSampleSize(auditConfig)
-        val contestsNotDone = contestsUA.filter { !it.done }
-
-        contestsNotDone.filter { !it.done }.forEach { contestUA ->
-            sampleSizer.simulateSampleSizeContest(contestUA, emptyList(), prevMvrs, roundIdx, show = true)
-        }
-        val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
+        val maxContestSize =  estimateSampleSizes(
+            auditConfig,
+            contestsUA,
+            emptyList(),
+            prevMvrs,
+            roundIdx,
+        )
 
         // choose samples
         val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?

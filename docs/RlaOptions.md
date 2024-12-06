@@ -89,9 +89,8 @@ Jurisdiction Scenarios
 
 Audit types
 
-1. Polling
-2. Comparison without CSD
-3. Comparison with CSD
+1. Polling/Comparison
+2. hasStyles/noStyles
 4. ONEAudit?
 5. Hybrid?
 6. Stratified?

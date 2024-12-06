@@ -3,7 +3,9 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.random.Random
 
 private val debug = false
@@ -29,7 +31,7 @@ data class MultiContestTestData(
 ) {
     val fcontests: List<ContestTestData>
     val ballotStyles: List<BallotStyle>
-    val partition = partition(totalBallots, nballotStyles) // ncards in each ballot style
+    val ballotStylePartition = partition(totalBallots, nballotStyles) // ncards in each ballot style
     var countBallots = 0
 
     init {
@@ -43,10 +45,10 @@ data class MultiContestTestData(
             ContestTestData(it, ncands, marginRange.start + Random.nextDouble(marginRange.endInclusive - marginRange.start))
         }
 
-        // every contest is in between 1 and nballotStyles/4 ballot styles, randomly chosen
+        // every contest is in between 1 and 4 ballot styles, randomly chosen
         val contestBs = mutableMapOf<ContestTestData, Set<Int>>()
         fcontests.forEach{
-            val nbs = if (nballotStyles < 4) 1 + Random.nextInt(nballotStyles) else 1 + Random.nextInt(nballotStyles/4)
+            val nbs = min(nballotStyles, 1 + Random.nextInt(4))
             val bset = mutableSetOf<Int>() // the ballot style id, 0 based
             while (bset.size < nbs) { // randomly choose nbs ballot styles
                 bset.add(Random.nextInt(nballotStyles))
@@ -58,7 +60,7 @@ data class MultiContestTestData(
             val contestsForThisBs = contestBs.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
             val contestList = contestsForThisBs.map { it.info.name }
             val contestIds = contestsForThisBs.map { it.info.id }
-            val ncards = partition[it]!!
+            val ncards = ballotStylePartition[it]!!
             countBallots += ncards
             BallotStyle.make(it, contestList, contestIds, ncards)
         }
@@ -91,8 +93,13 @@ data class MultiContestTestData(
     }
 
     override fun toString() = buildString {
-        appendLine("SampleData(ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
-        fcontests.forEach { appendLine(it) }
+        appendLine("MultiContestTestData(ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
+        fcontests.forEach { fcontest ->
+            append(fcontest)
+            val bs4id = ballotStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
+            appendLine(" ballotStyles=$bs4id")
+        }
+        appendLine("")
         ballotStyles.forEach { appendLine(it) }
     }
 
@@ -138,9 +145,9 @@ data class ContestTestData(
     fun adjust(svotes: MutableList<Pair<Int, Int>>): Int {
         val winner = svotes[0]
         val loser = svotes[1]
-        val wantMarginDiff = (margin * ncards).toInt()
+        val wantMarginDiff = ceil(margin * ncards).toInt()
         val haveMarginDiff = (winner.second - loser.second)
-        val adjust: Int = (wantMarginDiff - haveMarginDiff) / 2 // can be positive or negetive
+        val adjust: Int = ceil((wantMarginDiff - haveMarginDiff) * 0.5).toInt() // can be positive or negetive
         svotes.set(0, Pair(winner.first, winner.second + adjust))
         svotes[1] = Pair(loser.first, loser.second - adjust)
         return adjust // will be 0 when done
@@ -182,6 +189,7 @@ data class ContestTestData(
             if (debug) println()
         }
         this.adjustedVotes = svotes
+
         return Contest(this.info, svotes.toMap(), this.ncards)
     }
 
@@ -222,7 +230,7 @@ data class ContestTestData(
     }
 
     override fun toString() = buildString {
-        append(" FuzzedContest(contestId=$contestId, ncands=$ncands, margin=${df(margin)}, choiceFunction=$choiceFunction countCards=$ncards")
+        append(" ContestTestData(contestId=$contestId, ncands=$ncands, margin=${df(margin)}, choiceFunction=$choiceFunction countCards=$ncards")
     }
 }
 

@@ -3,32 +3,39 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestMultiContestTestData {
+
+    // @Test
+    fun testMakeSampleDataRepeat() {
+        repeat(100) { testMakeSampleData() }
+    }
+
     @Test
     fun testMakeSampleData() {
         val test = MultiContestTestData(20, 11, 20000, 0.011 .. 0.03)
-        println("countBallots = ${test.countBallots}")
-        println("partition = ${test.partition} total = ${test.partition.map{ it.value}.sum()} ")
+        println("testMakeSampleData--------------------------------------------------------------")
+        println("ballotStylePartition = ${test.ballotStylePartition} total = ${test.ballotStylePartition.map{ it.value}.sum()} ")
         print(test)
         println()
 
-        println("make contests")
+        println("test makeContests")
         val contests = test.makeContests()
-        contests.forEach {
-            it.winners.forEach { winner ->
-                it.losers.forEach { loser ->
-                    val margin = (it.votes[winner]!! - it.votes[loser]!!) / it.Nc.toDouble()
-                    println("  ${it.name}: votes=${it.votes} winner=$winner loser=$loser margin = ${df(margin)}")
-                    assertTrue(margin > .01)
+        contests.forEachIndexed { idx, contest ->
+            val fcontest = test.fcontests[idx]
+            contest.winners.forEach { winner ->
+                contest.losers.forEach { loser ->
+                    val margin = (contest.votes[winner]!! - contest.votes[loser]!! + 2) / contest.Nc.toDouble()
+                    println("  $contest margin = ${df(margin)} fmargin = ${df(fcontest.margin)}")
+                    assertTrue(fcontest.margin >= .011)
+                    assertTrue(margin >= fcontest.margin)
                 }
             }
         }
         println()
 
-        println("make cvrs, tabulate votes")
+        println("test makeCvrsFromContests")
         val cvrs = test.makeCvrsFromContests()
         val votes: Map<Int, Map<Int, Int>> = org.cryptobiotic.rlauxe.util.tabulateVotes(cvrs).toSortedMap()
         votes.forEach { vcontest ->

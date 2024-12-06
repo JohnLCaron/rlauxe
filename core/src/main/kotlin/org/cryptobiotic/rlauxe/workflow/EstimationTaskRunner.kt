@@ -64,7 +64,7 @@ class EstimationTaskRunner {
     ): EstimationResult {
         val stopwatch = Stopwatch()
         val result =  task.estimate()
-        if (showTaskResult) println("${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
+        if (showTaskResult) println(" ${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
         return result
     }
 

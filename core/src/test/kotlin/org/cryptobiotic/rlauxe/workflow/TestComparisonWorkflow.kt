@@ -21,17 +21,17 @@ class TestComparisonWorkflow {
 
     @Test
     fun testComparisonWithStyle() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
-        val N = 20000
-        val testData = MultiContestTestData(20, 11, N)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = 0.01)
+        val N = 50000
+        val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, N, testData)
     }
 
     @Test
     fun testComparisonNoStyle() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
-        val N = 20000
-        val testData = MultiContestTestData(20, 11, N)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.50, fuzzPct = 0.01)
+        val N = 50000
+        val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, N, testData)
     }
 

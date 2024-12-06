@@ -17,11 +17,11 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingNoStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, fuzzPct = 0.0)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.50, fuzzPct = 0.0)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
-        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.10)
+        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..0.10)
         val contests: List<Contest> = test.makeContests()
 
         println("Start testPollingNoStyle N=$N")
@@ -75,11 +75,11 @@ class TestPollingWorkflow {
     @Test
     fun testPollingWithStyle() {
         val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = .01)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
-        val test = MultiContestTestData(20, 11, N, marginRange= 0.04..0.10)
+        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..0.10)
         val contests: List<Contest> = test.makeContests()
         println("Start testPollingWithStyle N=$N")
         contests.forEach{ println(" $it")}

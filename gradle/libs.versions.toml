@@ -18,7 +18,7 @@ letsPlotImage = "4.3.3"
 mockk = "1.13.10"
 
 coroutines-version = "1.9.0-RC.2"
-kotest-version = "5.8.0"
+kotest-version = "5.9.1"
 ktor-version = "2.3.4"
 xmlutil-version = "0.90.0-RC3"
 
@@ -69,9 +69,10 @@ test-annotations-common = { module = "org.jetbrains.kotlin:kotlin-test-annotatio
 ktor-server-tests-jvm = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor-version" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "kotlin-version" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.10.0" }
+kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest-version" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest-version" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest-version" }
 kotest-datatest = { module = "io.kotest:kotest-framework-datatest", version.ref = "kotest-version" }
-kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest-version" }
 mockk = { module = "io.mockk:mockk", version = "1.13.12" }
 
 [bundles]
@@ -79,6 +80,7 @@ eglib = ["bull-result", "kotlinx-cli", "kotlinx-coroutines-core", "kotlinx-datet
 egtest = ["test-common", "test-annotations-common", "kotlinx-coroutines-test", "kotest-runner", "kotest-property", "kotest-datatest"]
 jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk"]
 logging = ["oshai-logging", "logback-classic"]
+kotest = ["kotest-runner", "kotest-assertions", "kotest-property", "kotest-datatest"]
 
 ktor-server = [
     "ktor-server-core-jvm",

@@ -24,7 +24,7 @@ class TestEstimateSampleSize {
         }
     }
 
-        @Test
+    @Test
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
@@ -50,28 +50,19 @@ class TestEstimateSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 1234567890L, fuzzPct = null, quantile=.50)
-        val finder = EstimateSampleSize(auditConfig)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 1234567890L, fuzzPct = null, quantile=.90)
 
         contestsUA.forEach { contestUA ->
             val cn = contestUA.ncvrs
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
-                //         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round) }
-                val result = finder.simulateSampleSizeComparisonAssorter(contestUA, assert.cassorter, cvrs, contestUA.ncvrs)
-                //     riskLimit: Double,
-                //    dilutedMargin: Double,
-                //    gamma: Double = 1.03,
-                //    oneOver: Int = 0,   // p1
-                //    twoOver: Int = 0,   // p2
-                //    oneUnder: Int = 0,  // p3
-                //    twoUnder: Int = 0,  // p4
-                val simSize = result.findQuantile(.90)
+                val result = simulateSampleSizeComparisonAssorter(auditConfig, contestUA, assert.cassorter, cvrs, contestUA.ncvrs)
+                val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.cassorter.margin, gamma,
-                    oneOver = ceil(cn*p1).toInt(),
-                    twoOver = ceil(cn*p2).toInt(),
-                    oneUnder = ceil(cn*p3).toInt(),
-                    twoUnder = ceil(cn*p4).toInt(),
+                    oneOver = ceil(cn*p1).toInt(), // p1
+                    twoOver = ceil(cn*p2).toInt(), // p2
+                    oneUnder = ceil(cn*p3).toInt(), // p3
+                    twoUnder = ceil(cn*p4).toInt(), // p4
                     )
                 estSizes.add(estSize)
                 println("  ${contestUA.name} margin=${df(assert.cassorter.margin)} est=$estSize sim=$simSize")
@@ -83,3 +74,12 @@ class TestEstimateSampleSize {
         }
     }
 }
+
+// fun simulateSampleSizeComparisonAssorter(
+//    auditConfig: AuditConfig,
+//    contestUA: ContestUnderAudit,
+//    cassorter: ComparisonAssorter,
+//    cvrs: List<Cvr>,
+//    maxSamples: Int,
+//    startingTestStatistic: Double = 1.0,
+//): RunTestRepeatedResult {

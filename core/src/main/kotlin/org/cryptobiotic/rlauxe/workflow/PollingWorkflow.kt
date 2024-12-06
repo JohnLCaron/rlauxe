@@ -33,24 +33,15 @@ class PollingWorkflow(
     }
 
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
-        println("EstimateSampleSize.simulateSampleSizeContest round $roundIdx")
+        println("estimateSampleSizes round $roundIdx")
 
-        val sampleSizer = EstimateSampleSize(auditConfig)
-        val tasks = mutableListOf<EstimationTask>()
-        contestsUA.filter{ !it.done }.forEach { contestUA ->
-            tasks.addAll(sampleSizer.makeEstimationTasks(contestUA, emptyList(), prevMvrs, roundIdx, show))
-        }
-        val results: List<EstimationResult> = EstimationTaskRunner().run(tasks) // run tasks concurrently
-
-        // pull out the results for each contest
-        contestsUA.filter{ !it.done }.forEach { contestUA ->
-            val sampleSizes = results.filter{ it.contestUA.id == contestUA.id && it.success }
-                .map{ it.assertion.estSampleSize }
-            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            if (show) println(" ${contestUA}")
-        }
-        if (show) println()
-        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
+        val maxContestSize =  estimateSampleSizes(
+            auditConfig,
+            contestsUA,
+            emptyList(),
+            prevMvrs,
+            roundIdx,
+        )
 
         // choose samples
         val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?

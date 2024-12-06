@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.comparison
 
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
-import org.cryptobiotic.rlauxe.util.makeCvrsByMargin
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.secureRandom
 import org.junit.jupiter.api.Test
 
 class Failures {
@@ -87,4 +88,18 @@ class Failures {
         writer.close()
         println("${results.size} results written to ${writer.filename}")
     }
+}
+
+// default one contest, two candidates ("A" and "B"), no phantoms, plurality
+// margin = percent margin of victory of A over B (between += .5)
+fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
+    val result = mutableListOf<Cvr>()
+    repeat(ncards) {
+        val random = secureRandom.nextDouble(1.0)
+        val cand = if (random < .5 + margin/2.0) 0 else 1
+        val votes = mutableMapOf<Int, IntArray>()
+        votes[0] = intArrayOf(cand)
+        result.add(Cvr("card-$it", votes))
+    }
+    return result
 }

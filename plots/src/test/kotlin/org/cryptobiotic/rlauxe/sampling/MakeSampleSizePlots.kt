@@ -290,7 +290,8 @@ class BettingTask(val name: String,
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         //  this uses auditConfig p1,,p4 to set apriori error rates. should be based on fuzzPct i think
-        return simulateSampleSizeBetaMart(finder.auditConfig, sampleFn, margin, noerror, upperBound, Nc, Nc, errorRates, moreParameters=otherParameters)
+        return simulateSampleSizeBetaMart(finder.auditConfig, sampleFn, margin, noerror, upperBound, Nc=Nc,
+            errorRates, maxSamples=Nc, moreParameters=otherParameters)
     }
 }
 
@@ -357,7 +358,7 @@ class ComparisonTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return finder.simulateSampleSizeComparisonAssorter(contestUA, cassort, cvrs)
+        return finder.simulateSampleSizeComparisonAssorter(contestUA, cassort, cvrs, maxSamples=contestUA.ncvrs)
     }
 }
 

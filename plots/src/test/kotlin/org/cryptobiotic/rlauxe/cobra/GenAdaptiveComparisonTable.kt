@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.cobra
 
+import org.cryptobiotic.rlauxe.comparison.makeCvrsByMargin
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.BettingTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.makeCvrsByMargin
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test

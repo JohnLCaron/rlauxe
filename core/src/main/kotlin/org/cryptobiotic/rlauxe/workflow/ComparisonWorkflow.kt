@@ -22,9 +22,9 @@ import org.cryptobiotic.rlauxe.util.*
 //	d) Read CVRs.
 
 class ComparisonWorkflow(
+    val auditConfig: AuditConfig,
     contests: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
-    val auditConfig: AuditConfig,
     val cvrs: List<Cvr>,
 ) {
     val contestsUA: List<ContestUnderAudit>
@@ -75,28 +75,38 @@ class ComparisonWorkflow(
      * Choose lists of ballots to sample.
      * @parameter mvrs: use existing mvrs to estimate samples. may be empty.
      */
-    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
+    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("EstimateSampleSize.simulateSampleSizeContest round $roundIdx")
 
         val sampleSizer = EstimateSampleSize(auditConfig)
-        val contestsNotDone = contestsUA.filter{ !it.done }
-        contestsNotDone.forEach { contestUA ->
-            sampleSizer.simulateSampleSizeContest(contestUA, cvrs, prevMvrs, roundIdx, show=true)
+        val tasks = mutableListOf<EstimationTask>()
+        contestsUA.filter{ !it.done }.forEach { contestUA ->
+            tasks.addAll(sampleSizer.makeEstimationTasks(contestUA, cvrs, prevMvrs, roundIdx, show=true))
         }
-        println()
-        val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
+        val results: List<EstimationResult> = EstimationTaskRunner().run(tasks) // run tasks concurrently
 
-        // TODO should we know max sampling percent? or is it an absolute number?
-        //   should there be a minimum increment?? esp if its going to end up hand-counted?
-        //   user should be able to force a total count size.
+        // pull out the results for each contest
+        contestsUA.filter{ !it.done }.forEach { contestUA ->
+            val sampleSizes = results.filter{ it.contestUA.id == contestUA.id && it.success }
+                .map{ it.assertion.estSampleSize }
+            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            if (show) println(" ${contestUA}")
+        }
+        if (show) println()
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
+
+        // TODO how to control the round's sampleSize?
 
         //	c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         //     draws random ballots by consistent sampling, and returns their locations to the auditors.
-        println("consistentCvrSampling round $roundIdx")
-        val sampleIndices = consistentCvrSampling(contestsUA.filter{ !it.done }, cvrsUA)
-        println(" ComparisonWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-
-        return sampleIndices
+        val contestsNotDone = contestsUA.filter{ !it.done }
+        if (contestsNotDone.size > 0) {
+            println("consistentCvrSampling round $roundIdx")
+            val sampleIndices = consistentCvrSampling(contestsNotDone, cvrsUA)
+            println(" ComparisonWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+            return sampleIndices
+        }
+        return emptyList()
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs

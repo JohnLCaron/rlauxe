@@ -29,20 +29,6 @@ fun makeCvr(idx: Int): Cvr {
     return Cvr("card", votes)
 }
 
-// default one contest, two candidates ("A" and "B"), no phantoms, plurality
-// margin = percent margin of victory of A over B (between += .5)
-fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
-    val result = mutableListOf<Cvr>()
-    repeat(ncards) {
-        val random = secureRandom.nextDouble(1.0)
-        val cand = if (random < .5 + margin/2.0) 0 else 1
-        val votes = mutableMapOf<Int, IntArray>()
-        votes[0] = intArrayOf(cand)
-        result.add(Cvr("card-$it", votes))
-    }
-    return result
-}
-
 fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 

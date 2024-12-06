@@ -21,7 +21,7 @@ class TestComparisonWorkflow {
 
     @Test
     fun testComparisonWithStyle() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
         val N = 20000
         val testData = MultiContestTestData(20, 11, N)
         testComparisonWorkflow(auditConfig, N, testData)
@@ -29,7 +29,7 @@ class TestComparisonWorkflow {
 
     @Test
     fun testComparisonNoStyle() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = .01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
         val N = 20000
         val testData = MultiContestTestData(20, 11, N)
         testComparisonWorkflow(auditConfig, N, testData)
@@ -47,7 +47,7 @@ class TestComparisonWorkflow {
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         val fuzzedMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, cvrs, auditConfig.fuzzPct!!)
 
-        val workflow = ComparisonWorkflow(contests, emptyList(), auditConfig, cvrs)
+        val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), cvrs)
         val stopwatch = Stopwatch()
 
         var prevMvrs = emptyList<CvrIF>()

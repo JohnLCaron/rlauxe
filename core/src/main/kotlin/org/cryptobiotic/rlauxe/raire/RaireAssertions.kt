@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.mean2margin
-import kotlin.math.min
 
 // The ouput of RAIRE assertion generator, read from JSON files
 data class RaireResults(
@@ -13,12 +12,12 @@ data class RaireResults(
     val contests: List<RaireContestUnderAudit>,
 ) {
     fun show() = buildString {
-        appendLine("overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
+        appendLine("RaireResults: overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
         contests.forEach { append(it.show()) }
     }
 }
 
-class RaireContest(
+data class RaireContest(
     override val info: org.cryptobiotic.rlauxe.core.ContestInfo,
     override val winnerNames: List<String>,
     override val Nc: Int,
@@ -71,7 +70,7 @@ class RaireContestUnderAudit(
     }
 
     fun show() = buildString {
-        appendLine("  contest ${contest.info.name} winner $winner eliminated $eliminated")
+        appendLine("  RaireContestUnderAudit ${contest.info.name} winner $winner eliminated $eliminated")
         assertions.forEach { append(it.show()) }
     }
 
@@ -171,10 +170,10 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
     var reportedMargin: Double = 0.0
 
     override fun upperBound() = 1.0
-    override fun toString() = buildString {
+    /* override fun toString() = buildString {
         append("RaireAssorter contest ${contestName} type= ${assertion.assertionType} winner=${assertion.winner} loser=${assertion.loser}")
         if (assertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${assertion.alreadyEliminated}")
-    }
+    } */
     override fun desc() = buildString {
         append("RaireAssorter winner/loser=${assertion.winner}/${assertion.loser}")
         if (assertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${assertion.alreadyEliminated}")

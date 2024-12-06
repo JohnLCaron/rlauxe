@@ -58,7 +58,7 @@ class TestEstimateSampleSize {
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
                 //         contestsUA.forEach { contestUA -> finder.simulateSampleSizeComparisonContest(contestUA, cvrsUA, prevMvrs, round) }
-                val result = finder.simulateSampleSizeComparisonAssorter(contestUA, assert.cassorter, cvrs,)
+                val result = finder.simulateSampleSizeComparisonAssorter(contestUA, assert.cassorter, cvrs, contestUA.ncvrs)
                 //     riskLimit: Double,
                 //    dilutedMargin: Double,
                 //    gamma: Double = 1.03,

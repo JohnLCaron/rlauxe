@@ -27,26 +27,30 @@ class PollingWorkflow(
         val prng = Prng(auditConfig.seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(emptyList())  // TODO
         contestsUA.filter { !it.done }.forEach { contest ->
-            contest.makePollingAssertions(votes[contest.id]!!)
+            contest.makePollingAssertions(null)
         }
     }
 
-    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int): List<Int> {
+    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("EstimateSampleSize.simulateSampleSizeContest round $roundIdx")
 
-        // set contest.sampleSize through simulation.
-        // Uses SimContest to simulate a contest with the same vote totals.
-        // standard: Uses PollWithoutReplacement, then mvr = cvrs
-        // alternative: Uses SimContest to simulate a contest with the same vote totals.
         val sampleSizer = EstimateSampleSize(auditConfig)
-        val contestsNotDone = contestsUA.filter { !it.done }
-
-        contestsNotDone.filter { !it.done }.forEach { contestUA ->
-            sampleSizer.simulateSampleSizeContest(contestUA, emptyList(), prevMvrs, roundIdx, show = true)
+        val tasks = mutableListOf<EstimationTask>()
+        contestsUA.filter{ !it.done }.forEach { contestUA ->
+            tasks.addAll(sampleSizer.makeEstimationTasks(contestUA, emptyList(), prevMvrs, roundIdx, show))
         }
-        val maxContestSize = contestsNotDone.map { it.estSampleSize }.max()
+        val results: List<EstimationResult> = EstimationTaskRunner().run(tasks) // run tasks concurrently
+
+        // pull out the results for each contest
+        contestsUA.filter{ !it.done }.forEach { contestUA ->
+            val sampleSizes = results.filter{ it.contestUA.id == contestUA.id && it.success }
+                .map{ it.assertion.estSampleSize }
+            contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            if (show) println(" ${contestUA}")
+        }
+        if (show) println()
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
 
         // choose samples
         val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?

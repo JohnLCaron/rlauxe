@@ -334,30 +334,6 @@ fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
     }
 }
 
-class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
-    var index = 0
-
-    override fun sample(): Double {
-        return assortValues[index++]
-    }
-
-    override fun reset() {
-        index = 0
-    }
-
-    fun sampleMean(): Double {
-        return assortValues.toList().average()
-    }
-
-    fun sampleCount(): Double {
-        return assortValues.toList().sum()
-    }
-
-    override fun N(): Int {
-        return assortValues.size
-    }
-}
-
 class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleGenerator {
     val N = assortValues.size
     val permutedIndex = MutableList(N) { it }

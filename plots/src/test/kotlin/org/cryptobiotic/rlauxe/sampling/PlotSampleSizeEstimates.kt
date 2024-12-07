@@ -104,14 +104,14 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirname = "/home/stormy/temp/estimate"
-        val filename = "ComparisonVsStyleAndPollFuzz"
+        val filename = "ComparisonVsStyleAndPoll"
         val writer = SRTcsvWriter("$dirname/${filename}.cvs")
         writer.writeCalculations(srts)
         writer.close()
 
         val plotter = PlotSampleSizes(dirname, filename)
         plotter.showSamples(catfld = {
-            if (it.hasStyles) "hasStyles" else if (it.isPolling) "polling" else "noStyles" })
+            if (it.hasStyles) "compare hasCSD" else if (it.isPolling) "polling hasCSD" else "compare noCSD" })
     }
 
     @Test

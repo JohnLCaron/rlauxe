@@ -29,7 +29,6 @@ Table of Contents
     * [Estimating Sample sizes](#estimating-sample-sizes)
     * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
       * [Comparison audits and CSDs](#comparison-audits-and-csds)
-      * [Consistent Sampling](#consistent-sampling)
       * [Polling audits and CSDs](#polling-audits-and-csds)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
@@ -51,6 +50,8 @@ Table of Contents
 
     SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
         https://github.com/pbstark/SHANGRLA
+
+    MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes	Glazer, Spertus, Stark; 6 Dec 2020
 
     ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
         https://github.com/pbstark/alpha.
@@ -338,12 +339,12 @@ While these do not affect the reliabilty of the audit, they have a strong impact
 
 #### Polling Vs Comparison Estimated Sample sizes
 
-This plot shows the large difference between a polling audit and a comparison audit at the same margin:
+This plot shows the large difference between a polling audit and a comparison audit at different margins:
 
-* [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
 
-Except for large N > 50000, polling at margins < 3% needs prohibitively large sample sizes.
-Comparison audits are perhaps useful down to margins = .8% .
+Polling at margins < 4% needs prohibitively large sample sizes.
+Comparison audits are perhaps useful down to margins = .4% .
 
 "In a card-level comparison audit, the estimated sample size scales with
 the reciprocal of the diluted margin." (STYLISH p.4)
@@ -410,7 +411,7 @@ For each contest assertion we estimate the required sample size that will satisf
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
 
-Note that each round does its own sampling without regards to the previous round's sampled ballots. 
+Note that each round does its own sampling without regard to the previous round's sampled ballots. 
 Since the seed remains the same, the sort is the same, and so previously MVRS are used as much as possible.
 
 Note: I _think_ its fine if more ballots come in between rounds (although this may be disallowed for security reasons). 
@@ -419,9 +420,9 @@ Ideally N_c doesnt change, so it just makes less evil zombies.
 
 ### Choosing which ballots/cards to sample
 
-Once we have all of the contests' estimated sample sizes, we then need to choose which ballots/cards to sample. 
+Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
 This step is highly dependent on how much we know about which ballots contain which contests. In particular,
-whether you have Card Style Data (CSD), where you know which cards/ballots contain which contests.
+whether you have Card Style Data (CSD), (see MoreStyle, p2)..
 
 For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records the
 case where a contest recieves no votes.
@@ -440,6 +441,10 @@ So far, we can distinguish the following cases:
 
 #### Comparison audits and CSDs
 
+ConsistentSampling is used in either case. This assigns large psuedo-random numbers to each ballot, sorts and chooses
+the first ballots that use any contest that needs more samples, until all contests have at least contest.estSampleSize
+in the sample of ballots.
+
 In practice, its unclear whether there's much difference for Comparison audits when the CSD is complete or not. 
 It appears that the assort value changes when there is a discrepency between the CVR and MVR, but not otherwise.
 
@@ -456,25 +461,19 @@ See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA A
 
 TODO: whats the reasoning for the above?
 
-ConsistentSampling is used in either case. For !hasCSD, we cant select unvoted contests, since they arent recorded.
+For !hasCSD, we cant select unvoted contests, since they arent recorded.
 So then if we see an unvoted contest on the MVR...
-
-#### Consistent Sampling
-
-TODO: describe algorithm.
 
 #### Polling audits and CSDs
 
 When a Polling audit has CSDs, then ConsistentSampling can be used. Otherwise, we have to use the following process: 
 
-The contests' estimated sample sizes are computed as usual. In order to find that many samples conyaining that contest, 
+The contests' estimated sample sizes are computed as usual. In order to find that number of ballots containing a contest, 
 among a batch of N ballots where Nc contain that contest, we have to examine (on average) (N / Nc) * contest.estSampleSize. 
 
-Then nsamples = largest of ((N / Nc) * contest.estSampleSize) over all the contests to be audited.
+Then nsamples = largest of {(N / Nc) * contest.estSampleSize} over all the contests to be audited.
 
 UniformSampling assigns large psuedo-random numbers to each ballot, sorts and chooses the first nsamples of them. 
-
-When going to multiple rounds, one should start from the next increment.
 
 In reality, we probably know Nc. Sample sizes are still huge, because you have to muliply by N / Nc. And then it works out
 that Nc cancels out:
@@ -488,16 +487,18 @@ that Nc cancels out:
         fullyDilutedMargin = (vw - vl)/ N
 
 The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
+In this plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the audit has CSDs.
 
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingNoStyle.html" rel="PollingNoStyle">![PollingNoStyle](./docs/plots/samples/PollingNoStyle.png)</a>
 
-![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)
+#### Polling Vs Comparison Estimated Sample sizes
 
-<img src="./docs/plots/samples/PollingEstimatesNoStyle.png" alt="imgSrc" width="600"/>
+This plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
 
-<a href="./docs/plots/samples/PollingEstimatesNoStyle.html" rel="some text">![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsStyleAndPoll.html" rel="ComparisonVsStyleAndPoll">![ComparisonVsStyleAndPoll](./docs/plots/samples/ComparisonVsStyleAndPoll.png)</a>
 
-<br/>Use this one:<br/>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingEstimatesNoStyle.html" rel="some text">![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)</a>
+Little difference between comparison with/out CSD. Large difference with polling with CSD. Not showing polling without CSD,
+since it depends on N/Nc scaling.
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 

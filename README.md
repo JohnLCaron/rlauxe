@@ -489,10 +489,12 @@ that Nc cancels out:
 
 The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
 
+
 ![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)
 
 <img src="./docs/plots/samples/PollingEstimatesNoStyle.png" alt="imgSrc" width="600"/>
 
+<a href="./docs/plots/samples/PollingEstimatesNoStyle.html" rel="some text">![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)</a>
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
 

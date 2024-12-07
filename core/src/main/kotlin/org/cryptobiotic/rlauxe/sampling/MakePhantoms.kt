@@ -7,6 +7,16 @@ import org.cryptobiotic.rlauxe.util.Prng
 
 // TODO deal with use_styles
 
+// Stylish p.5-6, paraphrased for clarity:
+// 1.a) Let 𝑁𝑐 denote the upper bound on the number of cards that contain contest 𝑐
+// 2.b) If there are more CVRs that contain a(ny) contest than the upper bound on the
+//    number of cards that contain the contest, stop: something is seriously wrong.
+// 2.c) If Nc is greater than the number of CVRs that contain the contest, create a corresponding set
+//   of “phantom” CVRs as described in section 3.4 of [SHANGRLA]. The phantom CVRs
+//   are generated separately for each contest: each phantom card contains only one contest.
+// 2.d) If Nc is greater than the number of physical cards that contain the contest, create enough
+//   “phantom” cards to make up the difference.
+
 // SHANGRLA.make_phantoms(). Probably 2.d ?
 //     @classmethod
 //    def make_phantoms(

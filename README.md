@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/04/2024
+last update: 12/07/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -19,23 +19,25 @@ Table of Contents
       * [SUPERMAJORITY](#supermajority)
       * [IRV](#irv)
     * [Betting martingales](#betting-martingales)
-    * [Polling Vs Comparison Estimated Sample sizes](#polling-vs-comparison-estimated-sample-sizes)
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
       * [Comparison Betting Payoffs](#comparison-betting-payoffs)
       * [Comparison error rates](#comparison-error-rates)
+      * [Polling Vs Comparison Estimated Sample sizes](#polling-vs-comparison-estimated-sample-sizes)
       * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
-    * [Consistent Sampling](#consistent-sampling)
-    * [Use Styles](#use-styles)
-    * [No Styles](#no-styles)
+    * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
+      * [Comparison audits and CSDs](#comparison-audits-and-csds)
+      * [Consistent Sampling](#consistent-sampling)
+      * [Polling audits and CSDs](#polling-audits-and-csds)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
     * [estimate comparison error rates](#estimate-comparison-error-rates)
+    * [use of previous round's sampled_cvr_indices](#use-of-previous-rounds-sampled_cvr_indices)
   * [Notes](#notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
@@ -192,21 +194,6 @@ losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exc
 
 See BettingMart.kt and related code for current implementation.
 
-
-### Polling Vs Comparison Estimated Sample sizes
-
-This plot shows the large difference between a polling audit and a comparison audit at the same margin:
-
-* [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
-
-Except for large N > 50000, polling at margins < 3% needs prohibitively large sample sizes.
-Comparison audits are perhaps useful down to margins = .8% .
-
-"In a card-level comparison audit, the estimated sample size scales with
-the reciprocal of the diluted margin." (STYLISH p.4)
-
-Polling scales as square of 1/margin.
-
 ### Polling audits
 
 A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
@@ -349,6 +336,20 @@ Currrently all assumptions on the apriori error rates are arbitrary. These rates
 be empirically determined, and public tables for different voting machines should be published. 
 While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
+#### Polling Vs Comparison Estimated Sample sizes
+
+This plot shows the large difference between a polling audit and a comparison audit at the same margin:
+
+* [Polling Vs Comparison Estimated Sample sizes](docs/plots/ComparisonVsPoll.html)
+
+Except for large N > 50000, polling at margins < 3% needs prohibitively large sample sizes.
+Comparison audits are perhaps useful down to margins = .8% .
+
+"In a card-level comparison audit, the estimated sample size scales with
+the reciprocal of the diluted margin." (STYLISH p.4)
+
+Polling scales as square of 1/margin.
+
 #### Estimating Sample sizes and error rates with fuzz
 
 Currently our strategy for generating comparison errors is as follows:
@@ -400,55 +401,47 @@ above) and sampling.
 
 ### Estimating Sample sizes
 
-For each contest assertion we estimate the needed sample size. The contest sample_size is then the maximum of those.
+For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
+running simulations, we can estimate error rates and add errors to the manufactured data.
+
+For each contest assertion we estimate the required sample size that will satisfy the risk limit for some fraction 
+(auditConfig.quantile) of the time. The contest sample_size is then the maximum of the contest's assertion estimates.
 
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
 
-### Consistent Sampling
+Note that each round does its own sampling without regards to the previous round's sampled ballots. 
+Since the seed remains the same, the sort is the same, and so previously MVRS are used as much as possible.
 
-TODO: describe algorithm.
+Note: I _think_ its fine if more ballots come in between rounds (although this may be disallowed for security reasons). 
+Just add the new ballots to the "all cvrs list", and do the next round as usual. 
+Ideally N_c doesnt change, so it just makes less evil zombies.
 
-We implement only sampling without replacement. See ConsistentSampling.kt.
+### Choosing which ballots/cards to sample
 
-When there are additional rounds, each round does its own consistent sampling without regards to the previous
-rounds. Since the seed remains the same, the sort is the same, and so previously founds MVRS are used as much as possible.
+Once we have all of the contests' estimated sample sizes, we then need to choose which ballots/cards to sample. 
+This step is highly dependent on how much we know about which ballots contain which contests. In particular,
+whether you have Card Style Data (CSD), where you know which cards/ballots contain which contests.
 
-Note that the code in SHANGRLA Audit.py CVR.consistent_sampling() never uses sampled_cvr_indices, so adopts the
-same strategy (sampling without regards to the previous rounds). Its possible that the code is wrong when sampled_cvr_indices 
-is passed in, since the sampling doesnt just use the first n sorted samples, which the code seems to assume. But I think the question is moot.
+For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records the
+case where a contest recieves no votes.
 
-I _think_ its fine if more ballots come in between rounds. Just add to the "all cvrs list". Ideally N_c doesnt change,
-so it just makes less evil zombies.
+So far, we can distinguish the following cases:
 
-## Ballot Styles
+1. Comparison, hasCSD: CVR is a CSD.
+2. Comparison, !hasCSD: contests with no votes are not recorded on the CVR.
 
-1. Comparison, useStyles: CVR is somplete
-2. Comparison, noStyles: contests with no votes are not on the CVR
+3. Polling, hasCSD: has a ballot manifest with ballot.hasContest(contestId)
+4. Polling, !hasCSD: doesnt know which ballots have which contests
+5. Polling, precinct batches/containers (see MoreStyle, p13)
+  * precinct-based voting where each voter in a precinct gets the same ballot style, and the balots are stored by precinct.
+  * information about which containers have which card styles, even without information about which cards contain which
+    contests, can still yield substantial efficiency gains for ballot-polling audits.
 
-3. Polling, useStyles: has a ballot manifest with ballot.hasContest(if)
-4. Polling, noStyles: doesnt know which ballots have which contests
-5. Polling, precinct batches/containers (MoreStyle, p13)
-   * precinct-based voting where each voter in a precinct gets the same ballot style, and the balots are stored by precinct.
-   * information about which containers have which card styles, even without information about which cards contain which 
-     contests, can still yield substantial efficiency gains for ballot-polling audits.
+#### Comparison audits and CSDs
 
-### Use Styles
-
-* See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020
-* See "Stylish Risk-Limiting Audits in Practice" Glazer, Spertus, Stark;  16 Sep 2023
-
-This gives a much tighter bound when you know what cards/ballots have which contests, since you can restrict your sampling
-to just those contests that are being audited.
-
-"Instead of sampling cards uniformly at random, the method uses card-style data (CSD) and consistent sampling".
-
-Without CSD "you basically have to pull 20 times the sample size". And yet all the CSD information is there in
-the election system. I'm inclined to say "you have to have CSD" to use our library (effectively).
-Then work with the vendors to make that a reality. We can do the work ourselves and give it to them.
-If the practical difference is so big, a production library can be more assertive in telling the user what they have to do.
-
-We implement only with CSD currently.
+In practice, its unclear whether there's much difference for Comparison audits when the CSD is complete or not. 
+It appears that the assort value changes when there is a discrepency between the CVR and MVR, but not otherwise.
 
 See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA Audit.py class Assorter):
 
@@ -461,15 +454,27 @@ See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA A
     If `use_style == False`, then if the CVR contains the contest but the MVR does not,
     the MVR is considered to be a non-vote in the contest .
 
-TODO: measure effects of useStyle = false
+TODO: whats the reasoning for the above?
 
-### No Styles
+ConsistentSampling is used in either case. For !hasCSD, we cant select unvoted contests, since they arent recorded.
+So then if we see an unvoted contest on the MVR...
 
-States that perform RLAs have so far drawn the sample of ballot cards to inspect from all the cards cast in the
-election, without regard for the contests those cards contain.
+#### Consistent Sampling
 
-If you dont know what ballots contains what contests, you dont know Nc. All you know is N, typically N >> Nc.
-This is why without CSD, "you basically have to pull 20 times the sample size".
+TODO: describe algorithm.
+
+#### Polling audits and CSDs
+
+When a Polling audit has CSDs, then ConsistentSampling can be used. Otherwise, we have to use the following process: 
+
+The contests' estimated sample sizes are computed as usual. In order to find that many samples conyaining that contest, 
+among a batch of N ballots where Nc contain that contest, we have to examine (on average) (N / Nc) * contest.estSampleSize. 
+
+Then nsamples = largest of ((N / Nc) * contest.estSampleSize) over all the contests to be audited.
+
+UniformSampling assigns large psuedo-random numbers to each ballot, sorts and chooses the first nsamples of them. 
+
+When going to multiple rounds, one should start from the next increment.
 
 In reality, we probably know Nc. Sample sizes are still huge, because you have to muliply by N / Nc. And then it works out
 that Nc cancels out:
@@ -482,11 +487,11 @@ that Nc cancels out:
                       = rho / fullyDilutedMargin
         fullyDilutedMargin = (vw - vl)/ N
 
-So sample sizes are still huge, because you have to multiply by N / Nc.
+The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
 
-Use uniform sampling instead of consistent sampling.
+![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)
 
-If you really dont know where any of the contests are, you cant even hand audit one contest. Seem totally unworkable.
+<img src="./docs/plots/samples/PollingEstimatesNoStyle.png" alt="imgSrc" width="600"/>
 
 
 ### Missing Ballots (aka phantoms-to-evil zombies))
@@ -614,6 +619,16 @@ total_size estimate, but not do the consistent sampling. Also maybe only works w
 ### estimate comparison error rates
 
 SHANGRLA has guesses for p1,p2,p3,p4. We do a blanket fuzz, and simulate the errors by ncandidates in a contest, then use those.
+
+### use of previous round's sampled_cvr_indices
+
+At first glance, it appears that SHANGRLA Audit.py CVR.consistent_sampling() might make use of the previous round's
+selected ballots (sampled_cvr_indices). However, it looks like CVR.consistent_sampling() never uses sampled_cvr_indices, 
+and so uses the same strategy as we do of sampling without regards to the previous rounds.
+
+Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt just use the 
+first n sorted samples, which the code seems to assume. But I think the question is moot.
+
 
 ## Notes
 

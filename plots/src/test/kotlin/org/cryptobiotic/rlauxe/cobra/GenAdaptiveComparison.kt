@@ -10,10 +10,10 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 
-class GenAdaptiveComparisonTable {
+class GenAdaptiveComparison {
 
     @Test
-    fun plotAdaptiveComparison() {
+    fun genAdaptiveComparison() {
         val stopwatch = Stopwatch()
 
         val p2s = listOf(.001, .002, .005, .0075, .01, .02, .03, .04, .05)
@@ -63,7 +63,7 @@ class GenAdaptiveComparisonTable {
 
     // just do one task
     @Test
-    fun testOneAdaptiveComparison() {
+    fun genOneAdaptiveComparison() {
         val stopwatch = Stopwatch()
 
         val p2s = listOf(.001) //, .005, .01)

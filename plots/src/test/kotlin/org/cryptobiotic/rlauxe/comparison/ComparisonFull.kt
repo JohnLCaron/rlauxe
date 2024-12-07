@@ -237,7 +237,7 @@ class MNFDresult(val d: Int, val eta0Factor: Double, val theta: Double, val perc
 fun makeMNmap(srs: List<SRT>): Map<MND, List<SRT>> {
     val mmap = mutableMapOf<MND, MutableList<SRT>>()
     srs.forEach {
-        val key = MND(it.N, it.reportedMean, it.reportedMeanDiff)
+        val key = MND(it.Nc, it.reportedMean, it.reportedMeanDiff)
         val dmap : MutableList<SRT> = mmap.getOrPut(key) { mutableListOf() }
         dmap.add(it)
     }

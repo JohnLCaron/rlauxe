@@ -17,7 +17,7 @@ letsPlot = "4.7.3"
 letsPlotImage = "4.3.3"
 mockk = "1.13.10"
 
-coroutines-version = "1.9.0-RC.2"
+coroutines-version = "1.9.0"
 kotest-version = "5.9.1"
 ktor-version = "2.3.4"
 xmlutil-version = "0.90.0-RC3"
@@ -80,7 +80,7 @@ eglib = ["bull-result", "kotlinx-cli", "kotlinx-coroutines-core", "kotlinx-datet
 egtest = ["test-common", "test-annotations-common", "kotlinx-coroutines-test", "kotest-runner", "kotest-property", "kotest-datatest"]
 jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk"]
 logging = ["oshai-logging", "logback-classic"]
-kotest = ["kotest-runner", "kotest-assertions", "kotest-property", "kotest-datatest"]
+# kotest = ["kotest-runner", "kotest-assertions", "kotest-property", "kotest-datatest"]
 
 ktor-server = [
     "ktor-server-core-jvm",

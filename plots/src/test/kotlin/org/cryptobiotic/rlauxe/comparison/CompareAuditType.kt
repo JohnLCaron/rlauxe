@@ -212,7 +212,7 @@ class CompareAuditType {
 
         val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size)
+        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false)
 
         contestUA.makePollingAssertions()
         val pollingAssertion = contestUA.pollingAssertions.first()
@@ -259,7 +259,7 @@ class CompareAuditType {
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
             val contest = makeContestFromCvrs(info, cvrs)
-            val contestUA = ContestUnderAudit(contest, cvrs.size)
+            val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false)
 
             contestUA.makePollingAssertions()
             val pollingAssertion = contestUA.pollingAssertions.first()
@@ -276,7 +276,7 @@ class CompareAuditType {
                     ntrials = reps,
                     upperBound = compareAssertion.cassorter.upperBound,
                 )
-                compareSrs.add(compareResult.makeSRT(N, theta, 0.0))
+                compareSrs.add(compareResult.makeSRT(theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
                     drawSample = PollWithoutReplacement(contestUA, cvrs, pollingAssertion.assorter),
@@ -287,7 +287,7 @@ class CompareAuditType {
                     withoutReplacement = true,
                     upperBound = pollingAssertion.assorter.upperBound()
                 )
-                pollingSrs.add(pollingResult.makeSRT(N, theta, 0.0))
+                pollingSrs.add(pollingResult.makeSRT(theta, 0.0))
             }
         }
 

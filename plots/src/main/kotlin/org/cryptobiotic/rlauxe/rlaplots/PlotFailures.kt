@@ -1,23 +1,22 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 fun main() {
-    val wtf: ClosedFloatingPointRange<Double> = 0.5..0.52
     //comparison99("/home/stormy/temp/sim/failures/comparison99.svg", 0.48..0.52)
     //comparison99("/home/stormy/temp/sim/failures/comparison99false.svg", 0.49..0.50)
 
     listOf(1.4, 1.5, 1.6, 1.7, 1.8).forEach { eta0Factor->
-        testChooseDF(
+        plotChooseDF(
             "/home/stormy/temp/sim/dvalues/testChooseDF.csv",
             "/home/stormy/temp/sim/dvalues/testChooseDF.${eta0Factor}.svg",
             thetaFilter = 0.495..0.5, d = 5000, eta0Factor = eta0Factor
         )
     }
 
-    testChooseD(
+    plotChooseD(
         "/home/stormy/temp/sim/dvalues/testChooseDF.csv",
         "/home/stormy/temp/sim/dvalues/testChooseD.svg",
         thetaFilter=0.495..0.5, reportedMeanDiff = -0.01, eta0Factor=1.8)
-    testChooseF(
+    PlotChooseF(
         "/home/stormy/temp/sim/dvalues/testChooseDF.csv",
         "/home/stormy/temp/sim/dvalues/testChooseF.svg",
         thetaFilter=0.495..0.5, reportedMeanDiff = -0.01, d=5000)
@@ -45,13 +44,13 @@ fun comparison99(saveFile: String, thetaFilter: ClosedRange<Double>? = null, rep
     val srts: List<SRT> = readAndFilter(filename, thetaFilter, reportedMeanDiff = reportedMeanDiff)
 
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val eta0Factor = srts[0].eta0Factor
     val d = srts[0].d
 
     srtPlot(
         titleS = "Comparison Audit: successRLAs at 40% cutoff",
-        subtitleS = "for N=$N d=$d eta0Factor=$eta0Factor ntrials=$ntrials",
+        subtitleS = "for Nc=$Nc d=$d eta0Factor=$eta0Factor ntrials=$ntrials",
         srts,
         saveFile = saveFile,
         "theta", "pctSuccess", "reportedMeanDiff",
@@ -61,19 +60,19 @@ fun comparison99(saveFile: String, thetaFilter: ClosedRange<Double>? = null, rep
     )
 }
 
-fun testChooseDF(input: String, saveFile: String,
+fun plotChooseDF(input: String, saveFile: String,
                  thetaFilter: ClosedRange<Double>? = null,
                  d: Int?=null, eta0Factor: Double?=null, ) {
     val srts: List<SRT> = readAndFilter(input, thetaFilter, d=d, eta0Factor=eta0Factor)
 
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val eta0Factor = srts[0].eta0Factor
     val d = srts[0].d
 
     srtPlot(
         titleS = "Comparison Accelerated: successRLAs at 20% cutoff",
-        subtitleS = "for N=$N d=$d eta0Factor=$eta0Factor ntrials=$ntrials",
+        subtitleS = "for Nc=$Nc d=$d eta0Factor=$eta0Factor ntrials=$ntrials",
         srts,
         saveFile = saveFile,
         "theta", "pctSuccess", "reportedMeanDiff",
@@ -83,16 +82,16 @@ fun testChooseDF(input: String, saveFile: String,
     )
 }
 
-fun testChooseD(input: String, saveFile: String, thetaFilter: ClosedRange<Double>? = null, reportedMeanDiff: Double, eta0Factor: Double) {
+fun plotChooseD(input: String, saveFile: String, thetaFilter: ClosedRange<Double>? = null, reportedMeanDiff: Double, eta0Factor: Double) {
     val srts: List<SRT> = readAndFilter(input, thetaFilter, reportedMeanDiff=reportedMeanDiff, eta0Factor=eta0Factor)
 
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val eta0Factor = srts[0].eta0Factor
 
     srtPlot(
         titleS = "Comparison Audit: successRLAs at 20% cutoff",
-        subtitleS = "for N=$N eta0Factor=$eta0Factor ntrials=$ntrials, reportedMeanDiff=$reportedMeanDiff",
+        subtitleS = "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials, reportedMeanDiff=$reportedMeanDiff",
         srts,
         saveFile = saveFile,
         "theta", "pctSuccess", "d",
@@ -102,16 +101,16 @@ fun testChooseD(input: String, saveFile: String, thetaFilter: ClosedRange<Double
     )
 }
 
-fun testChooseF(input: String, saveFile: String, thetaFilter: ClosedRange<Double>? = null, reportedMeanDiff: Double, d: Int) {
+fun PlotChooseF(input: String, saveFile: String, thetaFilter: ClosedRange<Double>? = null, reportedMeanDiff: Double, d: Int) {
     val srts: List<SRT> = readAndFilter(input, thetaFilter, reportedMeanDiff=reportedMeanDiff, d=d)
 
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val d = srts[0].d
 
     srtPlot(
         titleS = "Comparison Audit: successRLAs at 20% cutoff",
-        subtitleS = "for N=$N d=$d ntrials=$ntrials, reportedMeanDiff=$reportedMeanDiff",
+        subtitleS = "for Nc=$Nc d=$d ntrials=$ntrials, reportedMeanDiff=$reportedMeanDiff",
         srts,
         saveFile = saveFile,
         "theta", "pctSuccess", "eta0Factor",

@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.rlaplots.BettingPayoff
+import org.cryptobiotic.rlauxe.rlaplots.PlotBettingPayoffData
 import org.cryptobiotic.rlauxe.rlaplots.BettingPayoffData
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class TestBettingPayoff {
+class GenBettingPayoff {
 
     @Test
     fun showAdaptiveComparisonBet() {
@@ -123,7 +123,7 @@ class TestBettingPayoff {
             }
         }
 
-        val plotter = BettingPayoff("/home/stormy/temp/core2/", "bettingPayoff.csv")
+        val plotter = PlotBettingPayoffData("/home/stormy/temp/core2/", "bettingPayoff.csv")
         errorRates.forEach { error ->
             plotter.plotOneErrorRate(results, error)
         }

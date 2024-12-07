@@ -688,6 +688,7 @@ fun calc_sample_sizes(
         testParameters = mapOf("p2" to optimal.p2),
         showDetails = false,
         margin = minAssorter.margin,
+        Nc = N,
     )
 }
 

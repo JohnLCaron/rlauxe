@@ -421,6 +421,18 @@ is passed in, since the sampling doesnt just use the first n sorted samples, whi
 I _think_ its fine if more ballots come in between rounds. Just add to the "all cvrs list". Ideally N_c doesnt change,
 so it just makes less evil zombies.
 
+## Ballot Styles
+
+1. Comparison, useStyles: CVR is somplete
+2. Comparison, noStyles: contests with no votes are not on the CVR
+
+3. Polling, useStyles: has a ballot manifest with ballot.hasContest(if)
+4. Polling, noStyles: doesnt know which ballots have which contests
+5. Polling, precinct batches/containers (MoreStyle, p13)
+   * precinct-based voting where each voter in a precinct gets the same ballot style, and the balots are stored by precinct.
+   * information about which containers have which card styles, even without information about which cards contain which 
+     contests, can still yield substantial efficiency gains for ballot-polling audits.
+
 ### Use Styles
 
 * See "More style, less work: card-style data decrease risk-limiting audit sample sizes" Glazer, Spertus, Stark; 6 Dec 2020

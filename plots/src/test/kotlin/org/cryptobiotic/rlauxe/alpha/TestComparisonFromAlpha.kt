@@ -153,9 +153,10 @@ class TestComparisonFromAlpha {
                             testFn = alpha,
                             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
                             margin = mean2margin(eta0),
+                            Nc=N,
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
-                        al.add(result.makeSRT(N, theta, 0.0))
+                        al.add(result.makeSRT(theta, 0.0))
                     }
                 }
             }
@@ -359,7 +360,7 @@ class TestComparisonFromAlpha {
                     ntrials = reps,
                     upperBound = u,
                 )
-                srs.add(mart.makeSRT(N, reportedMean=theta, reportedMeanDiff=0.0))
+                srs.add(mart.makeSRT(reportedMean=theta, reportedMeanDiff=0.0))
             }
         }
 
@@ -496,7 +497,7 @@ class TestComparisonFromAlpha {
                     ntrials = reps,
                     upperBound = compareAssertion.cassorter.upperBound(),
                 )
-                srs.add(mart.makeSRT(N, theta, 0.0))
+                srs.add(mart.makeSRT(theta, 0.0))
             }
         }
 
@@ -570,22 +571,22 @@ class TestComparisonFromAlpha {
                     ntrials = ntrials,
                     upperBound = compareUpper,
                 )
-                srs.add(mart.makeSRT(N, theta, 0.0))
+                srs.add(mart.makeSRT(theta, 0.0))
             }
         }
 
         val title = " nsamples, ballot comparison, eta0=compareUpper, d = $d, error-free\n theta (col) vs N (row)"
         plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",
             colFld = { srt: SRT -> srt.reportedMean },
-            rowFld = { srt: SRT -> srt.N.toDouble() },
+            rowFld = { srt: SRT -> srt.Nc.toDouble() },
             fld = { srt: SRT -> srt.nsamples.toDouble() }
         )
 
         val titlePct = " pct nsamples, ballot comparison, eta0=compareUpper, d = $d, error-free\n theta (col) vs N (row)"
         plotSRS(srs, titlePct, false, colf = "%6.3f", rowf = "%6.0f",
             colFld = { srt: SRT -> srt.reportedMean },
-            rowFld = { srt: SRT -> srt.N.toDouble() },
-            fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+            rowFld = { srt: SRT -> srt.Nc.toDouble() },
+            fld = { srt: SRT -> 100.0 * srt.nsamples / srt.Nc }
         )
     }
 
@@ -657,12 +658,12 @@ class TestComparisonFromAlpha {
                 ntrials = ntrials,
                 upperBound = compareAssertion.cassorter.upperBound,
             )
-            srs.add(mart.makeSRT(N, theta, 0.0))
+            srs.add(mart.makeSRT(theta, 0.0))
 
             val title = " nsamples, ballot comparison, eta0=eta0, d = $d, error-free\n theta (col) vs N (row)"
             plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",
                 colFld = { srt: SRT -> srt.reportedMean },
-                rowFld = { srt: SRT -> srt.N.toDouble() },
+                rowFld = { srt: SRT -> srt.Nc.toDouble() },
                 fld = { srt: SRT -> srt.nsamples }
             )
 
@@ -670,8 +671,8 @@ class TestComparisonFromAlpha {
                 " pct nsamples, ballot comparison, eta0=eta0, d = $d, error-free\n theta (col) vs N (row)"
             plotSRS(srs, titlePct, false, colf = "%6.3f", rowf = "%6.0f",
                 colFld = { srt: SRT -> srt.reportedMean },
-                rowFld = { srt: SRT -> srt.N.toDouble() },
-                fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+                rowFld = { srt: SRT -> srt.Nc.toDouble() },
+                fld = { srt: SRT -> 100.0 * srt.nsamples / srt.Nc }
             )
         }
 

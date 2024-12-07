@@ -17,8 +17,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.lets.plot)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.kotest)
+    // testImplementation(kotlin("test"))
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.bundles.egtest)
 }
 
 tasks.withType<Test>().configureEach {
@@ -29,9 +30,9 @@ tasks.withType<Test>().configureEach {
 
     // Make tests run in parallel
     // More info: https://www.jvt.me/posts/2021/03/11/gradle-speed-parallel/
-    // systemProperties["junit.jupiter.execution.parallel.enabled"] = "true"
-    // systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
-    // systemProperties["junit.jupiter.execution.parallel.mode.classes.default"] = "concurrent"
+    systemProperties["junit.jupiter.execution.parallel.enabled"] = "true"
+    systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+    systemProperties["junit.jupiter.execution.parallel.mode.classes.default"] = "concurrent"
 }
 
 kotlin {

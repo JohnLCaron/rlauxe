@@ -93,13 +93,13 @@ class AlphaMart(
     }
 
     override fun testH0(
-        maxSample: Int,
+        maxSamples: Int,
         terminateOnNullReject: Boolean,
         showDetails: Boolean,
         startingTestStatistic: Double,
         drawSample: () -> Double,
     ): TestH0Result {
-        return betting.testH0(maxSample, terminateOnNullReject, showDetails, startingTestStatistic, drawSample)
+        return betting.testH0(maxSamples, terminateOnNullReject, showDetails, startingTestStatistic, drawSample)
     }
 }
 

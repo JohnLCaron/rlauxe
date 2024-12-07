@@ -11,13 +11,13 @@ fun plotSuccessVsTheta() {
     val thetaFilter: ClosedFloatingPointRange<Double> = 0.5001.. .506
     val srts: List<SRT> = readAndFilter(filename, thetaFilter)
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val eta0Factor = srts[0].eta0Factor
     val d = srts[0].d
 
     srtPlot(
         "Comparison Audit: % success at 20% cutoff",
-        "for N=$N eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
+        "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
         srts,
         "/home/stormy/temp/sim/dvalues/plotSuccessVsTheta.svg",
         "theta", "pctSuccess", "reportedMeanDiff",
@@ -32,13 +32,13 @@ fun plotFailuresVsTheta() {
     val thetaFilter: ClosedFloatingPointRange<Double> = 0.0.. .5
     val srts: List<SRT> = readAndFilter(filename, thetaFilter)
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val eta0Factor = srts[0].eta0Factor
     val d = srts[0].d
 
     srtPlot(
         "Comparison Audit: % false positives at 20% cutoff",
-        "for N=$N eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
+        "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
         srts,
         "/home/stormy/temp/sim/dvalues/plotFailuresVsTheta.svg",
         "theta", "falsePositives%", "reportedMeanDiff",
@@ -54,13 +54,13 @@ fun plotNSvsMD() {
     val thetaFilter: ClosedFloatingPointRange<Double> = 0.48 ..0.52
     val srts: List<SRT> = readAndFilter(filename, thetaFilter)
     val ntrials = srts[0].ntrials
-    val N = srts[0].N
+    val Nc = srts[0].Nc
     val eta0Factor = srts[0].eta0Factor
     val d = srts[0].d
 
     srtPlot(
         titleS = "Comparison Audit: n samples needed",
-       subtitleS = "for N=$N eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
+       subtitleS = "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
         srts,
         "/home/stormy/temp/sim/dvalues/plotNSvsMD.dup.svg",
         "reportedMeanDiff", "nsamples", "theta",

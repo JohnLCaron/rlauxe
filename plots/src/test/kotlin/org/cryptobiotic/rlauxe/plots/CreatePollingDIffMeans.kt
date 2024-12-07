@@ -176,7 +176,7 @@ class CreatePollingDiffMeans {
             silent = true
         ).first()
         val reportedMean = task.theta + reportedMeanDiff // TODO CHECK THIS
-        val sr = rr.makeSRT(task.N, reportedMean, reportedMeanDiff)
+        val sr = rr.makeSRT(reportedMean, reportedMeanDiff)
         if (showCalculation) println("${task.idx} (${calculations.size}): ${task.N}, ${task.theta}, $sr")
         return sr
     }
@@ -222,7 +222,7 @@ class CreatePollingDiffMeans {
         val reportedMean = theta + reportedMeanDiff
 
         val info = ContestInfo("contest0", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
-        val contestUA = ContestUnderAudit(info, cvrs).makePollingAssertions()
+        val contestUA = ContestUnderAudit(info, cvrs, isComparison = false).makePollingAssertions()
 
         val results = mutableListOf<RunTestRepeatedResult>()
         contestUA.pollingAssertions.map { assert ->

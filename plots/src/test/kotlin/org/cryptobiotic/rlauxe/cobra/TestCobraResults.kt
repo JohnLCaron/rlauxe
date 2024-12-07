@@ -58,6 +58,7 @@ class TestCobraResults {
                     testFn = betting,
                     testParameters = mapOf("alpha" to alpha),
                     margin = margin,
+                    Nc=N,
                     )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
 
@@ -112,6 +113,7 @@ class TestCobraResults {
                     testFn = betting,
                     testParameters = mapOf("p2" to p2),
                     margin = margin,
+                    Nc=N,
                     )
                 println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
 
@@ -177,6 +179,7 @@ class TestCobraResults {
                             testFn = betting,
                             testParameters = mapOf("p1" to p1, "p2" to p2),
                             margin = margin,
+                            Nc=N,
                             )
                         println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
                         val expected = findTable2Entry(p2 = p2, p1 = p1, p2prior = p2m, p1prior = p1m)
@@ -260,6 +263,7 @@ class TestCobraResults {
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),
                             showDetails = false,
                             margin = margin,
+                            Nc=N,
                             )
                         println("  result = ${result.avgSamplesNeeded()} hist:${result.percentHist}")
                         val expected = findTable2Entry(p2 = p2o, p1 = p1o, p2prior = p2prior, p1prior = p1prior)

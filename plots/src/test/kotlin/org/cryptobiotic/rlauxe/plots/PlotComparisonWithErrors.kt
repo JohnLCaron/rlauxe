@@ -104,7 +104,7 @@ class PlotComparisonWithErrors {
     fun makeNthetaMap(srs: List<SRT>): Map<Ntheta, List<SRT>> {
         val mmap = mutableMapOf<Ntheta, MutableList<SRT>>()
         srs.forEach {
-            val DD = Ntheta(it.N, it.reportedMean)
+            val DD = Ntheta(it.Nc, it.reportedMean)
             val dmap : MutableList<SRT> = mmap.getOrPut(DD) { mutableListOf() }
             dmap.add(it)
         }

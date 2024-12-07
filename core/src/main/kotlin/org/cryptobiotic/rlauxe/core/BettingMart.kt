@@ -23,12 +23,12 @@ class BettingMart(
     }
 
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
-    override fun testH0(maxSample: Int,
+    override fun testH0(maxSamples: Int,
                         terminateOnNullReject: Boolean,
                         showDetails: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
-        require(maxSample <= Nc)
+        require(maxSamples <= Nc)
 
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic
@@ -43,7 +43,7 @@ class BettingMart(
         val testStatistics = mutableListOf<Double>()
         val pvalues = mutableListOf<Double>()
 
-        while (sampleNumber < maxSample) {
+        while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
             xs.add(xj)

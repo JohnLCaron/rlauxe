@@ -48,19 +48,19 @@ fun pValueApprox(
     //        = (1 - 1/U) ^ n *  (1 - 1/(2γ)) ^ -n1 *  (1 - 1/γ) ^ -n2 (eq 10)
 
     // min(1, (1-1/U)^n * (1-1/(2*gamma))^(-n1) * (1-1/gamma)^(-n2) * (1+1/(2*gamma))^(-n3) * (1+1/(gamma))^(-n4)) (eq 10 extended)
-    val term = (1.0 - 1.0/U)
+    val term = (1.0 - 1.0 / U)
     val termn = pow(term, n.toDouble())
 
-    val term1 = (1.0 - 1.0/(2 * gamma))
+    val term1 = (1.0 - 1.0 / (2 * gamma))
     val term1n = pow(term1, -n1.toDouble())
 
-    val term2 = (1.0 - 1.0/gamma)
+    val term2 = (1.0 - 1.0 / gamma)
     val term2n = pow(term2, -n2.toDouble())
 
-    val term3 = (1.0 + 1.0/(2 * gamma))
+    val term3 = (1.0 + 1.0 / (2 * gamma))
     val term3n = pow(term3, -n3.toDouble())
 
-    val term4 = (1.0 + 1.0/gamma)
+    val term4 = (1.0 + 1.0 / gamma)
     val term4n = pow(term4, -n4.toDouble())
 
     val result = termn * term1n * term2n * term3n * term4n
@@ -102,25 +102,25 @@ fun macro(
     // Prod( (1-1/U) / (1 - e_r/(2*gamma * V)) ) for r=1..n (eq 9)
     // since its a product, we can do it in any order
 
-    val term0 = (1.0 - 1.0/U)
+    val term0 = (1.0 - 1.0 / U)
 
     // Pkm <= P (n, n1 , n2 ; U, γ)
     //        = (1 - 1/U) ^ n *  (1 - 1/(2γ)) ^ -n1 *  (1 - 1/γ) ^ -n2
 
     // min(1, (1-1/U)^n * (1-1/(2*gamma))^(-n1) * (1-1/gamma)^(-n2) * (1+1/(2*gamma))^(-n3) * (1+1/(gamma))^(-n4))
-    val term = (1.0 - 1.0/U)
+    val term = (1.0 - 1.0 / U)
     val termn = pow(term, n.toDouble())
 
-    val term1 = (1.0 - 1.0/(2 * gamma))
+    val term1 = (1.0 - 1.0 / (2 * gamma))
     val term1n = pow(term1, -n1.toDouble())
 
-    val term2 = (1.0 - 1.0/gamma)
+    val term2 = (1.0 - 1.0 / gamma)
     val term2n = pow(term2, -n2.toDouble())
 
-    val term3 = (1.0 + 1.0/(2 * gamma))
+    val term3 = (1.0 + 1.0 / (2 * gamma))
     val term3n = pow(term3, -n3.toDouble())
 
-    val term4 = (1.0 + 1.0/gamma)
+    val term4 = (1.0 + 1.0 / gamma)
     val term4n = pow(term4, -n4.toDouble())
 
     val result = termn * term1n * term2n * term3n * term4n
@@ -129,7 +129,8 @@ fun macro(
 
 // n is the number of samples. interesting that N isnt needed
 // mu is the dilutedMargin
-data class T3row(val n: Int, val mu: Double, val gamma:Double, val n1: Int, val n2: Int, val expect: Double)
+data class T3row(val n: Int, val mu: Double, val gamma: Double, val n1: Int, val n2: Int, val expect: Double)
+
 val table3s = listOf(
     T3row(500, .02, 1.01, 0, 0, .007),
     T3row(500, .02, 1.01, 1, 0, .014),
@@ -272,5 +273,5 @@ val table3s = listOf(
     T3row(2000, .005, 1.10, 0, 1, .116),
     T3row(2000, .005, 1.10, 0, 2, 1.0),
     T3row(2000, .005, 1.10, 0, 3, 1.0),
-    )
+)
 

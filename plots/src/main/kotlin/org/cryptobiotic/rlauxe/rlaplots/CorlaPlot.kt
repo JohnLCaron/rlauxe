@@ -17,13 +17,13 @@ class CorlaPlot {
 
         val srts: List<SRT> = readAndFilter(filename, thetaFilter)
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "CorlaPlot: success avg nsamples",
-            "for N=$N ntrials=$ntrials",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
             "$dir/CorlaPlot.plotSuccessVsTheta.${ntrials}.html",
             "theta", "nsamples", "p2oracle",
@@ -36,13 +36,13 @@ class CorlaPlot {
     fun plotSuccess20VsTheta() {
         val srts: List<SRT> = readAndFilter(filename)
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "CorlaPlot: % success at 20% cutoff",
-            "for N=$N ntrials=$ntrials",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
             "$dir/CorlaPlot.plotSuccess20VsTheta.${ntrials}.html",
             "theta", "pctSuccess", "p2oracle",
@@ -57,13 +57,13 @@ class CorlaPlot {
         val srts: List<SRT> = readAndFilter(filename, thetaFilter)
 
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "CorlaPlot: % success at 20% cutoff",
-            "for N=$N ntrials=$ntrials",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
             "$dir/CorlaPlot.plotSuccess20VsThetaNarrow.${ntrials}.html",
             "theta", "pctSuccess", "p2oracle",
@@ -77,13 +77,13 @@ class CorlaPlot {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.0.. .5
         val srts: List<SRT> = readAndFilter(filename, thetaFilter)
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "CorlaPlot: % false positives at 20% cutoff",
-            "for N=$N ntrials=$ntrials",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
             "$dir/CorlaPlot.plotFailuresVsTheta.${ntrials}.html",
             "theta", "falsePositives%", "p2oracle",

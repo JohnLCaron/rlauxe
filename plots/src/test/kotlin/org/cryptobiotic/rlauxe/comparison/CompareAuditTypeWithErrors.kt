@@ -223,7 +223,7 @@ class CompareAuditTypeWithErrors {
         val utitle = "Comparison - Polling"
         plotSRS(srs, utitle, false, ff = "%6.2f", colTitle = "cvrMean",
             colFld = { srt: SRT -> srt.reportedMean },
-            rowFld = { srt: SRT -> srt.N.toDouble() },
+            rowFld = { srt: SRT -> srt.Nc.toDouble() },
             fld = { srt: SRT -> srt.stddev }
         )
     }
@@ -260,7 +260,7 @@ class CompareAuditTypeWithErrors {
             ff = "%6.2f",
             colTitle = "cvrMean",
             colFld = { srt: SRT -> srt.reportedMean },
-            rowFld = { srt: SRT -> srt.N.toDouble() },
+            rowFld = { srt: SRT -> srt.Nc.toDouble() },
             fld = { srt: SRT -> srt.stddev }
         )
     }
@@ -318,7 +318,7 @@ class CompareAuditTypeWithErrors {
         val theta = cvrMean + cvrMeanDiff // the true mean
         if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")
 
-        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size, isComparison = false)
 
         contestUA.makePollingAssertions()
         val pollingAssertion = contestUA.pollingAssertions.first()
@@ -352,8 +352,8 @@ class CompareAuditTypeWithErrors {
         )
         // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: AlphaMartRepeatedResult): SRT {
         return Pair(
-            pollingResult.makeSRT(N, cvrMean, cvrMeanDiff),
-            compareResult.makeSRT(N, cvrMean, cvrMeanDiff)
+            pollingResult.makeSRT(cvrMean, cvrMeanDiff),
+            compareResult.makeSRT(cvrMean, cvrMeanDiff)
         )
     }
 }

@@ -121,7 +121,8 @@ class CompareShrinkTrunkWithFixed {
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
             margin = mean2margin(eta0),
-            )
+            Nc=N,
+        )
     }
 
     fun runAlphaMartFixedRepeated(eta0: Double, sampleGenerator: SampleGenerator, ntrials: Int): RunTestRepeatedResult {
@@ -137,6 +138,7 @@ class CompareShrinkTrunkWithFixed {
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0),
             margin = mean2margin(eta0),
+            Nc=N,
             )
     }
 }

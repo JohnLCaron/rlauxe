@@ -101,5 +101,6 @@ fun runAlphaMartRepeated(
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
         showDetails = showDetails,
         margin = mean2margin(eta0),
+        Nc=N,
     )
 }

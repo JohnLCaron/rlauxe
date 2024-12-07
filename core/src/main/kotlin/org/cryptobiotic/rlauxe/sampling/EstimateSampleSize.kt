@@ -50,7 +50,8 @@ fun makeEstimationTasks(
     prevMvrs: List<CvrIF>,  // TODO should be used for subsequent round estimation
     roundIdx: Int,
     show: Boolean = false,
-): List<EstimationTask> {
+    moreParameters: Map<String, Double> = emptyMap(),
+    ): List<EstimationTask> {
     val tasks = mutableListOf<EstimationTask>()
 
     contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
@@ -79,7 +80,8 @@ fun makeEstimationTasks(
                         cvrs,
                         maxSamples,
                         startingTestStatistic,
-                        prevSampleSize
+                        prevSampleSize,
+                        moreParameters
                     )
                 )
             }
@@ -90,14 +92,16 @@ fun makeEstimationTasks(
 }
 
 class SimulateSampleSizeTask(
-    val auditConfig: AuditConfig,
-    val contestUA: ContestUnderAudit,
-    val assertion: Assertion,
-    val cvrs: List<Cvr>,
-    val maxSamples: Int,
-    val startingTestStatistic: Double,
-    val prevSampleSize: Int,
-) : EstimationTask {
+        val auditConfig: AuditConfig,
+        val contestUA: ContestUnderAudit,
+        val assertion: Assertion,
+        val cvrs: List<Cvr>,
+        val maxSamples: Int,
+        val startingTestStatistic: Double,
+        val prevSampleSize: Int,
+        val moreParameters: Map<String, Double> = emptyMap(),
+    ) : EstimationTask {
+
     override fun name() = "task ${contestUA.name} ${assertion.assorter.desc()}"
     override fun estimate(): EstimationResult {
         val result = if (contestUA.isComparison) {
@@ -115,20 +119,30 @@ class SimulateSampleSizeTask(
                 contestUA,
                 assertion.assorter,
                 maxSamples,
-                startingTestStatistic
+                startingTestStatistic,
+                moreParameters=moreParameters,
             )
         }
+
+        // data class EstimationResult(
+        //    val contestUA: ContestUnderAudit,
+        //    val assertion: Assertion,
+        //    val success: Boolean,
+        //    val nsuccess: Int,
+        //    val totalSamplesNeeded: Int,
+        //    val task: EstimationTask
+        //)
 
         return if (result.failPct() > 80.0) { // TODO 80% ??
             assertion.estSampleSize = prevSampleSize + result.findQuantile(auditConfig.quantile)
             println("***FailPct $contestUA ${result.failPct()} > 80% size=${assertion.estSampleSize}")
             contestUA.done = true
             contestUA.status = TestH0Status.FailPct
-            EstimationResult(contestUA, assertion, false)
+            EstimationResult(contestUA, assertion, false, result.nsuccess, result.totalSamplesNeeded, this)
         } else {
             val size = prevSampleSize + result.findQuantile(auditConfig.quantile)
             assertion.estSampleSize = min(size, contestUA.Nc)
-            return EstimationResult(contestUA, assertion, true)
+            return EstimationResult(contestUA, assertion, true, result.nsuccess, result.totalSamplesNeeded, this)
         }
     }
 }
@@ -143,6 +157,7 @@ fun simulateSampleSizePollingAssorter(
     assorter: AssorterFunction,
     maxSamples: Int,
     startingTestStatistic: Double = 1.0,
+    moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val margin = assorter.reportedMargin()
     val simContest = SimContest(contestUA.contest as Contest, assorter)
@@ -162,7 +177,8 @@ fun simulateSampleSizePollingAssorter(
         assorter.upperBound(),
         maxSamples,
         Nc = contestUA.Nc,
-        startingTestStatistic
+        startingTestStatistic,
+        moreParameters = moreParameters,
     )
 }
 
@@ -207,6 +223,7 @@ fun simulateSampleSizeAlphaMart(
         showDetails = false,
         startingTestStatistic = startingTestStatistic,
         margin = margin,
+        Nc = Nc,
     )
     return result
 }
@@ -221,6 +238,7 @@ fun simulateSampleSizeComparisonAssorter(
     cvrs: List<Cvr>,
     maxSamples: Int,
     startingTestStatistic: Double = 1.0,
+    moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
 
     val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
@@ -245,6 +263,7 @@ fun simulateSampleSizeComparisonAssorter(
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
         maxSamples,
         startingTestStatistic,
+        moreParameters
     )
 }
 
@@ -294,6 +313,7 @@ fun simulateSampleSizeBetaMart(
         showDetails = false,
         startingTestStatistic = startingTestStatistic,
         margin = margin,
+        Nc = Nc,
     )
     return result
 }

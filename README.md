@@ -496,6 +496,9 @@ The scale factor N/Nc depends on how many contests there are and how they are di
 
 <a href="./docs/plots/samples/PollingEstimatesNoStyle.html" rel="some text">![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)</a>
 
+<br/>Use this one:<br/>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingEstimatesNoStyle.html" rel="some text">![PollingEstimatesNoStyle](./docs/plots/samples/PollingEstimatesNoStyle.png)</a>
+
 ### Missing Ballots (aka phantoms-to-evil zombies))
 
 From P2Z paper:

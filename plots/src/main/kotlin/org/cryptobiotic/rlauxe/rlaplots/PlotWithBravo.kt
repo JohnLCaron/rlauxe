@@ -4,14 +4,14 @@ import kotlin.collections.List
 
 fun main() {
     //showTNwithBravo("/home/stormy/temp/sim/dvalues/pollingAlpha.csv", .53, 10000, "/home/stormy/temp/sim/dvalues/pollingBravo.csv")
-    showTNwithBravo("/home/stormy/temp/sim/dvalues/comparisonAlpha9.csv", .53, 10000, "/home/stormy/temp/sim/dvalues/comparisonAlpha9")
+    plotTNwithBravo("/home/stormy/temp/sim/dvalues/comparisonAlpha9.csv", .53, 10000, "/home/stormy/temp/sim/dvalues/comparisonAlpha9")
 }
 
-fun showTNwithBravo(filename: String, theta: Double, N: Int, saveFile: String) {
-    val alphaSrts: List<SRT> = readFilterTN(filename, theta, N)
+fun plotTNwithBravo(filename: String, theta: Double, Nc: Int, saveFile: String) {
+    val alphaSrts: List<SRT> = readFilterTN(filename, theta, Nc)
 
     val ntrials = alphaSrts[0].ntrials
-    val N = alphaSrts[0].N
+    val N = alphaSrts[0].Nc
 
     srtPlot(
         titleS = "Polling Audit: pct votes sampled",

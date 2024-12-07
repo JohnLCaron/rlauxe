@@ -38,7 +38,7 @@ class TestAuditPolling {
                     if (show) print("${resultWithout.avgSamplesNeeded().toDouble()}, ${resultWith.avgSamplesNeeded().toDouble()}, ${"%5.2f".format(speedup)}, ")
                     if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
                     // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult): SRT {
-                    srs.add(resultWithout.makeSRT(N, margin2mean(margin), 0.0))
+                    srs.add(resultWithout.makeSRT(margin2mean(margin), 0.0))
                 }
                 if (show) println()
             }
@@ -66,7 +66,7 @@ class TestAuditPolling {
             println("Contests")
             contests.forEach { println("  ${it}") }
         }
-        val contestsUA = contests.map { ContestUnderAudit(it).makePollingAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()

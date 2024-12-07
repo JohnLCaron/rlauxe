@@ -11,7 +11,16 @@ import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.math.log10
 import kotlin.math.ln
 
-class BettingPayoff(val dir: String, val filename: String) {
+data class BettingPayoffData(
+    val Nc: Int,
+    val margin: Double,
+    val error: Double,
+    val bet: Double,
+    val payoff: Double,
+    val assort: Double
+)
+
+class PlotBettingPayoffData(val dir: String, val filename: String) {
 
     fun plotOneErrorRate(data: List<BettingPayoffData>, wantError: Double) {
         // val thetaFilter: ClosedFloatingPointRange<Double> = 0.500001.. 1.0
@@ -77,15 +86,6 @@ class BettingPayoff(val dir: String, val filename: String) {
 val risk = .05
 val logRisk = -ln(.05)
 fun sampleSize(payoff:Double) = logRisk / ln(payoff)
-
-data class BettingPayoffData(
-    val Nc: Int,
-    val margin: Double,
-    val error: Double,
-    val bet: Double,
-    val payoff: Double,
-    val assort: Double
-)
 
 // generic multiple line plotter
 fun <T> bpdPlot(

@@ -35,7 +35,7 @@ class PollingWorkflow(
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("estimateSampleSizes round $roundIdx")
 
-        val maxContestSize =  estimateSampleSizes(
+        val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
             emptyList(),

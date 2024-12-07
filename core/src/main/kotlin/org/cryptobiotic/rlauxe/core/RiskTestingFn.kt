@@ -32,7 +32,7 @@ data class TestH0Result(
 
 interface RiskTestingFn {
     fun testH0(
-        maxSample: Int,
+        maxSamples: Int,
         terminateOnNullReject: Boolean,
         showDetails: Boolean = false,
         startingTestStatistic: Double = 1.0,

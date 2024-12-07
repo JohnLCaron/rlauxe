@@ -301,7 +301,7 @@ class ComparisonWithErrors {
         plotSRS(calculations, titlePct, false, colf = "%6.3f", rowf = "%6.2f",
             colFld = { srt: SRT -> cvrMean + srt.reportedMeanDiff },
             rowFld = { srt: SRT -> srt.eta0Factor },
-            fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+            fld = { srt: SRT -> 100.0 * srt.nsamples / srt.Nc }
         )
 
         // expect 59 at .55, eta0=20 (diff == 0)
@@ -571,7 +571,6 @@ class ComparisonWithErrors {
             nrepeat = nrepeat, d = d, eta0Factor = task.eta0Factor
         )
         val sr = rr.makeSRT(
-            task.N,
             reportedMean = task.cvrMean,
             reportedMeanDiff = cvrMeanDiff,
         )

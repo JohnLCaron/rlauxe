@@ -31,6 +31,9 @@ data class EstimationResult(
     val contestUA: ContestUnderAudit,
     val assertion: Assertion,
     val success: Boolean,
+    val nsuccess: Int,
+    val totalSamplesNeeded: Int,
+    val task: EstimationTask
 )
 
 class EstimationTaskRunner {

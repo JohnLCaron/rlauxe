@@ -36,7 +36,7 @@ fun plotNTsuccess(srs: List<SRT>, title: String, colTitle: String= "") {
     val utitle = "nsuccess cvrMean (col) vs N (row): " + title
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.N.toDouble() },
+        rowFld = { srt: SRT -> srt.Nc.toDouble() },
         fld = { srt: SRT -> srt.nsuccess.toDouble() }
     )
 }
@@ -45,7 +45,7 @@ fun plotNTsuccessPct(srs: List<SRT>, title: String, colTitle: String= "") {
     val utitle = "successPct cvrMean (col) vs N (row): " + title
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.N.toDouble() },
+        rowFld = { srt: SRT -> srt.Nc.toDouble() },
         fld = { srt: SRT -> srt.successPct }
     )
 }
@@ -54,7 +54,7 @@ fun plotNTsamples(srs: List<SRT>, title: String, colTitle: String = "") {
     val utitle = "nsamples, cvrMean (col) vs N (row): " + title
     plotSRS(srs, utitle, false, ff = "%6.0f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.N.toDouble() },
+        rowFld = { srt: SRT -> srt.Nc.toDouble() },
         fld = { srt: SRT -> srt.nsamples }
     )
 }
@@ -63,7 +63,7 @@ fun plotNTsamplesPct(srs: List<SRT>, title: String, colTitle: String= "") {
     val utitle = "pct samples, cvrMean (col) vs N (row): " + title
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.N.toDouble() },
+        rowFld = { srt: SRT -> srt.Nc.toDouble() },
         fld = { srt: SRT -> srt.pctSamples }
     )
 }
@@ -72,7 +72,7 @@ fun plotNTsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTit
     val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.N.toDouble() },
+        rowFld = { srt: SRT -> srt.Nc.toDouble() },
         fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct) ?: -1.0  }
     )
 }
@@ -101,7 +101,7 @@ fun plotDDpct(srs: List<SRT>, title: String) {
     plotSRS(srs, utitle, false, ff = "%6.1f",
         colFld = { srt: SRT -> srt.theta },
         rowFld = { srt: SRT -> srt.d.toDouble() },
-        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.N }
+        fld = { srt: SRT -> 100.0 * srt.nsamples / srt.Nc }
     )
 }
 

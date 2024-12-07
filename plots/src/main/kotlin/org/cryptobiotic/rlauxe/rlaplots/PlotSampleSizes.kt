@@ -11,14 +11,14 @@ class PlotSampleSizes(val dir: String, val filename: String) {
 
     fun showSamples(data: List<SRT>, catfld: (SRT) -> String) {
         val ntrials = data[0].ntrials
-        val N = data[0].N
+        val Nc = data[0].Nc
 
         srtPlot(
             titleS = "$filename estimated sample sizes",
-            subtitleS = "for ntrials=$ntrials, N=$N",
+            subtitleS = "for ntrials=$ntrials, Nc=$Nc",
             data,
-            "$dir/${filename}.html",
-            "margin", "log10(nsamples)", "type",
+            "$dir/${filename}",
+            "margin", "log10(nsamples)", "category",
             xfld = { it.reportedMargin },
             yfld = { log10(it.wsamples) },
             catfld = catfld,
@@ -32,13 +32,13 @@ class PlotSampleSizes(val dir: String, val filename: String) {
 
     fun showFuzzedSamples(data: List<SRT>) {
         val ntrials = data[0].ntrials
-        val N = data[0].N
+        val Nc = data[0].Nc
 
         srtPlot(
             titleS = "$filename estimated sample sizes with fuzzed sampling",
-            subtitleS = "for ntrials=$ntrials, N=$N",
+            subtitleS = "for ntrials=$ntrials, N=$Nc",
             data,
-            "$dir/${filename}.html",
+            "$dir/${filename}",
             "margin", "log10(nsamples)", "fuzzPct",
             xfld = { it.reportedMargin },
             yfld = { log10(it.wsamples) },

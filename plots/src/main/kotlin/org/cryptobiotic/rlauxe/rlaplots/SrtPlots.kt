@@ -80,7 +80,8 @@ fun srtPlot(
         }
     }
 
-    plot.save(saveFile)
+    plot.save("${saveFile}.png")
+    plot.save("${saveFile}.html")
     println("saved to $saveFile")
 }
 
@@ -88,7 +89,7 @@ fun srtPlot(
 fun readAndFilter(
     filename: String,
     thetaRange: ClosedRange<Double>? = null,
-    N: Int? = null,
+    Nc: Int? = null,
     reportedMeanDiff: Double? = null,
     eta0Factor: Double? = null,
     d: Int? = null,
@@ -97,17 +98,17 @@ fun readAndFilter(
     val srts = reader.readCalculations()
     return srts.filter {
         (thetaRange == null || thetaRange.contains(it.theta))
-                && (N == null || it.N == N)
+                && (Nc == null || it.Nc == Nc)
                 && (reportedMeanDiff == null || it.reportedMeanDiff == reportedMeanDiff)
                 && (d == null || it.d == d)
                 && (eta0Factor == null || it.eta0Factor == eta0Factor)
     }
 }
 
-fun readFilterTN(filename: String, theta: Double, N: Int): List<SRT> {
+fun readFilterTN(filename: String, theta: Double, Nc: Int): List<SRT> {
     val reader = SRTcsvReader(filename)
     val srts = reader.readCalculations()
-    return srts.filter { it.theta == theta && it.N == N }
+    return srts.filter { it.theta == theta && it.Nc == Nc }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

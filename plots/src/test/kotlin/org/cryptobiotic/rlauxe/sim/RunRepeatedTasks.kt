@@ -66,7 +66,6 @@ class RepeatedTaskRunner {
         val stopwatch = Stopwatch()
         val rr = runTask(task, ntrials = ntrials)
         val sr = rr.makeSRT(
-            N=task.N(),
             reportedMean = task.reportedMean(),
             reportedMeanDiff = task.reportedMeanDiff(),
         )
@@ -90,6 +89,7 @@ class RepeatedTaskRunner {
             testParameters = task.makeTestParameters(),
             showDetails = false,
             margin = mean2margin(task.reportedMean()),
+            Nc=task.N(),
             )
     }
 

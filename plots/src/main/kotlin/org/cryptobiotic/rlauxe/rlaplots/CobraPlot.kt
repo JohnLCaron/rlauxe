@@ -15,13 +15,13 @@ class AdaptiveComparison {
 
         val srts: List<SRT> = readAndFilter(filename, thetaFilter)
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "AdaptiveComparison: success avg nsamples",
-            "for N=$N ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
             "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccessVsTheta.${ntrials}.html",
             "theta", "nsamples", "p2oracle",
@@ -34,13 +34,13 @@ class AdaptiveComparison {
     fun plotSuccess20VsTheta() {
         val srts: List<SRT> = readAndFilter(filename)
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "AdaptiveComparison: % success at 20% cutoff",
-            "for N=$N ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
             "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccess20VsTheta.${ntrials}.html",
             "theta", "pctSuccess", "p2oracle",
@@ -55,13 +55,13 @@ class AdaptiveComparison {
         val srts: List<SRT> = readAndFilter(filename, thetaFilter)
 
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "AdaptiveComparison: % success at 20% cutoff",
-            "for N=$N ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
             "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.${ntrials}.html",
             "theta", "pctSuccess", "p2oracle",
@@ -75,13 +75,13 @@ class AdaptiveComparison {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.0.. .5
         val srts: List<SRT> = readAndFilter(filename, thetaFilter)
         val ntrials = srts[0].ntrials
-        val N = srts[0].N
+        val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
         val d2 = srts[0].d2
 
         srtPlot(
             "AdaptiveComparison: % false positives at 20% cutoff",
-            "for N=$N ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
             "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotFailuresVsTheta.${ntrials}.html",
             "theta", "falsePositives%", "p2oracle",

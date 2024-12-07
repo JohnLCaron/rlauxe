@@ -69,11 +69,12 @@ class TestBravo  {
                 ntrials = ntrials,
                 testFn=alpha,
                 margin = mean2margin(eta0),
+                Nc=N,
                 )
 
             //val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
             // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult
-            results.add(rr.makeSRT(N, eta0, 0.0))
+            results.add(rr.makeSRT(eta0, 0.0))
         }
         return results
     }

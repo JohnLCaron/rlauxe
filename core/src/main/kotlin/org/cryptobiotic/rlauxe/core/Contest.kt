@@ -210,7 +210,7 @@ open class ContestUnderAudit(
                     welford.update(assertion.assorter.assort(cvr))
                 }
             }
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, welford.mean)
+            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, welford.mean, hasStyle=hasStyle)
             ComparisonAssertion(contest, comparisonAssorter)
         }
         return this

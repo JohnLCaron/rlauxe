@@ -159,7 +159,7 @@ data class ContestTestData(
         votesLeft = ncards
     }
 
-    fun makeContest(useStyles:Boolean=true): Contest {
+    fun makeContest(): Contest {
         val nvotes = this.ncards
         if (nvotes == 0) {
             return Contest(this.info, emptyMap(), this.ncards)

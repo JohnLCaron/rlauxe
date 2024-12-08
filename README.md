@@ -6,7 +6,7 @@ for the purpose of making a reusable and maintainable library.
 
 **WORK IN PROGRESS**
 
-Read this on [github.io](https://johnlcaron.github.io/rlauxe/) in order to see the rendered plots.
+You can also this on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 Table of Contents
 <!-- TOC -->
@@ -30,6 +30,7 @@ Table of Contents
     * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
       * [Comparison audits and CSDs](#comparison-audits-and-csds)
       * [Polling audits and CSDs](#polling-audits-and-csds)
+      * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
     * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Differences with SHANGRLA](#differences-with-shangrla)
@@ -290,22 +291,22 @@ then
 
 Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates and the margin. 
 
-Plots 1-5 shows the betting payoffs when all 4 error rates equal {0.0, 0.0001, .001, .005, .01}:
+Plots 1-5 shows the betting payoffs when all 4 error rates are equal {0.0, 0.0001, .001, .005, .01}:
 
-* [BettingPayoff error=0.0](docs/plots/betting/BettingPayoff0.0.html)
-* [BettingPayoff error=0.0001](docs/plots/betting/BettingPayoff1.0E-4.html)
-* [BettingPayoff error=0.001](docs/plots/betting/BettingPayoff0.001.html)
-* [BettingPayoff error=0.005](docs/plots/betting/BettingPayoff0.005.html)
-* [BettingPayoff error=0.01](docs/plots/betting/BettingPayoff0.01.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](./docs/plots/betting/BettingPayoff0.0.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](./docs/plots/betting/BettingPayoff1.0E-4.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.001.html" rel="BettingPayoff0.001">![BettingPayoff0.001](./docs/plots/betting/BettingPayoff0.0.001.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](./docs/plots/betting/BettingPayoff0.0.005.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](./docs/plots/betting/BettingPayoff0.01.png)</a>
 
 Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror):
 
-* [BettingPayoff when MVR matches the CVR](docs/plots/betting/BettingPayoffAssort1.0.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffAssort1.0.html" rel="BettingPayoffAssort1">![BettingPayoffAssort1](./docs/plots/betting/BettingPayoffAssort1.0.png)</a>
 
 Plot 7 translates the payoff into a sample size, when there are no errors, using (payoff)^sampleSize = 1 / riskLimit and
 solving for sampleSize = -ln(riskLimit) / ln(payoff).
 
-* [Betting SampleSize](docs/plots/betting/BettingPayoffSampleSize.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffSampleSize.html" rel="BettingPayoffSampleSize">![BettingPayoffSampleSize](./docs/plots/betting/BettingPayoffSampleSize.png)</a>
 
 The plot "error=0.0" is the equivilent to COBRA Fig 1, p. 6 for risk=.05. This is the best that can be done, 
 the minimum sampling size for the RLA.
@@ -491,7 +492,7 @@ In this plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingNoStyle.html" rel="PollingNoStyle">![PollingNoStyle](./docs/plots/samples/PollingNoStyle.png)</a>
 
-#### Polling Vs Comparison Estimated Sample sizes
+#### Polling Vs Comparison with/out CSD Estimated Sample sizes
 
 This plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
 

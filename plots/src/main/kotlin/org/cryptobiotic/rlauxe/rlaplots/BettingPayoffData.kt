@@ -33,7 +33,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         bpdPlot(
             "BettingPayoff",
             "error = $wantError",
-            "$dir/BettingPayoff${wantError}.html",
+            "$dir/BettingPayoff${wantError}",
             useData,
             "margin", "payoff", "assort",
             xfld = { it.margin },
@@ -53,7 +53,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         bpdPlot(
             "BettingPayoff",
             "assortValue = $wantAssort",
-            "$dir/BettingPayoffAssort${wantAssort}.html",
+            "$dir/BettingPayoffAssort${wantAssort}",
             useData,
             "margin", "payoff", "error",
             xfld = { it.margin },
@@ -73,7 +73,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         bpdPlot(
             "BettingPayoff",
             "riskLimit=$risk, assortValue=$wantAssort",
-            "$dir/BettingPayoffSampleSize.html",
+            "$dir/BettingPayoffSampleSize",
             useData,
             "margin", "log10(sampleSize)", "error",
             xfld = { it.margin },
@@ -146,7 +146,8 @@ fun <T> bpdPlot(
         }
     }
 
-    plot.save(saveFile)
+    plot.save("${saveFile}.png")
+    plot.save("${saveFile}.html")
     println("saved to $saveFile")
 }
 

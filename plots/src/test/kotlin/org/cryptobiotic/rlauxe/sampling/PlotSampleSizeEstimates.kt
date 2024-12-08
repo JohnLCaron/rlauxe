@@ -61,11 +61,12 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
     @Test
     fun plotComparisonVsStyleAndPoll() {
         val N = 10000
+        val ntrials = 1000
         val tasks = mutableListOf<ConcurrentTask>()
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
             // polling
-            val auditConfigPolling = AuditConfig(AuditType.POLLING, hasStyles = true, seed = 12356667890L, quantile = .80, fuzzPct = .055, ntrials = 100)
+            val auditConfigPolling = AuditConfig(AuditType.POLLING, hasStyles = true, seed = 12356667890L, quantile = .80, fuzzPct = .055, ntrials = ntrials)
             val fcontestP = ContestTestData(0, 2, margin)
             fcontestP.ncards = N
             val contestP = fcontestP.makeContest()
@@ -78,7 +79,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             // with styles
             val fcontest = ContestTestData(0, 2, margin)
             fcontest.ncards = N
-            val auditConfigStyles = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, quantile = .80, fuzzPct = .05, ntrials = 100)
+            val auditConfigStyles = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1235666890L, quantile = .80, fuzzPct = .05, ntrials = ntrials)
             val contest = fcontest.makeContest()
             val cvrs = fcontest.makeCvrs()
             print("margin = $margin ${contest.votes}")
@@ -88,7 +89,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigStyles, contestUAs, cassort, cvrs, moreParameters = mapOf("hasStyles" to 1.0)))
 
             // no styles
-            val auditConfigNo = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = false, seed = 123569667890L, quantile = .80, fuzzPct = .05, ntrials = 100)
+            val auditConfigNo = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = false, seed = 123569667890L, quantile = .80, fuzzPct = .05, ntrials = ntrials)
             val fcontestNo = ContestTestData(0, 2, margin)
             fcontestNo.ncards = N
             val contestNo = fcontestNo.makeContest()

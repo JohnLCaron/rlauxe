@@ -295,8 +295,8 @@ Plots 1-5 shows the betting payoffs when all 4 error rates are equal {0.0, 0.000
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](./docs/plots/betting/BettingPayoff0.0.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](./docs/plots/betting/BettingPayoff1.0E-4.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.001.html" rel="BettingPayoff0.001">![BettingPayoff0.001](./docs/plots/betting/BettingPayoff0.0.001.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](./docs/plots/betting/BettingPayoff0.0.005.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.001.html" rel="BettingPayoff0.001">![BettingPayoff0.001](./docs/plots/betting/BettingPayoff0.001.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](./docs/plots/betting/BettingPayoff0.005.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](./docs/plots/betting/BettingPayoff0.01.png)</a>
 
 Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror):
@@ -362,6 +362,10 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 The first plot shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
 have greater spread, but on average are not much affected.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
+
 
 * [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzConcurrent.html)
 * [Polling Sample sizes with fuzz](docs/plots/PollingFuzzConcurrent.html)

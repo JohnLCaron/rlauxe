@@ -286,7 +286,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirName = "/home/stormy/temp/estimate"
-        val filename = "PollingFuzzConcurrent"
+        val filename = "PollingFuzzed"
         val writer = SRTcsvWriter("$dirName/${filename}.cvs")
         writer.writeCalculations(srts)
         writer.close()
@@ -344,7 +344,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirName = "/home/stormy/temp/estimate"
-        val filename = "ComparisonFuzzConcurrent"
+        val filename = "ComparisonFuzzed"
         val writer = SRTcsvWriter("$dirName/${filename}.cvs")
         writer.writeCalculations(srts)
         writer.close()

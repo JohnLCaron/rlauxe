@@ -36,9 +36,9 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, 
 }
 
 class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
-    val ncvrs = cvrs.size
-    val permutedIndex = MutableList(ncvrs) { it }
-    var idx = 0
+    private val ncvrs = cvrs.size
+    private val permutedIndex = MutableList(ncvrs) { it }
+    private var idx = 0
 
     init {
         reset()
@@ -46,8 +46,11 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
 
     override fun sample(): Double {
         while (idx < ncvrs) {
-            val cvr = cvrs[permutedIndex[idx++]]
-            if (cvr.hasContest(contest.id)) return assorter.assort(cvr)
+            val cvr = cvrs[permutedIndex[idx]]
+            idx++
+            if (cvr.hasContest(contest.id)) {
+                return assorter.assort(cvr)
+            }
         }
         throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
     }

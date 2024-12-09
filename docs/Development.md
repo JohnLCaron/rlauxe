@@ -1,29 +1,24 @@
 # Development
-last changed: 12/02/2024
+last changed: 12/07/2024
 
 ## TODO
 
 ### core
 * raire library
 * hybrid audits
-* DONE PollingWithStyles
-* PollingWithoutStyles
 * the effect of adding n worst-case ballots to an audit.
 
 ### sampling
 * Estimate sample sizes with fixed formula
-* DONE Estimate sample sizes with simulation reps and quantile
 * DONE Raire error rates
 * Parallelization (?)
 * SecureRandom must be deterministic using a given seed, so verifiers can test. 
   Make a version that agrees exactly with SHANGRLA's version. (3)
   BigIntegers? Strings? Maybe hex strings?
-
 * COBRA 4.3 Diversified betting
 
 ### multiple rounds
 * Serialization of intermediate stages
-* Re-estimate sample sizes for all assertions, using previous MVRs. What causes sample size to get larger?
 
 ### interface
 * CLI
@@ -85,3 +80,9 @@ FuzzSampler           // this takes a list of cvrs and fuzzes them. Version for 
                       // fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
 MultiContestTestData  // creates a set of contests and ballotStyles, with randomly chosen candidates and margins. create cvrs that reflect the contests' exact votes.
 SampleGenerator           // abstraction for creating a sequence of samples. mostly superceded, mostly for testing.
+
+### plots module
+betting/GenBettingPayoff
+sampling/GenerateComparisonErrorTable  
+sampling/PlotPollingNoStyles  
+sampling/PlotSampleSizeEstimates  

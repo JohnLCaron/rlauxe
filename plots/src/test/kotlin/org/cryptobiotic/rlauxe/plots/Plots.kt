@@ -125,8 +125,8 @@ fun plotTFsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTit
 }
 
 fun extractDecile(srt: SRT, sampleMaxPct: Int): Double {
-    return if (srt.percentHist == null || srt.percentHist!!.cumul(sampleMaxPct) == 0.0) 0.0 else {
-        srt.percentHist!!.cumul(sampleMaxPct)
+    return if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
+        srt.percentHist.cumul(sampleMaxPct)
     }
 }
 
@@ -147,53 +147,6 @@ fun plotTFdiffSuccessDecile(pollSrs: List<SRT>, compareSrs: List<SRT>, sampleMax
     )
 }
 
-fun plotTFsuccess(srs: List<SRT>, title: String) {
-    val utitle = "nsuccess, theta (col) vs etaFactor (row): " + title
-    plotSRS(srs, utitle, true, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT -> srt.nsuccess.toDouble() }
-    )
-}
-
-fun plotTFsuccessPct(srs: List<SRT>, title: String) {
-    val utitle = "success Pct, theta (col) vs etaFactor (row): " + title
-    plotSRS(srs, utitle, false, colf = "%6.3f", rowf = "%6.2f", ff = "%6.1f", colTitle = "theta",
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT -> srt.successPct }
-    )
-}
-
-fun plotTFsuccessCombo(srs: List<SRT>, title: String) {
-    val utitle = "success Pct combo, theta (col) vs etaFactor (row): " + title
-    plotSRS(srs, utitle, false, colf = "%6.3f", rowf = "%6.2f", ff = "%6.1f", colTitle = "theta",
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT ->
-            if (srt.theta > .5) srt.pctSamples else srt.successPct
-        }
-    )
-}
-
-fun plotTFsamples(srs: List<SRT>, title: String) {
-    val utitle = "nsamples, theta (col) vs etaFactor (row): " + title
-    plotSRS(srs, utitle, true, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT -> srt.nsamples.toDouble() }
-    )
-}
-
-fun plotTFsamplesPct(srs: List<SRT>, title: String) {
-    val utitle = "nsamples Pct, theta (col) vs etaFactor (row): " + title
-    plotSRS(srs, utitle, false, colf = "%6.3f", rowf = "%6.2f", colTitle = "theta",
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT -> srt.pctSamples}
-    )
-}
-
 ////
 // general
 val df = "%6d"
@@ -202,12 +155,6 @@ val sf = "%8s"
 fun colHeader(srs: List<SRT>, colTitle: String, colf: String = "%6.3f", colFld: (SRT) -> Double) {
     print(sf.format(colTitle+":"))
     val cols = findValuesFromSRT(srs, colFld)
-    cols.forEach { print("${colf.format(it)}, ") }
-    println()
-}
-
-fun colHeader(cols: List<Double>, colTitle: String, colf: String = "%6.3f") {
-    print(sf.format(colTitle+":"))
     cols.forEach { print("${colf.format(it)}, ") }
     println()
 }

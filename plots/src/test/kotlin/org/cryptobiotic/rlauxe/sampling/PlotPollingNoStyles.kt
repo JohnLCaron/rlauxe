@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.rlaplots.PlotSampleSizes
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.rlaplots.makeSRTnostyle
 import org.cryptobiotic.rlauxe.util.nfn
@@ -30,11 +29,11 @@ class PlotPollingNoStyles {
                 fcontest.ncards = Nc
                 val contest = fcontest.makeContest()
 
-                print("margin = $margin ${contest.votes} Nc=$Nc N=$N")
+                print("reportedMargin = $margin ${contest.votes} Nc=$Nc N=$N")
                 val contestUA = ContestUnderAudit(contest, Nc, isComparison = false)
                 contestUA.makePollingAssertions()
                 val assertion = contestUA.minAssertion()!!
-                val moreParameters = mapOf("N" to N.toDouble(), "margin" to margin)
+                val moreParameters = mapOf("N" to N.toDouble(), "reportedMargin" to margin)
 
                 val task = SimulateSampleSizeTask(
                     auditConfig,

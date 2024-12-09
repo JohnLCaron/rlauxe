@@ -1,7 +1,7 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.rlaplots.PlotBettingPayoffData
-import org.cryptobiotic.rlauxe.rlaplots.BettingPayoffData
+import org.cryptobiotic.rlauxe.core.AdaptiveComparison
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 

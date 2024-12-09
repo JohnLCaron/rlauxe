@@ -30,7 +30,6 @@ import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.plots.plotTFdiffSuccessDecile
 import org.cryptobiotic.rlauxe.plots.plotTFsuccessDecile
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 

@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.util.margin2mean
+import kotlin.math.ceil
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
@@ -239,4 +241,21 @@ open class ContestUnderAudit(
     fun minMargin(): Double {
         return if (isComparison) (minComparisonAssertion()?.margin ?: 0.0) else (minPollingAssertion()?.margin ?: 0.0)
     }
+}
+
+fun make2wayContestInfo(type: SocialChoiceFunction = SocialChoiceFunction.PLURALITY) = ContestInfo(
+    "standard2way",
+    0,
+    mapOf("cand0" to 0, "cand1" to 1),
+    type,
+)
+
+fun make2wayContestFromMargin(Nc: Int, margin:Double): Contest {
+    require(margin > 0.0)
+    val winningVote = ceil(Nc*margin2mean(margin)).toInt()
+    return Contest(
+        info = make2wayContestInfo(),
+        voteInput = mapOf(0 to winningVote, 1 to Nc-winningVote),
+        Nc = Nc
+    )
 }

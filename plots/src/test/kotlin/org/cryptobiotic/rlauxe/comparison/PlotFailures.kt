@@ -1,4 +1,11 @@
-package org.cryptobiotic.rlauxe.rlaplots
+package org.cryptobiotic.rlauxe.comparison
+
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.dd
+import org.cryptobiotic.rlauxe.rlaplots.di
+import org.cryptobiotic.rlauxe.rlaplots.extractDecile
+import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
+import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 
 fun main() {
     //comparison99("/home/stormy/temp/sim/failures/comparison99.svg", 0.48..0.52)
@@ -63,7 +70,7 @@ fun comparison99(saveFile: String, thetaFilter: ClosedRange<Double>? = null, rep
 fun plotChooseDF(input: String, saveFile: String,
                  thetaFilter: ClosedRange<Double>? = null,
                  d: Int?=null, eta0Factor: Double?=null, ) {
-    val srts: List<SRT> = readAndFilter(input, thetaFilter, d=d, eta0Factor=eta0Factor)
+    val srts: List<SRT> = readAndFilter(input, thetaFilter, d = d, eta0Factor = eta0Factor)
 
     val ntrials = srts[0].ntrials
     val Nc = srts[0].Nc
@@ -83,7 +90,8 @@ fun plotChooseDF(input: String, saveFile: String,
 }
 
 fun plotChooseD(input: String, saveFile: String, thetaFilter: ClosedRange<Double>? = null, reportedMeanDiff: Double, eta0Factor: Double) {
-    val srts: List<SRT> = readAndFilter(input, thetaFilter, reportedMeanDiff=reportedMeanDiff, eta0Factor=eta0Factor)
+    val srts: List<SRT> =
+        readAndFilter(input, thetaFilter, reportedMeanDiff = reportedMeanDiff, eta0Factor = eta0Factor)
 
     val ntrials = srts[0].ntrials
     val Nc = srts[0].Nc
@@ -102,7 +110,7 @@ fun plotChooseD(input: String, saveFile: String, thetaFilter: ClosedRange<Double
 }
 
 fun PlotChooseF(input: String, saveFile: String, thetaFilter: ClosedRange<Double>? = null, reportedMeanDiff: Double, d: Int) {
-    val srts: List<SRT> = readAndFilter(input, thetaFilter, reportedMeanDiff=reportedMeanDiff, d=d)
+    val srts: List<SRT> = readAndFilter(input, thetaFilter, reportedMeanDiff = reportedMeanDiff, d = d)
 
     val ntrials = srts[0].ntrials
     val Nc = srts[0].Nc

@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.rlaplots
+package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.rlaplots.dd
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout

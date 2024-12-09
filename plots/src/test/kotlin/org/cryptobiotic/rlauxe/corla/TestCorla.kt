@@ -6,8 +6,6 @@ import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 

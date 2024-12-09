@@ -26,10 +26,10 @@ data class SRT(val Nc: Int,
 
     val reportedMean = margin2mean(reportedMargin)
     val theta = reportedMean + reportedMeanDiff // the true mean
-    val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
+    val successPct = 100.0 * nsuccess.toDouble() / (if (ntrials == 0) 1 else ntrials) // success ratio
     val failPct = 100.0 * (ntrials - nsuccess).toDouble() / (if (ntrials == 0) 1 else ntrials) // failure ratio
     val nsamples = totalSamplesNeeded.toDouble() / (if (nsuccess == 0) 1 else nsuccess) // avg number of samples for successes
-    val wsamples = (successPct * nsamples + failPct * Nc) /100 // nsamples weighted by success/failure
+    val wsamples = (successPct * nsamples + failPct * Nc) / 100 // nsamples weighted by success/failure
     val pctSamples = 100.0 * nsamples / (if (Nc == 0) 1 else Nc)
     val d : Int = testParameters["d"]?.toInt() ?: 0
     val eta0 = testParameters["eta0"] ?: 0.0
@@ -43,7 +43,7 @@ data class SRT(val Nc: Int,
     val hasStyles : Boolean = (testParameters["hasStyles"] != null)
 }
 
-
+// TODO reportedMean, reportedMeanDiff in parameters, or in RunTestRepeatedResult
 fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double): SRT {
     return SRT(
         this.Nc,
@@ -75,14 +75,15 @@ fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double
 //               val stddev: Double,
 //               val percentHist: Deciles?)
 
+// TODO Nc in parameters, or in EstimationResult
 fun EstimationResult.makeSRTnostyle(Nc: Int): SRT {
     val task = this.task as SimulateSampleSizeTask
     val parameters = task.moreParameters
     val N = parameters["N"]!! // double
     return SRT(
         Nc=Nc,
-        reportedMargin=parameters["margin"]!!,
-        reportedMeanDiff=0.0,
+        reportedMargin=parameters["reportedMargin"]?: 0.0,
+        reportedMeanDiff=parameters["reportedMeanDiff"]?: 0.0,
         testParameters=task.moreParameters,
         this.nsuccess,
         task.auditConfig.ntrials,

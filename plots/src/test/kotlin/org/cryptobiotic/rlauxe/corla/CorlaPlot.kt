@@ -1,15 +1,23 @@
-package org.cryptobiotic.rlauxe.rlaplots
+package org.cryptobiotic.rlauxe.corla
+
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.dd
+import org.cryptobiotic.rlauxe.rlaplots.extractDecile
+import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
+import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 
 fun main() {
-    val ac = AdaptiveComparison()
+    val ac = CorlaPlot()
     ac.plotSuccessVsTheta()
     ac.plotSuccess20VsTheta()
     ac.plotFailuresVsTheta()
     ac.plotSuccess20VsThetaNarrow()
 }
 
-class AdaptiveComparison {
-    val filename = "/home/stormy/temp/bet/plotAdaptiveComparison0001.csv"
+class CorlaPlot {
+    val dir = "/home/stormy/temp/corla"
+    val filename = "$dir/plotCorla10000.csv"
+
     fun plotSuccessVsTheta() {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.500001.. 1.0
 
@@ -20,10 +28,10 @@ class AdaptiveComparison {
         val d2 = srts[0].d2
 
         srtPlot(
-            "AdaptiveComparison: success avg nsamples",
-            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "CorlaPlot: success avg nsamples",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccessVsTheta.${ntrials}.html",
+            "$dir/CorlaPlot.plotSuccessVsTheta.${ntrials}.html",
             "theta", "nsamples", "p2oracle",
             xfld = { it.theta },
             yfld = { it.nsamples },
@@ -39,10 +47,10 @@ class AdaptiveComparison {
         val d2 = srts[0].d2
 
         srtPlot(
-            "AdaptiveComparison: % success at 20% cutoff",
-            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "CorlaPlot: % success at 20% cutoff",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccess20VsTheta.${ntrials}.html",
+            "$dir/CorlaPlot.plotSuccess20VsTheta.${ntrials}.html",
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
@@ -60,10 +68,10 @@ class AdaptiveComparison {
         val d2 = srts[0].d2
 
         srtPlot(
-            "AdaptiveComparison: % success at 20% cutoff",
-            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "CorlaPlot: % success at 20% cutoff",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.${ntrials}.html",
+            "$dir/CorlaPlot.plotSuccess20VsThetaNarrow.${ntrials}.html",
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
@@ -80,10 +88,10 @@ class AdaptiveComparison {
         val d2 = srts[0].d2
 
         srtPlot(
-            "AdaptiveComparison: % false positives at 20% cutoff",
-            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
+            "CorlaPlot: % false positives at 20% cutoff",
+            "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotFailuresVsTheta.${ntrials}.html",
+            "$dir/CorlaPlot.plotFailuresVsTheta.${ntrials}.html",
             "theta", "falsePositives%", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },

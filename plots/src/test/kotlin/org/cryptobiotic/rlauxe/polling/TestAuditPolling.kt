@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.sim.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 
@@ -37,7 +37,6 @@ class TestAuditPolling {
 
                     if (show) print("${resultWithout.avgSamplesNeeded().toDouble()}, ${resultWith.avgSamplesNeeded().toDouble()}, ${"%5.2f".format(speedup)}, ")
                     if (show) println("${pct}, ${resultWith.failPct()}, ${resultWithout.status}")
-                    // fun makeSRT(N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult): SRT {
                     srs.add(resultWithout.makeSRT(margin2mean(margin), 0.0))
                 }
                 if (show) println()

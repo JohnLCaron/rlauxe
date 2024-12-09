@@ -225,8 +225,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
         val plotter = PlotSampleSizes(dirname, filename)
         plotter.showSamples(catfld = {
             if (it.fuzzPct == 0.0) "standard" else "fuzz=${it.fuzzPct}"
-        }
-        )
+        })
     }
 
     @Test
@@ -235,10 +234,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
         val filename = "ComparisonStandardVsFuzz"
 
         val plotter = PlotSampleSizes(dirname, filename)
-        plotter.showSamples(catfld = {
-            if (it.fuzzPct == 0.0) "standard" else "fuzz=${it.fuzzPct}"
-        }
-        )
+        plotter.showSamples(catfld = { if (it.fuzzPct == 0.0) "standard" else "fuzz=${it.fuzzPct}" })
     }
 
     @Test
@@ -373,28 +369,7 @@ class BettingTask(val name: String,
     }
 }
 
-class AlphaTask(val name: String,
-                val auditConfig: AuditConfig,
-                val sampleFn: SampleGenerator,
-                val margin: Double,
-                val upperBound: Double,
-                val maxSamples: Int,
-                val Nc: Int,
-                val otherParameters: Map<String, Double>,
-): ConcurrentTask {
-    override fun name() = name
-    override fun run() : RunTestRepeatedResult {
-        //         sampleFn: SampleGenerator,
-        //        margin: Double,
-        //        upperBound: Double,
-        //        maxSamples: Int,
-        //        startingTestStatistic: Double = 1.0,
-        //        Nc: Int,
-        //        moreParameters: Map<String, Double> = emptyMap(),
-        return simulateSampleSizeAlphaMart(auditConfig, sampleFn, margin, upperBound, maxSamples=Nc, Nc=Nc, moreParameters=otherParameters)
-    }
-}
-
+// we have an assorter
 class PollingTask(
     val name: String,
     val auditConfig: AuditConfig,
@@ -406,6 +381,22 @@ class PollingTask(
     override fun name() = name
     override fun run(): RunTestRepeatedResult {
         return simulateSampleSizePollingAssorter(auditConfig, contestUA, assort, Nc, moreParameters=moreParameters)
+    }
+}
+
+// we dont have an assorter
+class AlphaTask(val name: String,
+                val auditConfig: AuditConfig,
+                val sampleFn: SampleGenerator,
+                val margin: Double,
+                val upperBound: Double,
+                val maxSamples: Int,
+                val Nc: Int,
+                val otherParameters: Map<String, Double>,
+): ConcurrentTask {
+    override fun name() = name
+    override fun run() : RunTestRepeatedResult {
+        return simulateSampleSizeAlphaMart(auditConfig, sampleFn, margin, upperBound, maxSamples=Nc, Nc=Nc, moreParameters=otherParameters)
     }
 }
 

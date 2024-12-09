@@ -28,7 +28,7 @@ interface ConcurrentTask {
 
 class ConcurrentTaskRunner {
     private val show = true
-    private val showTaskResult = true
+    private val showTaskResult = false
     private val mutex = Mutex()
     private val results = mutableListOf<RunTestRepeatedResult>()
 

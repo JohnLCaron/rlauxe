@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/07/2024
+last update: 12/08/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -38,7 +38,7 @@ Table of Contents
     * [compute sample size](#compute-sample-size)
     * [estimate comparison error rates](#estimate-comparison-error-rates)
     * [use of previous round's sampled_cvr_indices](#use-of-previous-rounds-sampled_cvr_indices)
-  * [Notes](#notes)
+  * [Other Notes](#other-notes)
   * [Development Notes](#development-notes)
 <!-- TOC -->
 
@@ -195,6 +195,7 @@ gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corres
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
 
 See BettingMart.kt and related code for current implementation.
+See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots.
 
 ### Polling audits
 
@@ -225,6 +226,8 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 * Low values of d are much better when true mean < reported mean, at the cost of larger samples sizes.
 * Tentatively, we will use d = 100 as default, and allow the user to override.
 
+See [Polling Simulations](docs/PollingSimulations.md) for more details and plots.
+
 ### Comparison audits
 
 The requirements for Comparison audits:
@@ -237,7 +240,7 @@ For the risk function, we use BettingMart with AdaptiveComparison. AdaptiveCompa
 over(under)statements. If these estimates are correct, one gets optimal sample sizes. 
 AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 
-See SHANGRLA Section 3.2.
+See Cobra section 4.2 and SHANGRLA Section 3.2.
 
 The overstatement error for the ith ballot is:
 ````
@@ -274,7 +277,7 @@ Notes
 
 #### Comparison Betting Payoffs
 
-For the jth sample with bet λ_i, the BettingMart payoff is
+For the ith sample with bet λ_i, the BettingMart payoff is
 
     t_i = 1 + λ_i * (X_i − µ_i)
 
@@ -366,10 +369,6 @@ have greater spread, but on average are not much affected.
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
 
-
-* [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzConcurrent.html)
-* [Polling Sample sizes with fuzz](docs/plots/PollingFuzzConcurrent.html)
-
 We use this strategy for generating comparison error rate estimates, as a function of number of candidates in the contest.
 (see TestComparisonFuzzSampler.generateErrorTable()).
 
@@ -399,6 +398,27 @@ Possible refinement of this algorithm might measure:
    1. percent time a mark is seen when its not there
    2. percent time a mark is not seen when it is there
    3. percent time a mark is given to the wrong candidate 
+
+#### Detail of estimates for 2-way contest
+
+In the following plots we keep fuzzPct fixed to .01, for a single 2-way contests at various margins.
+
+Plot 1 shows the average number of samples needed to reject the null, aka "success":
+
+[Number of samples needed](plots/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
+
+Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
+theta <= 0.5:
+
+[Percentage of successes when the cutoff is 20%](plots/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
+
+Plot 3 zooms in on the false positives when the cutoff is 20% of N:
+
+[False positives when the cutoff is 20%](plots/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
+
+Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
+
+[Percentage of successes, theta close to 1/2](plots/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.10000.html)
 
 ## Sampling
 
@@ -641,10 +661,8 @@ Its possible that the code is wrong when sampled_cvr_indices is passed in, since
 first n sorted samples, which the code seems to assume. But I think the question is moot.
 
 
-## Notes
+## Other Notes
 
-* [Simulations](docs/Simulations.md)
-* [Ballot Comparison using Betting Martingales](docs/Betting.md)
 * [ALPHA testing statistic](docs/AlphaMart.md)
 * [Notes on Corla](docs/Corla.md)
 

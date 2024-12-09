@@ -127,6 +127,6 @@ fun dd(d: Double) = "%5.3f".format(d)
 fun di(d: Int) = "%5d".format(d)
 
 fun extractDecile(srt: SRT, sampleMaxPct: Int) =
-    if (srt.percentHist == null || srt.percentHist!!.cumul(sampleMaxPct) == 0.0) 0.0 else {
-        srt.percentHist!!.cumul(sampleMaxPct)
+    if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
+        srt.percentHist.cumul(sampleMaxPct)
     }

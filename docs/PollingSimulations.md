@@ -1,15 +1,12 @@
-# Simulations
+# Polling Simulations
 last update: 10/15/2024
 
 Table of Contents
 <!-- TOC -->
-* [Simulations](#simulations)
-  * [Sample size simulations (Polling)](#sample-size-simulations-polling)
-    * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
-    * [how to set the parameter d?](#how-to-set-the-parameter-d)
+* [Polling Simulations](#polling-simulations)
+  * [compare table 3 of ALPHA for Polling Audit with replacement](#compare-table-3-of-alpha-for-polling-audit-with-replacement)
+  * [how to set the parameter d?](#how-to-set-the-parameter-d)
 <!-- TOC -->
-
-## Sample size simulations (Polling)
 
 See [9/4/24 plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=662624429#gid=662624429)
 
@@ -18,7 +15,7 @@ See [9/4/24 plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu2
 * sample size approx 1/margin as N -> inf. Something more complicated as margin -> 0. (Plot 2b)
 * variance is quite large (Plot 4)
 
-### compare table 3 of ALPHA for Polling Audit with replacement
+## compare table 3 of ALPHA for Polling Audit with replacement
 
 * eta0 = theta (no divergence of sample from true). 
 * 1000 repetitions
@@ -47,7 +44,7 @@ stddev samples vs theta
 * no use for the parameter d in this case. Likely useful only for when eta0 != theta
 * See PlotSampleSizes.kt
 
-### how to set the parameter d?
+## how to set the parameter d?
 
 From ALPHA (p 9)
 

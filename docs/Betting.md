@@ -38,7 +38,7 @@ We follow the code in https://github.com/spertus/comparison-RLA-betting/blob/mai
 find the value of lamda that maximizes EF[Ti], using org.apache.commons.math3.optim.univariate.BrentOptimizer.
 See [OptimalComparison implementation](../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/OptimalComparison.kt).
 
-## GenAdaptiveComparisonTable
+## GenAdaptiveComparison
 
 Following COBRA, we start with only the p2 errors, and use Adaptive betting from COBRA section 4.2, equation (4), 
 to estimate the p2 rate, using an adapted form of ALPHA's shrink_trunc algorithm:

@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.junit.jupiter.api.Test
 import kotlin.collections.forEach

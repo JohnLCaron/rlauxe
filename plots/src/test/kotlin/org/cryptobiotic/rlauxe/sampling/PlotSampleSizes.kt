@@ -1,5 +1,8 @@
-package org.cryptobiotic.rlauxe.rlaplots
+package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
+import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.log10
 
@@ -43,6 +46,28 @@ class PlotSampleSizes(val dir: String, val filename: String) {
             xfld = { it.reportedMargin },
             yfld = { log10(it.wsamples) },
             catfld = { df(it.fuzzPct) },
+        )
+    }
+
+    fun showMeanDifference(catfld: (SRT) -> String) {
+        val reader = SRTcsvReader("$dir/${filename}.cvs")
+        showMeanDifference(reader.readCalculations(), catfld)
+    }
+
+    fun showMeanDifference(data: List<SRT>, catfld: (SRT) -> String) {
+        val ntrials = data[0].ntrials
+        val Nc = data[0].Nc
+
+        srtPlot(
+            titleS = "$filename estimated sample sizes vs mean difference",
+            subtitleS = "for ntrials=$ntrials, N=$Nc",
+            data,
+            "$dir/${filename}",
+            "% reported mean difference from theta", "nsamples", "category",
+            xfld = { it.reportedMeanDiff },
+            // yfld = { log10(it.wsamples) },
+            yfld = { it.wsamples },
+            catfld = catfld,
         )
     }
 }

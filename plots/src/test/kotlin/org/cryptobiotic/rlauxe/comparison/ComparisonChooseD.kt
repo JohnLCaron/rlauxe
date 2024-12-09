@@ -5,7 +5,10 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sim.AlphaComparisonTask
+import org.cryptobiotic.rlauxe.rlaplots.dd
+import org.cryptobiotic.rlauxe.rlaplots.extractDecile
+import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
+import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.junit.jupiter.api.Test
 import kotlin.collections.forEach
@@ -14,6 +17,76 @@ import kotlin.math.max
 // * use etaFactor=1.8. use large enough N so it doesnt interfere
 // * determine NS as a function of cvrMean abd cvrMeanDiff
 // * fine tune d as a function of theta; can we improve based on cvrMean?
+
+fun main() {
+    //plotSuccessVsTheta()
+    //plotFailuresVsTheta()
+    plotNSvsMD()
+}
+
+fun plotSuccessVsTheta() {
+    val filename = "/home/stormy/temp/sim/full/comparisonChooseD1.csv"
+    val thetaFilter: ClosedFloatingPointRange<Double> = 0.5001.. .506
+    val srts: List<SRT> = readAndFilter(filename, thetaFilter)
+    val ntrials = srts[0].ntrials
+    val Nc = srts[0].Nc
+    val eta0Factor = srts[0].eta0Factor
+    val d = srts[0].d
+
+    srtPlot(
+        "Comparison Audit: % success at 20% cutoff",
+        "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
+        srts,
+        "/home/stormy/temp/sim/dvalues/plotSuccessVsTheta.svg",
+        "theta", "pctSuccess", "reportedMeanDiff",
+        xfld = { it.theta },
+        yfld = { extractDecile(it, 20) },
+        catfld = { dd(it.reportedMeanDiff) },
+    )
+}
+
+fun plotFailuresVsTheta() {
+    val filename = "/home/stormy/temp/sim/full/comparisonChooseD1.csv"
+    val thetaFilter: ClosedFloatingPointRange<Double> = 0.0.. .5
+    val srts: List<SRT> = readAndFilter(filename, thetaFilter)
+    val ntrials = srts[0].ntrials
+    val Nc = srts[0].Nc
+    val eta0Factor = srts[0].eta0Factor
+    val d = srts[0].d
+
+    srtPlot(
+        "Comparison Audit: % false positives at 20% cutoff",
+        "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
+        srts,
+        "/home/stormy/temp/sim/dvalues/plotFailuresVsTheta.svg",
+        "theta", "falsePositives%", "reportedMeanDiff",
+        xfld = { it.theta },
+        yfld = { extractDecile(it, 20) },
+        catfld = { dd(it.reportedMeanDiff) },
+    )
+}
+
+// incoherent as it stands, do not use
+fun plotNSvsMD() {
+    val filename = "/home/stormy/temp/sim/full/comparisonChooseD1.csv"
+    val thetaFilter: ClosedFloatingPointRange<Double> = 0.48 ..0.52
+    val srts: List<SRT> = readAndFilter(filename, thetaFilter)
+    val ntrials = srts[0].ntrials
+    val Nc = srts[0].Nc
+    val eta0Factor = srts[0].eta0Factor
+    val d = srts[0].d
+
+    srtPlot(
+        titleS = "Comparison Audit: n samples needed",
+        subtitleS = "for Nc=$Nc eta0Factor=$eta0Factor ntrials=$ntrials d=$d",
+        srts,
+        "/home/stormy/temp/sim/dvalues/plotNSvsMD.dup.svg",
+        "reportedMeanDiff", "nsamples", "theta",
+        xfld = { it.reportedMeanDiff },
+        yfld = { it.nsamples },
+        catfld = { dd(it.theta) },
+    )
+}
 
 class ComparisonChooseD {
     val showRaw = false

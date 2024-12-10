@@ -16,7 +16,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             hasStyles = true,
             seed = 12356667890L,
             quantile = .80,
-            fuzzPct = .001,
+            fuzzPct = .000,
             ntrials = 100
         )
         val N = 10000

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 
+// call this CobraTask ?
 data class BettingTask(
     val idx: Int,
     val N: Int,

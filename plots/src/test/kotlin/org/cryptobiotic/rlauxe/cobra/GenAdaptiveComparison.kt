@@ -20,17 +20,17 @@ class GenAdaptiveComparison {
         val reportedMeans = listOf(0.501, 0.502, 0.503, 0.504, 0.505, 0.506, 0.5075, 0.508, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.58, 0.6,)
 
         val N = 10000
-        val ntrials = 1000
-        val p2prior = .0001
-        val d2 = 100 // (1.0/p2prior).toInt()/10
+        val ntrials = 10000
+        val p2prior = .001
+        val d2 = 100
 
         val tasks = mutableListOf<BettingTask>()
         var taskCount = 0
-        reportedMeans.forEach { mean ->
+        reportedMeans.forEach { reportedMean ->
             p2s.forEach { p2 ->
-                // the cvrs get generated with this exact margin.
+                // the cvrs get generated with the reportedMeans.
                 // then the mvrs are generated with over/understatement errors, which means the cvrs overstate the winner's margin.
-                val cvrs = makeCvrsByExactMean(N, mean)
+                val cvrs = makeCvrsByExactMean(N, reportedMean)
                 tasks.add(
                     //     val N: Int,
                     //    val cvrMean: Double,
@@ -41,7 +41,7 @@ class GenAdaptiveComparison {
                     BettingTask(
                         idx=taskCount++,
                         N=N,
-                        cvrMean = mean,
+                        cvrMean = reportedMean,
                         cvrs = cvrs,
                         d2 = d2,
                         p2oracle = p2,
@@ -51,14 +51,22 @@ class GenAdaptiveComparison {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/bet/plotAdaptiveComparison0001.csv")
-
         val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)
 
+        val dirname = "/home/stormy/temp/p2errors"
+        val filename = "plotAdaptiveComparison001"
+        val writer = SRTcsvWriter("$dirname/${filename}.csv")
         writer.writeCalculations(results)
         writer.close()
         println("${results.size} results written to ${writer.filename} took ${stopwatch.tookPer(taskCount, "task")} of $ntrials trials each")
+
+        val plotter = PlotCobraDetails(dirname, filename)
+        plotter.plotSuccessVsTheta()
+        plotter.plotSuccess20VsTheta()
+        plotter.plotSuccess20VsThetaNarrow()
+        plotter.plotFailuresVsTheta()
+
     }
 
     // just do one task

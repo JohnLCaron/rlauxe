@@ -197,7 +197,6 @@ gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corres
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
 
 See BettingMart.kt and related code for current implementation.
-See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots.
 
 ### Polling audits
 
@@ -350,9 +349,15 @@ Currrently all assumptions on the apriori error rates are arbitrary. These rates
 be empirically determined, and public tables for different voting machines should be published. 
 While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
-#### Polling Vs Comparison Estimated Sample sizes
+See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and detail plots of 2-way contests
+with varying p2error rates..
 
-This plot shows the large difference between a polling audit and a comparison audit at different margins:
+### Estimating Error
+
+#### Polling Vs Comparison Estimated Sample sizes with no errors
+
+This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
+audit at different margins, with no errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
 
@@ -406,29 +411,7 @@ Currently the percentage of ballots with no votes cast for a contest is not well
 Possible refinement of this algorithm might measure:
    1. percent time a mark is seen when its not there
    2. percent time a mark is not seen when it is there
-   3. percent time a mark is given to the wrong candidate 
-
-#### Detail of estimates for 2-way contest
-
-In the following plots we keep fuzzPct fixed to .01, for a single 2-way contests at various margins. See *GenAdaptiveComparison.kt*.
-(TODO redo these).
-
-Plot 1 shows the average number of samples needed to reject the null, aka "success":
-
-[Number of samples needed](docs/plots/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
-
-Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
-theta <= 0.5:
-
-[Percentage of successes when the cutoff is 20%](docs/plots/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
-
-Plot 3 zooms in on the false positives when the cutoff is 20% of N:
-
-[False positives when the cutoff is 20%](docs/plots/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
-
-Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
-
-[Percentage of successes, theta close to 1/2](docs/plots/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.10000.html)
+   3. percent time a mark is given to the wrong candidate
 
 ## Sampling
 

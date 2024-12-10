@@ -63,28 +63,20 @@ We want to see what happens when the true p2 rate (p2oracle) is greater than p2p
 
 Plot 1 shows the average number of samples needed to reject the null, aka "success":
 
-<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotSuccessVsMargin.html" rel="plotSuccessVsMargin">![plotSuccessVsMargin](plots/p2errors/plotAdaptiveComparison001.plotSuccessVsMargin.png)</a>
-
-[Number of samples needed](plots/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotSuccessVsTheta.html" rel="plotSuccessVsTheta">![plotSuccessVsMargin](plots/p2errors/plotAdaptiveComparison001.plotSuccessVsTheta.png)</a>
 
 Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
 theta <= 0.5:
 
-<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsMargin.html" rel="plotSuccess20VsMargin">![plotSuccess20VsMargin](plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsMargin.png)</a>
-
-[Percentage of successes when the cutoff is 20%](plots/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsTheta.html" rel="plotSuccess20VsTheta">![plotSuccess20VsTheta](plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsTheta.png)</a>
 
 Plot 3 zooms in on the false positives when the cutoff is 20% of N:
 
-<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.html" rel="plotFailuresVsTheta>![plotFailuresVsTheta](plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.png)</a>
-
-[False positives when the cutoff is 20%](plots/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.html" rel="plotFailuresVsTheta>![plotFailuresVsTheta](plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.png)</a>
 
 Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
 
-<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsThetaNarrow.html" rel="plotSuccess20VsThetaNarrow">![plotSuccess20VsThetaNarrow](plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsThetaNarrow.png)</a>
-
-[Percentage of successes, theta close to 1/2](plots/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.10000.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsThetaNarrow.html" rel="plotSuccess20VsThetaNarrow">![plotSuccess20VsThetaNarrow](plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsThetaNarrow.png)</a>
 
 Comments
 * the weighting factor d_k is set to 100 = .1/p_k. Arguably it should be inversely proportional to p_k, since

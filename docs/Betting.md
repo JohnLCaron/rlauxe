@@ -57,25 +57,32 @@ where
 The estimated rate p̃_ki is then plugged into Equation 1, and BrentOptimizer is used to find the maximal value of lamda for 
 each step i, on the interval [0, 2]. (TODO should that be [1, 2] ??)
 
-In the following plots we keep p2prior fixed to .001, and plot various values against theta, the true mean of the mvrs. With only
-2-vote overstatements, theta = cvrMean - p2oracle, where p2oracle is the true value of p2. Thus we are seeing what happens
-when the true p2 rate (p2oracle) is greater than p2prior. We expect to do best when p2oracle = p2prior, which for these plots
-is when p2oracle = .001. 
+In the following plots, we generate synthetic data with specified margins for the CVRs. Then, for different p2oracle rates,
+we randomly flip votes to get the required number of p2 errors, and use those as the MVRs. We keep p2prior fixed to .001
+We want to see what happens when the true p2 rate (p2oracle) is greater than p2prior. 
 
 Plot 1 shows the average number of samples needed to reject the null, aka "success":
+
+<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotSuccessVsMargin.html" rel="plotSuccessVsMargin">![ComparisonVsPoll](plots/p2errors/plotAdaptiveComparison01.plotSuccessVsMargin.png)</a>
 
 [Number of samples needed](plots/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
 
 Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
 theta <= 0.5:
 
+<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsMargin.html" rel="plotSuccessVsMargin">![ComparisonVsPoll](plots/p2errors/plotSuccess20VsMargin.plotSuccessVsMargin.png)</a>
+
 [Percentage of successes when the cutoff is 20%](plots/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
 
 Plot 3 zooms in on the false positives when the cutoff is 20% of N:
 
+<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.html" rel="plotFailuresVsTheta>![ComparisonVsPoll](plots/p2errors/plotFailuresVsTheta.plotSuccessVsMargin.png)</a>
+
 [False positives when the cutoff is 20%](plots/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
 
 Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
+
+<a href="https://johnlcaron.github.io/rlauxe/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsMargin.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](plots/p2errors/plotSuccess20VsMargin.plotSuccessVsMargin.png)</a>
 
 [Percentage of successes, theta close to 1/2](plots/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.10000.html)
 

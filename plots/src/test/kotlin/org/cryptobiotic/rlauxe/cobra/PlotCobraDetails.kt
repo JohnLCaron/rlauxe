@@ -1,25 +1,30 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.rlaplots.SRT
+import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import org.cryptobiotic.rlauxe.rlaplots.dd
 import org.cryptobiotic.rlauxe.rlaplots.extractDecile
 import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
 import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 
 fun main() {
-    val ac = AdaptiveComparison()
+    val ac = PlotCobraDetails(dir, filename)
     ac.plotSuccessVsTheta()
     ac.plotSuccess20VsTheta()
     ac.plotFailuresVsTheta()
     ac.plotSuccess20VsThetaNarrow()
 }
 
-class AdaptiveComparison {
-    val filename = "/home/stormy/temp/bet/plotAdaptiveComparison0001.csv"
+val dir = "/home/stormy/temp/pvalues"
+val filename = "plotAdaptiveComparison0001"
+
+class PlotCobraDetails(val dir: String, val filename: String) {
+    val pathname = "$dir/${filename}.csv"
+
     fun plotSuccessVsTheta() {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.500001.. 1.0
 
-        val srts: List<SRT> = readAndFilter(filename, thetaFilter)
+        val srts: List<SRT> = readAndFilter(pathname, thetaFilter)
         val ntrials = srts[0].ntrials
         val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
@@ -29,7 +34,7 @@ class AdaptiveComparison {
             "AdaptiveComparison: success avg nsamples",
             "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccessVsTheta.${ntrials}.html",
+            "$dir/${filename}.plotSuccessVsTheta",
             "theta", "nsamples", "p2oracle",
             xfld = { it.theta },
             yfld = { it.nsamples },
@@ -38,7 +43,7 @@ class AdaptiveComparison {
     }
 
     fun plotSuccess20VsTheta() {
-        val srts: List<SRT> = readAndFilter(filename)
+        val srts: List<SRT> = readAndFilter(pathname)
         val ntrials = srts[0].ntrials
         val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
@@ -48,7 +53,7 @@ class AdaptiveComparison {
             "AdaptiveComparison: % success at 20% cutoff",
             "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccess20VsTheta.${ntrials}.html",
+            "$dir/${filename}.plotSuccess20VsTheta",
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
@@ -58,7 +63,7 @@ class AdaptiveComparison {
 
     fun plotSuccess20VsThetaNarrow() {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.5.. .52
-        val srts: List<SRT> = readAndFilter(filename, thetaFilter)
+        val srts: List<SRT> = readAndFilter(pathname, thetaFilter)
 
         val ntrials = srts[0].ntrials
         val Nc = srts[0].Nc
@@ -69,7 +74,7 @@ class AdaptiveComparison {
             "AdaptiveComparison: % success at 20% cutoff",
             "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.${ntrials}.html",
+            "$dir/${filename}.plotSuccess20VsThetaNarrow",
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
@@ -79,7 +84,7 @@ class AdaptiveComparison {
 
     fun plotFailuresVsTheta() {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.0.. .5
-        val srts: List<SRT> = readAndFilter(filename, thetaFilter)
+        val srts: List<SRT> = readAndFilter(pathname, thetaFilter)
         val ntrials = srts[0].ntrials
         val Nc = srts[0].Nc
         val p2prior = srts[0].p2prior
@@ -89,7 +94,7 @@ class AdaptiveComparison {
             "AdaptiveComparison: % false positives at 20% cutoff",
             "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
             srts,
-            "/home/stormy/temp/bet/AdaptiveComparisonPlot.plotFailuresVsTheta.${ntrials}.html",
+            "$dir/${filename}.plotFailuresVsTheta",
             "theta", "falsePositives%", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },

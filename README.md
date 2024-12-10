@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/09/2024
+last update: 12/10/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -349,8 +349,8 @@ Currrently all assumptions on the apriori error rates are arbitrary. These rates
 be empirically determined, and public tables for different voting machines should be published. 
 While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
-See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and detail plots of 2-way contests
-with varying p2error rates..
+See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
+with varying p2error rates.
 
 ### Estimating Error
 

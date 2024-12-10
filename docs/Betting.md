@@ -1,6 +1,6 @@
 # Ballot Comparison using Betting Martingales
 
-## 10/15/24
+## 12/10/24
 
 The BETTING paper presents general techniques for estimating an unknown mean from bounded observations.
 
@@ -55,7 +55,7 @@ where
 ````
 
 The estimated rate p̃_ki is then plugged into Equation 1, and BrentOptimizer is used to find the maximal value of lamda for 
-each step i, on the interval [0, 2]. (TODO should that be [1, 2] ??)
+each step i, on the interval [0, 2]. 
 
 In the following plots, we generate synthetic data with specified margins for the CVRs. Then, for different p2oracle rates,
 we randomly flip votes to get the required number of p2 errors, and use those as the MVRs. We keep p2prior fixed to .001
@@ -72,15 +72,14 @@ theta <= 0.5:
 
 Plot 3 zooms in on the false positives when the cutoff is 20% of N:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.html" rel="plotFailuresVsTheta>![plotFailuresVsTheta](plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.html" rel="plotFailuresVsTheta">![plotFailuresVsTheta](plots/p2errors/plotAdaptiveComparison001.plotFailuresVsTheta.png)</a>
 
 Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsThetaNarrow.html" rel="plotSuccess20VsThetaNarrow">![plotSuccess20VsThetaNarrow](plots/p2errors/plotAdaptiveComparison001.plotSuccess20VsThetaNarrow.png)</a>
 
 Comments
-* the weighting factor d_k is set to 100 = .1/p_k. Arguably it should be inversely proportional to p_k, since
-  we expect there to be one over/understatement error every 1/p_k samples. 
+* the weighting factor d_k is set to 100
 * this algorithm does well when p2oracle ~= p2prior, giving good results down to margins of 1-2%.
 * we are testing very high values of p2oracle, in order to see how the algorithm responds when the overstatement
   errors are high enough to change the election outcome.

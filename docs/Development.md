@@ -17,6 +17,9 @@ last changed: 12/07/2024
   BigIntegers? Strings? Maybe hex strings?
 * COBRA 4.3 Diversified betting
 
+### plots
+* GenAdaptiveComparison
+
 ### multiple rounds
 * Serialization of intermediate stages
 

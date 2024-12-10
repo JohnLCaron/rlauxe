@@ -1,12 +1,12 @@
 # rlauxe
-last update: 12/08/2024
+last update: 12/09/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
 **WORK IN PROGRESS**
 
-You can also this on [github.io](https://johnlcaron.github.io/rlauxe/).
+You can also read this on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 Table of Contents
 <!-- TOC -->
@@ -25,13 +25,14 @@ Table of Contents
       * [Comparison error rates](#comparison-error-rates)
       * [Polling Vs Comparison Estimated Sample sizes](#polling-vs-comparison-estimated-sample-sizes)
       * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
+      * [Detail of estimates for 2-way contest](#detail-of-estimates-for-2-way-contest)
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
     * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
       * [Comparison audits and CSDs](#comparison-audits-and-csds)
       * [Polling audits and CSDs](#polling-audits-and-csds)
       * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-    * [Missing Ballots (aka phantoms-to-evil zombies))](#missing-ballots-aka-phantoms-to-evil-zombies)
+    * [Missing Ballots (aka phantoms-to-evil zombies) (TODO)](#missing-ballots-aka-phantoms-to-evil-zombies-todo)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -76,7 +77,8 @@ Table of Contents
 
 SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
 It uses an _assorter_ to assign a number to each ballot, and a _statistical risk testing function_ that allows an audit to statistically
-prove that an election outcome is correct (or not) to within a _risk level_, for example with 95% probability.
+prove that an election outcome is correct (or not) to within a _risk level α_, for example,  risk limit = 5% means that
+the election is correct with 95% probability.
 
 It checks outcomes by testing _half-average assertions_, each of which claims that the mean of a finite list of numbers 
 between 0 and upper is greater than 1/2. The complementary _null hypothesis_ is that each assorter mean is not greater than 1/2.
@@ -180,7 +182,7 @@ See the RAIRE guides for details:
 
 ### Betting martingales
 
-Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using 
+In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using 
 betting martingales of the form
 
     M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
@@ -198,6 +200,11 @@ See BettingMart.kt and related code for current implementation.
 See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots.
 
 ### Polling audits
+
+The requirements for Polling audits:
+
+* There must be a BallotManifest defining the population of ballots, that contains a unique identifier that can be matched to the corresponding physical ballot.
+* There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
 A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
 The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
@@ -271,9 +278,9 @@ Notes
               = 1 / (3 - 2 * awinnerAvg/assorter.upperBound())
               > 0.5 since awinnerAvg > 0.5
   ````
-* The possible values of the bassort function are:
+* The possible values of the bassort function are then:
       {0, .5, 1, 1.5, 2} * noerror
-* When the cvrs always equal the corresponfing mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
+* When the cvrs always equal the corresponding mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
 
 #### Comparison Betting Payoffs
 
@@ -292,9 +299,9 @@ then
 
     payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
 
-Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates and the margin. 
+Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates (see next section) and the margin. 
 
-Plots 1-5 shows the betting payoffs when all 4 error rates are equal {0.0, 0.0001, .001, .005, .01}:
+Plots 1-5 shows the betting payoffs when all 4 error rates are equal to {0.0, 0.0001, .001, .005, .01}, respectively:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](./docs/plots/betting/BettingPayoff0.0.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](./docs/plots/betting/BettingPayoff1.0E-4.png)</a>
@@ -312,8 +319,10 @@ solving for sampleSize = -ln(riskLimit) / ln(payoff).
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffSampleSize.html" rel="BettingPayoffSampleSize">![BettingPayoffSampleSize](./docs/plots/betting/BettingPayoffSampleSize.png)</a>
 
 The plot "error=0.0" is the equivilent to COBRA Fig 1, p. 6 for risk=.05. This is the best that can be done, 
-the minimum sampling size for the RLA.
+this is the minimum sampling size for the RLA.
 Note that this value is independent of N, the number of ballots.
+
+See GenBettingPayoff.kt for the geration of these plots.
 
 #### Comparison error rates
 
@@ -370,10 +379,10 @@ have greater spread, but on average are not much affected.
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
 
 We use this strategy for generating comparison error rate estimates, as a function of number of candidates in the contest.
-(see TestComparisonFuzzSampler.generateErrorTable()).
+(see GenerateComparisonErrorTable.kt):
 
 N=100000 ntrials = 1000
-generated 12/12024
+generated 12/01/2024
 
 | ncand | r1     | r2     | r3     | r4     |
 |-------|--------|--------|--------|--------|
@@ -401,24 +410,25 @@ Possible refinement of this algorithm might measure:
 
 #### Detail of estimates for 2-way contest
 
-In the following plots we keep fuzzPct fixed to .01, for a single 2-way contests at various margins.
+In the following plots we keep fuzzPct fixed to .01, for a single 2-way contests at various margins. See *GenAdaptiveComparison.kt*.
+(TODO redo these).
 
 Plot 1 shows the average number of samples needed to reject the null, aka "success":
 
-[Number of samples needed](plots/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
+[Number of samples needed](docs/plots/plotAdaptiveComparison.plotSuccessVsMargin.10000.html)
 
 Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
 theta <= 0.5:
 
-[Percentage of successes when the cutoff is 20%](plots/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
+[Percentage of successes when the cutoff is 20%](docs/plots/plotAdaptiveComparison.plotSuccess20VsMargin.10000.html)
 
 Plot 3 zooms in on the false positives when the cutoff is 20% of N:
 
-[False positives when the cutoff is 20%](plots/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
+[False positives when the cutoff is 20%](docs/plots/plotAdaptiveComparison.plotFailuresVsTheta.10000.html)
 
 Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
 
-[Percentage of successes, theta close to 1/2](plots/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.10000.html)
+[Percentage of successes, theta close to 1/2](docs/plots/AdaptiveComparisonPlot.plotSuccess20VsThetaNarrow.10000.html)
 
 ## Sampling
 
@@ -428,18 +438,19 @@ above) and sampling.
 ### Estimating Sample sizes
 
 For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
-running simulations, we can estimate error rates and add errors to the manufactured data.
+running simulations, we can use estimated error rates and add errors to the manufactured data.
 
-For each contest assertion we estimate the required sample size that will satisfy the risk limit for some fraction 
-(auditConfig.quantile) of the time. The contest sample_size is then the maximum of the contest's assertion estimates.
+For each contest assertion we estimate the required sample size that will satisfy the risk limit some fraction 
+(_auditConfig.quantile_) of the time. The contest sample_size is then the maximum of the contest's assertion estimates.
 
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
 
 Note that each round does its own sampling without regard to the previous round's sampled ballots. 
-Since the seed remains the same, the sort is the same, and so previously MVRS are used as much as possible.
+Since the seed remains the same and the ballot ordering is the same, then previously audited MVRS are used as much as 
+possible in subsequent rounds.
 
-Note: I _think_ its fine if more ballots come in between rounds (although this may be disallowed for security reasons). 
+Note: I _think_ its ok if more ballots come in between rounds (although this may be disallowed for security reasons). 
 Just add the new ballots to the "all cvrs list", and do the next round as usual. 
 Ideally N_c doesnt change, so it just makes less evil zombies.
 
@@ -447,10 +458,9 @@ Ideally N_c doesnt change, so it just makes less evil zombies.
 
 Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
 This step is highly dependent on how much we know about which ballots contain which contests. In particular,
-whether you have Card Style Data (CSD), (see MoreStyle, p2)..
+whether you have Card Style Data (CSD), (see MoreStyle, p2).
 
-For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records the
-case where a contest recieves no votes.
+For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
 
 So far, we can distinguish the following cases:
 
@@ -459,19 +469,19 @@ So far, we can distinguish the following cases:
 
 3. Polling, hasCSD: has a ballot manifest with ballot.hasContest(contestId)
 4. Polling, !hasCSD: doesnt know which ballots have which contests
-5. Polling, precinct batches/containers (see MoreStyle, p13)
+5. Polling, precinct batches/containers (TODO). See MoreStyle, p.13:
   * precinct-based voting where each voter in a precinct gets the same ballot style, and the balots are stored by precinct.
   * information about which containers have which card styles, even without information about which cards contain which
     contests, can still yield substantial efficiency gains for ballot-polling audits.
 
 #### Comparison audits and CSDs
 
-ConsistentSampling is used in either case. This assigns large psuedo-random numbers to each ballot, sorts and chooses
-the first ballots that use any contest that needs more samples, until all contests have at least contest.estSampleSize
-in the sample of ballots.
+ConsistentSampling is used in either case. This assigns large psuedo-random numbers to each ballot, orders the ballots
+by that number, and selects the first ballots that use any contest that needs more samples, until all contests have 
+at least contest.estSampleSize in the sample of selected ballots.
 
-In practice, its unclear whether there's much difference for Comparison audits when the CSD is complete or not. 
-It appears that the assort value changes when there is a discrepency between the CVR and MVR, but not otherwise.
+In practice, its unclear whether there's much difference for Comparison audits when the CSD is complete or not (see plots below). 
+It appears that the assort value changes when there is a discrepency between the CVR and MVR, but not otherwise. 
 
 See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA Audit.py class Assorter):
 
@@ -486,46 +496,54 @@ See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA A
 
 TODO: whats the reasoning for the above?
 
-For !hasCSD, we cant select unvoted contests, since they arent recorded.
-So then if we see an unvoted contest on the MVR...
+For !hasCSD, we wont select unvoted contests to be in the sample, since they arent recorded.
+So then if we see an unvoted contest on the MVR, the case where the MVR contains the contest but not the CVR, then...
 
 #### Polling audits and CSDs
 
 When a Polling audit has CSDs, then ConsistentSampling can be used. Otherwise, we have to use the following process: 
 
-The contests' estimated sample sizes are computed as usual. In order to find that number of ballots containing a contest, 
-among a batch of N ballots where Nc contain that contest, we have to examine (on average) (N / Nc) * contest.estSampleSize. 
+The contests' estimated sample sizes are computed as usual. In order to find ballots containing a contest, 
+among a batch of N ballots where Nc ballots contain that contest, we have to examine (on average) (N / Nc) * contest.estSampleSize. 
 
-Then nsamples = largest of {(N / Nc) * contest.estSampleSize} over all the contests to be audited.
+Then contest sample_size is then the maximum of the contest's assertion estimates, as before. The audit's sample size is the
+maximum over the contests.
 
-UniformSampling assigns large psuedo-random numbers to each ballot, sorts and chooses the first nsamples of them. 
+UniformSampling assigns large psuedo-random numbers to each ballot, sorts and chooses the first nsamples of them. Since
+we cant distinguish whoch ballots have which contests, we just take the first audit.sampleSize ballots.
 
-In reality, we probably know Nc. Sample sizes are still huge, because you have to muliply by N / Nc. And then it works out
-that Nc cancels out:
+We must Nc as a condition of the audit, but its straightforwad to calculate a contests' sample size without Nc,
+since it works out that Nc cancels out:
 
         sampleEstimate = rho / dilutedMargin                  // (SuperSimple p. 4)
-        dilutedMargin = (vw - vl)/ Nc
+        where 
+          dilutedMargin = (vw - vl)/ Nc
         sampleEstimate = rho * Nc / (vw - vl)
         totalEstimate = sampleEstimate * N / Nc               // must scale by proportion of ballots with that contest
                       = rho * N / (vw - vl) 
                       = rho / fullyDilutedMargin
-        fullyDilutedMargin = (vw - vl)/ N
+        where
+          fullyDilutedMargin = (vw - vl)/ N
 
 The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
-In this plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the audit has CSDs.
+In the following plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the audit has CSDs.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingNoStyle.html" rel="PollingNoStyle">![PollingNoStyle](./docs/plots/samples/PollingNoStyle.png)</a>
 
+See _PlotPollingNoStyles.kt_.
+
 #### Polling Vs Comparison with/out CSD Estimated Sample sizes
 
-This plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
+The following plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsStyleAndPoll.html" rel="ComparisonVsStyleAndPoll">![ComparisonVsStyleAndPoll](./docs/plots/samples/ComparisonVsStyleAndPoll.png)</a>
 
 Little difference between comparison with/out CSD. Large difference with polling with CSD. Not showing polling without CSD,
 since it depends on N/Nc scaling.
 
-### Missing Ballots (aka phantoms-to-evil zombies))
+See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
+
+### Missing Ballots (aka phantoms-to-evil zombies) (TODO)
 
 From P2Z paper:
 
@@ -567,7 +585,7 @@ From SHANGRLA, section 3.4:
     treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
     the overstatement error.
 
-_In the code for ballot comparison but not polling yet TODO. See ComparisonAssorter.bassort()._
+_This is in the code but not testes yet TODO. See ComparisonAssorter.bassort()._
 
 
 ## Stratified audits using OneAudit (TODO)
@@ -624,6 +642,7 @@ An affine transformation of the overstatement assorter values can move them back
 constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
+
 ## Differences with SHANGRLA
 
 ### Limit audit to estimated samples

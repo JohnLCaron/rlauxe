@@ -14,6 +14,8 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 import kotlin.test.Test
 
+// CANDIDATE FOR REMOVAL
+
 class CompareShrinkTrunkWithFixed {
 
     @Test

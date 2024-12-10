@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.plots
+package org.cryptobiotic.rlauxe.polling
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +19,11 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.plots.createPctRatio
+import org.cryptobiotic.rlauxe.plots.plotPctRatio
+import org.cryptobiotic.rlauxe.plots.plotSRTpct
+import org.cryptobiotic.rlauxe.plots.plotSRTsamples
+import org.cryptobiotic.rlauxe.plots.plotSRTstdev
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
@@ -28,6 +33,8 @@ import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 
 import kotlin.text.format
+
+// CANDIDATE FOR REFACTOR
 
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans

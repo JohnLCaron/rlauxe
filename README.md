@@ -14,9 +14,9 @@ Table of Contents
   * [Reference Papers](#reference-papers)
   * [SHANGRLA framework](#shangrla-framework)
     * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
-      * [PLURALITY](#plurality)
-      * [APPROVAL](#approval)
-      * [SUPERMAJORITY](#supermajority)
+      * [Plurality](#plurality)
+      * [Approval](#approval)
+      * [SuperMajority](#supermajority)
       * [IRV](#irv)
     * [Betting martingales](#betting-martingales)
     * [Polling audits](#polling-audits)
@@ -104,7 +104,7 @@ batches of ballot cards instead of individual cards (_cluster sampling_).
 
 ### Assorters and supported SocialChoices
 
-#### PLURALITY
+#### Plurality
 
 "Top k candidates are elected."
 The rules may allow the voter to vote for one candidate, k candidates or some other number, including n, which
@@ -136,7 +136,7 @@ Notes
 * Someone has to enforce that each CVR has <= number of allowed votes.
 
 
-#### APPROVAL
+#### Approval
 
 See SHANGRLA, section 2.2.
 
@@ -146,7 +146,7 @@ The top k candidates are elected.
 The plurality voting algorithm is used plurality voting.
 
 
-#### SUPERMAJORITY
+#### SuperMajority
 
 "Top k candidates are elected, whose percent vote is above a fraction, f."
 
@@ -323,15 +323,19 @@ For IRV, the corresponding descriptions of the errror rates are:
     NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
     NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
 
-The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
-Currrently all assumptions on the apriori error rates are arbitrary. These rates should
-be empirically determined, and public tables for different voting machines should be published. 
-While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
-
 See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
 with varying p2error rates.
 
 ### Estimating Error
+
+The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+Currrently all assumptions on the apriori error rates are arbitrary. These rates should
+be empirically determined, and public tables for different voting machines should be published.
+While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
+
+If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
+are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
+fetching and interpreting ballots.
 
 #### Polling Vs Comparison Estimated Sample sizes with no errors
 
@@ -403,7 +407,7 @@ For each contest we simulate the audit with manufactured data that has the same 
 running simulations, we can use estimated error rates and add errors to the manufactured data.
 
 For each contest assertion we estimate the required sample size that will satisfy the risk limit some fraction 
-(_auditConfig.quantile_) of the time. The contest sample_size is then the maximum of the contest's assertion estimates.
+(_auditConfig.quantile_) of the time. The contest sample_size is then the maximum of the contests' assertion estimates.
 
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
@@ -547,7 +551,7 @@ From SHANGRLA, section 3.4:
     treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
     the overstatement error.
 
-_This is in the code but not testes yet TODO. See ComparisonAssorter.bassort()._
+_This is in the code but not tested yet TODO. See ComparisonAssorter.bassort()._
 
 
 ## Stratified audits using OneAudit (TODO)

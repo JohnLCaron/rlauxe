@@ -33,6 +33,8 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 
+// CANDIDATE FOR REMOVAL
+
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans
 // DiffAuditType

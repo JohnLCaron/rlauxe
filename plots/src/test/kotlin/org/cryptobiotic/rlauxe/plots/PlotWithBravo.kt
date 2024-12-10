@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.rlaplots.readFilterTN
 import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 import kotlin.collections.List
 
+// CANDIDATE FOR REFACTOR
+
 fun main() {
     //showTNwithBravo("/home/stormy/temp/sim/dvalues/pollingAlpha.csv", .53, 10000, "/home/stormy/temp/sim/dvalues/pollingBravo.csv")
     plotTNwithBravo("/home/stormy/temp/sim/dvalues/comparisonAlpha9.csv", .53, 10000, "/home/stormy/temp/sim/dvalues/comparisonAlpha9")

@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test
 import kotlin.collections.forEach
 import kotlin.math.max
 
+// CANDIDATE FOR REMOVAL
+
 // * use etaFactor=1.8. use large enough N so it doesnt interfere
 // * determine NS as a function of cvrMean abd cvrMeanDiff
 // * fine tune d as a function of theta; can we improve based on cvrMean?
@@ -249,53 +251,4 @@ class ComparisonChooseD {
             bests.forEach { println("  $it") }
         }
     }
-
-    /*
-    ////////////////////////////////////////////////////////////
-    // ((N, cvrMean, cvrMeanDiff, cutoff) x (eta0factor, D)
-
-    // have to be data classes to get the auto equals thing
-    data class MND(val N: Int, val cvrMean: Double, val cvrMeanDiff: Double) {
-        val theta = cvrMean + cvrMeanDiff
-        val fds = mutableListOf<MNFDresult>()
-        var best: Double = 0.0
-        var maxFalsePositive: Double = 0.0
-
-        override fun toString() =
-            "N=$N cvrMean=$cvrMean theta=${dd(theta)} best=${dd(best)} maxFalsePositive=${dd(maxFalsePositive)}"
-    }
-
-    class MNFDresult(val d: Int, val eta0Factor: Double, val theta: Double, val percentHist: Double) {
-        var ratio: Double = 0.0
-        fun falsePositive() = if (theta > 0.5) 0.0 else percentHist
-        override fun toString() =
-            " ${dd(ratio)} : d=$d f=${dd(eta0Factor)} theta=${dd(theta)} percentHist=${dd(percentHist)}"
-    }
-
-    fun makeMNmap(srs: List<SRT>): Map<MND, List<SRT>> {
-        val mmap = mutableMapOf<MND, MutableList<SRT>>()
-        srs.forEach {
-            val key = MND(it.N, it.reportedMean, it.reportedMeanDiff)
-            val dmap: MutableList<SRT> = mmap.getOrPut(key) { mutableListOf() }
-            dmap.add(it)
-        }
-        return mmap
-    }
-
-    data class FD(val d: Int, val eta0Factor: Double) {
-        override fun toString() = "d=$d eta0Factor=$eta0Factor"
-    }
-
-    data class FDresult(val fd: FD) {
-        val ratios = mutableListOf<Double>()
-        var geometricMean: Double = 0.0
-        var maxFalsePositive: Double = 0.0
-        fun trackFalsePositive(falsePositive: Double) {
-            maxFalsePositive = max(maxFalsePositive, falsePositive)
-        }
-
-        override fun toString() = "$fd geometricMean=${dd(geometricMean)} maxFalsePositive=${dd(maxFalsePositive)}"
-    }
-
-     */
 }

@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.polling
+package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.PollingTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 
 // explore comparison parameters
 class PollingParameters {
@@ -59,7 +59,17 @@ class PollingParameters {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 cvrMeanDiffs.forEach { cvrMeanDiff ->
                     val cvrMean = theta - cvrMeanDiff
-                    tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = 0, cvrs = cvrs, useFixedEstimFn = true))
+                    tasks.add(
+                        PollingTask(
+                            taskIdx++,
+                            N,
+                            cvrMean,
+                            cvrMeanDiff,
+                            d = 0,
+                            cvrs = cvrs,
+                            useFixedEstimFn = true
+                        )
+                    )
                 }
             }
         }

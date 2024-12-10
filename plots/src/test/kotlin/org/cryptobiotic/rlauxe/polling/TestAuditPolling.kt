@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 
+// CANDIDATE FOR REMOVAL
+
 class TestAuditPolling {
 
     val showContests = false

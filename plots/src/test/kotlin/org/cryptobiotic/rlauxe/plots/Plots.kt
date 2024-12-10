@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.plots
 
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 
+// CANDIDATE FOR REMOVAL
+
 //// plots for crtMean by meanDiff
 fun plotMeanFailPct(srs: List<SRT>, title: String) {
     val utitle = "pct failed cvrMean (row) vs meanDiff (col): " + title

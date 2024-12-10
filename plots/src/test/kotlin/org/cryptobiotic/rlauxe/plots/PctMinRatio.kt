@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.min
+// CANDIDATE FOR REFACTOR
 
 // construct new dlcalcs replacing pct with ratio = pct/pctMin
 fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<Int>): Map<Int, List<SRT>> {

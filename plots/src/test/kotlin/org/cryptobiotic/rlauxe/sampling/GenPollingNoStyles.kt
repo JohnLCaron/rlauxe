@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.EstimationTask
 import org.cryptobiotic.rlauxe.workflow.EstimationTaskRunner
 import org.junit.jupiter.api.Test
 
-class PlotPollingNoStyles {
+class GenPollingNoStyles {
 
     @Test
     fun plotPollingNoStyle() {

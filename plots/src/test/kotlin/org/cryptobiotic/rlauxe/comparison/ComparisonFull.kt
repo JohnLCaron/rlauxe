@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import kotlin.collections.forEach
 import kotlin.math.max
 
+// CANDIDATE FOR REMOVAL
 // explore comparison parameters
 class ComparisonFull {
     val showRaw = false

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.polling
+package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.PollingTask

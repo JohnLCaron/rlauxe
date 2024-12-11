@@ -18,7 +18,10 @@ last changed: 12/07/2024
 * COBRA 4.3 Diversified betting
 
 ### plots
-* GenAdaptiveComparison
+* cobra/GenAdaptiveComparison
+* sampling/GenPollingDvalues
+* sampling/GenPollingNoStyles
+* sampling/GenSampleSizeEstimates
 
 ### multiple rounds
 * Serialization of intermediate stages

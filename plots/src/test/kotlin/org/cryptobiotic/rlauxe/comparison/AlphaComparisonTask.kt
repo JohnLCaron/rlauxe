@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.sim.RepeatedTask
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 
+// CANDIDATE FOR REMOVAL
+
 data class AlphaComparisonTask(
     val idx: Int,
     val N: Int,

@@ -8,7 +8,8 @@ import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.junit.jupiter.api.Test
 
-// TODO
+// CANDIDATE FOR REMOVAL
+
 class TestAuditComparison {
 
     @Test

@@ -6,6 +6,8 @@ import kotlin.test.Test
 
 import kotlin.collections.getOrPut
 
+// CANDIDATE FOR REFACTOR
+
 // read raw data and make csv plots of polling with theta != eta0
 class PlotComparisonWithErrors {
     val nrepeat = 100

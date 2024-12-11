@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.rlaplots.extractDecile
 import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
 import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 
+// CANDIDATE FOR REMOVAL
+
 fun main() {
     //comparison99("/home/stormy/temp/sim/failures/comparison99.svg", 0.48..0.52)
     //comparison99("/home/stormy/temp/sim/failures/comparison99false.svg", 0.49..0.50)

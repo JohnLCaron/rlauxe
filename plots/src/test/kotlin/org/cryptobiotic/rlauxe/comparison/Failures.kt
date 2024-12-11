@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.junit.jupiter.api.Test
 
+// CANDIDATE FOR REMOVAL
+
 class Failures {
 
     @Test

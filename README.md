@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/10/2024
+last update: 12/11/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -22,9 +22,9 @@ Table of Contents
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
       * [Comparison Betting Payoffs](#comparison-betting-payoffs)
-      * [Comparison error rates](#comparison-error-rates)
+    * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
     * [Estimating Error](#estimating-error)
-      * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
+      * [Comparison error rates](#comparison-error-rates)
       * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
@@ -302,6 +302,35 @@ Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates (see 
 
 See [Ballot Payoff Plots](docs/BettingPayoffs.md) for details.
 
+
+### Polling Vs Comparison Estimated Sample sizes with no errors
+
+This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
+audit at different margins, where the MVRS match the CVRS ("no errors").
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
+
+Polling at margins < 4% needs prohibitively large sample sizes.
+Comparison audits are perhaps useful down to margins = .4% .
+
+"In a card-level comparison audit, the estimated sample size scales with
+the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
+
+### Estimating Error
+
+The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+Currrently all assumptions on the apriori error rates are arbitrary. These rates should
+be empirically determined, and public tables for different voting machines should be published.
+While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
+
+If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
+are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
+fetching and interpreting ballots.
+
+We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4. 
+Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. In both cases, we use
+CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates.
+
 #### Comparison error rates
 
 The comparison error rates are:
@@ -326,47 +355,21 @@ For IRV, the corresponding descriptions of the errror rates are:
 See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
 with varying p2error rates.
 
-### Estimating Error
-
-The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
-Currrently all assumptions on the apriori error rates are arbitrary. These rates should
-be empirically determined, and public tables for different voting machines should be published.
-While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
-
-If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
-are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
-fetching and interpreting ballots.
-
-#### Polling Vs Comparison Estimated Sample sizes with no errors
-
-This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
-audit at different margins, with no errors:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
-
-Polling at margins < 4% needs prohibitively large sample sizes.
-Comparison audits are perhaps useful down to margins = .4% .
-
-"In a card-level comparison audit, the estimated sample size scales with
-the reciprocal of the diluted margin." (STYLISH p.4)
-
-Polling scales as square of 1/margin.
-
 #### Estimating Sample sizes and error rates with fuzz
 
-Currently our strategy for generating comparison errors is as follows:
+We can also estimate comparison error rates as follows:
 
 The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-The first plot shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
+The first plot below shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
 have greater spread, but on average are not much affected.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
 
-We use this strategy for generating comparison error rate estimates, as a function of number of candidates in the contest.
+We use this strategy and run simulations that generate comparison error rates, as a function of number of candidates in the contest.
 (see GenerateComparisonErrorTable.kt):
 
 N=100000 ntrials = 1000
@@ -387,9 +390,9 @@ generated 12/01/2024
 Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
 For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a 
 vote between winner and loser, than switch a vote to/from other.
+(NOTE: Currently the percentage of ballots with no votes cast for a contest is not well accounted for)
 
-For now, we will use this table to generate the error rates when estimating the sample sizes, until better estimates are avalable.
-Currently the percentage of ballots with no votes cast for a contest is not well accounted for. 
+We give the user the option to specify a fuzzPct and use this table for the apriori error rates error rates,
 
 Possible refinement of this algorithm might measure:
    1. percent time a mark is seen when its not there

@@ -80,12 +80,12 @@ Samples       // keeps track of the latest sample, number of samples, and the sa
 
 ### sampling
 ComparisonSamplerSimulation // create internal cvr and mvr with the correct under/over statements. specific to a contest. only used for estimating the sample size
-ConstistentSampling
+ConsistentSampling
 EstimateSampleSize
 FuzzSampler           // this takes a list of cvrs and fuzzes them. Version for Sampling and Polling. 
                       // fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
 MultiContestTestData  // creates a set of contests and ballotStyles, with randomly chosen candidates and margins. create cvrs that reflect the contests' exact votes.
-SampleGenerator           // abstraction for creating a sequence of samples. mostly superceded, mostly for testing.
+SampleGenerator       // abstraction for creating a sequence of samples. mostly superceded, mostly for testing.
 
 ### plots module
 betting/GenBettingPayoff

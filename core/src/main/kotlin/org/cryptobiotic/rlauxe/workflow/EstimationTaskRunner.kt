@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
-// TODO: can we genericify?
+// TODO: can we generify?
 
 interface EstimationTask {
     fun name() : String
@@ -36,6 +36,8 @@ data class EstimationResult(
     val task: EstimationTask
 )
 
+// runs set of EstimationTask concurrently, which return EstimationResult
+// the task itself typically calls runTestRepeated
 class EstimationTaskRunner {
     private val show = true
     private val showTaskResult = true

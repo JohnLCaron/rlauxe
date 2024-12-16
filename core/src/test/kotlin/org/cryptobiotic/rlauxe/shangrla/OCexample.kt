@@ -1,13 +1,10 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.shangrla
 
 //     import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
 //    import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 //    import java.security.MessageDigest
 //    import java.nio.charset.StandardCharsets
 //    import kotlin.random.Random
-
-import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.*
 
 /*
 class OCexample {

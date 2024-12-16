@@ -7,8 +7,7 @@ import kotlin.math.max
 
 private val show = true
 
-// TODO maybe lost the sampleNum?
-// create internal cvr and mvr with the correct under/over statements.
+// create internal cvr and mvr with the correct under/over statements that match the passed in error rates.
 // specific to a contest. only used for estimating the sample size
 class ComparisonSamplerSimulation(
         rcvrs: List<Cvr>,
@@ -16,10 +15,10 @@ class ComparisonSamplerSimulation(
         val cassorter: ComparisonAssorter,
         errorRates: List<Double>,
     ): SampleGenerator {
-    val p1: Double = errorRates[0] // apriori rate of 1-vote overstatements; voted for other, cvr has winner
-    val p2: Double = errorRates[1] // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
-    val p3: Double = errorRates[2] // apriori rate of 1-vote understatements; voted for winner, cvr has other
-    val p4: Double = errorRates[3] // apriori rate of 2-vote understatements; voted for winner, cvr has loser
+    val p1: Double = errorRates[0] // rate of 1-vote overstatements; voted for other, cvr has winner
+    val p2: Double = errorRates[1] // rate of 2-vote overstatements; voted for loser, cvr has winner
+    val p3: Double = errorRates[2] // rate of 1-vote understatements; voted for winner, cvr has other
+    val p4: Double = errorRates[3] // rate of 2-vote understatements; voted for winner, cvr has loser
 
     val N = rcvrs.size
     val isIRV = contestUA.choiceFunction == SocialChoiceFunction.IRV
@@ -276,7 +275,6 @@ class ComparisonSamplerSimulation(
 
         return changed
     }
-
 
     fun moveToFront(votes: Map<Int, IntArray>, contestId: Int, toFront: Int) : Map<Int, IntArray> {
         // all we have to do is put a candidate that is not the winner or the loser, aka other

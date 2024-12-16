@@ -41,6 +41,7 @@ fun listToMap(names: List<String>): Map<String, Int> {
 fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
+fun sf(s: String, n: Int) = "%${n}s".format(s)
 
 // https://www.baeldung.com/cs/sampling-exponential-distribution
 // probability density function (PDF): f_lambda(x) = lambda * e^(-lambda * x)

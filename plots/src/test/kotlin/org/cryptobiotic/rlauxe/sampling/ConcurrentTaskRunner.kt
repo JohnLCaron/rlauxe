@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.sampling
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import java.util.concurrent.TimeUnit
 
 // assumes that the task returns RunTestRepeatedResult
@@ -26,6 +27,7 @@ interface ConcurrentTask {
     fun run() : RunTestRepeatedResult
 }
 
+// runs set of ConcurrentTask concurrently, which return RunTestRepeatedResult
 class ConcurrentTaskRunner {
     private val show = true
     private val showTaskResult = false

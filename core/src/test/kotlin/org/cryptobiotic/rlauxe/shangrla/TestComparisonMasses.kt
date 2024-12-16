@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.alpha
+package org.cryptobiotic.rlauxe.shangrla
 
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit

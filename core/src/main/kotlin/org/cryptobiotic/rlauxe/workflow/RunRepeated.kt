@@ -38,6 +38,8 @@ data class RunTestRepeatedResult(
     }
 }
 
+// single threaded
+// runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
 fun runTestRepeated(
         drawSample: SampleGenerator,
         maxSamples: Int,

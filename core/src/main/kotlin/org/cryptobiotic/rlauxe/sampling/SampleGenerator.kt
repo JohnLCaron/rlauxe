@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.secureRandom
-import kotlin.math.ln
 import kotlin.random.Random
 
 // TODO move as much as possible into testing

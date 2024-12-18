@@ -40,8 +40,8 @@ interface ContestIF {
 }
 
 /**
- * Contest with the reported results
- * @parameter votes: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be ommitted.
+ * Contest with the reported results.
+ * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be ommitted.
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  */
 class Contest(
@@ -76,12 +76,14 @@ class Contest(
         //val sortedVotes: List<Pair<Int, Int>> = votes.toList().sortedBy{ it.second }.reversed() // could keep the sorted list
         //winners = sortedVotes.subList(0, info.nwinners).map { it.first }
 
-        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  TODO what about IRV ?
+        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
         val useMin = info.minFraction ?: 0.0
-        val totalVotes = votes.values.sum() // so this is plurality of the votes, not of the cards or the ballots
+        val totalVotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
+        // todo why use totalVotes instead of Nc?
         val overTheMin = votes.toList().filter{ it.second.toDouble()/totalVotes >= useMin }.sortedBy{ it.second }.reversed()
         val useNwinners = min(overTheMin.size, info.nwinners)
         winners = overTheMin.subList(0, useNwinners).map { it.first }
+        // invert the map
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }
         winnerNames = winners.map { mapIdToName[it]!! }
 
@@ -93,7 +95,6 @@ class Contest(
         }
         losers = mlosers.toList()
     }
-
 
     override fun toString() = buildString {
         append("${info} Nc= $Nc votes=${votes}")
@@ -128,7 +129,7 @@ class Contest(
 
 /**
  * Mutable form of Contest.
- * @parameter ncvrs: count of cvrs for this contest
+ * @parameter ncvrs: count of cvrs for this contest (comparison only)
  */
 open class ContestUnderAudit(
     val contest: ContestIF,

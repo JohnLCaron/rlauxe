@@ -25,6 +25,8 @@ class TestCvrBuilders {
         roundtrip.forEachIndexed { idx, it ->
             assertEquals( cvrs[idx], it)
         }
+
+        cvrsbs.show()
     }
 
     @Test

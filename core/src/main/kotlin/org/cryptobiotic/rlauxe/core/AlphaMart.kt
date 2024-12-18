@@ -27,11 +27,8 @@ class TruncShrinkage(
 
     init {
         require(upperBound > 0.0)
-//        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
-        if (eta0 < 0.5) {
-            println("eta0 < 0.5")
-        }
-//         require(eta0 >= 0.5) // ??
+        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
+        require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)
     }
@@ -77,7 +74,7 @@ class TruncShrinkage(
     }
 }
 
-// wrapper around BettingMart; only use for polling
+// wrapper around BettingMart; used for polling
 class AlphaMart(
     val estimFn : EstimFn,  // estimator of the population mean
     val N: Int,             // max number of cards for this contest

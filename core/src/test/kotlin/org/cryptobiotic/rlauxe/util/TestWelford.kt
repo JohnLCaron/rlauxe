@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class TestWelford {
@@ -26,9 +26,15 @@ class TestWelford {
 
         val (wm, wv, swv) = welford.result()
         println("mean = ${wm}")
+        assertEquals(0.6, wm)
         println("variance = ${wv}")
+        assertEquals(0.24, wv)
+        assertEquals(0.24, welford.variance())
         println("sample variance = ${swv}")
+        assertEquals(0.26666666666666666, swv)
         println("stddev = ${sqrt(wv)}")
+
+        assertContains(welford.toString(), "(0.6, 0.24, 0.26666666666666666)")
     }
 
     @Test
@@ -97,8 +103,9 @@ class TestWelford {
             stdev.add(sqrt(wv))
         }
         println("means = ${means}")
+        assertEquals(0.87, means.last(), doublePrecision)
         println("stdev = ${stdev}")
-        // [0.         0.005625   0.005      0.00421875 0.0054     0.005, 0.00459184 0.00421875 0.00388889 0.0036    ]
+        assertEquals(0.06, stdev.last(), doublePrecision)
     }
 
 
@@ -216,5 +223,21 @@ class Bernoulli(p: Double) {
             }
             x++
         }
+    }
+}
+
+// https://www.baeldung.com/cs/sampling-exponential-distribution
+// probability density function (PDF): f_lambda(x) = lambda * e^(-lambda * x)
+// cumulative density function (CDF): F_lambda(x) =  1 - e^(-lambda * x)
+// inverse cumulative density function (CDF): F_lambda^(-1)(u) = -(1/lambda) * ln(1-u)
+// sample in [0, 1] with exponential distribution with decay lambda
+class Exponential(lambda: Double) {
+    val ilambda = 1.0 / lambda
+    val n = 1.0
+
+    fun next(): Double {
+        val u = Math.random()
+        val x = ilambda * ln(1.0-u)
+        return x
     }
 }

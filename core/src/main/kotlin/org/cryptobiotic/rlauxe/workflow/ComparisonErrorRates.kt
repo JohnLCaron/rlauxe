@@ -16,7 +16,7 @@ object ComparisonErrorRates {
     }
 
     init {
-        // TestComparisonFuzzSampler.generateErrorTable()
+        // GenerateComparisonErrorTable.generateErrorTable()
         // N=100000 ntrials = 1000
         // generated 12/12024
         errorRatios[2] = listOf(0.2535, 0.2524, 0.2474, 0.2480)

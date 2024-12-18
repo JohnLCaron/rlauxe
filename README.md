@@ -319,8 +319,7 @@ the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of
 ### Estimating Error
 
 The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
-Currrently all assumptions on the apriori error rates are arbitrary. These rates should
-be empirically determined, and public tables for different voting machines should be published.
+These rates should be empirically determined, and public tables for different voting machines should be published.
 While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
 If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
@@ -329,16 +328,18 @@ fetching and interpreting ballots.
 
 We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4. 
 Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. In both cases, we use
-CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates.
+CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates. This is used 
+when estimating the sample size from the diluted margin, and also when doing the actual audit comparing the CVRs and the MVRs. 
+
 
 #### Comparison error rates
 
 The comparison error rates are:
 
-        val p1: // apriori rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: // apriori rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: // apriori rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: // apriori rate of 2-vote understatements; voted for winner, cvr has loser
+        val p1: // rate of 1-vote overstatements; voted for other, cvr has winner
+        val p2: // rate of 2-vote overstatements; voted for loser, cvr has winner
+        val p3: // rate of 1-vote understatements; voted for winner, cvr has other
+        val p4: // rate of 2-vote understatements; voted for winner, cvr has loser
 
 For IRV, the corresponding descriptions of the errror rates are:
 

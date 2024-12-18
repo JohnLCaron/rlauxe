@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.sf
+import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import java.io.Reader
@@ -67,7 +67,7 @@ class Contest(
         sortedCandidates.forEach {
             val calcPct = 100.0 * it.totalVotes / contestVotes
             assertEquals(it.percentVotes, calcPct, .01)
-            appendLine("  ${sf(it.name, 20)} (${it.partyName}): ${it.totalVotes} ${dfn(it.percentVotes,2)}")
+            appendLine("  ${sfn(it.name, 20)} (${it.partyName}): ${it.totalVotes} ${dfn(it.percentVotes,2)}")
         }
         appendLine()
     }

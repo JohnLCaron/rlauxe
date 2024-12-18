@@ -20,10 +20,6 @@ data class Deciles(val ntrials: Int, val hist: MutableMap<Int, Int>) {
         append("]")
     }
 
-    fun toString(keys:List<String>) = buildString {
-        hist.forEach { append("${keys[it.key]}:${it.value} ") }
-    }
-
     fun toStringBinned() = buildString {
         val shist = hist.toSortedMap()
         shist.forEach {

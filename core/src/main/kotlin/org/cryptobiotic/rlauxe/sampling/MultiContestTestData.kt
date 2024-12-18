@@ -20,6 +20,7 @@ private val debug = false
     val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
     val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
  */
+
 // creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
 // It can create cvrs that reflect the contests' exact votes.
 data class MultiContestTestData(
@@ -126,7 +127,7 @@ data class MultiContestTestData(
 }
 
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
-// It can create cvrs that reflect this contest's vote; so can be used in simulating the audit.
+// It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
 // The cvrs are not multicontest.
 data class ContestTestData(
     val contestId: Int,

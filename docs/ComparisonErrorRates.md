@@ -54,8 +54,6 @@ have greater spread, but on average are not much affected.
 With a mixture of contests with different candidate sizes, and empty votes allowed, here is a representative table of
 how the fuzzing generates p1, p2, p3 and p4 error rates:
 
-TestComparisonFuzzSampler.generateErrorTable():
-
 | ncand | p1     | p2     | p3     | p4     |
 |-------|--------|--------|--------|--------|
 | 2     | 0.2541 | 0.2460 | 0.2471 | 0.2570 |
@@ -67,6 +65,8 @@ TestComparisonFuzzSampler.generateErrorTable():
 | 8     | 0.2899 | 0.0339 | 0.2846 | 0.0327 |
 | 9     | 0.2509 | 0.0212 | 0.2466 | 0.0218 |
 | 10    | 0.2834 | 0.0265 | 0.2680 | 0.0238 |
+
+(See GenerateComparisonErrorTable.generateErrorTable())
 
 For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a
 vote between winner and loser, than switch a vote to/from other.

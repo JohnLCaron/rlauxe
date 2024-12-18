@@ -20,6 +20,7 @@ class TestDeciles {
         assertEquals(3,  hist.hist[1])
         assertEquals(1,  hist.hist[2])
         assertNull(hist.hist[9])
+        assertEquals("10 [1:3 2:1 ]",  hist.toString())
 
         val hist2 = Deciles(10)
         hist2.add(70)
@@ -27,6 +28,7 @@ class TestDeciles {
         hist2.add(80)
 
         println("hist2 = ${hist2}")
+        assertEquals("10 [8:2 9:1 ]",  hist2.toString())
 
         assertNull(hist2.hist[7])
         assertEquals(2,  hist2.hist[8])

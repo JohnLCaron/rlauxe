@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.SimContest
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
@@ -241,8 +240,9 @@ fun simulateSampleSizeComparisonAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
 
-    val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
     val sampler = if (auditConfig.fuzzPct == null) {
+        // TODO always using the ComparisonErrorRates derived from fuzzPct. should have the option to use ones chosen by the user.
+        val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
         // ComparisonSamplerSimulation carefully adds that number of errors. So simulation has that error in it.
         ComparisonSamplerSimulation(cvrs, contestUA, cassorter, errorRates)
     } else {

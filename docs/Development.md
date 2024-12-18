@@ -79,12 +79,18 @@ OTOH the RLA should detect a compromised DB?
 Samples       // keeps track of the latest sample, number of samples, and the sample sum.
 
 ### sampling
-ComparisonSamplerSimulation // create internal cvr and mvr with the correct under/over statements. specific to a contest. only used for estimating the sample size
-ConsistentSampling
-EstimateSampleSize
+
+ConsistentSampling    // implement consistent or uniform sampling
+EstimateSampleSize    / estimates sample size; polling or comparison, with/out styles
+
+ComparisonSamplerSimulation // create internal cvr and mvr with the correct under/over statements based on the error rates.
+                            // specific to a contest. only used for estimating the sample size
+
 FuzzSampler           // this takes a list of cvrs and fuzzes them. Version for Sampling and Polling. 
-                      // fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
+                      // fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> 
+
 MultiContestTestData  // creates a set of contests and ballotStyles, with randomly chosen candidates and margins. create cvrs that reflect the contests' exact votes.
+
 SampleGenerator       // abstraction for creating a sequence of samples. mostly superceded, mostly for testing.
 
 ### plots module

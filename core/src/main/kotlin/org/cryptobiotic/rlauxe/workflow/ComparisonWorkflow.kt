@@ -236,47 +236,6 @@ fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>
     }
 }
 
-/* 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
-fun checkWinners(contestUA: ContestUnderAudit, accumVotes: Map<Int, Int>) {
-    val sortedVotes: List<Map.Entry<Int, Int>> = accumVotes.entries.sortedByDescending { it.value }
-    val contest = contestUA.contest
-    val nwinners = contest.winners.size
-
-    // make sure that the winners are unique
-    val winnerSet = mutableSetOf<Int>()
-    winnerSet.addAll(contest.winners)
-    if (winnerSet.size != contest.winners.size) {
-        println("winners in contest ${contest} have duplicates")
-        contestUA.done = true
-        contestUA.status = TestH0Status.ContestMisformed
-        return
-    }
-
-    // see if theres a tie
-    val winnerMin: Int = sortedVotes.take(nwinners).map{ it.value }.min()
-    if (sortedVotes.size > nwinners) {
-        val firstLoser = sortedVotes[nwinners]
-        if (firstLoser.value == winnerMin ) {
-            println("tie in contest ${contest}")
-            contestUA.done = true
-            contestUA.status = TestH0Status.MinMargin
-            return
-        }
-    }
-
-    // check that the top nwinners are in winners list
-    sortedVotes.take(nwinners).forEach { (candId, vote) ->
-        if (!contest.winners.contains(candId)) {
-            println("winners ${contest.winners} does not contain candidateId $candId")
-            contestUA.done = true
-            contestUA.status = TestH0Status.ContestMisformed
-            return
-        }
-    }
-}
-
- */
-
 /////////////////////////////////////////////////////////////////////////////////
 // run audit for one assertion; could be parallel
 // TODO could pass the testFn into the workflow
@@ -294,6 +253,7 @@ fun runOneAssertionAudit(
     val assorter = assertion.cassorter
     val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = false)
 
+    // TODO always using the ComparisonErrorRates derived from fuzzPct. should have the option to use ones chosen by the user.
     val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,

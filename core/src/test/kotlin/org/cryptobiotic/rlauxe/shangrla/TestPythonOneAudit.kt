@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
-import org.cryptobiotic.rlauxe.util.findFirstIndex
 import org.cryptobiotic.rlauxe.sampling.randomPermute
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.max
@@ -610,4 +609,15 @@ fun numpy_quantile(a: IntArray, q: Double): Int {
         runningTotal += a[i++]
     }
     return a[i]
+}
+
+fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
+    var firstIdx = -1
+    for (idx in 0 until x.size) {
+        if (pred(x[idx])) {
+            firstIdx = idx
+            break
+        }
+    }
+    return firstIdx
 }

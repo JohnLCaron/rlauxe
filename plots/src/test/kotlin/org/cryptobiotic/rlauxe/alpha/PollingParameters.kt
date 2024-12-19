@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.PollingTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 // explore comparison parameters
 class PollingParameters {

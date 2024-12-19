@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 // compare ballot polling to card comparison
 class CompareAlphaPaper {

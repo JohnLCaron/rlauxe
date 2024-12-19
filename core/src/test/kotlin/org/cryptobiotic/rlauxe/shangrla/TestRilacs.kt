@@ -1,5 +1,9 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
+import org.cryptobiotic.rlauxe.core.AlphaMart
+import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import kotlin.math.max
 
@@ -79,8 +83,10 @@ class TestRilacs {
         val minsd = 1.0e-6
         val c = max(eps, ((eta0 - t) / 2))
 
-        val estimFn = TruncShrinkage(N=N, withoutReplacement=true, upperBound = upperBound,
-            minsd = minsd, eta0 = eta0, c = c, d = d)
+        val estimFn = TruncShrinkage(
+            N = N, withoutReplacement = true, upperBound = upperBound,
+            minsd = minsd, eta0 = eta0, c = c, d = d
+        )
 
         val alpha = AlphaMart(
             estimFn = estimFn,

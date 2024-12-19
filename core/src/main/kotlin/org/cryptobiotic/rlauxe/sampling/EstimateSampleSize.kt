@@ -258,7 +258,7 @@ fun simulateSampleSizeComparisonAssorter(
         sampler,
         cassorter.margin,
         cassorter.noerror,
-        cassorter.upperBound(),
+        cassorter.upperBound,
         contestUA.Nc,
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
         maxSamples,

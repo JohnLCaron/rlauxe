@@ -21,7 +21,7 @@ class TestComparisonSamplerSimulation {
             val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)  // contestId -> candId, vote count (or rank?)
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs, votes[contest.id]!!)
+            val contestUA = ContestUnderAudit(contest, N).makeComparisonAssertions(cvrs, votes[contest.id]!!)
             val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
             val sampler = ComparisonSamplerSimulation(cvrs,

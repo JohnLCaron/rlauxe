@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.PollingTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 // explore values of d for both polling and comparison
 // TODO not sure its ok that eta0 < .5

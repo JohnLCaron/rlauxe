@@ -37,8 +37,8 @@ class TestRaireWorkflow {
             val rc = rcontests.find { it.contestNumber == rrc.id }
             requireNotNull(rc)
             require(rc.candidates == rrc.candidates)
-            rrc.ncvrs = rc.ncvrs
-            rrc.Nc = rc.ncvrs
+            // TODO rrc.ncvrs = rc.ncvrs
+            // TODO rrc.Nc = rc.ncvrs
         }
 
         val workflow = ComparisonWorkflow(auditConfig, emptyList(), raireResults.contests, cvrs)

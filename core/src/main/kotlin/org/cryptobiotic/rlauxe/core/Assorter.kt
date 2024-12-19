@@ -94,13 +94,6 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 
 /////////////////////////////////////////////////////////////////////////////////
 
-fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
-    val margin = 2.0 * assortAvgValue - 1.0 // reported assorter margin
-    val noerror = 1.0 / (2.0 - margin / assortUpperBound)  // assort value when there's no error
-    val upperBound = 2.0 * noerror  // maximum assort value
-    return Triple(margin, noerror, upperBound)
-}
-
 /** See SHANGRLA Section 3.2 */
 data class ComparisonAssorter(
     val contest: ContestIF,
@@ -113,13 +106,8 @@ data class ComparisonAssorter(
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
 
-    fun upperBound() = upperBound
-
     init {
         if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
-            if (avgCvrAssortValue <= 0.5) {
-                println("avgCvrAssortValue")
-            }
             require(avgCvrAssortValue > 0.5) { "$contest: ($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "$contest: ($noerror) noerror must be > .5" }
         }
@@ -193,8 +181,6 @@ data class ComparisonAssorter(
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr)
         return cvr_assort - mvr_assort
     }
-
-    fun name() = assorter.desc()
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -225,5 +211,5 @@ class ComparisonAssertion(
     val avgCvrAssortValue = cassorter.avgCvrAssortValue
     val cmargin = cassorter.margin
 
-    override fun toString() = "${cassorter.name()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"
+    override fun toString() = "${cassorter.assorter.desc()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"
 }

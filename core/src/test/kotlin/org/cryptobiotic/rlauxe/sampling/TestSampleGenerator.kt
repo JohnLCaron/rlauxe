@@ -99,11 +99,6 @@ class TestSampleGenerator {
             assertEquals(bassorter.noerror, cs0.sampleMean, doublePrecision)
 
             val cs = ComparisonWithErrors(cvrs, bassorter, cvrMean + meanDiff)
-            val (margin, noerror, upperBound) = comparisonAssorterCalc(cvrMean, 1.0)
-            assertEquals(margin, bassorter.margin, doublePrecision)
-            assertEquals(noerror, bassorter.noerror, doublePrecision)
-            assertEquals(upperBound, bassorter.upperBound, doublePrecision)
-
             val assorter = bassorter.assorter
             val cvrVotes = cs.cvrs.map { assorter.assort(it) }.sum()
             val mvrVotes = cs.mvrs.map { assorter.assort(it) }.sum()

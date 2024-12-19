@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.EstimationResult
 import org.cryptobiotic.rlauxe.workflow.EstimationTask
 import org.cryptobiotic.rlauxe.workflow.EstimationTaskRunner
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class GenPollingNoStyles {
 

@@ -121,8 +121,8 @@ fun makeContestsFromCvrs(
                     candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
                     nwinners=1,
                 ),
-                votes[contestId]!!,
-                cards[contestId]!!,
+                voteInput = votes[contestId]!!,
+                Nc = cards[contestId]!!,
             )
         )
     }

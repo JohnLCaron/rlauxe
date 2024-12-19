@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class GenAdaptiveComparison {
 

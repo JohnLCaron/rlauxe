@@ -100,7 +100,7 @@ private fun runWithComparisonFuzzSampler(
         sampler,
         assorter.margin,
         assorter.noerror,
-        assorter.upperBound(),
+        assorter.upperBound,
         Nc=contestUA.Nc,
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
         maxSamples=contestUA.ncvrs,

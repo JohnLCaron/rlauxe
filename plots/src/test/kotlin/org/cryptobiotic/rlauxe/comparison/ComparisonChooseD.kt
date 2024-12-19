@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.rlaplots.extractDecile
 import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
 import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.collections.forEach
 import kotlin.math.max
 

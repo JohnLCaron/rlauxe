@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.math.max
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

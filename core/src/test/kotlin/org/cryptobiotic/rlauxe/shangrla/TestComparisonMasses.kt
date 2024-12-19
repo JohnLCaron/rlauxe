@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
 

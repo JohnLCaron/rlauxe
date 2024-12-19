@@ -495,7 +495,7 @@ class TestComparisonFromAlpha {
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareAssertion.cassorter.upperBound(),
+                    upperBound = compareAssertion.cassorter.upperBound,
                 )
                 srs.add(mart.makeSRT(theta, 0.0))
             }

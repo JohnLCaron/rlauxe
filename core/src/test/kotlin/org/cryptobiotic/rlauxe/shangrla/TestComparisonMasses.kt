@@ -174,7 +174,7 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
         return assortValues.toList().sum()
     }
 
-    override fun N(): Int {
+    override fun maxSamples(): Int {
         return assortValues.size
     }
 }

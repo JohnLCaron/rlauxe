@@ -319,7 +319,7 @@ class CompareAuditTypeWithErrors {
         val theta = cvrMean + cvrMeanDiff // the true mean
         if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")
 
-        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size, isComparison = false)
+        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), isComparison = false)
 
         contestUA.makePollingAssertions()
         val pollingAssertion = contestUA.pollingAssertions.first()

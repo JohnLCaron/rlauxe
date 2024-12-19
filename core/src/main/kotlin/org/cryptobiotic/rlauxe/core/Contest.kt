@@ -145,7 +145,7 @@ class Contest(
  */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    val ncvrs: Int = 0, // TODO make immutable; only used by Raire
+    // val ncvrs: Int = 0, // TODO make immutable; only used by Raire
     val isComparison: Boolean = true,
     val hasStyle: Boolean = true,
 ) {
@@ -164,8 +164,9 @@ open class ContestUnderAudit(
     var status = TestH0Status.NotStarted // or its own enum ??
     var estTotalSampleSize = 0 // number of total samples estimated needed (no style)
 
+    // should only be used for testing i think
     constructor(info: ContestInfo, cvrs: List<CvrIF>, isComparison: Boolean=true, hasStyle: Boolean=true):
-            this( makeContestFromCvrs(info, cvrs), cvrs.count { it.hasContest(info.id) }, isComparison, hasStyle)
+            this( makeContestFromCvrs(info, cvrs), isComparison, hasStyle)
 
     override fun toString() = buildString {
         append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")

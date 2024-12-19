@@ -30,7 +30,7 @@ class GenPollingNoStyles {
                 val contest = fcontest.makeContest()
 
                 print("reportedMargin = $margin ${contest.votes} Nc=$Nc N=$N")
-                val contestUA = ContestUnderAudit(contest, Nc, isComparison = false)
+                val contestUA = ContestUnderAudit(contest, isComparison = false)
                 contestUA.makePollingAssertions()
                 val assertion = contestUA.minAssertion()!!
                 val moreParameters = mapOf("N" to N.toDouble(), "reportedMargin" to margin)

@@ -77,7 +77,7 @@ class TestRilacs {
         withoutReplacement: Boolean = true,
         u: Double = 1.0,
     ): TestH0Result {
-        val N = drawSample.N()
+        val N = drawSample.maxSamples()
         val t = 0.5
         val upperBound = u
         val minsd = 1.0e-6

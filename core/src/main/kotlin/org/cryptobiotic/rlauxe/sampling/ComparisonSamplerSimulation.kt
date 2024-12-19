@@ -20,6 +20,7 @@ class ComparisonSamplerSimulation(
     val p3: Double = errorRates[2] // rate of 1-vote understatements; voted for winner, cvr has other
     val p4: Double = errorRates[3] // rate of 2-vote understatements; voted for winner, cvr has loser
 
+    val maxSamples = rcvrs.count { it.hasContest(contestUA.id) }
     val N = rcvrs.size
     val isIRV = contestUA.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
@@ -61,7 +62,8 @@ class ComparisonSamplerSimulation(
 
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
-    override fun N() = N
+    override fun maxSamples() = maxSamples
+
     override fun reset() {
         permutedIndex.shuffle(secureRandom)
         idx = 0

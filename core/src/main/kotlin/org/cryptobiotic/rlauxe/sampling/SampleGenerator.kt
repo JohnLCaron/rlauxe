@@ -9,20 +9,20 @@ import kotlin.random.Random
 //// abstraction for creating a sequence of samples
 interface SampleGenerator {
     fun sample(): Double // get next in sample
-    fun N(): Int  // population size
+    fun maxSamples(): Int  // population size
     fun reset()   // start over again with different permutation (may be prohibited)
 }
 
 //// For polling audits.
 
 class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
-    val N = cvrs.size
+    val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val sampleMean = cvrs.map { assorter.assort(it) }.average()
     val sampleCount = cvrs.sumOf { assorter.assort(it) }
 
     override fun sample(): Double {
         while (true) {
-            val idx = secureRandom.nextInt(N) // with Replacement
+            val idx = secureRandom.nextInt(cvrs.size) // with Replacement
             val cvr = cvrs[idx]
             if (cvr.hasContest(contest.id)) return assorter.assort(cvr)
         }
@@ -31,12 +31,12 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, 
     override fun reset() {}
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 }
 
 class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
-    private val ncvrs = cvrs.size
-    private val permutedIndex = MutableList(ncvrs) { it }
+    val maxSamples = cvrs.count { it.hasContest(contest.id) }
+    private val permutedIndex = MutableList(cvrs.size) { it }
     private var idx = 0
 
     init {
@@ -44,7 +44,7 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
     }
 
     override fun sample(): Double {
-        while (idx < ncvrs) {
+        while (idx < cvrs.size) {
             val cvr = cvrs[permutedIndex[idx]]
             idx++
             if (cvr.hasContest(contest.id)) {
@@ -61,7 +61,7 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
 
     fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
     fun sampleCount() = cvrs.sumOf { assorter.assort(it) }
-    override fun N() = ncvrs
+    override fun maxSamples() = maxSamples
 }
 
 //// For comparison audits
@@ -73,8 +73,8 @@ class ComparisonSamplerGen(
     val cassorter: ComparisonAssorter,
     val allowReset: Boolean,
 ): SampleGenerator {
-    val N = cvrPairs.size
-    val permutedIndex = MutableList(N) { it }
+    val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }
+    val permutedIndex = MutableList(cvrPairs.size) { it }
     var idx = 0
 
     init {
@@ -100,13 +100,13 @@ class ComparisonSamplerGen(
         idx = 0
     }
 
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 }
 
 // the mvr and cvr always agree.
 class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter): SampleGenerator {
-    val N = cvrs.size
-    val permutedIndex = MutableList(N) { it }
+    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
+    val permutedIndex = MutableList(cvrs.size) { it }
     val sampleMean: Double
     val sampleCount: Double
     var idx = 0
@@ -118,7 +118,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     }
 
     override fun sample(): Double {
-        require (idx < N)
+        require (idx < cvrs.size)
         val curr = cvrs[permutedIndex[idx++]]
         return cassorter.bassort(curr, curr) // mvr == cvr, no errors. could just return cassorter.noerror
     }
@@ -130,16 +130,17 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
 
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 }
 
+// TODO candidate for removal
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
 // to make mvrs have mvrMean.
 data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
                                 val withoutReplacement: Boolean = true): SampleGenerator {
-    val N = cvrs.size
+    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
     val mvrs : List<Cvr>
-    val permutedIndex = MutableList(N) { it }
+    val permutedIndex = MutableList(cvrs.size) { it }
     val sampleMean: Double
     val sampleCount: Double
     val flippedVotes: Int
@@ -155,7 +156,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
         mvrs = mmvrs.toList()
 
         sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
-        sampleMean = sampleCount / N
+        sampleMean = sampleCount / cvrs.size
     }
 
     override fun sample(): Double {
@@ -165,7 +166,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
             idx++
             cassorter.bassort(mvr, cvr)
         } else {
-            val chooseIdx = secureRandom.nextInt(N) // with Replacement
+            val chooseIdx = secureRandom.nextInt(cvrs.size) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
@@ -180,14 +181,16 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
 
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 }
 
+// TODO candidate for removal
 // generate mvr by starting with cvrs and flipping (N * p2) votes (type 2 errors) and (N * p1) votes (type 1 errors)
 // TODO: generalize to p3, p4
 data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
                                     val p2: Double, val p1: Double = 0.0,
                                     val withoutReplacement: Boolean = true): SampleGenerator {
+    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
     val N = cvrs.size
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
@@ -236,7 +239,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
 
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 }
 
 ///////////////////////
@@ -358,7 +361,7 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleG
 
     fun sampleCount() = assortValues.sum()
     fun sampleMean() = assortValues.average()
-    override fun N() = N
+    override fun maxSamples() = N
 }
 
 

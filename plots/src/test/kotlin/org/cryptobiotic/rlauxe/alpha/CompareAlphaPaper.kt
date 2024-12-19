@@ -36,7 +36,7 @@ class CompareAlphaPaper {
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
             val contest = makeContestFromCvrs(info, cvrs)
-            val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false)
+            val contestUA = ContestUnderAudit(contest, isComparison = false)
 
             contestUA.makePollingAssertions()
             val pollingAssertion = contestUA.pollingAssertions.first()

@@ -11,10 +11,12 @@ class PollingWorkflow(
         val ballotManifest: BallotManifest,
         val N: Int, // total number of ballots/cards
 ) {
-    val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, it.Nc, false, auditConfig.hasStyles) }
+    val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     val ballotsUA: List<BallotUnderAudit>
 
     init {
+        require (auditConfig.auditType == AuditType.POLLING)
+
         contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
                 checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })

@@ -26,7 +26,7 @@ data class PollingTask(
     }
 
     override fun makeSampler(): SampleGenerator {
-        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
         return PollWithoutReplacement(contestUA, cvrs, pollingAssorter)
     }
 

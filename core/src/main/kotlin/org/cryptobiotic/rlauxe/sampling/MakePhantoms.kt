@@ -101,6 +101,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 
 fun makePhantomCvrs(
     contestsUA: List<ContestUnderAudit>,
+    ncvrs: Map<Int, Int>,
     prefix: String = "phantom-",
     prng: Prng,
 ): List<CvrUnderAudit> {
@@ -126,7 +127,7 @@ fun makePhantomCvrs(
     val phantombs = mutableListOf<PhantomBuilder>()
 
     for (contest in contestsUA) {
-        val phantoms_needed = contest.Nc - contest.ncvrs
+        val phantoms_needed = contest.Nc - ncvrs[contest.id]!!
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
         }

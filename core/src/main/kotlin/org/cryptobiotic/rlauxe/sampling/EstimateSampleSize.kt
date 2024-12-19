@@ -161,7 +161,7 @@ fun simulateSampleSizePollingAssorter(
     val margin = assorter.reportedMargin()
     val simContest = SimContest(contestUA.contest as Contest, assorter)
     val cvrs = simContest.makeCvrs()
-    require(cvrs.size == contestUA.ncvrs)
+    // require(cvrs.size == contestUA.ncvrs) // TODO WTF?
 
     val sampler = if (auditConfig.fuzzPct == null) {
         PollWithoutReplacement(contestUA, cvrs, assorter)

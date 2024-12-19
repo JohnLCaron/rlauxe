@@ -54,7 +54,6 @@ fun runTestRepeated(
     ): RunTestRepeatedResult {
 
     val showH0Result = false
-    // val N = drawSample.N()
 
     var totalSamplesNeeded = 0
     var fail = 0

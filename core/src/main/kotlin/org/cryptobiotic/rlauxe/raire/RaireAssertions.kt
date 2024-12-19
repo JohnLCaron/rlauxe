@@ -42,7 +42,7 @@ class RaireContestUnderAudit(
     val expectedPollsNumber : Int,
     val expectedPollsPercent : Double,
     val assertions: List<RaireAssertion>,
-): ContestUnderAudit(contest, ncvrs=0, isComparison=true, hasStyle=true) { // TODO set ncvrs, Nc
+): ContestUnderAudit(contest, isComparison=true, hasStyle=true) { // TODO set ncvrs, Nc
     val candidates =  listOf(winner) + eliminated
 
     // TODO eliminate

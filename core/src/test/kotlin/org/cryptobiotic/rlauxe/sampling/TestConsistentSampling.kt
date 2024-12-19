@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.makeNcvrsPerContest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -82,14 +83,14 @@ class TestConsistentSampling {
             CvrUnderAudit( it, prng.next())
         }
 
-        val contestsUA = contestInfos.mapIndexed { idx, it ->
-            ContestUnderAudit( it, cvrs)
-        }
+        val contests =  makeContestsFromCvrs(cvrs)
+        val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it) }
         contestsUA[0].estSampleSize = 3
         contestsUA[1].estSampleSize = 3
         contestsUA[2].estSampleSize = 2
 
-        val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
+        val ncvrs = makeNcvrsPerContest(contests, cvrs)
+        val phantomCVRs = makePhantomCvrs(contestsUA, ncvrs, "phantom-", prng)
         val cvrsUAP = cvrsUA + phantomCVRs
         assertEquals(9, cvrsUAP.size)
 
@@ -118,7 +119,7 @@ class TestConsistentSampling {
 
         fun runTest() {
             val test = MultiContestTestData(20, 11, 20000)
-            val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc, isComparison = false).makePollingAssertions() }
+            val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
             contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
             val prng = Prng(secureRandom.nextLong())

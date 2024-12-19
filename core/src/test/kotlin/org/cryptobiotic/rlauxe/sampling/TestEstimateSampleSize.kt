@@ -13,7 +13,7 @@ class TestEstimateSampleSize {
     @Test
     fun testFindSampleSizePolling() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc, isComparison = false) }
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, isComparison = false) }
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
@@ -27,7 +27,7 @@ class TestEstimateSampleSize {
     @Test
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it, it.Nc) }
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it ) }
         val cvrs = test.makeCvrsFromContests()
         val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
 
@@ -53,10 +53,10 @@ class TestEstimateSampleSize {
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 1234567890L, fuzzPct = null, quantile=.90)
 
         contestsUA.forEach { contestUA ->
-            val cn = contestUA.ncvrs
+            val cn = contestUA.Nc
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
-                val result = simulateSampleSizeComparisonAssorter(auditConfig, contestUA, assert.cassorter, cvrs, contestUA.ncvrs)
+                val result = simulateSampleSizeComparisonAssorter(auditConfig, contestUA, assert.cassorter, cvrs, cn)
                 val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.cassorter.margin, gamma,
                     oneOver = ceil(cn*p1).toInt(), // p1

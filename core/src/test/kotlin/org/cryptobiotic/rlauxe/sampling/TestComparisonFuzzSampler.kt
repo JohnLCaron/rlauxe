@@ -57,7 +57,7 @@ class TestComparisonFuzzSampler {
     @Test
     fun testComparisonFuzzed() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
+        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it) }
         val cvrs = test.makeCvrsFromContests()
         contestsUA.forEach { contest ->
             contest.makeComparisonAssertions(cvrs)
@@ -103,7 +103,7 @@ private fun runWithComparisonFuzzSampler(
         assorter.upperBound,
         Nc=contestUA.Nc,
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
-        maxSamples=contestUA.ncvrs,
+        maxSamples=sampler.maxSamples(),
         moreParameters=moreParameters,
     )
 }

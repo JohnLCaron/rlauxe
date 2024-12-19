@@ -46,20 +46,19 @@ fun doOneAlphaMartRun(
     withoutReplacement: Boolean = true,
     showDetails: Boolean = true,
 ): TestH0Result {
-    val N = drawSample.N()
     val t = 0.5
     val upperBound = u
     val minsd = 1.0e-6
     val c = max(eps, ((eta0 - t) / 2))
 
     val estimFn = TruncShrinkage(
-        N = N, withoutReplacement = withoutReplacement, upperBound = upperBound,
+        N = drawSample.maxSamples(), withoutReplacement = withoutReplacement, upperBound = upperBound,
         minsd = minsd, eta0 = eta0, c = c, d = d
     )
 
     val alpha = AlphaMart(
         estimFn = estimFn,
-        N = N,
+        N = drawSample.maxSamples(),
         upperBound = upperBound,
         withoutReplacement = withoutReplacement,
     )

@@ -31,7 +31,7 @@ class TestAssertions {
             .addCrv().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -72,7 +72,7 @@ class TestAssertions {
             .addCrv().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -100,7 +100,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = true).makeComparisonAssertions(cvrs)
 
         val assertions = contestUA.comparisonAssertions
         assertNotNull(assertions)
@@ -126,7 +126,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, cvrs.size).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = true).makeComparisonAssertions(cvrs)
 
         val assertions = contestUA.comparisonAssertions
         assertNotNull(assertions)
@@ -155,7 +155,7 @@ class TestAssertions {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         //val exception = assertFailsWith<RuntimeException> {
-            val contestUA = ContestUnderAudit(contest, cvrs.size).makeComparisonAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest, isComparison = true).makeComparisonAssertions(cvrs)
         //}
         //println(exception)
         //assertNotNull(exception.message)

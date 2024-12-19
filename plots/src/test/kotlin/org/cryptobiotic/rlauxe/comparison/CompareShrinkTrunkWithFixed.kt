@@ -24,7 +24,7 @@ class CompareShrinkTrunkWithFixed {
         val N = 10000
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
 
             val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter())
 
@@ -44,17 +44,17 @@ class CompareShrinkTrunkWithFixed {
         val minsd = 1.0e-6
         val t = 0.5
         val c = max(eps, (eta0 - t) / 2)
-        val N = sampleGenerator.N()
+        val N = sampleGenerator.maxSamples()
 
         val trunc = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, c = c)
-        val alpha = AlphaMart(estimFn = trunc, N = sampleGenerator.N())
-        return alpha.testH0(sampleGenerator.N(), true) { sampleGenerator.sample() }
+        val alpha = AlphaMart(estimFn = trunc, N = N)
+        return alpha.testH0(N, true) { sampleGenerator.sample() }
     }
 
     fun testAlphaMartFixed(eta0: Double, sampleGenerator: SampleGenerator): TestH0Result {
         val fixed = FixedEstimFn(eta0 = eta0)
-        val alpha = AlphaMart(estimFn = fixed, N = sampleGenerator.N())
-        return alpha.testH0(sampleGenerator.N(), true) { sampleGenerator.sample() }
+        val alpha = AlphaMart(estimFn = fixed, N = sampleGenerator.maxSamples())
+        return alpha.testH0(sampleGenerator.maxSamples(), true) { sampleGenerator.sample() }
     }
 
     @Test
@@ -67,7 +67,7 @@ class CompareShrinkTrunkWithFixed {
 
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), cvrs.size)
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
 
             val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter())
 
@@ -108,10 +108,10 @@ class CompareShrinkTrunkWithFixed {
         val minsd = 1.0e-6
         val t = 0.5
         val c = max(eps, (eta0 - t) / 2)
-        val N = sampleGenerator.N()
+        val N = sampleGenerator.maxSamples()
 
         val trunc = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, c = c)
-        val alpha = AlphaMart(estimFn = trunc, N = sampleGenerator.N())
+        val alpha = AlphaMart(estimFn = trunc, N = sampleGenerator.maxSamples())
 
         return runTestRepeated(
             drawSample = sampleGenerator,
@@ -126,7 +126,7 @@ class CompareShrinkTrunkWithFixed {
     }
 
     fun runAlphaMartFixedRepeated(eta0: Double, sampleGenerator: SampleGenerator, ntrials: Int): RunTestRepeatedResult {
-        val N = sampleGenerator.N()
+        val N = sampleGenerator.maxSamples()
         val fixed = FixedEstimFn(eta0 = eta0)
         val alpha = AlphaMart(estimFn = fixed, N = N)
 

@@ -32,7 +32,7 @@ class GenPollingDvalues {
             reportedMeanDiffs.forEach { reportedMeanDiff ->
                 val theta = reportedMean + reportedMeanDiff // the true mean, used to generate the mvrs
                 val mvrs = makeCvrsByExactMean(Nc, theta)
-                val contestUA = ContestUnderAudit(make2wayContestFromMargin(Nc, reportedMean), Nc, isComparison = false)
+                val contestUA = ContestUnderAudit(make2wayContestFromMargin(Nc, reportedMean), isComparison = false)
                 val assorter = contestUA.makePollingAssertions().minPollingAssertion()!!.assorter
 
                 dlist.forEach { d ->

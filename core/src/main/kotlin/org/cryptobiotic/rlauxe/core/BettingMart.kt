@@ -28,6 +28,8 @@ class BettingMart(
                         showDetails: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
+        if (maxSamples > Nc)
+            println("wait")
         require(maxSamples <= Nc)
 
         var sampleNumber = 0        // – j ← 0: sample number

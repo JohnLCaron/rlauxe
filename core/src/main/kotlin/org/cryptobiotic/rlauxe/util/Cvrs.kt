@@ -46,6 +46,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// testing
 
 fun makeContestFromCvrs(
     info: ContestInfo,

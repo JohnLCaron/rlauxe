@@ -10,7 +10,7 @@ class ComparisonFuzzSampler(
     val contestUA: ContestUnderAudit,
     val cassorter: ComparisonAssorter
 ): SampleGenerator, Iterator<Double> {
-
+    val maxSamples = cvrs.count { it.hasContest(contestUA.id) }
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val welford = Welford()
@@ -47,7 +47,7 @@ class ComparisonFuzzSampler(
         return makeFuzzedCvrsFrom(listOf(contestUA.contest as Contest), cvrs, fuzzPct)
     }
 
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 
     override fun hasNext(): Boolean = (idx < N)
 
@@ -60,6 +60,7 @@ class PollingFuzzSampler(
     val contestUA: ContestUnderAudit,
     val assorter: AssorterFunction
 ): SampleGenerator {
+    val maxSamples = cvrs.count { it.hasContest(contestUA.id) }
     val N = cvrs.size
     val welford = Welford()
     val permutedIndex = MutableList(N) { it }
@@ -94,7 +95,7 @@ class PollingFuzzSampler(
         return makeFuzzedCvrsFrom(listOf(contestUA.contest as Contest), cvrs, fuzzPct)
     }
 
-    override fun N() = N
+    override fun maxSamples() = maxSamples
 }
 
 fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {

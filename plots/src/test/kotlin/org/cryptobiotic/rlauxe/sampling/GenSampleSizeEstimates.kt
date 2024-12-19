@@ -30,7 +30,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             fcontest.ncards = N
             val contest = fcontest.makeContest()
             print("margin = $margin ${contest.votes}")
-            val contestUAp = ContestUnderAudit(contest, N, isComparison = false)
+            val contestUAp = ContestUnderAudit(contest, isComparison = false)
 
             // polling
             contestUAp.makePollingAssertions()
@@ -39,7 +39,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
 
             // comparison
             val cvrs = fcontest.makeCvrs()
-            val contestUAc = ContestUnderAudit(contest, N, isComparison = true)
+            val contestUAc = ContestUnderAudit(contest, isComparison = true)
             contestUAc.makeComparisonAssertions(cvrs)
             val cassort = contestUAc.minComparisonAssertion()!!.cassorter
             tasks.add(ComparisonTask("Comparison: margin = $margin", auditConfig, contestUAc, cassort, cvrs))
@@ -71,7 +71,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             fcontestP.ncards = N
             val contestP = fcontestP.makeContest()
             print("marginP = $margin ${contestP.votes}")
-            val contestUAp = ContestUnderAudit(contestP, N, isComparison = false, hasStyle = true)
+            val contestUAp = ContestUnderAudit(contestP, isComparison = false, hasStyle = true)
             contestUAp.makePollingAssertions()
             val assortP = contestUAp.minAssertion()!!.assorter
             tasks.add(PollingTask("Polling: margin = $margin", auditConfigPolling, contestUAp, assortP, N, moreParameters = mapOf("polling" to 1.0)))
@@ -83,7 +83,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             val contest = fcontest.makeContest()
             val cvrs = fcontest.makeCvrs()
             print("margin = $margin ${contest.votes}")
-            val contestUAs = ContestUnderAudit(contest, N, isComparison = true, hasStyle = true)
+            val contestUAs = ContestUnderAudit(contest, isComparison = true, hasStyle = true)
             contestUAs.makeComparisonAssertions(cvrs)
             val cassort = contestUAs.minComparisonAssertion()!!.cassorter
             tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigStyles, contestUAs, cassort, cvrs, moreParameters = mapOf("hasStyles" to 1.0)))
@@ -95,7 +95,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             val contestNo = fcontestNo.makeContest()
             val cvrsNo = fcontestNo.makeCvrs()
             print("margin = $margin ${contestNo.votes}")
-            val contestUAno = ContestUnderAudit(contestNo, N, isComparison = true, hasStyle = false)
+            val contestUAno = ContestUnderAudit(contestNo, isComparison = true, hasStyle = false)
             contestUAno.makeComparisonAssertions(cvrsNo)
             val cassortNo = contestUAno.minComparisonAssertion()!!.cassorter
             tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigNo, contestUAno, cassortNo, cvrsNo))
@@ -136,7 +136,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             fcontest.ncards = N
             val contest = fcontest.makeContest()
             print("margin = $margin ${contest.votes}")
-            val contestUA = ContestUnderAudit(contest, N, isComparison = false)
+            val contestUA = ContestUnderAudit(contest, isComparison = false)
 
             // polling
             contestUA.makePollingAssertions()
@@ -184,7 +184,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
             fcontest.ncards = N
             val contest = fcontest.makeContest()
             print("margin = $margin ${contest.votes}")
-            val contestUA = ContestUnderAudit(contest, N)
+            val contestUA = ContestUnderAudit(contest)
 
             val cvrs = fcontest.makeCvrs()
             contestUA.makeComparisonAssertions(cvrs)
@@ -263,7 +263,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
                 val cvrs = fcontest.makeCvrs()
 
                 print("fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
-                val contestUA = ContestUnderAudit(contest, N, isComparison = false)
+                val contestUA = ContestUnderAudit(contest, isComparison = false)
                 contestUA.makePollingAssertions()
                 val minAssort = contestUA.minAssertion()!!.assorter
                 val sampleFn = PollingFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
@@ -317,7 +317,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
                 val cvrs = fcontest.makeCvrs().map { it }
 
                 print("fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
-                val contestUA = ContestUnderAudit(contest, N)
+                val contestUA = ContestUnderAudit(contest)
 
                 // comparison; regen mvrs each repition to smoothe things out
                 contestUA.makeComparisonAssertions(cvrs)
@@ -410,7 +410,7 @@ class ComparisonTask(val name: String,
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         return simulateSampleSizeComparisonAssorter(auditConfig, contestUA, cassort, cvrs,
-            maxSamples=contestUA.ncvrs, moreParameters=moreParameters)
+            maxSamples=cvrs.size, moreParameters=moreParameters)
     }
 }
 

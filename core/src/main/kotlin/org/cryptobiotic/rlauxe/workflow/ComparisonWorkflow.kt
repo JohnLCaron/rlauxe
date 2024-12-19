@@ -32,6 +32,8 @@ class ComparisonWorkflow(
     val prng = Prng(auditConfig.seed)
 
     init {
+        require (auditConfig.auditType == AuditType.CARD_COMPARISON)
+
         // 2. Pre-processing and consistency checks
         // 	a) Check that the winners according to the CVRs are the reported winners.
         //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
@@ -40,12 +42,8 @@ class ComparisonWorkflow(
         //	d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
         //     create enough “phantom” cards to make up the difference. TODO diff between c) and d) ?
 
-        contestsUA = (makeContestsFromCvrs(contests, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
+        contestsUA = (makeContestUAFromCvrs(contests, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
-            //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
-            if (it.Nc < it.ncvrs) throw RuntimeException(
-                "upperBound ${it.Nc} < ncvrs ${it.ncvrs} for contest ${it.contest.info.id}"
-            )
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
                 checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
             }
@@ -53,14 +51,17 @@ class ComparisonWorkflow(
 
         // 3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
         //      (including “phantom” CVRs), using a high-quality PRNG [OS19].
-        val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
+        val ncvrs =  makeNcvrsPerContest(contests, cvrs)
+        val phantomCVRs = makePhantomCvrs(contestsUA, ncvrs, "phantom-", prng)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) } + phantomCVRs
 
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
 
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)  // contestId -> candId, vote count (or rank?)
+        val votes =  makeVotesPerContest(contests, cvrs)
+
+        // val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)  // contestId -> candId, vote count (or rank?)
         contestsUA.filter{ !it.done }.forEach { contest ->
             contest.makeComparisonAssertions(cvrsUA, votes[contest.id]!!)
             // TODO apply minMargin ?? maybe handled by failPct?
@@ -167,11 +168,29 @@ class ComparisonWorkflow(
 ///////////////////////////////////////////////////////////////////////
 
 // tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
-fun makeContestsFromCvrs(contests: List<Contest>, cvrs: List<CvrIF>, hasStyles: Boolean=true): List<ContestUnderAudit> {
-    if (contests.isEmpty()) return emptyList()
+fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<CvrIF>): Map<Int, Int> {
+    val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
+    contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete
+    for (cvr in cvrs) {
+        for (conId in cvr.votes.keys) {
+            val accum = ncvrs.getOrPut(conId) { 0 }
+            ncvrs[conId] = accum + 1
+        }
+    }
+    contests.forEach {
+        val ncvr = ncvrs[it.id]!!
+        //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
+        if (it.Nc < ncvr) throw RuntimeException(
+            "upperBound ${it.Nc} < ncvrs ${ncvr} for contest ${it.id}"
+        )
+    }
 
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    val ncvrs = mutableMapOf<Int, Int>()
+    return ncvrs
+}
+
+fun makeVotesPerContest(contests: List<Contest>, cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
+    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes
+    contests.forEach { allVotes[it.id] = mutableMapOf() } // make sure map is complete
     for (cvr in cvrs) {
         for ((conId, conVotes) in cvr.votes) {
             val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
@@ -180,17 +199,29 @@ fun makeContestsFromCvrs(contests: List<Contest>, cvrs: List<CvrIF>, hasStyles: 
                 accumVotes[cand] = accum + 1
             }
         }
-        for (conId in cvr.votes.keys) {
-            val accum = ncvrs.getOrPut(conId) { 0 }
-            ncvrs[conId] = accum + 1
+    }
+    return allVotes
+}
+
+fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<CvrIF>, hasStyles: Boolean=true): List<ContestUnderAudit> {
+    if (contests.isEmpty()) return emptyList()
+
+    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes
+    for (cvr in cvrs) {
+        for ((conId, conVotes) in cvr.votes) {
+            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
         }
     }
+
     return allVotes.keys.map { conId ->
         val contest = contests.find { it.id == conId }
         if (contest == null) throw RuntimeException("no contest for contest id= $conId")
-        val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, nc, true, hasStyles) // TODO nc vs ncvrs ??
+        val contestUA = ContestUnderAudit(contest, true, hasStyles) // TODO nc vs ncvrs ??
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }

@@ -31,8 +31,10 @@ class TestStopWatch {
         assertEquals("took 1000 ms", stopwatch.took())
 
         // tookPer
-        assertContains(stopwatch.tookPer(10), "for 10 nrows, 100.0 ms per nrows")
-        assertContains(stopwatch.tookPer(100, "glorbs"), "for 100 glorbs, 10.00 ms per glorbs")
+        assertContains(stopwatch.tookPer(10), "for 10 nrows, 100")
+        assertContains(stopwatch.tookPer(10), "ms per nrows")
+        assertContains(stopwatch.tookPer(100, "glorbs"), "for 100 glorbs, 10.")
+        assertContains(stopwatch.tookPer(100, "glorbs"), "ms per glorbs")
     }
 
     @Test

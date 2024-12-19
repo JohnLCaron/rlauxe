@@ -114,9 +114,7 @@ class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
     override fun reset() {
         // noop
     }
-    fun sampleMean() = samples.average()
-    fun sampleCount() = samples.sum()
-    override fun N() = N
+    override fun maxSamples() = N
 }
 
 class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGenerator {
@@ -129,7 +127,5 @@ class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGene
         samples = generateSampleWithMean(N, ratio)
         index = 0
     }
-    fun sampleMean() = samples.average()
-    fun sampleCount() = samples.sum()
-    override fun N() = N
+    override fun maxSamples() = N
 }

@@ -1,16 +1,20 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.make2wayContestFromMargin
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.math.ceil
 
 class GenPollingDvalues {
 
@@ -76,4 +80,22 @@ class GenPollingDvalues {
         val plotter = PlotSampleSizes(dirName, filename)
         plotter.showMeanDifference(catfld = { "d=${nfn(it.d,4)}" })
     }
+}
+
+
+fun make2wayContestInfo(type: SocialChoiceFunction = SocialChoiceFunction.PLURALITY) = ContestInfo(
+    "standard2way",
+    0,
+    mapOf("cand0" to 0, "cand1" to 1),
+    type,
+)
+
+fun make2wayContestFromMargin(Nc: Int, margin:Double): Contest {
+    require(margin > 0.0)
+    val winningVote = ceil(Nc*margin2mean(margin)).toInt()
+    return Contest(
+        info = make2wayContestInfo(),
+        voteInput = mapOf(0 to winningVote, 1 to Nc-winningVote),
+        Nc = Nc
+    )
 }

@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.collections.forEach
 import kotlin.math.max
 

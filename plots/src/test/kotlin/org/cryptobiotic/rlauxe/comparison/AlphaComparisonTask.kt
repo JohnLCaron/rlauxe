@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
@@ -9,6 +10,7 @@ import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.sim.RepeatedTask
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
+import kotlin.test.assertEquals
 
 // CANDIDATE FOR REMOVAL
 
@@ -36,7 +38,11 @@ data class AlphaComparisonTask(
     }
 
     override fun makeTestFn(): RiskTestingFn {
-        val (_, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, compareAssorter.upperBound)
+        val (margin, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, compareAssorter.upperBound)
+        assertEquals(margin, compareAssorter.margin, doublePrecision)
+        assertEquals(noerrors, compareAssorter.noerror, doublePrecision)
+        assertEquals(upperBound, compareAssorter.upperBound, doublePrecision)
+
         eta0 = eta0Factor * noerrors
         val t = 0.5
         val minsd = 1.0e-6
@@ -66,6 +72,13 @@ data class AlphaComparisonTask(
     override fun reportedMeanDiff() = cvrMeanDiff
 }
 
+fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Triple<Double, Double, Double> {
+    val margin = 2.0 * assortAvgValue - 1.0 // reported assorter margin
+    val noerror = 1.0 / (2.0 - margin / assortUpperBound)  // assort value when there's no error
+    val upperBound = 2.0 * noerror  // maximum assort value
+    return Triple(margin, noerror, upperBound)
+}
+
 // run AlphaMart with TrunkShrinkage in repeated trials
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
@@ -73,7 +86,7 @@ fun runAlphaMartRepeated(
     maxSamples: Int,
     eta0: Double,
     d: Int = 500,
-    f: Double = 0.0,
+    // f: Double = 0.0,
     withoutReplacement: Boolean = true,
     ntrials: Int = 1,
     upperBound: Double = 1.0,
@@ -86,7 +99,7 @@ fun runAlphaMartRepeated(
     val minsd = 1.0e-6
     val c = max(eps, ((eta0 - t) / 2))
 
-    val useEstimFn = estimFn ?: TruncShrinkage(N, true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+    val useEstimFn = estimFn ?: TruncShrinkage(N, true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, c = c)
 
     val alpha = AlphaMart(
         estimFn = useEstimFn,

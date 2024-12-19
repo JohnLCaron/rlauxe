@@ -20,7 +20,7 @@ class TruncShrinkage(
     val eta0: Double,
     val c: Double,
     val d: Int,
-    val f: Double = 0.0,
+    val f: Double = 0.0, // TODO remove?
 ) : EstimFn {
     val capAbove = upperBound * (1 - eps)
     val wterm = d * eta0  // eta0 given weight of d. eta is weighted average of eta0 and samples

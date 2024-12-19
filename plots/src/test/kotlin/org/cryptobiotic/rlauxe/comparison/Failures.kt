@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.secureRandom
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 // CANDIDATE FOR REMOVAL
 

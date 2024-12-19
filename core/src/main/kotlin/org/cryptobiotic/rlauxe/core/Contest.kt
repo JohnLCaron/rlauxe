@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.cryptobiotic.rlauxe.util.margin2mean
-import kotlin.math.ceil
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
@@ -21,12 +19,27 @@ data class ContestInfo(
     val candidateIds: List<Int>
 
     init {
-        require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null)
+        require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null) { "SUPERMAJORITY requires minFraction"}
+        require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || minFraction == null) { "only SUPERMAJORITY can have minFraction"}
+        require(minFraction == null || minFraction in (0.0..1.0)) { "minFraction between 0 and 1"}
+        require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
+
+        val candidateSet = candidateNames.toList().map { it.first }.toSet()
+        require(candidateSet.size == candidateNames.size) { "duplicate candidate name ${candidateNames}"} // may not be possible
+        candidateSet.forEach { candidate ->
+            candidateSet.filter{ it != candidate }.forEach {
+                require(candidate.isNotEmpty() ) { "empty candidate name: ${candidateNames}"}
+                require(!candidate.equals(it, ignoreCase = true) ) { "candidate names differ only by case: ${candidateNames}"}
+            }
+        }
+
         candidateIds = candidateNames.toList().map { it.second }
+        val candidateIdSet = candidateIds.toSet()
+        require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id ${candidateIds}"}
     }
 
     override fun toString() = buildString {
-        append("${name} ($id) ncands=${candidateIds.size}")
+        append("${name} ($id) candidates=${candidateNames}")
     }
 }
 
@@ -61,7 +74,7 @@ class Contest(
     init {
         // construct votes, adding 0 votes if needed
         voteInput.forEach {
-            require(info.candidateIds.contains(it.key))
+            require(info.candidateIds.contains(it.key)) { "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"}
         }
         val voteBuilder = mutableMapOf<Int, Int>()
         voteBuilder.putAll(voteInput)
@@ -72,13 +85,12 @@ class Contest(
         }
         votes = voteBuilder.toMap()
 
-        // find winners, check that the minimum value is satisfied
-        //val sortedVotes: List<Pair<Int, Int>> = votes.toList().sortedBy{ it.second }.reversed() // could keep the sorted list
-        //winners = sortedVotes.subList(0, info.nwinners).map { it.first }
-
+        //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
         val useMin = info.minFraction ?: 0.0
         val totalVotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
+        require(totalVotes <= Nc) { "Nc $Nc must be >= totalVotes ${totalVotes}"}
+
         // todo why use totalVotes instead of Nc?
         val overTheMin = votes.toList().filter{ it.second.toDouble()/totalVotes >= useMin }.sortedBy{ it.second }.reversed()
         val useNwinners = min(overTheMin.size, info.nwinners)
@@ -133,7 +145,7 @@ class Contest(
  */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    var ncvrs: Int = 0,
+    val ncvrs: Int = 0, // TODO make immutable; only used by Raire
     val isComparison: Boolean = true,
     val hasStyle: Boolean = true,
 ) {
@@ -141,8 +153,7 @@ open class ContestUnderAudit(
     val name = contest.info.name
     val choiceFunction = contest.info.choiceFunction
     val ncandidates = contest.info.candidateIds.size
-
-    var Nc = contest.Nc // TODO
+    val Nc = contest.Nc // TODO make immutable; only used by Raire
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
@@ -244,19 +255,3 @@ open class ContestUnderAudit(
     }
 }
 
-fun make2wayContestInfo(type: SocialChoiceFunction = SocialChoiceFunction.PLURALITY) = ContestInfo(
-    "standard2way",
-    0,
-    mapOf("cand0" to 0, "cand1" to 1),
-    type,
-)
-
-fun make2wayContestFromMargin(Nc: Int, margin:Double): Contest {
-    require(margin > 0.0)
-    val winningVote = ceil(Nc*margin2mean(margin)).toInt()
-    return Contest(
-        info = make2wayContestInfo(),
-        voteInput = mapOf(0 to winningVote, 1 to Nc-winningVote),
-        Nc = Nc
-    )
-}

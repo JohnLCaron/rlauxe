@@ -328,7 +328,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
                 tasks.add(
                     BettingTask(
                         "fuzzPct = $fuzzPct, margin = $margin", auditConfig,
-                        sampleFn, margin, minAssort.noerror, minAssort.upperBound(), N, N,
+                        sampleFn, margin, minAssort.noerror, minAssort.upperBound, N, N,
                         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, fuzzPct),
                         otherParameters,
                     )

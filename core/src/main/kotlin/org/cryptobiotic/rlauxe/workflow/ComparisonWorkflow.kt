@@ -231,7 +231,7 @@ fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
         // require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
-        contestUA.ncvrs = nc
+        // TODO contestUA.ncvrs = nc
         contestUA
     }
 }

@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class GenerateComparisonErrorTable {
     @Test

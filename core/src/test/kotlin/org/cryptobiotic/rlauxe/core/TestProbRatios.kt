@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import java.lang.RuntimeException
 import kotlin.random.Random
 import kotlin.test.assertEquals

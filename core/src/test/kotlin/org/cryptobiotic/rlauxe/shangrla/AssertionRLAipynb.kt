@@ -441,7 +441,7 @@ class AssertionRLA {
 //#%%
 //sampled_cvr_indices = CVR.consistent_sampling(cvr_list=cvr_list, contests=contests)
         val contestUA = raireResults.contests.map {
-            it.ncvrs = N
+            // TODO it.ncvrs = N
             it.estSampleSize = sampleSize
             it
         }

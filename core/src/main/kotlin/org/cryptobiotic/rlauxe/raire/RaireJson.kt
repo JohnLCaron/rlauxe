@@ -54,17 +54,18 @@ fun readRaireResults(filename: String): RaireResultsJson {
     }
 }
 
-fun RaireResultsJson.import() =
+fun RaireResultsJson.import(ncs: Map<String, Int>) =
     RaireResults(
         this.overallExpectedPollsNumber.toInt(),
         this.ballotsInvolvedInAuditNumber.toInt(),
-        this.audits.map { it.import() },
+        this.audits.map { it.import(ncs[it.contest]!!) },
     )
 
-fun RaireContestAuditJson.import() =
+fun RaireContestAuditJson.import(Nc: Int) =
     RaireContestUnderAudit.make(
         this.contest,
         this.winner.toInt(),
+        Nc,
         this.eliminated .map { it.toInt() },
         this.expectedPollsNumber.toInt(),
         this.expectedPollsPercent.toDouble(),

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.mean2margin
 
-// The ouput of RAIRE assertion generator, read from JSON files
+// The output of RAIRE assertion generator, read from JSON files
 data class RaireResults(
     val overallExpectedPollsNumber : Int,
     val ballotsInvolvedInAuditNumber : Int,
@@ -77,6 +77,7 @@ class RaireContestUnderAudit(
     companion object {
         fun make(name: String,
                  winner: Int,  // the sum of winner and eliminated must be all the candiates
+                 Nc: Int,
                  eliminated: List<Int>,
                  expectedPollsNumber : Int,
                  expectedPollsPercent : Double,
@@ -91,7 +92,7 @@ class RaireContestUnderAudit(
                     SocialChoiceFunction.IRV,
                 ),
                 listOf(winner.toString()),
-                Nc = 0, // TODO
+                Nc = Nc,
             )
             return RaireContestUnderAudit(contest, winner, eliminated, expectedPollsNumber, expectedPollsPercent, assertions)
         }

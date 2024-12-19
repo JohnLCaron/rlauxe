@@ -291,9 +291,12 @@ class AssertionRLA {
         // JSON input: .....        "already_eliminated": "",
         // had to change                     "already_eliminated": "",  to                     "already_eliminated": [],
         // also no good reaspon to use string instead of int
+
+        val ncs = mapOf("334" to 1000, "336" to 12000) // TODO
+
         val rr =
             readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
-        val raireResults = rr.import()
+        val raireResults = rr.import(ncs)
         val show = raireResults.show()
         println(show)
 

@@ -8,13 +8,12 @@ import kotlin.test.Test
 
 class TestRaireWorkflow {
 
-
-    //@Test
+    @Test
     fun testRaireComparisonWithStyle() {
         testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null))
     }
 
-    //@Test
+    @Test
     fun testRaireComparisonNoStyle() {
         testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 123568667890L, quantile=.80, fuzzPct = null))
     }
@@ -29,7 +28,9 @@ class TestRaireWorkflow {
         val cvrs = raireCvrs.cvrs
 
         // The corresponding assertions file that has already been generated.
-        val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json").import()
+        val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
+        val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
+            .import(ncs)
         print(raireResults.show())
 
         // check consistencey

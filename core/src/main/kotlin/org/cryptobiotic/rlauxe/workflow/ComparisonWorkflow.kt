@@ -238,8 +238,8 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
 }
 
 // TODO seems wrong
-fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>): List<ContestUnderAudit> {
-    if (contests.isEmpty()) return emptyList()
+fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>): List<ContestUnderAudit> {
+    if (rcontests.isEmpty()) return emptyList()
 
     val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
     val ncvrs = mutableMapOf<Int, Int>()
@@ -257,13 +257,12 @@ fun tabulateRaireVotes(contests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>
         }
     }
     return allVotes.keys.map { conId ->
-        val contestUA = contests.find { it.id == conId }
-        if (contestUA == null) throw RuntimeException("no contest for contest id= $conId")
+        val rcontestUA = rcontests.find { it.id == conId }
+        if (rcontestUA == null) throw RuntimeException("no contest for contest id= $conId")
         val nc = ncvrs[conId]!!
         val accumVotes = allVotes[conId]!!
         // require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
-        // TODO contestUA.ncvrs = nc
-        contestUA
+        rcontestUA
     }
 }
 

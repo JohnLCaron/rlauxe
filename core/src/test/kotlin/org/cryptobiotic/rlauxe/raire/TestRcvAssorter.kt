@@ -7,7 +7,9 @@ import kotlin.test.assertNotNull
 
 class TestRcvAssorter {
     val rr = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json")
-    val raireResults = rr.import()
+    val ncs = mapOf("361" to 1000, "334" to 12000) // TODO
+
+    val raireResults = rr.import(ncs)
 
     // testing
     fun RaireAssorter.match(winner: Int, loser: Int, winnerType: Boolean, already: List<Int> = emptyList()): Boolean {

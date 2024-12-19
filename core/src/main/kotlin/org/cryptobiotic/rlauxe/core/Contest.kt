@@ -25,21 +25,21 @@ data class ContestInfo(
         require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
 
         val candidateSet = candidateNames.toList().map { it.first }.toSet()
-        require(candidateSet.size == candidateNames.size) { "duplicate candidate name ${candidateNames}"} // may not be possible
+        require(candidateSet.size == candidateNames.size) { "duplicate candidate name $candidateNames"} // may not be possible
         candidateSet.forEach { candidate ->
             candidateSet.filter{ it != candidate }.forEach {
-                require(candidate.isNotEmpty() ) { "empty candidate name: ${candidateNames}"}
-                require(!candidate.equals(it, ignoreCase = true) ) { "candidate names differ only by case: ${candidateNames}"}
+                require(candidate.isNotEmpty() ) { "empty candidate name: $candidateNames"}
+                require(!candidate.equals(it, ignoreCase = true) ) { "candidate names differ only by case: $candidateNames"}
             }
         }
 
         candidateIds = candidateNames.toList().map { it.second }
         val candidateIdSet = candidateIds.toSet()
-        require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id ${candidateIds}"}
+        require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id $candidateIds"}
     }
 
     override fun toString() = buildString {
-        append("${name} ($id) candidates=${candidateNames}")
+        append("$name ($id) candidates=${candidateNames}")
     }
 }
 
@@ -145,7 +145,6 @@ class Contest(
  */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    // val ncvrs: Int = 0, // TODO make immutable; only used by Raire
     val isComparison: Boolean = true,
     val hasStyle: Boolean = true,
 ) {

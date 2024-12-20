@@ -125,7 +125,7 @@ class CreatePollingDiffMeans {
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(10, 50, 250, 1250)
 
-        val writer = SRTcsvWriter("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/PollingDiffMeans/SRT$nrepeat.csv")
         var totalCalculations = 0
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->
@@ -223,7 +223,6 @@ class CreatePollingDiffMeans {
         d: Int = 500,
         silent: Boolean = true,
     ): List<RunTestRepeatedResult> {
-        val N = cvrs.size
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
         val reportedMean = theta + reportedMeanDiff
@@ -241,7 +240,7 @@ class CreatePollingDiffMeans {
 
             val result = runAlphaMartRepeated(
                 drawSample = cvrSampler,
-                maxSamples = N,
+                // maxSamples = N,
                 eta0 = reportedMean, // use the reportedMean for the initial guess
                 d = d,
                 ntrials = nrepeat,

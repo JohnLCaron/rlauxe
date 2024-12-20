@@ -34,13 +34,18 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, 
     override fun maxSamples() = maxSamples
 }
 
-class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
+class PollWithoutReplacement(
+    val contest: ContestUnderAudit,
+    val cvrs : List<Cvr>,
+    val assorter: AssorterFunction,
+    val allowReset: Boolean = true,
+): SampleGenerator {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
     private val permutedIndex = MutableList(cvrs.size) { it }
     private var idx = 0
 
     init {
-        reset()
+        if (allowReset) reset()
     }
 
     override fun sample(): Double {
@@ -55,6 +60,7 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
     }
 
     override fun reset() {
+        if (!allowReset) throw RuntimeException("PollWithoutReplacement reset not allowed")
         permutedIndex.shuffle(secureRandom)
         idx = 0
     }
@@ -67,9 +73,9 @@ class PollWithoutReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr
 //// For comparison audits
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
-class ComparisonSamplerGen(
-    val cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
+class ComparisonWithoutReplacement(
     val contestUA: ContestUnderAudit,
+    val cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
     val cassorter: ComparisonAssorter,
     val allowReset: Boolean,
 ): SampleGenerator {
@@ -91,11 +97,11 @@ class ComparisonSamplerGen(
             }
             idx++
         }
-        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
+        throw RuntimeException("ComparisonWithoutReplacement no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
 
     override fun reset() {
-        if (!allowReset) throw RuntimeException("ComparisonSamplerGen reset not allowed")
+        if (!allowReset) throw RuntimeException("ComparisonWithoutReplacement reset not allowed")
         permutedIndex.shuffle(secureRandom)
         idx = 0
     }
@@ -243,6 +249,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
 }
 
 ///////////////////////
+// TODO candidates for removal
 
 // change cvrs to have the exact number of votes for wantAvg
 fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {

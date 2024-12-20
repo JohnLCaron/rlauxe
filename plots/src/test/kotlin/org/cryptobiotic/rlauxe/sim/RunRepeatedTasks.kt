@@ -28,7 +28,7 @@ interface RepeatedTask {
     fun makeSampler() : SampleGenerator
     fun makeTestFn() : RiskTestingFn
     fun makeTestParameters() : Map<String, Double>
-    fun maxSamples() : Int
+    // fun maxSamples() : Int
     fun name() : String
     fun N() : Int
     fun reportedMean() : Double
@@ -83,7 +83,7 @@ class RepeatedTaskRunner {
 
         return runTestRepeated(
             drawSample = task.makeSampler(),
-            maxSamples = task.maxSamples(),
+            // maxSamples = task.maxSamples(),
             ntrials = ntrials,
             testFn = task.makeTestFn(),
             testParameters = task.makeTestParameters(),

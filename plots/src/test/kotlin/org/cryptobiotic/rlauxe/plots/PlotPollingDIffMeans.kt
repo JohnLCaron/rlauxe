@@ -19,7 +19,7 @@ class PlotPollingDiffMeans {
         val nlist = listOf(50000, 20000, 10000, 5000, 1000)
         val nrepeat = 100
 
-        val reader = SRTcsvReader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
+        val reader = SRTcsvReader("/home/stormy/temp/PollingDiffMeans/SRT$nrepeat.csv")
         val allSrts = reader.readCalculations()
         println(" number of SRTs = ${allSrts.size}")
 
@@ -68,7 +68,7 @@ class PlotPollingDiffMeans {
         val dlist = listOf(10, 50, 250, 1250)
         val nrepeat = 100
 
-        val reader = SRTcsvReader("/home/stormy/temp/DiffMeansPolling/SRT$nrepeat.csv")
+        val reader = SRTcsvReader("/home/stormy/temp/PollingDiffMeans/SRT$nrepeat.csv")
         val allSrts = reader.readCalculations()
         println(" number of SRTs = ${allSrts.size}")
         val nThetaMap = makeNthetaMap(allSrts)

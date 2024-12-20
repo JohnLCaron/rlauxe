@@ -363,9 +363,9 @@ class BettingTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        //  this uses auditConfig p1,,p4 to set apriori error rates. should be based on fuzzPct i think
+        //  this uses auditConfig p1,p4 to set apriori error rates. should be based on fuzzPct i think
         return simulateSampleSizeBetaMart(auditConfig, sampleFn, margin, noerror, upperBound, Nc=Nc,
-            errorRates, maxSamples=Nc, moreParameters=otherParameters)
+            errorRates, moreParameters=otherParameters)
     }
 }
 
@@ -380,7 +380,7 @@ class PollingTask(
 ) : ConcurrentTask {
     override fun name() = name
     override fun run(): RunTestRepeatedResult {
-        return simulateSampleSizePollingAssorter(auditConfig, contestUA, assort, Nc, moreParameters=moreParameters)
+        return simulateSampleSizePollingAssorter(auditConfig, contestUA, assort, moreParameters=moreParameters)
     }
 }
 
@@ -396,7 +396,7 @@ class AlphaTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return simulateSampleSizeAlphaMart(auditConfig, sampleFn, margin, upperBound, maxSamples=Nc, Nc=Nc, moreParameters=otherParameters)
+        return simulateSampleSizeAlphaMart(auditConfig, sampleFn, margin, upperBound, Nc=Nc, moreParameters=otherParameters)
     }
 }
 
@@ -409,8 +409,7 @@ class ComparisonTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return simulateSampleSizeComparisonAssorter(auditConfig, contestUA, cassort, cvrs,
-            maxSamples=cvrs.size, moreParameters=moreParameters)
+        return simulateSampleSizeComparisonAssorter(auditConfig, contestUA, cassort, cvrs, moreParameters=moreParameters)
     }
 }
 

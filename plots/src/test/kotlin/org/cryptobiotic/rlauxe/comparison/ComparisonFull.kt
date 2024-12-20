@@ -85,7 +85,7 @@ class ComparisonFull {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/sim/full/comparisonFull.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/sim/comparisonFull.csv")
 
         val runner = RepeatedTaskRunner()
         val results = runner.run(tasks, ntrials)
@@ -97,7 +97,7 @@ class ComparisonFull {
 
     @Test
     fun cvrComparisonAnalyze() {
-        val reader = SRTcsvReader("/home/stormy/temp/sim/full/comparisonFull.csv")
+        val reader = SRTcsvReader("/home/stormy/temp/sim/comparisonFull.csv")
         val all = reader.readCalculations()
         cvrComparisonAnalyze(all, 10)
         cvrComparisonAnalyze(all, 20)

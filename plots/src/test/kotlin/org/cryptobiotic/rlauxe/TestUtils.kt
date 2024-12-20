@@ -15,15 +15,15 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
 }
 
 
-fun makeStandardContest() =
+fun makeStandardContest(Nc: Int) =
     Contest(
         ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
         mapOf(0 to 3, 1 to 33),
-        Nc = 0,
+        Nc = Nc,
     )
-fun makeStandardPluralityAssorter(): PluralityAssorter {
-    val contest = makeStandardContest()
+fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
+    val contest = makeStandardContest(Nc)
     return PluralityAssorter.makeWithVotes(contest, 0, 1, contest.votes)
 }
-fun makeStandardComparisonAssorter(avgCvrAssortValue: Double) =
-    ComparisonAssorter(makeStandardContest(), makeStandardPluralityAssorter(), avgCvrAssortValue)
+fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int) =
+    ComparisonAssorter(makeStandardContest(Nc), makeStandardPluralityAssorter(Nc), avgCvrAssortValue, check=false)

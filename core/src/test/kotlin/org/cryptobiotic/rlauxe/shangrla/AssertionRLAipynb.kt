@@ -292,7 +292,7 @@ class AssertionRLA {
         // had to change                     "already_eliminated": "",  to                     "already_eliminated": [],
         // also no good reaspon to use string instead of int
 
-        val ncs = mapOf("334" to 1000, "336" to 12000) // TODO
+        val ncs = mapOf("334" to 1000, "339" to 12000) // TODO
 
         val rr =
             readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
@@ -688,7 +688,7 @@ fun calc_sample_sizes(
 
     return runTestRepeated(
         drawSample = sampler,
-        maxSamples = N,
+        // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
         testParameters = mapOf("p2" to optimal.p2),

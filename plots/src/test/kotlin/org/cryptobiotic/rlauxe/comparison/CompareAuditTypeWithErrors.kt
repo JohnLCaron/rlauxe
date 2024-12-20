@@ -334,7 +334,7 @@ class CompareAuditTypeWithErrors {
 
         val pollingResult = runAlphaMartRepeated(
             drawSample = PollWithoutReplacement(contestUA, mvrs, pollingAssorter),
-            maxSamples = N,
+            // maxSamples = N,
             eta0 = cvrMean, // use the reportedMean for the initial guess
             d = d,
             ntrials = ntrials,
@@ -344,7 +344,7 @@ class CompareAuditTypeWithErrors {
 
         val compareResult = runAlphaMartRepeated(
             drawSample = comparisonSample,
-            maxSamples = N,
+            // maxSamples = N,
             eta0 = eta0Factor * compareAssorter.noerror,
             d = d,
             ntrials = ntrials,

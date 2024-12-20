@@ -40,7 +40,6 @@ class GenPollingNoStyles {
                     contestUA,
                     assertion,
                     emptyList(),
-                    Nc,
                     1.0,
                     0,
                     moreParameters=moreParameters

@@ -33,7 +33,7 @@ class TestAuditComparison {
         val cvrSampler = ComparisonNoErrors(cvrs, assertion.cassorter)
         val result = runAlphaMartRepeated(
             drawSample = cvrSampler,
-            maxSamples = N,
+            // maxSamples = N,
             eta0 = cvrSampler.sampleMean(),
             d = 100,
             ntrials = 100,

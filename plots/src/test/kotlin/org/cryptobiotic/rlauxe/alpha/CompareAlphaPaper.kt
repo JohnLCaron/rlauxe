@@ -41,13 +41,14 @@ class CompareAlphaPaper {
             contestUA.makePollingAssertions()
             val pollingAssertion = contestUA.pollingAssertions.first()
 
-            contestUA.makeComparisonAssertions(cvrs)
-            val compareAssertion = contestUA.comparisonAssertions.first()
+            val contestUAc = ContestUnderAudit(contest, isComparison = true)
+            contestUAc.makeComparisonAssertions(cvrs)
+            val compareAssertion = contestUAc.comparisonAssertions.first()
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
-                    maxSamples = N,
+                    // maxSamples = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
@@ -57,7 +58,7 @@ class CompareAlphaPaper {
 
                 val pollingResult = runAlphaMartRepeated(
                     drawSample = PollWithoutReplacement(contestUA, cvrs, pollingAssertion.assorter),
-                    maxSamples = N,
+                    // maxSamples = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,
                     ntrials = reps,

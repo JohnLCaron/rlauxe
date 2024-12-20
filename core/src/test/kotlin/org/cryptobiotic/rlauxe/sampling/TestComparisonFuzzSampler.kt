@@ -15,7 +15,7 @@ class TestComparisonFuzzSampler {
         val contests: List<Contest> = test.makeContests()
         print("contest = ${contests.first()}")
         val cvrs = test.makeCvrsFromContests()
-        val detail = false
+        val detail = true
         val ntrials = 1
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         fuzzPcts.forEach { fuzzPct ->
@@ -103,7 +103,7 @@ private fun runWithComparisonFuzzSampler(
         assorter.upperBound,
         Nc=contestUA.Nc,
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
-        maxSamples=sampler.maxSamples(),
+        // maxSamples=sampler.maxSamples(),
         moreParameters=moreParameters,
     )
 }

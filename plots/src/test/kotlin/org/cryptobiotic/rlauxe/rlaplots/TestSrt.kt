@@ -21,7 +21,7 @@ class TestSrt {
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
                 123, 234, 456, 0.009, hist)
 
-        val testFile = "/home/stormy/temp/test/testWriteRead.csv"
+        val testFile = "/home/stormy/temp/testSrt/testWriteRead.csv"
         val writer = SRTcsvWriter(testFile)
         writer.writeCalculations(listOf(target))
         writer.close()
@@ -52,13 +52,13 @@ class TestSrt {
         val parameters = mapOf("p1" to .01, "p2" to .001, "lam" to 1.1)
         val betta = RunTestRepeatedResult(parameters, Nc=43, totalSamplesNeeded=112, nsuccess=12,
             ntrials=ntrials, variance=11.5, percentHist=hist, status,
-            margin = .01,
+            margin = .04,
         )
 
         // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0
-        val target = betta.makeSRT(reportedMean=.505, reportedMeanDiff=.005)
+        val target = betta.makeSRT(reportedMean=.52, reportedMeanDiff=.005)
 
-        val testFile = "/home/stormy/temp/test/testWriteReadBetaResult.csv"
+        val testFile = "/home/stormy/temp/testSrt/testWriteReadBetaResult.csv"
         val writer = SRTcsvWriter(testFile)
         writer.writeCalculations(listOf(target))
         writer.close()
@@ -84,7 +84,7 @@ class TestSrt {
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
                 123, 234, 456, 0.009, hist)
 
-        val testFile = "/home/stormy/temp/test/testWriteRead1.csv"
+        val testFile = "/home/stormy/temp/testSrt/testWriteRead1.csv"
         val writer = SRTcsvWriterVersion1(testFile)
         writer.writeCalculations(listOf(target))
         writer.close()
@@ -106,7 +106,7 @@ class TestSrt {
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
                 123, 234, 456, 0.009, null)
 
-        val testFile = "/home/stormy/temp/test/testNullHistogram.csv"
+        val testFile = "/home/stormy/temp/testSrt/testNullHistogram.csv"
         val writer = SRTcsvWriter(testFile)
         writer.writeCalculations(listOf(target))
         writer.close()

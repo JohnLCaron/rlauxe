@@ -148,7 +148,7 @@ class TestComparisonFromAlpha {
                         print("  eta0=$eta0 d=$d")
                         val result =  runTestRepeated(
                             drawSample = sampleFn,
-                            maxSamples = N,
+                            // maxSamples = N,
                             ntrials = reps,
                             testFn = alpha,
                             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
@@ -304,7 +304,7 @@ class TestComparisonFromAlpha {
         //assorter_mean = (9000*0.51*1 + 1000*.5)/N  # contest has 51% for winner in 9000 valid votes, and 1000 non-votes
         //assorter_margin = 2*assorter_mean - 1
         val theta = 0.51
-        val N = 1000
+        val N = 10000
         val assorter_mean = (9000*theta + 1000*.5)/N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
         val assorter_margin = 2*assorter_mean - 1
 
@@ -354,7 +354,7 @@ class TestComparisonFromAlpha {
             for (d in dl) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = SampleFromArrayWithoutReplacement(x),
-                    maxSamples = N,
+                    // maxSamples = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
@@ -491,7 +491,7 @@ class TestComparisonFromAlpha {
             for (eta in etas) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
-                    maxSamples = N,
+                    // maxSamples = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
@@ -565,7 +565,7 @@ class TestComparisonFromAlpha {
 
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = drawSample,
-                    maxSamples = N,
+                    // maxSamples = N,
                     eta0 = compareUpper - eps,
                     d = d,
                     ntrials = ntrials,
@@ -652,7 +652,7 @@ class TestComparisonFromAlpha {
 
             val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                 drawSample = drawSample,
-                maxSamples = N,
+                // maxSamples = N,
                 eta0 = eta0,
                 d = d,
                 ntrials = ntrials,

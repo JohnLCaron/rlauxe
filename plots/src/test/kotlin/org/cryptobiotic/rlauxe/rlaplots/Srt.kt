@@ -199,7 +199,7 @@ class SRTcsvWriterVersion1(val filename: String) {
     // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
     fun toCSV(srt: SRT) = buildString {
         append(
-            "${srt.Nc}, ${srt.reportedMean}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ${srt.eta0Factor}, " +
+            "${srt.Nc}, ${srt.reportedMargin}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ${srt.eta0Factor}, " +
                 "${srt.nsuccess}, ${srt.ntrials}, ${srt.totalSamplesNeeded}, ${srt.stddev} "
         )
         if (srt.percentHist != null) {
@@ -236,7 +236,7 @@ class SRTcsvReaderVersion1(filename: String) {
         val ttokens = tokens.map { it.trim() }
         var idx = 0
         val N = ttokens[idx++].toInt()
-        val reportedMean = ttokens[idx++].toDouble()
+        val reportedMargin = ttokens[idx++].toDouble()
         val reportedMeanDiff = ttokens[idx++].toDouble()
         val d = ttokens[idx++].toInt()
         val eta0 = ttokens[idx++].toDouble()
@@ -248,7 +248,7 @@ class SRTcsvReaderVersion1(filename: String) {
 
         val percentHist = if (idx < tokens.size) Deciles.Companion.fromString(ttokens[idx++]) else null
 
-        return SRT(N, reportedMean, reportedMeanDiff,
+        return SRT(N, reportedMargin, reportedMeanDiff,
             mapOf("d" to d.toDouble(), "eta0" to eta0, "eta0Factor" to eta0Factor),
             nsuccess, ntrials, nsamples, stddev, percentHist)
     }

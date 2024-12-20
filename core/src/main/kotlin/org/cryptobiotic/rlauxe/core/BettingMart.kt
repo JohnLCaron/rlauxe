@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
  */
 class BettingMart(
     val bettingFn : BettingFn,
-    val Nc: Int,             // max number of cards for this contest
+    val Nc: Int,             // max number of cards for this contest, only used by populationMeanIfH0
     val withoutReplacement: Boolean = true,
     val noerror: Double, // for comparison assorters who need rate counting
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
@@ -28,8 +28,6 @@ class BettingMart(
                         showDetails: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
-        if (maxSamples > Nc)
-            println("wait")
         require(maxSamples <= Nc)
 
         var sampleNumber = 0        // – j ← 0: sample number

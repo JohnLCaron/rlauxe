@@ -16,12 +16,9 @@ import kotlin.test.Test
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
 // A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
 class TestBravo  {
-    val df = "%5d"
 
     @Test
     fun testBravo() {
-        val N = 20_000
-        val m = 100
         runBravoRepeat(eta0 = .55, trueMeans=listOf(.55), ntrials=1)
     }
 
@@ -55,16 +52,16 @@ class TestBravo  {
     //     fun runBravo(N : Int, m: Int, eta0 : Double, trueMean: Double, withoutReplacement: Boolean, ntrials:Int = 1): RunTestRepeatedResult {
     fun runBravoRepeat(eta0: Double, trueMeans: List<Double>, withoutReplacement: Boolean = true, ntrials: Int = 100 ): List<SRT> {
         val N = 20_000
-        val m = 2000
+        val m = 2000  // maxSamples
         val results = mutableListOf<SRT>()
         trueMeans.forEach { trueMean ->
             val estimFn = FixedMean(eta0)
             val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement)
-            val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(N, trueMean) else GenSampleMeanWithReplacement(N, trueMean)
+            val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(m, trueMean) else GenSampleMeanWithReplacement(m, trueMean)
 
             val rr = runTestRepeated(
                 drawSample = sampler,
-                maxSamples = m,
+                // maxSamples = m,
                 testParameters = mapOf("eta0" to eta0),
                 ntrials = ntrials,
                 testFn=alpha,

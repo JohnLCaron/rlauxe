@@ -42,7 +42,7 @@ data class RunTestRepeatedResult(
 // runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
 fun runTestRepeated(
         drawSample: SampleGenerator,
-        maxSamples: Int,
+        // maxSamples2: Int,
         ntrials: Int,
         testFn: RiskTestingFn,
         testParameters: Map<String, Double>,
@@ -67,7 +67,7 @@ fun runTestRepeated(
     repeat(ntrials) {
         drawSample.reset()
         val testH0Result = testFn.testH0(
-            maxSamples=maxSamples,
+            maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
             showDetails = showDetails,
             startingTestStatistic = startingTestStatistic) { drawSample.sample() }

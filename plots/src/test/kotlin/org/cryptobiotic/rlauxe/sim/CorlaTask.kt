@@ -16,7 +16,7 @@ data class CorlaTask(
     val p2: Double,      // oracle rate of 2-vote overstatements
     val p1: Double,     // oracle rate of 1-vote overstatements
 ): RepeatedTask {
-    val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+    val compareAssorter = makeStandardComparisonAssorter(cvrMean, N)
 
     init {
         require(N == cvrs.size)
@@ -38,7 +38,7 @@ data class CorlaTask(
         return mapOf("p1" to p1, "p2oracle" to p2)
     }
 
-    override fun maxSamples(): Int  = N
+    // override fun maxSamples(): Int  = N
     override fun name(): String = "CorlaTask$idx"
     override fun N(): Int  = N
     override fun reportedMean() = cvrMean

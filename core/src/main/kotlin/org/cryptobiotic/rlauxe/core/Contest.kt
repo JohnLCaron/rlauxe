@@ -43,6 +43,7 @@ data class ContestInfo(
     }
 }
 
+// Needed to allow RaireContest as subclass, which does not use votes: Map<Int, Int>
 interface ContestIF {
     val info: ContestInfo
     val Nc: Int
@@ -152,7 +153,7 @@ open class ContestUnderAudit(
     val name = contest.info.name
     val choiceFunction = contest.info.choiceFunction
     val ncandidates = contest.info.candidateIds.size
-    val Nc = contest.Nc // TODO make immutable; only used by Raire
+    val Nc = contest.Nc
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
@@ -161,7 +162,7 @@ open class ContestUnderAudit(
     var availableInSample = 0 // number of samples available in the current consistent sampling based on estSampleSize
     var done = false
     var status = TestH0Status.NotStarted // or its own enum ??
-    var estTotalSampleSize = 0 // number of total samples estimated needed (no style)
+    var estTotalSampleSize = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
 
     // should only be used for testing i think
     constructor(info: ContestInfo, cvrs: List<CvrIF>, isComparison: Boolean=true, hasStyle: Boolean=true):
@@ -172,14 +173,14 @@ open class ContestUnderAudit(
     }
 
     open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
-        require(!isComparison)
+        require(!isComparison) { "makePollingAssertions() can be called only on polling contest"}
         val useVotes = if (votes != null) votes else (contest as Contest).votes
 
         this.pollingAssertions = when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions(useVotes)
             SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
-            else -> throw RuntimeException(" choice function ${choiceFunction} is not supported")
+            else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
         return this
     }
@@ -208,13 +209,13 @@ open class ContestUnderAudit(
     }
 
     open fun makeComparisonAssertions(cvrs : Iterable<CvrIF>, votes: Map<Int, Int>? = null): ContestUnderAudit {
-        require(isComparison)
+        require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         val useVotes = if (votes != null) votes else (contest as Contest).votes
         val assertions = when (contest.info.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(useVotes)
             SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
-            else -> throw RuntimeException(" choice function ${contest.info.choiceFunction} is not supported")
+            else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
         }
 
         this.comparisonAssertions = assertions.map { assertion ->

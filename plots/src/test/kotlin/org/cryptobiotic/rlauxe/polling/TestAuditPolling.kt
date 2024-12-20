@@ -49,7 +49,6 @@ class TestAuditPolling {
     }
 
     fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<RunTestRepeatedResult> {
-        val N = cvrs.size
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 
         // count actual votes
@@ -80,7 +79,7 @@ class TestAuditPolling {
 
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
-                    maxSamples = N,
+                    // maxSamples = N,
                     eta0 = margin2mean(margin),
                     d = d,
                     ntrials = 10,

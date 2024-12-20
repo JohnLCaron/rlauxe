@@ -79,7 +79,7 @@ class ComparisonWorkflow(
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("estimateSampleSizes round $roundIdx")
 
-        val maxContestSize =  estimateSampleSizes(
+        val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
@@ -281,7 +281,7 @@ fun runOneAssertionAudit(
     roundIdx: Int,
 ): TestH0Status {
     val assorter = assertion.cassorter
-    val sampler = ComparisonSamplerGen(cvrPairs, contestUA, assorter, allowReset = false)
+    val sampler = ComparisonWithoutReplacement(contestUA, cvrPairs, assorter, allowReset = false)
 
     // TODO always using the ComparisonErrorRates derived from fuzzPct. should have the option to use ones chosen by the user.
     val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
@@ -308,7 +308,9 @@ fun runOneAssertionAudit(
     val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }
     assertion.samplesUsed = maxSamples
 
-    // do not terminate on null retject, continue to use all samples
+    // do not terminate on null reject, continue to use all samples
+    // TODO how does sampler.maxSamples compare to contestUA.availableInSample?
+    println("sampler.maxSamples ${sampler.maxSamples()} compare to contestUA.availableInSample ${contestUA.availableInSample}")
     val testH0Result = testFn.testH0(contestUA.availableInSample, terminateOnNullReject = false) { sampler.sample() }
     if (!testH0Result.status.fail) {
         assertion.proved = true

@@ -25,7 +25,7 @@ data class AlphaComparisonTask(
     val withoutReplacement: Boolean = true,
     val estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
 ): RepeatedTask {
-    val compareAssorter = makeStandardComparisonAssorter(cvrMean)
+    val compareAssorter = makeStandardComparisonAssorter(cvrMean, N)
     val theta = cvrMean + cvrMeanDiff
     var eta0: Double = 0.0
 
@@ -65,7 +65,7 @@ data class AlphaComparisonTask(
         return mapOf("eta0" to eta0, "d" to d.toDouble())
     }
 
-    override fun maxSamples(): Int  = N
+    // override fun maxSamples(): Int  = N
     override fun name(): String = "AlphaComparisonTask$idx"
     override fun N(): Int  = N
     override fun reportedMean() = cvrMean
@@ -83,7 +83,7 @@ fun comparisonAssorterCalc(assortAvgValue:Double, assortUpperBound: Double): Tri
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
     drawSample: SampleGenerator,
-    maxSamples: Int,
+    // maxSamples: Int,
     eta0: Double,
     d: Int = 500,
     withoutReplacement: Boolean = true,
@@ -108,7 +108,7 @@ fun runAlphaMartRepeated(
 
     return runTestRepeated(
         drawSample = drawSample,
-        maxSamples = maxSamples,
+        // maxSamples = maxSamples,
         terminateOnNullReject = true,
         ntrials = ntrials,
         testFn = alpha,

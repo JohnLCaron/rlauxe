@@ -39,7 +39,7 @@ class TestCobraResults {
             for (margin in margins.reversed()) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val compareAssorter = makeStandardComparisonAssorter(theta, N)
                 val sampler = ComparisonNoErrors(cvrs, compareAssorter)
                 val upperBound = compareAssorter.upperBound
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${compareAssorter.noerror}")
@@ -53,7 +53,7 @@ class TestCobraResults {
 
                 val result = runTestRepeated(
                     drawSample = sampler,
-                    maxSamples = N,
+                    // maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
                     testParameters = mapOf("alpha" to alpha),
@@ -91,7 +91,7 @@ class TestCobraResults {
             for (p2 in p2s) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val compareAssorter = makeStandardComparisonAssorter(theta, N)
                 val sampleWithErrors =
                     ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
                 val upperBound = compareAssorter.upperBound
@@ -108,7 +108,7 @@ class TestCobraResults {
 
                 val result = runTestRepeated(
                     drawSample = sampleWithErrors,
-                    maxSamples = N,
+                    // maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
                     testParameters = mapOf("p2" to p2),
@@ -156,7 +156,7 @@ class TestCobraResults {
                     for (p2m in p2priors) {
                         val theta = margin2mean(margin)
                         val cvrs = makeCvrsByExactMean(N, theta)
-                        val compareAssorter = makeStandardComparisonAssorter(theta)
+                        val compareAssorter = makeStandardComparisonAssorter(theta, N)
                         val sampleWithErrors =
                             ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = p1, withoutReplacement = false)
                         val upperBound = compareAssorter.upperBound
@@ -174,7 +174,7 @@ class TestCobraResults {
 
                         val result = runTestRepeated(
                             drawSample = sampleWithErrors,
-                            maxSamples = N,
+                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1, "p2" to p2),
@@ -229,7 +229,7 @@ class TestCobraResults {
             for (p1o in p1oracle) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val compareAssorter = makeStandardComparisonAssorter(theta, N)
                 for (p1prior in p1priors) {
                     for (p2prior in p2priors) {
                         val stopwatch = Stopwatch()
@@ -257,7 +257,7 @@ class TestCobraResults {
 
                         val result = runTestRepeated(
                             drawSample = sampler,
-                            maxSamples = N,
+                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),

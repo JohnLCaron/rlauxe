@@ -6,11 +6,10 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import kotlin.random.Random
 
-
-// For Polling, single contest and assorter.
-// adapted from MultiContestTestData, doesnt need to adjust votes, just use them as is from Contest
+// For Polling estimation, create sample cvrs with specified set of votes.
+// adapted from MultiContestTestData, single contest and assorter. doesnt need to adjust votes, just use them as is from Contest
 // TODO allow empty votes
-class SimContest(val contest: Contest, val assorter: AssorterFunction) {
+class PollingSimulation(val contest: Contest, val assorter: AssorterFunction) {
     val info = contest.info
     val ncands = info.candidateIds.size
     val margin = assorter.reportedMargin()
@@ -26,7 +25,7 @@ class SimContest(val contest: Contest, val assorter: AssorterFunction) {
         votesLeft = ncards
     }
 
-    // makes a new, independent set of Cvrs with the contest votes
+    // makes a new, independent set of Cvrs with the contest's votes
     fun makeCvrs(): List<Cvr> {
         resetTracker()
         val cvrbs = CvrBuilders().addContests(listOf(this.info))

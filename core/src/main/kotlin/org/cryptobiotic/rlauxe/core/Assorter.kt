@@ -196,7 +196,7 @@ open class Assertion(
     var status = TestH0Status.NotStarted
     var proved = false
     var estSampleSize = 0  // estimated sample size; depends only on the margin, fromEstimateSampleSize
-    var samplesNeeded = 0 // sample count when pvalue < riskLimit; from Audit
+    var samplesNeeded = 0 // first sample when pvalue < riskLimit; from runAudit
     var samplesUsed = 0 // sample count when testH0 terminates
     var pvalue = 0.0 // last pvalue when testH0 terminates
     var round = 0    // round when set to proved or disproved

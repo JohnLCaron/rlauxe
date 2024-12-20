@@ -23,7 +23,7 @@ class TestCorla {
 
         val theta = margin2mean(margin)
         val cvrs = makeCvrsByExactMean(N, theta)
-        val compareAssorter = makeStandardComparisonAssorter(theta)
+        val compareAssorter = makeStandardComparisonAssorter(theta, N)
         val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = p1, withoutReplacement = false)
 
         val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
@@ -31,7 +31,7 @@ class TestCorla {
 
         val corlaResult = runTestRepeated(
             drawSample = sampler,
-            maxSamples = N,
+            // maxSamples = N,
             ntrials = ntrials,
             testFn = corla,
             testParameters = mapOf("p1" to p1, "p2" to p2),
@@ -63,11 +63,9 @@ class TestCorla {
             for (p1o in p1oracle) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta)
+                val compareAssorter = makeStandardComparisonAssorter(theta, N)
                 for (p1prior in p1priors) {
                     for (p2prior in p2priors) {
-                        val stopwatch = Stopwatch()
-
                         // generate with the oracle, or true rates
                         val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2o, p1 = p1o, withoutReplacement = false)
                         val upperBound = compareAssorter.upperBound
@@ -91,7 +89,7 @@ class TestCorla {
 
                         val bettingResult = runTestRepeated(
                             drawSample = sampler,
-                            maxSamples = N,
+                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),
@@ -106,7 +104,7 @@ class TestCorla {
 
                         val corlaResult = runTestRepeated(
                             drawSample = sampler,
-                            maxSamples = N,
+                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = corla,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),

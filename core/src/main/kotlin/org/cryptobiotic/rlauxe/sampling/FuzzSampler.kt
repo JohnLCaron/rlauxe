@@ -100,13 +100,13 @@ class PollingFuzzSampler(
 
 fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
     var count = 0
-    var countf = 0
+    //var countf = 0
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
     cvrbs.forEach { cvrb: CvrBuilder ->
         val r = secureRandom.nextDouble(1.0)
         cvrb.contests.forEach { (_, cvb) ->
             if (r < fuzzPct) {
-                countf++
+                //countf++
                 val ccontest: CvrContest = cvb.contest
                 val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
                 cvb.votes.clear()

@@ -36,7 +36,6 @@ class PollingWorkflow(
 
     fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("estimateSampleSizes round $roundIdx")
-
         val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
@@ -120,11 +119,7 @@ fun auditOneAssertion(
     roundIdx: Int,
 ): TestH0Status {
     val assorter = assertion.assorter
-    val sampler = if (auditConfig.fuzzPct == null) {
-        PollWithoutReplacement(contestUA, mvrs, assorter)
-    } else {
-        PollingFuzzSampler(auditConfig.fuzzPct, mvrs, contestUA, assorter)
-    }
+    val sampler = PollWithoutReplacement(contestUA, mvrs, assorter, allowReset=false)
 
     val eta0 = margin2mean(assertion.margin)
     val minsd = 1.0e-6
@@ -148,8 +143,8 @@ fun auditOneAssertion(
         upperBound = assorter.upperBound(),
     )
 
-    val maxSamples = mvrs.count { it.hasContest(contestUA.id) }
-    assertion.samplesUsed = maxSamples
+    val maxSamples = mvrs.count { it.hasContest(contestUA.id) } // TODO use sampler.maxSamples() ?
+    assertion.samplesUsed = maxSamples // TODO set from result ?
 
     // do not terminate on null reject, continue to use all available samples
     val testH0Result = testFn.testH0(maxSamples, terminateOnNullReject = false) { sampler.sample() }

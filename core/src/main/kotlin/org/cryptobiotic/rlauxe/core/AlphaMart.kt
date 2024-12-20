@@ -27,7 +27,7 @@ class TruncShrinkage(
 
     init {
         require(upperBound > 0.0)
-        require(eta0 < upperBound) // ?? otherwise the math in alphamart gets wierd
+        require(eta0 <= upperBound) // ?? otherwise the math in alphamart gets wierd
         require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)

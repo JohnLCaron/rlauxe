@@ -9,7 +9,7 @@ private val show = true
 
 // create internal cvr and mvr with the correct under/over statements that match the passed in error rates.
 // specific to a contest. only used for estimating the sample size
-class ComparisonSamplerSimulation(
+class ComparisonSimulation(
         rcvrs: List<Cvr>,
         val contestUA: ContestUnderAudit,
         val cassorter: ComparisonAssorter,

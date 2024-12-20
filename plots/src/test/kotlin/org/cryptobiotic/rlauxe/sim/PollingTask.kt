@@ -18,7 +18,7 @@ data class PollingTask(
     val useFixedEstimFn: Boolean = false
 ): RepeatedTask {
     val theta = cvrMean + cvrMeanDiff
-    val pollingAssorter = makeStandardPluralityAssorter()
+    val pollingAssorter = makeStandardPluralityAssorter(N)
     var eta0: Double = 0.0
 
     init {
@@ -56,7 +56,7 @@ data class PollingTask(
         return mapOf("eta0" to eta0, "d" to d.toDouble())
     }
 
-    override fun maxSamples(): Int  = N
+    // override fun maxSamples(): Int  = N
     override fun name(): String = "AlphaPollingTask$idx"
     override fun N(): Int  = N
     override fun reportedMean() = cvrMean

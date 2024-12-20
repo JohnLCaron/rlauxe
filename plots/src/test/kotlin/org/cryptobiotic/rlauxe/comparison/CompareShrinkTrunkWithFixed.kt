@@ -26,7 +26,7 @@ class CompareShrinkTrunkWithFixed {
             val cvrs = makeCvrsByExactMean(N, eta)
             val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
 
-            val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter())
+            val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = testAlphaMartFixed(eta, sampleFn)
@@ -69,7 +69,7 @@ class CompareShrinkTrunkWithFixed {
             val cvrs = makeCvrsByExactMean(N, eta)
             val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
 
-            val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter())
+            val sampleFn = PollWithoutReplacement(contestUA, cvrs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = runAlphaMartFixedRepeated(eta, sampleFn, ntrials)
@@ -115,7 +115,7 @@ class CompareShrinkTrunkWithFixed {
 
         return runTestRepeated(
             drawSample = sampleGenerator,
-            maxSamples = N,
+            // maxSamples = N,
             terminateOnNullReject = true,
             ntrials = ntrials,
             testFn = alpha,
@@ -132,7 +132,7 @@ class CompareShrinkTrunkWithFixed {
 
         return runTestRepeated(
             drawSample = sampleGenerator,
-            maxSamples = N,
+            // maxSamples = N,
             terminateOnNullReject = true,
             ntrials = ntrials,
             testFn = alpha,

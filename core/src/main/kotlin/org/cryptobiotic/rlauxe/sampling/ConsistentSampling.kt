@@ -39,7 +39,7 @@ fun consistentCvrSampling(
         }
         inx++
     }
-    if (inx == sortedCvrIndices.size) {
+    if (inx > sortedCvrIndices.size) {
         throw RuntimeException("ran out of samples!!")
     }
     return sampledIndices
@@ -77,7 +77,7 @@ fun consistentPollingSampling(
         }
         inx++
     }
-    if (inx == sortedCvrIndices.size) {
+    if (inx > sortedCvrIndices.size) {
         throw RuntimeException("ran out of samples!!")
     }
     return sampledIndices

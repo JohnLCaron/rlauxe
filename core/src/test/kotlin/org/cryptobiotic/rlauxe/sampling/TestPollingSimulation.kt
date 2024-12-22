@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -18,7 +19,7 @@ import kotlin.test.assertEquals
 
 class TestPollingSimulation {
 
-    // @Test
+    @Test
     fun testPollingSimulation() {
         val test = makePS(0.05, 0.10, 0.0, 10000)
         val assorter = test.assorter
@@ -33,33 +34,34 @@ class TestPollingSimulation {
     @Test
     fun testPollingSimulation2withoutPhantoms() {
         val reportedMargin = .005
-        val test = makePS2(reportedMargin, 0.10, 0.0, 10000)
-        val contest = test.contest
+        val sim = PollingSimulation2.make(reportedMargin, 0.10, 0.0, 10000)
+        val contest = sim.contest
         val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
-        val cvrs = test.makeCvrs() // phantoms have been added
+        val cvrs = sim.makeCvrs() // phantoms have been added
         assertEquals(contest.Nc, cvrs.size)
 
-        val mean = cvrs.map{ assorter.assort(it) }.average()
-        println("ncvrs = ${cvrs.size} average= $mean, margin = ${mean2margin(mean)}")
+        val margin = assorter.calcAssorterMargin(contest.id, cvrs)
+        println("assorter= $assorter ncvrs = ${cvrs.size} margin= $margin")
 
         // true when phantoms = 0
-        assertEquals(reportedMargin, mean2margin(mean), doublePrecision)
+        assertEquals(reportedMargin, margin, doublePrecision)
     }
 
     @Test
     fun testPollingSimulation2withPhantoms() {
         val reportedMargin = .005
-        val test = makePS2(reportedMargin, 0.10, 0.01, 10000)
-        val contest = test.contest
+        val pctPhantoms = .01
+        val sim = PollingSimulation2.make(reportedMargin, 0.10, pctPhantoms, 10000)
+        val contest = sim.contest
         val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
-        val cvrs = test.makeCvrs() // phantoms have been added
+        val cvrs = sim.makeCvrs() // phantoms have been added
         assertEquals(contest.Nc, cvrs.size)
-
-        val mean = cvrs.map{ assorter.assort(it) }.average()
-        println("ncvrs = ${cvrs.size} average= $mean, margin = ${mean2margin(mean)}")
-
-        // true when phantoms ! 0
-        assertEquals(reportedMargin, mean2margin(mean), doublePrecision)
+        val calcMargin = assorter.calcAssorterMargin(contest.id, cvrs)
+        val Ncd = contest.Nc.toDouble()
+        val expectWithPhantoms = (margin2mean(calcMargin) * Ncd - 0.5 * sim.phantomCount) / Ncd
+        val assortWithPhantoms = cvrs.map { cvr -> assorter.assort(cvr, usePhantoms = true)}.average()
+        assertEquals(expectWithPhantoms, assortWithPhantoms, doublePrecision)
+        println("assorter= $assorter ncvrs = ${cvrs.size} assortWithPhantoms= $assortWithPhantoms")
     }
 }
 
@@ -92,27 +94,4 @@ fun makePS(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc:
     val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
     println("assorter = $assorter")
     return PollingSimulation(contest, assorter)
-}
-
-fun makePS2(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): PollingSimulation2 {
-    val info = ContestInfo(
-        name = "AvB",
-        id = 0,
-        choiceFunction = SocialChoiceFunction.PLURALITY,
-        candidateNames = listToMap( "A", "B"),
-    )
-    val underCount = (Nc * underVotePct).toInt()
-    val phantomCount = (Nc * phantomPct).toInt()
-    val voteCount = Nc - underCount - phantomCount
-    println("underCount = $underCount phantomCount = $phantomCount voteCount = $voteCount")
-
-    val winnerCount = ((reportedMargin * Nc + voteCount) / 2.0) .toInt()
-    val loserCount = ((voteCount - reportedMargin * Nc) / 2.0) .toInt()
-    val calcMargin = (winnerCount - loserCount) / Nc.toDouble()
-    assertEquals(reportedMargin, calcMargin)
-
-    val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc)
-    val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
-    println("assorter = $assorter")
-    return PollingSimulation2(contest, underVotePct)
 }

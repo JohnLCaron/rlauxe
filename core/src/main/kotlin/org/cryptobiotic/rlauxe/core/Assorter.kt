@@ -5,12 +5,21 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterFunction {
-    fun assort(mvr: CvrIF) : Double
+    fun assort(mvr: CvrIF, usePhantoms: Boolean = false) : Double
     fun upperBound(): Double
     fun desc(): String
     fun winner(): Int
     fun loser(): Int
     fun reportedMargin(): Double
+
+    // Calculate the assorter mean for all the CVRs,
+    //    including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest
+    //    (i.e., the assorter assigns the value 1/2 to phantom CVRs)
+    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<CvrIF>): Double {
+        val mean = cvrs.filter{ it.hasContest(contestId) }
+                        .map { assort(it, usePhantoms = false) }.average()
+        return mean2margin(mean)
+    }
 
     // from SuperSimple:
     // The number µ is the “diluted margin”: the smallest margin of victory in votes among the contests, divided by the
@@ -27,17 +36,16 @@ interface AssorterFunction {
     // Diluted refers to the fact that the denominator is the number of ballot cards, which is
     // greater than or equal to the number of valid votes.) (SHANGRLA p. 10)
 
-    /* should have one or the other:
-    fun reportedAssorterMargin(votes: Map<Int, Int>): Double
-    fun reportedAssorterMargin(cvrs: List<Cvr>): Double
-    fun reportedAssorterMargin() = cassorter.avgCvrAssortValue
-     */
+    // phantom ballots are re-animated as evil zombies: We suppose that they reflect whatever would
+    // increase the P-value most: a 2-vote overstatement for a ballot-level comparison audit,
+    // or a valid vote for every loser in a ballot-polling audit.
 }
 
 /** See SHANGRLA, section 2.1. */
 data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterFunction {
     // SHANGRLA section 2, p 4.
-    override fun assort(mvr: CvrIF): Double {
+    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+        if (usePhantoms && mvr.phantom) return 0.0
         val w = mvr.hasMarkFor(contest.info.id, winner)
         val l = mvr.hasMarkFor(contest.info.id, loser)
         return (w - l + 1) * 0.5
@@ -64,7 +72,8 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
     val upperBound = 0.5 / minFraction
 
     // SHANGRLA eq (1), section 2.3, p 5.
-    override fun assort(mvr: CvrIF): Double {
+    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+        if (usePhantoms && mvr.phantom) return 0.0
         val w = mvr.hasMarkFor(contest.info.id, winner)
         return if (mvr.hasOneVote(contest.info.id, contest.info.candidateIds)) (w / (2 * minFraction)) else .5
     }
@@ -98,7 +107,7 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 data class ComparisonAssorter(
     val contest: ContestIF,
     val assorter: AssorterFunction,   // A
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value != reportedMargin
     val hasStyle: Boolean = true, // TODO could be on the Contest ??
     val check: Boolean = true, // TODO get rid of
 ) {
@@ -166,7 +175,7 @@ data class ComparisonAssorter(
         //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
         //            else self.assort(mvr)
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(contest.info.id))) 0.0
-                         else this.assorter.assort(mvr)
+                         else this.assorter.assort(mvr, usePhantoms = false)
 
         //        If not use_style, then if the CVR contains the contest but the MVR does not,
         //        the MVR is considered to be a non-vote in the contest (assort()=1/2).
@@ -178,7 +187,7 @@ data class ComparisonAssorter(
         //            else int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )
 
-        val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr)
+        val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
     }
 }

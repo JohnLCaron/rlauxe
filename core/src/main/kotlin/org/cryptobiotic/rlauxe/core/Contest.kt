@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
@@ -218,13 +218,8 @@ open class ContestUnderAudit(
         }
 
         this.comparisonAssertions = assertions.map { assertion ->
-            val welford = Welford()
-            cvrs.forEach { cvr ->
-                if (cvr.hasContest(id)) {
-                    welford.update(assertion.assorter.assort(cvr))
-                }
-            }
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, welford.mean, hasStyle=hasStyle)
+            val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
+            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ComparisonAssertion(contest, comparisonAssorter)
         }
         return this

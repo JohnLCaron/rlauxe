@@ -250,9 +250,7 @@ class CreatePollingDiffMeans {
             if (!silent) {
                 println(result)
                 println(
-                    "truePopulationCount=${ff.format(cvrSampler.sampleCount())} truePopulationMean=${
-                        ff.format(cvrSampler.sampleMean())
-                    } failPct=${result.failPct()} status=${result.status}"
+                    "failPct=${result.failPct()} status=${result.status}"
                 )
             }
             results.add(result)

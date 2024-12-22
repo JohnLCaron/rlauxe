@@ -1,8 +1,11 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
+import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
 //    Let N_c = upper bound on ballots for contest C.
@@ -89,4 +92,27 @@ class PollingSimulation2(val contest: Contest, underVotePct: Double) {
         votesLeft--
         return candidateId
     }
+
+    companion object {
+
+        fun make(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): PollingSimulation2 {
+            val info = ContestInfo(
+                name = "AvB",
+                id = 0,
+                choiceFunction = SocialChoiceFunction.PLURALITY,
+                candidateNames = listToMap( "A", "B"),
+            )
+            val underCount = (Nc * underVotePct).toInt()
+            val phantomCount = (Nc * phantomPct).toInt()
+            val voteCount = Nc - underCount - phantomCount
+            println("underCount = $underCount phantomCount = $phantomCount voteCount = $voteCount")
+
+            val winnerCount = ((reportedMargin * Nc + voteCount) / 2.0) .toInt()
+            val loserCount = ((voteCount - reportedMargin * Nc) / 2.0) .toInt()
+
+            val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc)
+            return PollingSimulation2(contest, underVotePct)
+        }
+    }
+
 }

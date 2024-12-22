@@ -534,7 +534,7 @@ From SHANGRLA, section 3.4:
     identifiable physical ballot card that can be retrieved if that CVR is selected for audit.
     
     If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
-    including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest contest 
+    including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest 
     (i.e., the assorter assigns the value 1/2 to phantom CVRs). Find the corresponding assorter margin (v ≡ 2Ā − 1).
     [comment: so use 1/2 for assorter margin calculation].
 

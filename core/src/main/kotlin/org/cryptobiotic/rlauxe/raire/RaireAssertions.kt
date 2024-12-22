@@ -2,8 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.margin2mean
 
 // The output of RAIRE assertion generator, read from JSON files
 data class RaireResults(
@@ -52,17 +51,12 @@ class RaireContestUnderAudit(
         }
     }
 
-    override fun makeComparisonAssertions(cvrs : Iterable<CvrIF>, votes: Map<Int, Int>?): ContestUnderAudit {
-            this.comparisonAssertions = assertions.map { assertion ->
+    override fun makeComparisonAssertions(cvrs: Iterable<CvrIF>, votes: Map<Int, Int>?): ContestUnderAudit {
+        this.comparisonAssertions = assertions.map { assertion ->
             val assorter = RaireAssorter(this, assertion)
-            val welford = Welford()
-            cvrs.forEach { cvr ->
-                if (cvr.hasContest(contest.info.id)) {
-                    welford.update(assorter.assort(cvr))
-                }
-            }
-            assorter.reportedMargin = mean2margin(welford.mean)
-            val comparisonAssorter = ComparisonAssorter(contest, assorter, welford.mean)
+            val margin = assorter.calcAssorterMargin(id, cvrs)
+            assorter.reportedMargin = margin
+            val comparisonAssorter = ComparisonAssorter(contest, assorter, margin2mean(margin))
             // println(" assertion ${assertion} margin=${comparisonAssorter.margin} avg=${comparisonAssorter.avgCvrAssortValue}")
             ComparisonAssertion(contest, comparisonAssorter)
         }
@@ -185,10 +179,8 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
 
     // override fun reportedAssorterMargin(votes: Map<Int, Int>): Double = 0.0 // TODO
 
-    override fun assort(mvr: CvrIF): Double {
-        if (mvr.phantom) {
-            return 0.5
-        }
+    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+        if (usePhantoms && mvr.phantom) return 0.5;
         val rcvr = RaireCvr(mvr)
         return if (assertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
         else  if (assertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)

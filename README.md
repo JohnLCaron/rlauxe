@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/11/2024
+last update: 12/22/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -517,16 +517,16 @@ See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
 
 From P2Z paper:
 
+    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
+
     What if the ballot manifest is not accurate?
-    it suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
-    requires only an upper bound on the total number of ballots cast
+    It suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
     This ensures that the true risk limit remains smaller than the nominal risk limit.
 
-    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
-    designing and carrying out the audit so that each ballot has the correct probability of being selected involves the ballot manifest.
-
-    To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
-    
+    The dead (not found, phantom) ballots are re-animated as evil zombies: We suppose that they reflect whatever would
+    increase the P-value most: a 2-vote overstatement for a ballot-level comparison audit, 
+    or a valid vote for every loser in a ballot-polling audit.
+ 
 From SHANGRLA, section 3.4:
 
     Let NC denote an upper bound on the number of ballot cards that contain the contest. 
@@ -536,7 +536,8 @@ From SHANGRLA, section 3.4:
     If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
     including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest contest 
     (i.e., the assorter assigns the value 1/2 to phantom CVRs). Find the corresponding assorter margin (v ≡ 2Ā − 1).
-    
+    [comment: so use 1/2 for assorter margin calculation].
+
     To conduct the audit, sample integers between 1 and NC.
     
     1. If the resulting integer is between 1 and n, retrieve and inspect the ballot card associated with the corresponding CVR.
@@ -555,7 +556,41 @@ From SHANGRLA, section 3.4:
     treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
     the overstatement error.
 
-_This is in the code but not tested yet TODO. See ComparisonAssorter.bassort()._
+From SHANGRLA python code, assertion-RLA.ipynb:
+
+    Any sampled phantom card (i.e., a card for which there is no CVR) is treated as if its CVR is a non-vote (which it is), 
+    and as if its MVR was least favorable (an "evil zombie" producing the greatest doubt in every assertion, separately). 
+    Any sampled card for which there is a CVR is compared to its corresponding CVR.
+    If the card turns out not to contain the contest (despite the fact that the CVR says it does), 
+    the MVR is treated in the least favorable way for each assertion (i.e., as a zombie rather than as a non-vote).
+
+So it seems (case 1) we use 1/2 when calculating assorter margins, but during the actual audit, (case 2) we use 0 (polling) and 0? (comparison).
+
+So we need a different routine for "find assorter margin" than "find assorter value". Probably.
+Python code (Audit.py, Assorter) doesnt seem to reflect polling case 2 that I can find, but perhaps because the assort is passed in?
+
+    The basic method is assort, but the constructor can be called with (winner, loser)
+    instead. In that case,
+        assort = (winner - loser + 1)/2
+
+which corresponds to case 1.
+
+------------------------------------------------------------------------------------
+
+    Let N_c = upper bound on ballots for contest C.
+    Let Nb = N (physical ballots) = ncvrs (comparison) or nballots in manifest (polling).
+
+    When we have styles, we can calculate Nb_c = physical ballots for contest C
+    Let V_c = votes for contest C, V_c <= Nb_c <= N_c.
+    Let U_c = undervotes for contest C = Nb_c - V_c >= 0.
+    Let Np_c = nphantoms for contest C = N_c - Nb_c, and are added to the ballots before sampling or sample size estimation.
+    Then V_c + U_c + Np_c = N_c.
+
+    Comparison, no styles: we have cvrs, but the cvr doesnt record undervotes.
+    We know V_c and N_c. Cant distinguish an undervote from a phantom, so we dont know U_c, or Nb_c or Np_c.
+    For estimating, we can use some guess for U_c.
+    For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
+    I think we must have a ballot manifest, which means we have Nb, and ... 
 
 
 ## Stratified audits using OneAudit (TODO)

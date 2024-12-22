@@ -18,7 +18,7 @@ interface AssorterFunction {
     // The diluted margin µ is the smallest margin in votes among the contests under audit, divided by the total
     // number of ballots cast across all the contests under audit. (p. 4)
     // The reported margin of reported winner w ∈ Wc over reported loser l ∈ Lc in contest c is
-    //    Vwl ≡ Sum (vpw − vpl ), p=1..N = Sum (vpw) − Sum( vpl ) = votes(winner) - votes(loser) (p. 5)
+    //    Vwl ≡ Sum (vpw − vpl), p=1..N = Sum (vpw) − Sum( vpl ) = votes(winner) - votes(loser) (p. 5)
 
     // Define v ≡ 2Āc − 1, the reported assorter margin. In a two-candidate plurality contest, v
     // is the fraction of ballot cards with valid votes for the reported winner, minus the fraction

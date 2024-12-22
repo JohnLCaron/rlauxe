@@ -69,8 +69,8 @@ class PollingWorkflow(
             else if (auditConfig.hasStyles)
                 println(" $contest samplesUsed=${minAssertion.samplesUsed} round=${minAssertion.round} status=${contest.status}")
             else
-                println(" $contest samplesUsed=${minAssertion.samplesUsed} " +
-                        "estTotalSampleSize=${contest.estTotalSampleSize} round=${minAssertion.round} status=${contest.status}")
+                println(" $contest samplesUsed=${minAssertion.samplesUsed} estSampleSize=${contest.estSampleSize}" +
+                        " estSampleSizeNoStyles=${contest.estSampleSizeNoStyles} round=${minAssertion.round} status=${contest.status}")
         }
         println()
     }

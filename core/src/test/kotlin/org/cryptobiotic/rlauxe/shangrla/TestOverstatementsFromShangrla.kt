@@ -382,4 +382,132 @@ class TestOverstatementsFromShangrla {
         assertEquals(0.5 / 1.9, have)
     }
 
+    @Test
+    fun test_overstatement_with_phantoms() {
+
+        // def test_overstatement(self):
+        //        mvr_dict = [{'id': 1, 'votes': {'AvB': {'Alice':True}}},
+        //                    {'id': 2, 'votes': {'AvB': {'Bob':True}}},
+        //                    {'id': 3, 'votes': {'AvB': {}}},
+        //                    {'id': 4, 'votes': {'CvD': {'Elvis':True, 'Candy':False}}},
+        //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
+        //        mvrs = CVR.from_dict(mvr_dict)
+        val mvrb = CvrBuilders()
+            .addCrv().addContest("AvB", "Alice").ddone()
+            .addCrv().addContest("AvB", "Bob").ddone()
+            .addCrv().addContest("AvB").ddone()
+            .addCrv().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
+            .addPhantomCrv().addContest("AvB").ddone()
+        println(mvrb.show())
+        val mvrs = mvrb.build()
+
+        //        cvr_dict = [{'id': 1, 'votes': {'AvB': {'Alice':True}}},
+        //                    {'id': 2, 'votes': {'AvB': {'Bob':True}}},
+        //                    {'id': 3, 'votes': {'AvB': {}}},
+        //                    {'id': 4, 'votes': {'CvD': {'Elvis':True}}},
+        //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
+        //        cvrs = CVR.from_dict(cvr_dict)
+        val cvrb = CvrBuilders()
+            .addCrv().addContest("AvB", "Alice").ddone()
+            .addCrv().addContest("AvB", "Bob").ddone()
+            .addCrv().addContest("AvB").ddone()
+            .addCrv().addContest("CvD", "Elvis").ddone()
+            .addPhantomCrv().addContest("AvB").ddone()
+        println(cvrb.show())
+        val cvrs = cvrb.build()
+
+        //        winner = ["Alice"]
+        //        loser = ["Bob"]
+        //
+        //        aVb = Assertion(contest=self.con_test, assorter=Assorter(contest=self.con_test,
+        //                        assort = (lambda c, contest_id="AvB", winr="Alice", losr="Bob":
+        //                        ( CVR.as_vote(c.get_vote_for("AvB", winr))
+        //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
+        //                        + 1)/2), upper_bound=1))
+        //        aVb.margin=0.2
+
+        val info = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "Alice", "Bob"),
+        )
+        val contest = makeFakeContest(info, 100)
+        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val asrtns = contestUA.pollingAssertions
+        val assort = asrtns.first().assorter
+
+        val margin = 0.2
+
+        var aVb = ComparisonAssorter(contest, assort, (margin + 1.0)/2)
+
+        //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
+        //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0
+        assertEquals(0.0, aVb.overstatementError(mvrs[0], cvrs[0], false))
+        assertEquals(0.0, aVb.overstatementError(mvrs[0], cvrs[0], true))
+
+        //
+        //        assert aVb.assorter.overstatement(mvrs[0], cvrs[1], use_style=True) == -1
+        //        assert aVb.assorter.overstatement(mvrs[0], cvrs[1], use_style=False) == -1
+        assertEquals(-1.0, aVb.overstatementError(mvrs[0], cvrs[1], false))
+        assertEquals(-1.0, aVb.overstatementError(mvrs[0], cvrs[1], true))
+        //
+        //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=True) == 1/2
+        //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=False) == 1/2
+        assertEquals(.5, aVb.overstatementError(mvrs[2], cvrs[0], false))
+        assertEquals(.5, aVb.overstatementError(mvrs[2], cvrs[0], true))
+
+        //
+        //        assert aVb.assorter.overstatement(mvrs[2], cvrs[1], use_style=True) == -1/2
+        //        assert aVb.assorter.overstatement(mvrs[2], cvrs[1], use_style=False) == -1/2
+        assertEquals(-0.5, aVb.overstatementError(mvrs[2], cvrs[1], false))
+        assertEquals(-0.5, aVb.overstatementError(mvrs[2], cvrs[1], true))
+
+        //
+        //        assert aVb.assorter.overstatement(mvrs[1], cvrs[0], use_style=True) == 1
+        //        assert aVb.assorter.overstatement(mvrs[1], cvrs[0], use_style=False) == 1
+        assertEquals(1.0, aVb.overstatementError(mvrs[1], cvrs[0], false))
+        assertEquals(1.0, aVb.overstatementError(mvrs[1], cvrs[0], true))
+
+        //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=True) == 1/2
+        //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=False) == 1/2
+        assertEquals(0.5, aVb.overstatementError(mvrs[2], cvrs[0], false))
+        assertEquals(0.5, aVb.overstatementError(mvrs[2], cvrs[0], true))
+
+        //        assert aVb.assorter.overstatement(mvrs[3], cvrs[0], use_style=True) == 1
+        //        assert aVb.assorter.overstatement(mvrs[3], cvrs[0], use_style=False) == 1/2
+        assertEquals(1.0, aVb.overstatementError(mvrs[3], cvrs[0], true))
+        assertEquals(0.5, aVb.overstatementError(mvrs[3], cvrs[0], false))
+
+
+        //        try:
+        //            tst = aVb.assorter.overstatement(mvrs[3], cvrs[3], use_style=True)
+        //            raise AssertionError('aVb is not contained in the mvr or cvr')
+        //        except ValueError:
+        //            pass
+        assertFailsWith<RuntimeException> {
+            assertEquals(0.0, aVb.overstatementError(mvrs[3], cvrs[3], true))
+        }
+        //        assert aVb.assorter.overstatement(mvrs[3], cvrs[3], use_style=False) == 0
+        assertEquals(0.0, aVb.overstatementError(mvrs[3], cvrs[3], false))
+
+        //// mvrs[4], cvrs[4] are the phantoms
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=True) == 1/2
+        assertEquals(0.5, aVb.overstatementError(mvrs[4], cvrs[4], true))
+
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=False) == 1/2
+        assertEquals(0.5, aVb.overstatementError(mvrs[4], cvrs[4], false))
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=False) == 1/2
+        assertEquals(0.5, aVb.overstatementError(mvrs[4], cvrs[4], false))
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[0], use_style=True) == 1
+        assertEquals(1.0, aVb.overstatementError(mvrs[4], cvrs[0], true))
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[0], use_style=False) == 1
+        assertEquals(1.0, aVb.overstatementError(mvrs[4], cvrs[0], false))
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[1], use_style=True) == 0
+        assertEquals(0.0, aVb.overstatementError(mvrs[4], cvrs[1], true))
+        //        assert aVb.assorter.overstatement(mvrs[4], cvrs[1], use_style=False) == 0
+        assertEquals(0.0, aVb.overstatementError(mvrs[4], cvrs[1], true))
+    }
+
+
 }

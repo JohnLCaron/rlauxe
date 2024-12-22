@@ -34,6 +34,13 @@ class CvrBuilders {
         return cb
     }
 
+    fun addPhantomCrv(): CvrBuilder {
+        this.nextCvrId++
+        val cb = CvrBuilder(this, "card${nextCvrId}", phantom=true)
+        builders.add(cb)
+        return cb
+    }
+
     fun addCvr(cvrId: String): CvrBuilder {
         val cb = CvrBuilder(this, cvrId)
         builders.add(cb)
@@ -76,6 +83,7 @@ class CvrContest(val name: String, val id: Int) {
 class CvrBuilder(
     val builders: CvrBuilders,
     val id: String,
+    val phantom: Boolean = false,
 ) {
     val contests = mutableMapOf<Int, ContestVoteBuilder>() // contestId -> ContestVoteBuilder
 
@@ -102,20 +110,21 @@ class CvrBuilder(
         return cb
     }
 
-    fun addContest(contestId: Int, votes: IntArray) {
+    fun addContest(contestId: Int, votes: IntArray): CvrBuilder  {
         val contest: CvrContest? = builders.getContest(contestId)
         // if contest not present, just skip
         if (contest != null) {
             val cvb: ContestVoteBuilder = contests.getOrPut(contest.id) { ContestVoteBuilder(this, contest) }
             votes.forEach { cvb.votes.add(it) }
         }
+        return this
     }
 
     fun done() = builders
 
     fun build() : Cvr {
         val votes: Map<Int, IntArray> = contests.values.map { it.build() }.toMap()
-        return Cvr(id, votes)
+        return Cvr(id, votes, phantom)
     }
 
     companion object {

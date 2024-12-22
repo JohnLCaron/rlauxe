@@ -155,11 +155,8 @@ class ComparisonWorkflow(
             val minAssertion = contest.minAssertion()
             if (minAssertion == null)
                 println(" $contest has no assertions; status=${contest.status}")
-            else if (auditConfig.hasStyles)
-                println(" $contest samplesUsed=${minAssertion.samplesUsed} round=${minAssertion.round} status=${contest.status}")
             else
-                println(" $contest samplesUsed=${minAssertion.samplesUsed} " +
-                        "estTotalSampleSize=${contest.estTotalSampleSize} round=${minAssertion.round} status=${contest.status}")
+                println(" $contest samplesUsed=${minAssertion.samplesUsed} round=${minAssertion.round} status=${contest.status}")
         }
         println()
     }
@@ -309,9 +306,7 @@ fun runOneAssertionAudit(
     assertion.samplesUsed = maxSamples
 
     // do not terminate on null reject, continue to use all samples
-    // TODO how does sampler.maxSamples compare to contestUA.availableInSample?
-    println("sampler.maxSamples ${sampler.maxSamples()} compare to contestUA.availableInSample ${contestUA.availableInSample}")
-    val testH0Result = testFn.testH0(contestUA.availableInSample, terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
     if (!testH0Result.status.fail) {
         assertion.proved = true
         assertion.round = roundIdx

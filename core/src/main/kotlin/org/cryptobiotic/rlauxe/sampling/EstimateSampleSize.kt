@@ -66,7 +66,7 @@ fun makeEstimationTasks(
                 }
                 // start where the audit left off
                 prevSampleSize = assert.samplesUsed
-                maxSamples = contestUA.Nc - prevSampleSize
+                maxSamples = contestUA.Nc - prevSampleSize // TODO
                 startingTestStatistic = 1.0 / assert.pvalue
             }
 
@@ -77,7 +77,7 @@ fun makeEstimationTasks(
                         contestUA,
                         assert,
                         cvrs,
-                        // maxSamples,
+                        // maxSamples,  // TODO
                         startingTestStatistic,
                         prevSampleSize,
                         moreParameters

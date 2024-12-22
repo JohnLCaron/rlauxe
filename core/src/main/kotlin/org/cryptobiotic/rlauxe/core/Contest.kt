@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
@@ -159,10 +159,9 @@ open class ContestUnderAudit(
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
-    var availableInSample = 0 // number of samples available in the current consistent sampling based on estSampleSize
     var done = false
     var status = TestH0Status.NotStarted // or its own enum ??
-    var estTotalSampleSize = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
+    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
 
     // should only be used for testing i think
     constructor(info: ContestInfo, cvrs: List<CvrIF>, isComparison: Boolean=true, hasStyle: Boolean=true):
@@ -219,13 +218,8 @@ open class ContestUnderAudit(
         }
 
         this.comparisonAssertions = assertions.map { assertion ->
-            val welford = Welford()
-            cvrs.forEach { cvr ->
-                if (cvr.hasContest(id)) {
-                    welford.update(assertion.assorter.assort(cvr))
-                }
-            }
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, welford.mean, hasStyle=hasStyle)
+            val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
+            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ComparisonAssertion(contest, comparisonAssorter)
         }
         return this

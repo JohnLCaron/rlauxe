@@ -57,10 +57,6 @@ class TestSampleGenerator {
                 if (!silent && showContests) println("  ${it}")
 
                 val cvrSampler = PollWithoutReplacement(contestUA, cvrs, it.assorter)
-                println("truePopulationCount = ${cvrSampler.sampleCount()}")
-                println("truePopulationMean = ${cvrSampler.sampleMean()}")
-                assertEquals((N * theta).toInt(), cvrSampler.sampleCount().toInt())
-                assertEquals(theta.toInt(), cvrSampler.sampleMean().toInt())
             }
         }
     }

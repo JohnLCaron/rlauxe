@@ -17,20 +17,16 @@ interface SampleGenerator {
 
 class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
-    val sampleMean = cvrs.map { assorter.assort(it) }.average()
-    val sampleCount = cvrs.sumOf { assorter.assort(it) }
 
     override fun sample(): Double {
         while (true) {
             val idx = secureRandom.nextInt(cvrs.size) // with Replacement
             val cvr = cvrs[idx]
-            if (cvr.hasContest(contest.id)) return assorter.assort(cvr)
+            if (cvr.hasContest(contest.id)) return assorter.assort(cvr, usePhantoms = true)
         }
     }
 
     override fun reset() {}
-    fun sampleMean() = sampleMean
-    fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
 }
 
@@ -53,7 +49,7 @@ class PollWithoutReplacement(
             val cvr = cvrs[permutedIndex[idx]]
             idx++
             if (cvr.hasContest(contest.id)) {
-                return assorter.assort(cvr)
+                return assorter.assort(cvr, usePhantoms = true)
             }
         }
         throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
@@ -65,8 +61,6 @@ class PollWithoutReplacement(
         idx = 0
     }
 
-    fun sampleMean() = cvrs.map{ assorter.assort(it) }.average()
-    fun sampleCount() = cvrs.sumOf { assorter.assort(it) }
     override fun maxSamples() = maxSamples
 }
 

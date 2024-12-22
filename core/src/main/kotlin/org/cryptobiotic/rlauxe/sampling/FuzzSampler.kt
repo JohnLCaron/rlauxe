@@ -75,7 +75,7 @@ class PollingFuzzSampler(
         while (idx < N) {
             val mvr = mvrs[permutedIndex[idx]]
             if (mvr.hasContest(contestUA.id)) {
-                val result = assorter.assort(mvr)
+                val result = assorter.assort(mvr, usePhantoms = true)
                 idx++
                 welford.update(result)
                 return result

@@ -39,13 +39,8 @@ fun consistentCvrSampling(
         }
         inx++
     }
-    if (inx == sortedCvrIndices.size) {
-        println("ran out of samples!!")
-    }
-    currentSizes.forEach { (contestId, size) ->
-        val contest = contests.find { it.id == contestId }!!
-        contest.availableInSample = size
-        if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
+    if (inx > sortedCvrIndices.size) {
+        throw RuntimeException("ran out of samples!!")
     }
     return sampledIndices
 }
@@ -82,12 +77,8 @@ fun consistentPollingSampling(
         }
         inx++
     }
-    if (inx == sortedCvrIndices.size) {
-        println("ran out of samples!!")
-    }
-    contests.forEach { contest ->
-        contest.availableInSample = currentSizes[contest.id]!!
-        if (show) println(" ${contest} availableInSample=${contest.availableInSample}")
+    if (inx > sortedCvrIndices.size) {
+        throw RuntimeException("ran out of samples!!")
     }
     return sampledIndices
 }
@@ -112,8 +103,8 @@ fun uniformPollingSampling(
         val fac = N / it.Nc.toDouble()
         val est = (it.estSampleSize * fac).toInt()
         val estPct = (it.estSampleSize / it.Nc.toDouble())
-        println("  $it: scale=${df(fac)} estTotalNeeded=${est.toInt()}")
-        it.estTotalSampleSize = est
+        println("  $it: scale=${df(fac)} estSampleSizeNoStyles=${est.toInt()}")
+        it.estSampleSizeNoStyles = est
         if (estPct > samplePctCutoff) {
             it.done = true
             it.status = TestH0Status.LimitReached
@@ -123,7 +114,7 @@ fun uniformPollingSampling(
                 minAssert.round = roundIdx
         }
     }
-    val estTotalSampleSizes = contests.filter { !it.done }.map { it.estTotalSampleSize }
+    val estTotalSampleSizes = contests.filter { !it.done }.map { it.estSampleSizeNoStyles }
     if (estTotalSampleSizes.isEmpty()) return emptyList()
 
     // get list of ballot indexes sorted by sampleNum
@@ -136,7 +127,5 @@ fun uniformPollingSampling(
 
     return sampledIndices
 }
-
-private val show = true
 
 

@@ -11,19 +11,22 @@ class TestCvrBuilders {
     @Test
     fun testConvertCvrsRoundtrip() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contests: List<Contest> = test.makeContests()
+        val contests: List<Contest> = test.contests
         val cvrs = test.makeCvrsFromContests()
 
         // turn the cvrs into mutable builders
         val cvrsbs = CvrBuilders()
-        cvrsbs.addContests( contests.map { it.info} )
+        cvrsbs.addContests( contests.map { it.info } )
         cvrs.forEach { CvrBuilder.fromCvr(cvrsbs, it) }
 
         // convert back to Cvr
-        val roundtrip: List<Cvr>  = cvrsbs.build().map { it }
+        val roundtrip: List<Cvr> = cvrsbs.build().map { it }
         // same order
         roundtrip.forEachIndexed { idx, it ->
-            assertEquals( cvrs[idx], it)
+            val cvr2 = cvrs[idx]
+            if (it != cvr2)
+                println("cvr")
+            assertEquals(cvrs[idx], it)
         }
 
         cvrsbs.show()
@@ -33,7 +36,7 @@ class TestCvrBuilders {
     fun testFuzzedCvrs() {
         val ncontests = 20
         val test = MultiContestTestData(ncontests, 11, 50000)
-        val contests: List<Contest> = test.makeContests()
+        val contests: List<Contest> = test.contests
         val cvrs = test.makeCvrsFromContests()
         val detail = false
         val ntrials = 1

@@ -25,7 +25,7 @@ class GenPollingNoStyles {
         val tasks = mutableListOf<EstimationTask>()
         Ns.forEach { N ->
             margins.forEach { margin ->
-                val fcontest = ContestTestData(0, 4, margin)
+                val fcontest = ContestTestData(0, 4, margin, 0.0, 0.0)
                 fcontest.ncards = Nc
                 val contest = fcontest.makeContest()
 

@@ -12,17 +12,16 @@ class TestComparisonFuzzSampler {
     fun testFuzzedCvrs() {
         val ncontests = 1
         val test = MultiContestTestData(ncontests, 1, 50000)
-        val contests: List<Contest> = test.makeContests()
-        print("contest = ${contests.first()}")
+        print("contest = ${test.contests.first()}")
         val cvrs = test.makeCvrsFromContests()
         val detail = true
         val ntrials = 1
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
+            val fcvrs = makeFuzzedCvrsFrom(test.contests, cvrs, fuzzPct)
             println(" fuzzPct = $fuzzPct")
             val avgRates = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
-            contests.forEach { contest ->
+            test.contests.forEach { contest ->
                 val contestUA = ContestUnderAudit(contest.info, cvrs).makeComparisonAssertions(cvrs)
                 val minAssert = contestUA.minComparisonAssertion()
                 if (minAssert != null) repeat(ntrials) {
@@ -57,7 +56,7 @@ class TestComparisonFuzzSampler {
     @Test
     fun testComparisonFuzzed() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it) }
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it) }
         val cvrs = test.makeCvrsFromContests()
         contestsUA.forEach { contest ->
             contest.makeComparisonAssertions(cvrs)

@@ -12,18 +12,18 @@ class TestAssorterBasics {
     @Test
     fun testPluralityAssorter() {
         val cvrs = CvrBuilders()
-            .addCrv().addContest("AvB", "0").ddone()
-            .addCrv().addContest("AvB", "1").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
             // artifact of creating Contests and candidates from cvrs.
-            .addCrv().addContest("AvB").addCandidate("3", 0).ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
             .build()
 
         val contestInfo = ContestInfo(
@@ -56,19 +56,19 @@ class TestAssorterBasics {
     @Test
     fun testPluralityAssorterWithPhantoms() {
         val cvrs = CvrBuilders()
-            .addCrv().addContest("AvB", "0").ddone()
-            .addCrv().addContest("AvB", "1").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
             // artifact of creating Contests and candidates from cvrs.
-            .addCrv().addContest("AvB").addCandidate("3", 0).ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addPhantomCrv().addContest("AvB").ddone()
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
             .build()
 
         val contestInfo = ContestInfo(
@@ -107,18 +107,18 @@ class TestAssorterBasics {
     @Test
     fun testPollingSuper() {
         val cvrs = CvrBuilders()
-            .addCrv().addContest("AvB").addCandidate("0", 0).ddone()
-            .addCrv().addContest("AvB", "1").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
-            .addCrv().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB").addCandidate("0", 0).ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
             // artifact of creating Contests and candidates from cvrs.
-            .addCrv().addContest("AvB").addCandidate("3", 0).ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
-            .addCrv().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
             .build()
 
         val contestInfo = ContestInfo(

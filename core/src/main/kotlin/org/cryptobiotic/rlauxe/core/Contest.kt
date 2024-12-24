@@ -43,7 +43,7 @@ data class ContestInfo(
     }
 }
 
-// Needed to allow RaireContest as subclass, which does not use votes: Map<Int, Int>
+// Needed to allow RaireContest as subclass, which does not have votes: Map<Int, Int>
 interface ContestIF {
     val info: ContestInfo
     val Nc: Int
@@ -102,7 +102,7 @@ class Contest(
 
         // find losers
         val mlosers = mutableListOf<Int>()
-        // could require that all candidates are in votes, but this allows candidates with no votes to not be in votes
+        // could require that all candidates are in votes, but this way, it allows candidates with no votes
         info.candidateNames.forEach { (_, id) ->
             if (!winners.contains(id)) mlosers.add(id)
         }
@@ -137,6 +137,13 @@ class Contest(
         result = 31 * result + winners.hashCode()
         result = 31 * result + losers.hashCode()
         return result
+    }
+
+    fun calcMargin(winner: Int, loser: Int): Double {
+        val winnerVotes = votes[winner] ?: 0
+        val loserVotes = votes[loser] ?: 0
+        val reportedMargin = (winnerVotes - loserVotes) / Nc.toDouble()
+        return reportedMargin
     }
 }
 

@@ -15,13 +15,13 @@ interface SampleGenerator {
 
 //// For polling audits.
 
-class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
-    val maxSamples = cvrs.count { it.hasContest(contest.id) }
+class PollWithReplacement(val contest: ContestUnderAudit, val mvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
+    val maxSamples = mvrs.count { it.hasContest(contest.id) }
 
     override fun sample(): Double {
         while (true) {
-            val idx = secureRandom.nextInt(cvrs.size) // with Replacement
-            val cvr = cvrs[idx]
+            val idx = secureRandom.nextInt(mvrs.size) // with Replacement
+            val cvr = mvrs[idx]
             if (cvr.hasContest(contest.id)) return assorter.assort(cvr, usePhantoms = true)
         }
     }
@@ -32,12 +32,12 @@ class PollWithReplacement(val contest: ContestUnderAudit, val cvrs : List<Cvr>, 
 
 class PollWithoutReplacement(
     val contest: ContestUnderAudit,
-    val cvrs : List<Cvr>,
+    val mvrs : List<Cvr>,
     val assorter: AssorterFunction,
     val allowReset: Boolean = true,
 ): SampleGenerator {
-    val maxSamples = cvrs.count { it.hasContest(contest.id) }
-    private val permutedIndex = MutableList(cvrs.size) { it }
+    val maxSamples = mvrs.count { it.hasContest(contest.id) }
+    private val permutedIndex = MutableList(mvrs.size) { it }
     private var idx = 0
 
     init {
@@ -45,8 +45,8 @@ class PollWithoutReplacement(
     }
 
     override fun sample(): Double {
-        while (idx < cvrs.size) {
-            val cvr = cvrs[permutedIndex[idx]]
+        while (idx < mvrs.size) {
+            val cvr = mvrs[permutedIndex[idx]]
             idx++
             if (cvr.hasContest(contest.id)) {
                 return assorter.assort(cvr, usePhantoms = true)

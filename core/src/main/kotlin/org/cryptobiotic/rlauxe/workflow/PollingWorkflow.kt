@@ -143,17 +143,15 @@ fun auditOneAssertion(
         upperBound = assorter.upperBound(),
     )
 
-    val maxSamples = mvrs.count { it.hasContest(contestUA.id) } // TODO use sampler.maxSamples() ?
-    assertion.samplesUsed = maxSamples // TODO set from result ?
-
     // do not terminate on null reject, continue to use all available samples
-    val testH0Result = testFn.testH0(maxSamples, terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
     if (!testH0Result.status.fail) {
         assertion.proved = true
         assertion.round = roundIdx
     } else {
         println("testH0Result.status = ${testH0Result.status}")
     }
+    assertion.samplesUsed = testH0Result.sampleCount
     assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst { it < auditConfig.riskLimit }
     assertion.pvalue = testH0Result.pvalues.last()
 

@@ -140,10 +140,10 @@ class TestAssertionsFromShangrla {
         votes = makeCvr(3)
         assertEquals(0.5, target.assorter.assort(votes), "wrong value for vote for invalid vote--Dan")
 
-        var cvr = CvrBuilders().addCrv().addContest("AvB", "Alice").addCandidate("Bob").ddone().build().first()
+        var cvr = CvrBuilders().addCvr().addContest("AvB", "Alice").addCandidate("Bob").ddone().build().first()
         assertEquals(0.5, target.assorter.assort(cvr), "wrong value for vote for invalid vote--Alice & Bob")
 
-        cvr = CvrBuilders().addCrv().addContest("AvB", "Bob").addCandidate("Candy").ddone().build().first()
+        cvr = CvrBuilders().addCvr().addContest("AvB", "Bob").addCandidate("Candy").ddone().build().first()
         assertEquals(0.5, target.assorter.assort(cvr), "wrong value for vote for invalid vote--Bob & Candy")
     }
 }

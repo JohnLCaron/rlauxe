@@ -21,7 +21,7 @@ Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
  */
 
 // See SHANGRLA 3.2
-class TestComparisonAssorter {
+class TestAssorterComparison {
 
     @Test
     fun testBasics() {

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
@@ -100,11 +101,10 @@ import org.cryptobiotic.rlauxe.util.Prng
 //        return cvr_list, phantoms
 
 fun makePhantomCvrs(
-    contestsUA: List<ContestUnderAudit>,
+    contests: List<Contest>,
     ncvrs: Map<Int, Int>,
     prefix: String = "phantom-",
-    prng: Prng,
-): List<CvrUnderAudit> {
+): List<Cvr> {
     // code assertRLA.ipynb
     // + Prepare ~2EZ:
     //    - `N_phantoms = max_cards - cards_in_manifest`
@@ -126,7 +126,7 @@ fun makePhantomCvrs(
     // create phantom CVRs as needed for each contest
     val phantombs = mutableListOf<PhantomBuilder>()
 
-    for (contest in contestsUA) {
+    for (contest in contests) {
         val phantoms_needed = contest.Nc - ncvrs[contest.id]!!
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
@@ -136,13 +136,13 @@ fun makePhantomCvrs(
             phantombs[it].contests.add(contest.id)
         }
     }
-    return phantombs.map { it.build(prng) }
+    return phantombs.map { it.build() }
 }
 
 class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
-    fun build(prng: Prng): CvrUnderAudit {
+    fun build(): Cvr {
         val votes = contests.associateWith { IntArray(0) }
-        return CvrUnderAudit(Cvr(id, votes, phantom = true), prng.next())
+        return Cvr(id, votes, phantom = true)
     }
 }

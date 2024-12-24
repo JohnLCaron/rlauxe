@@ -36,7 +36,7 @@ class TestComparisonWorkflow {
     }
 
     fun testComparisonWorkflow(auditConfig: AuditConfig, N: Int, testData: MultiContestTestData) {
-        val contests: List<Contest> = testData.makeContests()
+        val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow N=$N")
         contests.forEach{ println(" $it")}
         println()

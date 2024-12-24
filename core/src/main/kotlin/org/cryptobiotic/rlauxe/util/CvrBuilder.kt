@@ -27,16 +27,16 @@ class CvrBuilders {
         return contests.values.find { it.id == contestId }
     }
 
-    fun addCrv(): CvrBuilder {
+    fun addCvr(): CvrBuilder {
         this.nextCvrId++
         val cb = CvrBuilder(this, "card${nextCvrId}")
         builders.add(cb)
         return cb
     }
 
-    fun addPhantomCrv(): CvrBuilder {
-        this.nextCvrId++
-        val cb = CvrBuilder(this, "card${nextCvrId}", phantom=true)
+    fun addPhantomCvr(cvrId: String? = null): CvrBuilder {
+        val useId = cvrId?: "card${this.nextCvrId++}"
+        val cb = CvrBuilder(this, useId, phantom=true)
         builders.add(cb)
         return cb
     }
@@ -129,7 +129,7 @@ class CvrBuilder(
 
     companion object {
         fun fromCvr(builders: CvrBuilders, cvr: Cvr): CvrBuilder {
-            val cvrb: CvrBuilder = builders.addCvr( cvr.id)
+            val cvrb: CvrBuilder = if (cvr.phantom) builders.addPhantomCvr(cvr.id) else builders.addCvr( cvr.id)
             cvr.votes.forEach { contestId, votes ->
                 cvrb.addContest(contestId, votes)
             }

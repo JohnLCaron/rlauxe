@@ -21,8 +21,8 @@ class TestPollingWorkflow {
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
-        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..0.10)
-        val contests: List<Contest> = test.makeContests()
+        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..< 0.10)
+        val contests: List<Contest> = test.contests
 
         println("Start testPollingNoStyle N=$N")
         contests.forEach{ println(" $it")}
@@ -79,8 +79,8 @@ class TestPollingWorkflow {
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
-        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..0.10)
-        val contests: List<Contest> = test.makeContests()
+        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..< 0.10)
+        val contests: List<Contest> = test.contests
         println("Start testPollingWithStyle N=$N")
         contests.forEach{ println(" $it")}
         println()

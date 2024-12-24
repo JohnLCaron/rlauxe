@@ -52,8 +52,8 @@ class ComparisonWorkflow(
         // 3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
         //      (including “phantom” CVRs), using a high-quality PRNG [OS19].
         val ncvrs =  makeNcvrsPerContest(contests, cvrs)
-        val phantomCVRs = makePhantomCvrs(contestsUA, ncvrs, "phantom-", prng)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) } + phantomCVRs
+        val phantomCVRs = makePhantomCvrs(contests, ncvrs)
+        cvrsUA = (cvrs + phantomCVRs).map { CvrUnderAudit(it, prng.next()) }
 
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
@@ -302,9 +302,6 @@ fun runOneAssertionAudit(
         withoutReplacement = true
     )
 
-    val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }
-    assertion.samplesUsed = maxSamples
-
     // do not terminate on null reject, continue to use all samples
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
     if (!testH0Result.status.fail) {
@@ -313,6 +310,7 @@ fun runOneAssertionAudit(
     } else {
         println("testH0Result.status = ${testH0Result.status}")
     }
+    assertion.samplesUsed = testH0Result.sampleCount
     assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit }
     assertion.pvalue = testH0Result.pvalues.last()
 

@@ -13,7 +13,7 @@ class TestEstimateSampleSize {
     @Test
     fun testFindSampleSizePolling() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, isComparison = false) }
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false) }
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
@@ -27,7 +27,7 @@ class TestEstimateSampleSize {
     @Test
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit( it ) }
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it ) }
         val cvrs = test.makeCvrsFromContests()
         val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
 

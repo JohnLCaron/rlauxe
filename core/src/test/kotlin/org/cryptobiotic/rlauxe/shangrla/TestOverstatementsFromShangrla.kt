@@ -162,10 +162,10 @@ class TestOverstatementsFromShangrla {
         //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
         //        mvrs = CVR.from_dict(mvr_dict)
         val mvrb = CvrBuilders()
-            .addCrv().addContest("AvB", "Alice").ddone()
-            .addCrv().addContest("AvB", "Bob").ddone()
-            .addCrv().addContest("AvB").ddone()
-            .addCrv().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
+            .addCvr().addContest("AvB", "Alice").ddone()
+            .addCvr().addContest("AvB", "Bob").ddone()
+            .addCvr().addContest("AvB").ddone()
+            .addCvr().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
         println(mvrb.show())
         val mvrs = mvrb.build()  + CvrUnderAudit.makePhantom("Phantastic", 0)
 
@@ -177,10 +177,10 @@ class TestOverstatementsFromShangrla {
         //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
         //        cvrs = CVR.from_dict(cvr_dict)
         val cvrb = CvrBuilders()
-            .addCrv().addContest("AvB", "Alice").ddone()
-            .addCrv().addContest("AvB", "Bob").ddone()
-            .addCrv().addContest("AvB").ddone()
-            .addCrv().addContest("CvD", "Elvis").ddone()
+            .addCvr().addContest("AvB", "Alice").ddone()
+            .addCvr().addContest("AvB", "Bob").ddone()
+            .addCvr().addContest("AvB").ddone()
+            .addCvr().addContest("CvD", "Elvis").ddone()
         println(cvrb.show())
         val cvrs = cvrb.build() + CvrUnderAudit.makePhantom("Phantastic", 0)
 
@@ -393,11 +393,11 @@ class TestOverstatementsFromShangrla {
         //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
         //        mvrs = CVR.from_dict(mvr_dict)
         val mvrb = CvrBuilders()
-            .addCrv().addContest("AvB", "Alice").ddone()
-            .addCrv().addContest("AvB", "Bob").ddone()
-            .addCrv().addContest("AvB").ddone()
-            .addCrv().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
-            .addPhantomCrv().addContest("AvB").ddone()
+            .addCvr().addContest("AvB", "Alice").ddone()
+            .addCvr().addContest("AvB", "Bob").ddone()
+            .addCvr().addContest("AvB").ddone()
+            .addCvr().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
         println(mvrb.show())
         val mvrs = mvrb.build()
 
@@ -408,11 +408,11 @@ class TestOverstatementsFromShangrla {
         //                    {'id': 'phantom_1', 'votes': {'AvB': {}}, 'phantom': True}]
         //        cvrs = CVR.from_dict(cvr_dict)
         val cvrb = CvrBuilders()
-            .addCrv().addContest("AvB", "Alice").ddone()
-            .addCrv().addContest("AvB", "Bob").ddone()
-            .addCrv().addContest("AvB").ddone()
-            .addCrv().addContest("CvD", "Elvis").ddone()
-            .addPhantomCrv().addContest("AvB").ddone()
+            .addCvr().addContest("AvB", "Alice").ddone()
+            .addCvr().addContest("AvB", "Bob").ddone()
+            .addCvr().addContest("AvB").ddone()
+            .addCvr().addContest("CvD", "Elvis").ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
         println(cvrb.show())
         val cvrs = cvrb.build()
 

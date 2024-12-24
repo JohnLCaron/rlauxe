@@ -77,7 +77,6 @@ fun makeEstimationTasks(
                         contestUA,
                         assert,
                         cvrs,
-                        // maxSamples,  // TODO
                         startingTestStatistic,
                         prevSampleSize,
                         moreParameters
@@ -95,7 +94,6 @@ class SimulateSampleSizeTask(
         val contestUA: ContestUnderAudit,
         val assertion: Assertion,
         val cvrs: List<Cvr>,
-        // val maxSamples: Int,
         val startingTestStatistic: Double,
         val prevSampleSize: Int,
         val moreParameters: Map<String, Double> = emptyMap(),
@@ -159,7 +157,7 @@ fun simulateSampleSizePollingAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val margin = assorter.reportedMargin()
-    val simContest = PollingSimulation(contestUA.contest as Contest, assorter)
+    val simContest = ContestSimulation(contestUA.contest as Contest, 0.0) // TODO pctUndervote
     val cvrs = simContest.makeCvrs()
 
     val sampler = if (auditConfig.fuzzPct == null) {

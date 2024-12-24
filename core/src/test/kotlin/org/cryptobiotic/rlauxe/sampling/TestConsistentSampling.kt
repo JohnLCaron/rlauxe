@@ -22,15 +22,15 @@ class TestConsistentSampling {
         )
 
         val cvrs = CvrBuilders()
-            .addCrv().addContest("city_council", "Alice").done()
+            .addCvr().addContest("city_council", "Alice").done()
             .addContest("measure_1", "yes").done().done()
-            .addCrv().addContest("city_council", "Bob").done()
+            .addCvr().addContest("city_council", "Bob").done()
             .addContest("measure_1", "yes").done().done()
-            .addCrv().addContest("city_council", "Bob").done()
+            .addCvr().addContest("city_council", "Bob").done()
             .addContest("measure_1", "no").done().done()
-            .addCrv().addContest("city_council", "Charlie").done().done()
-            .addCrv().addContest("city_council", "Doug").done().done()
-            .addCrv().addContest("measure_1", "no").done().done()
+            .addCvr().addContest("city_council", "Charlie").done().done()
+            .addCvr().addContest("city_council", "Doug").done().done()
+            .addCvr().addContest("measure_1", "no").done().done()
             .build()
 
         val prng = Prng(12345678901L)
@@ -64,24 +64,21 @@ class TestConsistentSampling {
         )
 
         val cvrs = CvrBuilders()
-            .addCrv().addContest("city_council", "Alice").done()
+            .addCvr().addContest("city_council", "Alice").done()
                     .addContest("measure_1", "yes").done().done()
-            .addCrv().addContest("city_council", "Bob").done()
+            .addCvr().addContest("city_council", "Bob").done()
                     .addContest("measure_1", "yes").done().done()
-            .addCrv().addContest("city_council", "Bob").done()
+            .addCvr().addContest("city_council", "Bob").done()
                     .addContest("measure_1", "no").done().done()
-            .addCrv().addContest("city_council", "Charlie").done().done()
-            .addCrv().addContest("city_council", "Doug").done().done()
-            .addCrv().addContest("measure_1", "no").done().done()
-            .addCrv().addContest("measure_2", "no").done().done()
-            .addCrv().addContest("measure_2", "no").done().done()
-            .addCrv().addContest("measure_2", "yes").done().done()
+            .addCvr().addContest("city_council", "Charlie").done().done()
+            .addCvr().addContest("city_council", "Doug").done().done()
+            .addCvr().addContest("measure_1", "no").done().done()
+            .addCvr().addContest("measure_2", "no").done().done()
+            .addCvr().addContest("measure_2", "no").done().done()
+            .addCvr().addContest("measure_2", "yes").done().done()
             .build()
 
-        val prng = Prng(123456789012L)
-        val cvrsUA = cvrs.mapIndexed { idx, it ->
-            CvrUnderAudit( it, prng.next())
-        }
+
 
         val contests =  makeContestsFromCvrs(cvrs)
         val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it) }
@@ -90,17 +87,15 @@ class TestConsistentSampling {
         contestsUA[2].estSampleSize = 2
 
         val ncvrs = makeNcvrsPerContest(contests, cvrs)
-        val phantomCVRs = makePhantomCvrs(contestsUA, ncvrs, "phantom-", prng)
-        val cvrsUAP = cvrsUA + phantomCVRs
+        val phantomCVRs = makePhantomCvrs(contests, ncvrs)
+
+        val prng = Prng(123456789012L)
+        val cvrsUAP = (cvrs + phantomCVRs).map { CvrUnderAudit( it, prng.next()) }
         assertEquals(9, cvrsUAP.size)
 
         val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
         assertEquals(6, sample_cvr_indices.size)
         assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
-
-        //assertEquals(6461562665860220490, contestsUA[0].sampleThreshold)
-        //assertEquals(6461562665860220490, contestsUA[1].sampleThreshold)
-        //assertEquals(2182043544522574371, contestsUA[2].sampleThreshold)
     }
 
     // the cvrs include all the contests, and always have a vote in that contest
@@ -119,7 +114,7 @@ class TestConsistentSampling {
 
         fun runTest() {
             val test = MultiContestTestData(20, 11, 20000)
-            val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+            val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
             contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
             val prng = Prng(secureRandom.nextLong())

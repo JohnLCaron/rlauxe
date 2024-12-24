@@ -15,6 +15,7 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.4")
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.bundles.egtest)
 }
 
 tasks.test {

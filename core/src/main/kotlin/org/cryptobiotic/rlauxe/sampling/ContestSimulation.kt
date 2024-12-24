@@ -23,9 +23,10 @@ import kotlin.random.Random
 //    For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
 //    I think we must have a ballot manifest, which means we have Nb, and ...
 
-// contest has Votes and Nc
-class PollingSimulation2(val contest: Contest, underVotePct: Double) {
-    val ncands = contest.info.candidateIds.size
+/** Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms. */
+class ContestSimulation(val contest: Contest, underVotePct: Double) {
+    val info = contest.info
+    val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
     val underCount = (contest.Nc * underVotePct).toInt() // U_c
     val phantomCount = contest.Nc - underCount - voteCount // Np_c
@@ -37,7 +38,7 @@ class PollingSimulation2(val contest: Contest, underVotePct: Double) {
         resetTracker()
     }
 
-    fun show() = "Contest ${contest.id} voteCount = $voteCount underCount = $underCount phantomCount = $phantomCount "
+    fun show() = "ContestSimulation ${contest.id} voteCount=$voteCount underCount=$underCount phantomCount=$phantomCount "
 
     fun resetTracker() {
         trackVotesRemaining = mutableListOf()
@@ -45,27 +46,28 @@ class PollingSimulation2(val contest: Contest, underVotePct: Double) {
         votesLeft = voteCount
     }
 
-    // makes a new, independent set of Cvrs with the contest's votes, undervotes, and phantoms.
+    // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
+    // cvrs only contain this contest
     // ncvrs = voteCount + underCount + phantomCount = Nc
     fun makeCvrs(): List<Cvr> {
         resetTracker()
         val cvrbs = CvrBuilders().addContests(listOf(contest.info))
         val result = mutableListOf<Cvr>()
         repeat(this.voteCount) {
-            val cvrb = cvrbs.addCrv()
-            cvrb.addContest(contest.info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
+            val cvrb = cvrbs.addCvr()
+            cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
             result.add(cvrb.build())
         }
         // add empty undervotes
         repeat(underCount) {
-            val cvrb = cvrbs.addCrv()
-            cvrb.addContest(contest.info.name).done()
+            val cvrb = cvrbs.addCvr()
+            cvrb.addContest(info.name).done()
             result.add(cvrb.build())
         }
         // add phantoms
         repeat(phantomCount) {
-            val cvrb = cvrbs.addPhantomCrv()
-            cvrb.addContest(contest.info.name).done()
+            val cvrb = cvrbs.addPhantomCvr()
+            cvrb.addContest(info.name).done()
             result.add(cvrb.build())
         }
         return result.toList()
@@ -94,8 +96,8 @@ class PollingSimulation2(val contest: Contest, underVotePct: Double) {
     }
 
     companion object {
-
-        fun make(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): PollingSimulation2 {
+        /** Make a 2 candidate plurality Contest with given margin etc. */
+        fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
             val info = ContestInfo(
                 name = "AvB",
                 id = 0,
@@ -105,13 +107,12 @@ class PollingSimulation2(val contest: Contest, underVotePct: Double) {
             val underCount = (Nc * underVotePct).toInt()
             val phantomCount = (Nc * phantomPct).toInt()
             val voteCount = Nc - underCount - phantomCount
-            println("underCount = $underCount phantomCount = $phantomCount voteCount = $voteCount")
 
             val winnerCount = ((reportedMargin * Nc + voteCount) / 2.0) .toInt()
             val loserCount = ((voteCount - reportedMargin * Nc) / 2.0) .toInt()
 
             val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc)
-            return PollingSimulation2(contest, underVotePct)
+            return ContestSimulation(contest, underVotePct)
         }
     }
 

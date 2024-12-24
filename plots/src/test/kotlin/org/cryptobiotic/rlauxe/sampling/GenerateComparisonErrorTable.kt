@@ -23,20 +23,18 @@ class GenerateComparisonErrorTable {
 
         margins.forEach { margin ->
             ncands.forEach { ncand ->
-                val fcontest = ContestTestData(0, ncand, margin)
-                fcontest.ncards = N
-                val contest = fcontest.makeContest() // TODO useStyle matters?
-                // print("contest votes = ${contest.votes} ")
+                //         fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
+                val sim = ContestSimulation.make2wayTestContest(margin, 0.0, 0.0, N) // TODO
 
                 val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
                 fuzzPcts.forEach { fuzzPct ->
                     // println("margin= $margin ncand=$ncand fuzzPct=$fuzzPct")
 
                     repeat(auditConfig.ntrials) {
-                        val cvrs = fcontest.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, true, true)
+                        val cvrs = sim.makeCvrs()
+                        val contestUA = ContestUnderAudit(sim.contest, true, true)
                         val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
-                        contestUA.makeComparisonAssertions(cvrs, votes[contest.id]!!)
+                        contestUA.makeComparisonAssertions(cvrs, votes[sim.contest.id]!!)
                         val minAssert = contestUA.minComparisonAssertion()!!
                         val minAssort = minAssert.cassorter
 

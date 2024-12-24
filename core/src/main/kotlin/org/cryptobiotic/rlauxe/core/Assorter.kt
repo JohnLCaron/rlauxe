@@ -12,9 +12,13 @@ interface AssorterFunction {
     fun loser(): Int
     fun reportedMargin(): Double
 
-    // Calculate the assorter mean for all the CVRs,
-    //    including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest
-    //    (i.e., the assorter assigns the value 1/2 to phantom CVRs)
+    // Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
+    //    by treating the phantom CVRs as if they contain no valid vote in the contest
+    //    (i.e., the assorter assigns the value 1/2 to phantom CVRs). SHANGRLA section 3.4 p 12.
+    // It is not necessary to adjust the margins to account for those omissions. Rather, it is
+    //    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
+    //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
+    // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<CvrIF>): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }
                         .map { assort(it, usePhantoms = false) }.average()
@@ -41,11 +45,14 @@ interface AssorterFunction {
     // or a valid vote for every loser in a ballot-polling audit.
 }
 
-/** See SHANGRLA, section 2.1. */
+/** See SHANGRLA, section 2.1, p.4 */
 data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterFunction {
-    // SHANGRLA section 2, p 4.
+    // If a ballot cannot be found (because the manifest is wrong—either because it lists a ballot that is not there, or
+    //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
+    //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
+    //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
     override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
-        if (usePhantoms && mvr.phantom) return 0.0
+        if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(contest.info.id, winner)
         val l = mvr.hasMarkFor(contest.info.id, loser)
         return (w - l + 1) * 0.5
@@ -67,13 +74,12 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
     }
 }
 
-/** See SHANGRLA, section 2.3. */
+/** See SHANGRLA, section 2.3, p.5. */
 data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterFunction {
     val upperBound = 0.5 / minFraction
 
-    // SHANGRLA eq (1), section 2.3, p 5.
     override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
-        if (usePhantoms && mvr.phantom) return 0.0
+        if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(contest.info.id, winner)
         return if (mvr.hasOneVote(contest.info.id, contest.info.candidateIds)) (w / (2 * minFraction)) else .5
     }
@@ -135,7 +141,7 @@ data class ComparisonAssorter(
         //     B assigns nonnegative numbers to ballots, and the outcome is correct iff Bavg > 1/2
         //     So, B is an assorter.
 
-        val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi
+        val overstatement = overstatementError(mvr, cvr, this.hasStyle) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
         val denom =  (2.0 - margin/this.assorter.upperBound())
         val result1 =  tau * noerror
@@ -202,13 +208,16 @@ open class Assertion(
     val loser = assorter.loser()
     val margin = assorter.reportedMargin()
 
+    // these values are set during estimateSampleSizes()
+    var estSampleSize = 0   // estimated sample size
+
+    // these values are set during runAudit()
     var status = TestH0Status.NotStarted
     var proved = false
-    var estSampleSize = 0  // estimated sample size; depends only on the margin, fromEstimateSampleSize
-    var samplesNeeded = 0 // first sample when pvalue < riskLimit; from runAudit
-    var samplesUsed = 0 // sample count when testH0 terminates
-    var pvalue = 0.0 // last pvalue when testH0 terminates
-    var round = 0    // round when set to proved or disproved
+    var samplesNeeded = 0   // first sample when pvalue < riskLimit
+    var samplesUsed = 0     // sample count when testH0 terminates
+    var pvalue = 0.0        // last pvalue when testH0 terminates
+    var round = 0           // round when set to proved or disproved
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(margin)}"
 }

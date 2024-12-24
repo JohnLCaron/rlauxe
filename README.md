@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/22/2024
+last update: 12/24/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -141,9 +141,9 @@ Notes
 See SHANGRLA, section 2.2.
 
 In approval voting, voters may vote for as many candidates as they like.
-The top k candidates are elected.
+The top K candidates are elected.
 
-The plurality voting algorithm is used plurality voting.
+The plurality voting algorithm is used, with K winners and C-K losers.
 
 
 #### SuperMajority

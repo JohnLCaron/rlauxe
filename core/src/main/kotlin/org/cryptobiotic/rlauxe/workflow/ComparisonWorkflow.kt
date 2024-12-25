@@ -141,14 +141,6 @@ class ComparisonWorkflow(
         return allDone
     }
 
-    fun showResultsOld() {
-        println("Audit results")
-        contestsUA.forEach{ contest ->
-            println(" $contest status=${contest.status}")
-        }
-        println()
-    }
-
     fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->

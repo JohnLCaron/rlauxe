@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
-import org.cryptobiotic.rlauxe.sampling.generateSampleWithMean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
@@ -125,4 +124,20 @@ class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGene
         index = 0
     }
     override fun maxSamples() = N
+}
+
+
+// generate a sample thats approximately mean = theta
+fun generateUniformSample(N: Int) : DoubleArray {
+    return DoubleArray(N) {
+        secureRandom.nextDouble(1.0)
+    }
+}
+
+// generate a sample thats approximately mean = theta
+fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
+    return DoubleArray(N) {
+        val r = secureRandom.nextDouble(1.0)
+        if (r < ratio) 1.0 else 0.0
+    }
 }

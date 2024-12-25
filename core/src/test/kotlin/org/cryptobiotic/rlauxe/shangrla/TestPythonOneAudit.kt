@@ -9,6 +9,7 @@ import kotlin.math.max
 
 import kotlin.math.min
 import kotlin.math.sqrt
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -621,3 +622,13 @@ fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
     }
     return firstIdx
 }
+
+///////////////////////
+//// DoubleArrays
+fun randomPermute(samples : DoubleArray): DoubleArray {
+    val n = samples.size
+    val permutedIndex = MutableList(n) { it }
+    permutedIndex.shuffle(Random)
+    return DoubleArray(n) { samples[permutedIndex[it]] }
+}
+

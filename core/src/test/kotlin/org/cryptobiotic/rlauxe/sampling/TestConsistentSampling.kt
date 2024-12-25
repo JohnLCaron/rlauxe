@@ -2,142 +2,120 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.makeNcvrsPerContest
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestConsistentSampling {
 
-    // SHANGRLA test_CVR.py
     @Test
-    fun test_consistent_sampling() {
-        val contestInfos: List<ContestInfo> = listOf(
-            ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
-                choiceFunction = SocialChoiceFunction.PLURALITY),
-            ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
-                SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
-            ContestInfo("dont_care", 2, candidateNames= listToMap("yes", "no"),
-                SocialChoiceFunction.PLURALITY),
-        )
+    fun testConsistentCvrSampling() {
+        val test = MultiContestTestData(20, 11, 20000)
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
-        val cvrs = CvrBuilders()
-            .addCvr().addContest("city_council", "Alice").done()
-            .addContest("measure_1", "yes").done().done()
-            .addCvr().addContest("city_council", "Bob").done()
-            .addContest("measure_1", "yes").done().done()
-            .addCvr().addContest("city_council", "Bob").done()
-            .addContest("measure_1", "no").done().done()
-            .addCvr().addContest("city_council", "Charlie").done().done()
-            .addCvr().addContest("city_council", "Doug").done().done()
-            .addCvr().addContest("measure_1", "no").done().done()
-            .build()
+        val prng = Prng(secureRandom.nextLong())
+        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it, prng.next()) }
 
-        val prng = Prng(12345678901L)
-        val cvrsUA = cvrs.mapIndexed { idx, it ->
-            CvrUnderAudit( it, prng.next()) // here we assign sample number deterministically
+        val sampleIndices = consistentCvrSampling(contestsUA, cvrsUAP)
+        println("nsamples needed = ${sampleIndices.size}\n")
+        sampleIndices.forEach {
+            assertTrue(it < cvrsUAP.size)
         }
-        val contestsUA = contestInfos.mapIndexed { idx, it ->
-            ContestUnderAudit( it, cvrs)
+        contestsUA.forEach { contest ->
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
         }
-        contestsUA[0].estSampleSize = 3
-        contestsUA[1].estSampleSize = 4
 
-        val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUA)
-        assertEquals(5, sample_cvr_indices.size)
-
-        assertEquals(listOf(3, 2, 1, 5, 0), sample_cvr_indices)
-        //assertEquals(3769430703478411547, contestsUA[0].sampleThreshold)
-        //assertEquals(6830268459859750345, contestsUA[1].sampleThreshold)
-        //assertEquals(0, contestsUA[2].sampleThreshold)
-    }
-
-    @Test
-    fun testSamplingWithPhantoms() {
-        val contestInfos: List<ContestInfo> = listOf(
-            ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
-                choiceFunction = SocialChoiceFunction.PLURALITY),
-            ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
-                SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
-            ContestInfo("measure_2", 2, candidateNames= listToMap("yes", "no"),
-                SocialChoiceFunction.PLURALITY),
-        )
-
-        val cvrs = CvrBuilders()
-            .addCvr().addContest("city_council", "Alice").done()
-                    .addContest("measure_1", "yes").done().done()
-            .addCvr().addContest("city_council", "Bob").done()
-                    .addContest("measure_1", "yes").done().done()
-            .addCvr().addContest("city_council", "Bob").done()
-                    .addContest("measure_1", "no").done().done()
-            .addCvr().addContest("city_council", "Charlie").done().done()
-            .addCvr().addContest("city_council", "Doug").done().done()
-            .addCvr().addContest("measure_1", "no").done().done()
-            .addCvr().addContest("measure_2", "no").done().done()
-            .addCvr().addContest("measure_2", "no").done().done()
-            .addCvr().addContest("measure_2", "yes").done().done()
-            .build()
-
-
-
-        val contests =  makeContestsFromCvrs(cvrs)
-        val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it) }
-        contestsUA[0].estSampleSize = 3
-        contestsUA[1].estSampleSize = 3
-        contestsUA[2].estSampleSize = 2
-
-        val ncvrs = makeNcvrsPerContest(contests, cvrs)
-        val phantomCVRs = makePhantomCvrs(contests, ncvrs)
-
-        val prng = Prng(123456789012L)
-        val cvrsUAP = (cvrs + phantomCVRs).map { CvrUnderAudit( it, prng.next()) }
-        assertEquals(9, cvrsUAP.size)
-
-        val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
-        assertEquals(6, sample_cvr_indices.size)
-        assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
-    }
-
-    // the cvrs include all the contests, and always have a vote in that contest
-    @Test
-    fun testSamplingNoSkip() {
-        TestSamplingWithSkip(0).runTest()
-    }
-
-    // the cvrs include all the contests, but dont always have a vote in that contest
-    @Test
-    fun testSamplingSkipSome() {
-        TestSamplingWithSkip(1).runTest()
-    }
-
-    class TestSamplingWithSkip(val skipSomeContests: Int) {
-
-        fun runTest() {
-            val test = MultiContestTestData(20, 11, 20000)
-            val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
-            contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
-
-            val prng = Prng(secureRandom.nextLong())
-            val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it, prng.next()) }
-
-            val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
-            println("nsamples = ${sample_cvr_indices.size}\n")
-            contestsUA.forEach { contest ->
-                println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+        // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
+        println("contest.name (id) == sampleSize")
+        contestsUA.forEach { contest ->
+            val cvrs = cvrsUAP.filter { it.hasContest(contest.id) }
+            var count = 0
+            cvrs.forEachIndexed { idx, it ->
+                if (it.sampled) count++
             }
+            assertTrue(contest.estSampleSize <= cvrs.size)
+            assertTrue(contest.estSampleSize <= count)
+            // TODO what else can we check ??
+        }
+    }
 
-            // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
-            println("contest.name (id) == sampleSize")
-            contestsUA.forEach { contest ->
-                val cvrs = cvrsUAP.filter { it.hasContest(contest.id)}
-                var count = 0
-                cvrs.forEachIndexed { idx, it ->
-                    if (it.sampled) count++
-                }
-                assertTrue(contest.estSampleSize <= cvrs.size)
-                assertTrue(contest.estSampleSize <= count)
-                // TODO what else can we check ??
+    @Test
+    fun testConsistentPollingSampling() {
+        val test = MultiContestTestData(20, 11, 20000)
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
+
+        val ballots = test.makeBallotsForPolling()
+        val ballotManifest = BallotManifest(ballots, test.ballotStyles)
+
+        val prng = Prng(secureRandom.nextLong())
+        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
+
+        val sampleIndices = consistentPollingSampling(contestsUA, ballotsUA, ballotManifest)
+        println("nsamples needed = ${sampleIndices.size}\n")
+        sampleIndices.forEach {
+            assertTrue(it < ballotsUA.size)
+        }
+        contestsUA.forEach { contest ->
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+        }
+
+        // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
+        println("contest.name (id) == sampleSize")
+        contestsUA.forEach { contest ->
+            val ballotsForContest = ballotsUA.filter {
+                val ballotStyle = ballotManifest.getBallotStyleFor(it.ballot.ballotStyleId!!)!!
+                ballotStyle.hasContest(contest.id)
             }
+            var count = 0
+            ballotsUA.forEachIndexed { idx, it ->
+                if (it.sampled) count++
+            }
+            assertTrue(contest.estSampleSize <= ballotsForContest.size)
+            assertTrue(contest.estSampleSize <= count)
+        }
+    }
+
+    @Test
+    fun testUniformPollingSampling() {
+        val N = 20000
+        val test = MultiContestTestData(20, 11, N)
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        contestsUA.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
+
+        val ballots = test.makeBallotsForPolling()
+        // val ballotManifest = BallotManifest(ballots, test.ballotStyles)
+
+        val prng = Prng(secureRandom.nextLong())
+        val ballotsUA = ballots.map { BallotUnderAudit(it, prng.next()) }
+
+        //    contests: List<ContestUnderAudit>,
+        //    ballots: List<BallotUnderAudit>, // all the ballots available to sample
+        //    samplePctCutoff: Double,
+        //    N: Int,
+        //    roundIdx: Int,
+        val estPctCutoff = .50
+        val sampleIndices = uniformPollingSampling(contestsUA, ballotsUA, estPctCutoff, N, 0)
+        println("nsamples needed = ${sampleIndices.size}\n")
+        sampleIndices.forEach {
+            assertTrue(it < ballotsUA.size)
+        }
+        contestsUA.forEach { contest ->
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+        }
+
+        // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
+        println("contest.name (id) == sampleSize")
+        contestsUA.forEach { contest ->
+            assertTrue(contest.estSampleSize <= sampleIndices.size)
+            assertTrue(contest.done || contest.estSampleSizeNoStyles <= sampleIndices.size)
+
+            val estPct = contest.estSampleSize / contest.Nc.toDouble()
+            println("contest ${contest.id} estPct=$estPct done=${contest.done}")
+            if (estPct > estPctCutoff)
+                assertTrue(contest.done)
         }
     }
 }

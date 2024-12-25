@@ -23,9 +23,6 @@ class PollingWorkflow(
             }
         }
 
-        // TODO polling phantoms
-        // phantoms can be CVRs, so dont need CvrIF.
-        // val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
         val prng = Prng(auditConfig.seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 

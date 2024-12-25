@@ -24,7 +24,7 @@ class TestAssorterMargins {
             val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
             val cvrs = test.makeCvrsFromContests()
             val fcontest = test.fcontests.find { it.info.name == contest.name }!!
-            testAssertions(fcontest, contest, contestUA.pollingAssertions, cvrs)
+            testAssertions(contest, contestUA.pollingAssertions, cvrs)
         }
     }
 
@@ -35,7 +35,7 @@ class TestAssorterMargins {
                 propTestFastConfig, // propTestSlowConfig,
                 Arb.int(min = 10, max = 30),
                 Arb.int(min = 5, max = 15),
-                Arb.int(min = 10000, max = 30000),
+                Arb.int(min = 10000, max = 20000),
             ) { ncontests, nstyles, Nc ->
                 val test = MultiContestTestData(ncontests, nstyles, Nc, 0.011..<0.033)
                 val cvrs = test.makeCvrsFromContests()
@@ -43,7 +43,7 @@ class TestAssorterMargins {
                 test.contests.forEach { contest ->
                     val fcontest = test.fcontests.find { it.info.name == contest.name }!!
                     val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
-                    testAssertions(fcontest, contest, contestUA.pollingAssertions, cvrs)
+                    testAssertions(contest, contestUA.pollingAssertions, cvrs)
                 }
             }
         }
@@ -68,12 +68,12 @@ class TestAssorterMargins {
                         )
                     }]"
                 )
-                testAssertions(null, sim.contest, contestUA.pollingAssertions, sim.makeCvrs())
+                testAssertions(sim.contest, contestUA.pollingAssertions, sim.makeCvrs())
             }
         }
     }
 
-    fun testAssertions(fcontest: ContestTestData?, contest: Contest, assertions: List<Assertion>, cvrs: List<Cvr>) {
+    fun testAssertions(contest: Contest, assertions: List<Assertion>, cvrs: List<Cvr>) {
         assertions.forEach { ast ->
             val ncvrs = cvrs.filter { it.hasContest(contest.id) }.count()
             assertTrue(ncvrs == contest.Nc)

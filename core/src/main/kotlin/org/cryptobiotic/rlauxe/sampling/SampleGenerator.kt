@@ -133,118 +133,6 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     override fun maxSamples() = maxSamples
 }
 
-// TODO candidate for removal
-// generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
-// to make mvrs have mvrMean.
-data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
-                                val withoutReplacement: Boolean = true): SampleGenerator {
-    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
-    val mvrs : List<Cvr>
-    val permutedIndex = MutableList(cvrs.size) { it }
-    val sampleMean: Double
-    val sampleCount: Double
-    val flippedVotes: Int
-    var idx = 0
-
-    init {
-        reset()
-
-        // we want to flip the exact number of votes, for reproducibility
-        val mmvrs = mutableListOf<Cvr>()
-        mmvrs.addAll(cvrs)
-        flippedVotes = flipExactVotes(mmvrs, mvrMean)
-        mvrs = mmvrs.toList()
-
-        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
-        sampleMean = sampleCount / cvrs.size
-    }
-
-    override fun sample(): Double {
-        val assortVal = if (withoutReplacement) {
-            val cvr = cvrs[permutedIndex[idx]]
-            val mvr = mvrs[permutedIndex[idx]]
-            idx++
-            cassorter.bassort(mvr, cvr)
-        } else {
-            val chooseIdx = secureRandom.nextInt(cvrs.size) // with Replacement
-            val cvr = cvrs[chooseIdx]
-            val mvr = mvrs[chooseIdx]
-            cassorter.bassort(mvr, cvr)
-        }
-        return assortVal
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(secureRandom)
-        idx = 0
-    }
-
-    fun sampleMean() = sampleMean
-    fun sampleCount() = sampleCount
-    override fun maxSamples() = maxSamples
-}
-
-// TODO candidate for removal
-// generate mvr by starting with cvrs and flipping (N * p2) votes (type 2 errors) and (N * p1) votes (type 1 errors)
-// TODO: generalize to p3, p4
-data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
-                                    val p2: Double, val p1: Double = 0.0,
-                                    val withoutReplacement: Boolean = true): SampleGenerator {
-    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
-    val N = cvrs.size
-    val mvrs : List<Cvr>
-    val permutedIndex = MutableList(N) { it }
-    val sampleMean: Double
-    val sampleCount: Double
-    val flippedVotes2: Int
-    val flippedVotes1: Int
-
-    var idx = 0
-
-    init {
-        reset()
-
-        // we want to flip the exact number of votes, for reproducibility
-        val mmvrs = mutableListOf<Cvr>()
-        mmvrs.addAll(cvrs)
-        flippedVotes2 = add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2).toInt())
-        flippedVotes1 =  if (p1 == 0.0) 0 else {
-            add1voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p1).toInt())
-        }
-        mvrs = mmvrs.toList()
-
-        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
-        sampleMean = sampleCount / N
-    }
-
-    override fun sample(): Double {
-        val assortVal = if (withoutReplacement) {
-            val cvr = cvrs[permutedIndex[idx]]
-            val mvr = mvrs[permutedIndex[idx]]
-            idx++
-            cassorter.bassort(mvr, cvr)
-        } else {
-            val chooseIdx = secureRandom.nextInt(N) // with Replacement
-            val cvr = cvrs[chooseIdx]
-            val mvr = mvrs[chooseIdx]
-            cassorter.bassort(mvr, cvr)
-        }
-        return assortVal
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(secureRandom)
-        idx = 0
-    }
-
-    fun sampleMean() = sampleMean
-    fun sampleCount() = sampleCount
-    override fun maxSamples() = maxSamples
-}
-
-///////////////////////
-// TODO candidates for removal
-
 // change cvrs to have the exact number of votes for wantAvg
 fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
     val ncards = cvrs.size
@@ -256,7 +144,7 @@ fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
 
 // change cvrs to add the given number of two-vote over/understatements.
 // Note that we replace the Cvr in the list when we change it
-private fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
+fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
     if (needToChangeVotesFromA == 0) return 0
     val ncards = cvrs.size
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
@@ -293,29 +181,6 @@ private fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFrom
     return changed
 }
 
-// change cvrs to add the given number of one-vote overstatements.
-private fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
-    if (needToChangeVotesFromA == 0) return 0
-    val ncards = cvrs.size
-    val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
-    var changed = 0
-    while (changed < needToChangeVotesFromA) {
-        val cvrIdx = secureRandom.nextInt(ncards)
-        val cvr = cvrs[cvrIdx]
-        if (cvr.hasMarkFor(0, 0) == 1) {
-            val votes = mutableMapOf<Int, IntArray>()
-            votes[0] = intArrayOf(2)
-            cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
-            changed++
-        }
-    }
-    val checkAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
-    // if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
-    require(checkAvotes == startingAvotes - needToChangeVotesFromA)
-    return changed
-}
-
-
 ///////////////////////
 //// DoubleArrays
 fun randomPermute(samples : DoubleArray): DoubleArray {
@@ -325,45 +190,6 @@ fun randomPermute(samples : DoubleArray): DoubleArray {
     return DoubleArray(n) { samples[permutedIndex[it]] }
 }
 
-// generate a sample thats approximately mean = theta
-fun generateUniformSample(N: Int) : DoubleArray {
-    return DoubleArray(N) {
-        secureRandom.nextDouble(1.0)
-    }
-}
-
-// generate a sample thats approximately mean = theta
-fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
-    return DoubleArray(N) {
-        val r = secureRandom.nextDouble(1.0)
-        if (r < ratio) 1.0 else 0.0
-    }
-}
-
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleGenerator {
-    val N = assortValues.size
-    val permutedIndex = MutableList(N) { it }
-    var idx = 0
-
-    init {
-        reset()
-    }
-
-    override fun sample(): Double {
-        require (idx < N)
-        require (permutedIndex[idx] < N)
-        return assortValues[permutedIndex[idx++]]
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(secureRandom)
-        idx = 0
-    }
-
-    fun sampleCount() = assortValues.sum()
-    fun sampleMean() = assortValues.average()
-    override fun maxSamples() = N
-}
 
 
 

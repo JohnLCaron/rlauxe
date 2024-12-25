@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.comparison
 
+import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
-import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.sim.RepeatedTask
 import org.cryptobiotic.rlauxe.util.mean2margin

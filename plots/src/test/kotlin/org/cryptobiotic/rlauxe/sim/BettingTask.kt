@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
-import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 
 // call this CobraTask ?

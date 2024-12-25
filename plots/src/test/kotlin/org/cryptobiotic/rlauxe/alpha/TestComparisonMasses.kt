@@ -1,16 +1,13 @@
-package org.cryptobiotic.rlauxe.shangrla
+package org.cryptobiotic.rlauxe.alpha
 
 
+import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
-import org.cryptobiotic.rlauxe.sampling.SampleFromArrayWithoutReplacement
-import org.cryptobiotic.rlauxe.sampling.generateUniformSample
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.core.doOneAlphaMartRun
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
@@ -118,40 +115,6 @@ class TestComparisonMasses {
         println()
     }
 
-    // is it true we can normalize the assorter valeus and get the same result?
-    @Test
-    fun compareNormalizing() {
-        val N = 100
-        val cvrMean = .55
-        val cvrs = makeCvrsByExactMean(N, cvrMean)
-        val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeComparisonAssertions(cvrs, contest.votes)
-        val compareAssorter = contestUA.comparisonAssertions.first().cassorter
-
-        val sampler = ComparisonNoErrors(cvrs, compareAssorter)
-        val assorterMean = sampler.sampleMean()
-
-        val d = 100
-
-        println("N=$N cvrMean=$cvrMean assorterMean=$assorterMean noerror=${compareAssorter.noerror}, u=${compareAssorter.upperBound}")
-        println("sampler mean=${sampler.sampleMean()}, count=${sampler.sampleCount()}")
-
-        val resultNotNormalized = doOneAlphaMartRun(sampler, maxSamples = N, eta0 = assorterMean, d = d, u = compareAssorter.upperBound)
-        println("resultNotNormalized = $resultNotNormalized}")
-        println("resultNotNormalized = ${resultNotNormalized.sampleCount}")
-        println()
-
-        val normalizedValues = cvrs.map{ compareAssorter.bassort(it, it) / compareAssorter.noerror / 2 } // makes everything 1/2 when no errors
-        val samplerN = ArrayAsGenSampleFn(normalizedValues.toDoubleArray())
-        println("samplerN mean=${samplerN.sampleMean()}, count=${samplerN.sampleCount()}")
-
-        val resultNormalized = doOneAlphaMartRun(samplerN, maxSamples = N, eta0 = assorterMean, d = d, u = 1.0)
-        println("resultNormalized = $resultNormalized}")
-        println("\nresultNormalized = ${resultNormalized.sampleCount}")
-
-        // it would seem that the idea of normalizing is wrong, the algorithm relies on alternative mean > 1/2.
-        // probably violating the conditions of an assorter, namely B̄ ≡ Sum(B(bi, ci)) / N > 1/2
-    }
 }
 
 
@@ -177,4 +140,30 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
     override fun maxSamples(): Int {
         return assortValues.size
     }
+}
+
+
+class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleGenerator {
+    val N = assortValues.size
+    val permutedIndex = MutableList(N) { it }
+    var idx = 0
+
+    init {
+        reset()
+    }
+
+    override fun sample(): Double {
+        require (idx < N)
+        require (permutedIndex[idx] < N)
+        return assortValues[permutedIndex[idx++]]
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(secureRandom)
+        idx = 0
+    }
+
+    fun sampleCount() = assortValues.sum()
+    fun sampleMean() = assortValues.average()
+    override fun maxSamples() = N
 }

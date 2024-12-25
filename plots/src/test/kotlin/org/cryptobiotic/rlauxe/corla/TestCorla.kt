@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
-import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.util.*

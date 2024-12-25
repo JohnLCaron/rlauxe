@@ -8,18 +8,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-private val debug = false
-
-/*
-    val test = MultiContestTestData(20, 11, 20000)
-    val contests: List<Contest> = test.makeContests()
-    val testCvrs = test.makeCvrsFromContests()
-    val ballots = test.makeBallots()
-
-    val test = MultiContestTestData(20, 11, 20000)
-    val contestsUA: List<ContestUnderAudit> = test.makeContests().map { ContestUnderAudit(it, it.Nc) }
-    val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit.fromCvrIF( it, false) }
- */
+private const val debug = false
 
 // creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
 // It can create cvrs that reflect the contests' exact votes.
@@ -102,7 +91,8 @@ data class MultiContestTestData(
     }
 
     override fun toString() = buildString {
-        appendLine("MultiContestTestData(ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
+        append("MultiContestTestData ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
+        appendLine(" marginRange=$marginRange underVotePct=$underVotePct phantomPct=$phantomPct")
         fcontests.forEach { fcontest ->
             append(fcontest)
             val bs4id = ballotStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
@@ -120,6 +110,7 @@ data class MultiContestTestData(
         ballotStyles.forEach { ballotStyle ->
             val fcontests = fcontests.filter { ballotStyle.contestNames.contains(it.info.name) }
             repeat(ballotStyle.ncards) {
+                // add regular Cvrs including undervotes
                 result.add(makeCvr(cvrbs, fcontests))
             }
         }
@@ -133,7 +124,6 @@ data class MultiContestTestData(
         return result + phantoms
     }
 
-    // add regular Cvrs including undervotes
     private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestData>): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
@@ -176,20 +166,6 @@ data class ContestTestData(
             return Contest(this.info, emptyMap(), this.ncards)
         }
         val votes: List<Pair<Int, Int>> = partition(nvotes, ncands)
-
-        /* pick (ncands - 1) numbers to partition the votes
-        val partition = List(ncands - 1) { it }.map { Pair(it, Random.nextInt(nvotes)) }.toMutableList()
-        partition.add(Pair(ncands - 1, nvotes)) // add the end point
-
-        // turn those into votes
-        val psort = partition.sortedBy { it.second }
-        var last = 0
-        val votes = mutableListOf<Pair<Int, Int>>()
-        psort.forEach { ps ->
-            votes.add(Pair(ps.first, ps.second - last))
-            last = ps.second
-        }
-         */
         var svotes = votes.sortedBy { it.second }.reversed().toMutableList()
         svotes.add(Pair(ncands, underCount)) // represents the undervotes, always at the end
 
@@ -227,24 +203,10 @@ data class ContestTestData(
         val wantMarginDiff = ceil(margin * ncards).toInt()
         val haveMarginDiff = (winner.second - loser.second)
         val adjust: Int = ceil((wantMarginDiff - haveMarginDiff) * 0.5).toInt() // can be positive or negetive
-        svotes.set(0, Pair(winner.first, winner.second + adjust))
+        svotes[0] = Pair(winner.first, winner.second + adjust)
         svotes[1] = Pair(loser.first, loser.second - adjust)
         return adjust // will be 0 when done
     }
-
-    /* used for standalone contest
-    fun makeCvrs(): List<Cvr> {
-        resetTracker()
-        val cvrbs = CvrBuilders().addContests(listOf(this.info))
-        val result = mutableListOf<Cvr>()
-        repeat(this.ncards) {
-            val cvrb = cvrbs.addCrv()
-            cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
-            result.add(cvrb.build())
-        }
-        return result.toList()
-    }
-    */
 
     // choose Candidate, add contest, including undervote (no candidate selected)
     fun addContestToCvr(cvrb: CvrBuilder) {
@@ -274,10 +236,7 @@ data class ContestTestData(
         trackVotesRemaining[idx] = Pair(candidateIdx, nvotes - 1)
         votesLeft--
 
-        val check = trackVotesRemaining.map { it.second }.sum()
-        if (check != votesLeft) {
-            println("check")
-        }
+        val check = trackVotesRemaining.sumOf { it.second }
         require(check == votesLeft)
         return candidateIdx
     }

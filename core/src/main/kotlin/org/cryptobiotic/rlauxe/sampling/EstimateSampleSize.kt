@@ -55,18 +55,18 @@ fun makeEstimationTasks(
 
     contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
         if (!assert.proved) {
-            var maxSamples = contestUA.Nc // TODO WRONG ??
+            // var maxSamples = contestUA.Nc // TODO WRONG ??
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 if (assert.samplesUsed == contestUA.Nc) {
                     println("***LimitReached $contestUA")
-                    contestUA.done = true
+                    contestUA.done = true  // TODO why isnt this on assert, not contest?
                     contestUA.status = TestH0Status.LimitReached
                 }
                 // start where the audit left off
                 prevSampleSize = assert.samplesUsed
-                maxSamples = contestUA.Nc - prevSampleSize // TODO
+                // maxSamples = contestUA.Nc - prevSampleSize // TODO
                 startingTestStatistic = 1.0 / assert.pvalue
             }
 
@@ -107,7 +107,6 @@ class SimulateSampleSizeTask(
                 contestUA,
                 (assertion as ComparisonAssertion).cassorter,
                 cvrs,
-                // maxSamples,
                 startingTestStatistic
             )
         } else {
@@ -115,20 +114,10 @@ class SimulateSampleSizeTask(
                 auditConfig,
                 contestUA,
                 assertion.assorter,
-                // maxSamples,
                 startingTestStatistic,
                 moreParameters=moreParameters,
             )
         }
-
-        // data class EstimationResult(
-        //    val contestUA: ContestUnderAudit,
-        //    val assertion: Assertion,
-        //    val success: Boolean,
-        //    val nsuccess: Int,
-        //    val totalSamplesNeeded: Int,
-        //    val task: EstimationTask
-        //)
 
         return if (result.failPct() > 80.0) { // TODO 80% ??
             assertion.estSampleSize = prevSampleSize + result.findQuantile(auditConfig.quantile)
@@ -152,7 +141,6 @@ fun simulateSampleSizePollingAssorter(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     assorter: AssorterFunction,
-    // maxSamples: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
@@ -171,7 +159,6 @@ fun simulateSampleSizePollingAssorter(
         sampler,
         margin,
         assorter.upperBound(),
-        // maxSamples,
         Nc = contestUA.Nc,
         startingTestStatistic,
         moreParameters = moreParameters,
@@ -183,7 +170,6 @@ fun simulateSampleSizeAlphaMart(
     sampleFn: SampleGenerator,
     margin: Double,
     upperBound: Double,
-    // maxSamples2: Int,
     Nc: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -212,7 +198,6 @@ fun simulateSampleSizeAlphaMart(
 
     val result: RunTestRepeatedResult = runTestRepeated(
         drawSample = sampleFn,
-        // maxSamples = maxSamples,
         ntrials = auditConfig.ntrials,
         testFn = testFn,
         testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
@@ -232,7 +217,6 @@ fun simulateSampleSizeComparisonAssorter(
     contestUA: ContestUnderAudit,
     cassorter: ComparisonAssorter,
     cvrs: List<Cvr>,
-    // maxSamples: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
@@ -258,7 +242,6 @@ fun simulateSampleSizeComparisonAssorter(
         cassorter.upperBound,
         contestUA.Nc,
         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
-        // maxSamples,
         startingTestStatistic,
         moreParameters
     )
@@ -272,7 +255,6 @@ fun simulateSampleSizeBetaMart(
     upperBound: Double,
     Nc: Int,
     errorRates: List<Double>,
-    // maxSamples: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
@@ -298,7 +280,6 @@ fun simulateSampleSizeBetaMart(
 
     val result: RunTestRepeatedResult = runTestRepeated(
         drawSample = sampleFn,
-        // maxSamples = maxSamples,
         ntrials = auditConfig.ntrials,
         testFn = testFn,
         testParameters = mapOf(

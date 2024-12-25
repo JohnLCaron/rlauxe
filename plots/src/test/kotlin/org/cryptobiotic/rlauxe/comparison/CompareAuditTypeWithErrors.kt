@@ -17,7 +17,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT

@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.sampling.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.util.doubleIsClose

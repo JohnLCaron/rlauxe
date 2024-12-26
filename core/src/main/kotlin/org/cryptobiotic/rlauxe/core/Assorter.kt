@@ -217,7 +217,7 @@ open class Assertion(
     var status = TestH0Status.NotStarted
     var proved = false
     var samplesNeeded = 0   // first sample when pvalue < riskLimit
-    var samplesUsed = 0     // sample count when testH0 terminates
+    var samplesUsed = 0     // sample count when testH0 terminates, usually maxSamples
     var pvalue = 0.0        // last pvalue when testH0 terminates
     var round = 0           // round when set to proved or disproved
 

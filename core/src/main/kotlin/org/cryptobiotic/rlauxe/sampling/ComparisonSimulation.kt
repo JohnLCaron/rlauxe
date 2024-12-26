@@ -11,7 +11,7 @@ private val show = true
 // specific to a contest. only used for estimating the sample size
 class ComparisonSimulation(
         rcvrs: List<Cvr>,
-        val contest: Contest,
+        val contest: ContestIF,
         val cassorter: ComparisonAssorter,
         errorRates: List<Double>,
     ): SampleGenerator {

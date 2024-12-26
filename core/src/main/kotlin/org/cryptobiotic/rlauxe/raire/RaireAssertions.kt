@@ -23,6 +23,9 @@ data class RaireContest(
 ) : ContestIF {
     override val winners: List<Int>
     override val losers: List<Int>
+    override val ncandidates = info.candidateIds.size
+    override val id = info.id
+    override val choiceFunction = info.choiceFunction
 
     init {
         winners = winnerNames.map { info.candidateNames[it]!! }

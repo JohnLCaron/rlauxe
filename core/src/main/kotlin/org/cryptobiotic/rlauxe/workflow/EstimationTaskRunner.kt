@@ -36,7 +36,7 @@ data class EstimationResult(
 // the task itself typically calls runTestRepeated
 class EstimationTaskRunner {
     private val show = true
-    private val showTaskResult = true
+    private val showTaskResult = false
     private val mutex = Mutex()
     private val results = mutableListOf<EstimationResult>()
 

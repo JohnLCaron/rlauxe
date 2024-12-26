@@ -46,7 +46,10 @@ data class ContestInfo(
 // Needed to allow RaireContest as subclass, which does not have votes: Map<Int, Int>
 interface ContestIF {
     val info: ContestInfo
+    val id: Int
     val Nc: Int
+    val ncandidates: Int
+    val choiceFunction: SocialChoiceFunction
 
     val winnerNames: List<String>
     val winners: List<Int>
@@ -63,15 +66,16 @@ class Contest(
         voteInput: Map<Int, Int>,
         override val Nc: Int,
     ): ContestIF {
-    val id = info.id
+    override val id = info.id
     val name = info.name
-    val choiceFunction = info.choiceFunction
-    val ncandidates = info.candidateIds.size
+    override val choiceFunction = info.choiceFunction
+    override val ncandidates = info.candidateIds.size
 
     val votes: Map<Int, Int>
     override val winnerNames: List<String>
     override val winners: List<Int>
     override val losers: List<Int>
+    val minMargin: Double
 
     init {
         // construct votes, adding 0 votes if needed
@@ -108,10 +112,13 @@ class Contest(
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
+
+        val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
+        minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
     override fun toString() = buildString {
-        append("${info} Nc= $Nc votes=${votes}")
+        append("$name ($id) Nc= $Nc votes=${votes} minMargin=${df(minMargin)}")
     }
 
     override fun equals(other: Any?): Boolean {

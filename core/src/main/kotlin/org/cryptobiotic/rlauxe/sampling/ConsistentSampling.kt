@@ -13,7 +13,7 @@ fun consistentCvrSampling(
 ): List<Int> {
     if (cvrList.isEmpty()) return emptyList()
 
-    val currentSizes = mutableMapOf<Int, Int>()
+    val currentSizes = mutableMapOf<Int, Int>() // contestId -> ncvrs in sample
     fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.estSampleSize
 
     // get list of cvr indexes sorted by sampleNum
@@ -42,6 +42,7 @@ fun consistentCvrSampling(
     if (inx > sortedCvrIndices.size) {
         throw RuntimeException("ran out of samples!!")
     }
+
     return sampledIndices
 }
 

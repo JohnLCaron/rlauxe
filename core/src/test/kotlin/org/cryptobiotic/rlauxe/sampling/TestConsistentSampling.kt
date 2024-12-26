@@ -47,13 +47,13 @@ class TestConsistentSampling {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
         contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
-        val ballots = test.makeBallotsForPolling()
+        val ballots = test.makeBallotsForPolling(true)
         val ballotManifest = BallotManifest(ballots, test.ballotStyles)
 
         val prng = Prng(secureRandom.nextLong())
         val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
-        val sampleIndices = consistentPollingSampling(contestsUA, ballotsUA, ballotManifest)
+        val sampleIndices = consistentPollingSampling(contestsUA, ballotsUA)
         println("nsamples needed = ${sampleIndices.size}\n")
         sampleIndices.forEach {
             assertTrue(it < ballotsUA.size)
@@ -66,8 +66,7 @@ class TestConsistentSampling {
         println("contest.name (id) == sampleSize")
         contestsUA.forEach { contest ->
             val ballotsForContest = ballotsUA.filter {
-                val ballotStyle = ballotManifest.getBallotStyleFor(it.ballot.ballotStyleId!!)!!
-                ballotStyle.hasContest(contest.id)
+                it.ballot.hasContest(contest.id)
             }
             var count = 0
             ballotsUA.forEachIndexed { idx, it ->
@@ -85,7 +84,7 @@ class TestConsistentSampling {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
         contestsUA.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
-        val ballots = test.makeBallotsForPolling()
+        val ballots = test.makeBallotsForPolling(false)
         // val ballotManifest = BallotManifest(ballots, test.ballotStyles)
 
         val prng = Prng(secureRandom.nextLong())

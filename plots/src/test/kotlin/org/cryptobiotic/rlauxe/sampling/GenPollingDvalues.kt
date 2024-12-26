@@ -50,7 +50,7 @@ class GenPollingDvalues {
                         d1 = d
                     )
 
-                    val sampler = PollWithoutReplacement(contestUA, mvrs, assorter)
+                    val sampler = PollWithoutReplacement(contestUA.contest as Contest, mvrs, assorter)
                     tasks.add(
                         AlphaTask(
                             name = "theta = $theta, reportedMargin = $reportedMargin",

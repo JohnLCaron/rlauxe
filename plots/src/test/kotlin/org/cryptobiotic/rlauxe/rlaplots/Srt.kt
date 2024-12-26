@@ -85,9 +85,9 @@ fun EstimationResult.makeSRTnostyle(Nc: Int): SRT {
         reportedMargin=parameters["reportedMargin"]?: 0.0,
         reportedMeanDiff=parameters["reportedMeanDiff"]?: 0.0,
         testParameters=task.moreParameters,
-        this.nsuccess,
+        this.repeatedResult.nsuccess,
         task.auditConfig.ntrials,
-        ceil(this.totalSamplesNeeded * N / Nc).toInt(),
+        ceil(this.repeatedResult.totalSamplesNeeded * N / Nc).toInt(),
         stddev=0.0,
         percentHist=null)
 }

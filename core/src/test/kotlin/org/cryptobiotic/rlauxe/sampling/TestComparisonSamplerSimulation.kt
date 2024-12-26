@@ -25,7 +25,7 @@ class TestComparisonSamplerSimulation {
             val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
             val sampler = ComparisonSimulation(cvrs,
-                contestUA,
+                contestUA.contest as Contest,
                 compareAssorter,
                 ComparisonErrorRates.standard,
             )
@@ -90,7 +90,7 @@ class TestComparisonSamplerSimulation {
     fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA, assorter, ComparisonErrorRates.standard)
+        val sampler = ComparisonSimulation(cvrs, contestUA.contest as Contest, assorter, ComparisonErrorRates.standard)
 
         val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()

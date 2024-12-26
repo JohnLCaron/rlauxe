@@ -27,7 +27,7 @@ data class RunTestRepeatedResult(
     fun errorRates() = buildString { errorRate.forEach{ append("${df(it)},") } }
 
     override fun toString() = buildString {
-        appendLine("RunTesRepeatedResult: testParameters=$testParameters Nc=$Nc successPct=${successPct()} in ntrials=$ntrials")
+        appendLine("RunTestRepeatedResult: testParameters=$testParameters Nc=$Nc successPct=${successPct()} in ntrials=$ntrials")
         append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
         if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
         if (status != null) appendLine("  status:${status}")

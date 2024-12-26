@@ -7,10 +7,10 @@ import org.cryptobiotic.rlauxe.util.*
 class ComparisonFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
-    val contestUA: ContestUnderAudit,
+    val contest: Contest,
     val cassorter: ComparisonAssorter
 ): SampleGenerator, Iterator<Double> {
-    val maxSamples = cvrs.count { it.hasContest(contestUA.id) }
+    val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
     val welford = Welford()
@@ -25,7 +25,7 @@ class ComparisonFuzzSampler(
     override fun sample(): Double {
         while (idx < N) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id)) {
+            if (cvr.hasContest(contest.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
                 welford.update(result)
@@ -33,7 +33,7 @@ class ComparisonFuzzSampler(
             }
             idx++
         }
-        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
+        throw RuntimeException("no samples left for ${contest.id} and ComparisonAssorter ${cassorter}")
     }
 
     override fun reset() {
@@ -44,7 +44,7 @@ class ComparisonFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contestUA.contest as Contest), cvrs, fuzzPct)
+        return makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
@@ -57,10 +57,10 @@ class ComparisonFuzzSampler(
 class PollingFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
-    val contestUA: ContestUnderAudit,
+    val contest: Contest,
     val assorter: AssorterFunction
 ): SampleGenerator {
-    val maxSamples = cvrs.count { it.hasContest(contestUA.id) }
+    val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size
     val welford = Welford()
     val permutedIndex = MutableList(N) { it }
@@ -74,7 +74,7 @@ class PollingFuzzSampler(
     override fun sample(): Double {
         while (idx < N) {
             val mvr = mvrs[permutedIndex[idx]]
-            if (mvr.hasContest(contestUA.id)) {
+            if (mvr.hasContest(contest.id)) {
                 val result = assorter.assort(mvr, usePhantoms = true)
                 idx++
                 welford.update(result)
@@ -82,7 +82,7 @@ class PollingFuzzSampler(
             }
             idx++
         }
-        throw RuntimeException("no samples left for ${contestUA.id} and Assorter ${assorter}")
+        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
     }
 
     override fun reset() {
@@ -92,21 +92,20 @@ class PollingFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contestUA.contest as Contest), cvrs, fuzzPct)
+        return makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
 }
 
+// TODO cant be used on raire, approval
 fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
     var count = 0
-    //var countf = 0
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
-    cvrbs.forEach { cvrb: CvrBuilder ->
+    cvrbs.filter { !it.phantom }.forEach { cvrb: CvrBuilder ->
         val r = secureRandom.nextDouble(1.0)
         cvrb.contests.forEach { (_, cvb) ->
             if (r < fuzzPct) {
-                //countf++
                 val ccontest: CvrContest = cvb.contest
                 val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
                 cvb.votes.clear()
@@ -127,7 +126,7 @@ fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
         val ncandIdx = secureRandom.nextInt(size + 1)
-        if (ncandIdx == size) return null
+        if (ncandIdx == size) return null // choose none
         val candId = candidateIds[ncandIdx]
         if (candId != currId) {
             return candId

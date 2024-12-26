@@ -250,4 +250,39 @@ class TestAssorterPlurality {
         println(" ($winner, $loser)= $assortAvg")
         return assortAvg
     }
+
+    @Test
+    fun testAssortValues() {
+        val info = ContestInfo(
+            name = "ABCs",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap("Alice", "Bob", "Candy"),
+            nwinners = 1,
+        )
+        val contest = Contest(info, mapOf(0 to 52, 1 to 44), 100)
+        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val assorter = contestUA.pollingAssertions.first().assorter
+        assertTrue(assorter is PluralityAssorter)
+        assertEquals(0, assorter.winner())
+        assertEquals(1, assorter.loser())
+
+        assertEquals(1.0, assorter.assort(makeCvr(0)))
+        assertEquals(0.0, assorter.assort(makeCvr(1)))
+        assertEquals(0.5, assorter.assort(makeCvr(2)))
+        assertEquals(0.5, assorter.assort(makeCvr(3)))
+
+        // undervote
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = false))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = true))
+        // phantom
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = true), usePhantoms = false))
+        assertEquals(0.0, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = true), usePhantoms = true))
+
+        // contest not on cvr
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = false))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = true))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = false))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
+    }
 }

@@ -270,7 +270,7 @@ fun runOneAssertionAudit(
     roundIdx: Int,
 ): TestH0Status {
     val assorter = assertion.cassorter
-    val sampler = ComparisonWithoutReplacement(contestUA, cvrPairs, assorter, allowReset = false)
+    val sampler = ComparisonWithoutReplacement(contestUA.contest as Contest, cvrPairs, assorter, allowReset = false)
 
     // TODO always using the ComparisonErrorRates derived from fuzzPct. should have the option to use ones chosen by the user.
     val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)

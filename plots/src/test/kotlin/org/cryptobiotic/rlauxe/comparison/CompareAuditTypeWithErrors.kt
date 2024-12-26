@@ -18,6 +18,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
@@ -333,7 +334,7 @@ class CompareAuditTypeWithErrors {
         val mvrs = comparisonSample.mvrs
 
         val pollingResult = runAlphaMartRepeated(
-            drawSample = PollWithoutReplacement(contestUA, mvrs, pollingAssorter),
+            drawSample = PollWithoutReplacement(contestUA.contest as Contest, mvrs, pollingAssorter),
             // maxSamples = N,
             eta0 = cvrMean, // use the reportedMean for the initial guess
             d = d,

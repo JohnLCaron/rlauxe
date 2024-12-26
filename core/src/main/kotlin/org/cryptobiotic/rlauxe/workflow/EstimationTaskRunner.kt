@@ -15,8 +15,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 
-import org.cryptobiotic.rlauxe.core.Assertion
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.sampling.SimulateSampleSizeTask
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
@@ -28,12 +27,9 @@ interface EstimationTask {
 }
 
 data class EstimationResult(
-    val contestUA: ContestUnderAudit,
-    val assertion: Assertion,
-    val success: Boolean,
-    val nsuccess: Int,
-    val totalSamplesNeeded: Int,
-    val task: EstimationTask
+    val task: SimulateSampleSizeTask,
+    val repeatedResult: RunTestRepeatedResult,
+    val failed: Boolean
 )
 
 // runs set of EstimationTask concurrently, which return EstimationResult
@@ -69,7 +65,7 @@ class EstimationTaskRunner {
     ): EstimationResult {
         val stopwatch = Stopwatch()
         val result =  task.estimate()
-        if (showTaskResult) println(" ${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
+        if (showTaskResult) println(" ${task.name()} (${results.size}): took ${stopwatch.elapsed(TimeUnit.SECONDS)} secs")
         return result
     }
 

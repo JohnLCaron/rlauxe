@@ -55,7 +55,7 @@ class TestSampleGenerator {
             contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = PollWithoutReplacement(contestUA, cvrs, it.assorter)
+                val cvrSampler = PollWithoutReplacement(contestUA.contest as Contest, cvrs, it.assorter)
             }
         }
     }
@@ -64,7 +64,7 @@ class TestSampleGenerator {
     fun testMakeCvrsByExactMean() {
         repeat(20) {
             val cvrs = makeCvrsByExactMean(100, .573)
-            val actual = cvrs.map { it.hasMarkFor(0, 0) }.sum()
+            val actual = cvrs.sumOf { it.hasMarkFor(0, 0) }
             assertEquals(57, actual)
         }
     }

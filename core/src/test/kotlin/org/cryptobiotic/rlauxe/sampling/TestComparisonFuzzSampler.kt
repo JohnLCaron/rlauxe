@@ -92,7 +92,7 @@ private fun runWithComparisonFuzzSampler(
     ): RunTestRepeatedResult {
 
     val assorter = assertion.cassorter
-    val sampler = ComparisonFuzzSampler(auditConfig.fuzzPct!!, cvrs, contestUA, assorter)
+    val sampler = ComparisonFuzzSampler(auditConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
 
     return simulateSampleSizeBetaMart(
         auditConfig,

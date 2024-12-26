@@ -39,12 +39,13 @@ class PollingWorkflow(
             emptyList(),
             prevMvrs,
             roundIdx,
+            show=show,
         )
 
         // choose samples
         val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?
             println("\nconsistentPollingSampling round $roundIdx")
-            val sampleIndices = consistentPollingSampling(contestsUA.filter { !it.done }, ballotsUA, ballotManifest)
+            val sampleIndices = consistentPollingSampling(contestsUA.filter { !it.done }, ballotsUA)
             println(" PollingWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
             sampleIndices
         } else {
@@ -95,7 +96,7 @@ fun runAudit(
         var allAssertionsDone = true
         contestUA.pollingAssertions.forEach { assertion ->
             if (!assertion.proved) {
-                assertion.status = auditOneAssertion(auditConfig, contestUA, assertion, mvrs, roundIdx)
+                assertion.status = auditOneAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx)
                 allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
             }
         }
@@ -110,13 +111,13 @@ fun runAudit(
 
 fun auditOneAssertion(
     auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
+    contest: Contest,
     assertion: Assertion,
     mvrs: List<Cvr>,
     roundIdx: Int,
 ): TestH0Status {
     val assorter = assertion.assorter
-    val sampler = PollWithoutReplacement(contestUA, mvrs, assorter, allowReset=false)
+    val sampler = PollWithoutReplacement(contest, mvrs, assorter, allowReset=false)
 
     val eta0 = margin2mean(assertion.margin)
     val minsd = 1.0e-6
@@ -124,7 +125,7 @@ fun auditOneAssertion(
     val c = (eta0 - t) / 2
 
     val estimFn = TruncShrinkage(
-        N = contestUA.Nc,
+        N = contest.Nc,
         withoutReplacement = true,
         upperBound = assertion.assorter.upperBound(),
         d = auditConfig.d1,
@@ -134,7 +135,7 @@ fun auditOneAssertion(
     )
     val testFn = AlphaMart(
         estimFn = estimFn,
-        N = contestUA.Nc,
+        N = contest.Nc,
         withoutReplacement = true,
         riskLimit = auditConfig.riskLimit,
         upperBound = assorter.upperBound(),
@@ -152,6 +153,6 @@ fun auditOneAssertion(
     assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst { it < auditConfig.riskLimit }
     assertion.pvalue = testH0Result.pvalues.last()
 
-    println(" ${contestUA.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue = ${assertion.pvalue} status = ${testH0Result.status}")
+    println(" ${contest.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue = ${assertion.pvalue} status = ${testH0Result.status}")
     return testH0Result.status
 }

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -56,7 +57,7 @@ class TestEstimateSampleSize {
             val cn = contestUA.Nc
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
-                val result = simulateSampleSizeComparisonAssorter(auditConfig, contestUA, assert.cassorter, cvrs)
+                val result = simulateSampleSizeComparisonAssorter(auditConfig, contestUA.contest as Contest, assert.cassorter, cvrs)
                 val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.cassorter.margin, gamma,
                     oneOver = ceil(cn*p1).toInt(), // p1

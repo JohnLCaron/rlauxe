@@ -8,14 +8,57 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 // CANDIDATE FOR REMOVAL
 
 class TestAuditPolling {
 
     val showContests = false
+
+    @Test
+    fun testMakeCvrsByExactMean() {
+        val d = 100
+        val N = 20000
+        val margin = .04
+        val cvrs = makeCvrsByExactMean(N, margin2mean(margin))
+        val resultWithout = testPollingWorkflow(margin, withoutReplacement = true, cvrs, d, silent = false).first()
+        println(resultWithout)
+    }
+
+    @Test
+    fun testMultiContestTestData() {
+        val N = 50000
+        val ncontests = 1
+        val nbs = 1
+        val marginRange= 0.01 ..< 0.01
+        val underVotePct= 0.20 ..< 0.20
+        val phantomRange= 0.005 ..< 0.005
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+
+        val contest = test.contests.first()
+        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val assorter = contestUA.pollingAssertions.first().assorter
+
+        val cvrs = test.makeCvrsFromContests()
+        val ballots = test.makeBallotsForPolling(true)
+
+        val cvrSampler = PollWithoutReplacement(contestUA.contest as Contest, cvrs, assorter)
+
+        val d = 100
+        val margin = assorter.reportedMargin()
+        val result = runAlphaMartRepeated(
+            drawSample = cvrSampler,
+            eta0 = margin2mean(margin),
+            d = d,
+            ntrials = 10,
+            upperBound = assorter.upperBound()
+        )
+        println(result)
+    }
 
     @Test
     fun testPollingWorkflow() {
@@ -75,7 +118,8 @@ class TestAuditPolling {
             contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(contestUA, cvrs, it.assorter) else PollWithReplacement(contestUA, cvrs, it.assorter)
+                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(contestUA.contest as Contest, cvrs, it.assorter)
+                    else PollWithReplacement(contestUA.contest as Contest, cvrs, it.assorter)
 
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,

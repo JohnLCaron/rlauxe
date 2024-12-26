@@ -52,13 +52,14 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
     override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+        if (!mvr.hasContest(contest.info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(contest.info.id, winner)
         val l = mvr.hasMarkFor(contest.info.id, loser)
         return (w - l + 1) * 0.5
     }
     override fun upperBound() = 1.0
-    override fun desc() = "PluralityAssorter winner=$winner loser=$loser"
+    override fun desc() = " winner=$winner loser=$loser"
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin
@@ -79,6 +80,7 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
     val upperBound = 0.5 / minFraction
 
     override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+        if (!mvr.hasContest(contest.info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(contest.info.id, winner)
         return if (mvr.hasOneVote(contest.info.id, contest.info.candidateIds)) (w / (2 * minFraction)) else .5

@@ -58,7 +58,7 @@ class TestComparisonWorkflow {
         var done = false
         while (!done) {
             val indices = workflow.chooseSamples(prevMvrs, roundIdx)
-            val currRound = Round(roundIdx, indices, previousSamples)
+            val currRound = Round(roundIdx, indices, previousSamples.toSet())
             rounds.add(currRound)
             previousSamples.addAll(indices)
 

@@ -48,7 +48,6 @@ fun consistentCvrSampling(
 fun consistentPollingSampling(
     contests: List<ContestUnderAudit>, // all the contests you want to sample
     ballots: List<BallotUnderAudit>, // all the ballots available to sample
-    ballotManifest: BallotManifest,
 ): List<Int> {
     if (ballots.isEmpty()) return emptyList()
 
@@ -65,15 +64,12 @@ fun consistentPollingSampling(
         // get the next sorted cvr
         val sidx = sortedCvrIndices[inx]
         val ballot = ballots[sidx]
-        val ballotStyle = ballotManifest.getBallotStyleFor(ballot.ballot.ballotStyleId!!)!!
         // does this cvr contribute to one or more contests that need more samples?
-        if (contests.any { contestInProgress(it) && ballotStyle.hasContest(it.id) }) {
+        if (contests.any { contestInProgress(it) && ballot.hasContest(it.id) }) {
             // then use it
             sampledIndices.add(sidx)
             ballot.sampled = true
-            ballotStyle.contestIds.forEach {
-                currentSizes[it] = currentSizes[it]?.plus(1) ?: 1
-            }
+            ballot.contestIds().forEach { currentSizes[it] = currentSizes[it]?.plus(1) ?: 1 }
         }
         inx++
     }

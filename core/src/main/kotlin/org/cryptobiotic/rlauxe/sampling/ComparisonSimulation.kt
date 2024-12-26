@@ -11,7 +11,7 @@ private val show = true
 // specific to a contest. only used for estimating the sample size
 class ComparisonSimulation(
         rcvrs: List<Cvr>,
-        val contestUA: ContestUnderAudit,
+        val contest: Contest,
         val cassorter: ComparisonAssorter,
         errorRates: List<Double>,
     ): SampleGenerator {
@@ -20,9 +20,9 @@ class ComparisonSimulation(
     val p3: Double = errorRates[2] // rate of 1-vote understatements; voted for winner, cvr has other
     val p4: Double = errorRates[3] // rate of 2-vote understatements; voted for winner, cvr has loser
 
-    val maxSamples = rcvrs.count { it.hasContest(contestUA.id) }
+    val maxSamples = rcvrs.count { it.hasContest(contest.id) }
     val N = rcvrs.size
-    val isIRV = contestUA.choiceFunction == SocialChoiceFunction.IRV
+    val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()
@@ -56,7 +56,7 @@ class ComparisonSimulation(
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
 
-        sampleCount = rcvrs.filter { it.hasContest(contestUA.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
+        sampleCount = rcvrs.filter { it.hasContest(contest.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
         sampleMean = sampleCount / N
     }
 
@@ -73,14 +73,14 @@ class ComparisonSimulation(
         while (idx < N) {
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
-            if (cvr.hasContest(contestUA.id)) {
+            if (cvr.hasContest(contest.id)) {
                 val result = cassorter.bassort(mvr, cvr)
                 idx++
                 return result
             }
             idx++
         }
-        throw RuntimeException("no samples left for contest=${contestUA.id} and ComparisonAssorter ${cassorter}")
+        throw RuntimeException("no samples left for contest=${contest.id} and ComparisonAssorter ${cassorter}")
     }
 
     fun showFlips() = buildString {
@@ -103,8 +103,8 @@ class ComparisonSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx] // this is the cvr
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
-                val votes = if (isIRV) moveToFront(cvr.votes, contestUA.id, cassorter.assorter.loser())
-                            else mapOf(contestUA.id to intArrayOf(cassorter.assorter.loser()))
+                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter.loser())
+                            else mapOf(contest.id to intArrayOf(cassorter.assorter.loser()))
 
                 val alteredMvr = makeNewCvr(cvr, votes) // this is the altered mvr
                 mcvrs[cardIdx] = alteredMvr
@@ -143,8 +143,8 @@ class ComparisonSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.0) {
-                val votes = if (isIRV) moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
-                            else mapOf(contestUA.id to intArrayOf(cassorter.assorter.winner()))
+                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter.winner())
+                            else mapOf(contest.id to intArrayOf(cassorter.assorter.winner()))
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter.assort(alteredMvr) != 1.0) {
@@ -184,7 +184,7 @@ class ComparisonSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
-                val votes = emptyList(cvr.votes, contestUA.id)
+                val votes = emptyList(cvr.votes, contest.id)
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter.assort(alteredMvr) != 0.5) {
@@ -223,7 +223,7 @@ class ComparisonSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.5) {
-                val votes = moveToFront(cvr.votes, contestUA.id, cassorter.assorter.winner())
+                val votes = moveToFront(cvr.votes, contest.id, cassorter.assorter.winner())
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 require(cassorter.assorter.assort(alteredMvr) == 1.0)
@@ -255,8 +255,8 @@ class ComparisonSimulation(
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val mvr = mcvrs[cardIdx]
-            if (!usedCvrs.contains(mvr.id) && (mvr.hasMarkFor(contestUA.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
-                val votes = mapOf(contestUA.id to intArrayOf(otherCandidate))
+            if (!usedCvrs.contains(mvr.id) && (mvr.hasMarkFor(contest.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
+                val votes = mapOf(contest.id to intArrayOf(otherCandidate))
 
                 val alteredCvr = makeNewCvr(mvr, votes)
                 require(cassorter.assorter.assort(alteredCvr) == 0.5)
@@ -270,7 +270,7 @@ class ComparisonSimulation(
             }
             cardIdx++
         }
-        val checkAvotes = cvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val checkAvotes = cvrs.count { cassorter.assorter.assort(it) == 1.0 }
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votesP could only flip $changed, wanted $needToChange")
        // require(checkAvotes == startingAvotes - needToChange)

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/24/2024
+last update: 12/26/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -32,7 +32,7 @@ Table of Contents
       * [Comparison audits and CSDs](#comparison-audits-and-csds)
       * [Polling audits and CSDs](#polling-audits-and-csds)
       * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-    * [Missing Ballots (aka phantoms-to-evil zombies) (TODO)](#missing-ballots-aka-phantoms-to-evil-zombies-todo)
+    * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -513,7 +513,7 @@ since it depends on N/Nc scaling.
 
 See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
 
-### Missing Ballots (aka phantoms-to-evil zombies) (TODO)
+### Missing Ballots (aka phantoms-to-evil zombies)
 
 From P2Z paper:
 
@@ -592,6 +592,15 @@ which corresponds to case 1.
     For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
     I think we must have a ballot manifest, which means we have Nb, and ... 
 
+------------------------------------------------------------------------------------
+
+The margin is calculated with both undervotes and phantoms = 1/2.
+But in reality, the phantoms use "worst case" vote for the loser.
+If the phantom pct is greater than the margin, the audit will fail.
+When hasStyles, we know what that percent is. When !hasStyles we probably cant tell whats a phantom and whats an undervote
+until we audit, although the determination of Nc might indeed tell us the number of phantoms, regardless of hasStyles.
+
+So for estimation, we could calculate the margin with usePhantoms=true, since thats what were going to see during the audit.
 
 ## Stratified audits using OneAudit (TODO)
 

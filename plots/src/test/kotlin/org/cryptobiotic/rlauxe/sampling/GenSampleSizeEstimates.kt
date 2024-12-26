@@ -252,7 +252,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
                 val contestUA = ContestUnderAudit(sim.contest, isComparison = false)
                 contestUA.makePollingAssertions()
                 val minAssort = contestUA.minAssertion()!!.assorter
-                val sampleFn = PollingFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
+                val sampleFn = PollingFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
 
                 val otherParameters = mapOf("fuzzPct" to fuzzPct)
                 tasks.add(
@@ -306,7 +306,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
                 // comparison; regen mvrs each repition to smoothe things out
                 contestUA.makeComparisonAssertions(cvrs)
                 val minAssort = contestUA.minComparisonAssertion()!!.cassorter
-                val sampleFn = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
+                val sampleFn = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
 
                 val otherParameters = mapOf("fuzzPct" to fuzzPct)
                 tasks.add(
@@ -364,7 +364,7 @@ class PollingTask(
 ) : ConcurrentTask {
     override fun name() = name
     override fun run(): RunTestRepeatedResult {
-        return simulateSampleSizePollingAssorter(auditConfig, contestUA, assort, moreParameters=moreParameters)
+        return simulateSampleSizePollingAssorter(auditConfig, contestUA.contest as Contest, assort, moreParameters=moreParameters)
     }
 }
 
@@ -393,7 +393,7 @@ class ComparisonTask(val name: String,
 ): ConcurrentTask {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return simulateSampleSizeComparisonAssorter(auditConfig, contestUA, cassort, cvrs, moreParameters=moreParameters)
+        return simulateSampleSizeComparisonAssorter(auditConfig, contestUA.contest as Contest, cassort, cvrs, moreParameters=moreParameters)
     }
 }
 

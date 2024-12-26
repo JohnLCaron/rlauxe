@@ -66,6 +66,7 @@ class Contest(
     val id = info.id
     val name = info.name
     val choiceFunction = info.choiceFunction
+    val ncandidates = info.candidateIds.size
 
     val votes: Map<Int, Int>
     override val winnerNames: List<String>
@@ -147,10 +148,7 @@ class Contest(
     }
 }
 
-/**
- * Mutable form of Contest.
- * @parameter ncvrs: count of cvrs for this contest (comparison only)
- */
+/** Mutable form of Contest. */
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true,
@@ -214,6 +212,7 @@ open class ContestUnderAudit(
         return assertions
     }
 
+    // cvrs must be complete in order to get the margin right.
     open fun makeComparisonAssertions(cvrs : Iterable<CvrIF>, votes: Map<Int, Int>? = null): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         val useVotes = if (votes != null) votes else (contest as Contest).votes

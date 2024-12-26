@@ -25,22 +25,33 @@ package org.cryptobiotic.rlauxe.core
 data class BallotManifest(
     val ballots: List<Ballot>,
     val ballotStyles: List<BallotStyle> // empty if style info not available, auditConfig.hasStyles = false
-) {
-    fun getBallotStyleFor(ballotStyleId: Int): BallotStyle? {
-        return ballotStyles.find { it.id == ballotStyleId }
-    }
-}
+)
 
 data class Ballot(
     val id: String,
     val phantom: Boolean = false,
-    val ballotStyleId: Int?, // if hasStyles
-)
+    val ballotStyle: BallotStyle?, // if hasStyles
+    val contestIds: List<Int>? = null, // if hasStyles
+) {
+    fun hasContest(contestId: Int): Boolean {
+        if (ballotStyle != null) return ballotStyle.hasContest(contestId) == true
+        if (contestIds != null) return contestIds.find{ it == contestId } != null
+        return false
+    }
+    fun contestIds(): List<Int> {
+        if (ballotStyle != null) return ballotStyle.contestIds
+        if (contestIds != null) return contestIds
+        return emptyList()
+    }
+}
 
 class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) {
     var sampled = false //  # is this CVR in the sample?
     val id = ballot.id
     val phantom = ballot.phantom
+
+    fun hasContest(contestId: Int) = ballot.hasContest(contestId)
+    fun contestIds() = ballot.contestIds()
 }
 
 // The term ballot style generally refers to the set of contests on a given voter’s ballot. (Ballot

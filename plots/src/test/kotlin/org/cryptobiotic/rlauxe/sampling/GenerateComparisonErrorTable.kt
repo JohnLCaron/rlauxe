@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.df
@@ -39,7 +40,7 @@ class GenerateComparisonErrorTable {
                         val minAssort = minAssert.cassorter
 
                         val samples = PrevSamplesWithRates(minAssort.noerror)
-                        val sampler = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA, minAssort)
+                        val sampler = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
                         while (sampler.hasNext()) {
                             samples.addSample(sampler.next())
                         }

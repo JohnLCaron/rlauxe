@@ -15,7 +15,7 @@ interface SampleGenerator {
 
 //// For polling audits.
 
-class PollWithReplacement(val contest: ContestUnderAudit, val mvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
+class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterFunction): SampleGenerator {
     val maxSamples = mvrs.count { it.hasContest(contest.id) }
 
     override fun sample(): Double {
@@ -31,7 +31,7 @@ class PollWithReplacement(val contest: ContestUnderAudit, val mvrs : List<Cvr>, 
 }
 
 class PollWithoutReplacement(
-    val contest: ContestUnderAudit,
+    val contest: Contest,
     val mvrs : List<Cvr>,
     val assorter: AssorterFunction,
     val allowReset: Boolean = true,
@@ -68,7 +68,7 @@ class PollWithoutReplacement(
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
 class ComparisonWithoutReplacement(
-    val contestUA: ContestUnderAudit,
+    val contestUA: Contest,
     val cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
     val cassorter: ComparisonAssorter,
     val allowReset: Boolean,

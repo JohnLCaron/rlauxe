@@ -1,10 +1,8 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.Ballot
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.util.Prng
 
 // TODO deal with use_styles
 
@@ -105,25 +103,7 @@ fun makePhantomCvrs(
     ncvrs: Map<Int, Int>,
     prefix: String = "phantom-",
 ): List<Cvr> {
-    // code assertRLA.ipynb
-    // + Prepare ~2EZ:
-    //    - `N_phantoms = max_cards - cards_in_manifest`
-    //    - If `N_phantoms < 0`, complain
-    //    - Else create `N_phantoms` phantom cards
-    //    - For each contest `c`:
-    //        + `N_c` is the input upper bound on the number of cards that contain `c`
-    //        + if `N_c is None`, `N_c = max_cards - non_c_cvrs`, where `non_c_cvrs` is #CVRs that don't contain `c`
-    //        + `C_c` is the number of CVRs that contain the contest
-    //        + if `C_c > N_c`, complain
-    //        + else if `N_c - C_c > N_phantoms`, complain
-    //        + else:
-    //            - Consider contest `c` to be on the first `N_c - C_c` phantom CVRs
-    //            - Consider contest `c` to be on the first `N_c - C_c` phantom ballots
 
-    // 3.4 SHANGRLA
-    // If N_c > ncvrs, create N − n “phantom ballots” and N − n “phantom CVRs.”
-
-    // create phantom CVRs as needed for each contest
     val phantombs = mutableListOf<PhantomBuilder>()
 
     for (contest in contests) {
@@ -136,13 +116,37 @@ fun makePhantomCvrs(
             phantombs[it].contests.add(contest.id)
         }
     }
-    return phantombs.map { it.build() }
+    return phantombs.map { it.buildCvr() }
+}
+
+fun makePhantomBallots(
+    contests: List<Contest>,
+    ncvrs: Map<Int, Int>,
+    prefix: String = "phantom-",
+): List<Ballot> {
+
+    val phantombs = mutableListOf<PhantomBuilder>()
+
+    for (contest in contests) {
+        val phantoms_needed = contest.Nc - ncvrs[contest.id]!!
+        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
+            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
+        }
+        // include this contest on the first n phantom CVRs
+        repeat(phantoms_needed) {
+            phantombs[it].contests.add(contest.id)
+        }
+    }
+    return phantombs.map { it.buildBallot() }
 }
 
 class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
-    fun build(): Cvr {
+    fun buildCvr(): Cvr {
         val votes = contests.associateWith { IntArray(0) }
         return Cvr(id, votes, phantom = true)
+    }
+    fun buildBallot(): Ballot {
+        return Ballot(id, phantom = true, null, contests)
     }
 }

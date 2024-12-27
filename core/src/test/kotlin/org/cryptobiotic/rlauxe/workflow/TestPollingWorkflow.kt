@@ -18,11 +18,16 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingNoStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.50, fuzzPct = 0.0)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
-        val test = MultiContestTestData(11, 4, N, marginRange= 0.04..< 0.10)
+        val ncontests = 11
+        val nbs = 4
+        val marginRange= 0.05 ..< 0.10
+        val underVotePct= 0.02 ..< 0.02
+        val phantomPct= 0.005 ..< 0.005
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomPct)
         val contests: List<Contest> = test.contests
 
         println("Start testPollingNoStyle N=$N")
@@ -33,39 +38,12 @@ class TestPollingWorkflow {
         val testCvrs = test.makeCvrsFromContests()
         val ballots = test.makeBallotsForPolling(auditConfig.hasStyles)
 
-        // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-        val testMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
+        val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
+            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
+            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, emptyList()), N)
-        val stopwatch = Stopwatch()
-
-        val previousSamples = mutableSetOf<Int>()
-        var rounds = mutableListOf<Round>()
-        var roundIdx = 1
-
-        var prevMvrs = emptyList<CvrIF>()
-        var done = false
-        while (!done) {
-            val indices = workflow.chooseSamples(prevMvrs, roundIdx)
-            val currRound = Round(roundIdx, indices, previousSamples)
-            rounds.add(currRound)
-            previousSamples.addAll(indices)
-
-            println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            stopwatch.start()
-
-            val sampledMvrs = indices.map {
-                testMvrs[it]
-            }
-
-            done = workflow.runAudit(sampledMvrs, roundIdx)
-            println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            prevMvrs = sampledMvrs
-            roundIdx++
-        }
-
-        rounds.forEach { println(it) }
-        workflow.showResults()
+        runWorkflow(workflow, testMvrs)
     }
 
     // @Test
@@ -75,8 +53,7 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingWithStyle() {
-        val stopwatch = Stopwatch()
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -104,40 +81,12 @@ class TestPollingWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
-        val testMvrs: List<Cvr> = if (auditConfig.fuzzPct == null) testCvrs
+        val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
                 // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                 else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, test.ballotStyles), N)
-        stopwatch.start()
-
-        val previousSamples = mutableSetOf<Int>()
-        var rounds = mutableListOf<Round>()
-        var roundIdx = 1
-
-        var prevMvrs = emptyList<CvrIF>()
-        var done = false
-        while (!done) {
-            val indices = workflow.chooseSamples(prevMvrs, roundIdx)
-            val currRound = Round(roundIdx, indices, previousSamples.toSet())
-            rounds.add(currRound)
-            previousSamples.addAll(indices)
-
-            println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            stopwatch.start()
-
-            val sampledMvrs = indices.map {
-                testMvrs[it]
-            }
-
-            done = workflow.runAudit(sampledMvrs, roundIdx)
-            println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            prevMvrs = sampledMvrs
-            roundIdx++
-        }
-
-        rounds.forEach { println(it) }
-        workflow.showResults()
+        runWorkflow(workflow, testMvrs)
     }
 
     @Test
@@ -164,7 +113,7 @@ class TestPollingWorkflow {
         val ballots = test.makeBallotsForPolling(true)
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
         val workflow = PollingWorkflow(auditConfig, test.contests, BallotManifest(ballots, test.ballotStyles), N)
 
         runWorkflow(workflow, testCvrs)
@@ -177,7 +126,7 @@ class TestPollingWorkflow {
         var rounds = mutableListOf<Round>()
         var roundIdx = 1
 
-        var prevMvrs = emptyList<CvrIF>()
+        var prevMvrs = emptyList<Cvr>()
         var done = false
         while (!done) {
             val indices = workflow.chooseSamples(prevMvrs, roundIdx)

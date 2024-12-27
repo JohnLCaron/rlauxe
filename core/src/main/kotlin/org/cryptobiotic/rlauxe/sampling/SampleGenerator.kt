@@ -68,8 +68,8 @@ class PollWithoutReplacement(
 // the values produced here are the B assort values, SHANGRLA section 3.2.
 
 class ComparisonWithoutReplacement(
-    val contestUA: Contest,
-    val cvrPairs: List<Pair<Cvr, CvrUnderAudit>>, // (mvr, cvr)
+    val contestUA: ContestIF,
+    val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     val cassorter: ComparisonAssorter,
     val allowReset: Boolean,
 ): SampleGenerator {

@@ -6,6 +6,8 @@ data class AuditConfig(val auditType: AuditType,
                        val hasStyles: Boolean,
                        val seed: Long,
                        val fuzzPct: Double?,
+                       val errorRates: List<Double>? = null,
+                       val useGeneratedErrorRates: Boolean = false,
                        val ntrials: Int = 100, // when estimating the sample size
                        val quantile: Double = 0.50, // use this percentile success for estimated sample size
                        val d1: Int = 100,  // for trunc_shrinkage

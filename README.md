@@ -678,7 +678,23 @@ From STYLISH paper:
         4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
 
 AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
-total_size estimate, but not do the consistent sampling. Also maybe only works whne you use sampleThreshold ??
+total_size estimate, but not do the consistent sampling, which gives you the total sample size.
+
+### generation of phantoms
+
+From STYLISH paper:
+
+        2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that 
+            contain the contest, create a corresponding set of “phantom” CVRs as described in section 3.4 of [St20]. 
+            The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
+
+SHANGRLA.make_phantoms() instead generates max(Np_c) phantoms, then for each contest adds it to the first Np_c phantoms.
+Im guessing STYLISH is trying to describe the easist possible algorithm.
+
+        2.d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical 
+           cards whose locations are known, create enough “phantom” cards to make up the difference. 
+
+Not clear what this means, and how its different from 2.c.
 
 ### estimate comparison error rates
 

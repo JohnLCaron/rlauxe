@@ -71,7 +71,7 @@ class TestComparisonSamplerSimulation {
             "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallots(cvrFile)
         val cvrs = raireCvrs.cvrs
-        val cvrsUA = cvrs.map { CvrUnderAudit(it) }
+        // val cvrsUA = cvrs.map { CvrUnderAudit(it) }
 
         val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
         val raireResults =
@@ -80,7 +80,7 @@ class TestComparisonSamplerSimulation {
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()
 
-        contestUA.makeComparisonAssertions(cvrsUA)
+        contestUA.makeComparisonAssertions(cvrs)
 
         contestUA.comparisonAssertions.forEach { assert ->
             run(cvrs, contestUA, assert.cassorter)
@@ -90,7 +90,7 @@ class TestComparisonSamplerSimulation {
     fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA.contest as Contest, assorter, ComparisonErrorRates.standard)
+        val sampler = ComparisonSimulation(cvrs, contestUA.contest, assorter, ComparisonErrorRates.standard)
 
         val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()

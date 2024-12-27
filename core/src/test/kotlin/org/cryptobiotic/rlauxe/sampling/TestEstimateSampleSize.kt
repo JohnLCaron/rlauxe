@@ -30,18 +30,18 @@ class TestEstimateSampleSize {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it ) }
         val cvrs = test.makeCvrsFromContests()
-        val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
+        // val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
-            contest.makeComparisonAssertions(cvrsUAP)
+            contest.makeComparisonAssertions(cvrs)
             contest.comparisonAssertions.forEach {
                 println("  comparison assertion = ${it}")
             }
         }
 
         //contestsUA.forEach { println("contest = ${it}") }
-        println("ncvrs = ${cvrsUAP.size}\n")
+        println("ncvrs = ${cvrs.size}\n")
         val p1 = .01
         val p2 = .001
         val p3 = .01

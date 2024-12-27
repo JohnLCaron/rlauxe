@@ -50,7 +50,7 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
 
 fun makeContestFromCvrs(
     info: ContestInfo,
-    cvrs: List<CvrIF>,
+    cvrs: List<Cvr>,
 ): Contest {
     val votes = tabulateVotes(cvrs)
     val ncards = cardsPerContest(cvrs)
@@ -67,7 +67,7 @@ fun makeContestFromCvrs(
 }
 
 fun makeContestsFromCvrs(
-    cvrs: List<CvrIF>,
+    cvrs: List<Cvr>,
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
 ): List<Contest> {
     val votes = tabulateVotes(cvrs)
@@ -76,7 +76,7 @@ fun makeContestsFromCvrs(
 }
 
 // Number of votes in each contest, return contestId -> candidateId -> nvotes
-fun tabulateVotes(cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
+fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
     val r = mutableMapOf<Int, MutableMap<Int, Int>>()
     for (cvr in cvrs) {
         for ((con, conVotes) in cvr.votes) {
@@ -91,7 +91,7 @@ fun tabulateVotes(cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
 }
 
 // Number of cards in each contest, return contestId -> ncards
-fun cardsPerContest(cvrs: List<CvrIF>): Map<Int, Int> {
+fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
     val d = mutableMapOf<Int, Int>()
     for (cvr in cvrs) {
         for (con in cvr.votes.keys) {

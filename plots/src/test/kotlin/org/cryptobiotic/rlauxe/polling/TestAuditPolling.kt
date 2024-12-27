@@ -9,9 +9,10 @@ import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 // CANDIDATE FOR REMOVAL
 

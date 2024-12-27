@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.plots.colHeader
@@ -31,7 +31,7 @@ import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.plots.plotTFdiffSuccessDecile
 import org.cryptobiotic.rlauxe.plots.plotTFsuccessDecile
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import kotlin.test.Test
 
 // CANDIDATE FOR REMOVAL

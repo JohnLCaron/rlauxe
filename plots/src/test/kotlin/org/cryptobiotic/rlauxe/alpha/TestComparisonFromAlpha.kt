@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT

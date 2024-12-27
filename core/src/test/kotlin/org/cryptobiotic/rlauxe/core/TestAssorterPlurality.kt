@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.sampling.makeCvr
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test

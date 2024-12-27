@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.doubleIsClose
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.sampling.flipExactVotes
 import org.cryptobiotic.rlauxe.sampling.add2voteOverstatements
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

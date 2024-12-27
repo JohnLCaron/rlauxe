@@ -181,15 +181,6 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     return changed
 }
 
-///////////////////////
-//// DoubleArrays
-fun randomPermute(samples : DoubleArray): DoubleArray {
-    val n = samples.size
-    val permutedIndex = MutableList(n) { it }
-    permutedIndex.shuffle(Random)
-    return DoubleArray(n) { samples[permutedIndex[it]] }
-}
-
 
 
 

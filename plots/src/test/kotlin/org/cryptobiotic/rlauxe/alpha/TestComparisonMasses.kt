@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
 import kotlin.math.abs

@@ -14,7 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // from https://github.com/pbstark/alpha/blob/main/Code/alpha.ipynb
-class TestComparisonFromAlpha {
+class ReproduceAlphaResults {
 
     // see # set up simulations
     @Test
@@ -474,7 +474,6 @@ class TestComparisonFromAlpha {
         val assorter_mean = (9000 * thetas.last() + 1000 * .5) / N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
         val assorter_margin = 2 * assorter_mean - 1
         val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
-        assertEquals(1.009081735, u, doublePrecision)
          */
 
         val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
@@ -532,12 +531,6 @@ class TestComparisonFromAlpha {
         val ntrials = 1
         // val eta0 = 1.0
 
-        /* what to make of this ??
-        val assorter_mean = (9000 * thetas.last() + 1000 * .5) / N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
-        val assorter_margin = 2 * assorter_mean - 1
-        val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
-        assertEquals(1.009081735, u, doublePrecision)
-         */
         val info = ContestInfo(
             "contest0",
             0,

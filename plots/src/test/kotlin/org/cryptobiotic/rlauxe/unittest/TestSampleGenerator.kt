@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cobra
+package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision

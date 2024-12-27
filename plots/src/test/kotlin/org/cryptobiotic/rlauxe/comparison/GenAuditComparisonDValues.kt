@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 // CANDIDATE FOR REMOVAL
 
-class TestAuditComparison {
+class GenAuditComparisonDValues {
 
     @Test
     fun testComparisonWorkflow() {

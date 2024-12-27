@@ -14,14 +14,14 @@ import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.BettingFn
 import org.cryptobiotic.rlauxe.core.OptimalLambda
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-// Reproduce COBRA results
-class TestCobraResults {
+class ReproduceCobraResults {
 
     //Fig. 1. Deterministic sample sizes (y-axis; log10 scale) for a comparison audit of a
     //plurality contest with various diluted margins (x-axis) and risk limits (colors), with no
@@ -157,7 +157,13 @@ class TestCobraResults {
                         val cvrs = makeCvrsByExactMean(N, theta)
                         val compareAssorter = makeStandardComparisonAssorter(theta, N)
                         val sampleWithErrors =
-                            ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = p1, withoutReplacement = false)
+                            ComparisonWithErrorRates(
+                                cvrs,
+                                compareAssorter,
+                                p2 = p2,
+                                p1 = p1,
+                                withoutReplacement = false
+                            )
                         val upperBound = compareAssorter.upperBound
                         println("testTable2OracleBets: p1=${p1}  p2=${p2}")
 
@@ -234,7 +240,13 @@ class TestCobraResults {
                         val stopwatch = Stopwatch()
 
                         // generate with the oracle, or true rates
-                        val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2o, p1 = p1o, withoutReplacement = false)
+                        val sampler = ComparisonWithErrorRates(
+                            cvrs,
+                            compareAssorter,
+                            p2 = p2o,
+                            p1 = p1o,
+                            withoutReplacement = false
+                        )
                         val upperBound = compareAssorter.upperBound
                         println("testAdaptiveBets: p1=${p1o}  p2=${p2o} p1prior=${p1prior}  p2prior=${p2prior}")
 

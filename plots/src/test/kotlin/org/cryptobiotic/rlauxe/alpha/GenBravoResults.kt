@@ -14,7 +14,7 @@ import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
 // A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
-class TestBravo  {
+class GenBravoResults  {
 
     @Test
     fun testBravo() {

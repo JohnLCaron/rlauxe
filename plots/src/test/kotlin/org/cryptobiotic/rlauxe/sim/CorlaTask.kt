@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.corla.Corla

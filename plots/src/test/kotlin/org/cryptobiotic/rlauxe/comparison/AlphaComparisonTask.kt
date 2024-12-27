@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.comparison
 
-import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
-import org.cryptobiotic.rlauxe.cobra.ComparisonWithErrors
+import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
 
-class TestComparisonMasses {
+class CompareAlphaPaperUsingMasses {
     // trying to understand what this paragraph from ALPHA p 21 means:
     // "To assess the relative performance of these supermartingales for comparison audits, they
     // were applied to pseudo-random samples from nonnegative populations that had mass 0.001
@@ -61,13 +61,6 @@ class TestComparisonMasses {
             0.9946234445107308, 0.9491996903839541, 0.872444371417956,
             0.7438389502041729, 0.6236597364242038, 0.5499456507451624, 0.5059920323745111
         )
-
-        /* within 1%
-        thetas.forEachIndexed { idx, it ->
-            assertEquals(expected[idx], it, .01)
-        }
-
-         */
 
         // our results
         // testMass m=0.99 N=10000 theta=0.9941992429721956

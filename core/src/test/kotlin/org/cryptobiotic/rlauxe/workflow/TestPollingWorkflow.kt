@@ -126,7 +126,7 @@ class TestPollingWorkflow {
         var rounds = mutableListOf<Round>()
         var roundIdx = 1
 
-        var prevMvrs = emptyList<CvrIF>()
+        var prevMvrs = emptyList<Cvr>()
         var done = false
         while (!done) {
             val indices = workflow.chooseSamples(prevMvrs, roundIdx)

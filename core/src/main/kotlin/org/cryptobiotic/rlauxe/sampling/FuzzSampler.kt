@@ -64,7 +64,7 @@ class PollingFuzzSampler(
     val N = cvrs.size
     val welford = Welford()
     val permutedIndex = MutableList(N) { it }
-    var mvrs: List<CvrIF>
+    var mvrs: List<Cvr>
     var idx = 0
 
     init {

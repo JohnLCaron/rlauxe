@@ -12,7 +12,6 @@ class PollingWorkflow(
         val N: Int, // total number of ballots/cards
 ) {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-    val ballotsUA: List<BallotUnderAudit>
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
@@ -23,15 +22,12 @@ class PollingWorkflow(
             }
         }
 
-        val prng = Prng(auditConfig.seed)
-        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
-
         contestsUA.filter { !it.done }.forEach { contest ->
             contest.makePollingAssertions(null)
         }
     }
 
-    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
+    fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("estimateSampleSizes round $roundIdx")
         val maxContestSize = estimateSampleSizes(
             auditConfig,
@@ -41,6 +37,9 @@ class PollingWorkflow(
             roundIdx,
             show=show,
         )
+
+        val prng = Prng(auditConfig.seed)
+        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
         // choose samples
         val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?
@@ -62,6 +61,23 @@ class PollingWorkflow(
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
+            if (minAssertion == null) {
+                println(" $contest has no assertions; status=${contest.status}")
+            } else {
+                println(" $contest round=${minAssertion.round} status=${contest.status}")
+                minAssertion.roundResults.forEach { rr ->
+                    println("   $rr")
+                }
+            }
+        }
+        println()
+    }
+
+    /*
+    fun showResults2() {
+        println("Audit results")
+        contestsUA.forEach{ contest ->
+            val minAssertion = contest.minAssertion()
             if (minAssertion == null)
                 println(" $contest has no assertions; status=${contest.status}")
             else if (auditConfig.hasStyles)
@@ -72,6 +88,8 @@ class PollingWorkflow(
         }
         println()
     }
+
+     */
 
     fun runAudit(mvrs: List<Cvr>, roundIdx: Int): Boolean {
         return runAudit(auditConfig, contestsUA, mvrs, roundIdx)
@@ -149,10 +167,17 @@ fun auditOneAssertion(
     } else {
         println("testH0Result.status = ${testH0Result.status}")
     }
-    assertion.samplesUsed = testH0Result.sampleCount
-    assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst { it < auditConfig.riskLimit }
-    assertion.pvalue = testH0Result.pvalues.last()
 
-    println(" ${contest.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue = ${assertion.pvalue} status = ${testH0Result.status}")
+    val roundResult = AuditRoundResult(roundIdx,
+        estSampleSize=assertion.estSampleSize,
+        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit },
+        samplesUsed = testH0Result.sampleCount,
+        pvalue = testH0Result.pvalues.last(),
+        status = testH0Result.status,
+        // calcAssortMargin=assorter.calcAssorterMargin(contest.id, mvrs),
+    )
+    assertion.roundResults.add(roundResult)
+
+    println(" ${contest.name} $roundResult")
     return testH0Result.status
 }

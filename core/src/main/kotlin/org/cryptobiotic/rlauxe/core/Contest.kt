@@ -176,7 +176,7 @@ open class ContestUnderAudit(
     var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
 
     // should only be used for testing i think
-    constructor(info: ContestInfo, cvrs: List<CvrIF>, isComparison: Boolean=true, hasStyle: Boolean=true):
+    constructor(info: ContestInfo, cvrs: List<Cvr>, isComparison: Boolean=true, hasStyle: Boolean=true):
             this( makeContestFromCvrs(info, cvrs), isComparison, hasStyle)
 
     override fun toString() = buildString {
@@ -220,7 +220,7 @@ open class ContestUnderAudit(
     }
 
     // cvrs must be complete in order to get the margin right.
-    open fun makeComparisonAssertions(cvrs : Iterable<CvrIF>, votes: Map<Int, Int>? = null): ContestUnderAudit {
+    open fun makeComparisonAssertions(cvrs : Iterable<Cvr>, votes: Map<Int, Int>? = null): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         val useVotes = if (votes != null) votes else (contest as Contest).votes
         val assertions = when (contest.info.choiceFunction) {

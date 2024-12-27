@@ -21,7 +21,7 @@ fun estimateSampleSizes(
     auditConfig: AuditConfig,
     contestsUA: List<ContestUnderAudit>,
     cvrs: List<Cvr>,        // Comparison only
-    prevMvrs: List<CvrIF>,
+    prevMvrs: List<Cvr>,
     roundIdx: Int,
     show: Boolean = false,
 ): Int? {
@@ -45,7 +45,7 @@ fun estimateSampleSizes(
             // val size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
             val size = task.prevSampleSize + ceil(result.totalSamplesNeeded / result.ntrials.toDouble()).toInt()
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-            if (show) println("  ${task.contestUA.name} ${task.assertion}")
+            // if (show) println("  ${task.contestUA.name} ${task.assertion}")
         }
     }
 
@@ -55,7 +55,7 @@ fun estimateSampleSizes(
         val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id && !it.failed }
             .map { it.task.assertion.estSampleSize }
         contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        if (show) println(" ${contestUA}")
+        if (show) println("  ${contestUA}")
     }
     if (show) println()
     val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
@@ -66,7 +66,7 @@ fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     cvrs: List<Cvr>,        // Comparison only
-    prevMvrs: List<CvrIF>,  // TODO should be used for subsequent round estimation
+    prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimationTask> {
@@ -78,15 +78,16 @@ fun makeEstimationTasks(
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
-                if (assert.samplesUsed == contestUA.Nc) {
+                val rr = assert.roundResults.last()
+                if (rr.samplesUsed == contestUA.Nc) {
                     println("***LimitReached $contestUA")
                     contestUA.done = true  // TODO why isnt this on assert, not contest?
                     contestUA.status = TestH0Status.LimitReached
                 }
                 // start where the audit left off
-                prevSampleSize = assert.samplesUsed
+                prevSampleSize = rr.samplesUsed
                 // maxSamples = contestUA.Nc - prevSampleSize // TODO
-                startingTestStatistic = 1.0 / assert.pvalue
+                startingTestStatistic = 1.0 / rr.pvalue
             }
 
             if (!contestUA.done) {
@@ -231,9 +232,10 @@ fun simulateSampleSizeComparisonAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
 
-    val sampler = if (auditConfig.errorRates != null) {
-        ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
-    } else if (auditConfig.fuzzPct == null) {
+    val sampler = //if (auditConfig.errorRates != null) {
+    //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
+    //} else
+    if (auditConfig.fuzzPct == null) {
         val cvrPairs = cvrs.zip( cvrs)
         ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true)
     } else if (auditConfig.useGeneratedErrorRates) {
@@ -247,6 +249,11 @@ fun simulateSampleSizeComparisonAssorter(
     // at the beginning
     sampler.reset()
 
+    val calcMargin = cassorter.calcAssorterMargin(cvrs.zip( cvrs)) // TODO
+    println("  ** simulateSampleSizeComparisonAssorter ${contest.info.name} calcMargin=$calcMargin ")
+
+    val errorRates = auditConfig.errorRates ?: ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
+
     return simulateSampleSizeBetaMart(
         auditConfig,
         sampler,
@@ -254,7 +261,7 @@ fun simulateSampleSizeComparisonAssorter(
         cassorter.noerror,
         cassorter.upperBound,
         contest.Nc,
-        ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct),
+        errorRates,
         startingTestStatistic,
         moreParameters
     )

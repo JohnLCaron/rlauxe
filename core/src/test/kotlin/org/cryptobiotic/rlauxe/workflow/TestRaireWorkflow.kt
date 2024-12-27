@@ -48,7 +48,7 @@ class TestRaireWorkflow {
         // cant make fuzzed cvrs from raire as it stands
         // val fuzzedMvrs: List<Cvr> = makeFuzzedCvrsFrom(contests, cvrs, auditConfig.fuzzPct!!)
 
-        var prevMvrs = emptyList<CvrIF>()
+        var prevMvrs = emptyList<Cvr>()
         val previousSamples = mutableSetOf<Int>()
         var rounds = mutableListOf<Round>()
         var roundIdx = 1

@@ -95,6 +95,7 @@ fun uniformPollingSampling(
     // totalEst = est * N / Nc = rho * N / (vw - vl) = rho / fullyDilutedMargin
     // fullyDilutedMargin = (vw - vl)/ N
 
+    // TODO use rounds
     // scale by proportion of ballots that have this contest
     contests.forEach {
         val fac = N / it.Nc.toDouble()
@@ -106,9 +107,17 @@ fun uniformPollingSampling(
             it.done = true
             it.status = TestH0Status.LimitReached
             println("  ***$it estPct $estPct > samplePctCutoff $samplePctCutoff round $roundIdx")
-            val minAssert = it.minAssertion()
-            if (minAssert != null)
-                minAssert.round = roundIdx
+            val minAssert = it.minAssertion()!!
+
+            val roundResult = AuditRoundResult(roundIdx,
+                estSampleSize=est,
+                samplesNeeded = -1,
+                samplesUsed = -1,
+                pvalue = 0.0,
+                status = TestH0Status.LimitReached,
+                // calcAssortMargin=0.0,
+            )
+            minAssert.roundResults.add(roundResult)
         }
     }
     val estTotalSampleSizes = contests.filter { !it.done }.map { it.estSampleSizeNoStyles }

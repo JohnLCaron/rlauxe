@@ -58,7 +58,7 @@ class ComparisonWorkflow(
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
-    fun chooseSamples(prevMvrs: List<CvrIF>, roundIdx: Int, show: Boolean = true): List<Int> {
+    fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = true): List<Int> {
         println("estimateSampleSizes round $roundIdx")
 
         val maxContestSize = estimateSampleSizes(
@@ -116,7 +116,7 @@ class ComparisonWorkflow(
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize across assertions
-        println("runOneAssertionAudit")
+        println("runOneAssertionAudit round roundIdx")
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
@@ -139,10 +139,16 @@ class ComparisonWorkflow(
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
-            if (minAssertion == null)
+            if (minAssertion == null) {
                 println(" $contest has no assertions; status=${contest.status}")
-            else
-                println(" $contest samplesUsed=${minAssertion.samplesUsed} round=${minAssertion.round} status=${contest.status}")
+            } else {
+                val samplesUsedSum = minAssertion.roundResults.sumOf { it.samplesUsed }
+                val samplesEstSum = minAssertion.roundResults.sumOf { it.estSampleSize }
+                println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${samplesEstSum} samplesUsed=$samplesUsedSum round=${minAssertion.round} status=${contest.status}")
+               // if (minAssertion.roundResults.size > 1) {
+                    minAssertion.roundResults.forEach { rr -> println("   $rr") }
+               // }
+            }
         }
         println()
     }
@@ -151,7 +157,7 @@ class ComparisonWorkflow(
 ///////////////////////////////////////////////////////////////////////
 
 // tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
-fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<CvrIF>): Map<Int, Int> {
+fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Int> {
     val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
     contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete
     for (cvr in cvrs) {
@@ -171,7 +177,7 @@ fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<CvrIF>): Map<Int, In
     return ncvrs
 }
 
-fun makeVotesPerContest(contests: List<Contest>, cvrs: List<CvrIF>): Map<Int, Map<Int, Int>> {
+fun makeVotesPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
     val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes
     contests.forEach { allVotes[it.id] = mutableMapOf() } // make sure map is complete
     for (cvr in cvrs) {
@@ -186,7 +192,7 @@ fun makeVotesPerContest(contests: List<Contest>, cvrs: List<CvrIF>): Map<Int, Ma
     return allVotes
 }
 
-fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<CvrIF>, hasStyles: Boolean=true): List<ContestUnderAudit> {
+fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: Boolean=true): List<ContestUnderAudit> {
     if (contests.isEmpty()) return emptyList()
 
     val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes (cand -> vote)
@@ -221,7 +227,7 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
 }
 
 // TODO seems wrong
-fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<CvrIF>): List<ContestUnderAudit> {
+fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>): List<ContestUnderAudit> {
     if (rcontests.isEmpty()) return emptyList()
 
     val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
@@ -259,19 +265,18 @@ fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<CvrIF
 fun runOneAssertionAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
-    assertion: ComparisonAssertion,
+    cassertion: ComparisonAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
 ): TestH0Status {
-    val assorter = assertion.cassorter
-    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, assorter, allowReset = false)
+    val cassorter = cassertion.cassorter
+    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
-    // TODO always using the ComparisonErrorRates derived from fuzzPct. should have the option to use ones chosen by the user.
-    val errorRates = ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
+    val errorRates = auditConfig.errorRates ?: ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,
         withoutReplacement = true,
-        a = assorter.noerror,
+        a = cassorter.noerror,
         d1 = auditConfig.d1,
         d2 = auditConfig.d2,
         p1 = errorRates[0],
@@ -282,8 +287,8 @@ fun runOneAssertionAudit(
     val testFn = BettingMart(
         bettingFn = optimal,
         Nc = contestUA.Nc,
-        noerror = assorter.noerror,
-        upperBound = assorter.upperBound,
+        noerror = cassorter.noerror,
+        upperBound = cassorter.upperBound,
         riskLimit = auditConfig.riskLimit,
         withoutReplacement = true
     )
@@ -291,16 +296,22 @@ fun runOneAssertionAudit(
     // do not terminate on null reject, continue to use all samples
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
     if (!testH0Result.status.fail) {
-        assertion.proved = true
-        assertion.round = roundIdx
+        cassertion.proved = true
+        cassertion.round = roundIdx
     } else {
         println("testH0Result.status = ${testH0Result.status}")
     }
-    assertion.samplesUsed = testH0Result.sampleCount
-    assertion.samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit }
-    assertion.pvalue = testH0Result.pvalues.last()
 
-    println(" ${contestUA.name} $assertion, samplesNeeded=${assertion.samplesNeeded} samplesUsed=${assertion.samplesUsed} pvalue=${assertion.pvalue} status=${testH0Result.status}")
+    val roundResult = AuditRoundResult(roundIdx,
+        estSampleSize=cassertion.estSampleSize,
+        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit },
+        samplesUsed = testH0Result.sampleCount,
+        pvalue = testH0Result.pvalues.last(),
+        status = testH0Result.status,
+        // calcAssortMargin=cassorter.calcAssorterMargin(cvrPairs),
+        )
+    cassertion.roundResults.add(roundResult)
 
+    println(" ${contestUA.name} $roundResult")
     return testH0Result.status
 }

@@ -54,7 +54,7 @@ class RaireContestUnderAudit(
         }
     }
 
-    override fun makeComparisonAssertions(cvrs: Iterable<CvrIF>, votes: Map<Int, Int>?): ContestUnderAudit {
+    override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
         this.comparisonAssertions = assertions.map { assertion ->
             val assorter = RaireAssorter(this, assertion)
             val margin = assorter.calcAssorterMargin(id, cvrs)
@@ -182,7 +182,7 @@ class RaireAssorter(contest: RaireContestUnderAudit, val assertion: RaireAsserti
 
     // override fun reportedAssorterMargin(votes: Map<Int, Int>): Double = 0.0 // TODO
 
-    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (usePhantoms && mvr.phantom) return 0.5;
         val rcvr = RaireCvr(mvr)
         return if (assertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)

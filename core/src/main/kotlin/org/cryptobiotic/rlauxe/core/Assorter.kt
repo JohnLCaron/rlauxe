@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterFunction {
-    fun assort(mvr: CvrIF, usePhantoms: Boolean = false) : Double
+    fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
     fun upperBound(): Double
     fun desc(): String
     fun winner(): Int
@@ -19,7 +19,7 @@ interface AssorterFunction {
     //    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
     //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
     // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
-    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<CvrIF>): Double {
+    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }
                         .map { assort(it, usePhantoms = false) }.average()
         return mean2margin(mean)
@@ -51,7 +51,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
-    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(contest.info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(contest.info.id, winner)
@@ -79,7 +79,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
 data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterFunction {
     val upperBound = 0.5 / minFraction
 
-    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(contest.info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(contest.info.id, winner)
@@ -130,8 +130,14 @@ data class ComparisonAssorter(
         }
     }
 
+    fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
+        val mean = cvrPairs.filter{ it.first.hasContest(contest.id) }
+            .map { bassort(it.first, it.second) }.average()
+        return mean2margin(mean)
+    }
+
     // B(bi, ci)
-    fun bassort(mvr: CvrIF, cvr:CvrIF): Double {
+    fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
         //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
@@ -163,7 +169,7 @@ data class ComparisonAssorter(
     //        Phantom CVRs and MVRs are treated specially:
     //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
     //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
-    fun overstatementError(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
+    fun overstatementError(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
 
 
         //        # sanity check
@@ -202,6 +208,15 @@ data class ComparisonAssorter(
 
 ///////////////////////////////////////////////////////////////////
 
+data class AuditRoundResult( val roundIdx: Int,
+                        val estSampleSize: Int,   // estimated sample size
+                        val samplesNeeded: Int,   // first sample when pvalue < riskLimit
+                        val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
+                        val pvalue: Double,       // last pvalue when testH0 terminates
+                        val status: TestH0Status, // testH0 status
+                        // val calcAssortMargin: Double, // debug
+    )
+
 open class Assertion(
     val contest: ContestIF,
     val assorter: AssorterFunction,
@@ -210,15 +225,15 @@ open class Assertion(
     val loser = assorter.loser()
     val margin = assorter.reportedMargin()
 
+    val roundResults = mutableListOf<AuditRoundResult>()
+
     // these values are set during estimateSampleSizes()
-    var estSampleSize = 0   // estimated sample size
+    var estSampleSize = 0   // estimated sample size for current round
 
     // these values are set during runAudit()
     var status = TestH0Status.NotStarted
     var proved = false
-    var samplesNeeded = 0   // first sample when pvalue < riskLimit
-    var samplesUsed = 0     // sample count when testH0 terminates, usually maxSamples
-    var pvalue = 0.0        // last pvalue when testH0 terminates
+
     var round = 0           // round when set to proved or disproved
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(margin)}"

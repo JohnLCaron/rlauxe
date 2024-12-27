@@ -167,7 +167,7 @@ class TestOverstatementsFromShangrla {
             .addCvr().addContest("AvB").ddone()
             .addCvr().addContest("CvD", "Elvis").addCandidate("Candy", 0).ddone()
         println(mvrb.show())
-        val mvrs = mvrb.build()  + CvrUnderAudit.makePhantom("Phantastic", 0)
+        val mvrs = mvrb.build()  + Cvr.makePhantom("Phantastic", 0)
 
         //
         //        cvr_dict = [{'id': 1, 'votes': {'AvB': {'Alice':True}}},
@@ -182,7 +182,7 @@ class TestOverstatementsFromShangrla {
             .addCvr().addContest("AvB").ddone()
             .addCvr().addContest("CvD", "Elvis").ddone()
         println(cvrb.show())
-        val cvrs = cvrb.build() + CvrUnderAudit.makePhantom("Phantastic", 0)
+        val cvrs = cvrb.build() + Cvr.makePhantom("Phantastic", 0)
 
         //
         //        winner = ["Alice"]

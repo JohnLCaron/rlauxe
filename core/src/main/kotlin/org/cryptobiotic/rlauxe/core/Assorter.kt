@@ -233,7 +233,6 @@ open class Assertion(
     // these values are set during runAudit()
     var status = TestH0Status.NotStarted
     var proved = false
-
     var round = 0           // round when set to proved or disproved
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(margin)}"

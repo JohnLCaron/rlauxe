@@ -17,7 +17,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.createPctRatio
 import org.cryptobiotic.rlauxe.plots.plotPctRatio
@@ -29,10 +29,8 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import kotlin.test.Test
-
-import kotlin.text.format
 
 // CANDIDATE FOR REFACTOR
 

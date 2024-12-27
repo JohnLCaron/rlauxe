@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.sim.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test

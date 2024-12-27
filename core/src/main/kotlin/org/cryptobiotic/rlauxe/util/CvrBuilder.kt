@@ -2,8 +2,6 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 
-// for testing, here to share between modules
-
 class CvrBuilders {
     val builders = mutableListOf<CvrBuilder>()
     var nextCvrId = 0

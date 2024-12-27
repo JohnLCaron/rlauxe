@@ -1,13 +1,8 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

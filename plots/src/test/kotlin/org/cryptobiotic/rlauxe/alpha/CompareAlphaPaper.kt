@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.alpha
 
-
 import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -13,7 +12,7 @@ import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import kotlin.test.Test
 

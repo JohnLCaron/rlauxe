@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.BallotManifest
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.EstimFn
@@ -9,7 +8,6 @@ import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.AuditConfig

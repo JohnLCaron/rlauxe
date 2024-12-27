@@ -1,52 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.flipExactVotes
-import java.security.SecureRandom
-import kotlin.random.Random
-
-val secureRandom = SecureRandom.getInstanceStrong()!!
-
-// making CVRs for simulations and testing
-fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
-    val cvrs = mutableListOf<Cvr>()
-    var total = 0
-    counts.forEachIndexed { idx, it ->
-        repeat(it) {
-            val votes = mutableMapOf<Int, IntArray>()
-            votes[0] = intArrayOf(idx)
-            cvrs.add(Cvr("card-$total", votes))
-            total++
-        }
-    }
-    cvrs.shuffle( secureRandom )
-    return cvrs
-}
-
-fun makeCvr(idx: Int): Cvr {
-    val votes = mutableMapOf<Int, IntArray>()
-    votes[0] = intArrayOf(idx)
-    return Cvr("card", votes)
-}
-
-fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
-fun mean2margin(mean: Double) = 2.0 * mean - 1.0
-
-fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
-    val randomCvrs = mutableListOf<Cvr>()
-    repeat(ncards) {
-        val random = secureRandom.nextDouble(1.0)
-        val cand = if (random < mean) 0 else 1
-        val votes = mutableMapOf<Int, IntArray>()
-        votes[0] = intArrayOf(cand)
-        randomCvrs.add(Cvr("card-$it", votes))
-    }
-    flipExactVotes(randomCvrs, mean)
-    return randomCvrs
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// testing
 
 fun makeContestFromCvrs(
     info: ContestInfo,
@@ -54,25 +8,11 @@ fun makeContestFromCvrs(
 ): Contest {
     val votes = tabulateVotes(cvrs)
     val ncards = cardsPerContest(cvrs)
-
-    if ((votes[info.id] == null) || (ncards[info.id] == null)) {
-        print("")
-    }
-
     return Contest(
         info,
         votes[info.id] ?: emptyMap(),
         ncards[info.id] ?: 0,
     )
-}
-
-fun makeContestsFromCvrs(
-    cvrs: List<Cvr>,
-    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-): List<Contest> {
-    val votes = tabulateVotes(cvrs)
-    val ncards = cardsPerContest(cvrs)
-    return makeContestsFromCvrs(votes, ncards, choiceFunction)
 }
 
 // Number of votes in each contest, return contestId -> candidateId -> nvotes
@@ -100,44 +40,4 @@ fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
         }
     }
     return d
-}
-
-fun makeContestsFromCvrs(
-    votes: Map<Int, Map<Int, Int>>,  // contestId -> candidate -> votes
-    cards: Map<Int, Int>, // contestId -> ncards
-    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-): List<Contest> {
-    val svotes = votes.toSortedMap()
-    val contests = mutableListOf<Contest>()
-
-    for ((contestId, candidateMap) in svotes.toSortedMap()) {
-        val scandidateMap = candidateMap.toSortedMap()
-
-        contests.add(
-            Contest(
-                ContestInfo(
-                    name = "contest$contestId",
-                    id = contestId,
-                    choiceFunction = choiceFunction,
-                    candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
-                    nwinners=1,
-                ),
-                voteInput = votes[contestId]!!,
-                Nc = cards[contestId]!!,
-            )
-        )
-    }
-
-    return contests
-}
-
-fun makeFakeContest(info: ContestInfo, ncvrs: Int): Contest {
-    val cvrs = mutableListOf<Cvr>()
-    repeat(ncvrs) {
-        val votes = mutableMapOf<Int, IntArray>()
-        val choice = Random.nextInt(info.nwinners)
-        votes[0] = intArrayOf(choice)
-        cvrs.add(Cvr("card-$it", votes))
-    }
-    return makeContestFromCvrs(info, cvrs)
 }

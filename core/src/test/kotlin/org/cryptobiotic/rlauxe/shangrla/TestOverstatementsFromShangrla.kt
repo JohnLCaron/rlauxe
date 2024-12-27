@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeCvr
-import org.cryptobiotic.rlauxe.util.makeFakeContest
+import org.cryptobiotic.rlauxe.sampling.makeCvr
+import org.cryptobiotic.rlauxe.sampling.makeFakeContest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

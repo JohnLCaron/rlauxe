@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
-import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals

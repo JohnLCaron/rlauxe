@@ -106,7 +106,7 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) candidates={cand0=0, cand1=1, cand2=2} Nc= 211 votes={0=100, 1=108, 2=0}",
+            "testContestInfo (0) Nc= 211 votes={0=100, 1=108, 2=0} minMargin=0.0379",
             contest.toString()
         )
 

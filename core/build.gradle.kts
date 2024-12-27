@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.serialization)
+    id ("java-test-fixtures")
 }
 
 repositories {
@@ -16,6 +17,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.egtest)
+
+    testFixturesImplementation(libs.bundles.egtest)
 }
 
 tasks.test {
@@ -29,14 +32,6 @@ tasks.test {
     systemProperties["junit.jupiter.execution.parallel.enabled"] = "true"
     systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
     systemProperties["junit.jupiter.execution.parallel.mode.classes.default"] = "concurrent"
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 kotlin {

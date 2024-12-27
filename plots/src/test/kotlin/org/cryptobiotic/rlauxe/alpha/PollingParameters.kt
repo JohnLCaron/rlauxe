@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.PollingTask
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import kotlin.test.Test
 
 // explore comparison parameters

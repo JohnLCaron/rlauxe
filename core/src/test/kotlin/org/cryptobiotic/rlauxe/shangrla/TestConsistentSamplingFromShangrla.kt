@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.consistentCvrSampling
+import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.makeNcvrsPerContest
@@ -76,7 +77,7 @@ class TestConsistentSamplingFromShangrla {
             .addCvr().addContest("measure_2", "yes").done().done()
             .build()
 
-        val contests =  makeContestsFromCvrs(cvrs)
+        val contests = makeContestsFromCvrs(cvrs)
         val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it) }
         contestsUA[0].estSampleSize = 3
         contestsUA[1].estSampleSize = 3

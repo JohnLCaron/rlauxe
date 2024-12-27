@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.cryptobiotic.rlauxe.util.makeCvr
-import org.cryptobiotic.rlauxe.util.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.sampling.makeCvr
+import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals

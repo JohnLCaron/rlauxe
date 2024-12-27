@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.serialization)
+    id ("java-test-fixtures")
 }
 
 repositories {
@@ -17,9 +18,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.lets.plot)
-    // testImplementation(kotlin("test"))
     testImplementation(libs.kotlin.test)
     testImplementation(libs.bundles.egtest)
+
+    testImplementation(testFixtures(project(":core")))
 }
 
 tasks.withType<Test>().configureEach {

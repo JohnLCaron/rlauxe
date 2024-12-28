@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.workflow.BallotOrCard
+
 // immutable
 data class Cvr(
     val id: String,
@@ -59,17 +61,18 @@ data class Cvr(
 }
 
 /** Mutable version of Cvr. sampleNum >= 0  */
-class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L) {
+class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCard {
     var sampled = false //  # is this CVR in the sample?
 
     val id = cvr.id
     val votes = cvr.votes
     val phantom = cvr.phantom
-    fun hasContest(contestId: Int) = cvr.hasContest(contestId)
-    fun hasMarkFor(contestId: Int, candidateId: Int) = cvr.hasMarkFor(contestId, candidateId)
-    fun hasOneVote(contestId: Int, candidates: List<Int>) = cvr.hasOneVote(contestId, candidates)
 
-    // constructor(id: String, contestIdx: Int) : this( Cvr(id, mapOf(contestIdx to IntArray(0)), false))
+    override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
+    override fun sampleNumber() = sampleNum
+    override fun setIsSampled(isSampled: Boolean) {
+        this.sampled = isSampled
+    }
 
     override fun toString() = buildString {
         append("$id ($phantom)")

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/27/2024
+last update: 12/28/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -29,9 +29,10 @@ Table of Contents
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
     * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
-      * [Comparison audits and CSDs](#comparison-audits-and-csds)
-      * [Polling audits and CSDs](#polling-audits-and-csds)
-      * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
+      * [Consistent Sampling](#consistent-sampling)
+      * [Uniform Sampling](#uniform-sampling)
+    * [Comparison audits and CSDs](#comparison-audits-and-csds)
+    * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
     * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
   * [Differences with SHANGRLA](#differences-with-shangrla)
@@ -432,6 +433,9 @@ This step is highly dependent on how much we know about which ballots contain wh
 whether you have Card Style Data (CSD), (see MoreStyle, p2).
 
 For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
+If it does not record contests with no votes, I think we have to use uniform sampling instead of consistent sampling.
+This has such a dramatic effect on sample sizes that I would consider this an bug of the CVR software.
+Nonetheless we handle this case in the library.
 
 So far, we can distinguish the following cases:
 
@@ -445,7 +449,49 @@ So far, we can distinguish the following cases:
   * information about which containers have which card styles, even without information about which cards contain which
     contests, can still yield substantial efficiency gains for ballot-polling audits.
 
-#### Comparison audits and CSDs
+#### Consistent Sampling
+
+When we can tell which ballots/CVRs contain a given contest, we can use consistent sampling, as follows:
+
+* For each contest, estimate the number of samples needed (contest.estSamples).
+* For each ballot/cvr, assign a large psuedo-random number, using a high-quality PRNG.
+* Sort the ballots/cvrs by that number
+* Select the first ballots/cvrs that use any contest that needs more samples, until all contests have
+at least contest.estSampleSize in the sample of selected ballots.
+
+#### Uniform Sampling
+
+When we can't tell which ballots/CVRs contain a given contest, we can use uniform sampling, as follows:
+
+* For each contest, estimate the number of samples needed (contest.estSamples).
+* Let N be the total number of ballots, and Nc the maximum number of cards for a contest C. Then we assume that the
+  probability of a ballot containing contest C is Nc / N.
+* Over all contests, compute contest.estSamples / Nc / N and choose the maximum = audit.estSamples.
+* For each ballot/cvr, assign a large psuedo-random number, using a high-quality PRNG.
+* Sort the ballots/cvrs by that number
+* Take the first audit.estSamples of the sorted ballots.
+
+We need Nc as a condition of the audit, but its straightforward to estimate a contests' sample size without Nc,
+since it works out that Nc cancels out:
+
+        sampleEstimate = rho / dilutedMargin                  // (SuperSimple p. 4)
+        where 
+          dilutedMargin = (vw - vl)/ Nc
+        sampleEstimate = rho * Nc / (vw - vl)
+        totalEstimate = sampleEstimate * N / Nc               // must scale by proportion of ballots with that contest
+                      = rho * N / (vw - vl) 
+                      = rho / fullyDilutedMargin
+        where
+          fullyDilutedMargin = (vw - vl)/ N
+
+The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
+In the following plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the audit has CSDs:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingNoStyle.html" rel="PollingNoStyle">![PollingNoStyle](./docs/plots/samples/PollingNoStyle.png)</a>
+
+See _PlotPollingNoStyles.kt_.
+
+### Comparison audits and CSDs
 
 ConsistentSampling is used in either case. This assigns large psuedo-random numbers to each ballot, orders the ballots
 by that number, and selects the first ballots that use any contest that needs more samples, until all contests have 
@@ -470,40 +516,7 @@ TODO: whats the reasoning for the above?
 For !hasCSD, we wont select unvoted contests to be in the sample, since they arent recorded.
 So then if we see an unvoted contest on the MVR, the case where the MVR contains the contest but not the CVR, then...
 
-#### Polling audits and CSDs
-
-When a Polling audit has CSDs, then ConsistentSampling can be used. Otherwise, we have to use the following process: 
-
-The contests' estimated sample sizes are computed as usual. In order to find ballots containing a contest, 
-among a batch of N ballots where Nc ballots contain that contest, we have to examine (on average) (N / Nc) * contest.estSampleSize. 
-
-Then contest sample_size is then the maximum of the contest's assertion estimates, as before. The audit's sample size is the
-maximum over the contests.
-
-UniformSampling assigns large psuedo-random numbers to each ballot, sorts and chooses the first nsamples of them. Since
-we cant distinguish whoch ballots have which contests, we just take the first audit.sampleSize ballots.
-
-We must Nc as a condition of the audit, but its straightforwad to calculate a contests' sample size without Nc,
-since it works out that Nc cancels out:
-
-        sampleEstimate = rho / dilutedMargin                  // (SuperSimple p. 4)
-        where 
-          dilutedMargin = (vw - vl)/ Nc
-        sampleEstimate = rho * Nc / (vw - vl)
-        totalEstimate = sampleEstimate * N / Nc               // must scale by proportion of ballots with that contest
-                      = rho * N / (vw - vl) 
-                      = rho / fullyDilutedMargin
-        where
-          fullyDilutedMargin = (vw - vl)/ N
-
-The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
-In the following plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the audit has CSDs.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingNoStyle.html" rel="PollingNoStyle">![PollingNoStyle](./docs/plots/samples/PollingNoStyle.png)</a>
-
-See _PlotPollingNoStyles.kt_.
-
-#### Polling Vs Comparison with/out CSD Estimated Sample sizes
+### Polling Vs Comparison with/out CSD Estimated Sample sizes
 
 The following plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
 
@@ -513,6 +526,7 @@ Little difference between comparison with/out CSD. Large difference with polling
 since it depends on N/Nc scaling.
 
 See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
+
 
 ### Missing Ballots (aka phantoms-to-evil zombies)
 

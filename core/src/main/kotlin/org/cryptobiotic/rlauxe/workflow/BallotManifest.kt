@@ -27,6 +27,12 @@ data class BallotManifest(
     val ballotStyles: List<BallotStyle> // empty if style info not available, auditConfig.hasStyles = false
 )
 
+interface BallotOrCard {
+    fun hasContest(contestId: Int): Boolean
+    fun sampleNumber(): Long
+    fun setIsSampled(isSampled: Boolean)
+}
+
 data class Ballot(
     val id: String,
     val phantom: Boolean = false,
@@ -38,6 +44,7 @@ data class Ballot(
         if (contestIds != null) return contestIds.find{ it == contestId } != null
         return false
     }
+
     fun contestIds(): List<Int> {
         if (ballotStyle != null) return ballotStyle.contestIds
         if (contestIds != null) return contestIds
@@ -45,13 +52,16 @@ data class Ballot(
     }
 }
 
-class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) {
-    var sampled = false //  # is this CVR in the sample?
+class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) : BallotOrCard {
+    var sampled = false //  # is this in the sample?
     val id = ballot.id
     val phantom = ballot.phantom
 
-    fun hasContest(contestId: Int) = ballot.hasContest(contestId)
-    fun contestIds() = ballot.contestIds()
+    override fun hasContest(contestId: Int) = ballot.hasContest(contestId)
+    override fun sampleNumber() = sampleNum
+    override fun setIsSampled(isSampled: Boolean) {
+        this.sampled = isSampled
+    }
 }
 
 // The term ballot style generally refers to the set of contests on a given voter’s ballot. (Ballot

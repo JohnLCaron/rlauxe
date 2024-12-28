@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.Ballot
+import org.cryptobiotic.rlauxe.workflow.BallotStyle
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.max
@@ -79,15 +81,15 @@ data class MultiContestTestData(
     }
 
     override fun toString() = buildString {
-        append("MultiContestTestData ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
+        append("ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
         appendLine(" marginRange=$marginRange underVotePct=$underVotePct phantomPct=$phantomPct")
         fcontests.forEach { fcontest ->
-            append(fcontest)
+            append("  $fcontest")
             val bs4id = ballotStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
             appendLine(" ballotStyles=$bs4id")
         }
         appendLine("")
-        ballotStyles.forEach { appendLine(it) }
+        ballotStyles.forEach { appendLine("  $it") }
     }
 
     // includes undervotes and phantoms, size = totalBallots + phantom count
@@ -176,7 +178,7 @@ data class ContestTestData(
 
         val nvotes = this.ncards - underCount
         if (nvotes == 0) {
-            return Contest(this.info, emptyMap(), this.ncards)
+            return Contest(this.info, emptyMap(), this.ncards, 0)
         }
         val votes: List<Pair<Int, Int>> = partition(nvotes, ncands)
         var svotes = votes.sortedBy { it.second }.reversed().toMutableList()
@@ -206,7 +208,7 @@ data class ContestTestData(
         // N_c = ncards / (1 - ppct)
 
         val removeUndervotes = svotes.filter{ it.first != ncands }
-        return Contest(this.info, removeUndervotes.toMap(), Nc.toInt())
+        return Contest(this.info, removeUndervotes.toMap(), Nc.toInt(), this.phantomCount)
     }
 
     fun adjust(svotes: MutableList<Pair<Int, Int>>, Nc: Int): Int {
@@ -254,7 +256,7 @@ data class ContestTestData(
     }
 
     override fun toString() = buildString {
-        append(" ContestTestData(contestId=$contestId, ncands=$ncands, margin=${df(margin)}, choiceFunction=$choiceFunction countCards=$ncards")
+        append("ContestTestData($contestId, ncands=$ncands, margin=${df(margin)}, $choiceFunction ncards=$ncards")
     }
 }
 

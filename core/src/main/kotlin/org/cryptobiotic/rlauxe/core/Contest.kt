@@ -48,6 +48,7 @@ interface ContestIF {
     val info: ContestInfo
     val id: Int
     val Nc: Int
+    val Np: Int
     val ncandidates: Int
     val choiceFunction: SocialChoiceFunction
 
@@ -65,6 +66,7 @@ class Contest(
         override val info: ContestInfo,
         voteInput: Map<Int, Int>,
         override val Nc: Int,
+        override val Np: Int,
     ): ContestIF {
     override val id = info.id
     val name = info.name
@@ -75,7 +77,7 @@ class Contest(
     override val winnerNames: List<String>
     override val winners: List<Int>
     override val losers: List<Int>
-    val minMargin: Double
+    val minMargin: Double  // TODO should we remove Np in this calculation?
 
     init {
         // construct votes, adding 0 votes if needed
@@ -94,11 +96,11 @@ class Contest(
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
         val useMin = info.minFraction ?: 0.0
-        val totalVotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
-        require(totalVotes <= Nc) { "Nc $Nc must be >= totalVotes ${totalVotes}"}
+        val nvotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
+        require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
 
         // todo why use totalVotes instead of Nc?
-        val overTheMin = votes.toList().filter{ it.second.toDouble()/totalVotes >= useMin }.sortedBy{ it.second }.reversed()
+        val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()
         val useNwinners = min(overTheMin.size, info.nwinners)
         winners = overTheMin.subList(0, useNwinners).map { it.first }
         // invert the map
@@ -118,7 +120,7 @@ class Contest(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc= $Nc votes=${votes} minMargin=${df(minMargin)}")
+        append("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -166,6 +168,7 @@ open class ContestUnderAudit(
     val choiceFunction = contest.info.choiceFunction
     val ncandidates = contest.info.candidateIds.size
     val Nc = contest.Nc
+    val Np = contest.Np
 
     var pollingAssertions: List<Assertion> = emptyList()
     var comparisonAssertions: List<ComparisonAssertion> = emptyList()

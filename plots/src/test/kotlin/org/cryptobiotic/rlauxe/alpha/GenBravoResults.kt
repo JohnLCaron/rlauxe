@@ -5,9 +5,9 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
-import org.cryptobiotic.rlauxe.workflow.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.random.Random
 import kotlin.test.Test
@@ -95,13 +95,13 @@ class GenBravoResults  {
 // ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
 // Nℓ is the number of votes reported for candidate ℓ: η is not updated as data are collected
 class FixedMean(val eta0: Double): EstimFn {
-    override fun eta(prevSamples: Samples): Double {
+    override fun eta(prevSampleTracker: SampleTracker): Double {
         return eta0
     }
 }
 
 // generate random values with given mean
-class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
+class GenSampleMeanWithReplacement(val N: Int, ratio: Double): Sampler {
     val samples = generateSampleWithMean(N, ratio)
     override fun sample(): Double {
         val idx = Random.nextInt(N) // with Replacement
@@ -113,7 +113,7 @@ class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
     override fun maxSamples() = N
 }
 
-class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGenerator {
+class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): Sampler {
     var samples = generateSampleWithMean(N, ratio)
     var index = 0
     override fun sample(): Double {

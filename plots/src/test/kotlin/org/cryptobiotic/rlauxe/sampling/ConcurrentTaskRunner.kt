@@ -16,7 +16,6 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import java.util.concurrent.TimeUnit
 
 // assumes that the task returns RunTestRepeatedResult

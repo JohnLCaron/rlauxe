@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.sim
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.Sampler
 
 // call this CobraTask ?
 data class BettingTask(
@@ -20,7 +20,7 @@ data class BettingTask(
         require( N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleGenerator {
+    override fun makeSampler(): Sampler {
         return ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2oracle, withoutReplacement = true)
     }
 

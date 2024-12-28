@@ -96,7 +96,7 @@ class TestContest {
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
             SocialChoiceFunction.PLURALITY
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), 211)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -106,28 +106,28 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc= 211 votes={0=100, 1=108, 2=0} minMargin=0.0379",
+            "testContestInfo (0) Nc=211 Np=0 votes={0=100, 1=108, 2=0} minMargin=0.0379",
             contest.toString()
         )
 
         val mess1 = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), 222)
+            Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), Nc=222, Np=0)
         }.message
         assertEquals("'3' not found in contestInfo candidateIds [0, 1, 2]", mess1)
 
         val mess2 = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 108), 111)
+            Contest(info, mapOf(0 to 100, 1 to 108), Nc=111, Np=0)
         }.message
         assertEquals("Nc 111 must be >= totalVotes 208", mess2)
 
-        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), 211)
+        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
         assertEquals(contest.hashCode(), contest2.hashCode())
     }
 
     @Test
     fun testContestUnderAudit() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.IRV)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), 211)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
 
         val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val mess1 = assertFailsWith<RuntimeException> {

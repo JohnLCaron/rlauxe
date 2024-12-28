@@ -12,9 +12,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -181,7 +179,7 @@ class TestMultiContestTestData {
 // run AlphaMart with TrunkShrinkage in repeated trials
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
-    drawSample: SampleGenerator,
+    drawSample: Sampler,
     // maxSamples: Int,
     eta0: Double,
     d: Int = 500,

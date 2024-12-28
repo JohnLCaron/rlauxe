@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.polling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.plots.plotDDsample
 import org.cryptobiotic.rlauxe.rlaplots.SRT
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement

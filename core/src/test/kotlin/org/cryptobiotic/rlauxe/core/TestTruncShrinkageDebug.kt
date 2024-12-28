@@ -85,13 +85,13 @@ class TruncShrinkageDebug(
     val welford = Welford()
 
     // estimate population mean from previous samples
-    fun eta(prevSamples: Samples): TruncShrinkageResult {
-        val lastj = prevSamples.numberOfSamples()
+    fun eta(prevSampleTracker: SampleTracker): TruncShrinkageResult {
+        val lastj = prevSampleTracker.numberOfSamples()
         val dj1 = (d + lastj).toDouble()
 
         val sampleSum = if (lastj == 0) 0.0 else {
-            welford.update(prevSamples.last())
-            prevSamples.sum()
+            welford.update(prevSampleTracker.last())
+            prevSampleTracker.sum()
         }
 
         // note stdev not used if f = 0, except in capBelow
@@ -110,8 +110,8 @@ class TruncShrinkageDebug(
         // for instance c = (η0 − µ)/2.
 
         val e_j = c / sqrt(dj1)
-        val mean = meanUnderNull(N, 0.5, prevSamples)
-        val mean2 = populationMeanIfH0(prevSamples.numberOfSamples(), prevSamples.sum())
+        val mean = meanUnderNull(N, 0.5, prevSampleTracker)
+        val mean2 = populationMeanIfH0(prevSampleTracker.numberOfSamples(), prevSampleTracker.sum())
         if  (mean != mean2) {
             println("wtf")
         }
@@ -130,7 +130,7 @@ class TruncShrinkageDebug(
         return if (!withoutReplacement) 0.5 else (N * 0.5 - sampleSumMinusCurrent) / (N - sampleNum + 1)
     }
 
-    fun meanUnderNull(N: Int, t: Double, x: Samples): Double {
+    fun meanUnderNull(N: Int, t: Double, x: SampleTracker): Double {
         if (!withoutReplacement) return t  // t is always 1/2 ??
         if (x.numberOfSamples() == 0) return t
 

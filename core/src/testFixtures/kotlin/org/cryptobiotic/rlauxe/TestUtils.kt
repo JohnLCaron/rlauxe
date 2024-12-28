@@ -36,7 +36,9 @@ fun makeStandardContest(Nc: Int) =
         ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
         mapOf(0 to 3, 1 to 33),
         Nc = Nc,
+        Np=0, // TODO
     )
+
 fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
     val contest = makeStandardContest(Nc)
     return PluralityAssorter.makeWithVotes(contest, 0, 1, contest.votes)

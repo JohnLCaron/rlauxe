@@ -1,8 +1,7 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.sqrt
 
@@ -41,16 +40,16 @@ data class RunTestRepeatedResult(
 // single threaded
 // runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
 fun runTestRepeated(
-        drawSample: SampleGenerator,
+    drawSample: Sampler,
         // maxSamples2: Int,
-        ntrials: Int,
-        testFn: RiskTestingFn,
-        testParameters: Map<String, Double>,
-        terminateOnNullReject: Boolean = true,
-        showDetails: Boolean = false,
-        startingTestStatistic: Double = 1.0,
-        margin: Double?,
-        Nc:Int, // maximum cards in the contest
+    ntrials: Int,
+    testFn: RiskTestingFn,
+    testParameters: Map<String, Double>,
+    terminateOnNullReject: Boolean = true,
+    showDetails: Boolean = false,
+    startingTestStatistic: Double = 1.0,
+    margin: Double?,
+    Nc:Int, // maximum cards in the contest
     ): RunTestRepeatedResult {
 
     val showH0Result = false

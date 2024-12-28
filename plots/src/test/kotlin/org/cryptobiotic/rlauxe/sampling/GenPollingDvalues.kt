@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
 import kotlin.test.Test
 import kotlin.math.ceil
 
@@ -95,6 +94,7 @@ fun make2wayContestFromMargin(Nc: Int, margin:Double): Contest {
     return Contest(
         info = make2wayContestInfo(),
         voteInput = mapOf(0 to winningVote, 1 to Nc-winningVote),
-        Nc = Nc
+        Nc = Nc,
+        Np=0, // TODO
     )
 }

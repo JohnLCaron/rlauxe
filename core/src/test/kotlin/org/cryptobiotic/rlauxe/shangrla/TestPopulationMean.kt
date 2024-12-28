@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.PrevSamples
-import org.cryptobiotic.rlauxe.core.Samples
+import org.cryptobiotic.rlauxe.core.SampleTracker
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -218,14 +218,14 @@ class TestPopulationMeanWithoutReplacement {
         repeat(100) {
             val num = (N * 0.5 - halfSamples.sum())
             val den = (N - halfSamples.numberOfSamples())
-            val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSamples = halfSamples)
+            val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = halfSamples)
             println("mj=${mj} num=$num den=$den")
             halfSamples.count++
             assertEquals(.5, mj) // its the deviations of the sample from 1/2 that cause mj to change
         }
     }
 
-    class HalfSamples(): Samples {
+    class HalfSamples(): SampleTracker {
         var count = 0
         override fun last() = .5
         override fun numberOfSamples() = count
@@ -242,13 +242,13 @@ class TestPopulationMeanWithoutReplacement {
         println("awinnerAvg=${awinnerAvg} noerror=${samples.noerror}")
 
         repeat(100) {
-            val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSamples = samples)
+            val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = samples)
             println("mj=${mj}")
             samples.count++
         }
     }
 
-    class ComparisonSamples(awinnerAvg: Double): Samples {
+    class ComparisonSamples(awinnerAvg: Double): SampleTracker {
         val noerror = 1.0 / (3 - 2 * awinnerAvg)
         var count = 0
         override fun last() = noerror
@@ -260,7 +260,7 @@ class TestPopulationMeanWithoutReplacement {
 }
 
 // old way
-fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: Samples): Double {
+fun meanUnderNull(N: Int, withoutReplacement: Boolean, x: SampleTracker): Double {
     val t = 0.5
     if (!withoutReplacement) return t  // with replacement
     if (x.numberOfSamples() == 0) return t

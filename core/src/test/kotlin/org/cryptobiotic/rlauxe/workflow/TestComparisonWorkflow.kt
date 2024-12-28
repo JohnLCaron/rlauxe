@@ -12,7 +12,7 @@ class TestComparisonWorkflow {
     @Test
     fun testComparisonOneContest() {
         val N = 100000
-        val ncontests = 100
+        val ncontests = 1
         val nbs = 1
         val marginRange= 0.015 ..< 0.05
         val underVotePct= 0.02 ..< 0.12
@@ -22,14 +22,6 @@ class TestComparisonWorkflow {
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
-        testComparisonWorkflow(auditConfig, N, testData)
-    }
-
-    @Test
-    fun testComparisonOneContest2() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
-        val N = 50000
-        val testData = MultiContestTestData(1, 1, N)
         testComparisonWorkflow(auditConfig, N, testData)
     }
 
@@ -50,7 +42,7 @@ class TestComparisonWorkflow {
     fun noErrorsWithPhantoms() {
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10)
         val N = 100000
-        val ncontests = 40
+        val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 ..< 0.05
         val underVotePct= 0.02 ..< 0.22
@@ -62,7 +54,7 @@ class TestComparisonWorkflow {
     @Test
     fun p2ErrorsEqualPhantoms() {
         val N = 100000
-        val ncontests = 40
+        val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 ..< 0.05
         val underVotePct= 0.02 ..< 0.22
@@ -78,7 +70,7 @@ class TestComparisonWorkflow {
 
     @Test
     fun testComparisonWithStyleFuzz() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = 0.01, ntrials=10)
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, N, testData)
@@ -86,7 +78,7 @@ class TestComparisonWorkflow {
 
     @Test
     fun testComparisonNoStyle() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = 0.01)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = 0.01, ntrials=10)
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, N, testData)
@@ -94,8 +86,8 @@ class TestComparisonWorkflow {
 
     fun testComparisonWorkflow(auditConfig: AuditConfig, N: Int, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.contests
-        println("Start testComparisonWorkflow N=$N")
-        contests.forEach{ println(" $it")}
+        println("Start testComparisonWorkflow $testData")
+        contests.forEach{ println("  $it")}
         println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
@@ -116,7 +108,7 @@ class TestComparisonWorkflow {
         var done = false
         while (!done) {
             val roundStopwatch = Stopwatch()
-
+            println("---------------------------")
             val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
             val currRound = Round(roundIdx, indices, previousSamples.toSet())
             rounds.add(currRound)

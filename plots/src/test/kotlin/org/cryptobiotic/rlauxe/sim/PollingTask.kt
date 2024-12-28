@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sim
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import kotlin.math.max
@@ -25,7 +25,7 @@ data class PollingTask(
         require(N == cvrs.size)
     }
 
-    override fun makeSampler(): SampleGenerator {
+    override fun makeSampler(): Sampler {
         val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
         return PollWithoutReplacement(contestUA.contest as Contest, cvrs, pollingAssorter)
     }
@@ -66,5 +66,5 @@ data class PollingTask(
 class FixedEstimFn(
     val eta0: Double,
 ) : EstimFn {
-    override fun eta(prevSamples: Samples) = eta0
+    override fun eta(prevSampleTracker: SampleTracker) = eta0
 }

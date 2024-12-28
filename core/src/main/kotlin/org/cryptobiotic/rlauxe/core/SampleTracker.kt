@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /** keeps track of the latest sample, number of samples, and the sample sum. */
-interface Samples {
+interface SampleTracker {
     fun last(): Double  // latest sample
     fun numberOfSamples(): Int    // total number of samples so far
     fun sum(): Double   // sum of samples so far
@@ -19,7 +19,7 @@ interface Samples {
  * Its up to the method using this to make it "previous samples", by not adding the
  * current sample to it until the end of the iteration.
  */
-class PrevSamples : Samples {
+class PrevSamples : SampleTracker {
     private var last = 0.0
     private var sum = 0.0
     private val welford = Welford()
@@ -38,7 +38,7 @@ class PrevSamples : Samples {
 }
 
 /** This also counts the under/overstatements for comparison audits. */
-class PrevSamplesWithRates(val noerror: Double) : Samples {
+class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     private var last = 0.0
     private var sum = 0.0
     private val welford = Welford()

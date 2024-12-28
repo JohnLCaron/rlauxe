@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.sampling.flipExactVotes
 import org.cryptobiotic.rlauxe.sampling.add2voteOverstatements
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
@@ -157,7 +157,7 @@ class TestSampleGenerator {
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
 // to make mvrs have mvrMean.
 data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
-                                val withoutReplacement: Boolean = true): SampleGenerator {
+                                val withoutReplacement: Boolean = true): Sampler {
     val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(cvrs.size) { it }
@@ -209,7 +209,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
 // TODO: generalize to p3, p4
 data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
                                     val p2: Double, val p1: Double = 0.0,
-                                    val withoutReplacement: Boolean = true): SampleGenerator {
+                                    val withoutReplacement: Boolean = true): Sampler {
     val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
     val N = cvrs.size
     val mvrs : List<Cvr>
@@ -287,7 +287,7 @@ private fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFrom
     return changed
 }
 
-fun testLimits(sampler: SampleGenerator, nsamples: Int, upper: Double) {
+fun testLimits(sampler: Sampler, nsamples: Int, upper: Double) {
     repeat(nsamples) {
         val ss = sampler.sample()
         assertTrue(ss >= 0)
@@ -295,7 +295,7 @@ fun testLimits(sampler: SampleGenerator, nsamples: Int, upper: Double) {
     }
 }
 
-fun countAssortValues(sampler: SampleGenerator, nsamples: Int, assortValue: Double): Int {
+fun countAssortValues(sampler: Sampler, nsamples: Int, assortValue: Double): Int {
     sampler.reset()
     var count = 0
     repeat(nsamples) {

@@ -263,7 +263,7 @@ class TestAssorterPlurality {
             candidateNames = listToMap("Alice", "Bob", "Candy"),
             nwinners = 1,
         )
-        val contest = Contest(info, mapOf(0 to 52, 1 to 44), 100)
+        val contest = Contest(info, mapOf(0 to 52, 1 to 44), Nc=100, Np=0)
         val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
         val assorter = contestUA.pollingAssertions.first().assorter
         assertTrue(assorter is PluralityAssorter)

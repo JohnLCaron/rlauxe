@@ -5,11 +5,6 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
-import org.cryptobiotic.rlauxe.workflow.EstimationResult
-import org.cryptobiotic.rlauxe.workflow.EstimationTask
-import org.cryptobiotic.rlauxe.workflow.EstimationTaskRunner
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -178,7 +173,7 @@ fun simulateSampleSizePollingAssorter(
 
 fun simulateSampleSizeAlphaMart(
     auditConfig: AuditConfig,
-    sampleFn: SampleGenerator,
+    sampleFn: Sampler,
     margin: Double,
     upperBound: Double,
     Nc: Int,
@@ -269,7 +264,7 @@ fun simulateSampleSizeComparisonAssorter(
 
 fun simulateSampleSizeBetaMart(
     auditConfig: AuditConfig,
-    sampleFn: SampleGenerator,
+    sampleFn: Sampler,
     margin: Double,
     noerror: Double,
     upperBound: Double,

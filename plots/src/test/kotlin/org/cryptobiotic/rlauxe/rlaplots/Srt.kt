@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.sampling.SimulateSampleSizeTask
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.workflow.EstimationResult
+import org.cryptobiotic.rlauxe.sampling.EstimationResult
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream

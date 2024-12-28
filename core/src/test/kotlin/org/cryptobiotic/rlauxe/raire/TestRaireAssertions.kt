@@ -15,9 +15,10 @@ class TestRaireAssertions {
 
     // create plausible Nc for each contest
     val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
+    val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()
 
     val rr = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
-    val raireResults = rr.import(ncs)
+    val raireResults = rr.import(ncs, nps)
 
     @Test
     fun testRaireAssertions() {

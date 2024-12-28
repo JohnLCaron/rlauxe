@@ -28,7 +28,7 @@ fun estimateSampleSizes(
     // run tasks concurrently
     val estResults: List<EstimationResult> = EstimationTaskRunner(show).run(tasks, nthreads)
 
-    // cant change contestUA until out of the concurrent task running
+    // cant change contestUA until out of the concurrent tasks
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
@@ -38,15 +38,15 @@ fun estimateSampleSizes(
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
         } else {
-            // val size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            val size = task.prevSampleSize + ceil(result.totalSamplesNeeded / result.ntrials.toDouble()).toInt()
+            val size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
+            // val size = task.prevSampleSize + ceil(result.totalSamplesNeeded / result.ntrials.toDouble()).toInt()
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
             // if (show) println("  ${task.contestUA.name} ${task.assertion}")
         }
     }
 
     // pull out the sampleSizes for all successful assertions in the contest
-    // probably dont need to check dailed, if it did fail, contest.done is true
+    // probably dont need to check failed, if it did fail, contest.done is true
     contestsUA.filter { !it.done }.forEach { contestUA ->
         val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id && !it.failed }
             .map { it.task.assertion.estSampleSize }
@@ -58,6 +58,47 @@ fun estimateSampleSizes(
     return maxContestSize
 }
 
+// just runs the estimate again. Why is it different from last? Can we use prevVvrs?
+fun makeEstimationTasksFresh(
+    auditConfig: AuditConfig,
+    contestUA: ContestUnderAudit,
+    cvrs: List<Cvr>,        // Comparison only
+    prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
+    roundIdx: Int,
+    moreParameters: Map<String, Double> = emptyMap(),
+): List<EstimationTask> {
+    val tasks = mutableListOf<EstimationTask>()
+
+    contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
+        if (!assert.proved) {
+            if (roundIdx > 1) {
+                val rr = assert.roundResults.last()
+                if (rr.samplesUsed == contestUA.Nc) {
+                    println("***LimitReached $contestUA")
+                    contestUA.done = true
+                    contestUA.status = TestH0Status.LimitReached
+                }
+            }
+
+            if (!contestUA.done) {
+                tasks.add(
+                    SimulateSampleSizeTask(
+                        auditConfig,
+                        contestUA,
+                        assert,
+                        cvrs,
+                        1.0,
+                        0,
+                        moreParameters
+                    )
+                )
+            }
+        }
+    }
+    return tasks
+}
+
+// tries to start from where the last left off. Otherwise, wouldnt uou just get the previous estimate?
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
@@ -77,12 +118,11 @@ fun makeEstimationTasks(
                 val rr = assert.roundResults.last()
                 if (rr.samplesUsed == contestUA.Nc) {
                     println("***LimitReached $contestUA")
-                    contestUA.done = true  // TODO why isnt this on assert, not contest?
+                    contestUA.done = true
                     contestUA.status = TestH0Status.LimitReached
                 }
                 // start where the audit left off
                 prevSampleSize = rr.samplesUsed
-                // maxSamples = contestUA.Nc - prevSampleSize // TODO
                 startingTestStatistic = 1.0 / rr.pvalue
             }
 

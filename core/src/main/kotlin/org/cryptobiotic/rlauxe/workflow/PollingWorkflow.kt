@@ -12,6 +12,7 @@ class PollingWorkflow(
         val N: Int, // total number of ballots/cards
 ) {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
+    val ballotsUA: List<BallotUnderAudit>
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
@@ -25,6 +26,10 @@ class PollingWorkflow(
         contestsUA.filter { !it.done }.forEach { contest ->
             contest.makePollingAssertions(null)
         }
+
+        // must be done once and for all rounds
+        val prng = Prng(auditConfig.seed)
+        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
     fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = true): List<Int> {
@@ -37,9 +42,6 @@ class PollingWorkflow(
             roundIdx,
             show=show,
         )
-
-        val prng = Prng(auditConfig.seed)
-        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
         // choose samples
         val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?

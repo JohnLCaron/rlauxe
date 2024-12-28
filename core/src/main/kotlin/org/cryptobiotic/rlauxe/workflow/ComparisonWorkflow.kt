@@ -24,8 +24,7 @@ class ComparisonWorkflow(
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
 ) {
     val contestsUA: List<ContestUnderAudit>
-    val prng = Prng(auditConfig.seed)
-
+    val cvrsUA: List<CvrUnderAudit>
     init {
         require (auditConfig.auditType == AuditType.CARD_COMPARISON)
 
@@ -47,6 +46,10 @@ class ComparisonWorkflow(
         contestsUA.filter{ !it.done }.forEach { contest ->
             contest.makeComparisonAssertions(cvrs, votes[contest.id]!!)
         }
+
+        // must be done once and for all rounds
+        val prng = Prng(auditConfig.seed)
+        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
     // 4. Main audit loop. While A is not empty:
@@ -69,7 +72,6 @@ class ComparisonWorkflow(
             show=show,
         )
 
-
         //	2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
         //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
         //	2.d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
@@ -78,7 +80,6 @@ class ComparisonWorkflow(
         //      (including “phantom” CVRs), using a high-quality PRNG [OS19].
         // val ncvrs =  makeNcvrsPerContest(contests, cvrs)
         // val phantomCVRs = makePhantomCvrs(contests, ncvrs)
-        val cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
 
         // TODO how to control the round's sampleSize?
 
@@ -115,7 +116,7 @@ class ComparisonWorkflow(
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize across assertions
-        println("runOneAssertionAudit round roundIdx")
+        println("runAudit round $roundIdx")
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
@@ -124,12 +125,13 @@ class ComparisonWorkflow(
                     assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
-                if (allAssertionsDone) {
-                    contestUA.done = true
-                    contestUA.status = TestH0Status.StatRejectNull
-                }
-                allDone = allDone && contestUA.done
             }
+            if (allAssertionsDone) {
+                contestUA.done = true
+                contestUA.status = TestH0Status.StatRejectNull
+            }
+            allDone = allDone && contestUA.done
+
         }
         return allDone
     }
@@ -141,12 +143,10 @@ class ComparisonWorkflow(
             if (minAssertion == null) {
                 println(" $contest has no assertions; status=${contest.status}")
             } else {
-                val samplesUsedSum = minAssertion.roundResults.sumOf { it.samplesUsed }
-                val samplesEstSum = minAssertion.roundResults.sumOf { it.estSampleSize }
                 if (minAssertion.roundResults.size == 1) {
                     println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(minAssertion.margin)} ${minAssertion.roundResults[0]}")
                 } else {
-                    println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${samplesEstSum} samplesUsed=$samplesUsedSum round=${minAssertion.round} status=${contest.status}")
+                    println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${contest.estSampleSize} round=${minAssertion.round} status=${contest.status}")
                     minAssertion.roundResults.forEach { rr -> println("   $rr") }
                }
             }

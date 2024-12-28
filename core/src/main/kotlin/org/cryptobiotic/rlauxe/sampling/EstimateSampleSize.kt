@@ -24,13 +24,14 @@ fun estimateSampleSizes(
     prevMvrs: List<Cvr>,
     roundIdx: Int,
     show: Boolean = false,
+    nthreads: Int = 14,
 ): Int? {
     val tasks = mutableListOf<EstimationTask>()
     contestsUA.filter { !it.done }.forEach { contestUA ->
         tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, prevMvrs, roundIdx))
     }
     // run tasks concurrently
-    val estResults: List<EstimationResult> = EstimationTaskRunner().run(tasks)
+    val estResults: List<EstimationResult> = EstimationTaskRunner(show).run(tasks, nthreads)
 
     // cant change contestUA until out of the concurrent task running
     estResults.forEach { estResult ->
@@ -139,7 +140,6 @@ class SimulateSampleSizeTask(
                 moreParameters=moreParameters,
             )
         }
-
         return EstimationResult(this, result, result.failPct() > 80.0) // TODO 80% ??
     }
 }
@@ -249,8 +249,8 @@ fun simulateSampleSizeComparisonAssorter(
     // at the beginning
     sampler.reset()
 
-    val calcMargin = cassorter.calcAssorterMargin(cvrs.zip( cvrs)) // TODO
-    println("  ** simulateSampleSizeComparisonAssorter ${contest.info.name} calcMargin=$calcMargin ")
+    // val calcMargin = cassorter.calcAssorterMargin(cvrs.zip( cvrs)) // TODO
+    // println("  ** simulateSampleSizeComparisonAssorter ${contest.info.name} calcMargin=$calcMargin ")
 
     val errorRates = auditConfig.errorRates ?: ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
 

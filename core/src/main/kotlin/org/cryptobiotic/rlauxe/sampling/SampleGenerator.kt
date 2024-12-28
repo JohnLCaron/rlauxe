@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.random.Random
 
 // TODO move as much as possible into testing
@@ -20,7 +19,7 @@ class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assort
 
     override fun sample(): Double {
         while (true) {
-            val idx = secureRandom.nextInt(mvrs.size) // with Replacement
+            val idx = Random.nextInt(mvrs.size) // with Replacement
             val cvr = mvrs[idx]
             if (cvr.hasContest(contest.id)) return assorter.assort(cvr, usePhantoms = true)
         }
@@ -57,7 +56,7 @@ class PollWithoutReplacement(
 
     override fun reset() {
         if (!allowReset) throw RuntimeException("PollWithoutReplacement reset not allowed")
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -96,7 +95,7 @@ class ComparisonWithoutReplacement(
 
     override fun reset() {
         if (!allowReset) throw RuntimeException("ComparisonWithoutReplacement reset not allowed")
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -124,7 +123,7 @@ class ComparisonNoErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter
     }
 
     override fun reset() {
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -153,7 +152,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     // we need more A votes, needToChangeVotesFromA < 0>
     if (needToChangeVotesFromA < 0) {
         while (changed > needToChangeVotesFromA) {
-            val cvrIdx = secureRandom.nextInt(ncards)
+            val cvrIdx = Random.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 1) == 1) {
                 val votes = mutableMapOf<Int, IntArray>()
@@ -165,7 +164,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     } else {
         // we need more B votes, needToChangeVotesFromA > 0
         while (changed < needToChangeVotesFromA) {
-            val cvrIdx = secureRandom.nextInt(ncards)
+            val cvrIdx = Random.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 0) == 1) {
                 val votes = mutableMapOf<Int, IntArray>()

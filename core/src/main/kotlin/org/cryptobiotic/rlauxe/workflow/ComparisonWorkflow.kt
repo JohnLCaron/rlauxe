@@ -24,7 +24,6 @@ class ComparisonWorkflow(
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
 ) {
     val contestsUA: List<ContestUnderAudit>
-    // val cvrsUA: List<CvrUnderAudit>
     val prng = Prng(auditConfig.seed)
 
     init {

@@ -7,9 +7,9 @@ import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.test.Test
 import kotlin.math.abs
+import kotlin.random.Random
 import kotlin.test.assertEquals
 
 class CompareAlphaPaperUsingMasses {
@@ -152,7 +152,7 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleG
     }
 
     override fun reset() {
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 

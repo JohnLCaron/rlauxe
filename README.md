@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/26/2024
+last update: 12/27/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -37,6 +37,7 @@ Table of Contents
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
+    * [generation of phantoms](#generation-of-phantoms)
     * [estimate comparison error rates](#estimate-comparison-error-rates)
     * [use of previous round's sampled_cvr_indices](#use-of-previous-rounds-sampled_cvr_indices)
   * [Other Notes](#other-notes)

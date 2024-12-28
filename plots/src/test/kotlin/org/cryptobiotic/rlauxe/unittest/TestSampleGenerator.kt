@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.sampling.add2voteOverstatements
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -185,7 +186,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
             idx++
             cassorter.bassort(mvr, cvr)
         } else {
-            val chooseIdx = secureRandom.nextInt(cvrs.size) // with Replacement
+            val chooseIdx = Random.nextInt(cvrs.size) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
@@ -194,7 +195,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
     }
 
     override fun reset() {
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -243,7 +244,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
             idx++
             cassorter.bassort(mvr, cvr)
         } else {
-            val chooseIdx = secureRandom.nextInt(N) // with Replacement
+            val chooseIdx = Random.nextInt(N) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
@@ -252,7 +253,7 @@ data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: Compari
     }
 
     override fun reset() {
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -271,7 +272,7 @@ private fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFrom
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0
     while (changed < needToChangeVotesFromA) {
-        val cvrIdx = secureRandom.nextInt(ncards)
+        val cvrIdx = Random.nextInt(ncards)
         val cvr = cvrs[cvrIdx]
         if (cvr.hasMarkFor(0, 0) == 1) {
             val votes = mutableMapOf<Int, IntArray>()

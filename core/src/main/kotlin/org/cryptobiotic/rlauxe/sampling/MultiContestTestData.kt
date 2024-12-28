@@ -18,7 +18,7 @@ data class MultiContestTestData(
     val totalBallots: Int, // including undervotes but not phantoms
     val marginRange: OpenEndRange<Double> = 0.01..< 0.03,
     val underVotePct: OpenEndRange<Double> = 0.01..< 0.30, // needed to set Nc
-    val phantomPct: OpenEndRange<Double> = 0.00..< 0.01, // needed to set Nc
+    val phantomPct: OpenEndRange<Double> = 0.00..< 0.005, // needed to set Nc
 ) {
     // generate with ballotStyles; but if hasStyles = false, then these are not visible
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)

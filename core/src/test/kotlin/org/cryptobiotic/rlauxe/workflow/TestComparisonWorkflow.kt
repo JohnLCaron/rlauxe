@@ -12,7 +12,7 @@ class TestComparisonWorkflow {
     @Test
     fun testComparisonOneContest() {
         val N = 100000
-        val ncontests = 1
+        val ncontests = 100
         val nbs = 1
         val marginRange= 0.015 ..< 0.05
         val underVotePct= 0.02 ..< 0.12
@@ -21,8 +21,7 @@ class TestComparisonWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10,
-            errorRates=errorRates)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
         testComparisonWorkflow(auditConfig, N, testData)
     }
 
@@ -106,6 +105,7 @@ class TestComparisonWorkflow {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
+        val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
         val stopwatch = Stopwatch()
 
         var prevMvrs = emptyList<Cvr>()
@@ -115,13 +115,14 @@ class TestComparisonWorkflow {
 
         var done = false
         while (!done) {
+            val roundStopwatch = Stopwatch()
+
             val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
             val currRound = Round(roundIdx, indices, previousSamples.toSet())
             rounds.add(currRound)
             previousSamples.addAll(indices)
 
-            println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            stopwatch.start()
+            println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
             val sampledMvrs = indices.map { testMvrs[it] }
 
@@ -133,6 +134,7 @@ class TestComparisonWorkflow {
 
         rounds.forEach { println(it) }
         workflow.showResults()
+        println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
     }
 
 }

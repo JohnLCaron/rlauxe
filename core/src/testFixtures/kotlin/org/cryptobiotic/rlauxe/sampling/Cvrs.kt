@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.cardsPerContest
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.util.tabulateVotes
 import kotlin.collections.iterator
 import kotlin.random.Random
@@ -20,7 +19,7 @@ fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
             total++
         }
     }
-    cvrs.shuffle( secureRandom )
+    cvrs.shuffle( Random )
     return cvrs
 }
 
@@ -34,7 +33,7 @@ fun makeCvr(idx: Int): Cvr {
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {
-        val random = secureRandom.nextDouble(1.0)
+        val random = Random.nextDouble(1.0)
         val cand = if (random < mean) 0 else 1
         val votes = mutableMapOf<Int, IntArray>()
         votes[0] = intArrayOf(cand)

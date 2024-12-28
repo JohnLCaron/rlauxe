@@ -34,14 +34,13 @@ data class EstimationResult(
 
 // runs set of EstimationTask concurrently, which return EstimationResult
 // the task itself typically calls runTestRepeated
-class EstimationTaskRunner {
-    private val showTime = false
+class EstimationTaskRunner(val showTime: Boolean = false) {
     private val showTaskResult = false
     private val mutex = Mutex()
     private val results = mutableListOf<EstimationResult>()
 
-    // run all the tasks concurrently
-    fun run(tasks: List<EstimationTask>, nthreads: Int = 30): List<EstimationResult> {
+    // run the tasks concurrently
+    fun run(tasks: List<EstimationTask>, nthreads: Int = 14): List<EstimationResult> {
         val stopwatch = Stopwatch()
         if (showTime) println("\nEstimationTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads")
         runBlocking {
@@ -64,8 +63,9 @@ class EstimationTaskRunner {
         task: EstimationTask,
     ): EstimationResult {
         val stopwatch = Stopwatch()
-        val result =  task.estimate()
-        if (showTaskResult) println(" ${task.name()} (${results.size}): took ${stopwatch.elapsed(TimeUnit.SECONDS)} secs")
+        if (showTaskResult) println(" starting ${task.name()} on thread ${Thread.currentThread().name}")
+        val result = task.estimate()
+        if (showTaskResult) println(" ${task.name()} (${results.size}): took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} msecs")
         return result
     }
 

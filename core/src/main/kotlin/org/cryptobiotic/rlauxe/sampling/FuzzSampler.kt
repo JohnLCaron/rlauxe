@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.random.Random
 
 // this takes a list of cvrs and fuzzes them
 class ComparisonFuzzSampler(
@@ -39,7 +40,7 @@ class ComparisonFuzzSampler(
     override fun reset() {
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(cvrs)
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -87,7 +88,7 @@ class PollingFuzzSampler(
 
     override fun reset() {
         mvrs = remakeFuzzed()
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 
@@ -103,7 +104,7 @@ fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double
     var count = 0
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
     cvrbs.filter { !it.phantom }.forEach { cvrb: CvrBuilder ->
-        val r = secureRandom.nextDouble(1.0)
+        val r = Random.nextDouble(1.0)
         cvrb.contests.forEach { (_, cvb) ->
             if (r < fuzzPct) {
                 val ccontest: CvrContest = cvb.contest
@@ -125,7 +126,7 @@ fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double
 fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
-        val ncandIdx = secureRandom.nextInt(size + 1)
+        val ncandIdx = Random.nextInt(size + 1)
         if (ncandIdx == size) return null // choose none
         val candId = candidateIds[ncandIdx]
         if (candId != currId) {

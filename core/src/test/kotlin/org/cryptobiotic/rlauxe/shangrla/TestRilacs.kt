@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.eps
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.Sampler
 import kotlin.math.max
 
 class TestRilacs {
@@ -70,7 +70,7 @@ class TestRilacs {
      */
 
     fun doOne(
-        drawSample: SampleGenerator,
+        drawSample: Sampler,
         maxSamples: Int,
         eta0: Double,
         d: Int = 100,

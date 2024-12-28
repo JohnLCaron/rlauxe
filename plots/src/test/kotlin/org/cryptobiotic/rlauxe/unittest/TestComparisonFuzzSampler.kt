@@ -1,10 +1,21 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.unittest
 
-import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.test.Test
-
+import org.cryptobiotic.rlauxe.core.ComparisonAssertion
+import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.sampling.ComparisonFuzzSampler
+import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeBetaMart
+import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.secureRandom
+import org.cryptobiotic.rlauxe.workflow.AuditConfig
+import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.junit.jupiter.api.Test
 
 class TestComparisonFuzzSampler {
 
@@ -63,7 +74,13 @@ class TestComparisonFuzzSampler {
         }
         println("total ncvrs = ${cvrs.size}\n")
 
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = secureRandom.nextLong(), quantile=.50, fuzzPct = .01)
+        val auditConfig = AuditConfig(
+            AuditType.CARD_COMPARISON,
+            hasStyles = true,
+            seed = secureRandom.nextLong(),
+            quantile = .50,
+            fuzzPct = .01
+        )
 
         contestsUA.forEach { contestUA ->
             val sampleSizes = mutableListOf<Pair<Int, Double>>()
@@ -84,12 +101,12 @@ class TestComparisonFuzzSampler {
 }
 
 private fun runWithComparisonFuzzSampler(
-        auditConfig: AuditConfig,
-        contestUA: ContestUnderAudit,
-        assertion: ComparisonAssertion,
-        cvrs: List<Cvr>, // (mvr, cvr)
-        moreParameters: Map<String, Double> = emptyMap(),
-    ): RunTestRepeatedResult {
+    auditConfig: AuditConfig,
+    contestUA: ContestUnderAudit,
+    assertion: ComparisonAssertion,
+    cvrs: List<Cvr>, // (mvr, cvr)
+    moreParameters: Map<String, Double> = emptyMap(),
+): RunTestRepeatedResult {
 
     val assorter = assertion.cassorter
     val sampler = ComparisonFuzzSampler(auditConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)

@@ -143,10 +143,12 @@ class ComparisonWorkflow(
             } else {
                 val samplesUsedSum = minAssertion.roundResults.sumOf { it.samplesUsed }
                 val samplesEstSum = minAssertion.roundResults.sumOf { it.estSampleSize }
-                println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${samplesEstSum} samplesUsed=$samplesUsedSum round=${minAssertion.round} status=${contest.status}")
-               // if (minAssertion.roundResults.size > 1) {
+                if (minAssertion.roundResults.size == 1) {
+                    println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(minAssertion.margin)} ${minAssertion.roundResults[0]}")
+                } else {
+                    println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${samplesEstSum} samplesUsed=$samplesUsedSum round=${minAssertion.round} status=${contest.status}")
                     minAssertion.roundResults.forEach { rr -> println("   $rr") }
-               // }
+               }
             }
         }
         println()

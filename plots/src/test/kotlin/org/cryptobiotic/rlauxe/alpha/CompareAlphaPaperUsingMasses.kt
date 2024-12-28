@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.SampleGenerator
+import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import kotlin.test.Test
 import kotlin.math.abs
@@ -111,7 +111,7 @@ class CompareAlphaPaperUsingMasses {
 }
 
 
-class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
+class ArrayAsGenSampleFn(val assortValues : DoubleArray): Sampler {
     var index = 0
 
     override fun sample(): Double {
@@ -136,7 +136,7 @@ class ArrayAsGenSampleFn(val assortValues : DoubleArray): SampleGenerator {
 }
 
 
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): SampleGenerator {
+class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampler {
     val N = assortValues.size
     val permutedIndex = MutableList(N) { it }
     var idx = 0

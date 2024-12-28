@@ -598,10 +598,11 @@ which corresponds to case 1.
 The margin is calculated with both undervotes and phantoms = 1/2.
 But in reality, the phantoms use "worst case" vote for the loser.
 If the phantom pct is greater than the margin, the audit will fail.
-When hasStyles, we know what that percent is. When !hasStyles we probably cant tell whats a phantom and whats an undervote
-until we audit, although the determination of Nc might indeed tell us the number of phantoms, regardless of hasStyles.
-
+When hasStyles, we know what that percent is.
 So for estimation, we could calculate the margin with usePhantoms=true, since thats what were going to see during the audit.
+
+Ive convinced myself that one cant know Nc without knowing Np. Since Np has such a strong effect, we will keep it per 
+contest and use it in the estimation and also the betting strategy.
 
 ## Stratified audits using OneAudit (TODO)
 

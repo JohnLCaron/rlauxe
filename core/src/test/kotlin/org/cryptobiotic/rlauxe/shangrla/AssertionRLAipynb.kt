@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -293,10 +293,11 @@ class AssertionRLA {
         // also no good reaspon to use string instead of int
 
         val ncs = mapOf("334" to 1000, "339" to 12000) // TODO
+        val nps = mapOf("334" to 0, "339" to 0) // TODO
 
         val rr =
             readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
-        val raireResults = rr.import(ncs)
+        val raireResults = rr.import(ncs, nps)
         val show = raireResults.show()
         println(show)
 
@@ -628,7 +629,7 @@ fun replicate_p_values(
     val contest = contests.first()
     val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampler: SampleGenerator = ComparisonNoErrors(cvrs, minAssorter)
+    val sampler: Sampler = ComparisonNoErrors(cvrs, minAssorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
@@ -659,7 +660,7 @@ fun calc_sample_sizes(
     val contest = contests.first().makeComparisonAssertions(cvrs)
     val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampler: SampleGenerator = ComparisonNoErrors(cvrs, minAssorter)
+    val sampler: Sampler = ComparisonNoErrors(cvrs, minAssorter)
 
     // class AdaptiveComparison(
     //    val N: Int,

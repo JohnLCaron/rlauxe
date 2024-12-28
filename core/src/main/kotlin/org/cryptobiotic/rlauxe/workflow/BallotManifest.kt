@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.workflow
 
 // The id must uniquely identify the paper ballot. Here it may be some simple thing (seq number) that points to
 // the paper ballot location. Its necessary that the system publically commit to that mapping before the Audit,
@@ -70,7 +70,7 @@ data class BallotStyle(
     fun hasContest(contestId: Int) = contestIds.contains(contestId)
 
     override fun toString() = buildString {
-        append(" BallotStyle($id, contestIds=$contestIds, numberBallots=$ncards")
+        append("BallotStyle($id, contestIds=$contestIds, numberBallots=$ncards")
     }
 
     companion object {

@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.workflow.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import kotlin.test.Test
 
 // compare ballot polling to card comparison

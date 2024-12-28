@@ -10,7 +10,7 @@ class ComparisonFuzzSampler(
     val cvrs: List<Cvr>,
     val contest: Contest,
     val cassorter: ComparisonAssorter
-): SampleGenerator, Iterator<Double> {
+): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
@@ -60,7 +60,7 @@ class PollingFuzzSampler(
     val cvrs: List<Cvr>,
     val contest: Contest,
     val assorter: AssorterFunction
-): SampleGenerator {
+): Sampler {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size
     val welford = Welford()

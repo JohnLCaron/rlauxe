@@ -20,6 +20,7 @@ data class RaireContest(
     override val info: org.cryptobiotic.rlauxe.core.ContestInfo,
     override val winnerNames: List<String>,
     override val Nc: Int,
+    override val Np: Int,
 ) : ContestIF {
     override val winners: List<Int>
     override val losers: List<Int>
@@ -75,6 +76,7 @@ class RaireContestUnderAudit(
         fun make(name: String,
                  winner: Int,  // the sum of winner and eliminated must be all the candiates
                  Nc: Int,
+                 Np: Int,
                  eliminated: List<Int>,
                  expectedPollsNumber : Int,
                  expectedPollsPercent : Double,
@@ -90,6 +92,7 @@ class RaireContestUnderAudit(
                 ),
                 listOf(winner.toString()),
                 Nc = Nc,
+                Np = Np,
             )
             return RaireContestUnderAudit(contest, winner, eliminated, expectedPollsNumber, expectedPollsPercent, assertions)
         }

@@ -9,7 +9,7 @@ const val eps = 2.220446049250313e-16
 
 // estimate the population mean for the jth sample from the previous j-1 samples
 interface EstimFn {
-    fun eta(prevSamples: Samples): Double
+    fun eta(prevSampleTracker: SampleTracker): Double
 }
 
 class TruncShrinkage(
@@ -36,13 +36,13 @@ class TruncShrinkage(
     val welford = Welford()
 
     // estimate population mean from previous samples
-    override fun eta(prevSamples: Samples): Double {
-        val lastj = prevSamples.numberOfSamples()
+    override fun eta(prevSampleTracker: SampleTracker): Double {
+        val lastj = prevSampleTracker.numberOfSamples()
         val dj1 = (d + lastj).toDouble()
 
         val sampleSum = if (lastj == 0) 0.0 else {
-            welford.update(prevSamples.last())
-            prevSamples.sum()
+            welford.update(prevSampleTracker.last())
+            prevSampleTracker.sum()
         }
 
         // (2.5.2, eq 14, "truncated shrinkage")
@@ -59,7 +59,7 @@ class TruncShrinkage(
         // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
         // for instance c = (η0 − µ)/2.
-        val mean = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        val mean = populationMeanIfH0(N, withoutReplacement, prevSampleTracker)
         val e_j = c / sqrt(dj1)
         val capBelow = mean + e_j
 

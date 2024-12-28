@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.core.BettingFn
 import org.cryptobiotic.rlauxe.core.OptimalLambda
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
-import org.cryptobiotic.rlauxe.workflow.runTestRepeated
+import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.test.Test

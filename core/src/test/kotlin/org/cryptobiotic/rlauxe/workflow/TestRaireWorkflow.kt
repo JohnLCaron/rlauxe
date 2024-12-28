@@ -29,8 +29,9 @@ class TestRaireWorkflow {
 
         // The corresponding assertions file that has already been generated.
         val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
+        val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()
         val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
-            .import(ncs)
+            .import(ncs, nps)
         print(raireResults.show())
 
         // check consistencey

@@ -19,9 +19,9 @@ class FixedBet(val lam: Double): BettingFn {
     override fun bet(prevSamples: PrevSamplesWithRates) = lam
 }
 
-fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSamples: Samples): Double {
-    val sampleNum = prevSamples.numberOfSamples()
-    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSamples.sum()) / (N - sampleNum)
+fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSampleTracker: SampleTracker): Double {
+    val sampleNum = prevSampleTracker.numberOfSamples()
+    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSampleTracker.sum()) / (N - sampleNum)
 }
 
 /*

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.Ballot
+import org.cryptobiotic.rlauxe.workflow.Ballot
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 

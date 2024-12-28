@@ -25,7 +25,7 @@ class GenerateComparisonErrorTable {
         margins.forEach { margin ->
             ncands.forEach { ncand ->
                 //         fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
-                val sim = ContestSimulation.make2wayTestContest(margin, 0.0, 0.0, N) // TODO
+                val sim = ContestSimulation.make2wayTestContest(margin, 0.0, 0.0, Nc=N) // TODO
 
                 val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
                 fuzzPcts.forEach { fuzzPct ->

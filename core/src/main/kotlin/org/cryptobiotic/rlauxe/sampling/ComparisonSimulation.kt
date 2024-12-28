@@ -14,7 +14,7 @@ class ComparisonSimulation(
         val contest: ContestIF,
         val cassorter: ComparisonAssorter,
         errorRates: List<Double>,
-    ): SampleGenerator {
+    ): Sampler {
     val p1: Double = errorRates[0] // rate of 1-vote overstatements; voted for other, cvr has winner
     val p2: Double = errorRates[1] // rate of 2-vote overstatements; voted for loser, cvr has winner
     val p3: Double = errorRates[2] // rate of 1-vote understatements; voted for winner, cvr has other

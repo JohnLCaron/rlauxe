@@ -16,8 +16,6 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.EstimationResult
-import org.cryptobiotic.rlauxe.workflow.EstimationTask
 
 fun main() {
     val test = MultiContestTestData(15, 1, 20000)

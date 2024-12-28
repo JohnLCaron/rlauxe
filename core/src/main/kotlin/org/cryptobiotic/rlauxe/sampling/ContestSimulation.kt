@@ -76,7 +76,7 @@ class ContestSimulation(val contest: Contest, underVotePct: Double) {
     // choice is a number from 0..votesLeft
     // shrink the partition as votes are taken from it
     fun chooseCandidate(choice: Int): Int {
-        val check = trackVotesRemaining.map { it.second }.sum()
+        val check = trackVotesRemaining.sumOf { it.second }
         require(check == votesLeft)
 
         var sum = 0
@@ -111,7 +111,7 @@ class ContestSimulation(val contest: Contest, underVotePct: Double) {
             val winnerCount = ((reportedMargin * Nc + voteCount) / 2.0) .toInt()
             val loserCount = ((voteCount - reportedMargin * Nc) / 2.0) .toInt()
 
-            val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc)
+            val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc, Np=phantomCount)
             return ContestSimulation(contest, underVotePct)
         }
     }

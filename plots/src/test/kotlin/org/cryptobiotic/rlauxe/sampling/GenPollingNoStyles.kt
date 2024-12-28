@@ -6,9 +6,6 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRTnostyle
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.EstimationResult
-import org.cryptobiotic.rlauxe.workflow.EstimationTask
-import org.cryptobiotic.rlauxe.workflow.EstimationTaskRunner
 import kotlin.test.Test
 
 class GenPollingNoStyles {

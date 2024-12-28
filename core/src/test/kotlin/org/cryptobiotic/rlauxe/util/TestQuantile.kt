@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.workflow.quantile
+import org.cryptobiotic.rlauxe.sampling.quantile
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 class TestQuantile {
 

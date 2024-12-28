@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.workflow.BallotUnderAudit
 
 //// Adapted from SHANGRLA Audit.py
 

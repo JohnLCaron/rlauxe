@@ -43,6 +43,55 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     return randomCvrs
 }
 
+
+// change cvrs to have the exact number of votes for wantAvg
+fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
+    val ncards = cvrs.size
+    val expectedAVotes = (ncards * wantAvg).toInt()
+    val actualAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    val needToChangeVotesFromA = actualAvotes - expectedAVotes
+    return add2voteOverstatements(cvrs, needToChangeVotesFromA)
+}
+
+// change cvrs to add the given number of two-vote over/understatements.
+// Note that we replace the Cvr in the list when we change it
+fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
+    if (needToChangeVotesFromA == 0) return 0
+    val ncards = cvrs.size
+    val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    var changed = 0
+
+    // we need more A votes, needToChangeVotesFromA < 0>
+    if (needToChangeVotesFromA < 0) {
+        while (changed > needToChangeVotesFromA) {
+            val cvrIdx = Random.nextInt(ncards)
+            val cvr = cvrs[cvrIdx]
+            if (cvr.hasMarkFor(0, 1) == 1) {
+                val votes = mutableMapOf<Int, IntArray>()
+                votes[0] = intArrayOf(0)
+                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                changed--
+            }
+        }
+    } else {
+        // we need more B votes, needToChangeVotesFromA > 0
+        while (changed < needToChangeVotesFromA) {
+            val cvrIdx = Random.nextInt(ncards)
+            val cvr = cvrs[cvrIdx]
+            if (cvr.hasMarkFor(0, 0) == 1) {
+                val votes = mutableMapOf<Int, IntArray>()
+                votes[0] = intArrayOf(1)
+                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                changed++
+            }
+        }
+    }
+    val checkAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    // if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
+    require(checkAvotes == startingAvotes - needToChangeVotesFromA)
+    return changed
+}
+
 fun makeContestsFromCvrs(
     cvrs: List<Cvr>,
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
@@ -74,6 +123,7 @@ fun makeContestsFromCvrs(
                 ),
                 voteInput = votes[contestId]!!,
                 Nc = cards[contestId]!!,
+                Np=0, // TODO
             )
         )
     }

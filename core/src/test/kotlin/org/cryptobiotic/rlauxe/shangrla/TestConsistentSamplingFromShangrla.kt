@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.consistentCvrSampling
+import org.cryptobiotic.rlauxe.sampling.consistentSampling
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
@@ -45,7 +45,7 @@ class TestConsistentSamplingFromShangrla {
         contestsUA[0].estSampleSize = 3
         contestsUA[1].estSampleSize = 4
 
-        val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUA)
+        val sample_cvr_indices = consistentSampling(contestsUA, cvrsUA)
         assertEquals(5, sample_cvr_indices.size)
 
         assertEquals(listOf(3, 2, 1, 5, 0), sample_cvr_indices)
@@ -90,7 +90,7 @@ class TestConsistentSamplingFromShangrla {
         val cvrsUAP = (cvrs + phantomCVRs).map { CvrUnderAudit( it, prng.next()) }
         assertEquals(9, cvrsUAP.size)
 
-        val sample_cvr_indices = consistentCvrSampling(contestsUA, cvrsUAP)
+        val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
         assertEquals(6, sample_cvr_indices.size)
         assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
     }

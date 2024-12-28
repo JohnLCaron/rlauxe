@@ -19,7 +19,7 @@ class TestConsistentSampling {
         val prng = Prng(secureRandom.nextLong())
         val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it, prng.next()) }
 
-        val sampleIndices = consistentCvrSampling(contestsUA, cvrsUAP)
+        val sampleIndices = consistentSampling(contestsUA, cvrsUAP)
         println("nsamples needed = ${sampleIndices.size}\n")
         sampleIndices.forEach {
             assertTrue(it < cvrsUAP.size)
@@ -54,7 +54,7 @@ class TestConsistentSampling {
         val prng = Prng(secureRandom.nextLong())
         val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
-        val sampleIndices = consistentPollingSampling(contestsUA, ballotsUA)
+        val sampleIndices = consistentSampling(contestsUA, ballotsUA)
         println("nsamples needed = ${sampleIndices.size}\n")
         sampleIndices.forEach {
             assertTrue(it < ballotsUA.size)
@@ -97,7 +97,7 @@ class TestConsistentSampling {
         //    N: Int,
         //    roundIdx: Int,
         val estPctCutoff = .50
-        val sampleIndices = uniformPollingSampling(contestsUA, ballotsUA, estPctCutoff, N, 0)
+        val sampleIndices = uniformSampling(contestsUA, ballotsUA, estPctCutoff, N, 0)
         println("nsamples needed = ${sampleIndices.size}\n")
         sampleIndices.forEach {
             assertTrue(it < ballotsUA.size)

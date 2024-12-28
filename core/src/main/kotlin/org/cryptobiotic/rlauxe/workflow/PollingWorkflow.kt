@@ -43,20 +43,23 @@ class PollingWorkflow(
             show=show,
         )
 
-        // choose samples
-        val result = if (auditConfig.hasStyles) { // maybe should be in AuditConfig?
-            println("\nconsistentPollingSampling round $roundIdx")
-            val sampleIndices = consistentPollingSampling(contestsUA.filter { !it.done }, ballotsUA)
-            println(" PollingWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-            sampleIndices
-        } else {
-            println("\nuniformPollingSampling round $roundIdx")
-            val sampleIndices = uniformPollingSampling(contestsUA.filter { !it.done }, ballotsUA, auditConfig.samplePctCutoff, N, roundIdx)
-            println("maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-            sampleIndices
+        // choose indices to sample
+        val contestsNotDone = contestsUA.filter{ !it.done }
+        if (contestsNotDone.size > 0) {
+            return if (auditConfig.hasStyles) {
+                println("\nconsistentSampling round $roundIdx")
+                val sampleIndices = consistentSampling(contestsNotDone, ballotsUA)
+                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                sampleIndices
+            } else {
+                println("\nuniformSampling round $roundIdx")
+                val sampleIndices = uniformSampling(contestsNotDone, ballotsUA, auditConfig.samplePctCutoff, N, roundIdx)
+                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                sampleIndices
+            }
         }
 
-        return result
+        return emptyList()
     }
 
     fun showResults() {

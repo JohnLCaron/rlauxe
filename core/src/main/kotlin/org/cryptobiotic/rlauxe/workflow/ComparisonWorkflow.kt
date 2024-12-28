@@ -84,13 +84,20 @@ class ComparisonWorkflow(
         // TODO how to control the round's sampleSize?
 
         //	4.c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
+        // draws random ballots and returns their locations to the auditors.
         val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
-            println("consistentCvrSampling round $roundIdx")
-            //  This draws random ballots by consistent sampling, and returns their locations to the auditors.
-            val sampleIndices = consistentCvrSampling(contestsNotDone, cvrsUA)
-            println(" ComparisonWithStyle.chooseSamples maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-            return sampleIndices
+            return if (auditConfig.hasStyles) {
+                println("\nconsistentSampling round $roundIdx")
+                val sampleIndices = consistentSampling(contestsNotDone, cvrsUA)
+                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                sampleIndices
+            } else {
+                println("\nuniformSampling round $roundIdx")
+                val sampleIndices = uniformSampling(contestsNotDone, cvrsUA, auditConfig.samplePctCutoff, cvrs.size, roundIdx)
+                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                sampleIndices
+            }
         }
         return emptyList()
     }

@@ -104,28 +104,6 @@ fun ceilDiv(numerator: Int, denominator: Int): Int {
     return fracCeil
 }
 
-// this one assumes you cant change data array
-// https://softwareengineering.stackexchange.com/questions/195652/how-to-calculate-percentile-in-java-without-using-library/453902
-fun quantile(data: List<Int>, quantile: Double): Int {
-    if (data.isEmpty())
-        return 0
-
-    require (quantile in 0.0..1.0)
-    val total = data.sum() * quantile
-
-    val sortedData = mutableListOf<Int>()
-    sortedData.addAll(data) // or sort in place, which changes data
-    sortedData.sort()
-
-    var i = -1
-    var runningTotal = 0
-    while (runningTotal < total) {
-        i++
-        runningTotal += sortedData[i]
-    }
-    return sortedData[i]
-}
-
 /*
 fun cumul(data: List<Int>, value: Int): Double {
     if (data.isEmpty())

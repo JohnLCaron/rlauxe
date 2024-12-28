@@ -9,7 +9,7 @@ data class AuditConfig(val auditType: AuditType,
                        val errorRates: List<Double>? = null,
                        val useGeneratedErrorRates: Boolean = false,
                        val ntrials: Int = 100, // when estimating the sample size
-                       val quantile: Double = 0.50, // use this percentile success for estimated sample size
+                       val quantile: Double = 0.80, // use this percentile success for estimated sample size
                        val d1: Int = 100,  // for trunc_shrinkage
                        val d2: Int = 100,
                        val riskLimit: Double = 0.05,

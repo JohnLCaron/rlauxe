@@ -14,7 +14,7 @@ class TestComparisonWorkflow {
         val N = 100000
         val ncontests = 1
         val nbs = 1
-        val marginRange= 0.015 ..< 0.05
+        val marginRange= 0.01 ..< 0.01
         val underVotePct= 0.02 ..< 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct ..< phantomPct
@@ -22,12 +22,12 @@ class TestComparisonWorkflow {
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
-        testComparisonWorkflow(auditConfig, N, testData)
+        testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun noErrorsNoPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10)
         val N = 100000
         val ncontests = 11
         val nbs = 4
@@ -35,12 +35,12 @@ class TestComparisonWorkflow {
         val underVotePct= 0.02 ..< 0.12
         val phantomPct= 0.00 ..< 0.00
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomPct)
-        testComparisonWorkflow(auditConfig, N, testData)
+        testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun noErrorsWithPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10)
         val N = 100000
         val ncontests = 42
         val nbs = 11
@@ -48,7 +48,7 @@ class TestComparisonWorkflow {
         val underVotePct= 0.02 ..< 0.22
         val phantomPct= 0.005 ..< 0.005
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomPct)
-        testComparisonWorkflow(auditConfig, N, testData)
+        testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
@@ -63,28 +63,28 @@ class TestComparisonWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10,
                 errorRates=errorRates)
-        testComparisonWorkflow(auditConfig, N, testData)
+        testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun testComparisonWithStyleFuzz() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = 0.01, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = 0.01, ntrials=10)
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
-        testComparisonWorkflow(auditConfig, N, testData)
+        testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun testComparisonNoStyle() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = 0.01, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = 0.01, ntrials=10)
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
-        testComparisonWorkflow(auditConfig, N, testData)
+        testComparisonWorkflow(auditConfig, testData)
     }
 
-    fun testComparisonWorkflow(auditConfig: AuditConfig, N: Int, testData: MultiContestTestData) {
+    fun testComparisonWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
         contests.forEach{ println("  $it")}

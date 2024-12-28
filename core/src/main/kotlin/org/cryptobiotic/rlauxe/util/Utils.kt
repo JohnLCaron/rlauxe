@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.util
 
 import java.security.SecureRandom
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.min
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
 
@@ -28,3 +30,15 @@ fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
 fun sfn(s: String, n: Int) = "%${n}s".format(s)
+
+fun quantile(data: List<Int>, quantile: Double): Int {
+    if (data.isEmpty())
+        return 0
+    val p0 = ceil(quantile * data.size).toInt()
+    val p = min((quantile * data.size).toInt(), data.size-1)
+
+    val sortedData = mutableListOf<Int>()
+    sortedData.addAll(data)
+    sortedData.sort()
+    return sortedData[p]
+}

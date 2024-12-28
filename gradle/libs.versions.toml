@@ -17,6 +17,7 @@ letsPlot = "4.7.3"
 letsPlotImage = "4.3.3"
 mockk = "1.13.10"
 
+# coroutines-version = "1.8.0-RC2"
 coroutines-version = "1.9.0"
 kotest-version = "5.9.1"
 ktor-version = "2.3.4"

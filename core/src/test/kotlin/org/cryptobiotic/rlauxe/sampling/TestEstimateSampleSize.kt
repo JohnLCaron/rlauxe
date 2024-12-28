@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.corla.estimateSampleSizeSimple
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
@@ -75,12 +74,3 @@ class TestEstimateSampleSize {
         }
     }
 }
-
-// fun simulateSampleSizeComparisonAssorter(
-//    auditConfig: AuditConfig,
-//    contestUA: ContestUnderAudit,
-//    cassorter: ComparisonAssorter,
-//    cvrs: List<Cvr>,
-//    maxSamples: Int,
-//    startingTestStatistic: Double = 1.0,
-//): RunTestRepeatedResult {

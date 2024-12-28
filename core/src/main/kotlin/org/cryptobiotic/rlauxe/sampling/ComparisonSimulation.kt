@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.math.max
+import kotlin.random.Random
 
 private val show = true
 
@@ -65,7 +65,7 @@ class ComparisonSimulation(
     override fun maxSamples() = maxSamples
 
     override fun reset() {
-        permutedIndex.shuffle(secureRandom)
+        permutedIndex.shuffle(Random)
         idx = 0
     }
 

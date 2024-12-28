@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.workflow.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.SampleGenerator
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.secureRandom
+import kotlin.random.Random
 import kotlin.test.Test
 
 // Test Alpha running BRAVO. Compare against UnifiedEvaluation tables (with replacement only)
@@ -104,7 +104,7 @@ class FixedMean(val eta0: Double): EstimFn {
 class GenSampleMeanWithReplacement(val N: Int, ratio: Double): SampleGenerator {
     val samples = generateSampleWithMean(N, ratio)
     override fun sample(): Double {
-        val idx = secureRandom.nextInt(N) // with Replacement
+        val idx = Random.nextInt(N) // with Replacement
         return samples[idx]
     }
     override fun reset() {
@@ -130,14 +130,14 @@ class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): SampleGene
 // generate a sample thats approximately mean = theta
 fun generateUniformSample(N: Int) : DoubleArray {
     return DoubleArray(N) {
-        secureRandom.nextDouble(1.0)
+        Random.nextDouble(1.0)
     }
 }
 
 // generate a sample thats approximately mean = theta
 fun generateSampleWithMean(N: Int, ratio: Double) : DoubleArray {
     return DoubleArray(N) {
-        val r = secureRandom.nextDouble(1.0)
+        val r = Random.nextDouble(1.0)
         if (r < ratio) 1.0 else 0.0
     }
 }

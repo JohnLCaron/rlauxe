@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sim.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.secureRandom
+import kotlin.random.Random
 import kotlin.test.Test
 
 // CANDIDATE FOR REMOVAL
@@ -96,7 +96,7 @@ class Failures {
 fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
     val result = mutableListOf<Cvr>()
     repeat(ncards) {
-        val random = secureRandom.nextDouble(1.0)
+        val random = Random.nextDouble(1.0)
         val cand = if (random < .5 + margin/2.0) 0 else 1
         val votes = mutableMapOf<Int, IntArray>()
         votes[0] = intArrayOf(cand)

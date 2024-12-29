@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.Cvr
 import java.io.File
 
-data class ContestInfo(val candidates: List<String>, val winner: String, val order: List<Int>)
+data class RaireContestInfo(val candidates: List<String>, val winner: String, val order: List<Int>)
 
 // Raire CVR file in csv .raire format.
 
@@ -20,7 +20,7 @@ fun readRaireBallots(fileName: String): RaireCvrs {
     val ncontests = lines[lineIndex++].toInt()
 
 //  Map between contest id and the candidates & winner & order of that contest.
-    val contest_info = mutableMapOf<String, ContestInfo>()
+    val contest_info = mutableMapOf<String, RaireContestInfo>()
 
     //  first is the list of contests
     repeat(ncontests) { contestIdx ->
@@ -50,7 +50,7 @@ fun readRaireBallots(fileName: String): RaireCvrs {
             else for (tokidx in windx + 2 until inf_index) order.add(toks[tokidx].toInt())
         }
 
-        contest_info[cid] = ContestInfo(cands, winner, order)
+        contest_info[cid] = RaireContestInfo(cands, winner, order)
     }
 
     // TODO I dont see how this code works for more than one contest

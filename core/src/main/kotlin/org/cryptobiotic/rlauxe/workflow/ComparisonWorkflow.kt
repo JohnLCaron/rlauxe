@@ -151,11 +151,13 @@ class ComparisonWorkflow(
                 println(" $contest has no assertions; status=${contest.status}")
             } else {
                 if (minAssertion.roundResults.size == 1) {
-                    println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(minAssertion.margin)} ${minAssertion.roundResults[0]}")
+                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(minAssertion.margin)} ${minAssertion.roundResults[0]}")
+                    if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
                 } else {
-                    println(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${contest.estSampleSize} round=${minAssertion.round} status=${contest.status}")
+                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(minAssertion.margin)} est=${contest.estSampleSize} round=${minAssertion.round} status=${contest.status}")
+                    if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
                     minAssertion.roundResults.forEach { rr -> println("   $rr") }
-               }
+                }
             }
         }
         println()

@@ -68,8 +68,13 @@ class PollingWorkflow(
             val minAssertion = contest.minAssertion()
             if (minAssertion == null) {
                 println(" $contest has no assertions; status=${contest.status}")
-            } else {
+            } else if (auditConfig.hasStyles) {
                 println(" $contest round=${minAssertion.round} status=${contest.status}")
+                minAssertion.roundResults.forEach { rr ->
+                    println("   $rr")
+                }
+            } else {
+                println(" $contest round=${minAssertion.round} status=${contest.status} estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}")
                 minAssertion.roundResults.forEach { rr ->
                     println("   $rr")
                 }

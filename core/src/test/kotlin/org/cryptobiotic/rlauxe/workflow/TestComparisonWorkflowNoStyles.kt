@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestComparisonWorkflow {
+class TestComparisonWorkflowNoStyles {
 
     @Test
     fun testComparisonOneContest() {
@@ -21,13 +21,29 @@ class TestComparisonWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
+        testComparisonWorkflow(auditConfig, testData)
+    }
+
+    @Test
+    fun testComparisonTwoContests() {
+        val N = 100000
+        val ncontests = 2
+        val nbs = 1
+        val marginRange= 0.01 ..< 0.01
+        val underVotePct= 0.02 ..< 0.12
+        val phantomPct= 0.005
+        val phantomRange= phantomPct ..< phantomPct
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomRange)
+
+        val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
         testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun noErrorsNoPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = null, ntrials=10)
         val N = 100000
         val ncontests = 11
         val nbs = 4
@@ -40,7 +56,7 @@ class TestComparisonWorkflow {
 
     @Test
     fun noErrorsWithPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = null, ntrials=10)
         val N = 100000
         val ncontests = 42
         val nbs = 11
@@ -63,14 +79,14 @@ class TestComparisonWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = null, ntrials=10,
                 errorRates=errorRates)
         testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun testComparisonWithFuzz() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = 0.01, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = 0.01, ntrials=10)
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, testData)

@@ -10,12 +10,12 @@ class TestRaireWorkflow {
 
     @Test
     fun testRaireComparisonWithStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null))
+        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10))
     }
 
     @Test
     fun testRaireComparisonNoStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 123568667890L, quantile=.80, fuzzPct = null))
+        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 123568667890L, fuzzPct = null, ntrials=10))
     }
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
@@ -28,8 +28,8 @@ class TestRaireWorkflow {
         val cvrs = raireCvrs.cvrs
 
         // The corresponding assertions file that has already been generated.
-        val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
-        val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()
+        val ncs = raireCvrs.contests.associate { Pair(it.contestNumber.toString(), it.ncvrs + 2) }
+        val nps = raireCvrs.contests.associate { Pair(it.contestNumber.toString(), 2) }
         val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
             .import(ncs, nps)
         print(raireResults.show())

@@ -106,35 +106,7 @@ class TestComparisonWorkflowNoStyles {
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
-        val stopwatch = Stopwatch()
-
-        var prevMvrs = emptyList<Cvr>()
-        val previousSamples = mutableSetOf<Int>()
-        var rounds = mutableListOf<Round>()
-        var roundIdx = 1
-
-        var done = false
-        while (!done) {
-            val roundStopwatch = Stopwatch()
-            println("---------------------------")
-            val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
-            val currRound = Round(roundIdx, indices, previousSamples.toSet())
-            rounds.add(currRound)
-            previousSamples.addAll(indices)
-
-            println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-
-            val sampledMvrs = indices.map { testMvrs[it] }
-
-            done = workflow.runAudit(indices, sampledMvrs, roundIdx)
-            println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            prevMvrs = sampledMvrs
-            roundIdx++
-        }
-
-        rounds.forEach { println(it) }
-        workflow.showResults()
-        println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
+        runComparisonWorkflow(workflow, testMvrs, nassertions)
     }
 
 }

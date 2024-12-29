@@ -68,8 +68,8 @@ fun RaireContestAuditJson.import(Nc: Int, Np: Int) =
         Nc=Nc,
         Np=Np,
         this.eliminated .map { it.toInt() },
-        this.expectedPollsNumber.toInt(),
-        this.expectedPollsPercent.toDouble(),
+        // this.expectedPollsNumber.toInt(),
+        // this.expectedPollsPercent.toDouble(),
         this.assertions.map { it.import() },
     )
 
@@ -77,7 +77,20 @@ fun RaireAssertionJson.import() =
     RaireAssertion(
         this.winner.toInt(),
         this.loser.toInt(),
-        this.already_eliminated.map { it.toInt() },
+        0, // not available, calculate instead
         RaireAssertionType.fromString(this.assertion_type),
+        this.already_eliminated.map { it.toInt() },
         this.explanation,
     )
+
+// The output of RAIRE assertion generator, read from JSON files
+data class RaireResults(
+    val overallExpectedPollsNumber : Int,
+    val ballotsInvolvedInAuditNumber : Int,
+    val contests: List<RaireContestUnderAudit>,
+) {
+    fun show() = buildString {
+        appendLine("RaireResults: overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
+        contests.forEach { append(it.show()) }
+    }
+}

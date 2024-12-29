@@ -31,6 +31,7 @@ class RaireCvr(val cvr: Cvr) {
     //            if (contest_id not in self.votes or candidate not in self.votes[contest_id])
     //            else self.votes[contest_id][candidate]
     //        )
+
     /** if candidate not ranked, 0, else rank (1 based) */
     fun get_vote_for(contest: Int, candidate: Int): Int {
         val rankedChoices = cvr.votes[contest]

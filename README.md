@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/28/2024
+last update: 12/29/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -176,7 +176,7 @@ Notes
 
 #### IRV
 
-We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate the assertions needed by SHANGRLA. 
+We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions. 
 
 See the RAIRE guides for details:
 * [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)

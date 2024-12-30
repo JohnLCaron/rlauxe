@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /*
@@ -32,7 +33,7 @@ class TestAssorterComparison {
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listToMap( "A", "B", "C"),
+            candidateNames = listToMap("A", "B", "C"),
         )
         val winnerCvr = makeCvr(0)
         val loserCvr = makeCvr(1)
@@ -77,16 +78,17 @@ class TestAssorterComparison {
 
         assertEquals(0.0, bassorter.bassort(loserCvr, winnerCvr))              // flipped vote from loser to winner
         assertEquals(noerror, bassorter.bassort(loserCvr, loserCvr))           // no error
-        assertEquals(0.5*noerror, bassorter.bassort(loserCvr, otherCvr))       // flipped vote from loser to other
+        assertEquals(0.5 * noerror, bassorter.bassort(loserCvr, otherCvr))       // flipped vote from loser to other
 
-        assertEquals(0.5*noerror, bassorter.bassort(otherCvr, winnerCvr))      // flipped vote from other to winner
-        assertEquals(1.5*noerror, bassorter.bassort(otherCvr, loserCvr))       // flipped vote from other to loser
+        assertEquals(0.5 * noerror, bassorter.bassort(otherCvr, winnerCvr))      // flipped vote from other to winner
+        assertEquals(1.5 * noerror, bassorter.bassort(otherCvr, loserCvr))       // flipped vote from other to loser
         assertEquals(noerror, bassorter.bassort(otherCvr, otherCvr))           // no error
 
         // so bassort in [0, 2 / (2 - margin)] = [0, 2 / (3 - 2 * Aavg)] in {0, .5, 1, 1.5, 2} * noerror
         // so bassort in [0, 2*noerror], where noerror > .5. since margin > 0, since awinnerAvg > .5.
         val assortValues = listOf(0.0, .5, 1.0, 1.5, 2.0).map { it * noerror }
         println(" bassort in $assortValues where margin = $margin noerror=$noerror")
+        println(" bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]")
 
         val assortValuesN = assortValues.map { it / noerror / 2 }
         println(" assortValuesN in $assortValuesN")
@@ -312,4 +314,119 @@ class TestAssorterComparison {
         assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf(1,0))))
         assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf())))
     }
+
+
+    @Test
+    fun testPhantoms() {
+        val info = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "A", "B", "C"),
+        )
+        val winnerCvr = makeCvr(0)
+        val loserCvr = makeCvr(1)
+        val otherCvr = makeCvr(2)
+        val phantomCvr = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
+        val cvrs = listOf(winnerCvr, loserCvr, otherCvr, phantomCvr)
+        val contest = makeContestFromCvrs(info, cvrs)
+
+        val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
+        val awinnerAvg = .51
+        val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
+        assertEquals(.02, margin, doublePrecision)
+        val bassorter = ComparisonAssorter(contest, assorter, awinnerAvg)
+        assertEquals(.02, bassorter.margin, doublePrecision)
+
+        assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
+        assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser
+        assertEquals(0.5, assorter.assort(otherCvr))  // voted for someone else
+        assertEquals(0.5, assorter.assort(phantomCvr, false))  // ignore cvr is a phantom
+        assertEquals(0.0, assorter.assort(phantomCvr, true))  // cvr is a phantom
+        // so assort in {0, .5, 1}
+
+        assertEquals(0.0, bassorter.overstatementError(winnerCvr, winnerCvr, true))
+        assertEquals(-1.0, bassorter.overstatementError(winnerCvr, loserCvr, true))
+        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, otherCvr, true))
+        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, phantomCvr, true))
+
+        assertEquals(1.0, bassorter.overstatementError(loserCvr, winnerCvr, true))
+        assertEquals(0.0, bassorter.overstatementError(loserCvr, loserCvr, true))
+        assertEquals(0.5, bassorter.overstatementError(loserCvr, otherCvr, true))
+        assertEquals(0.5, bassorter.overstatementError(loserCvr, phantomCvr, true))
+
+        assertEquals(0.5, bassorter.overstatementError(otherCvr, winnerCvr, true))
+        assertEquals(-0.5, bassorter.overstatementError(otherCvr, loserCvr, true))
+        assertEquals(0.0, bassorter.overstatementError(otherCvr, otherCvr, true))
+
+        assertEquals(1.0, bassorter.overstatementError(phantomCvr, winnerCvr, true)) // check
+        assertEquals(0.0, bassorter.overstatementError(phantomCvr, loserCvr, true)) // check
+        assertEquals(0.5, bassorter.overstatementError(phantomCvr, phantomCvr, true)) // check, usual case
+        // so overstatementError in [-1, -.5, 0, .5, 1]
+
+        // TODO hasStyle parameter doesnt matter unless mvr doesnt have the contest. See testHasStyles below.
+        for (mvr in cvrs) {
+            for (cvr in cvrs) {
+                assertEquals(bassorter.overstatementError(mvr, cvr, false), bassorter.overstatementError(mvr, cvr, true))
+            }
+        }
+
+        val noerror = 1.0 / (2.0 - margin)
+        assertEquals(.5050505050505051, noerror, doublePrecision)
+        assertEquals(1.0 / (3 - 2 * awinnerAvg), noerror, doublePrecision)
+        assertEquals(noerror, bassorter.noerror, doublePrecision)
+        println("noerror = $noerror")
+
+        // bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
+        assertEquals(noerror, bassorter.bassort(winnerCvr, winnerCvr))         // no error
+        assertEquals(2 * noerror, bassorter.bassort(winnerCvr, loserCvr))      // cvr flipped vote from winner to loser
+        assertEquals(1.5 * noerror, bassorter.bassort(winnerCvr, otherCvr))    // cvr flipped vote from winner to other
+        assertEquals(1.5 * noerror, bassorter.bassort(winnerCvr, phantomCvr))  // found winner: oneUnder
+
+        assertEquals(0.0, bassorter.bassort(loserCvr, winnerCvr))              // cvr flipped vote from loser to winner
+        assertEquals(noerror, bassorter.bassort(loserCvr, loserCvr))           // no error
+        assertEquals(0.5*noerror, bassorter.bassort(loserCvr, otherCvr))       // cvr flipped vote from loser to other
+        assertEquals(0.5*noerror, bassorter.bassort(loserCvr, phantomCvr))     // found loser: oneOver
+
+        assertEquals(0.5*noerror, bassorter.bassort(otherCvr, winnerCvr))      // cvr flipped vote from other to winner
+        assertEquals(1.5*noerror, bassorter.bassort(otherCvr, loserCvr))       // cvr flipped vote from other to loser
+        assertEquals(noerror, bassorter.bassort(otherCvr, otherCvr))           // no error
+
+        assertEquals(0.0, bassorter.bassort(phantomCvr, winnerCvr))          // cvr reported winner, cant find ballot: twoOver
+        assertEquals(noerror, bassorter.bassort(phantomCvr, loserCvr))       // cvr reported loser, cant find ballot: nuetral
+        assertEquals(0.5*noerror, bassorter.bassort(phantomCvr, phantomCvr)) // cant find ballot: oneOver
+    }
+
+    @Test
+    fun testHasStyles() {
+        val info = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "A", "B", "C"),
+        )
+        val winnerCvr = makeCvr(0)
+        val loserCvr = makeCvr(1)
+        val otherCvr = makeCvr(2)
+        val phantomCvr = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
+        val cvrs = listOf(winnerCvr, loserCvr, otherCvr, phantomCvr)
+        val contest = makeContestFromCvrs(info, cvrs)
+
+        val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
+        val awinnerAvg = .51
+        val bassorter = ComparisonAssorter(contest, assorter, awinnerAvg)
+
+        val differentContest = Cvr("diff", mapOf(1 to IntArray(0)))
+
+        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, differentContest, false))
+
+        val mess = assertFailsWith<RuntimeException> {
+            assertEquals(0.0, bassorter.overstatementError(winnerCvr, differentContest, true))
+        }.message!!
+        assertTrue(mess.contains("does not contain contest"))
+
+        assertEquals(0.5, bassorter.overstatementError(differentContest, winnerCvr, false))
+        assertEquals(1.0, bassorter.overstatementError(differentContest, winnerCvr, true))
+    }
+
 }

@@ -52,7 +52,7 @@ class TestComparisonWorkflow {
     }
 
     @Test
-    fun p2ErrorsEqualPhantoms() {
+    fun p1ErrorsEqualPhantoms() {
         val N = 100000
         val ncontests = 42
         val nbs = 11
@@ -62,9 +62,8 @@ class TestComparisonWorkflow {
         val phantomRange= phantomPct ..< phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomRange)
 
-        val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10,
-                errorRates=errorRates)
+        val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null, ntrials=10, errorRates=errorRates)
         testComparisonWorkflow(auditConfig, testData)
     }
 
@@ -111,11 +110,9 @@ fun runComparisonWorkflow(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nas
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
         previousSamples.addAll(indices)
-
         println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
         val sampledMvrs = indices.map { testMvrs[it] }
-
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
         println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         prevMvrs = sampledMvrs

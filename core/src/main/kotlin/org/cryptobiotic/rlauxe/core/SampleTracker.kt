@@ -43,10 +43,10 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     private var sum = 0.0
     private val welford = Welford()
     private var countP0 = 0
-    private var countP1 = 0
-    private var countP2 = 0
-    private var countP3 = 0
-    private var countP4 = 0
+    private var countP1o = 0
+    private var countP2o = 0
+    private var countP1u = 0
+    private var countP2u = 0
 
     override fun last() = last
     override fun numberOfSamples() = welford.count
@@ -55,10 +55,10 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     override fun variance() = welford.variance()
 
     // these are the rates from the previous samples.
-    fun sampleP1count() = countP1
-    fun sampleP2count() = countP2
-    fun sampleP3count() = countP3
-    fun sampleP4count() = countP4
+    fun countP1o() = countP1o
+    fun countP2o() = countP2o
+    fun countP1u() = countP1u
+    fun countP2u() = countP2u
 
     fun addSample(sample : Double) {
         last = sample
@@ -67,22 +67,22 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
 
         if (noerror != 0.0) {
             // or just say which overstatement it is?
+            if (doubleIsClose(sample, 0.0)) countP2o++
+            if (doubleIsClose(sample, noerror * 0.5)) countP1o++
             if (doubleIsClose(sample, noerror)) countP0++
-            if (doubleIsClose(sample, noerror * 0.5)) countP1++
-            if (doubleIsClose(sample, 0.0)) countP2++
-            if (doubleIsClose(sample, noerror * 1.5)) countP3++
-            if (doubleIsClose(sample, noerror * 2.0)) countP4++
+            if (doubleIsClose(sample, noerror * 1.5)) countP1u++
+            if (doubleIsClose(sample, noerror * 2.0)) countP2u++
         }
     }
 
-    fun samplingErrors() = listOf(countP0,countP1,countP2,countP3,countP4)
+    fun samplingErrors() = listOf(countP0,countP1o,countP2o,countP1u,countP2u)
 
     fun samplingErrors(denom:Double) = buildString {
         append("[${dfn(countP0/denom, 4)},")
-        append("${dfn(countP1/denom, 4)},")
-        append("${dfn(countP2/denom, 4)},")
-        append("${dfn(countP3/denom, 4)},")
-        append("${dfn(countP4/denom, 4)}]")
+        append("${dfn(countP1o/denom, 4)},")
+        append("${dfn(countP2o/denom, 4)},")
+        append("${dfn(countP1u/denom, 4)},")
+        append("${dfn(countP2u/denom, 4)}]")
     }
 }
 

@@ -61,7 +61,7 @@ message AuditConfig {
 }
 
 message ContestBounds {
-  map<string, uint32> bounds = 1; // contest name -> bound. B7. trustworthy upper bound on number of ballots for this contest
+  map<string, uint32> bounds = 1; // contest name -> bound. B7. trustworthy upper bound on number of ballots/cards for this contest
 }
 
 message Contest {
@@ -75,7 +75,7 @@ message Contest {
 
 message Votes {
     string contest_id = 1;
-    repeated uint32 candidate_ids = 2; // candidate has 1 vote.for irv, the order of candidate_ids is their ranking
+    repeated uint32 candidate_ids = 2; // candidate has 1 vote. for irv, the order of candidate_ids is their ranking
 }
 
 message BallotManifest {

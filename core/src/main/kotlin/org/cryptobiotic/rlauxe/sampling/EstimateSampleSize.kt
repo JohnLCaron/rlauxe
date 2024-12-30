@@ -324,10 +324,10 @@ fun simulateSampleSizeBetaMart(
         a = noerror,
         d1 = auditConfig.d1,
         d2 = auditConfig.d2,
-        p1 = errorRates[0],
-        p2 = errorRates[1],
-        p3 = errorRates[2],
-        p4 = errorRates[3],
+        p2o = errorRates[0],
+        p1o = errorRates[1],
+        p1u = errorRates[2],
+        p2u = errorRates[3],
     )
     val testFn = BettingMart(
         bettingFn = optimal,
@@ -342,10 +342,10 @@ fun simulateSampleSizeBetaMart(
         ntrials = auditConfig.ntrials,
         testFn = testFn,
         testParameters = mapOf(
-            "p1" to optimal.p1,
-            "p2" to optimal.p2,
-            "p3" to optimal.p3,
-            "p4" to optimal.p4
+            "p2o" to optimal.p2o,
+            "p1o" to optimal.p1o,
+            "p1u" to optimal.p1u,
+            "p2u" to optimal.p2u
         ) + moreParameters,
         showDetails = false,
         startingTestStatistic = startingTestStatistic,

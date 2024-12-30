@@ -680,10 +680,10 @@ fun calc_sample_sizes(
         a = minAssorter.noerror,
         d1 = 100,
         d2 = 100,
-        p1 = .01,
-        p2 = .001,
-        p3 = 0.0,
-        p4 = 0.0,
+        p2o = .001,
+        p1o = .01,
+        p1u = 0.0,
+        p2u = 0.0,
     )
     val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
 
@@ -692,7 +692,7 @@ fun calc_sample_sizes(
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2" to optimal.p2),
+        testParameters = mapOf("p2o" to optimal.p2o),
         showDetails = false,
         margin = minAssorter.margin,
         Nc = N,

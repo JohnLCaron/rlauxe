@@ -91,7 +91,7 @@ class CompareAlphaPaperUsingMasses {
 
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeComparisonAssertions(cvrs, contest.votes)
+        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeComparisonAssertions(cvrs)
         val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
         // sanity checks

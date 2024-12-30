@@ -34,8 +34,8 @@ class GenerateComparisonErrorTable {
                     repeat(auditConfig.ntrials) {
                         val cvrs = sim.makeCvrs()
                         val contestUA = ContestUnderAudit(sim.contest, true, true)
-                        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
-                        contestUA.makeComparisonAssertions(cvrs, votes[sim.contest.id]!!)
+                        // val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
+                        contestUA.makeComparisonAssertions(cvrs)
                         val minAssert = contestUA.minComparisonAssertion()!!
                         val minAssort = minAssert.cassorter
 

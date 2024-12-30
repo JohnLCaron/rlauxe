@@ -28,7 +28,7 @@ class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assort
 }
 
 class PollWithoutReplacement(
-    val contest: Contest,
+    val contest: ContestIF,
     val mvrs : List<Cvr>,
     val assorter: AssorterFunction,
     val allowReset: Boolean = true,

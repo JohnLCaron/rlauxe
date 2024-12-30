@@ -42,9 +42,9 @@ class ComparisonWorkflow(
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
 
-        val votes =  makeVotesPerContest(contests, cvrs)
+        // val votes =  makeVotesPerContest(contests, cvrs)
         contestsUA.filter{ !it.done }.forEach { contest ->
-            contest.makeComparisonAssertions(cvrs, votes[contest.id]!!)
+            contest.makeComparisonAssertions(cvrs) // , votes[contest.id]!!)
         }
 
         // must be done once and for all rounds

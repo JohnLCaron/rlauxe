@@ -24,7 +24,7 @@ class PollingWorkflow(
         }
 
         contestsUA.filter { !it.done }.forEach { contest ->
-            contest.makePollingAssertions(null)
+            contest.makePollingAssertions()
         }
 
         // must be done once and for all rounds

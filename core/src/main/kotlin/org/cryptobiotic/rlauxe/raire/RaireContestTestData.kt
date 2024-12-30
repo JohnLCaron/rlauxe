@@ -151,7 +151,7 @@ fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>
     val votes = Votes(cvotes, testContest.ncands)
     val result = votes.runElection(TimeOut.never())
     println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
-    require(1 == result.possibleWinners.size) // TODO
+    require(1 == result.possibleWinners.size) { "nwinners ${result.possibleWinners.size} must be 1" } // TODO
     val winner:Int = result.possibleWinners[0]
 
     // Map<String, Object> metadata,

@@ -74,22 +74,22 @@ class AdaptiveComparison(
     val a: Double, // compareAssorter.noerror
     val d1: Int,  // weight p1, p3
     val d2: Int, // weight p2, p4
-    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
+    val p2o: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
+    val p1o: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
+    val p1u: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
+    val p2u: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
     val eps: Double = .00001
 ): BettingFn {
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastj = prevSamples.numberOfSamples() // TODO lastj = 0
-        val p1est = if (p1 == 0.0) 0.0 else estimateRate(d1, p1, prevSamples.sampleP1count().toDouble() / lastj, lastj, eps)
-        val p2est = if (p2 == 0.0) 0.0 else estimateRate(d2, p2, prevSamples.sampleP2count().toDouble() / lastj, lastj, eps)
-        val p3est = if (p3 == 0.0) 0.0 else estimateRate(d1, p3, prevSamples.sampleP3count().toDouble() / lastj, lastj, eps)
-        val p4est = if (p4 == 0.0) 0.0 else estimateRate(d2, p4, prevSamples.sampleP4count().toDouble() / lastj, lastj, eps)
+        val p2oest = if (p2o == 0.0) 0.0 else estimateRate(d2, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
+        val p1oest = if (p1o == 0.0) 0.0 else estimateRate(d1, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
+        val p1uest = if (p1u == 0.0) 0.0 else estimateRate(d1, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
+        val p2uest = if (p2u == 0.0) 0.0 else estimateRate(d2, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
-        val kelly = OptimalLambda(a, p1est, p2est, p3est, p4est, mui)
+        val kelly = OptimalLambda(a, p2oest, p1oest, p1uest, p2uest, mui)
         return kelly.solve()
     }
 
@@ -116,13 +116,13 @@ class AdaptiveComparison(
  *   au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
  * mui := mean value under H0, = 1/2 for with replacement
  * p0 := #{xi = a}/N is the rate of correct CVRs.
- * p1 := #{xi = a/2}/N is the rate of 1-vote overstatements.
- * p2 := #{xi = 0}/N is the rate of 2-vote overstatements.
- * p3 := #{xi = 3a/2}/N is the rate of 1-vote understatements.
- * p4 := #{xi = 2a}/N is the rate of 2-vote understatements.
+ * p2o := #{xi = 0}/N is the rate of 2-vote overstatements.
+ * p1o := #{xi = a/2}/N is the rate of 1-vote overstatements.
+ * p1u := #{xi = 3a/2}/N is the rate of 1-vote understatements.
+ * p2u := #{xi = 2a}/N is the rate of 2-vote understatements.
  */
-class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Double = 0.0, val p4: Double = 0.0, val mui: Double = 0.5) {
-    val p0 = 1.0 - p1 - p2 - p3 - p4
+class OptimalLambda(val a: Double, val p2o: Double, val p1o: Double, val p1u: Double = 0.0, val p2u: Double = 0.0, val mui: Double = 0.5) {
+    val p0 = 1.0 - p2o - p1o - p1u - p2u
     val debug = false
 
     fun solve(): Double {
@@ -148,7 +148,7 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
             GoalType.MAXIMIZE,
             MaxEval(1000)
         )
-        if (debug) println( "Kelly: p1=${p1}  p2=${p2}  p3=${p3}  p4=${p4} point=${result.point} took=$stopwatch")
+        if (debug) println( "Kelly: p2o=${p2o}  p1o=${p1o}  p1u=${p1u}  p2u=${p2u} point=${result.point} took=$stopwatch")
         return result.point
     }
 
@@ -164,10 +164,10 @@ class OptimalLambda(val a: Double, val p1: Double, val p2: Double, val p3: Doubl
     fun expectedValueLogt(lam: Double): Double {
 
         return ln(1.0 + lam * (a - mui)) * p0 +
-                ln(1.0 + lam * (a*0.5 - mui)) * p1 +
-                ln(1.0 - lam * mui) * p2 +
-                ln(1.0 + lam * (a*1.5 - mui)) * p3 +
-                ln(1.0 + lam * (a*2.0 - mui)) * p4
+                ln(1.0 + lam * (a*0.5 - mui)) * p1o +
+                ln(1.0 - lam * mui) * p2o +
+                ln(1.0 + lam * (a*1.5 - mui)) * p1u +
+                ln(1.0 + lam * (a*2.0 - mui)) * p2u
     }
 
     /* why not just use
@@ -209,7 +209,7 @@ fun estimateSampleSizeOptimalLambda(
     alpha: Double, // risk
     dilutedMargin: Double, // the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
     upperBound: Double, // assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
-    p1: Double, p2: Double, p3: Double = 0.0, p4: Double = 0.0
+    p2o: Double, p1o: Double, p1u: Double = 0.0, p2u: Double = 0.0
 ): Int {
 
     //  a := 1 / (2 − v/au)
@@ -217,7 +217,7 @@ fun estimateSampleSizeOptimalLambda(
     //  au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
 
     val a = 1 / (2 - dilutedMargin / upperBound)
-    val kelly = OptimalLambda(a, p1=p1, p2=p2, p3=p3, p4=p4)
+    val kelly = OptimalLambda(a, p2o=p2o, p1o=p1o, p1u=p1u, p2u=p2u)
     val lam = kelly.solve()
 
     // 1 / alpha = bet ^ size

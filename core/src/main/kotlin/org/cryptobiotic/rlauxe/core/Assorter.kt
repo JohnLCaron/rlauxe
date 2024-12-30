@@ -151,11 +151,7 @@ data class ComparisonAssorter(
 
         val overstatement = overstatementError(mvr, cvr, this.hasStyle) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
-        val denom =  (2.0 - margin/this.assorter.upperBound())
-        val result1 =  tau * noerror
-        val result2 =  tau / denom
-        require(doubleIsClose(result1, result2))
-        return result1
+        return tau * noerror
     }
 
     //    overstatement error for a CVR compared to the human reading of the ballot.

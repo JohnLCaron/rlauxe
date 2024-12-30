@@ -46,7 +46,7 @@ fun compareCorlaAndOptimal(dilutedMargin: Double) {
     println()
 }
 
-fun compareCorlaAndOptimal(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, oneOver: Int, twoOver: Int,) {
+fun compareCorlaAndOptimal(dilutedMargin: Double, twoOver: Int, oneOver: Int, oneUnder: Int, twoUnder: Int,) {
     val riskLimit = 0.05
     val gamma = 1.2
 
@@ -54,10 +54,10 @@ fun compareCorlaAndOptimal(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, 
         riskLimit,
         dilutedMargin,
         gamma,
-        twoUnder = twoUnder,
-        oneUnder = oneUnder,
+        twoOver = twoOver,
         oneOver = oneOver,
-        twoOver = twoOver
+        oneUnder = oneUnder,
+        twoUnder = twoUnder,
     )
 
     // fun estimateSampleSizeOptimalLambda(
@@ -72,10 +72,10 @@ fun compareCorlaAndOptimal(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, 
         riskLimit,
         dilutedMargin,
         1.0,
-        p1 = oneUnder/N,
-        p2 = twoUnder/N,
-        p3 = oneOver/N,
-        p4 = twoOver/N,
+        p1u = oneUnder/N,
+        p2u = twoUnder/N,
+        p1o = oneOver/N,
+        p2o = twoOver/N,
     )
 
     println("   [$twoOver, $oneOver, $oneUnder, $twoUnder] -> $optimal $corla")

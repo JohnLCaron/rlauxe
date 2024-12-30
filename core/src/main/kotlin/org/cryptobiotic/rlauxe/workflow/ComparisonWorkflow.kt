@@ -289,10 +289,10 @@ fun runOneAssertionAudit(
         a = cassorter.noerror,
         d1 = auditConfig.d1,
         d2 = auditConfig.d2,
-        p1 = errorRates[0],
-        p2 = errorRates[1],
-        p3 = errorRates[2],
-        p4 = errorRates[3],
+        p2o = errorRates[0],
+        p1o = errorRates[1],
+        p1u = errorRates[2],
+        p2u = errorRates[3],
     )
     val testFn = BettingMart(
         bettingFn = optimal,

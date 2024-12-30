@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/29/2024
+last update: 12/30/2024
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -617,6 +617,8 @@ So for estimation, we could calculate the margin with usePhantoms=true, since th
 
 Ive convinced myself that one cant know Nc without knowing Np. Since Np has such a strong effect, we will keep it per 
 contest and use it in the estimation and also the betting strategy.
+
+Should use phantomPct for estimated 1-vote overstatement error rate estimate.
 
 ## Stratified audits using OneAudit (TODO)
 

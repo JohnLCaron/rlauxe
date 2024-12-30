@@ -39,10 +39,10 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
                 sampleNumber,
                 reportedMargin,
                 gamma,
-                n1 = prevSamples.sampleP1count(),
-                n2 = prevSamples.sampleP2count(),
-                n3 = prevSamples.sampleP3count(),
-                n4 = prevSamples.sampleP4count(),
+                p2o = prevSamples.countP2o(),
+                p1o = prevSamples.countP1o(),
+                p1u = prevSamples.countP1u(),
+                p2u = prevSamples.countP2u(),
             )
             pvalues.add(pvalue)
 
@@ -87,10 +87,10 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
             sampleNumber,
             reportedMargin,
             gamma,
-            n1 = prevSamples.sampleP1count(),
-            n2 = prevSamples.sampleP2count(),
-            n3 = prevSamples.sampleP3count(),
-            n4 = prevSamples.sampleP4count(),
+            p2o = prevSamples.countP2o(),
+            p1o = prevSamples.countP1o(),
+            p1u = prevSamples.countP1u(),
+            p2u = prevSamples.countP2u(),
         )
 
         val status = if (p <= riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
@@ -105,10 +105,10 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         n: Int, // n is the sample size, not N total ballots
         dilutedMargin: Double, // V is the smallest reported margin = min_c { min w∈Wc ∈Lc (V_wl) } over contests c
         gamma: Double,  // use 1.01 or 1.10 ??
-        n1: Int, // oneOver
-        n2: Int, // twoOver
-        n3: Int = 0, // oneUnder
-        n4: Int = 0, // twoUnder
+        p2o: Int, // twoOver
+        p1o: Int, // oneOver
+        p1u: Int = 0, // oneUnder
+        p2u: Int = 0, // twoUnder
     ): Double {
 
         // Contest c appears on Nc of the N cast ballots
@@ -125,16 +125,16 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         val termn = pow(term, n.toDouble())
 
         val term1 = (1.0 - 1.0/(2 * gamma))
-        val term1n = pow(term1, -n1.toDouble())
+        val term1n = pow(term1, -p1o.toDouble())
 
         val term2 = (1.0 - 1.0/gamma)
-        val term2n = pow(term2, -n2.toDouble())
+        val term2n = pow(term2, -p2o.toDouble())
 
         val term3 = (1.0 + 1.0/(2 * gamma))
-        val term3n = pow(term3, -n3.toDouble())
+        val term3n = pow(term3, -p1u.toDouble())
 
         val term4 = (1.0 + 1.0/gamma)
-        val term4n = pow(term4, -n4.toDouble())
+        val term4n = pow(term4, -p2u.toDouble())
 
         val result = termn * term1n * term2n * term3n * term4n
         return min(1.0, result)

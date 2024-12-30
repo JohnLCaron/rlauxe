@@ -31,10 +31,10 @@ data class BettingTask(
             a = compareAssorter.noerror,
             d1 = 0,
             d2 = d2,
-            p1 = 0.0,
-            p2 = p2prior,
-            p3 = 0.0,
-            p4 = 0.0,
+            p2o = p2prior,
+            p1o = 0.0,
+            p1u = 0.0,
+            p2u = 0.0,
         )
         return BettingMart(
             bettingFn = adaptive, Nc = N, noerror = compareAssorter.noerror,

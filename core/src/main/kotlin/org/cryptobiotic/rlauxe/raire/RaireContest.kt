@@ -35,7 +35,7 @@ class RaireContestUnderAudit(
     contest: RaireContest,
     val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
     val assertions: List<RaireAssertion>,
-): ContestUnderAudit(contest, isComparison=true, hasStyle=true) { // TODO set ncvrs, Nc
+): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     val candidates =  contest.info.candidateIds
 
     // TODO eliminate
@@ -45,25 +45,9 @@ class RaireContestUnderAudit(
         }
     }
 
-    fun makeComparisonAssertionsOrg(cvrs : Iterable<Cvr>, votes: Map<Int, Int>? = null): ContestUnderAudit {
+    // override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
+    override fun makeComparisonAssertions(cvrs: Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        val useVotes = if (votes != null) votes else (contest as Contest).votes
-        val assertions = when (contest.info.choiceFunction) {
-            SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(useVotes)
-            SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
-            else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
-        }
-
-        this.comparisonAssertions = assertions.map { assertion ->
-            val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
-            ComparisonAssertion(contest, comparisonAssorter)
-        }
-        return this
-    }
-
-    override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
         this.comparisonAssertions = assertions.map { assertion ->
             val assorter = RaireAssorter(contest.info, assertion)
             val calcMargin = assorter.calcAssorterMargin(id, cvrs)

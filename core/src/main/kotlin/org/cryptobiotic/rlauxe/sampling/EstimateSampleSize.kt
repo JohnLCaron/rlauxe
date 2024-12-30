@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
-import kotlin.math.ceil
 import kotlin.math.min
+import kotlin.math.max
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,8 +38,12 @@ fun estimateSampleSizes(
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
         } else {
-            val size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
+            var size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
             // val size = task.prevSampleSize + ceil(result.totalSamplesNeeded / result.ntrials.toDouble()).toInt()
+            if (roundIdx > 1) {
+                // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
+                size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
+            }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
             // if (show) println("  ${task.contestUA.name} ${task.assertion}")
         }
@@ -98,11 +102,11 @@ fun makeEstimationTasksFresh(
     return tasks
 }
 
-// tries to start from where the last left off. Otherwise, wouldnt uou just get the previous estimate?
+// tries to start from where the last left off. Otherwise, wouldnt you just get the previous estimate?
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
-    cvrs: List<Cvr>,        // Comparison only
+    cvrs: List<Cvr>,        // only needed when Comparison
     prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -169,7 +173,7 @@ class SimulateSampleSizeTask(
         } else {
             simulateSampleSizePollingAssorter(
                 auditConfig,
-                contest as Contest,
+                contest as Contest, // TODO cant use Raire
                 assertion.assorter,
                 startingTestStatistic,
                 moreParameters=moreParameters,
@@ -185,7 +189,7 @@ class SimulateSampleSizeTask(
 // also called from MakeSampleSizePlots
 fun simulateSampleSizePollingAssorter(
     auditConfig: AuditConfig,
-    contest: Contest,
+    contest: Contest,  // TODO cant use Raire
     assorter: AssorterFunction,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -197,7 +201,7 @@ fun simulateSampleSizePollingAssorter(
     val sampler = if (auditConfig.fuzzPct == null) {
         PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
     } else {
-        PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contest, assorter)
+        PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire
     }
 
     return simulateSampleSizeAlphaMart(
@@ -277,7 +281,7 @@ fun simulateSampleSizeComparisonAssorter(
         val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
         ComparisonSimulation(cvrs, contest, cassorter, errorRates)
     } else {
-        ComparisonFuzzSampler(auditConfig.fuzzPct, cvrs, contest as Contest, cassorter)
+        ComparisonFuzzSampler(auditConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
     }
 
     // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros

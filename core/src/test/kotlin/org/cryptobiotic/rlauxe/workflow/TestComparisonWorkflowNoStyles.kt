@@ -41,6 +41,13 @@ class TestComparisonWorkflowNoStyles {
         testComparisonWorkflow(auditConfig, testData)
     }
 
+    // @Test
+    fun noErrorsNoPhantomsRepeat() {
+        repeat(100) {
+            noErrorsNoPhantoms()
+        }
+    }
+
     @Test
     fun noErrorsNoPhantoms() {
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = null, ntrials=10)

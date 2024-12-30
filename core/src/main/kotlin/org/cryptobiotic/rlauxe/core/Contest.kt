@@ -186,9 +186,11 @@ open class ContestUnderAudit(
         append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
     }
 
-    open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
+    // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
+    open fun makePollingAssertions(): ContestUnderAudit {
         require(!isComparison) { "makePollingAssertions() can be called only on polling contest"}
-        val useVotes = if (votes != null) votes else (contest as Contest).votes
+        // val useVotes = if (votes != null) votes else (contest as Contest).votes
+        val useVotes = (contest as Contest).votes
 
         this.pollingAssertions = when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
@@ -223,9 +225,11 @@ open class ContestUnderAudit(
     }
 
     // cvrs must be complete in order to get the margin right.
-    open fun makeComparisonAssertions(cvrs : Iterable<Cvr>, votes: Map<Int, Int>? = null): ContestUnderAudit {
+    // open fun makeComparisonAssertions(cvrs : Iterable<Cvr>, votes: Map<Int, Int>? = null): ContestUnderAudit {
+    open fun makeComparisonAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        val useVotes = if (votes != null) votes else (contest as Contest).votes
+        // val useVotes = if (votes != null) votes else (contest as Contest).votes
+        val useVotes = (contest as Contest).votes
         val assertions = when (contest.info.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(useVotes)

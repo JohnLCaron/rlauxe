@@ -69,7 +69,7 @@ class CreatePollingDiffMeans {
         println("rrOver = $rrOver")
     }
 
-    @Test
+    // @Test reported mean must be >= .5
     fun plotUnder() {
         val theta = .51
         val cvrs = makeCvrsByExactMean(N, theta)

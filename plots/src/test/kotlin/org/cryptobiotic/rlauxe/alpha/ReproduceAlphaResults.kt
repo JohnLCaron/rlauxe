@@ -318,7 +318,7 @@ class ReproduceAlphaResults {
         val u = 2.0/(2-assorter_margin)
         assertEquals(1.009081735, u, doublePrecision)
         val dl = listOf(10, 100, 1000, 10000, 100000)
-        val etal = listOf(0.9, 1.0, u, 2.0, 2.0 * u) // should be .9, 1, 1.009, 2, 2.018
+        val etal = listOf(0.9, 1.0, u) // eta cant be larger than u , 2.0, 2.0 * u) // should be .9, 1, 1.009, 2, 2.018
 
         // TODO check you get same result
         //x = np.full(N, overstatement_assorter(0, assorter_margin))  # error-free in this simulation, wi = 0
@@ -458,69 +458,6 @@ class ReproduceAlphaResults {
     //10.000,   2765,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
     //15.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
     //20.000,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-
-    // replicate same result using ComparisonAssertion
-    @Test
-    fun comparisonReplication() {
-        val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
-        val nlist = listOf(50000, 20000, 10000, 5000, 1000)
-        val dl = listOf(10, 100, 1000, 10000)
-
-        val d = 100
-        val N = 10000
-        val reps = 1000
-
-        /* what to make of this ??
-        val assorter_mean = (9000 * thetas.last() + 1000 * .5) / N // contest has 51% for winner in 9000 valid votes, and 1000 non-votes
-        val assorter_margin = 2 * assorter_mean - 1
-        val u = 2.0 / (2 - assorter_margin) // use this as the upper bound for comparisons?
-         */
-
-        val etas = listOf(0.9, 1.0, 1.5, 2.0, 5.0, 7.5, 10.0, 15.0, 20.0) // should be .9, 1, 1.009, 2, 2.018
-
-        val info = ContestInfo("contest0", 0, listToMap("A","B"), choiceFunction = SocialChoiceFunction.PLURALITY)
-
-        val srs = mutableListOf<SRT>()
-        for (theta in thetas) {
-            val cvrs = makeCvrsByExactMean(N, theta)
-            val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
-            val compareAssertion = contestUA.comparisonAssertions.first()
-
-            for (eta in etas) {
-                val mart: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
-                    // maxSamples = N,
-                    eta0 = eta,
-                    d = d,
-                    ntrials = reps,
-                    upperBound = compareAssertion.cassorter.upperBound,
-                )
-                srs.add(mart.makeSRT(theta, 0.0))
-            }
-        }
-
-        println("TestComparisonFromAlpha.comparisonReplication ntrials=$reps")
-        val title = " nsamples, ballot comparison, N=$N, d-$d, error-free\n theta (col) vs eta0 (row)"
-        plotSRS(srs, title, true, colf="%6.3f", rowf="%6.1f",
-            colFld = { srt: SRT -> srt.reportedMean },
-            rowFld = { srt: SRT -> srt.eta0 },
-            fld = { srt: SRT -> srt.nsamples }
-        )
-
-        // TestComparisonFromAlpha.comparisonReplication ntrials=1000
-        // nsamples, ballot comparison, N=10000, d = 100, error-free
-        // theta (col) vs eta0 (row)
-        //       : 0.501,  0.502,  0.503,  0.504,  0.505,  0.510,  0.520,  0.530,  0.540,  0.550,  0.575,  0.600,  0.650,  0.700,
-        //   0.9,   9955,   9768,   9343,   8594,   7511,   2357,    501,    243,    157,    115,     70,     51,     34,     26,
-        //   1.0,   9951,   9720,   9127,   7994,   6410,   1468,    336,    174,    116,     87,     54,     40,     27,     21,
-        //   1.5,   9917,   9027,   6008,   3242,   1864,    427,    155,     98,     74,     59,     39,     29,     19,     14,
-        //   2.0,   9826,   6756,   2956,   1517,    949,    312,    148,     98,     74,     59,     39,     29,     19,     14,
-        //   5.0,   5185,   1625,    963,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-        //   7.5,   3315,   1393,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-        //  10.0,   2768,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-        //  15.0,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-        //  20.0,   2588,   1390,    949,    721,    581,    294,    148,     98,     74,     59,     39,     29,     19,     14,
-    }
 
     @Test
     fun comparisonNvsTheta() {

@@ -28,7 +28,9 @@ class Dvalues {
                     val cvrs = makeCvrsByExactMean(N, theta)
                     cvrMeanDiffs.forEach { cvrMeanDiff ->
                         val cvrMean = theta - cvrMeanDiff
-                        tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = d, cvrs = cvrs))
+                        if (cvrMean >= .5) {
+                            tasks.add(PollingTask(taskIdx++, N, cvrMean, cvrMeanDiff, d = d, cvrs = cvrs))
+                        }
                     }
                 }
             }

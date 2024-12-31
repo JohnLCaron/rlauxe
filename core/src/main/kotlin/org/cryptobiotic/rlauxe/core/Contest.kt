@@ -64,7 +64,7 @@ interface ContestIF {
  */
 class Contest(
         override val info: ContestInfo,
-        voteInput: Map<Int, Int>,
+        voteInput: Map<Int, Int>,   // candidateId -> nvotes
         override val Nc: Int,
         override val Np: Int,
     ): ContestIF {

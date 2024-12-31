@@ -1,15 +1,16 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.corla.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeComparisonAssorter
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.test.Test
 
-class TestEstimateSampleSize {
+class TestCorlaEstimateSampleSize {
     @Test
     fun testFindSampleSizePolling() {
         val test = MultiContestTestData(20, 11, 20000)

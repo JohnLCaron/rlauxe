@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
@@ -45,7 +45,38 @@ class TestRaireWorkflowFromJson {
 
         val nassertions = raireResults.contests.sumOf { it.assertions.size }
         val workflow = ComparisonWorkflow(auditConfig, emptyList(), raireResults.contests, cvrs)
-        runComparisonWorkflow(workflow, cvrs, nassertions)
+        runComparisonWorkflowR(workflow, cvrs, nassertions)
     }
 
+}
+
+fun runComparisonWorkflowR(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
+    val stopwatch = Stopwatch()
+
+    var prevMvrs = emptyList<Cvr>()
+    val previousSamples = mutableSetOf<Int>()
+    var rounds = mutableListOf<Round>()
+    var roundIdx = 1
+
+    var done = false
+    while (!done) {
+        val roundStopwatch = Stopwatch()
+        println("---------------------------")
+        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
+        val currRound = Round(roundIdx, indices, previousSamples.toSet())
+        rounds.add(currRound)
+        previousSamples.addAll(indices)
+        println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${roundStopwatch.elapsed(
+            TimeUnit.MILLISECONDS)} ms\n")
+
+        val sampledMvrs = indices.map { testMvrs[it] }
+        done = workflow.runAudit(indices, sampledMvrs, roundIdx)
+        println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+        prevMvrs = sampledMvrs
+        roundIdx++
+    }
+
+    rounds.forEach { println(it) }
+    workflow.showResults()
+    println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
 }

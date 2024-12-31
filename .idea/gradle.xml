@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/plots" />
+            <option value="$PROJECT_DIR$/rla" />
           </set>
         </option>
       </GradleProjectSettings>

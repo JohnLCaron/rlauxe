@@ -1,8 +1,7 @@
-package org.cryptobiotic.rlauxe.shangrla
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.readDominionBallotManifest
-import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType

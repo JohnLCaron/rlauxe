@@ -65,9 +65,9 @@ fun RaireContestAuditJson.import(Nc: Int, Np: Int) =
     RaireContestUnderAudit.make(
         this.contest,
         this.winner.toInt(),
-        Nc=Nc,
-        Np=Np,
-        this.eliminated .map { it.toInt() },
+        Nc = Nc,
+        Np = Np,
+        this.eliminated.map { it.toInt() },
         // this.expectedPollsNumber.toInt(),
         // this.expectedPollsPercent.toDouble(),
         this.assertions.map { it.import() },

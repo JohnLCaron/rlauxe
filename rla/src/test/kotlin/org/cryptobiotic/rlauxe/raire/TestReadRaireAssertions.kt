@@ -1,13 +1,12 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.workflow.tabulateRaireVotes
 import org.cryptobiotic.rlauxe.util.Prng
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestRaireAssertions {
+class TestReadRaireAssertions {
 
     val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
     val raireCvrs = readRaireBallots(cvrFile)

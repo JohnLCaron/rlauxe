@@ -4,9 +4,6 @@ plugins {
     id ("java-test-fixtures")
 }
 
-group = "org.cryptobiotic.rlauxe"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }
@@ -21,9 +18,9 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("org.apache.commons:commons-csv:1.4")
 
-    testFixturesImplementation(libs.bundles.egtest)
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.egtest)
+    testImplementation(testFixtures(project(":core")))
 }
 
 tasks.test {

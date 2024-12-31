@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.serialization)
     id ("java-test-fixtures")
 }
 
@@ -12,9 +11,7 @@ dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))
     implementation(libs.bull.result)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.json)
     implementation("org.apache.commons:commons-math3:3.6.1")
-    implementation("org.apache.commons:commons-csv:1.4")
 
     testFixturesImplementation(libs.bundles.egtest)
     testImplementation(kotlin("test"))

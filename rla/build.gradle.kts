@@ -4,12 +4,17 @@ plugins {
     id ("java-test-fixtures")
 }
 
+group = "org.cryptobiotic.rlauxe"
+version = "1.0-SNAPSHOT"
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(files("../libs/raire-java-1.0.2.jar"))
+    api(project(":core"))
+    implementation(files("../libs/raire-java-1.0.2-jar-with-dependencies.jar"))
+
     implementation(libs.bull.result)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

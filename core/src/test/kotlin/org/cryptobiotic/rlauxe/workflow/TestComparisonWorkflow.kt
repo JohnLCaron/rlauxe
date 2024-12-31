@@ -85,7 +85,7 @@ class TestComparisonWorkflow {
         val testCvrs = testData.makeCvrsFromContests()
         val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
+            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }

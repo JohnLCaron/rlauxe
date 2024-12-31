@@ -39,6 +39,11 @@ message ContestInfo {
   double minFraction = 6; // supermajority only. between 0 and 1.
 }
 
+message ElectionInfo {
+  string name = 1;
+  repeated ContestInfo contests = 2;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Election Information
 
@@ -68,9 +73,8 @@ message Contest {
   ContestInfo info = 1;
   repeated string reported_winners = 2; // B8
   repeated Votes reported_votes = 3; // B8
-
-  // assertions with their margins ??
-  // nphantoms ??
+  uint32 Nc = 4;
+  uint32 Np = 5;
 }
 
 message Votes {

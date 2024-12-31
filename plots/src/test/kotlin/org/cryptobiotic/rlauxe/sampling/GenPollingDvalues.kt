@@ -69,7 +69,7 @@ class GenPollingDvalues {
         val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
         val srts = results.map { it.makeSRT(it.testParameters["reportedMean"]?: 0.0, it.testParameters["reportedMeanDiff"]?: 0.0) }
 
-        val dirName = "/home/stormy/temp/dvalues"
+        val dirName = "/home/stormy/temp/polling"
         val filename = "PollingDvalues"
         val writer = SRTcsvWriter("$dirName/${filename}.cvs")
         writer.writeCalculations(srts)

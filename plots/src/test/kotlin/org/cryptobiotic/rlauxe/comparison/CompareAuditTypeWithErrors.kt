@@ -115,7 +115,7 @@ class CompareAuditTypeWithErrors {
     fun plotAuditTypesTF() {
         val cvrMeans = listOf(.501, .502, .503, .504, .505, .506, .507, .508, .51, .52, .53, .54)// , .6, .65, .7)
         // val cvrMeans = listOf(.506, .51, .52, .53, .54, .55, .575, .6, .65, .7)
-        val N = 10000
+        val N = 1000
         val eta0Factors = listOf(1.0, 1.25, 1.5, 1.75)
 
         val tasks = mutableListOf<AlphaMartTask>()
@@ -316,25 +316,23 @@ class CompareAuditTypeWithErrors {
         d: Int = 1000,
         silent: Boolean = true,
     ): Pair<SRT, SRT> {
-        val N = cvrs.size
         val theta = cvrMean + cvrMeanDiff // the true mean
         if (!silent) println(" N=${cvrs.size} theta=$theta d=$d diffMean=$cvrMeanDiff")
 
-        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), isComparison = false)
-
-        contestUA.makePollingAssertions()
-        val pollingAssertion = contestUA.pollingAssertions.first()
+        val contestUAp = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), isComparison = false)
+        contestUAp.makePollingAssertions()
+        val pollingAssertion = contestUAp.pollingAssertions.first()
         val pollingAssorter = pollingAssertion.assorter
 
-        contestUA.makeComparisonAssertions(cvrs)
-        val compareAssertion = contestUA.comparisonAssertions.first()
+        val contestUAc = ContestUnderAudit(makeContestsFromCvrs(cvrs).first(), isComparison = true)
+        contestUAc.makeComparisonAssertions(cvrs)
+        val compareAssertion = contestUAc.comparisonAssertions.first()
         val compareAssorter = compareAssertion.cassorter
-
         val comparisonSample = ComparisonWithErrors(cvrs, compareAssorter, theta)
         val mvrs = comparisonSample.mvrs
 
         val pollingResult = runAlphaMartRepeated(
-            drawSample = PollWithoutReplacement(contestUA.contest as Contest, mvrs, pollingAssorter),
+            drawSample = PollWithoutReplacement(contestUAp.contest as Contest, mvrs, pollingAssorter),
             // maxSamples = N,
             eta0 = cvrMean, // use the reportedMean for the initial guess
             d = d,

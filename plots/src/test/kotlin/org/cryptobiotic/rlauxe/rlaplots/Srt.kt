@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
+import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.sampling.SimulateSampleSizeTask
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.sampling.EstimationResult
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -41,6 +43,40 @@ data class SRT(val Nc: Int,
     val fuzzPct : Double = (testParameters["fuzzPct"] ?: 0.0)
     val isPolling : Boolean = (testParameters["polling"] != null)
     val hasStyles : Boolean = (testParameters["hasStyles"] != null)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SRT
+
+        if (Nc != other.Nc) return false
+        if (!doubleIsClose(reportedMargin, other.reportedMargin)) return false
+        if (!doubleIsClose(reportedMeanDiff, other.reportedMeanDiff)) return false
+        if (nsuccess != other.nsuccess) return false
+        if (ntrials != other.ntrials) return false
+        if (totalSamplesNeeded != other.totalSamplesNeeded) return false
+        if (stddev != other.stddev) return false
+        if (testParameters != other.testParameters) return false
+        if (percentHist != other.percentHist) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = Nc
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + reportedMeanDiff.hashCode()
+        result = 31 * result + nsuccess
+        result = 31 * result + ntrials
+        result = 31 * result + totalSamplesNeeded
+        result = 31 * result + stddev.hashCode()
+        result = 31 * result + testParameters.hashCode()
+        result = 31 * result + (percentHist?.hashCode() ?: 0)
+        return result
+    }
+
+
 }
 
 // TODO reportedMean, reportedMeanDiff in parameters, or in RunTestRepeatedResult

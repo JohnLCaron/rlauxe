@@ -6,16 +6,16 @@ import kotlin.test.Test
 
 import kotlin.collections.getOrPut
 
-// CANDIDATE FOR REFACTOR
+// CANDIDATE FOR REFACTOR: lost dataset
 
 // read raw data and make csv plots of polling with theta != eta0
 class PlotComparisonWithErrors {
     val nrepeat = 100
     // val reader = SRTreader("src/test/data/plots/CvrComparison/SRT$nrepeat.csv")
-    val reader = SRTcsvReader("/home/stormy/temp/PlotComparisonWithErrors/Full$nrepeat.csv")
+    val reader = SRTcsvReader("../core/src/test/data/plots/CvrComparison/SRT10.csv")
 
     // These are N vs theta plots for various values of d and MeanDiff
-    @Test
+    // @Test
     fun plotNTheta() {
         val srts = reader.readCalculations()
         val title = "N=10000 d=100 eta0=noerror"
@@ -25,7 +25,7 @@ class PlotComparisonWithErrors {
     }
 
     // These are N vs theta plots for various values of d and MeanDiff
-    @Test
+    // @Test
     fun plotNThetaForDD() {
         val allSrts = reader.readCalculations()
         val ddiffMap = makeDDiffMap(allSrts)
@@ -70,7 +70,7 @@ class PlotComparisonWithErrors {
 
     ////////////////////////////////////////////////////
     // These are d vs MeanDiff plots for various values of N, theta
-    @Test
+    // @Test
     fun plotDvsMeanDiff() {
         val allSrts = reader.readCalculations()
         val nThetaMap = makeNthetaMap(allSrts)

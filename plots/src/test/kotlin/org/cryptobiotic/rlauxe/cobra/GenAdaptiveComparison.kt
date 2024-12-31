@@ -108,7 +108,7 @@ class GenAdaptiveComparison {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/bet/plotAdaptiveComparison.csv")
+        val writer = SRTcsvWriter("/home/stormy/temp/betting/plotAdaptiveComparison.csv")
 
         val runner = RepeatedTaskRunner()
         val results =  runner.run(tasks, ntrials)

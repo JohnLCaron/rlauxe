@@ -1,5 +1,5 @@
 # rlauxe
-last update: 12/30/2024
+last update: 01/01/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -682,6 +682,8 @@ null mean is 1/2 once again, which reproduces the original assorter.
 SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample size. However, in multiple
 contest audits, additional ballots may be in the sample because they are needed by another contest. Since theres no 
 guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
+
+*** If the Audit gets below the risk limit, should you terminate? Or finish all the samples that have been audited?
 
 ### compute sample size
 

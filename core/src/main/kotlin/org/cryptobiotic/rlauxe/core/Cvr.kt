@@ -61,7 +61,7 @@ data class Cvr(
 }
 
 /** Mutable version of Cvr. sampleNum >= 0  */
-class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCard {
+data class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCard {
     var sampled = false //  # is this CVR in the sample?
 
     val id = cvr.id

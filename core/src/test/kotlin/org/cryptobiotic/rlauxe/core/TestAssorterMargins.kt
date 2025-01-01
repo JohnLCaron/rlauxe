@@ -19,7 +19,7 @@ class TestAssorterMargins {
 
     @Test
     fun testProblem() {
-        val test = MultiContestTestData(16, 13, 27703, 0.02..<0.033)
+        val test = MultiContestTestData(16, 13, 27703, 0.02..0.033)
         test.contests.forEach { contest ->
             val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
             val cvrs = test.makeCvrsFromContests()
@@ -37,7 +37,7 @@ class TestAssorterMargins {
                 Arb.int(min = 5, max = 15),
                 Arb.int(min = 10000, max = 20000),
             ) { ncontests, nstyles, Nc ->
-                val test = MultiContestTestData(ncontests, nstyles, Nc, 0.011..<0.033)
+                val test = MultiContestTestData(ncontests, nstyles, Nc, 0.011..0.033)
                 val cvrs = test.makeCvrsFromContests()
 
                 try {

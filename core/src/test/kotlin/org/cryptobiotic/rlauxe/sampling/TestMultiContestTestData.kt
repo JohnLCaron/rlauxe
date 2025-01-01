@@ -30,9 +30,9 @@ class TestMultiContestTestData {
         val N = 50000
         val ncontests = 40
         val nbs = 11
-        val marginRange= 0.01 ..< 0.04
-        val underVotePct= 0.234 ..< 0.345
-        val phantomRange= 0.001 ..< 0.01
+        val marginRange= 0.01 .. 0.04
+        val underVotePct= 0.234 .. 0.345
+        val phantomRange= 0.001 .. 0.01
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
@@ -90,9 +90,9 @@ class TestMultiContestTestData {
         val N = 50000
         val ncontests = 1
         val nbs = 1
-        val marginRange= 0.04 ..< 0.04
-        val underVotePct= 0.20 ..< 0.20
-        val phantomRange= 0.05 ..< 0.05
+        val marginRange= 0.04 .. 0.04
+        val underVotePct= 0.20 .. 0.20
+        val phantomRange= 0.05 .. 0.05
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
@@ -127,9 +127,9 @@ class TestMultiContestTestData {
         val N = 50000
         val ncontests = 1
         val nbs = 1
-        val marginRange= 0.01 ..< 0.01
-        val underVotePct= 0.20 ..< 0.20
-        val phantomRange= 0.005 ..< 0.005
+        val marginRange= 0.01 .. 0.01
+        val underVotePct= 0.20 .. 0.20
+        val phantomRange= 0.005 .. 0.005
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()

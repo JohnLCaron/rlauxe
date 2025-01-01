@@ -9,7 +9,6 @@ repositories {
 
 dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))
-    implementation(libs.bull.result)
     implementation(libs.kotlinx.coroutines.core)
     implementation("org.apache.commons:commons-math3:3.6.1")
 

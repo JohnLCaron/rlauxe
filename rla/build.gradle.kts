@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.bull.result)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
-    implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("org.apache.commons:commons-csv:1.4")
 
     testImplementation(kotlin("test"))

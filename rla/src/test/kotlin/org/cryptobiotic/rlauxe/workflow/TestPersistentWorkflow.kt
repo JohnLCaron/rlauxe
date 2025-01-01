@@ -1,24 +1,35 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.util.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 class TestPersistentWorkflow {
+    val topdir = "/home/stormy/temp/persist/testPersistentWorkflow"
 
     @Test
     fun testPersistentWorkflow() {
+        val publish = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = 0.01, ntrials=10)
-        val N = 50000
+        val N = 5000
         val testData = MultiContestTestData(11, 4, N)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
         contests.forEach{ println("  $it")}
         println()
+
+        val electionInit = ElectionInit(
+            "class TestPersistentWorkflow {\n",
+            contests.map { it.info }
+        )
+        val electionInitJson = electionInit.publishJson()
+        writeElectionInitJsonFile(electionInitJson, publish.electionInitFile())
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
@@ -27,13 +38,15 @@ class TestPersistentWorkflow {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
+        writeCvrsJsonFile(workflow.cvrsUA, publish.cvrsFile())
+
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
-        runPersistentWorkflow(workflow, testMvrs, nassertions)
+        runPersistentWorkflow(publish, workflow, testMvrs, nassertions)
     }
 
 }
 
-fun runPersistentWorkflow(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
+fun runPersistentWorkflow(publish: Publisher, workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var prevMvrs = emptyList<Cvr>()
@@ -46,6 +59,8 @@ fun runPersistentWorkflow(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nas
         val roundStopwatch = Stopwatch()
         println("---------------------------")
         val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
+        writeSampleIndicesJsonFile(indices, publish.sampleIndicesFile(roundIdx))
+
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
         previousSamples.addAll(indices)
@@ -53,6 +68,9 @@ fun runPersistentWorkflow(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nas
 
         val sampledMvrs = indices.map { testMvrs[it] }
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
+        val auditRound = AuditRound(roundIdx, workflow.contestsUA, done)
+        writeAuditRoundJsonFile(auditRound, publish.auditRoundFile(roundIdx))
+
         println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         prevMvrs = sampledMvrs
         roundIdx++

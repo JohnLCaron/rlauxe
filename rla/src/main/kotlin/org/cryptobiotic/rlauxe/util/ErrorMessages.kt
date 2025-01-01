@@ -90,8 +90,3 @@ class Indent(val level: Int) {
         return blanks.toString()
     }
 }
-
-fun Double.sigfig(minSigfigs: Int = 4): String {
-    val df = "%.${minSigfigs}G".format(this)
-    return if (df.startsWith("0.")) df.substring(1) else df
-}

@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterFunction {
@@ -210,7 +209,6 @@ data class AuditRoundResult( val roundIdx: Int,
                         val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
                         val pvalue: Double,       // last pvalue when testH0 terminates
                         val status: TestH0Status, // testH0 status
-                        // val calcAssortMargin: Double, // debug
     )
 
 open class Assertion(
@@ -227,7 +225,7 @@ open class Assertion(
     var estSampleSize = 0   // estimated sample size for current round
 
     // these values are set during runAudit()
-    var status = TestH0Status.NotStarted
+    var status = TestH0Status.InProgress
     var proved = false
     var round = 0           // round when set to proved or disproved
 

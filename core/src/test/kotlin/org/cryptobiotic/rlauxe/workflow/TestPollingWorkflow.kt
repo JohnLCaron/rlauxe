@@ -23,10 +23,10 @@ class TestPollingWorkflow {
         val N = 100000
         val ncontests = 11
         val nbs = 4
-        val marginRange= 0.05 ..< 0.10
-        val underVotePct= 0.02 ..< 0.02
-        val phantomPct= 0.005 ..< 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomPct)
+        val marginRange= 0.05 .. 0.10
+        val underVotePct= 0.02..0.02
+        val phantomPct= 0.005..0.005
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
         val contests: List<Contest> = test.contests
 
         println("Start testPollingNoStyle N=$N")
@@ -39,7 +39,7 @@ class TestPollingWorkflow {
 
         val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
+            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, emptyList()), N)
         runWorkflow(workflow, testMvrs)
@@ -58,10 +58,10 @@ class TestPollingWorkflow {
         val N = 50000
         val ncontests = 11
         val nbs = 4
-        val marginRange= 0.05 ..< 0.10
-        val underVotePct= 0.02 ..< 0.02
-        val phantomPct= 0.005 ..< 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomPct)
+        val marginRange= 0.05 .. 0.10
+        val underVotePct= 0.02 .. 0.02
+        val phantomPct= 0.005 .. 0.005
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
 
         val contests: List<Contest> = test.contests
         contests.forEachIndexed { idx, contest ->
@@ -82,7 +82,7 @@ class TestPollingWorkflow {
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
         val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
                 // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-                else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct)
+                else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, test.ballotStyles), N)
         runWorkflow(workflow, testMvrs)
@@ -93,10 +93,10 @@ class TestPollingWorkflow {
         val N = 50000
         val ncontests = 1
         val nbs = 1
-        val marginRange= 0.05 ..< 0.05
-        val underVotePct= 0.05 ..< 0.05
-        val phantomPct= 0.005 ..< 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange=marginRange, underVotePct=underVotePct, phantomPct=phantomPct)
+        val marginRange= 0.05 .. 0.05
+        val underVotePct= 0.05 .. 0.05
+        val phantomPct= 0.005 .. 0.005
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
         test.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
             val fcontest = test.fcontests[idx]

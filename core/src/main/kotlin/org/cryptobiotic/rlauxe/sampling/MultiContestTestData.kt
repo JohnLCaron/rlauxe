@@ -18,9 +18,9 @@ data class MultiContestTestData(
     val ncontest: Int,
     val nballotStyles: Int,
     val totalBallots: Int, // including undervotes but not phantoms
-    val marginRange: OpenEndRange<Double> = 0.01..< 0.03,
-    val underVotePct: OpenEndRange<Double> = 0.01..< 0.30, // needed to set Nc
-    val phantomPct: OpenEndRange<Double> = 0.00..< 0.005, // needed to set Nc
+    val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
+    val underVotePct: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
+    val phantomPct: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
 ) {
     // generate with ballotStyles; but if hasStyles = false, then these are not visible
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
@@ -39,9 +39,9 @@ data class MultiContestTestData(
         fcontests = List(ncontest) { it }.map {// id same as index
             val ncands = max(Random.nextInt(5), 2)
             ContestTestData(it, ncands,
-                marginRange.start + if (marginRange.isEmpty()) 0.0 else Random.nextDouble(marginRange.endExclusive - marginRange.start),
-                underVotePct.start + if (underVotePct.isEmpty()) 0.0 else Random.nextDouble(underVotePct.endExclusive - underVotePct.start),
-                phantomPct.start + if (phantomPct.isEmpty()) 0.0 else Random.nextDouble(phantomPct.endExclusive - phantomPct.start),
+                marginRange.start + if (marginRange.isEmpty()) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
+                underVotePct.start + if (underVotePct.isEmpty()) 0.0 else Random.nextDouble(underVotePct.endInclusive - underVotePct.start),
+                phantomPct.start + if (phantomPct.isEmpty()) 0.0 else Random.nextDouble(phantomPct.endInclusive - phantomPct.start),
                 // TODO ChoiceFunction ??
             )
         }

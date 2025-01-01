@@ -175,7 +175,7 @@ open class ContestUnderAudit(
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
     var done = false
-    var status = TestH0Status.NotStarted // or its own enum ??
+    var status = TestH0Status.InProgress // or its own enum ??
     var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
 
     // should only be used for testing i think

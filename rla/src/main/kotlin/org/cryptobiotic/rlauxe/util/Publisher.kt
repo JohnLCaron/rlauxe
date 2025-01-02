@@ -8,6 +8,7 @@ class Publisher(val topdir: String) {
         validateOutputDir(Path.of(topdir), ErrorMessages("Publisher"))
     }
 
+    fun auditConfigFile() = "$topdir/audirConfig.json"
     fun electionInitFile() = "$topdir/electionInit.json"
     fun cvrsFile() = "$topdir/cvrs.json"
 

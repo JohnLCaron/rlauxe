@@ -16,6 +16,8 @@ class TestPersistentWorkflow {
     fun testPersistentWorkflow() {
         val publish = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = 0.01, ntrials=10)
+        writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
+
         val N = 5000
         val testData = MultiContestTestData(11, 4, N)
 

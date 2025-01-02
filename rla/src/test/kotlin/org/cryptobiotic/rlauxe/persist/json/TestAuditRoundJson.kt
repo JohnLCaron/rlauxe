@@ -88,7 +88,7 @@ class TestAuditRoundJson {
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
         runPersistentWorkflow(publish, workflow, testCvrs, nassertions)
         val target = AuditRound(1, workflow.contestsUA, true)
-/*
+
         val nrounds = 1
         for (round in 1..nrounds) {
             val result: Result<AuditResult, ErrorMessages> = readAuditRoundJsonFile(publish.auditRoundFile(round))
@@ -98,6 +98,5 @@ class TestAuditRoundJson {
             compareAuditResult(target, roundtrip)
         }
 
- */
     }
 }

@@ -155,12 +155,17 @@ class Contest(
         val reportedMargin = (winnerVotes - loserVotes) / Nc.toDouble()
         return reportedMargin
     }
+
+    companion object {
+        fun makeWithCandidateNames(info: ContestInfo, votesByName: Map<String, Int>, Nc: Int, Np: Int) =
+            Contest(info, votesByName.map { (key, value) -> Pair(info.candidateNames[key]!!, value) }.toMap(), Nc, Np)
+    }
 }
 
 /** Mutable form of Contest. */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    val isComparison: Boolean = true,
+    val isComparison: Boolean = true, // TODO change to AuditType
     val hasStyle: Boolean = true,
 ) {
     val id = contest.info.id

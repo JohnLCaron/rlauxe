@@ -1,0 +1,118 @@
+Suite Notes
+
+https://github.com/pbstark/CORLA18
+
+2 Stratified audits
+
+Stratified sampling involves partitioning a population into non-overlapping groups and drawing independent random samples from those groups. The method we develop here can be used with any test statistic, and test statistics in different strata need not be the same. which is key to combining audits of ballots cast using diverse voting technologies.
+
+overstatement error 	an error that caused the margin between any reported winner and any reported loser to appear larger than it really was. 
+
+understatement error 	an error that caused the margin between every reported winner and every reported loser to appear to be smaller than it really was. 
+
+w 	reported winner  
+ℓ 	reported loser
+Vw 	total number of reported votes for candidate w
+Vℓ	total number of reported votes for candidate ℓ
+Vwℓ 	Vw − Vℓ > 0 the contest-wide margin (in votes) of w over ℓ.
+S 	the strata
+V_wℓ,s 	Vw − Vℓ in stratum s
+Awℓ 	the actual margin that a full hand count would show. 
+	Reported winner w really beat reported loser ℓ if and only if Awℓ > 0
+A_wℓ,s 	denote the actual margin in stata s
+ω_wℓ,s 	V_wℓ,s − A_wℓ,s  the overstatement of the margin of w over ℓ in stratum s.
+ω_wℓ 	Sum(ω_wℓ,s) < Vwℓ .
+
+
+An RLA is a test of the hypothesis that the outcome is wrong, that is, that w did not really beat ℓ: 
+	Sum(ω_wℓ,s) >= Vwℓ
+The null is true if and only if there exists some S-tuple of real numbers (λ_s)s=1..S with Sum(λ_s) = 1 such that 		
+	ω_wℓ,s ≥ λ_s * Vwℓ for all s
+Thus if we can reject the conjunction hypothesis Intersection{ω_wℓ,s ≥ λ_s * Vwℓ} for all s
+at significance level α for all (λ_s) with Sum(λ_s) = 1, we can stop the audit, and the risk limit will be α.
+
+Set λ_s = ω_wℓ,s / Sum_t(ω_wℓ,t)
+if ω_wℓ > Vwℓ, then ω_wℓ,s = λ_s * ω_wℓ ≥ λ_s * Vwℓ for all s.
+
+
+2.1 Fisher’s combination method
+2.2 Maximizing Fisher’s combined P -value for S = 2
+
+3 Auditing cross-jurisdictional contests
+
+SUITE makes possible a “hybrid” RLA that keeps the advantages of ballot-level comparison audits in CVR counties but does not require major changes to how no-CVR counties audit, nor major changes to RLATool. The key is to use stratified sampling with two strata: ballots cast in CVR counties and those cast in no-CVR counties.
+
+3.1 Comparison audits of overstatement quotas
+3.2 Ballot-polling audits of overstatement quotas
+
+4. Numerical examples
+
+5. Discussion
+
+The null hypothesis is a union over all partitions of outcome-changing error across strata.
+The hypothesis is rejected if the maximum P -value over all such partitions is
+sufficiently small. Each possible partition yields an intersection hypothesis, tested
+by combining P -values from different strata using Fisher’s combining function
+(or a suitable replacement).
+
+===================
+Sweeter Notes
+
+Suite was written before SHANGRLA and ALPHA
+https://github.com/spertus/sweeter-than-SUITE (R code)
+
+We combine the union-intersection tests in SUITE, the reduction of RLAs to testing whether the means of a collection of lists are all ≤ 1/2 of SHANGRLA, and the nonnegative supermartingale (NNSM) tests in ALPHA to improve the efficiency and flexibility of stratified RLAs.
+
+3 Stratified audits
+
+3.1 Assorters and assertions
+
+In a stratified audit, the population of ballot cards is partitioned into K disjoint strata. 
+Stratum k contains Nk ballot cards, so N = Sumk(Nk) . 
+The weight of stratum k is wk := Nk /N ; the weight vector is w := [w1 , ..., wK]T
+
+For each assorter A there is a set of assorter values {xi} i=1..N
+Each assorter may have its own upper bound uk in stratum k.
+The true mean of the assorter values in stratum k is µk ; µ := [µ1 , ..., µK]T
+The overall assorter mean is µ = wT * µ.
+
+Let θ = [θ1 , ..., θK]T with 0 ≤ θk ≤ uk . 
+A single intersection null is of the form µ ≤ θ, i.e., Intersection {µk ≤ θk} over k. 
+The union-intersection form of the complementary null that the outcome is incorrect is:
+
+eq (1)   H0 : Union ( Intersection {µk ≤ θk} over k ) over Assorters
+
+From stratum k we have nk samples X := {X_1,k , ..., X_nk,k } drawn by simple random sampling, with or without replacement, independently across strata.
+
+
+3.2 Stratified comparison audits
+
+3.3 Union-intersection tests
+
+3.4 Combining Functions
+
+3.5 Intersection supermartingales
+
+3.6 Within-stratum P-values
+
+3.7 Sequential stratum selection
+
+4 Evaluations
+4.1 Combination and allocation rules
+4.2 Comparison to SUITE
+4.3 A highly stratified audit
+
+5 Discussion
+
+Our general recommendation for hybrid audits is: (i) use an intersection
+supermartingale test with (ii) adaptive stratum selection and (iii) ALPHA-UB (or
+another method that can exploit low sample variance to bet more aggressively) as
+the risk-measuring function in the comparison stratum and (iv) ALPHA-ST (or a
+method that “learns” the population mean) as the risk-measuring function in the
+ballot-polling stratum. When the number of strata is large, audits can leverage the
+log-linear form of the EB supermartingale to quickly find the maximum P -value
+
+A Computational Details
+
+
+

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/01/2025
+last update: 01/11/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -620,24 +620,36 @@ contest and use it in the estimation and also the betting strategy.
 
 Should use phantomPct for estimated 1-vote overstatement error rate estimate.
 
+-------------------
+From OneAudit, p 9:
+
+    The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest; 
+    the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
+
+1 - 5218/5294 = .0143
+1 - 22082/22372 = .0129
+
 ## Stratified audits using OneAudit (TODO)
 
 Deal with one contest at a time for now.
 
+OneAudit, 2.3 pp 5-7:
 ````
 Let bi denote the true votes on the ith ballot card; there are N ballots in all. 
 Let ci denote the voting system’s interpretation of the ith card. Suppose we
 have a CVR ci for every ballot card whose index i is in C. The cardinality of C is
 |C|. Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g} g=1..G for
-which reported assorter subtotals are available. For instance Gg might comprise
+which reported assorter subtotals are available. For instance G_g might comprise
 all ballots for which no CVR is available or all ballots cast in a particular precinct.
 
-A(bi) is the assort value of the ith ballot, Ā(b) its average value = Sum(A(bi))/N over all ballots
+A(bi) is the assort value of the ith ballot, Ā(b) its average value = Sum(A(bi))/N over all ballots.
 A(ci) is the assort value of the ith CVR, Ā(c) its average value = Sum(A(ci))/N over all ballots (note using N) 
-With subscript its just over that set Ā_Gg(c) = Sum(A(ci)) / |Gg|, ci in Gg.
+With a subscript, its the sum just over that set, ie Ā_Gg(c) = Sum(A(ci)) / |G_g|, ci in G_g.
 ````
 
-Using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that give the same assorter batch subtotals.
+Using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that give the same assorter 
+batch subtotals.
+
 ````
     v ≡ 2Ā(c) − 1, the reported _assorter margin_, aka the _diluted margin_.
 
@@ -663,7 +675,10 @@ statement assorters across batches and re-scaling so that the null mean is still
 1/2) and by starting with a sample size that is expected to be large enough to
 confirm the contest outcome if the reported results are correct.
 ````
-See "Auditing heterogenous voting systems" Section 4 for comparision to SUITE
+
+Section 4: Auditing heterogenous voting systems: When the voting system can report linked CVRs for some but not all cards.
+
+See "Auditing heterogenous voting systems" Section 4 for comparision to SUITE:
 ````
 The statistical tests used in RLAs are not affine equivariant because
 they rely on a priori bounds on the assorter values. The original assorter values

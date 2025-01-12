@@ -195,7 +195,7 @@ fun simulateSampleSizePollingAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val margin = assorter.reportedMargin()
-    val simContest = ContestSimulation(contest, 0.0) // TODO pctUndervote
+    val simContest = ContestSimulation(contest)
     val cvrs = simContest.makeCvrs()
 
     val sampler = if (auditConfig.fuzzPct == null) {

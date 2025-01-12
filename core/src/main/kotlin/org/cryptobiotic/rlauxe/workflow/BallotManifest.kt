@@ -69,6 +69,8 @@ class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) : BallotOr
 // eligible to vote in the same set of contests, ballots for the two precincts are considered to
 // be of two different styles.) Here, we use card style to refer to the set of contests on a given
 // ballot card, and CSD to refer to card-style data for an election. (MoreStyle p.2)
+
+// Auditors compare upper bounds (possibly by style) to numbers in manifest (PubliclyVerifiable)
 data class BallotStyle(
     val name: String,
     val id: Int,

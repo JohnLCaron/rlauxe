@@ -37,9 +37,9 @@ class TestReadRaireAssertions {
             assertTrue(0.5 < cassertion.avgCvrAssortValue)
             assertTrue(0.0 < cassertion.cmargin)
             cvrs.forEach {
-                assertTrue(cassertion.cassorter.assorter.assort(it) in 0.0..cassertion.cassorter.assorter.upperBound())
-                if (!it.phantom) assertEquals(cassertion.cassorter.noerror, cassertion.cassorter.bassort(it, it))
-                else assertEquals(cassertion.cassorter.noerror/2, cassertion.cassorter.bassort(it, it))
+                assertTrue(cassertion.cassorter.assorter().assort(it) in 0.0..cassertion.cassorter.assorter().upperBound())
+                if (!it.phantom) assertEquals(cassertion.cassorter.noerror(), cassertion.cassorter.bassort(it, it))
+                else assertEquals(cassertion.cassorter.noerror()/2, cassertion.cassorter.bassort(it, it))
             }
         }
     }

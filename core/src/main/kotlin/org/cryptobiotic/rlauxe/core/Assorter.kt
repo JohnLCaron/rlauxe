@@ -64,7 +64,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
     override fun reportedMargin() = reportedMargin
 
     companion object {
-        fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>?=null): PluralityAssorter {
+        fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>? = null): PluralityAssorter {
             val useVotes = if (votes != null) votes else (contest as Contest).votes
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
@@ -110,6 +110,16 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 
 /////////////////////////////////////////////////////////////////////////////////
 
+interface ComparisonAssorterIF {
+    fun avgCvrAssortValue(): Double
+    fun margin(): Double
+    fun noerror(): Double
+    fun upperBound(): Double
+
+    fun assorter(): AssorterFunction
+    fun bassort(mvr: Cvr, cvr:Cvr): Double
+}
+
 /** See SHANGRLA Section 3.2 */
 data class ComparisonAssorter(
     val contest: ContestIF,
@@ -117,7 +127,7 @@ data class ComparisonAssorter(
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value != reportedMargin
     val hasStyle: Boolean = true, // TODO could be on the Contest ??
     val check: Boolean = true, // TODO get rid of
-) {
+) : ComparisonAssorterIF {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
@@ -129,6 +139,12 @@ data class ComparisonAssorter(
         }
     }
 
+    override fun avgCvrAssortValue() = avgCvrAssortValue
+    override fun margin() = margin
+    override fun noerror() = noerror
+    override fun upperBound() = upperBound
+    override fun assorter() = assorter
+
     fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
         val mean = cvrPairs.filter{ it.first.hasContest(contest.id) }
             .map { bassort(it.first, it.second) }.average()
@@ -136,7 +152,7 @@ data class ComparisonAssorter(
     }
 
     // B(bi, ci)
-    fun bassort(mvr: Cvr, cvr:Cvr): Double {
+    override fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
         //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
@@ -232,12 +248,12 @@ open class Assertion(
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(margin)}"
 }
 
-class ComparisonAssertion(
+open class ComparisonAssertion(
     contest: ContestIF,
-    val cassorter: ComparisonAssorter,
-): Assertion(contest, cassorter.assorter) {
-    val avgCvrAssortValue = cassorter.avgCvrAssortValue
-    val cmargin = cassorter.margin
+    val cassorter: ComparisonAssorterIF,
+): Assertion(contest, cassorter.assorter()) {
+    val avgCvrAssortValue = cassorter.avgCvrAssortValue()
+    val cmargin = cassorter.margin()
 
-    override fun toString() = "${cassorter.assorter.desc()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"
+    override fun toString() = "${cassorter.assorter().desc()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"
 }

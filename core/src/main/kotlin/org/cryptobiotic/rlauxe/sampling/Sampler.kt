@@ -67,7 +67,7 @@ class PollWithoutReplacement(
 class ComparisonWithoutReplacement(
     val contestUA: ContestIF,
     val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    val cassorter: ComparisonAssorter,
+    val cassorter: ComparisonAssorterIF,
     val allowReset: Boolean,
 ): Sampler {
     val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }

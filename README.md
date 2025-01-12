@@ -629,7 +629,7 @@ From OneAudit, p 9:
 1 - 5218/5294 = .0143
 1 - 22082/22372 = .0129
 
-## Stratified audits using OneAudit (TODO)
+## Stratified audits using OneAudit (In Progress)
 
 Deal with one contest at a time for now.
 

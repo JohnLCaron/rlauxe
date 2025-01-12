@@ -29,28 +29,28 @@ class TestComparisonSamplerWithRaire {
         contestUA.makeComparisonAssertions(cvrs)
 
         contestUA.comparisonAssertions.forEach { assert ->
-            run(cvrs, contestUA, assert.cassorter)
+            run(cvrs, contestUA, assert.cassorter as ComparisonAssorter)
         }
     }
 
-    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
-        println("\n${assorter.assorter.desc()}")
+    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ComparisonAssorter) {
+        println("\n${cassorter.assorter().desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA.contest, assorter, ComparisonErrorRates.standard)
+        val sampler = ComparisonSimulation(cvrs, contestUA.contest, cassorter, ComparisonErrorRates.standard)
 
-        val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
-        val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()
-        val sampleMvrs = sampler.mvrs.map { assorter.assorter.assort(it) }.average()
+        val orgCvrs = cvrs.map { cassorter.assorter().assort(it) }.average()
+        val sampleCvrs = sampler.cvrs.map { cassorter.assorter().assort(it) }.average()
+        val sampleMvrs = sampler.mvrs.map { cassorter.assorter().assort(it) }.average()
         println(" orgCvrs=${df(orgCvrs)} sampleCvrs=${df(sampleCvrs)} sampleMvrs=${df(sampleMvrs)}")
 
-        val before = cvrs.map { assorter.bassort(it, it) }.average()
+        val before = cvrs.map { cassorter.bassort(it, it) }.average()
         sampler.reset()
         val welford = Welford()
         repeat(cvrs.size) {
             welford.update(sampler.sample())
         }
 
-        println(" bassort expectedNoerror=${df(assorter.noerror)} noerror=${df(before)} sampleMean = ${df(welford.mean)}")
+        println(" bassort expectedNoerror=${df(cassorter.noerror())} noerror=${df(before)} sampleMean = ${df(welford.mean)}")
     }
 
 }

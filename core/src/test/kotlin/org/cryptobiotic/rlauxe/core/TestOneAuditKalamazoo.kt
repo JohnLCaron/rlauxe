@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.sampling.makeCvr
 import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -100,32 +101,24 @@ class TestOneAuditKalamazoo {
         )
         assertTrue(doublesAreClose(sam, expectedSam, doublePrecision))
 
-        // do the same thing using real polling assorters
-        val minNoCvrAssorter = strataNocvr.makeContestUnderAudit(emptyList()).minAssertion()!!.assorter
-        println(minNoCvrAssorter)
-        assertEquals(assorterMeanNoCvr, minNoCvrAssorter.reportedMargin(), doublePrecision)
-        assertEquals(0.5682996602896477, minNoCvrAssorter.reportedMargin(), doublePrecision)
-
-        val minAllAssorter = contest.makeContestUnderAudit(emptyList()).minAssertion()!!.assorter
+        // do the same thing using real assorters
+        val testCvrs = contest.makeTestCvrs()
+        val contestUA = contest.makeContestUnderAudit(testCvrs)
+        val minAllAsserter = contestUA.minAssertion()
+        assertNotNull(minAllAsserter)
+        val minAllAssorter = minAllAsserter!!.assorter
         println(minAllAssorter)
         assertEquals(assorterMeanAll, minAllAssorter.reportedMargin(), doublePrecision)
         assertEquals(0.5468806477264513, minAllAssorter.reportedMargin(), doublePrecision)
 
-        /* do the same thing using real OneAudit assorters
-        val minNoCvrAssorter = strataNocvr.makeContestUnderAudit(emptyList()).minAssertion()!!.assorter
-        println(minNoCvrAssorter)
-        assertEquals(assorterMeanNoCvr, minNoCvrAssorter.reportedMargin(), doublePrecision)
-        assertEquals(0.5682996602896477, minNoCvrAssorter.reportedMargin(), doublePrecision)
-
-        val minAllAssorter = contest.makeContestUnderAudit(emptyList()).minAssertion()!!.assorter
-        println(minAllAssorter)
-        assertEquals(assorterMeanAll, minAllAssorter.reportedMargin(), doublePrecision)
-        assertEquals(0.5468806477264513, minAllAssorter.reportedMargin(), doublePrecision) */
+        val minAssorterMargin = minAllAssorter.calcAssorterMargin(contest.id, testCvrs)
+        println(" calcAssorterMargin for min = $minAssorterMargin")
+        assertEquals(0.5468806477264513, minAssorterMargin, doublePrecision)
     }
 }
 
 // from oa_polling.ipynb
-fun makeContestKalamazoo(): ContestOA { // TODO set margin
+fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
 
     // the candidates
     val info = ContestInfo(
@@ -163,12 +156,12 @@ fun makeContestKalamazoo(): ContestOA { // TODO set margin
     //    val votes: Map<Int, Int>,   // candidateId -> nvotes
     //    val Nc: Int,  // upper limit on number of ballots in this starata for this contest
     //    val Np: Int,  // number of phantom ballots in this starata for this contest
-    val strata = mutableListOf<ContestStratum>()
+    val strata = mutableListOf<OneAuditStratum>()
     repeat(2) { idx ->
         strata.add(
-            ContestStratum(
+            OneAuditStratum(
                 stratumNames[idx],
-                if (idx == 0) AuditType.CARD_COMPARISON else AuditType.POLLING,
+                hasCvrs = (idx == 0),
                 info,
                 candidates.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
                 Nc = stratumSizes[idx],
@@ -176,7 +169,7 @@ fun makeContestKalamazoo(): ContestOA { // TODO set margin
             )
         )
     }
-    return ContestOA(info, strata)
+    return OneAuditContest(info, strata)
 }
 
 fun makeCvrs() { // TODO set proportion

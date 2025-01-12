@@ -312,7 +312,7 @@ class PlotSampleSizeEstimates : AbstractProjectConfig() {
                 tasks.add(
                     BettingTask(
                         "fuzzPct = $fuzzPct, margin = $margin", auditConfig,
-                        sampleFn, margin, minAssort.noerror, minAssort.upperBound, N, N,
+                        sampleFn, margin, minAssort.noerror(), minAssort.upperBound(), N, N,
                         ComparisonErrorRates.getErrorRates(contestUA.ncandidates, fuzzPct),
                         otherParameters,
                     )
@@ -387,7 +387,7 @@ class AlphaTask(val name: String,
 class ComparisonTask(val name: String,
                      val auditConfig: AuditConfig,
                      val contestUA: ContestUnderAudit,
-                     val cassort: ComparisonAssorter,
+                     val cassort: ComparisonAssorterIF,
                      val cvrs: List<Cvr>,
                      val moreParameters: Map<String, Double> = emptyMap(),
 ): ConcurrentTask {

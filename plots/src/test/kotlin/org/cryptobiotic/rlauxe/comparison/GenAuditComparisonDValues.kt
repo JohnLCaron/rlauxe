@@ -30,14 +30,14 @@ class GenAuditComparisonDValues {
         val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
         val assertion = contestUA.comparisonAssertions.first()
 
-        val cvrSampler = ComparisonNoErrors(cvrs, assertion.cassorter)
+        val cvrSampler = ComparisonNoErrors(info.id, cvrs, assertion.cassorter)
         val result = runAlphaMartRepeated(
             drawSample = cvrSampler,
             // maxSamples = N,
             eta0 = cvrSampler.sampleMean(),
             d = 100,
             ntrials = 100,
-            upperBound = assertion.cassorter.upperBound
+            upperBound = assertion.cassorter.upperBound()
         )
         println(result)
     }

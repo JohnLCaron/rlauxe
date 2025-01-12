@@ -3,9 +3,11 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 import kotlin.test.Test
 
 class TestOneAuditWorkflow {
+    val showSamples = false
 
     @Test
     fun testOneAuditContest() {
@@ -16,10 +18,10 @@ class TestOneAuditWorkflow {
         val underVotePct= 0.05 .. 0.05
         val phantomPct= 0.005 .. 0.005
 
-        val contestOA = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01)
-        val testCvrs = contestOA.makeCvrs() // fake
+        val contestOA = makeContestOA(23000, 22000, cvrPercent = .70, undervotePercent=.01)
+        val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
 
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = 12356667490L, quantile=.80, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = Random.nextLong(), quantile=.80, fuzzPct = null, ntrials=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
         runOneAuditWorkflow(workflow, testCvrs)
@@ -43,7 +45,6 @@ class TestOneAuditWorkflow {
             println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             stopwatch.start()
 
-            println("indices=$indices")
             val sampledMvrs = indices.map {
                 testMvrs[it]
             }
@@ -52,11 +53,12 @@ class TestOneAuditWorkflow {
             var nocvrs = 0
             println("sampledMvrs")
             sampledMvrs.forEachIndexed { idx, cvr ->
-                println("  $idx ${indices[idx]} = $cvr")
+                if (showSamples) println("  $idx ${indices[idx]} = $cvr")
                 if (cvr.id == "noCvr") nocvrs++
             }
-            println(" nocvrs=${df(nocvrs/nsamples)} withCvrs=${df((nsamples-nocvrs)/nsamples)}")
+            println(" nsamples=$nsamples nocvrs=${df(nocvrs/nsamples)} withCvrs=${df((nsamples-nocvrs)/nsamples)}")
 
+            // TODO were not yet using the ONE algorithm, just comparisions that always agree
             done = workflow.runAudit(indices, sampledMvrs, roundIdx)
             println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs

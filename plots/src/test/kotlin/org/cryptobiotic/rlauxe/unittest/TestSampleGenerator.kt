@@ -31,16 +31,16 @@ class TestSampleGenerator {
         repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
             val contest = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
-            val bassorter = contest.comparisonAssertions.first().cassorter
-            assertEquals(.02, bassorter.margin, doublePrecision)
-            assertEquals(0.5050505050505051, bassorter.noerror, doublePrecision)
-            assertEquals(1.0101010101010102, bassorter.upperBound, doublePrecision)
+            val bassorter = contest.comparisonAssertions.first().cassorter as ComparisonAssorter
+            assertEquals(.02, bassorter.margin(), doublePrecision)
+            assertEquals(0.5050505050505051, bassorter.noerror(), doublePrecision)
+            assertEquals(1.0101010101010102, bassorter.upperBound(), doublePrecision)
 
             val cs0 = ComparisonWithErrors(cvrs, bassorter, cvrMean)
-            assertEquals(bassorter.noerror, cs0.sampleMean, doublePrecision)
+            assertEquals(bassorter.noerror(), cs0.sampleMean, doublePrecision)
 
             val cs = ComparisonWithErrors(cvrs, bassorter, cvrMean + meanDiff)
-            val assorter = bassorter.assorter
+            val assorter = bassorter.assorter()
             val cvrVotes = cs.cvrs.map { assorter.assort(it) }.sum()
             val mvrVotes = cs.mvrs.map { assorter.assort(it) }.sum()
             assertEquals(cvrVotes - cs.flippedVotes, mvrVotes, doublePrecision)
@@ -48,9 +48,9 @@ class TestSampleGenerator {
 
             println(" ComparisonWithErrors: cvrVotes=$cvrVotes mvrVotes=$mvrVotes sampleCount=${cs.sampleCount} sampleMean=${cs.sampleMean}")
 
-            val expectedAssortValue = (N - cs.flippedVotes) * (bassorter.noerror)
+            val expectedAssortValue = (N - cs.flippedVotes) * (bassorter.noerror())
 
-            testLimits(cs, N, bassorter.upperBound)
+            testLimits(cs, N, bassorter.upperBound())
 
             repeat(11) {
                 cs.reset()
@@ -71,13 +71,13 @@ class TestSampleGenerator {
         val cvrs = makeCvrsByExactMean(N, reportedAvg)
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-        val compareAssorter = contestUA.comparisonAssertions.first().cassorter
+        val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
 
         val meanDiff = .01
         val sampler = ComparisonWithErrors(cvrs, compareAssorter, reportedAvg - meanDiff)
-        testLimits(sampler, N, compareAssorter.upperBound)
+        testLimits(sampler, N, compareAssorter.upperBound())
 
-        val noerror = compareAssorter.noerror
+        val noerror = compareAssorter.noerror()
         assertEquals((meanDiff*N).toInt(), countAssortValues(sampler, N, 0.0))
         assertEquals(0, countAssortValues(sampler, N, noerror/2))
         assertEquals(((1.0-meanDiff)*N).toInt(), countAssortValues(sampler, N, noerror))
@@ -97,12 +97,12 @@ class TestSampleGenerator {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
                 val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-                val compareAssorter = contestUA.comparisonAssertions.first().cassorter
+                val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
 
                 val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2)
-                testLimits(sampler, N, compareAssorter.upperBound)
+                testLimits(sampler, N, compareAssorter.upperBound())
 
-                val noerror = compareAssorter.noerror
+                val noerror = compareAssorter.noerror()
                 assertEquals((p2 * N).toInt(), countAssortValues(sampler, N, 0.0))
                 assertEquals(0, countAssortValues(sampler, N, noerror / 2))
                 assertEquals(((1.0 - p2) * N).toInt(), countAssortValues(sampler, N, noerror))
@@ -125,7 +125,7 @@ class TestSampleGenerator {
                     val cvrs = makeCvrsByExactMean(N, theta)
                     val contest = makeContestsFromCvrs(cvrs).first()
                     val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-                    val compareAssorter = contestUA.comparisonAssertions.first().cassorter
+                    val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
 
                     val sampler = ComparisonWithErrorRates(
                         cvrs,
@@ -134,9 +134,9 @@ class TestSampleGenerator {
                         p1,
                         true
                     ) // false just makes the numbers imprecise
-                    testLimits(sampler, N, compareAssorter.upperBound)
+                    testLimits(sampler, N, compareAssorter.upperBound())
                     println("\nmargin=$margin p2 = $p2 p1= $p1")
-                    val noerror = compareAssorter.noerror
+                    val noerror = compareAssorter.noerror()
                    // println(" p2 = ${countAssortValues(sampler, N, 0.0)} expect ${(p2 * N)}")
                     // println(" p1 = ${countAssortValues(sampler, N, noerror / 2)} expect ${(p1 * N)}")
 

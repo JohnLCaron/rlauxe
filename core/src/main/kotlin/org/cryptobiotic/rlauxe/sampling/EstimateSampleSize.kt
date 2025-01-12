@@ -265,7 +265,7 @@ fun simulateSampleSizeAlphaMart(
 fun simulateSampleSizeComparisonAssorter(
     auditConfig: AuditConfig,
     contest: ContestIF,
-    cassorter: ComparisonAssorter,
+    cassorter: ComparisonAssorterIF,
     cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -277,9 +277,9 @@ fun simulateSampleSizeComparisonAssorter(
     if (auditConfig.fuzzPct == null) {
         val cvrPairs = cvrs.zip( cvrs)
         ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true)
-    } else if (auditConfig.useGeneratedErrorRates) {
-        val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
-        ComparisonSimulation(cvrs, contest, cassorter, errorRates)
+    // } else if (auditConfig.useGeneratedErrorRates) {
+      //  val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
+      //  ComparisonSimulation(cvrs, contest, cassorter, errorRates)
     } else {
         ComparisonFuzzSampler(auditConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
     }
@@ -296,9 +296,9 @@ fun simulateSampleSizeComparisonAssorter(
     return simulateSampleSizeBetaMart(
         auditConfig,
         sampler,
-        cassorter.margin,
-        cassorter.noerror,
-        cassorter.upperBound,
+        cassorter.margin(),
+        cassorter.noerror(),
+        cassorter.upperBound(),
         contest.Nc,
         errorRates,
         startingTestStatistic,

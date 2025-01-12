@@ -47,12 +47,12 @@ class CompareAlphaPaper {
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter),
+                    drawSample = ComparisonNoErrors(contest.id, cvrs, compareAssertion.cassorter),
                     // maxSamples = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareAssertion.cassorter.upperBound,
+                    upperBound = compareAssertion.cassorter.upperBound(),
                 )
                 compareSrs.add(compareResult.makeSRT(theta, 0.0))
 

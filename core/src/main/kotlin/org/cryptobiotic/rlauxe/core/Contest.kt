@@ -206,7 +206,7 @@ open class ContestUnderAudit(
         return this
     }
 
-    fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
+    open fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
         // test that every winner beats every loser. SHANGRLA 2.1
         val assertions = mutableListOf<Assertion>()
         contest.winners.forEach { winner ->
@@ -255,9 +255,9 @@ open class ContestUnderAudit(
     }
 
     fun minComparisonAssertion(): ComparisonAssertion? {
-        val margins = comparisonAssertions.map { it.cassorter.margin }
+        val margins = comparisonAssertions.map { it.cassorter.margin() }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.cassorter.margin == minMargin }
+        return comparisonAssertions.find { it.cassorter.margin() == minMargin }
     }
 
     fun minPollingAssertion(): Assertion? {

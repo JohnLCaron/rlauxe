@@ -50,7 +50,7 @@ class TestCvrBuilders {
                 val minAssert = contestUA.minComparisonAssertion()
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter
-                    val samples = PrevSamplesWithRates(minAssort.noerror)
+                    val samples = PrevSamplesWithRates(minAssort.noerror())
                     var ccount = 0
                     var count = 0
                     fcvrs.forEachIndexed { idx, fcvr ->

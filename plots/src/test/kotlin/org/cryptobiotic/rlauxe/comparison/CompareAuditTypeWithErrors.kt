@@ -15,6 +15,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.core.ComparisonAssorter
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrors
@@ -328,7 +329,7 @@ class CompareAuditTypeWithErrors {
         contestUAc.makeComparisonAssertions(cvrs)
         val compareAssertion = contestUAc.comparisonAssertions.first()
         val compareAssorter = compareAssertion.cassorter
-        val comparisonSample = ComparisonWithErrors(cvrs, compareAssorter, theta)
+        val comparisonSample = ComparisonWithErrors(cvrs, compareAssorter as ComparisonAssorter, theta)
         val mvrs = comparisonSample.mvrs
 
         val pollingResult = runAlphaMartRepeated(

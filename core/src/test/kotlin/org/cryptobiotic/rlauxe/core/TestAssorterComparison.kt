@@ -308,7 +308,7 @@ class TestAssorterComparison {
         //  flip2votes 0.5 != 0.0
         //    cvr=card-379 (false) 0: [0]
         //    alteredMvr=card-379 (false) 0: [1, 0]
-        val passorter = compareAssorter1.assorter
+        val passorter = compareAssorter1.assorter()
         assertEquals(1.0, passorter.assort(Cvr(contest.id, listOf(0))))
         assertEquals(0.0, passorter.assort(Cvr(contest.id, listOf(1))))
         assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf(1,0))))

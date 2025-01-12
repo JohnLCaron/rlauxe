@@ -484,9 +484,9 @@ class ReproduceAlphaResults {
                 val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
                 val assorter = contestUA.comparisonAssertions.first().cassorter
 
-                val margin = assorter.margin
+                val margin = assorter.margin()
                 val compareUpper = 2.0/(2-margin)
-                val drawSample = ComparisonNoErrors(cvrs, assorter)
+                val drawSample = ComparisonNoErrors(contest.id, cvrs, assorter)
                 val etaActual = drawSample.sampleMean()
                 val etaExpect =  1.0/(2-margin)
                 val same = doubleIsClose(etaActual, etaExpect)
@@ -573,8 +573,8 @@ class ReproduceAlphaResults {
             val cvrs = makeCvrsByExactMean(N, theta)
             val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
             val compareAssertion = contestUA.comparisonAssertions.first()
-            val margin = compareAssertion.cassorter.margin
-            val drawSample = ComparisonNoErrors(cvrs, compareAssertion.cassorter)
+            val margin = compareAssertion.cassorter.margin()
+            val drawSample = ComparisonNoErrors(info.id, cvrs, compareAssertion.cassorter)
             val etaActual = drawSample.sampleMean()
             val eta0 = factor / (2 - margin)
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
@@ -585,7 +585,7 @@ class ReproduceAlphaResults {
                 eta0 = eta0,
                 d = d,
                 ntrials = ntrials,
-                upperBound = compareAssertion.cassorter.upperBound,
+                upperBound = compareAssertion.cassorter.upperBound(),
             )
             srs.add(mart.makeSRT(theta, 0.0))
 

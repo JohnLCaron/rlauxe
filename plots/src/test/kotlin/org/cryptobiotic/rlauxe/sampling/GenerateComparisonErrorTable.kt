@@ -39,7 +39,7 @@ class GenerateComparisonErrorTable {
                         val minAssert = contestUA.minComparisonAssertion()!!
                         val minAssort = minAssert.cassorter
 
-                        val samples = PrevSamplesWithRates(minAssort.noerror)
+                        val samples = PrevSamplesWithRates(minAssort.noerror())
                         val sampler = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
                         while (sampler.hasNext()) {
                             samples.addSample(sampler.next())

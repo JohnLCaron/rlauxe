@@ -628,16 +628,16 @@ fun replicate_p_values(
     val contest = contests.first()
     val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = ComparisonNoErrors(cvrs, minAssorter)
+    val sampler: Sampler = ComparisonNoErrors(contest.id, cvrs, minAssorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
         withoutReplacement = true,
-        upperBound = minAssorter.upperBound,
+        upperBound = minAssorter.upperBound(),
         p2 = 0.01
     )
 
-    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
     val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
     println(result)
     println("pvalues = ${result.pvalues}")
@@ -659,7 +659,7 @@ fun calc_sample_sizes(
     val contest = contests.first().makeComparisonAssertions(cvrs)
     val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = ComparisonNoErrors(cvrs, minAssorter)
+    val sampler: Sampler = ComparisonNoErrors(contest.id, cvrs, minAssorter)
 
     // class AdaptiveComparison(
     //    val N: Int,
@@ -676,7 +676,7 @@ fun calc_sample_sizes(
     val optimal = AdaptiveComparison(
         Nc = N,
         withoutReplacement = true,
-        a = minAssorter.noerror,
+        a = minAssorter.noerror(),
         d1 = 100,
         d2 = 100,
         p2o = .001,
@@ -684,7 +684,7 @@ fun calc_sample_sizes(
         p1u = 0.0,
         p2u = 0.0,
     )
-    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror, upperBound = minAssorter.upperBound, withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampler,
@@ -693,7 +693,7 @@ fun calc_sample_sizes(
         testFn = betta,
         testParameters = mapOf("p2o" to optimal.p2o),
         showDetails = false,
-        margin = minAssorter.margin,
+        margin = minAssorter.margin(),
         Nc = N,
     )
 }

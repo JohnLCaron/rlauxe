@@ -20,7 +20,7 @@ class TestAlphaMartComparison {
         val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
         val compareAssorter = contestUA.comparisonAssertions.first().cassorter
 
-        val sampler = ComparisonNoErrors(cvrs, compareAssorter)
+        val sampler = ComparisonNoErrors(contest.id, cvrs, compareAssorter)
         val theta = sampler.sampleMean()
         val expected = 1.0 / (3 - 2 * cvrMean)
         assertEquals(expected, theta, doublePrecision)
@@ -28,9 +28,9 @@ class TestAlphaMartComparison {
         val eta0 = theta
         val d = 100
 
-        println("N=$N cvrMean=$cvrMean theta=$theta eta0=$eta0, d=$d compareAssorter.upperBound=${compareAssorter.upperBound}")
+        println("N=$N cvrMean=$cvrMean theta=$theta eta0=$eta0, d=$d compareAssorter.upperBound=${compareAssorter.upperBound()}")
 
-        val result = doOneAlphaMartRun(sampler, N, eta0 = eta0, d = d, u = compareAssorter.upperBound)
+        val result = doOneAlphaMartRun(sampler, N, eta0 = eta0, d = d, u = compareAssorter.upperBound())
         println("\n${result}")
 
         assertEquals(TestH0Status.StatRejectNull, result.status)

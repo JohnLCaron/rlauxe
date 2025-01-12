@@ -286,7 +286,7 @@ fun runOneAssertionAudit(
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,
         withoutReplacement = true,
-        a = cassorter.noerror,
+        a = cassorter.noerror(),
         d1 = auditConfig.d1,
         d2 = auditConfig.d2,
         p2o = errorRates[0],
@@ -297,8 +297,8 @@ fun runOneAssertionAudit(
     val testFn = BettingMart(
         bettingFn = optimal,
         Nc = contestUA.Nc,
-        noerror = cassorter.noerror,
-        upperBound = cassorter.upperBound,
+        noerror = cassorter.noerror(),
+        upperBound = cassorter.upperBound(),
         riskLimit = auditConfig.riskLimit,
         withoutReplacement = true
     )

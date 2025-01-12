@@ -1,12 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.doublesAreClose
-import org.cryptobiotic.rlauxe.sampling.makeCvr
-import org.cryptobiotic.rlauxe.workflow.AuditType
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TestOneAudit {
 
@@ -17,8 +11,8 @@ class TestOneAudit {
     }
 }
 
-// rwo contest, controleld margin
-fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, undervotePercent: Double): ContestOA { // TODO set margin
+// two contest, specified margin
+fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, undervotePercent: Double): OneAuditContest { // TODO set margin
 
     // the candidates
     val info = ContestInfo(
@@ -39,10 +33,6 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, undervotePercent:
         "winner" to listOf((winner * cvrPercent).toInt(), (winner * noCvrPercent).toInt()),
         "loser" to listOf((loser * cvrPercent).toInt(), (loser * noCvrPercent).toInt()),
     )
-    // val votes0: Map<Int, Int> = candidates.map { (key: String, value: List<Int>) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
-
-    // The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest
-    // the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
     val stratumNames = listOf("hasCvr", "noCvr")
     val stratumSizes = listOf((totalVotes * cvrPercent).toInt(), (totalVotes * noCvrPercent).toInt()) // hasCvr, noCvr
 
@@ -51,12 +41,12 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, undervotePercent:
     //    val votes: Map<Int, Int>,   // candidateId -> nvotes
     //    val Nc: Int,  // upper limit on number of ballots in this starata for this contest
     //    val Np: Int,  // number of phantom ballots in this starata for this contest
-    val strata = mutableListOf<ContestStratum>()
+    val strata = mutableListOf<OneAuditStratum>()
     repeat(2) { idx ->
         strata.add(
-            ContestStratum(
+            OneAuditStratum(
                 stratumNames[idx],
-                if (idx == 0) AuditType.CARD_COMPARISON else AuditType.POLLING,
+                hasCvrs = (idx == 0),
                 info,
                 candidates.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
                 Nc = stratumSizes[idx],
@@ -64,5 +54,5 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, undervotePercent:
             )
         )
     }
-    return ContestOA(info, strata)
+    return OneAuditContest(info, strata)
 }

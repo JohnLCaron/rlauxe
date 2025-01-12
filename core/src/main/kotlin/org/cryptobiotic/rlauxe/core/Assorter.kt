@@ -61,7 +61,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
     override fun desc() = " winner=$winner loser=$loser"
     override fun winner() = winner
     override fun loser() = loser
-    override fun reportedMargin() = reportedMargin
+    override fun reportedMargin() = reportedMargin // TODO why is this here? if not here, only need one PluralityAssorter
 
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>? = null): PluralityAssorter {
@@ -111,7 +111,6 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 /////////////////////////////////////////////////////////////////////////////////
 
 interface ComparisonAssorterIF {
-    fun avgCvrAssortValue(): Double
     fun margin(): Double
     fun noerror(): Double
     fun upperBound(): Double
@@ -139,7 +138,6 @@ data class ComparisonAssorter(
         }
     }
 
-    override fun avgCvrAssortValue() = avgCvrAssortValue
     override fun margin() = margin
     override fun noerror() = noerror
     override fun upperBound() = upperBound
@@ -252,7 +250,6 @@ open class ComparisonAssertion(
     contest: ContestIF,
     val cassorter: ComparisonAssorterIF,
 ): Assertion(contest, cassorter.assorter()) {
-    val avgCvrAssortValue = cassorter.avgCvrAssortValue()
     val cmargin = cassorter.margin()
 
     override fun toString() = "${cassorter.assorter().desc()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"

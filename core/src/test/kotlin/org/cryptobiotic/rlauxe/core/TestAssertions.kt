@@ -109,8 +109,8 @@ class TestAssertions {
         assertions.forEach {
             assertIs<ComparisonAssertion>(it)
             assertIs<ComparisonAssorter>(it.cassorter)
-            assertIs< PluralityAssorter>(it.cassorter.assorter)
-            assertEquals(1.0, it.cassorter.assorter.upperBound())
+            assertIs< PluralityAssorter>(it.cassorter.assorter())
+            assertEquals(1.0, it.cassorter.upperBound())
         }
     }
 
@@ -135,8 +135,8 @@ class TestAssertions {
         assertions.forEach {
             assertIs<ComparisonAssertion>(it)
             assertIs<ComparisonAssorter>(it.cassorter)
-            assertIs< SuperMajorityAssorter>(it.cassorter.assorter)
-            assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.cassorter.assorter.upperBound())
+            assertIs< SuperMajorityAssorter>(it.cassorter.assorter())
+            assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.cassorter.upperBound())
         }
     }
 

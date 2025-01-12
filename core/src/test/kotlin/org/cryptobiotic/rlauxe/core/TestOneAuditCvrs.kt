@@ -12,7 +12,7 @@ class TestOneAuditCvrs {
         println("contestOA = $contestOA")
         contestOA.strata.forEach { stratum ->
             val scvrs = stratum.makeFakeCvrs()
-            assertEquals(stratum.Nc, scvrs.size)
+            assertEquals(stratum.Ng, scvrs.size)
         }
         val cvrs = contestOA.makeTestCvrs()
         assertEquals(contestOA.Nc, cvrs.size)
@@ -24,7 +24,7 @@ class TestOneAuditCvrs {
         println("contestOA = $contestOA")
         contestOA.strata.forEach { stratum ->
             val scvrs = stratum.makeFakeCvrs()
-            assertEquals(stratum.Nc, scvrs.size)
+            assertEquals(stratum.Ng, scvrs.size)
         }
         val cvrs = contestOA.makeTestCvrs()
         assertEquals(contestOA.Nc, cvrs.size)

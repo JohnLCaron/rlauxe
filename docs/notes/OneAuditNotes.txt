@@ -1,0 +1,193 @@
+OneAudit Notes
+https://www.github.com/pbstark/ONEAudit.
+
+Card 	“ballot card” means a sheet of paper; a ballot comprises one or more cards.
+CVR	“cast-vote record” is the voting system’s interpretation of the votes on a particular card.
+MVR	"manual-vote record” is the auditors’ reading of the votes on a card
+
+BPA	    "ballot-polling RLA"s examine individual randomly selected cards but do not use
+	    data from the voting system other than the totals;
+BLCA 	"batch-level comparison RLA"s compare reported vote subtotals for randomly selected batches
+	    of cards (e.g., all cards cast in a precinct) to manual tabulations of the same batches
+CLCA	"card-level comparison RLA"s compare individual CVRs to the corresponding MVRs for a random sample of cards
+hybrid  combine two or more of the approaches above.
+
+1. Introduction
+
+This paper shows that applying CLCA to any combination of CVRs provided
+by the voting system and CVRs created by the auditors to match batch subtotals
+or contest totals gives a valid RLA. When the CVRs are derived entirely from
+contest totals, the method is algebraically equivalent to BPA. When the CVRs
+are derived from batch subtotals, the method is far more efficient than BLCA
+and approaches the efficiency of ‘pure’ CLCA when the batches are sufficiently
+homogeneous. (so this is an improved version of batch auditing)
+
+Options for heterogeneous elections:
+– give up the efficiency of CLCA (card-level comparison RLAs) and use BPA (batch polling audits)
+– hybrid RLAs that use different audit strategies in different strata [SUITE,SHANGRLA,ALPHA,SWEETER]
+– BLCA (batch-level comparison RLAs) using weighted random samples [SuperSimple,CORLA,SUITE]
+– CLCA that rescans some or all of the cards to create linked CVRs the voting system did not originally provide
+– CLCA using cryptographic nonces to link CVRs to cards without compromising voter privacy (Noncesuch)
+
+Section 4 develops a simpler approach that in examples is more efficient than
+a hybrid audit or BLCA, works even when a BCLA is impracticable, avoids
+the expense of re-scanning any ballots, and does not require new or additional equipment.
+
+2. Testing net overstatement does not require CVRs linked to ballot cards
+
+2.1 Warmup: 2-candidate plurality contest
+
+Let bi = 1 if card i has a vote for Alice, −1 if it has a vote for Bob, and 0 otherwise
+Let ci = 1 if card i was counted by the voting system as a vote for Alice, −1 if it was counted as a vote for Bob, 0 otherwise
+The overstatement of the margin on the ith card is ci − bi ∈ {−2, −1, 0, 1, 2}
+It is the number of votes by which the voting system exaggerated the number of votes for Alice. 
+The true margin is Sum(bi) and the reported margin is Sum(ci)
+
+Alice really won if the net overstatement of the margin E({ci }) = Sum(ci - bi) < reported margin Sum(ci)
+
+If {ci} and {ci′} are any two sets of CVRs for which Sum(ci) = Sum(ci'), then E({ci}) = E({ci′})
+	they are overstatement net equivalent (ONE).
+	Thus, we can conduct a CLCA using any set {c′i} of CVRs that reproduces the contest-level results
+
+If the voting system reports CVRs for some individual ballot cards, we can conduct a CLCA that uses those CVRs, augmented by ONE CVRs for the remaining ballot cards (derived from batch subtotals or from contest totals, by subtraction).
+
+2.2 Numerical example
+
+Consider a contest in which 20,000 cards were cast in all, of which 10,000 were cast by mail and have linked CVRs,
+with 5,000 votes for Alice, 4,000 for Bob, and 1,000 undervotes.
+
+The other 10,000 cards were cast in 10 precincts, 1,000 cards in each. Net across those 10 precincts, Alice and Bob
+each got 5,000 votes. In 5 precincts, Alice showed more votes than Bob; in the other 5, Bob showed more than Alice.
+
+The reported results are thus 10,000 votes for Alice, 9,000 for Bob, and 1,000 undervotes.
+The margin is 1,000 votes; the diluted margin (margin in votes, divided by cards cast) is 1000/20000 = 5%.
+
+(A)
+Consider two sets of precinct subtotals:
+  1. 5 precincts show 900 votes for Alice and 100 for Bob; the other 5 show 900 votes for Bob and 100 for Alice.
+  2. 5 precincts show 990 votes for Alice and 10 for Bob; the other 5 show 990 votes for Bob and 10 for Alice.
+
+  Construct ONE CVRs for the 10,000 cards cast in the 10 precincts as follows:
+  If the precinct reports a votes for Alice and 1000 − a for Bob, the net vote for Alice is a − (1000 − a) = 2a − 1000.
+  The “average” CVR for the precinct has (2a − 1000)/1000 = 2a/1000 − 1 votes for Alice; that is the ONEAudit CVR for
+  every card in the precinct.
+
+  For instance, a precinct that reported 900 votes for Alice and 100 for Bob has a net margin of 900 × 1 + 100 × −1 = 800 for Alice,
+  so that precinct contributes 1,000 ONE CVRs, each with ci = (0.9) × 1 + (0.1) × (−1) = 0.8 votes for Alice.
+
+(B)
+  To audit, draw ballot cards uniformly at random, without replacement. To find the overstatement for each audited card,
+  subtract the MVR for the card (-1, 0, or 1)
+     1) from the CVR (-1, 0, or 1) if the system provided one,
+  or 2) from the ONE CVR for its precinct (a number in [−1, 1]) if the system did not provide a CVR.
+
+If there had been a CVR for
+every card and the results were exactly correct, the sample size for a standard
+CLCA with risk limit 5% would be about 125 cards. A BPA at risk limit 5%
+would examine about 2,300 cards. A BLCA (treating individual cards as batches
+for those with CVRs) using sampling with probability proportional to an error
+bound and the Kaplan-Markov test [21] would examine about 7250 cards on
+average in the 900/100 scenario and 5300 in the 990/10 scenario. For ONEAudit,
+the expected sample size is about 800 cards in the 900/100 scenario and 170 in
+the 990/10 scenario. As preferences within precincts become more homogeneous,
+ONEAudit approaches the efficiency of CLCA.
+
+2.3 The general case
+
+(For auditing IRV using RAIRE [4], CVRs are generally required to construct an appropriate
+ set of assorters and to find their margins—but the CVRs do not have to be
+ linked to individual ballot cards.)
+
+Let bi denote the true votes on the ith ballot card; there are N cards in
+all. Let ci denote the voting system’s interpretation of the ith card.
+
+Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is
+|C|. Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G}, g=1..G
+which reported assorter subtotals are available.
+
+See paper for math showing "using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that
+give the same assorter batch subtotals."
+
+So each ballot is assigned a group with assorter value computed as in (A),
+When a ballot is selected to sample, auditors have to find it and create an MVR for it.
+The cassort value is computed as in (B).
+
+3. Auditing using batch subtotals (oa-batch)
+
+Also see in oa_batch.ipynb
+	## Kaplan-Markov batch-level comparison using PPEB
+	# Georgia 2022 audit
+	# California 2020
+	## Stem Cell Research Institute Bond Initiative (CA Prop 14)
+
+BLCAs have two logistical hurdles: (i) They require manually tabulating the votes on every ballot card in the batches
+selected for audit. (ii) When the batches of cards for which the voting system reports subtotals do not correspond to
+identifiable physical batches (common for vote-by-mail and vote centers), the audit has to find and retrieve every card
+in the audited reporting batches.
+
+Both can be avoided using CLCA with ONE CVRs. The following algorithm gives a valid RLA, but selects and compares the
+manual interpretation of individual cards to the implied “average” CVR of the reporting batch each card belongs to. (See Algorithm)
+
+Algorithm for a CLCA using ONE CVRs from batch subtotals. THis is apparently the algorithm one uses for the ONECVR part
+of a heterogeneous audit. Unfortunately not spelled out in Section 4.
+...
+5. Calculate the reported mean assorter values for each reporting batch; these are the ONE CVRs.
+6. While any measured risk is greater than its risk limit and not every card has been audited:
+– Select a card at random, e.g., by selecting a batch at random with probability proportional to the size of the batch,
+then selecting a card uniformly at random from the batch using the k-cut method [14], or by selecting at random from the
+entire collection of cards.
+– Calculate the overstatement for the selected card using the ONE CVR for the reporting batch the card belongs to.
+– Update the measured risk of any assertion whose measured risk is still greater than its risk limit.
+
+3.1 Numerical case studies
+Table 3. Actual and estimated expected sample sizes for various RLA methods
+
+
+4 Auditing heterogenous voting systems (oa-polling)
+
+When the voting system can report linked CVRs for some but not all cards,
+we can augment the voting system’s linked CVRs with ONE CVRs for the remaining cards, then use CLCA.
+
+The ONE CVRs can be derived from overall contest results or from reported subtotals, e.g., precinct subtotals.
+Finer-grained subtotals generally give smaller audit sample sizes (when the reported outcome is correct)
+if the smaller groups are more homogeneous than the overall election.
+
+Compare this method with Suite (Table 5).
+                    PF*     SD      90th percentile
+SUITE               0.037   n/a     n/a
+ALPHA PF∗           0.018   0.002   0.019
+ALPHA PM*           0.003   0.000   0.003
+EmpBernstein PF∗    0.348   0.042   0.390
+EmpBernstein PM∗    0.420   0.134   0.561
+ALPHA ONEAudit      0.020   0.010   0.032
+
+Table 5. P-values for the 2018 RLA pilot in Kalamazoo, MI, for different risk-measuring functions.
+Rows 2–5 are from Sweeter, Table 3.
+ALPHA and Empirical Bernstein stratumwise supermartingales combined
+using either Fisher’s combining function (PF∗) or multiplication (PM*)
+
+5 Sample sizes for contest-level ONE CLCA vs. BPA. Maybe this is about oa-batch, not oa-polling?
+
+5.1 Theory
+the statistical tests used in RLAs are not affine equivariant because
+they rely on a priori bounds on the assorter values.
+
+5.2 Numerical comparison
+
+Table 6. Geometric mean of the ratios of sample sizes to the smallest sample size for each condition described above.
+
+Transforming the assorter into an overstatement assorter using the ONEAudit transformation, then testing whether the
+mean of the resulting population is ≤ 1/2 using the ALPHA test martingale with the truncated shrinkage estimator of [22]
+with d = 10 and η between 0.505 and 0.55 performed comparably to—but slightly worse than using ALPHA on the raw assorter
+ values for the same d and η, and within 4.8% of the overall performance of the best-performing method.
+
+6. Conclusions
+
+ONE CVRs let audits use batch-level data far more efficiently than traditional batch-level comparison RLAs (BLCAs) do.
+If batches are sufficiently homogeneous, the workload approaches that of “pure” CLCA using linked CVRs from the voting system.
+
+ONE CVRs also can obviate the need to stratify, to rescan cards, or to use “hybrid” audits when the voting system cannot
+export a linked CVR for every card. ONEAudit better than previous hybrid/stratification audots.
+
+Also see in oa_polling.ipynb
+	## Kalamazoo replication

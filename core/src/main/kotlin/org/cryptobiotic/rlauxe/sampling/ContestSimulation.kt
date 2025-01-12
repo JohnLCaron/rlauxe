@@ -24,12 +24,12 @@ import kotlin.random.Random
 //    I think we must have a ballot manifest, which means we have Nb, and ...
 
 /** Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms. */
-class ContestSimulation(val contest: Contest, underVotePct: Double) {
+class ContestSimulation(val contest: Contest) {
     val info = contest.info
     val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
-    val underCount = (contest.Nc * underVotePct).toInt() // U_c
-    val phantomCount = contest.Nc - underCount - voteCount // Np_c
+    val phantomCount = contest.Np //  - underCount - voteCount // Np_c
+    val underCount = contest.Nc - contest.Np - voteCount // U_c
 
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0
@@ -112,7 +112,7 @@ class ContestSimulation(val contest: Contest, underVotePct: Double) {
             val loserCount = ((voteCount - reportedMargin * Nc) / 2.0) .toInt()
 
             val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc, Np=phantomCount)
-            return ContestSimulation(contest, underVotePct)
+            return ContestSimulation(contest)
         }
     }
 

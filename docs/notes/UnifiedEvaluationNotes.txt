@@ -1,0 +1,171 @@
+UnifiedEvaluation
+
+2.2 Notation
+
+Let X1, X2, · · · ∈ {0, 1} denote the sampled ballots, with Xi = 1 or 0.
+
+n	the number of (not necessarily distinct) ballots sampled at a given point in the audit
+m 	the maximum sample size (i.e. number of draws) for the audit, after which they go to a full hand count
+N 	the total number of cast ballots.
+Yn 	= Sum(Xi) the number of sampled ballots that are in favour of the reported winner after n draws
+T 	the true total number of votes for the winner
+pT 	T/N the true proportion of such votes
+pr 	the reported proportion of votes for the winner
+Sn	= Sn(X1, X2, ..) is the statistic used to evaluate the evidence in the sample.
+
+
+For sampling with replacement, conditional on n, Yn has a binomial distribution with parameters n and pT . 
+For sampling without replacement, conditional on n, Yn has a hypergeometric distribution with parameters n, T and N .
+
+H0	The null hypothesis that the reported winner(s) did not really win. pT <= 1/2
+H1	the alternative H1 is that the reported winners really won. pT > 1/2
+
+certification rate 	the probability of rejecting H0
+significance level 	risk = false positive rate = miscertification = rejecting H0 when in fact it is true
+power 			the certification rate when H1 is true
+risk-limiting		there is an upper bound on the maximum possible risk
+
+3.2 SPRT tests the simple hypotheses
+	H0 : pT = p0
+	H1 : pT = p1
+using the likelihood ratio:
+	if Sn = Pr(Yn || p1) / Pr(Yn || p0 ) > 1/alpha
+terminate and certify (reject H0 ), otherwise continue sampling.
+
+BRAVO uses
+	p0 = 0.5
+	p1 = pr - eps
+where eps is a pre-specified small value for which p1 > 0.5, typically based on the pr.
+
+MAXBRAVO replaces Pr(Yn || p1) with max_p1 (Pr(Yn || p1))
+
+3.3 ClipAudit
+	Sn = (An − Bn )/ sqrt(An + Bn) , where An = Yn and Bn = n−Yn
+
+3.4 SHANGRLA uses martingale-based methods best suited for comparision audits. KMART, Kaplan-Wald, Kaplan-MArkov, Kaplan-Kolmogorov.
+
+All the procedures involve a parameter γ that prevents degenerate values of Sn. This parameter either needs to be set to a specific value or is integrated out.
+
+t 	the value of E(Xi) under the null hypothesis. In the two-candidate context discussed in this paper, t = p0 = 0.5.
+
+When sampling without replacement, if we ever observe Yn > Nt then we ignore the statistic and terminate the audit since H1 is guaranteed to be true.
+
+4. Evaluating auditing methods
+
+For each method, the termination threshold h was calibrated numerically to yield maximum risk as close as possible to 5%.
+We use three quantities to measure performance: maximum risk, power, and the mean sample size.
+
+Except where stated, our benchmarking experiments used sampling without replacement.
+
+The tests labelled ‘BRAVO’ are tests of a method related to but not identical to BRAVO, because there is no notion of a ‘reported’ vote share in our experiments. Instead, we set p1 to several fixed values to explore how the underlying test statistic (from the SPRT) performs in different scenarios.
+
+Mean sample sizes. We focus on average sample sizes as a measure of audit efficiency. 
+	
+Table 2 shows the results of experiments with N = 20,000 and m = 2,000, with replacement.
+
+UnitedEvaluation
+BRAVO p1	.52	.55	.60	.64	.70 (trueMean)
+	.51	1617 	791 	384 	272 	190
+	.55	1549 	562 	196 	129 	85
+	.7	1828 	1592 	530 	95 	37
+
+AlphaSimBravo
+ 		.52	.55	.60	.65	.70 (trueMean)
+	.51	4959   1688 	783 	234 	384
+	.55	_ 	598 	199 	121 	86
+	.7	_ 	_ 	_ 	79 	40
+
+TestBravo max 2000
+sampleCount
+   eta0        0.52   0.55   0.60   0.64   0.70  
+    0.70          37     70    236    101     39  
+    0.55         765    561    202    129     86  
+    0.51        1738   1492    786    554    384  
+failPct
+   eta0        0.52   0.55   0.60   0.64   0.70  
+    0.70        0.91   0.81   0.18   0.00   0.00  
+    0.55        0.62   0.02   0.00   0.00   0.00  
+    0.51        0.97   0.22   0.00   0.00   0.00   
+
+TestBravo max 20000
+sampleCount
+   eta0        0.52   0.55   0.60   0.64   0.70  
+    0.70       18269  14764   2236     99     38  
+    0.55        9947    599    206    131     85  
+    0.51        5129   1685    779    557    387  
+failPct
+   eta0        0.52   0.55   0.60   0.64   0.70  
+    0.70        0.00   0.00   0.00   0.00   0.00  
+    0.55        0.00   0.00   0.00   0.00   0.00  
+    0.51        0.00   0.00   0.00   0.00   0.00  
+
+Table 3 shows the results of experiments with N = 20,000 and m = 2,000, without replacement.
+
+AlphaSimBravo
+ 		.505	.51	.52	.55	.60	.64	.70 (trueMean)
+	.51	_   	19962	19525	5133	790	556	385 	
+	.55	_   	17408	13371	 932	200	131	 86 	
+	.7	_   	18844	18433  16021   3612	 99	 38 	
+
+testAgainstUnifiedWithoutReplacement
+sampleCount
+   eta0        0.52   0.55   0.60   0.64   0.70  
+    0.70          43     74    263     94     38  
+    0.55         769    556    197    131     86  
+    0.51        1671   1309    669    476    331  
+failPct
+   eta0        0.52   0.55   0.60   0.64   0.70  
+    0.70        0.92   0.80   0.14   0.00   0.00  
+    0.55        0.61   0.02   0.00   0.00   0.00  
+    0.51        0.87   0.09   0.00   0.00   0.00 
+
+(no difference vs without replacement?)
+
+Seems stupid not to use the sample mean for et0:
+
+without replacement
+
+ testWithSampleMean ratio=0.5050 eta0=0.5021 voteDiff= -29 sampleCount= 9415 cumulhist=4:2 5:8 6:20 7:38 8:71 9:143 10:1000 fail=0 status=0:1000  
+ testWithSampleMean ratio=0.5100 eta0=0.5100 voteDiff=   0 sampleCount= 5469 cumulhist=1:1 2:26 3:93 4:218 5:390 6:593 7:776 8:946 9:1000 fail=0 status=0:1000  
+ testWithSampleMean ratio=0.5200 eta0=0.5260 voteDiff=  60 sampleCount= 1670 cumulhist=1:300 2:695 3:893 4:970 5:998 6:1000 fail=0 status=0:1000  
+ testWithSampleMean ratio=0.5300 eta0=0.5304 voteDiff=   3 sampleCount= 1350 cumulhist=1:434 2:809 3:950 4:987 5:999 6:1000 fail=0 status=0:1000  
+ testWithSampleMean ratio=0.5500 eta0=0.5524 voteDiff=  23 sampleCount=  490 cumulhist=1:909 2:993 3:999 4:1000 fail=0 status=0:1000  
+ testWithSampleMean ratio=0.6000 eta0=0.6092 voteDiff=  91 sampleCount=  128 cumulhist=1:1000 fail=0 status=0:1000   
+
+
+with replacement
+
+ testWithSampleMean ratio=0.5050 eta0=0.5042 voteDiff=  -8 sampleCount= 9881 cumulhist=8:1 9:3 10:785 status=0:3 1:782 2:215  
+ testWithSampleMean ratio=0.5100 eta0=0.5113 voteDiff=  12 sampleCount= 7734 cumulhist=2:10 3:45 4:127 5:200 6:271 7:364 8:424 9:473 10:991 status=0:523 1:468 2:9  
+ testWithSampleMean ratio=0.5200 eta0=0.5190 voteDiff= -10 sampleCount= 4062 cumulhist=1:44 2:255 3:450 4:606 5:699 6:776 7:834 8:873 9:905 10:1000 status=0:925 1:75  
+ testWithSampleMean ratio=0.5300 eta0=0.5282 voteDiff= -18 sampleCount= 2003 cumulhist=1:299 2:663 3:811 4:880 5:940 6:965 7:980 8:986 9:990 10:1000 status=0:994 1:6  
+ testWithSampleMean ratio=0.5500 eta0=0.5437 voteDiff= -63 sampleCount=  798 cumulhist=1:738 2:948 3:989 4:998 5:1000 status=0:1000  
+ testWithSampleMean ratio=0.6000 eta0=0.5917 voteDiff= -82 sampleCount=  190 cumulhist=1:994 2:1000 status=0:1000 
+
+ BRAVO is ALPHA with the following restrictions:
+• the sample is drawn with replacement from ballot cards that do have a valid vote for the
+reported winner w or the reported loser ℓ (ballot cards with votes for other candidates or
+non-votes are ignored)
+• ballot cards are encoded as 0 or 1, depending on whether they have a valid vote for the
+reported winner or for the reported loser; u = 1 and the only possible values of xi are 0
+and 1
+• µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement
+• ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
+Nℓ is the number of votes reported for candidate ℓ: η is not updated as data are collected
+
+AlphaTrunc without replacement
+
+ testWithSampleMean ratio=0.5050 eta0=0.5048 voteDiff=  -3 sampleCount= 1606 cumulhist=2:11 status=0:11 2:989  
+ testWithSampleMean ratio=0.5100 eta0=0.5138 voteDiff=  76 sampleCount= 1268 cumulhist=1:39 2:137 status=0:137 2:863  
+ testWithSampleMean ratio=0.5200 eta0=0.5151 voteDiff= -99 sampleCount= 1220 cumulhist=1:56 2:178 status=0:178 2:822  
+ testWithSampleMean ratio=0.5300 eta0=0.5214 voteDiff=-172 sampleCount= 1120 cumulhist=1:164 2:388 status=0:388 2:612  
+ testWithSampleMean ratio=0.5500 eta0=0.5541 voteDiff=  80 sampleCount=  485 cumulhist=1:914 2:999 status=0:999 2:1  
+ testWithSampleMean ratio=0.6000 eta0=0.6006 voteDiff=  12 sampleCount=  146 cumulhist=1:1000 status=0:1000  
+
+ testWithSampleMean ratio=0.5050 eta0=0.5007 voteDiff= -42 sampleCount= 9751 cumulhist=1:2 2:7 3:10 4:12 5:17 6:22 7:31 8:37 9:46 10:1000 status=0:1000  
+ testWithSampleMean ratio=0.5100 eta0=0.5069 voteDiff= -30 sampleCount= 7070 cumulhist=1:9 2:43 3:71 4:107 5:162 6:239 7:341 8:544 9:900 10:1000 status=0:1000  
+ testWithSampleMean ratio=0.5200 eta0=0.5202 voteDiff=   1 sampleCount= 2630 cumulhist=1:140 2:393 3:627 4:808 5:923 6:982 7:999 8:1000 status=0:1000  
+ testWithSampleMean ratio=0.5300 eta0=0.5326 voteDiff=  25 sampleCount= 1230 cumulhist=1:487 2:825 3:968 4:997 5:1000 status=0:1000  
+ testWithSampleMean ratio=0.5500 eta0=0.5552 voteDiff=  51 sampleCount=  461 cumulhist=1:915 2:999 3:1000 status=0:1000  
+ testWithSampleMean ratio=0.6000 eta0=0.6013 voteDiff=  12 sampleCount=  145 cumulhist=1:1000 status=0:1000  
+

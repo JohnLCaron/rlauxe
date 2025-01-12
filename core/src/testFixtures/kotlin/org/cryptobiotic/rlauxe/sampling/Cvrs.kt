@@ -23,12 +23,11 @@ fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
     return cvrs
 }
 
-fun makeCvr(idx: Int): Cvr {
+fun makeCvr(winner: Int): Cvr {
     val votes = mutableMapOf<Int, IntArray>()
-    votes[0] = intArrayOf(idx)
-    return Cvr("card", votes)
+    votes[0] = intArrayOf(winner)
+    return Cvr("cardWinner$winner", votes)
 }
-
 
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()

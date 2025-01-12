@@ -1,0 +1,129 @@
+NotesShangrla
+
+https://github.com/dvukcevic/SHANGRLA/tree/cmdline is 36 commits ahead of, 2 commits behind pbstark/SHANGRLA:main.
+
+https://github.com/aekh/AWAIRE/ and https://github.com/pbstark/ONEAudit may have code not in SHANGRLA??
+
+Audit
+  use_styles
+  AuditType // POLLING, CARD_COMPARISON, ONEAUDIT
+  quantile
+  error_rate_1 (overstatement_assorter_margin, overstatement_assorter_mean)
+  error_rate_2
+  max_cards
+  reps
+  strata
+
+`use_style` controls whether the sample is drawn from all cards (`use_style == False`) or card style information is used
+to target the cards that purport to contain each contest (`use_style == True`).
+
+Contest
+  id
+  candidates
+  SocialChoiceFunction
+  assertions
+  n_winners
+  winners
+  ncvrs
+  ncards
+  share_to_win 
+  risk_limit
+
+CVR
+  id
+  phantom
+  votes
+  tally_ppo
+  sample_num
+  p
+  sampled
+
+Assertion
+  contest
+  assorter
+  winner
+  loser
+  NonnegMean (test)
+  margin
+  p_value
+  p_history
+  proved
+  sample_size
+
+AssortorFn
+  contest
+  upper_bound
+  assort function: cvr -> double
+  
+
+NonnegMean: "Tests of the hypothesis that the mean of a population of values in [0, u] is less than or equal to t"
+
+NonnegMean test: Only ALPHA_MART is used / tested. only need variants if we want to compare performance.
+   estimation function: optimal_comparison mostly used
+			fixed_alternative_mean (default)
+			shrink_trunc (used by raire)
+
+  It appears to me that the bet function is only used when test=betting_mart, which is never. 
+  See https://raw.githubusercontent.com/dvukcevic/SHANGRLA/repackage/shangrla/core/NonnegMean.py for changes in fork.
+
+1. variants
+    ALPHA_MART: requires "estimation function"
+    BETTING_MART: requires "betting function"
+    KAPLAN_KOLMOGOROV, KAPLAN_MARKOV, KAPLAN_WALD: required "tuning parameter" g
+    WALD_SPRT: Wald’s Sequential Probability Ratio Test (SPRT) for sampling with replacement. Outdated, used to compare.
+
+2. parameters
+   u = population of values in [0, u]; needs to be mutable.
+	for plurality, u = 1
+	for super-majority, u = 1/(2f), where f is the fraction of valid votes required to win.
+   t = less than or equal to t (always 1/2 ?) never changes
+
+3. Stratified audits (TBD)
+
+4. Zombie Bounds II: Return of the Missing Ballot
+    phantoms-to-zombies approach
+    N = upper bound on the number of ballot cards that contain the contest
+    add phantom ballots to get N total
+
+
+Equations
+
+1. A_Alice,Bob(bi) = (Alice(bi) − Bob(bi) + 1) / 2  (p 4)
+2. A_Alice,Bob = Sum(A_Alice,Bob(bi)) / B, over all bi (p 4)
+3. v ≡ 2Āc − 1, the reported assorter margin (p 10)
+
+NotesArlo
+* bravo.py: Library for performing a BRAVO-style ballot polling risk-limiting audit,
+as described by Lindeman and Stark here: https://www.usenix.org/system/files/conference/evtwote12/evtwote12-final27.pdf
+
+*  macro.py: An implemenation of per-contest batch comparison audits, loosely based on
+MACRO, developed by Philip Stark (see https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1443314 for the
+publication).
+
+*  minerva.py: Library for performing a Minerva-style ballot polling risk-limiting audit,
+as described by Zagórski et al https://arxiv.org/abs/2008.02315
+
+*  providence.py: Library for performing a Providence ballot polling risk-limiting audit,
+as described by Broadrick et al https://arxiv.org/abs/2210.08717
+
+* suite.py: This library allows the performing of a stratified audit. For now, it works with ballot polling and ballot comparison, plurality winner contests. SUITE, described by Ottoboni, Stark, Lindeman, and McBurnett at https://arxiv.org/abs/1809.04235. This code borrows heavily from code already written by Stark and Ottoboni at https://github.com/pbstark/CORLA18
+
+theres some code for raire, not sure how complete, or provenance:
+  raire.py, raire_utils.py
+
+
+NotesR2B2
+
+E   FileNotFoundError: [Errno 2] No such file or directory: 'src/r2b2/tests/data/cli_test_expected_out_interactive_athena.txt'
+
+src/r2b2/tests/test_audit.py:105 (test_simple_audit_execute_rounds)
+{'a': [10], 'a_so': [], 'b': [0], 'b_so': []} != {'a': [10], 'b': [0]}
+
+Expected :{'a': [10], 'b': [0]}
+Actual   :{'a': [10], 'a_so': [], 'b': [0], 'b_so': []}
+
+src/r2b2/tests/test_minerva.py:30 (test_min_sample_size)
+832 != 840
+
+
+

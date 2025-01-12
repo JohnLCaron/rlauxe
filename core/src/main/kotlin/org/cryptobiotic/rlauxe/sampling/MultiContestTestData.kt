@@ -39,9 +39,9 @@ data class MultiContestTestData(
         fcontests = List(ncontest) { it }.map {// id same as index
             val ncands = max(Random.nextInt(5), 2)
             ContestTestData(it, ncands,
-                marginRange.start + if (marginRange.isEmpty()) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
-                underVotePct.start + if (underVotePct.isEmpty()) 0.0 else Random.nextDouble(underVotePct.endInclusive - underVotePct.start),
-                phantomPct.start + if (phantomPct.isEmpty()) 0.0 else Random.nextDouble(phantomPct.endInclusive - phantomPct.start),
+                marginRange.start + if (marginRange.endInclusive <= marginRange.start) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
+                underVotePct.start + if (underVotePct.endInclusive <= underVotePct.start) 0.0 else Random.nextDouble(underVotePct.endInclusive - underVotePct.start),
+                phantomPct.start + if (phantomPct.endInclusive <= phantomPct.start) 0.0 else Random.nextDouble(phantomPct.endInclusive - phantomPct.start),
                 // TODO ChoiceFunction ??
             )
         }

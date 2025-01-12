@@ -1,15 +1,9 @@
-package org.cryptobiotic.rlauxe.shangrla
+package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
-import org.cryptobiotic.rlauxe.core.eps
-import org.cryptobiotic.rlauxe.sampling.randomPermute
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import kotlin.math.max
 
-import kotlin.math.min
-import kotlin.math.sqrt
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -113,6 +107,7 @@ class TestOnePollingAudit {
         //  500 = avgReject = 3109.274}
     }
 
+    // test_oabatch_ipynb
     fun testSyntheticAvB(reps: Int, dl: List<Int> = listOf(10, 100, 1000, 10000), polling: Boolean = false): Pair<Results, Map<Int, Results>> {
         val N = 20000
         val Abar = (10000 * 1 + 1000 * .5 + 9000 * 0) / N
@@ -138,6 +133,7 @@ class TestOnePollingAudit {
         val bb = B(fab, 0.0, v, u)
         // CVRs
         val cc = B(1.0, 1.0, v, u)
+
         // make the overstatement data
         val nn = N_per_pct * pct / 2.0
         val x1 = DoubleArray(10000) { cc }
@@ -161,8 +157,8 @@ class TestOnePollingAudit {
         //    dl: List<Int>,
         //    c: Double = .5,
         //    reps: Int = 1000,
-        return if (polling) oneaudit(x, alpha=alpha, u_over=1.0, eta=Abar, dl=dl, c=c, reps=reps)
-               else oneaudit(x, alpha=alpha, u_over=u_over, eta=u_over, dl=dl, c=c, reps=reps)
+        return if (polling) oneaudit(x, alpha=alpha, u_over=1.0, eta=Abar,      dl=dl, c=c, reps=reps)
+                       else oneaudit(x, alpha=alpha, u_over=u_over, eta=u_over, dl=dl, c=c, reps=reps)
     }
 
 }
@@ -194,88 +190,6 @@ class Results(val reps: Int) {
 //   and start/NonnegMean alphamart.shrink_trunc
 // Note theres no f parameter
 
-// def shrink_trunc(x: np.array, N: int, mu: float=1/2, nu: float=1-np.finfo(float).eps, u: float=1, c: float=1/2,
-//                 d: float=100) -> np.array:
-//    '''
-//    apply the shrinkage and truncation estimator to an array
-//
-//    sample mean is shrunk towards nu, with relative weight d times the weight of a single observation.
-//    estimate is truncated above at u-u*eps and below at mu_j+e_j(c,j)
-//
-//    S_1 = 0
-//    S_j = \sum_{i=1}^{j-1} x_i, j > 1
-//    m_j = (N*mu-S_j)/(N-j+1) if np.isfinite(N) else mu
-//    e_j = c/sqrt(d+j-1)
-//    eta_j =  ( (d*nu + S_j)/(d+j-1) \vee (m_j+e_j) ) \wedge u*(1-eps)
-//
-//    Parameters
-//    ----------
-//    x : np.array
-//        input data
-//    mu : float in (0, 1)
-//        hypothesized population mean
-//    eta : float in (t, 1)
-//        initial alternative hypothethesized value for the population mean
-//    c : positive float
-//        scale factor for allowing the estimated mean to approach t from above
-//    d : positive float
-//        relative weight of nu compared to an observation, in updating the alternative for each term
-//    '''
-//    S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
-//    j = np.arange(1,len(x)+1)              # 1, 2, 3, ..., len(x)
-//    m = (N*mu-S)/(N-j+1) if np.isfinite(N) else mu   # mean of population after (j-1)st draw, if null is true
-//    return np.minimum(u*(1-np.finfo(float).eps), np.maximum((d*nu+S)/(d+j-1),m+c/np.sqrt(d+j-1)))
-
-class ShrinkTrunc(
-    val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
-    val d: Int = 100, val withReplacement: Boolean = false
-) : EstimArrayFn {
-
-    override fun eta(x: DoubleArray): DoubleArray {
-
-        //    S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
-        val cum_sum = np_cumsum(x)
-        val S = DoubleArray(x.size + 1) { if (it == 0) 0.0 else cum_sum[it - 1] }   // 0, x_1, x_1+x_2, ...,
-        // val Sp = DoubleArray(x.size) { S[it] } // same length as the data.
-
-        //    j = np.arange(1,len(x)+1)              # 1, 2, 3, ..., len(x)
-        // val j = IntArray(x.size) { it + 1 } // 1, 2, 3, ..., len(x) LOOK unneeded?
-
-        //    m = (N*mu-S)/(N-j+1) if np.isfinite(N) else mu   # mean of population after (j-1)st draw, if null is true
-        val M = S.mapIndexed { idx, s ->
-            // if (withReplacement) mu else (N * mu - s) / (N - j[idx] - 1)
-            if (withReplacement) mu else (N * mu - s) / (N - idx)
-        }
-
-        // return np.minimum(u*(1-np.finfo(float).eps), np.maximum((d*nu+S)/(d+j-1),m+c/np.sqrt(d+j-1)))
-        val term1 = u * (1.0 - eps)
-        // (d*nu+S)/(d+j-1)
-        val term2 = S.mapIndexed { idx, s ->
-            // (d * nu + s) / (d + j[idx] - 1)
-            (d * nu + s) / (d + idx)
-        }
-        // m+c/np.sqrt(d+j-1)
-        val term3 = M.mapIndexed { idx, m ->
-            // m + c / (sqrt(d + j[idx] - 1))
-            m + c / (sqrt((d + idx).toDouble()))
-        }
-
-        val maxTerm = S.mapIndexed { idx, it -> max(term2[idx], term3[idx]) }
-        val minTerm = maxTerm.map { min(term1, it) }
-        return minTerm.toDoubleArray()
-    }
-}
-
-// class TruncShrinkage(
-//    val N: Int,
-//    val upperBound: Double,
-//    val minsd: Double,
-//    val eta0: Double,
-//    val c: Double,
-//    val d: Int,
-//    val f: Double,
-//) : EstimFn {
-
 class TruncShrinkageProxy(
     val N: Int, val mu: Double = 0.5, val nu: Double, val u: Double = 1.0, val c: Double = 0.5,
     val d: Int, val withReplacement: Boolean = false
@@ -297,47 +211,6 @@ class TruncShrinkageProxy(
 // identical in oa-batch and oa-polling
 // simpler than SHANGRLA NonnegMean.py alpha_mart and core/NonnegMean alpha_mart
 // because those have factored part of algo into sjm()
-/*
-def alpha_mart(x: np.array, N: int, mu: float=1/2, eta: float=1-np.finfo(float).eps, u: float=1,
-               estim: callable=shrink_trunc) -> np.array :
-    '''
-    Finds the ALPHA martingale for the hypothesis that the population
-    mean is less than or equal to t using a martingale method,
-    for a population of size N, based on a series of draws x.
-
-    The draws must be in random order, or the sequence is not a martingale under the null
-
-    If N is finite, assumes the sample is drawn without replacement
-    If N is infinite, assumes the sample is with replacement
-
-    Parameters
-    ----------
-    x : list corresponding to the data
-    N : int
-        population size for sampling without replacement, or np.infinity for sampling with replacement
-    mu : float in (0,1)
-        hypothesized fraction of ones in the population
-    eta : float in (t,1)
-        alternative hypothesized population mean
-    estim : callable
-        estim(x, N, mu, eta, u) -> np.array of length len(x), the sequence of values of eta_j for ALPHA
-
-    Returns
-    -------
-    terms : array
-        sequence of terms that would be a nonnegative supermartingale under the null
-    '''
-    S = np.insert(np.cumsum(x),0,0)[0:-1]  # 0, x_1, x_1+x_2, ...,
-    j = np.arange(1,len(x)+1)              # 1, 2, 3, ..., len(x)
-    m = (N*mu-S)/(N-j+1) if np.isfinite(N) else mu   # mean of population after (j-1)st draw, if null is true
-    etaj = estim(x, N, mu, eta, u)
-    with np.errstate(divide='ignore',invalid='ignore'):
-        term = (x*etaj/m + (u-x)*(u-etaj)/(u-m))/u
-        terms = np.cumprod((x*etaj/m + (u-x)*(u-etaj)/(u-m))/u)
-    terms[m<0] = np.inf
-    return terms
-
- */
 
 fun alpha_mart(
     x: DoubleArray, N: Int, mu: Double = .5, eta: Double = 1.0, u: Double = 1.0, estim: EstimArrayFn,
@@ -450,18 +323,14 @@ fun sprt_mart(
 // only appears in oa-batch and not oa-polling
 // def oneaudit(x, alpha: float, u_over: float, eta: float, dl: list, c: float=1/2, reps=10**3, verbose=True):
 //    '''
-//    test whether the assorter mean is \le 1/2 using ballot polling, with ALPHA mart and the SPRT
+//    test whether the assorter mean is < 1/2 using ballot polling, with ALPHA mart and the SPRT
 //
 //    Parameters
 //    ----------
-//    x: numpy array
-//        the data
-//    alpha: float
-//        risk limit
-//    u_over: float
-//        a priori upper bound on the population of scaled overstatements
-//    eta: float
-//        starting alternative value
+//    x: the data
+//    alpha: risk limit
+//    u_over: a priori upper bound on the population of scaled overstatements
+//    eta: starting alternative value
 //    '''
 //    resl = ['rej_N','not_rej_N']
 //
@@ -487,7 +356,7 @@ fun oneaudit(
     var randx = x
     repeat(reps) {
         if (reps > 1) {
-            randx = randomPermute(randx)
+            randx.shuffle()
         }
 
         //        np.random.shuffle(x)
@@ -621,14 +490,5 @@ fun findFirstIndex(x: DoubleArray, pred: (Double) -> Boolean): Int {
         }
     }
     return firstIdx
-}
-
-///////////////////////
-//// DoubleArrays
-fun randomPermute(samples : DoubleArray): DoubleArray {
-    val n = samples.size
-    val permutedIndex = MutableList(n) { it }
-    permutedIndex.shuffle(Random)
-    return DoubleArray(n) { samples[permutedIndex[it]] }
 }
 

@@ -20,7 +20,7 @@ class TestCvr {
     @Test
     fun testCvrUnderAudit() {
         val cvrUA = CvrUnderAudit(makeCvr(1), 12345L)
-        assertEquals("cardWinner1 (false) 0: [1]", cvrUA.toString())
+        assertEquals("card (false) 0: [1]", cvrUA.toString())
         assertEquals(0, cvrUA.cvr.hasMarkFor(0, 0))
         assertEquals(1, cvrUA.cvr.hasMarkFor(0, 1))
     }

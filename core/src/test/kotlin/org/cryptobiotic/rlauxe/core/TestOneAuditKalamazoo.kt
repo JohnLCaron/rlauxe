@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.sampling.makeCvr
-import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,8 +20,8 @@ class TestOneAuditKalamazoo {
         // votes_cvr=5218.0 votes_poll=22082.0 diff cvr: 76.0, diff poll: 290.0
         assertEquals(5218, strataCvr.votes.values.sum())
         assertEquals(22082, strataNocvr.votes.values.sum())
-        assertEquals(76, strataCvr.Nc - strataCvr.votes.values.sum())
-        assertEquals(290, strataNocvr.Nc - strataNocvr.votes.values.sum())
+        assertEquals(76, strataCvr.Ng - strataCvr.votes.values.sum())
+        assertEquals(290, strataNocvr.Ng - strataNocvr.votes.values.sum())
 
         // whitmer=20699, schuette=5569, assorter_mean_all=0.5468806477264513
         val whitmerTotal = contest.votes[info.candidateNames["Whitmer"]!!]!!
@@ -35,7 +34,7 @@ class TestOneAuditKalamazoo {
         // assorter_mean_poll=0.5682996602896477,
         val whitmerNoCvr = strataNocvr.votes[info.candidateNames["Whitmer"]!!]!!
         val schuetteNoCvr = strataNocvr.votes[info.candidateNames["Schuette"]!!]!!
-        val assorterMeanNoCvr = (whitmerNoCvr - schuetteNoCvr).toDouble() / strataNocvr.Nc  // using strata Nc
+        val assorterMeanNoCvr = (whitmerNoCvr - schuetteNoCvr).toDouble() / strataNocvr.Ng  // using strata Nc
         assertEquals(0.5682996602896477, assorterMeanNoCvr, doublePrecision)
 
         // eta=0.5245932724032007, v=0.09376129545290257, u_b=1.0491865448064015,
@@ -164,7 +163,7 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
                 hasCvrs = (idx == 0),
                 info,
                 candidates.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
-                Nc = stratumSizes[idx],
+                Ng = stratumSizes[idx],
                 Np = 0  // TODO investigate
             )
         )

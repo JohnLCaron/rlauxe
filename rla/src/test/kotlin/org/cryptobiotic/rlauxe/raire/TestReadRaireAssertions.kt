@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.workflow.tabulateRaireVotes
 import org.cryptobiotic.rlauxe.util.Prng
+import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,7 +35,7 @@ class TestReadRaireAssertions {
         val cassertions = contestsUA.first().comparisonAssertions
         assertTrue(cassertions.isNotEmpty())
         cassertions.forEach { cassertion ->
-            assertTrue(0.5 < cassertion.avgCvrAssortValue)
+            assertTrue(0.5 < margin2mean(cassertion.margin))
             assertTrue(0.0 < cassertion.cmargin)
             cvrs.forEach {
                 assertTrue(cassertion.cassorter.assorter().assort(it) in 0.0..cassertion.cassorter.assorter().upperBound())

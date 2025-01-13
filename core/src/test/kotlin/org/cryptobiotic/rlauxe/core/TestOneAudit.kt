@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class TestOneAudit {
 
@@ -8,6 +9,26 @@ class TestOneAudit {
     fun testMakeContest() {
         val contest = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01)
         println(contest)
+    }
+
+    @Test
+    fun testAssorters() {
+        val contest = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01)
+        val testCvrs = contest.makeTestCvrs()
+        val contestOA = contest.makeContestUnderAudit(testCvrs)
+        val minAllAsserter = contestOA.minComparisonAssertion()
+        assertNotNull(minAllAsserter)
+        val minAllAssorter = minAllAsserter.assorter
+        println(minAllAssorter)
+
+        val minAssorterMargin = minAllAssorter.calcAssorterMargin(contest.id, testCvrs)
+        println(" calcAssorterMargin for minAllAssorter = $minAssorterMargin")
+
+        val cass = minAllAsserter.cassorter as OneAuditComparisonAssorter
+        cass.batchAvgValues.forEach { (name, avgValue) ->
+            println("   $name avgValue= $avgValue")
+        }
+
     }
 }
 
@@ -49,7 +70,7 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, undervotePercent:
                 hasCvrs = (idx == 0),
                 info,
                 candidates.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
-                Nc = stratumSizes[idx],
+                Ng = stratumSizes[idx],
                 Np = 0  // TODO investigate
             )
         )

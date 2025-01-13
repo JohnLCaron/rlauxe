@@ -61,7 +61,7 @@ class OneAuditContest (
         }
         losers = mlosers.toList()
 
-        Nc = strata.sumOf { it.Nc }
+        Nc = strata.sumOf { it.Ng }
         Np = strata.sumOf { it.Np }
         require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
 
@@ -96,7 +96,10 @@ class OneAuditContest (
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
+        appendLine("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
+        strata.forEach {
+            appendLine("$it")
+        }
     }
 }
 
@@ -105,15 +108,21 @@ class OneAuditStratum (
     val hasCvrs: Boolean,
     val info: ContestInfo,
     val votes: Map<Int, Int>,   // candidateId -> nvotes
-    val Nc: Int,  // upper limit on number of ballots in this strata for this contest
+    val Ng: Int,  // upper limit on number of ballots in this strata for this contest
     val Np: Int,  // number of phantom ballots in this strata for this contest
 ) {
-    val contest = Contest(info.copy(name=strataName), votes, Nc, Np)
+    val contest = Contest(info.copy(name=strataName), votes, Ng, Np)
 
     init {
         votes.forEach {
             require(info.candidateIds.contains(it.key)) { "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"}
         }
+    }
+
+    fun reportedMargin(winner: Int, loser:Int): Double {
+        val winnerVotes = votes[winner] ?: 0
+        val loserVotes = votes[loser] ?: 0
+        return (winnerVotes - loserVotes) / Ng.toDouble()
     }
 
     fun makeFakeCvrs(): List<Cvr> {
@@ -122,7 +131,7 @@ class OneAuditStratum (
             repeat(nvotes) { cvrs.add(makeCvr(info.id, candId)) }
         }
         // undervotes
-        val nu = this.Nc - cvrs.size
+        val nu = this.Ng - cvrs.size
         repeat(nu) {
             cvrs.add(makeCvr(info.id))
         }
@@ -134,6 +143,10 @@ class OneAuditStratum (
         val votes = mutableMapOf<Int, IntArray>()
         votes[contestId] = if (winner != null) intArrayOf(winner) else IntArray(0)
         return Cvr(strataName, votes) // TODO ok to glom onto cvr.id to indicate statum ??
+    }
+
+    override fun toString() = buildString {
+        append("  strata $strataName hasCvrs=$hasCvrs Nc=$Ng Np=$Np votes=${votes}")
     }
 }
 
@@ -147,83 +160,93 @@ class OneAuditContestUnderAudit(
 ): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=true) {
 
     override fun makeComparisonAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
-        // primitive assertions
-        val assertions = when (contest.info.choiceFunction) {
-            SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY, -> makePluralityAssertions() // TODO supermaj
-            else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
+        // TODO assume its plurality for now
+        val assertions = mutableListOf<Pair<Assertion, Map<String, Double>>>()
+        contest.winners.forEach { winner ->
+            contest.losers.forEach { loser ->
+                val baseAssorter = PluralityAssorter.makeWithVotes(this.contest, winner, loser, contestOA.votes)
+                val batchAvgValues = contestOA.strata.map { stratum -> Pair(stratum.strataName, stratum.reportedMargin(winner, loser)) }
+                assertions.add( Pair(Assertion( this.contest, baseAssorter), batchAvgValues.toMap()))
+            }
         }
 
         // turn into comparison assertions
-        this.comparisonAssertions = assertions.map { assertion ->
+        this.comparisonAssertions = assertions.map { (assertion: Assertion, batchAvgValues: Map<String, Double>) ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
-            ComparisonAssertion(contest, comparisonAssorter)
+            ComparisonAssertion(contest, OneAuditComparisonAssorter(contest, assertion.assorter, margin2mean(margin), batchAvgValues))
         }
 
         return this
     }
-
-    fun makePluralityAssertions(): List<Assertion> {
-        // test that every winner beats every loser. SHANGRLA 2.1
-        val assertions = mutableListOf<Assertion>()
-        contest.winners.forEach { winner ->
-            contest.losers.forEach { loser ->
-                var assorterCvr : AssorterFunction? = null
-                val strataAssorters = contestOA.strata.map { stratum ->
-                    val assorter = PluralityAssorter.makeWithVotes(stratum.contest, winner, loser, stratum.votes) // TODO wrong
-                    if (stratum == contestOA.stratumCvr) assorterCvr = assorter // TODO not always one??
-                    Pair(stratum.strataName, assorter)
-                }
-                assertions.add( Assertion( this.contest,
-                    CompositeAssorter(this.contest.info, winner, loser, 1.0,
-                        contestOA.reportedMargin(winner, loser),
-                        strataAssorters.toMap(),
-                        assorterCvr!!)) )
-            }
-        }
-        return assertions
-    }
 }
 
-data class CompositeAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val upperBound: Double,
-        val reportedMargin: Double, // TODO where do we get this?
-        val assorters: Map<String, AssorterFunction>,
-        val assorterCvr: AssorterFunction,
-    ): AssorterFunction {
+// assorter_mean_all = (whitmer-schuette)/N
+// v = 2*assorter_mean_all-1
+// u_b = 2*u/(2*u-v)  # upper bound on the overstatement assorter
+// noerror = u/(2*u-v)
 
-    override fun upperBound() = upperBound
-    override fun winner() = winner
-    override fun loser() = loser
-    override fun reportedMargin() = reportedMargin
-    override fun desc() = buildString {
-        append("CompositeAssorter winner/loser=${winner}/${loser}")
-    }
+// Let
+//     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
+//     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
+//
+//     ωi ≡ A(ci) − A(bi)   overstatementError
+//     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
+//     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
 
-    override fun assort(cvr: Cvr, usePhantoms: Boolean): Double {
-        val useStratum = assorters[cvr.id]?: assorterCvr // find the correct stratum TODO cvr stratum
-        val result =  useStratum.assort(cvr, usePhantoms)
-        //val id = (useStratum as PluralityAssorter).contest.info.name
-        //println(" assort with ${id} got result $result")
-        return result
-    }
+//    Ng = |G_g|
+//    Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
+//    margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
+//    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
+//    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
+//    otherwise = 1/2
 
-    // TODO need to filter strata?
-    override fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>): Double {
-        val mean = cvrs.filter{ it.hasContest(contestId) }
-            .map { assort(it, usePhantoms = false) }.average()
+data class OneAuditComparisonAssorter(
+    val contest: ContestIF,
+    val assorter: AssorterFunction,   // A(mvr)
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
+    val batchAvgValues: Map<String, Double>,   // strataName -> assorter_mean_poll
+) : ComparisonAssorterIF {
+    //val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
+    //val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
+    //val upperBound = 2.0 * noerror  // maximum assort value
+
+    // TODO these are just for the cvrs. Problem?
+    val cvrComparisonAssorter = ComparisonAssorter(contest, assorter, avgCvrAssortValue)
+    override fun margin() = cvrComparisonAssorter.margin
+    override fun noerror() = cvrComparisonAssorter.noerror
+    override fun upperBound() = cvrComparisonAssorter.upperBound
+    override fun assorter() = assorter
+
+    fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
+        val mean = cvrPairs.filter{ it.first.hasContest(contest.id) }
+            .map { bassort(it.first, it.second) }.average()
         return mean2margin(mean)
     }
 
-    override fun toString() = buildString {
-        appendLine("CompositeAssorter: info=$info")
-        appendLine("  winner=$winner, loser=$loser, upperBound=$upperBound, reportedMargin=$reportedMargin")
-        assorters.forEach {
-            appendLine("  $it")
+    // B(bi, ci)
+    override fun bassort(mvr: Cvr, cvr:Cvr): Double {
+        val batchAvgValue = batchAvgValues[cvr.id]
+        if (batchAvgValue == null) {
+            return cvrComparisonAssorter.bassort(mvr, cvr)
         }
+
+        val overstatement = overstatementError(mvr, cvr, batchAvgValue) // ωi
+        val tau = (1.0 - overstatement / this.assorter.upperBound())
+        val margin = 2.0 * batchAvgValue - 1.0 // reported assorter margin
+        val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
+        val result =  tau * noerror
+        return result
     }
 
+    fun overstatementError(mvr: Cvr, cvr: Cvr, batchAvgValue: Double, hasStyle: Boolean = true): Double {
+        if (hasStyle and !cvr.hasContest(contest.info.id)) {
+            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.info.name} (${contest.info.id})")
+        }
+        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(contest.info.id))) 0.0
+                         else this.assorter.assort(mvr, usePhantoms = false)
 
+        val cvr_assort = if (cvr.phantom) .5 else batchAvgValue
+        return cvr_assort - mvr_assort
+    }
 }
-
 

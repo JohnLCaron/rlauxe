@@ -665,7 +665,16 @@ Following SHANGRLA Section 3.2 define
 
     see OneAudit section 2.3
 ````
+Section 2
 
+````
+    Ng = |G_g|
+    assorter_mean_poll = (winner total - loser total) / Ng
+    mvr has loser vote = (1-assorter_mean_poll)/(2-v)
+    mvr has winner vote = (2-assorter_mean_poll)/(2-v)
+    otherwise = 1/2
+  
+````
 See "Algorithm for a CLCA using ONE CVRs from batch subtotals" in Section 3.
 ````
 This algorithm can be made more efficient statistically and logistically in a variety

@@ -137,7 +137,6 @@ fun makeRaireContest(N: Int, margin: Double): Pair<RaireContestUnderAudit, List<
 }
 
 fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>): Triple<Int, RaireResult, AssertionAndDifficulty> {
-
     val vc = VoteConsolidator()
     testCvrs.forEach {
         val votes = it.cvr.votes[testContest.info.id]

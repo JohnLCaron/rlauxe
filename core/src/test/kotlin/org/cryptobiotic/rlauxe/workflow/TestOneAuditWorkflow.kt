@@ -18,7 +18,7 @@ class TestOneAuditWorkflow {
         val underVotePct= 0.05 .. 0.05
         val phantomPct= 0.005 .. 0.005
 
-        val contestOA = makeContestOA(23000, 22000, cvrPercent = .30, undervotePercent=.01)
+        val contestOA = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS

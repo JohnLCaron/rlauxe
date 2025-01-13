@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class TestOneAudit {
 
@@ -15,16 +16,17 @@ class TestOneAudit {
         val contest = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01)
         val testCvrs = contest.makeTestCvrs()
         val contestOA = contest.makeContestUnderAudit(testCvrs)
-        val minAllAssorter = contestOA.minComparisonAssertion()!!.assorter
+        val minAllAsserter = contestOA.minComparisonAssertion()
+        assertNotNull(minAllAsserter)
+        val minAllAssorter = minAllAsserter.assorter
         println(minAllAssorter)
 
         val minAssorterMargin = minAllAssorter.calcAssorterMargin(contest.id, testCvrs)
         println(" calcAssorterMargin for minAllAssorter = $minAssorterMargin")
 
-        val cass = minAllAssorter as CompositeAssorter
-        cass.assorters.forEach { (name, assorter) ->
-            val margin = assorter.calcAssorterMargin(contest.id, testCvrs)
-            println("   $name calcAssorterMargin= $margin")
+        val cass = minAllAsserter.cassorter as OneAuditComparisonAssorter
+        cass.batchAvgValues.forEach { (name, avgValue) ->
+            println("   $name avgValue= $avgValue")
         }
 
     }

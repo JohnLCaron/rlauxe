@@ -50,7 +50,7 @@ class TestAssorterComparisonOneAudit {
         val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
 
         val assorter_mean_poll = awinnerAvg
-        val bassorter = OneAuditComparisonAssorter(contest, assorter, awinnerAvg, assorter_mean_poll=assorter_mean_poll)
+        val bassorter = OneAuditComparisonAssorter(contest, assorter, awinnerAvg, mapOf("card" to assorter_mean_poll))
 
         assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
         assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser
@@ -62,10 +62,6 @@ class TestAssorterComparisonOneAudit {
         val loserVote = (1.0-assorter_mean_poll)/(2-margin)
         val winnerVote = (2.0-assorter_mean_poll)/(2-margin)
         println("loserVote=$loserVote winner=$winnerVote ")
-
-        println(" mvr other overstatementError=${bassorter.overstatementError(otherCvr, winnerCvr, true)} ")
-        println(" mvr winner overstatementError=${bassorter.overstatementError(winnerCvr, winnerCvr, true)} ")
-        println(" mvr loser overstatementError=${bassorter.overstatementError(loserCvr, winnerCvr, true)} ")
 
         println(" mvr other bassort=${bassorter.bassort(otherCvr, winnerCvr)} ")
         println(" mvr winner bassort=${bassorter.bassort(winnerCvr, winnerCvr)} ")
@@ -91,34 +87,37 @@ class TestAssorterComparisonOneAudit {
         val contestOA = contest.makeContestUnderAudit(testCvrs)
         println(contestOA)
 
-        val winnerCvr = makeCvr(0)
-        val loserCvr = makeCvr(1)
-        val otherCvr = makeCvr(2)
-        val phantomCvr = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
+        val winnerCvr = makeCvr(0, "noCvr")
+        val loserCvr = makeCvr(1, "noCvr")
+        val otherCvr = makeCvr(2, "noCvr")
 
         val bassorter = contestOA.minComparisonAssertion()!!.cassorter as OneAuditComparisonAssorter
         println(bassorter)
-        // val noerror = 1.0 / (2.0 - margin / assorter.upperBound())
-        println("  noerror=${bassorter.noerror()}")
-        assertEquals(1.0 / (2.0 - bassorter.margin()) / bassorter.assorter().upperBound(), bassorter.noerror())
 
-        assertEquals(0.0, bassorter.overstatementError(winnerCvr, winnerCvr, true))
-        assertEquals(-1.0, bassorter.overstatementError(winnerCvr, loserCvr, true))
-        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, otherCvr, true))
-        assertEquals(-0.5, bassorter.overstatementError(winnerCvr, phantomCvr, true))
+        val assorter_mean_poll = bassorter.batchAvgValues["noCvr"]!!
+        val margin = mean2margin(assorter_mean_poll)
 
-        assertEquals(1.0, bassorter.overstatementError(loserCvr, winnerCvr, true))
-        assertEquals(0.0, bassorter.overstatementError(loserCvr, loserCvr, true))
-        assertEquals(0.5, bassorter.overstatementError(loserCvr, otherCvr, true))
-        assertEquals(0.5, bassorter.overstatementError(loserCvr, phantomCvr, true))
+        //    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
+        //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
+        val loserVote = (1.0-assorter_mean_poll)/(2-margin)
+        val winnerVote = (2.0-assorter_mean_poll)/(2-margin)
+        println("loserVote=$loserVote winner=$winnerVote ")
 
-        assertEquals(0.5, bassorter.overstatementError(otherCvr, winnerCvr, true))
-        assertEquals(-0.5, bassorter.overstatementError(otherCvr, loserCvr, true))
-        assertEquals(0.0, bassorter.overstatementError(otherCvr, otherCvr, true))
+        println(" mvr other bassort=${bassorter.bassort(otherCvr, winnerCvr)} ")
+        println(" mvr winner bassort=${bassorter.bassort(winnerCvr, winnerCvr)} ")
+        println(" mvr loser bassort=${bassorter.bassort(loserCvr, winnerCvr)} ")
 
-        assertEquals(1.0, bassorter.overstatementError(phantomCvr, winnerCvr, true)) // check
-        assertEquals(0.0, bassorter.overstatementError(phantomCvr, loserCvr, true)) // check
-        assertEquals(0.5, bassorter.overstatementError(phantomCvr, phantomCvr, true)) // check, usual case
+        assertEquals(0.5, bassorter.bassort(otherCvr, winnerCvr), doublePrecision)
+        assertEquals(loserVote, bassorter.bassort(loserCvr, winnerCvr), doublePrecision)
+        assertEquals(winnerVote, bassorter.bassort(winnerCvr, winnerCvr), doublePrecision)
+
+        assertEquals(0.5, bassorter.bassort(otherCvr, loserCvr), doublePrecision)
+        assertEquals(loserVote, bassorter.bassort(loserCvr, loserCvr), doublePrecision)
+        assertEquals(winnerVote, bassorter.bassort(winnerCvr, loserCvr), doublePrecision)
+
+        assertEquals(0.5, bassorter.bassort(otherCvr, otherCvr), doublePrecision)
+        assertEquals(loserVote, bassorter.bassort(loserCvr, otherCvr), doublePrecision)
+        assertEquals(winnerVote, bassorter.bassort(winnerCvr, otherCvr), doublePrecision)
         // so overstatementError in [-1, -.5, 0, .5, 1]
     }
 }

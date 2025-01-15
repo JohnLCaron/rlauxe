@@ -20,7 +20,7 @@ class TestOneAuditCvrs {
 
     @Test
     fun testMakeContestOAcvrs() {
-        val contestOA = makeContestOA(23333, 21678, cvrPercent = .70, undervotePercent=.01)
+        val contestOA = makeContestOA(23333, 21678, cvrPercent = .70, .11, undervotePercent=.01)
         println("contestOA = $contestOA")
         contestOA.strata.forEach { stratum ->
             val scvrs = stratum.makeFakeCvrs()

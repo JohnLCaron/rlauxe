@@ -27,6 +27,7 @@ fun listToMap(names: List<String>): Map<String, Int> {
 
 fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
+fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 
 fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)

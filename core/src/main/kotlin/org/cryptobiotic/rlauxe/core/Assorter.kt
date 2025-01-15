@@ -58,7 +58,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
         return (w - l + 1) * 0.5
     }
     override fun upperBound() = 1.0
-    override fun desc() = " winner=$winner loser=$loser"
+    override fun desc() = " winner=$winner loser=$loser reportedMargin=$reportedMargin"
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin // TODO why is this here? if not here, only need one PluralityAssorter
@@ -111,7 +111,6 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 /////////////////////////////////////////////////////////////////////////////////
 
 interface ComparisonAssorterIF {
-    fun margin(): Double
     fun noerror(): Double
     fun upperBound(): Double
 
@@ -123,11 +122,11 @@ interface ComparisonAssorterIF {
 data class ComparisonAssorter(
     val contest: ContestIF,
     val assorter: AssorterFunction,   // A
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value != reportedMargin
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
     val hasStyle: Boolean = true, // TODO could be on the Contest ??
     val check: Boolean = true, // TODO get rid of
 ) : ComparisonAssorterIF {
-    val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
+    private val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
 
@@ -138,7 +137,7 @@ data class ComparisonAssorter(
         }
     }
 
-    override fun margin() = margin
+    // override fun margin() = margin
     override fun noerror() = noerror
     override fun upperBound() = upperBound
     override fun assorter() = assorter
@@ -231,7 +230,7 @@ open class Assertion(
 ) {
     val winner = assorter.winner()
     val loser = assorter.loser()
-    val margin = assorter.reportedMargin()
+    // val margin = assorter.reportedMargin()
 
     val roundResults = mutableListOf<AuditRoundResult>()
 
@@ -243,14 +242,12 @@ open class Assertion(
     var proved = false
     var round = 0           // round when set to proved or disproved
 
-    override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(margin)}"
+    override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"
 }
 
 open class ComparisonAssertion(
     contest: ContestIF,
     val cassorter: ComparisonAssorterIF,
 ): Assertion(contest, cassorter.assorter()) {
-    val cmargin = cassorter.margin()
-
-    override fun toString() = "${cassorter.assorter().desc()} cmargin=${df(cmargin)} estSampleSize=$estSampleSize"
+    override fun toString() = "${cassorter.assorter().desc()} estSampleSize=$estSampleSize"
 }

@@ -27,7 +27,8 @@ class TestCorla {
         val compareAssorter = makeStandardComparisonAssorter(theta, N)
         val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = p1, withoutReplacement = false)
 
-        val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
+        // TODO reportedMargin or clcaMargin?
+        val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.assorter.reportedMargin(), noerror=compareAssorter.noerror,
             p1 = p1, p2 = p2, p3 = 0.0, p4 = 0.0)
 
         val corlaResult = runTestRepeated(
@@ -100,7 +101,7 @@ class TestCorla {
                         )
                         println(" bettingResult = ${bettingResult}")
 
-                        val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.margin, noerror=compareAssorter.noerror,
+                        val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.assorter.reportedMargin(), noerror=compareAssorter.noerror,
                             p1 = p1prior, p2 = p2prior, p3 = 0.0, p4 = 0.0) // not using the priors
 
                         val corlaResult = runTestRepeated(

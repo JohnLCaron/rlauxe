@@ -255,15 +255,15 @@ open class ContestUnderAudit(
     }
 
     fun minComparisonAssertion(): ComparisonAssertion? {
-        val margins = comparisonAssertions.map { it.cassorter.margin() }
+        val margins = comparisonAssertions.map { it.assorter.reportedMargin()  }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.cassorter.margin() == minMargin }
+        return comparisonAssertions.find { it.assorter.reportedMargin()  == minMargin }
     }
 
     fun minPollingAssertion(): Assertion? {
-        val margins = pollingAssertions.map { it.margin }
+        val margins = pollingAssertions.map { it.assorter.reportedMargin() }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return pollingAssertions.find { it.margin == minMargin }
+        return pollingAssertions.find { it.assorter.reportedMargin() == minMargin }
     }
 
     fun minAssertion(): Assertion? {
@@ -271,7 +271,8 @@ open class ContestUnderAudit(
     }
 
     fun minMargin(): Double {
-        return if (isComparison) (minComparisonAssertion()?.margin ?: 0.0) else (minPollingAssertion()?.margin ?: 0.0)
+        return if (isComparison) (minComparisonAssertion()?.assorter?.reportedMargin() ?: 0.0)
+        else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 }
 

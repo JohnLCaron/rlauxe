@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.makeCvr
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
@@ -47,10 +48,12 @@ class TestAssorterPlurality {
         val winner = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         val winnerAvg = cvrs.map { winner.assort(it) }.average()
         assertEquals(.55, winnerAvg)
+        assertEquals(margin2mean(winner.reportedMargin), winnerAvg)
 
         val loser = PluralityAssorter.makeWithVotes(contest, winner = 1, loser = 0)
         val loserAvg = cvrs.map { loser.assort(it) }.average()
         assertEquals(.45, loserAvg)
+        assertEquals(margin2mean(loser.reportedMargin), loserAvg)
     }
 
     @Test
@@ -70,6 +73,10 @@ class TestAssorterPlurality {
         assertEquals(0.5, winner12.assort(cvr0))
         assertEquals(1.0, winner12.assort(cvr1))
         assertEquals(0.0, winner12.assort(cvr2))
+
+        val cvrs = listOf(cvr0, cvr1, cvr2)
+        val winnerAvg = cvrs.map { winner12.assort(it) }.average()
+        assertEquals(margin2mean(winner12.reportedMargin), winnerAvg, doublePrecision)
     }
 
     @Test
@@ -116,6 +123,8 @@ class TestAssorterPlurality {
     fun test3way(contest : Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int, loser:Int, other: Int): Double {
         val assort = PluralityAssorter.makeWithVotes(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
+        assertEquals(margin2mean(assort.reportedMargin), assortAvg, doublePrecision)
+
         assertEquals((counts[winner] + counts[other]*.5)/counts.sum(), assortAvg)
         print(" ($winner, $loser, $other)= $assortAvg == ")
         return assortAvg
@@ -245,10 +254,9 @@ class TestAssorterPlurality {
     fun testNway(contest : Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int, loser:Int): Double {
         val assort = PluralityAssorter.makeWithVotes(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
+        assertEquals(margin2mean(assort.reportedMargin), assortAvg, doublePrecision)
+
         val others = counts.mapIndexed { idx, it -> if (idx != winner && idx != loser) it else 0}.sum()
-        if ((counts[winner] + others *.5)/counts.sum() != assortAvg) {
-            println()
-        }
         assertEquals((counts[winner] + others *.5)/counts.sum(), assortAvg, "winner=$winner loser=$loser")
         println(" ($winner, $loser)= $assortAvg")
         return assortAvg

@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.ComparisonAssorterIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
-
 // the mvr and cvr always agree.
 class ComparisonNoErrors(val contestId: Int, val cvrs : List<Cvr>, val cassorter: ComparisonAssorterIF): Sampler {
     val maxSamples = cvrs.count { it.hasContest(contestId) }

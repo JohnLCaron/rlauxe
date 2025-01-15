@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TestAssorterMargins {
@@ -23,7 +24,7 @@ class TestAssorterMargins {
         test.contests.forEach { contest ->
             val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
             val cvrs = test.makeCvrsFromContests()
-            val fcontest = test.fcontests.find { it.info.name == contest.name }!!
+            assertNotNull(test.fcontests.find { it.info.name == contest.name })
             testAssertions(contest, contestUA.pollingAssertions, cvrs)
         }
     }
@@ -42,7 +43,6 @@ class TestAssorterMargins {
 
                 try {
                     test.contests.forEach { contest ->
-                        // val fcontest = test.fcontests.find { it.info.name == contest.name }!!
                         val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
                         testAssertions(contest, contestUA.pollingAssertions, cvrs)
                     }
@@ -91,10 +91,8 @@ class TestAssorterMargins {
 
             val calcReportedMargin = contest.calcMargin(ast.winner, ast.loser)
             val calcAssorterMargin = ast.assorter.calcAssorterMargin(ast.contest.info.id, cvrs)
-            if (!doubleIsClose(calcReportedMargin, calcAssorterMargin))
-                println("")
             assertEquals(calcReportedMargin, calcAssorterMargin, doublePrecision, "calcReportedMargin")
-            assertEquals(ast.margin, calcAssorterMargin, doublePrecision, "calcAssorterMargin")
+            assertEquals(ast.assorter.reportedMargin(), calcAssorterMargin, doublePrecision, "calcAssorterMargin")
 
             //val assortWithoutPhantoms = margin2mean(calcAssorterMargin)
             //val assortWithPhantoms = cvrs.filter { it.hasContest(ast.contest.info.id) }

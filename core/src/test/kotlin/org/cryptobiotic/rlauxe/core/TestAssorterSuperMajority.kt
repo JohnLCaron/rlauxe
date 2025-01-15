@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvr
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -118,6 +119,8 @@ class TestAssorterSuperMajority {
         val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!)
         assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
+        assertEquals(margin2mean(assort.reportedMargin), assortAvg, doublePrecision)
+
         val n = counts.sum().toDouble()
         val p = counts[winner] / n
         val q = counts.sum() / n

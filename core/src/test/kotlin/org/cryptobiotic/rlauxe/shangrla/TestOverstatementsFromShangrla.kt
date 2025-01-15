@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.sampling.makeCvr
 import org.cryptobiotic.rlauxe.sampling.makeFakeContest
+import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -72,12 +73,16 @@ class TestOverstatementsFromShangrla {
         assertEquals(1.0/3.0, overstatement_assorter_margin(aVb))
     }
 
-    fun overstatement_assorter_margin(assort: ComparisonAssorter, error_rate_1: Double = 0.0, error_rate_2: Double = 0.0): Double {
-        return (1 - (error_rate_2 + error_rate_1 / 2) * assort.assorter.upperBound() / assort.margin) / (2 * assort.assorter.upperBound() / assort.margin - 1)
+    fun overstatement_assorter_margin(cassort: ComparisonAssorter, error_rate_1: Double = 0.0, error_rate_2: Double = 0.0): Double {
+        val assort = cassort.assorter
+        val cmargin = mean2margin(cassort.avgCvrAssortValue)
+        return (1 - (error_rate_2 + error_rate_1 / 2) * assort.upperBound() / cmargin) / (2 * assort.upperBound() / cmargin - 1)
     }
 
-    fun overstatement_assorter_mean(assort: ComparisonAssorter, error_rate_1: Double = 0.0, error_rate_2: Double = 0.0): Double {
-        return (1 - error_rate_1 / 2 - error_rate_2) / (2 - assort.margin / assort.assorter.upperBound())
+    fun overstatement_assorter_mean(cassort: ComparisonAssorter, error_rate_1: Double = 0.0, error_rate_2: Double = 0.0): Double {
+        val assort = cassort.assorter
+        val cmargin = mean2margin(cassort.avgCvrAssortValue)
+        return (1 - error_rate_1 / 2 - error_rate_2) / (2 - cmargin / assort.upperBound())
     }
 
     //

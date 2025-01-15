@@ -147,7 +147,7 @@ fun auditOneAssertion(
     val assorter = assertion.assorter
     val sampler = PollWithoutReplacement(contest, mvrs, assorter, allowReset=false)
 
-    val eta0 = margin2mean(assertion.margin)
+    val eta0 = margin2mean(assorter.reportedMargin())
     val minsd = 1.0e-6
     val t = 0.5
     val c = (eta0 - t) / 2
@@ -155,7 +155,7 @@ fun auditOneAssertion(
     val estimFn = TruncShrinkage(
         N = contest.Nc,
         withoutReplacement = true,
-        upperBound = assertion.assorter.upperBound(),
+        upperBound = assorter.upperBound(),
         d = auditConfig.d1,
         eta0 = eta0,
         minsd = minsd,
@@ -184,7 +184,6 @@ fun auditOneAssertion(
         samplesUsed = testH0Result.sampleCount,
         pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,
-        // calcAssortMargin=assorter.calcAssorterMargin(contest.id, mvrs),
     )
     assertion.roundResults.add(roundResult)
 

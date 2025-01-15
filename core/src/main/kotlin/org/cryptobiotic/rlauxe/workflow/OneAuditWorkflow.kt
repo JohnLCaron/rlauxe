@@ -10,7 +10,8 @@ class OneAuditWorkflow(
     val auditConfig: AuditConfig,
     contests: List<OneAuditContest>, // the contests you want to audit
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-) {
+    val quiet: Boolean = false,
+): RlauxWorkflow {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
     init {
@@ -27,8 +28,8 @@ class OneAuditWorkflow(
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
-    fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = false): List<Int> {
-        println("estimateSampleSizes round $roundIdx")
+    override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
+        if (!quiet) println("estimateSampleSizes round $roundIdx")
 
         val maxContestSize = estimateSampleSizes(
             auditConfig,
@@ -46,14 +47,14 @@ class OneAuditWorkflow(
         val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
-                println(" consistentSampling round $roundIdx")
+                if (!quiet) println(" consistentSampling round $roundIdx")
                 val sampleIndices = consistentSampling(contestsNotDone, cvrsUA)
-                println("  maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                if (!quiet) println("  maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             } else {
-                println(" uniformSampling round $roundIdx")
+                if (!quiet) println(" uniformSampling round $roundIdx")
                 val sampleIndices = uniformSampling(contestsNotDone, cvrsUA, auditConfig.samplePctCutoff, cvrs.size, roundIdx)
-                println("  maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                if (!quiet) println("  maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             }
         }
@@ -61,7 +62,7 @@ class OneAuditWorkflow(
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
+    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         val contestsNotDone = contestsUA.filter{ !it.done }
         val sampledCvrs = sampleIndices.map { cvrs[it] }
 
@@ -70,7 +71,7 @@ class OneAuditWorkflow(
         val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
-        println("runAudit round $roundIdx")
+        if (!quiet) println("runAudit round $roundIdx")
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
@@ -91,7 +92,7 @@ class OneAuditWorkflow(
         return allDone
     }
 
-    fun showResults() {
+    override fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minComparisonAssertion()
@@ -109,6 +110,10 @@ class OneAuditWorkflow(
             }
         }
         println()
+    }
+
+    override fun getContests(): List<ContestUnderAudit> {
+        return contestsUA
     }
 }
 
@@ -173,7 +178,7 @@ fun runOneAuditAssertionAlpha(
     roundIdx: Int,
 ): TestH0Status {
     val assorter = cassertion.cassorter as OneAuditComparisonAssorter
-    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassertion.cassorter, allowReset = false, trackStratum = true)
+    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassertion.cassorter, allowReset = false, trackStratum = false)
 
     val eta0 = margin2mean(assorter.clcaMargin)
     val minsd = 1.0e-6

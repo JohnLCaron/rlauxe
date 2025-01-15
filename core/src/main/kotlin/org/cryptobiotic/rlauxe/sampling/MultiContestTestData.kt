@@ -19,8 +19,8 @@ data class MultiContestTestData(
     val nballotStyles: Int,
     val totalBallots: Int, // including undervotes but not phantoms
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
-    val underVotePct: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
-    val phantomPct: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
+    val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
+    val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
 ) {
     // generate with ballotStyles; but if hasStyles = false, then these are not visible
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
@@ -40,8 +40,8 @@ data class MultiContestTestData(
             val ncands = max(Random.nextInt(5), 2)
             ContestTestData(it, ncands,
                 marginRange.start + if (marginRange.endInclusive <= marginRange.start) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
-                underVotePct.start + if (underVotePct.endInclusive <= underVotePct.start) 0.0 else Random.nextDouble(underVotePct.endInclusive - underVotePct.start),
-                phantomPct.start + if (phantomPct.endInclusive <= phantomPct.start) 0.0 else Random.nextDouble(phantomPct.endInclusive - phantomPct.start),
+                underVotePctRange.start + if (underVotePctRange.endInclusive <= underVotePctRange.start) 0.0 else Random.nextDouble(underVotePctRange.endInclusive - underVotePctRange.start),
+                phantomPctRange.start + if (phantomPctRange.endInclusive <= phantomPctRange.start) 0.0 else Random.nextDouble(phantomPctRange.endInclusive - phantomPctRange.start),
                 // TODO ChoiceFunction ??
             )
         }
@@ -82,7 +82,7 @@ data class MultiContestTestData(
 
     override fun toString() = buildString {
         append("ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
-        appendLine(" marginRange=$marginRange underVotePct=$underVotePct phantomPct=$phantomPct")
+        appendLine(" marginRange=$marginRange underVotePct=$underVotePctRange phantomPct=$phantomPctRange")
         fcontests.forEach { fcontest ->
             append("  $fcontest")
             val bs4id = ballotStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }

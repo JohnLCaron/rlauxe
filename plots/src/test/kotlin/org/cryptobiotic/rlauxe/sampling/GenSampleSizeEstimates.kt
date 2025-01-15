@@ -5,8 +5,10 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import io.kotest.core.config.AbstractProjectConfig
+import org.cryptobiotic.rlauxe.concur.ConcurrentTask
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunner
 
-class PlotSampleSizeEstimates : AbstractProjectConfig() {
+class GenSampleSizeEstimates : AbstractProjectConfig() {
     override val parallelism = 3
 
     @Test

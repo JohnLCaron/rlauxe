@@ -26,7 +26,7 @@ class TestPollingWorkflow {
         val marginRange= 0.05 .. 0.10
         val underVotePct= 0.02..0.02
         val phantomPct= 0.005..0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         val contests: List<Contest> = test.contests
 
         println("Start testPollingNoStyle N=$N")
@@ -61,7 +61,7 @@ class TestPollingWorkflow {
         val marginRange= 0.05 .. 0.10
         val underVotePct= 0.02 .. 0.02
         val phantomPct= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
 
         val contests: List<Contest> = test.contests
         contests.forEachIndexed { idx, contest ->
@@ -96,7 +96,7 @@ class TestPollingWorkflow {
         val marginRange= 0.05 .. 0.05
         val underVotePct= 0.05 .. 0.05
         val phantomPct= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         test.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
             val fcontest = test.fcontests[idx]

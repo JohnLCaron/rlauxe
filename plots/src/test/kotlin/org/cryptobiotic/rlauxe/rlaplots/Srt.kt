@@ -75,8 +75,6 @@ data class SRT(val Nc: Int,
         result = 31 * result + (percentHist?.hashCode() ?: 0)
         return result
     }
-
-
 }
 
 // TODO reportedMean, reportedMeanDiff in parameters, or in RunTestRepeatedResult
@@ -146,7 +144,7 @@ class SRTcsvWriter(val filename: String) {
     // val hist: Histogram?, val reportedMeanDiff: Double, val d: Int)
     fun toCSV(srt: SRT) = buildString {
         append(
-            "${writeParameters(srt)}, ${srt.Nc}, ${srt.reportedMean}, ${srt.reportedMeanDiff}, " +
+            "${writeParameters(srt.testParameters)}, ${srt.Nc}, ${srt.reportedMean}, ${srt.reportedMeanDiff}, " +
                     "${srt.nsuccess}, ${srt.ntrials}, ${srt.totalSamplesNeeded}, ${srt.stddev} "
         )
         if (srt.percentHist != null) {
@@ -160,9 +158,9 @@ class SRTcsvWriter(val filename: String) {
     }
 }
 
-fun writeParameters(srt: SRT) = buildString {
+fun writeParameters(params: Map<String, Double> ) = buildString {
     append("\"")
-    srt.testParameters.forEach { key, value ->
+    params.forEach { key, value ->
         append("$key=$value ")
     }
     append("\"")
@@ -216,6 +214,7 @@ class SRTcsvReader(filename: String) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// older version
 
 // simple serialization to csv files
 class SRTcsvWriterVersion1(val filename: String) {

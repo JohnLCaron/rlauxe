@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.concur
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +15,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 

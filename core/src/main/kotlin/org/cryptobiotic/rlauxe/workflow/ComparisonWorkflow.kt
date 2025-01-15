@@ -22,7 +22,8 @@ class ComparisonWorkflow(
     contests: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-) {
+    val quiet: Boolean = false,
+): RlauxWorkflow {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
     init {
@@ -60,8 +61,8 @@ class ComparisonWorkflow(
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
-    fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = true): List<Int> {
-        println("estimateSampleSizes round $roundIdx")
+    override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
+        if (!quiet) println("estimateSampleSizes round $roundIdx")
 
         val maxContestSize = estimateSampleSizes(
             auditConfig,
@@ -88,14 +89,14 @@ class ComparisonWorkflow(
         val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
-                println("\nconsistentSampling round $roundIdx")
+                if (!quiet) println("\nconsistentSampling round $roundIdx")
                 val sampleIndices = consistentSampling(contestsNotDone, cvrsUA)
-                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             } else {
-                println("\nuniformSampling round $roundIdx")
+                if (!quiet) println("\nuniformSampling round $roundIdx")
                 val sampleIndices = uniformSampling(contestsNotDone, cvrsUA, auditConfig.samplePctCutoff, cvrs.size, roundIdx)
-                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             }
         }
@@ -103,7 +104,7 @@ class ComparisonWorkflow(
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
+    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
         // 	e) Import the MVRs.
         //	f) For each MVR 𝑖:
@@ -123,7 +124,7 @@ class ComparisonWorkflow(
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
         // TODO could parellelize across assertions
-        println("runAudit round $roundIdx")
+        if (!quiet) println("runAudit round $roundIdx")
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
@@ -143,7 +144,7 @@ class ComparisonWorkflow(
         return allDone
     }
 
-    fun showResults() {
+    override fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minComparisonAssertion()
@@ -162,6 +163,8 @@ class ComparisonWorkflow(
         }
         println()
     }
+
+    override fun getContests(): List<ContestUnderAudit> = contestsUA
 }
 
 ///////////////////////////////////////////////////////////////////////

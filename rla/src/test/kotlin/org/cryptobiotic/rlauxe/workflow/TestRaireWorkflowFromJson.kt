@@ -62,7 +62,7 @@ fun runComparisonWorkflowR(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, na
     while (!done) {
         val roundStopwatch = Stopwatch()
         println("---------------------------")
-        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
+        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
         previousSamples.addAll(indices)

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.sim
+package org.cryptobiotic.rlauxe.concur
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +24,8 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.mean2margin
 
+// TODO convert to use ConcurrentTaskRunner for the concurrency
+//   adapt RunTestRepeatedResult -> List<SRT>
 interface RepeatedTask {
     fun makeSampler() : Sampler
     fun makeTestFn() : RiskTestingFn

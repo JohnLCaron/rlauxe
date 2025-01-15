@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.util
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,37 +13,46 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.sampling.EstimationResult
+import org.cryptobiotic.rlauxe.sampling.EstimationTask
+import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.makeEstimationTasks
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
+import kotlin.test.Test
 
-fun main() {
-    val test = MultiContestTestData(15, 1, 20000)
-    val cvrs = test.makeCvrsFromContests()
-    val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it ).makeComparisonAssertions(cvrs) }
-    val nassertions = contestsUA.sumOf { it.assertions().size }
-    println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
+class MeasureEstimationTaskConcurrency {
+    @Test
+    fun measure() {
+        val test = MultiContestTestData(15, 1, 20000)
+        val cvrs = test.makeCvrsFromContests()
+        val contestsUA: List<ContestUnderAudit> =
+            test.contests.map { ContestUnderAudit(it).makeComparisonAssertions(cvrs) }
+        val nassertions = contestsUA.sumOf { it.assertions().size }
+        println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
 
-    val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1234567890L, fuzzPct = null, ntrials = 10)
-    val tasks = mutableListOf<EstimationTask>()
-    contestsUA.filter { !it.done }.forEach { contestUA ->
-        tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, emptyList(), 1))
+        val auditConfig =
+            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1234567890L, fuzzPct = null, ntrials = 10)
+        val tasks = mutableListOf<EstimationTask>()
+        contestsUA.filter { !it.done }.forEach { contestUA ->
+            tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, emptyList(), 1))
+        }
+
+        val one = runWest(1, tasks, 0.0).toDouble()
+        runWest(2, tasks, one)
+        runWest(4, tasks, one)
+        runWest(6, tasks, one)
+        runWest(8, tasks, one)
+        runWest(10, tasks, one)
+        runWest(12, tasks, one)
+        runWest(14, tasks, one)
+        runWest(16, tasks, one)
     }
 
-    val one = runWest(1, tasks, 0.0).toDouble()
-    runWest(2, tasks, one)
-    runWest(4, tasks, one)
-    runWest(6, tasks, one)
-    runWest(8, tasks, one)
-    runWest(10, tasks, one)
-    runWest(12, tasks, one)
-    runWest(14, tasks, one)
-    runWest(16, tasks, one)
-}
-
-fun runWest(nthreads: Int, tasks: List<EstimationTask>, one: Double): Long {
-    val runner = EstimationWTaskRunner()
-    return runner.calc(nthreads, tasks, one)
+    fun runWest(nthreads: Int, tasks: List<EstimationTask>, one: Double): Long {
+        val runner = EstimationWTaskRunner()
+        return runner.calc(nthreads, tasks, one)
+    }
 }
 
 class EstimationWTaskRunner() {

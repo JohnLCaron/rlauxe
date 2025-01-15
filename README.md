@@ -34,7 +34,7 @@ Table of Contents
     * [Comparison audits and CSDs](#comparison-audits-and-csds)
     * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
     * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
-  * [Stratified audits using OneAudit (In Progress)](#stratified-audits-using-oneaudit-in-progress)
+  * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
@@ -668,7 +668,7 @@ From OneAudit, p 9:
 1 - 5218/5294 = .0143
 1 - 22082/22372 = .0129
 
-## Stratified audits using OneAudit (In Progress)
+## Stratified audits using OneAudit
 
 When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
 This is "overstatement-net-equivalent" (aka ONE).
@@ -825,7 +825,7 @@ SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample
 contest audits, additional ballots may be in the sample because they are needed by another contest. Since theres no 
 guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
 
-*** If the Audit gets below the risk limit, should you terminate? Or finish all the samples that have been audited?
+*** If the Audit gets below the risk limit, should you terminate? Or finish all the samples that have been audited? ***
 
 ### compute sample size
 

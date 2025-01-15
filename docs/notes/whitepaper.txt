@@ -1,0 +1,53 @@
+RLA alliance
+
+Mission is to produce open-source, free as in beer, production quality software libraries for use in public elections to conduct public RLAs.
+The libraries are used by the vendors that sell voting systems to integrate RLA capabilities.
+
+Incorporate the latest academic research and best practices of RLA into production software.
+Inform and educate public election officials.
+Publish working example software that captures common configurations and needs.
+
+produce and maintain the libraries, conformance suites, interoperability specifications.
+
+Attract software developers to contribute. 
+Attract researchers and academics to contribute.
+Attract RLA experts to contribute.
+
+Non goals: create full voting systems. Our libraries are used by the vendors that sell voting systems.
+
+interoperable/conformance
+standardized error reporting / logging.
+
+3 languages: python (maybe), rust, kotlin/java.
+
+Arlo
+Shangrla
+colorado-rla
+california?
+
+what are the features we need to provide? minimal viable product? colorado-rla?
+
+algorithm-only library, make the math independent of the integration in order to provide uniform capabilities.
+
+API 
+
+integrators - interface with jurisdictions, provide support, customization, and value added. 
+Eventually these are the people we are "selling" to.
+
+Use web server to communicate.
+Pull the database and web framework out, "algorithm-only library".
+
+Prototype: is this feasible?
+
+abstract the RLA part out of colorado-rla.
+Talk to raire.
+create a conformance test
+rust and kotlin?
+
+----
+
+focus on api
+
+
+
+

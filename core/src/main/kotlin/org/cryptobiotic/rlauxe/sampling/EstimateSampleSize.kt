@@ -4,13 +4,14 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
+import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
 import kotlin.math.min
 import kotlin.math.max
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//// Both Comparison and Polling
+//// Comparison, Polling, OneAudit.
 
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
@@ -28,7 +29,7 @@ fun estimateSampleSizes(
     // run tasks concurrently
     val estResults: List<EstimationResult> = EstimationTaskRunner(show).run(tasks, nthreads)
 
-    // cant change contestUA until out of the concurrent tasks
+    // cant modify contestUA until out of the concurrent tasks
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
@@ -115,7 +116,6 @@ fun makeEstimationTasks(
 
     contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
         if (!assert.proved) {
-            // var maxSamples = contestUA.Nc // TODO WRONG ??
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
@@ -162,101 +162,35 @@ class SimulateSampleSizeTask(
 
     override fun name() = "task ${contest.info.name} ${assertion.assorter.desc()} ${df(assertion.assorter.reportedMargin())}"
     override fun estimate(): EstimationResult {
-        val result: RunTestRepeatedResult = if (contestUA.isComparison) {
-            simulateSampleSizeComparisonAssorter(
-                auditConfig,
-                contest,
-                (assertion as ComparisonAssertion).cassorter,
-                cvrs,
-                startingTestStatistic
-            )
-        } else {
-            simulateSampleSizePollingAssorter(
-                auditConfig,
-                contest as Contest, // TODO cant use Raire
-                assertion.assorter,
-                startingTestStatistic,
-                moreParameters=moreParameters,
-            )
+        val result: RunTestRepeatedResult = when (auditConfig.auditType) {
+            AuditType.CARD_COMPARISON ->
+                simulateSampleSizeComparisonAssorter(
+                    auditConfig,
+                    contest,
+                    (assertion as ComparisonAssertion).cassorter,
+                    cvrs,
+                    startingTestStatistic
+                )
+            AuditType.POLLING ->
+                simulateSampleSizePollingAssorter(
+                    auditConfig,
+                    contest as Contest, // TODO cant use Raire
+                    assertion.assorter,
+                    startingTestStatistic,
+                    moreParameters=moreParameters,
+                )
+            AuditType.ONEAUDIT ->
+                simulateSampleSizeOneAuditAssorter(
+                    auditConfig,
+                    contest,
+                    (assertion as ComparisonAssertion).cassorter,
+                    cvrs,
+                    startingTestStatistic,
+                    moreParameters=moreParameters,
+                )
         }
         return EstimationResult(this, result, result.failPct() > 80.0) // TODO 80% ??
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-//// Polling
-
-// also called from MakeSampleSizePlots
-fun simulateSampleSizePollingAssorter(
-    auditConfig: AuditConfig,
-    contest: Contest,  // TODO cant use Raire
-    assorter: AssorterFunction,
-    startingTestStatistic: Double = 1.0,
-    moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
-    val margin = assorter.reportedMargin()
-    val simContest = ContestSimulation(contest)
-    val cvrs = simContest.makeCvrs()
-
-    val sampler = if (auditConfig.fuzzPct == null) {
-        PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
-    } else {
-        PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire
-    }
-
-    return simulateSampleSizeAlphaMart(
-        auditConfig,
-        sampler,
-        margin,
-        assorter.upperBound(),
-        Nc = contest.Nc,
-        startingTestStatistic,
-        moreParameters = moreParameters,
-    )
-}
-
-fun simulateSampleSizeAlphaMart(
-    auditConfig: AuditConfig,
-    sampleFn: Sampler,
-    margin: Double,
-    upperBound: Double,
-    Nc: Int,
-    startingTestStatistic: Double = 1.0,
-    moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
-    val eta0 = margin2mean(margin)
-    val minsd = 1.0e-6
-    val t = 0.5
-    val c = (eta0 - t) / 2 // TODO
-
-    val estimFn = TruncShrinkage(
-        N = Nc,
-        withoutReplacement = true,
-        upperBound = upperBound,
-        d = auditConfig.d1,
-        eta0 = eta0,
-        minsd = minsd,
-        c = c,
-    )
-    val testFn = AlphaMart(
-        estimFn = estimFn,
-        N = Nc,
-        upperBound = upperBound,
-        riskLimit = auditConfig.riskLimit,
-        withoutReplacement = true
-    )
-
-    val result: RunTestRepeatedResult = runTestRepeated(
-        drawSample = sampleFn,
-        ntrials = auditConfig.ntrials,
-        testFn = testFn,
-        testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
-        showDetails = false,
-        startingTestStatistic = startingTestStatistic,
-        margin = margin,
-        Nc = Nc,
-    )
-    return result
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,6 +289,174 @@ fun simulateSampleSizeBetaMart(
     return result
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//// Polling
+
+// also called from MakeSampleSizePlots
+fun simulateSampleSizePollingAssorter(
+    auditConfig: AuditConfig,
+    contest: Contest,  // TODO cant use Raire
+    assorter: AssorterFunction,
+    startingTestStatistic: Double = 1.0,
+    moreParameters: Map<String, Double> = emptyMap(),
+): RunTestRepeatedResult {
+    val margin = assorter.reportedMargin()
+    val simContest = ContestSimulation(contest)
+    val cvrs = simContest.makeCvrs()
+
+    val sampler = if (auditConfig.fuzzPct == null) {
+        PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
+    } else {
+        PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire
+    }
+
+    return simulateSampleSizeAlphaMart(
+        auditConfig,
+        sampler,
+        margin,
+        assorter.upperBound(),
+        Nc = contest.Nc,
+        startingTestStatistic,
+        moreParameters = moreParameters,
+    )
+}
+
+fun simulateSampleSizeAlphaMart(
+    auditConfig: AuditConfig,
+    sampleFn: Sampler,
+    margin: Double,
+    upperBound: Double,
+    Nc: Int,
+    startingTestStatistic: Double = 1.0,
+    moreParameters: Map<String, Double> = emptyMap(),
+): RunTestRepeatedResult {
+    val eta0 = margin2mean(margin)
+    val minsd = 1.0e-6
+    val t = 0.5
+    val c = (eta0 - t) / 2 // TODO
+
+    val estimFn = TruncShrinkage(
+        N = Nc,
+        withoutReplacement = true,
+        upperBound = upperBound,
+        d = auditConfig.d1,
+        eta0 = eta0,
+        minsd = minsd,
+        c = c,
+    )
+    val testFn = AlphaMart(
+        estimFn = estimFn,
+        N = Nc,
+        upperBound = upperBound,
+        riskLimit = auditConfig.riskLimit,
+        withoutReplacement = true
+    )
+
+    val result: RunTestRepeatedResult = runTestRepeated(
+        drawSample = sampleFn,
+        ntrials = auditConfig.ntrials,
+        testFn = testFn,
+        testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
+        showDetails = false,
+        startingTestStatistic = startingTestStatistic,
+        margin = margin,
+        Nc = Nc,
+    )
+    return result
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//// OneAudit
+
+fun simulateSampleSizeOneAuditAssorter(
+    auditConfig: AuditConfig,
+    contest: ContestIF,
+    cassorter: ComparisonAssorterIF,
+    cvrs: List<Cvr>,
+    startingTestStatistic: Double = 1.0,
+    moreParameters: Map<String, Double> = emptyMap(),
+): RunTestRepeatedResult {
+    val cassorterOA = cassorter as OneAuditComparisonAssorter
+
+    val sampler = //if (auditConfig.errorRates != null) {
+    //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
+        //} else
+        if (auditConfig.fuzzPct == null) {
+            val cvrPairs = cvrs.zip( cvrs)
+            ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=true)
+            // } else if (auditConfig.useGeneratedErrorRates) {
+            //  val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
+            //  ComparisonSimulation(cvrs, contest, cassorter, errorRates)
+        } else {
+            ComparisonFuzzSampler(auditConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
+        }
+
+    // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros
+    // at the beginning
+    sampler.reset()
+
+    val errorRates = auditConfig.errorRates ?: ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
+
+    return simulateSampleSizeOneAudit(
+        auditConfig,
+        sampler,
+        cassorterOA.clcaMargin,
+        cassorter.noerror(),
+        cassorter.upperBound(),
+        contest.Nc,
+        errorRates,
+        startingTestStatistic,
+        moreParameters
+    )
+}
+
+fun simulateSampleSizeOneAudit(
+    auditConfig: AuditConfig,
+    sampleFn: Sampler,
+    margin: Double,
+    noerror: Double,
+    upperBound: Double,
+    Nc: Int,
+    errorRates: List<Double>,
+    startingTestStatistic: Double = 1.0,
+    moreParameters: Map<String, Double> = emptyMap(),
+): RunTestRepeatedResult {
+
+    val eta0 = margin2mean(margin)
+    val minsd = 1.0e-6
+    val t = 0.5
+    val c = (eta0 - t) / 2
+
+    val estimFn = TruncShrinkage(
+        N = Nc,
+        withoutReplacement = true,
+        upperBound = upperBound,
+        d = auditConfig.d1,
+        eta0 = eta0,
+        minsd = minsd,
+        c = c,
+    )
+    val testFn = AlphaMart(
+        estimFn = estimFn,
+        N = Nc,
+        withoutReplacement = true,
+        riskLimit = auditConfig.riskLimit,
+        upperBound = upperBound,
+    )
+
+    val result: RunTestRepeatedResult = runTestRepeated(
+        drawSample = sampleFn,
+        ntrials = auditConfig.ntrials,
+        testFn = testFn,
+        testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
+        showDetails = false,
+        startingTestStatistic = startingTestStatistic,
+        margin = margin,
+        Nc = Nc,
+    )
+    return result
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 // SHANGRLA computeSampleSize not needed, I think
 
@@ -421,6 +523,5 @@ fun computeSampleSizePolling(
     val summ: Double = ballots.filter { !it.phantom }.map { it.p }.sum()
     return ceil(summ).toInt()
 }
-
  */
 

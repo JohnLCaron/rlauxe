@@ -43,7 +43,7 @@ class TestOneAuditWorkflow {
         var prevMvrs = emptyList<Cvr>()
         var done = false
         while (!done) {
-            val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
+            val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
             val currRound = Round(roundIdx, indices, previousSamples.toSet())
             rounds.add(currRound)
             previousSamples.addAll(indices)
@@ -64,7 +64,6 @@ class TestOneAuditWorkflow {
             }
             println(" nsamples=$nsamples nocvrs=${df(nocvrs/nsamples)} withCvrs=${df((nsamples-nocvrs)/nsamples)}")
 
-            // TODO were not yet using the ONE algorithm, just comparisions that always agree
             done = workflow.runAudit(indices, sampledMvrs, roundIdx)
             println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             prevMvrs = sampledMvrs

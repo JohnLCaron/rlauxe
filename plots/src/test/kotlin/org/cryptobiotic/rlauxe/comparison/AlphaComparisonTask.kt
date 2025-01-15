@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.sampling.Sampler
-import org.cryptobiotic.rlauxe.sim.RepeatedTask
+import org.cryptobiotic.rlauxe.concur.RepeatedTask
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 import kotlin.test.assertEquals

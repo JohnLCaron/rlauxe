@@ -10,7 +10,8 @@ class PollingWorkflow(
         contests: List<ContestIF>, // the contests you want to audit
         val ballotManifest: BallotManifest,
         val N: Int, // total number of ballots/cards
-) {
+        val quiet: Boolean = false,
+): RlauxWorkflow {
     val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     val ballotsUA: List<BallotUnderAudit>
 
@@ -32,8 +33,8 @@ class PollingWorkflow(
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
-    fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = true): List<Int> {
-        println("estimateSampleSizes round $roundIdx")
+    override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
+        if (!quiet) println("estimateSampleSizes round $roundIdx")
         val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
@@ -47,14 +48,14 @@ class PollingWorkflow(
         val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
-                println("\nconsistentSampling round $roundIdx")
+                if (!quiet) println("\nconsistentSampling round $roundIdx")
                 val sampleIndices = consistentSampling(contestsNotDone, ballotsUA)
-                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             } else {
-                println("\nuniformSampling round $roundIdx")
+                if (!quiet) println("\nuniformSampling round $roundIdx")
                 val sampleIndices = uniformSampling(contestsNotDone, ballotsUA, auditConfig.samplePctCutoff, N, roundIdx)
-                println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             }
         }
@@ -62,7 +63,7 @@ class PollingWorkflow(
         return emptyList()
     }
 
-    fun showResults() {
+    override fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
@@ -83,27 +84,10 @@ class PollingWorkflow(
         println()
     }
 
-    /*
-    fun showResults2() {
-        println("Audit results")
-        contestsUA.forEach{ contest ->
-            val minAssertion = contest.minAssertion()
-            if (minAssertion == null)
-                println(" $contest has no assertions; status=${contest.status}")
-            else if (auditConfig.hasStyles)
-                println(" $contest samplesUsed=${minAssertion.samplesUsed} round=${minAssertion.round} status=${contest.status}")
-            else
-                println(" $contest samplesUsed=${minAssertion.samplesUsed} estSampleSize=${contest.estSampleSize}" +
-                        " estSampleSizeNoStyles=${contest.estSampleSizeNoStyles} round=${minAssertion.round} status=${contest.status}")
-        }
-        println()
-    }
-
-     */
-
-    fun runAudit(mvrs: List<Cvr>, roundIdx: Int): Boolean {
+    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         return runAudit(auditConfig, contestsUA, mvrs, roundIdx)
     }
+    override fun getContests() : List<ContestUnderAudit> = contestsUA
 }
 
 fun runAudit(
@@ -118,7 +102,6 @@ fun runAudit(
         return true
     }
 
-    println("auditOneAssertion")
     var allDone = true
     contestsNotDone.forEach { contestUA ->
         var allAssertionsDone = true

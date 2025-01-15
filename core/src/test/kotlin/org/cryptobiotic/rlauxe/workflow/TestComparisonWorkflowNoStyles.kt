@@ -16,7 +16,7 @@ class TestComparisonWorkflowNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
@@ -32,7 +32,7 @@ class TestComparisonWorkflowNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, fuzzPct=null, ntrials=10, errorRates=errorRates)
@@ -55,7 +55,7 @@ class TestComparisonWorkflowNoStyles {
         val marginRange= 0.015 .. 0.05
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.00 .. 0.00
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         testComparisonWorkflow(auditConfig, testData)
     }
 
@@ -68,7 +68,7 @@ class TestComparisonWorkflowNoStyles {
         val marginRange= 0.01 .. 0.05
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005 .. 0.005
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         testComparisonWorkflow(auditConfig, testData)
     }
 
@@ -81,7 +81,7 @@ class TestComparisonWorkflowNoStyles {
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePct =underVotePct, phantomPct =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, fuzzPct = null, ntrials=10,

@@ -17,6 +17,7 @@ import kotlin.random.Random
 
 /////////////////////////////////////////////////
 
+// run as main to make sure test framework not interfering
 fun main() {
     val wtf = Dispatchers.Default
     println("CoroutineDispatcher: ${wtf}") // corePoolSize = 48. could use reflection to get at it

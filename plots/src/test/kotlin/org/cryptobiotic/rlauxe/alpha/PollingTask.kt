@@ -1,10 +1,11 @@
-package org.cryptobiotic.rlauxe.sim
+package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.concur.RepeatedTask
 import kotlin.math.max
 
 data class PollingTask(

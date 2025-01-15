@@ -32,7 +32,7 @@ class TestSampleGenerator {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
             val contest = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
             val bassorter = contest.comparisonAssertions.first().cassorter as ComparisonAssorter
-            assertEquals(.02, bassorter.margin(), doublePrecision)
+            assertEquals(.02, bassorter.assorter().reportedMargin(), doublePrecision)
             assertEquals(0.5050505050505051, bassorter.noerror(), doublePrecision)
             assertEquals(1.0101010101010102, bassorter.upperBound(), doublePrecision)
 

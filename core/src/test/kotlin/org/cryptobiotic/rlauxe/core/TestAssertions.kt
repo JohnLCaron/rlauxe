@@ -41,8 +41,8 @@ class TestAssertions {
             assertIs<Assertion>(it)
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
-            println("$it: ${it.margin}")
-            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.margin, doublePrecision)
+            println("$it: ${it.assorter.reportedMargin()}")
+            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.assorter.reportedMargin(), doublePrecision)
         }
     }
 
@@ -82,9 +82,9 @@ class TestAssertions {
             assertIs<Assertion>(it)
             assertIs<SuperMajorityAssorter>(it.assorter)
             assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.assorter.upperBound())
-            println("$it: ${it.margin}")
+            println("$it: ${it.assorter.reportedMargin()}")
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr) }.average()
-            val mean = margin2mean(it.margin)
+            val mean = margin2mean(it.assorter.reportedMargin())
             assertEquals(assortAvg, mean)
         }
     }

@@ -693,7 +693,7 @@ fun calc_sample_sizes(
         testFn = betta,
         testParameters = mapOf("p2o" to optimal.p2o),
         showDetails = false,
-        margin = minAssorter.margin(),
+        margin = minAssorter.assorter().reportedMargin(),
         Nc = N,
     )
 }

@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/11/2025
+last update: 01/14/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -34,7 +34,7 @@ Table of Contents
     * [Comparison audits and CSDs](#comparison-audits-and-csds)
     * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
     * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
-  * [Stratified audits using OneAudit (TODO)](#stratified-audits-using-oneaudit-todo)
+  * [Stratified audits using OneAudit (In Progress)](#stratified-audits-using-oneaudit-in-progress)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
@@ -252,19 +252,58 @@ See Cobra section 4.2 and SHANGRLA Section 3.2.
 
 The overstatement error for the ith ballot is:
 ````
-    ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ upper    "overstatement error" (SHANGRLA eq 2, p 9)
+    ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ upper    "overstatement error" (SHANGRLA eq 2, p 9)
       bi is the manual voting record (MVR) for the ith ballot
       ci is the cast-vote record for the ith ballot
       A() is the assorter function
 Let
      Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-     v ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
+     v ≡ 2Ā(c) − 1, the _reported assorter margin_
      τi ≡ (1 − ωi /upper) ≥ 0
      B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper) ≡ "comparison assorter" ≡ B(MVR, CVR)
 
 Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
     B̄ ≡ Sum(B(bi, ci)) / N > 1/2
 and so B is an half-average assorter.
+````
+
+````
+  "assorter" here is the plurality assorter
+  Let 
+    bi denote the true votes on the ith ballot card; there are N cards in all.
+    ci denote the voting system’s interpretation of the ith card
+    Ā(c) ≡ Sum(A(ci))/N is the average assorter value across all the CVRs
+    margin ≡ v ≡ 2Ā(c) − 1, the _reported assorter margin_
+  
+    ωi ≡ A(ci) − A(bi)   overstatementError for ith ballot
+    ωi in [-1, -.5, 0, .5, 1] (for plurality assorter, which is in {0, .5, 1}))
+  
+    
+    We know Āb = Āc − ω̄, so Āb > 1/2 iff ω̄ < Āc − 1/2 iff ω̄/(2*Āc − 1) < 1/2 = ω̄/v < 1/2
+    
+    
+    
+    scale so that B(0) = (2*Āc − 1)
+    
+        find B affine transform to interval [0, u], where H0 is average B < 1/2
+    shift to 0, just add 1 to ωi, B(-1) = 0
+    
+    so B(-1) = 0
+       B(0) = 1/2 
+       B(1) = u 
+    
+    Bi = (1 - ωi/u) / (2 - v/u)
+    Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)    
+    
+    τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
+    B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
+  
+  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
+  find B transform to interval [0, u],  where H0 is B < 1/2
+  Bi = (1 - ωi/u) / (2 - v/u)
+  Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
+  
+  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
 ````
 
 Notes 
@@ -631,21 +670,75 @@ From OneAudit, p 9:
 
 ## Stratified audits using OneAudit (In Progress)
 
-Deal with one contest at a time for now.
+When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
+This is "overstatement-net-equivalent" (aka ONE).
 
 OneAudit, 2.3 pp 5-7:
 ````
-Let bi denote the true votes on the ith ballot card; there are N ballots in all. 
-Let ci denote the voting system’s interpretation of the ith card. Suppose we
-have a CVR ci for every ballot card whose index i is in C. The cardinality of C is
-|C|. Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g} g=1..G for
-which reported assorter subtotals are available. For instance G_g might comprise
-all ballots for which no CVR is available or all ballots cast in a particular precinct.
+      "assorter" here is the plurality assorter
+      from oa_polling.ipynb
+      assorter_mean_all = (whitmer-schuette)/N
+      v = 2*assorter_mean_all-1
+      u_b = 2*u/(2*u-v)  # upper bound on the overstatement assorter
+      noerror = u/(2*u-v)
 
-A(bi) is the assort value of the ith ballot, Ā(b) its average value = Sum(A(bi))/N over all ballots.
-A(ci) is the assort value of the ith CVR, Ā(c) its average value = Sum(A(ci))/N over all ballots (note using N) 
-With a subscript, its the sum just over that set, ie Ā_Gg(c) = Sum(A(ci)) / |G_g|, ci in G_g.
+      Let bi denote the true votes on the ith ballot card; there are N cards in all.
+      Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
+      Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
+
+          Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
+          margin ≡ 2Ā(c) − 1, the _reported assorter margin_
+
+          ωi ≡ A(ci) − A(bi)   overstatementError
+          τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
+          B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
+
+         Ng = |G_g|
+         Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng; > 0
+         margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
+         
+         mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
+         mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
+         otherwise = 1/2
 ````
+
+````
+Plurality assort values:
+  assort in {0, .5, 1}
+
+Regular Comparison:
+  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
+  find B transform to interval [0, u],  where H0 is B < 1/2
+  Bi = (1 - ωi/u) / (2 - v/u)
+  Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
+
+  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
+  
+Batch Comparison:
+  mvr assort in {0, .5, 1} as before
+  cvr assort is always Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
+  overstatementError == A(ci) − A(bi) = Ā(g) - {0, .5, 1} = { Ā(g), Ā(g)-.5, Ā(g)-1} = [loser, nuetral, winner]
+  
+  ωi ≡ A(ci) − A(bi)   overstatementError
+  τi ≡ (1 − ωi /u) = {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u}
+  B(bi, ci) ≡ {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u} / (2 − v/u)
+          
+  mvr has loser vote = (1 - Ā(g)/u) / (2-v/u)
+  mvr has winner vote = (1 - (Ā(g)-1)/u) / (2-v/u)
+  mvr has other vote = (1 - (Ā(g)-.5)/u) / (2-v/u) = 1/2
+  
+  when u = 1
+   mvr has loser vote = (1 - A) / (2-v)
+   mvr has winner vote = (2 - A) / (2-v)
+   mvr has other vote = (1.5 - A) / (2-v) 
+  
+  v = 2A-1
+  2-v = 2-(2A-1) = 3-2A = 2*(1.5-A)
+  other = (1.5-A) / (2-v) = (1.5-A)/2*(1.5-A) = 1/2
+  
+  Bi in [ (1 - Ā(g)), .5, (2 - Ā(g))] * noerror(g)
+````
+
 
 Using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that give the same assorter 
 batch subtotals.
@@ -666,7 +759,6 @@ Following SHANGRLA Section 3.2 define
     see OneAudit section 2.3
 ````
 Section 2
-
 ````
     Ng = |G_g|
     assorter_mean_poll = (winner total - loser total) / Ng
@@ -698,6 +790,32 @@ An affine transformation of the overstatement assorter values can move them back
 constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter.
 ````
+
+Section 5.2
+
+````
+While CLCA with ONE CVRs is algebraically equivalent to BPA, the perfor-
+mance of a given statistical test will be different for the two formulations.
+
+Transforming the assorter into an overstatement assorter using the ONEAudit transformation, then testing whether 
+the mean of the resulting population is ≤ 1/2 using the ALPHA test martingale with the
+truncated shrinkage estimator of [22] with d = 10 and η between 0.505 and 0.55
+performed comparably to—but slightly worse than—using ALPHA on the raw
+assorter values for the same d and η, and within 4.8% of the overall performance
+of the best-performing method.
+````
+
+"ALPHA on the raw assorter values" I think is regular BPA.
+"Transforming the assorter into an overstatement assorter" is ONEAIDIT I think, but using Alpha instead of Betting? 
+This paper came out at the same time as COBRA.
+
+If ONEAUDIT is better than current BPA, perhaps can unify all 3 (comparison, polling, oneaudit) into a single workflow??
+The main difference is preparing the contest with strata.
+
+Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appears if the MVR is missing?
+
+Unclear about using nostyle with ONEAUDIT.
+
 
 ## Differences with SHANGRLA
 

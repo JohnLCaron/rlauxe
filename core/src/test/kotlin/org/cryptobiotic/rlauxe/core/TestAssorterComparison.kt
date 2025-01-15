@@ -45,7 +45,7 @@ class TestAssorterComparison {
         val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
         assertEquals(.02, margin, doublePrecision)
         val bassorter = ComparisonAssorter(contest, assorter, awinnerAvg)
-        assertEquals(.02, bassorter.margin, doublePrecision)
+        assertEquals(.02, mean2margin(bassorter.avgCvrAssortValue), doublePrecision)
 
         assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
         assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser
@@ -336,7 +336,7 @@ class TestAssorterComparison {
         val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
         assertEquals(.02, margin, doublePrecision)
         val bassorter = ComparisonAssorter(contest, assorter, awinnerAvg)
-        assertEquals(.02, bassorter.margin, doublePrecision)
+        assertEquals(.02, mean2margin(bassorter.avgCvrAssortValue), doublePrecision)
 
         assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
         assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser

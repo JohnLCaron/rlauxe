@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
 
 //// abstraction for creating a sequence of samples
@@ -69,6 +70,7 @@ class ComparisonWithoutReplacement(
     val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     val cassorter: ComparisonAssorterIF,
     val allowReset: Boolean,
+    val trackStratum: Boolean = false,
 ): Sampler {
     val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
@@ -83,6 +85,7 @@ class ComparisonWithoutReplacement(
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
             if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
+                if (trackStratum) print("${sfn(cvr.id, 8)} ")
                 idx++
                 return result
             }

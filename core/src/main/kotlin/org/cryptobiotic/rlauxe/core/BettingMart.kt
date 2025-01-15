@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /**
@@ -55,10 +56,8 @@ class BettingMart(
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
-            val eta = lamToEta(lamj, upperBound, mj)
-            if (etaToLam(eta, upperBound, mj) != lamj) {
-                etaToLam(eta, upperBound, mj)
-            }
+            val eta = lamToEta(lamj, mu=mj, upper=upperBound)
+            //println(" testH0: lamj=$lamj eta=$eta mean=$mj upperBound=$upperBound round=${lamToEta(lamj, mj, upperBound)}")
             etas.add(eta)
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
@@ -85,7 +84,7 @@ class BettingMart(
             testStatistic *= tj // Tj ← Tj-1 & tj
             testStatistics.add(testStatistic)
 
-            if (showDetail) println("    $sampleNumber = $xj m=$mj lamj = $lamj tj=$tj, Tj = $testStatistic")
+            if (showDetail) println("    bet=${df(lamj)} (eta=${df(eta)}) $sampleNumber: $xj tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
 
             // – S ← S + Xj
             prevSamples.addSample(xj)

@@ -31,6 +31,7 @@ class TruncShrinkage(
         require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)
+        // println("TruncShrinkage eta0=$eta0 ")
     }
 
     val welford = Welford()
@@ -70,6 +71,9 @@ class TruncShrinkage(
         //    where ǫi → 0 as the sample size grows.
         //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
         val boundedEst = min(max(capBelow, est), capAbove)
+        val lam = etaToLam(boundedEst, mean, upperBound)
+        val roundtrip = lamToEta(lam, mean, upperBound)
+        // println(" TruncShrinkage: eta=$boundedEst mean=$mean upperBound=$upperBound lam=$lam round=$roundtrip")
         return boundedEst
     }
 }

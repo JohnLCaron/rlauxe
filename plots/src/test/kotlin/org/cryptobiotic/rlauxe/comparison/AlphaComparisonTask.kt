@@ -39,7 +39,7 @@ data class AlphaComparisonTask(
 
     override fun makeTestFn(): RiskTestingFn {
         val (margin, noerrors, upperBound) = comparisonAssorterCalc(cvrMean, 1.0)
-        assertEquals(margin, compareAssorter.margin, doublePrecision)
+        assertEquals(margin, compareAssorter.assorter().reportedMargin(), doublePrecision)
         assertEquals(noerrors, compareAssorter.noerror, doublePrecision)
         assertEquals(upperBound, compareAssorter.upperBound, doublePrecision)
 

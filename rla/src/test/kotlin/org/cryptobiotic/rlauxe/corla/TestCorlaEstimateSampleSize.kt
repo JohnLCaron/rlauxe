@@ -59,14 +59,14 @@ class TestCorlaEstimateSampleSize {
             val sampleSizes = contestUA.comparisonAssertions.map { assert ->
                 val result = simulateSampleSizeComparisonAssorter(auditConfig, contestUA.contest as Contest, assert.cassorter, cvrs)
                 val simSize = result.findQuantile(auditConfig.quantile)
-                val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.cassorter.margin(), gamma,
+                val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.assorter.reportedMargin(), gamma,
                     oneOver = ceil(cn*p1).toInt(), // p1
                     twoOver = ceil(cn*p2).toInt(), // p2
                     oneUnder = ceil(cn*p3).toInt(), // p3
                     twoUnder = ceil(cn*p4).toInt(), // p4
                     )
                 estSizes.add(estSize)
-                println("  ${contestUA.name} margin=${df(assert.cassorter.margin())} est=$estSize sim=$simSize")
+                println("  ${contestUA.name} margin=${df(assert.assorter.reportedMargin())} est=$estSize sim=$simSize")
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()

@@ -44,7 +44,7 @@ class TestAssorterBasics {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            val mean = margin2mean(it.margin)
+            val mean = margin2mean(it.assorter.reportedMargin())
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
@@ -89,7 +89,7 @@ class TestAssorterBasics {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            val mean = margin2mean(it.margin)
+            val mean = margin2mean(it.assorter.reportedMargin())
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
@@ -147,7 +147,7 @@ class TestAssorterBasics {
                 println("${cvr.id}: ${assertion.assorter.assort(cvr)} usew1=$usew1 usew2=$usew2")
                 assertion.assorter.assort(cvr)
             }.average()
-            val mean = margin2mean(assertion.margin)
+            val mean = margin2mean(assertion.assorter.reportedMargin())
             println("$assertion: facc=$facc assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean)
         }

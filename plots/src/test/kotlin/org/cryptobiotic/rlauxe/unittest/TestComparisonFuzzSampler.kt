@@ -88,10 +88,11 @@ class TestComparisonFuzzSampler {
                 val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contestUA, assertion, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
                 assertion.estSampleSize = size
-                sampleSizes.add(Pair(size, assertion.cmargin))
-                println(" ${assertion.cassorter.assorter().desc()} margin=${df(assertion.cassorter.margin())} estSize=${size}}")
+                sampleSizes.add(Pair(size, assertion.assorter.reportedMargin()))
+                println(" ${assertion.cassorter.assorter().desc()} margin=${df(assertion.assorter.reportedMargin())} estSize=${size}}")
 
             }
+            // TODO use minAssertion()
             val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.map { it.first }.max() ?: 0
             val pair = if (sampleSizes.isEmpty()) Pair(0, 0.0) else sampleSizes.find{ it.first == maxSize }!!
             contestUA.estSampleSize = pair.first
@@ -114,7 +115,7 @@ private fun runWithComparisonFuzzSampler(
     return simulateSampleSizeBetaMart(
         auditConfig,
         sampler,
-        assorter.margin(),
+        assorter.assorter().reportedMargin(),
         assorter.noerror(),
         assorter.upperBound(),
         Nc=contestUA.Nc,

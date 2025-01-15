@@ -29,7 +29,7 @@ data class CorlaTask(
 
     override fun makeTestFn(): RiskTestingFn {
         return Corla(
-            N = N, riskLimit = riskLimit, reportedMargin = compareAssorter.margin, noerror = compareAssorter.noerror,
+            N = N, riskLimit = riskLimit, reportedMargin = compareAssorter.assorter.reportedMargin(), noerror = compareAssorter.noerror,
             p1 = p1, p2 = p2, p3 = 0.0, p4 = 0.0
         )
     }

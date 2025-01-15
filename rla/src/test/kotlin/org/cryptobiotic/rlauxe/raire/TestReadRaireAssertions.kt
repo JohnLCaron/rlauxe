@@ -35,8 +35,8 @@ class TestReadRaireAssertions {
         val cassertions = contestsUA.first().comparisonAssertions
         assertTrue(cassertions.isNotEmpty())
         cassertions.forEach { cassertion ->
-            assertTrue(0.5 < margin2mean(cassertion.margin))
-            assertTrue(0.0 < cassertion.cmargin)
+            assertTrue(0.5 < margin2mean(cassertion.assorter.reportedMargin()))
+            assertTrue(0.0 < cassertion.assorter.reportedMargin())
             cvrs.forEach {
                 assertTrue(cassertion.cassorter.assorter().assort(it) in 0.0..cassertion.cassorter.assorter().upperBound())
                 if (!it.phantom) assertEquals(cassertion.cassorter.noerror(), cassertion.cassorter.bassort(it, it))

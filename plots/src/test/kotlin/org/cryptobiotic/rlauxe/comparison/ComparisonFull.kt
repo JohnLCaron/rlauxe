@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvReader
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import kotlin.test.Test
 import kotlin.collections.forEach
 import kotlin.math.max
@@ -41,7 +41,7 @@ class ComparisonFull {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/cvrComparisonND.csv")
 
-        val runner = RepeatedTaskRunner()
+        val runner = RunRepeatedTasks()
         val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)
@@ -87,7 +87,7 @@ class ComparisonFull {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/comparisonFull.csv")
 
-        val runner = RepeatedTaskRunner()
+        val runner = RunRepeatedTasks()
         val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

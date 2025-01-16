@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/14/2025
+last update: 01/15/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -35,6 +35,7 @@ Table of Contents
     * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
     * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
+    * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
@@ -816,6 +817,18 @@ Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appea
 
 Unclear about using nostyle with ONEAUDIT.
 
+### Comparison of AuditTypes' sample sizes
+
+These are plots of sample sizes for the three audit types: Polling, Comparison (clca) amd OneAudit (with 20% and 80% of ballots having CVRs),
+when there are no errors between the MVRs and the CVRs.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/AllTypesNoErrorsRepeatedLinear.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/AllTypesNoErrorsRepeatedLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/AllTypesNoErrorsRepeatedLog.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/AllTypesNoErrorsRepeatedLog.png)</a>
+
+* OneAudit results are about twice as good as polling, but clearly has the same O(margin).
+* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
+* OneAudit and Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the two OneAudit with 20% and 80% of ballots having CVRs. More investigation needed.
 
 ## Differences with SHANGRLA
 

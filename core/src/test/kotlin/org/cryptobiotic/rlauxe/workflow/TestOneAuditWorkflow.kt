@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
-import org.cryptobiotic.rlauxe.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -18,7 +15,7 @@ class TestOneAuditWorkflow {
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = Random.nextLong(), quantile=.80, fuzzPct = null, ntrials=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
-        runWorkflow(workflow, testCvrs)
+        runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
     }
 
     @Test
@@ -30,6 +27,6 @@ class TestOneAuditWorkflow {
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = Random.nextLong(), quantile=.80, fuzzPct = null, ntrials=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
-        runWorkflow(workflow, testCvrs)
+        runWorkflow("testOneAuditContest", workflow, testCvrs)
     }
 }

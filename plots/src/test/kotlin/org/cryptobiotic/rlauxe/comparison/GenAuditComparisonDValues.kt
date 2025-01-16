@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.comparison
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.test.Test
@@ -69,7 +69,7 @@ class GenAuditComparisonDValues {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/alphaComparisonDValues.csv")
 
-        val runner = RepeatedTaskRunner()
+        val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

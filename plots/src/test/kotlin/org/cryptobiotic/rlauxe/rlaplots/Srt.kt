@@ -158,7 +158,7 @@ class SRTcsvWriter(val filename: String) {
     }
 }
 
-fun writeParameters(params: Map<String, Double> ) = buildString {
+fun writeParameters(params: Map<String, Number> ) = buildString {
     append("\"")
     params.forEach { key, value ->
         append("$key=$value ")

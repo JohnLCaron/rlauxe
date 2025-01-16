@@ -64,7 +64,7 @@ data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamp
 
 data class WorkflowResult(val N: Int, val margin: Double, val nrounds: Double,
                            val samplesUsed: Double, val samplesNeeded: Double,
-                           val parameters: Map<String, Number>,
+                           val parameters: Map<String, Double>,
 ) {
     companion object {
         fun avgRepeatedRuns(runs: List<WorkflowResult>): WorkflowResult {

@@ -97,7 +97,7 @@ class Contest(
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
         val useMin = info.minFraction ?: 0.0
         val nvotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
-        require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
+        require(nvotes <= Nc) { "Nc $Nc must be <= totalVotes ${nvotes}"}
 
         // todo why use totalVotes instead of Nc?
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()

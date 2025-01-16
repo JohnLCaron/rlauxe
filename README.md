@@ -819,13 +819,14 @@ Unclear about using nostyle with ONEAUDIT.
 
 ### Comparison of AuditTypes' sample sizes
 
-These are plots of sample sizes for the three audit types: Polling, Comparison (clca) amd OneAudit (with 20% and 80% of ballots having CVRs),
+These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 20% and 80% of ballots having CVRs),
 when there are no errors between the MVRs and the CVRs.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/AllTypesNoErrorsRepeatedLinear.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/AllTypesNoErrorsRepeatedLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/AllTypesNoErrorsRepeatedLog.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/AllTypesNoErrorsRepeatedLog.png)</a>
 
-* OneAudit results are about twice as good as polling, but clearly has the same O(margin).
+* OneAudit results are about twice as high as polling, and have a similar O(margin).
+* Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
 * When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
 * OneAudit and Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
 * Its surprising that theres not more difference between the two OneAudit with 20% and 80% of ballots having CVRs. More investigation needed.

@@ -14,7 +14,7 @@ fun makeContestOA(margin: Double, N: Int, cvrPercent: Double, skewVotesPercent: 
 
 // two contest, specified total votes
 // divide into two stratum based on cvrPercent
-// skew votes
+// skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
 fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double): OneAuditContest {
 
     // the candidates
@@ -31,13 +31,6 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent:
     val noCvrPercent = (1.0 - cvrPercent)
     val totalVotes = (1.0 + undervotePercent) * (winner+loser)
     val skewVotes = skewVotesPercent * totalVotes
-    // println(" skewVotes $skewVotes pct=$skewVotesPercent")
-
-    // reported results for the two strata
-    val candidates = mapOf(     // candidateName -> [votes(cvr), votes(nocvr)]
-        "winner" to listOf((winner * noCvrPercent + skewVotes).toInt(), (winner * cvrPercent - skewVotes).toInt()),
-        "loser" to listOf((loser * noCvrPercent - skewVotes).toInt(), (loser * cvrPercent + skewVotes).toInt()),
-    )
 
     val stratumNames = when {
         (cvrPercent == 0.0) -> listOf("noCvr")
@@ -51,18 +44,14 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent:
     }
     val cvrIdx = if (cvrPercent == 1.0) 0 else 1
 
+    // reported results for the two strata
     val votes = when {
-        (cvrPercent == 0.0) -> mapOf(
-            "winner" to listOf((winner * noCvrPercent + skewVotes).toInt()),
-            "loser" to listOf((loser * noCvrPercent - skewVotes).toInt()),
-        )
-        (cvrPercent == 1.0) -> mapOf(
-            "winner" to listOf((winner * cvrPercent - skewVotes).toInt()),
-            "loser" to listOf((loser * cvrPercent + skewVotes).toInt()),
-        )
-        else -> mapOf(
-            "winner" to listOf((winner * noCvrPercent + skewVotes).toInt(), (winner * cvrPercent - skewVotes).toInt()),
-            "loser" to listOf((loser * noCvrPercent - skewVotes).toInt(), (loser * cvrPercent + skewVotes).toInt()),
+        (cvrPercent == 0.0 || cvrPercent == 1.0) -> mapOf(
+            "winner" to listOf((winner + skewVotes).toInt()),
+            "loser" to listOf((loser - skewVotes).toInt()),
+        ) else -> mapOf(
+            "winner" to listOf((winner * noCvrPercent - skewVotes).toInt(), (winner * cvrPercent + skewVotes).toInt()),
+            "loser" to listOf((loser * noCvrPercent + skewVotes).toInt(), (loser * cvrPercent - skewVotes).toInt()),
         )
     }
 

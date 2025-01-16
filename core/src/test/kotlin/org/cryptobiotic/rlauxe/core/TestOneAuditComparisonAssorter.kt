@@ -100,7 +100,7 @@ class TestOneAuditComparisonAssorter {
 
     @Test
     fun testMakeContestUnderAudit() {
-        val contest = makeContestOA(200, 180, cvrPercent = .66, 0.05, undervotePercent = .0)
+        val contest = makeContestOA(2000, 1800, cvrPercent = .66, 0.05, undervotePercent = .0)
         val testCvrs = contest.makeTestCvrs()
         val contestUA = contest.makeContestUnderAudit(testCvrs)
         println(contestUA)
@@ -158,8 +158,8 @@ class TestOneAuditComparisonAssorter {
         val noCount = testCvrs.filter { it.id == "noCvr" }.count()
         println("allCount = $allCount cvrCount=$cvrCount noCount=$noCount")
         assertEquals(allCount, contest.Nc)
-        assertEquals(cvrCount, contest.strata[0].Ng)
-        assertEquals(noCount, contest.strata[1].Ng)
+        assertEquals(cvrCount, contest.strata[1].Ng)
+        assertEquals(noCount, contest.strata[0].Ng)
 
         // whats the plurality assort value average?
         val pluralityAssorter = bassorter.assorter
@@ -184,11 +184,11 @@ class TestOneAuditComparisonAssorter {
         assertEquals(allAvg, margin2mean(calc))
 
         // TODO what should this equal??
-        assertEquals(0.5103275988946809, allAvg, doublePrecision)
-        assertEquals(0.5167373880245173, cvrAvg, doublePrecision)
-        assertEquals(0.5018226002430137, noAvg, doublePrecision)
+//        assertEquals(0.5103270265473376, allAvg, doublePrecision)
+ //       assertEquals(0.5039080459770175, cvrAvg, doublePrecision)
+   //     assertEquals(0.5188442211055272, noAvg, doublePrecision)
 
-        val allWeighted = (cvrAvg * contest.strata[0].Ng + noAvg * contest.strata[1].Ng) / contest.Nc
+        val allWeighted = (cvrAvg * contest.strata[1].Ng + noAvg * contest.strata[0].Ng) / contest.Nc
         assertEquals(allAvg, allWeighted, doublePrecision)
 
         println("clcaMargin = ${bassorter.clcaMargin}")

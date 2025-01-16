@@ -247,8 +247,6 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
     if (votes1 == votes2) return true
     val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
     val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
-    if (votes1z != votes2z)
-        println("")
     return votes1z == votes2z
 }
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.core.OneAuditContest
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.test.Test
@@ -43,6 +44,7 @@ class TestMakeOneAudit {
                 println("margin=$margin cvrPercent=$cvrPercent")
                 val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.0)
                 checkBasics(contestOA, margin, cvrPercent)
+                checkAgainstCvrs(contestOA, margin, cvrPercent)
             }
         }
     }
@@ -53,5 +55,26 @@ class TestMakeOneAudit {
         contestOA.strata.forEach { stratum ->
             assertEquals(margin, stratum.reportedMargin(0, 1), doublePrecision) // oh i see
         }
+    }
+
+    fun checkAgainstCvrs(contest: OneAuditContest, margin: Double, cvrPercent: Double) {
+        val testCvrs = contest.makeTestCvrs()
+        val contestOA = contest.makeContestUnderAudit(testCvrs)
+
+        val bassorter = contestOA.minComparisonAssertion()!!.cassorter as OneAuditComparisonAssorter
+        println(bassorter)
+        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${bassorter.clcaMargin} ")
+
+        // sanity check
+        val allCount = testCvrs.count()
+        assertEquals(allCount, contest.Nc)
+
+        val cvrCount = testCvrs.filter { it.id != "noCvr" }.count()
+        val noCount = testCvrs.filter { it.id == "noCvr" }.count()
+        println("allCount = $allCount cvrCount=$cvrCount noCount=$noCount")
+        val strataCvr = contest.strata.find{ it.hasCvrs }
+        val strataNo = contest.strata.find{ !it.hasCvrs }
+        assertEquals(cvrCount, strataCvr?.Ng ?: 0)
+        assertEquals(noCount, strataNo?.Ng ?: 0)
     }
 }

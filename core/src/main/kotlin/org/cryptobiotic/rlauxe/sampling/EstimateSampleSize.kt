@@ -210,7 +210,7 @@ fun simulateSampleSizeComparisonAssorter(
     //} else
     if (auditConfig.fuzzPct == null) {
         val cvrPairs = cvrs.zip( cvrs)
-        ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=true)
+        ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=false)
     // } else if (auditConfig.useGeneratedErrorRates) {
       //  val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
       //  ComparisonSimulation(cvrs, contest, cassorter, errorRates)

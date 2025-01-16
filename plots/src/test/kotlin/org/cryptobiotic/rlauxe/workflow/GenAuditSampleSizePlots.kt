@@ -40,7 +40,7 @@ class GenAuditSampleSizePlots {
                 val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.0)
                 val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
                 val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs, quiet = quiet)
-                val otherParameters = mapOf("cvrPercent" to cvrPercent, "nruns" to nruns, "ntrials" to 10,)
+                val otherParameters = mapOf("cvrPercent" to cvrPercent, "nruns" to nruns.toDouble(), "ntrials" to 10.toDouble(),)
                 tasks.add(
                     RepeatedTaskRunner(10,
                         OneAuditWorkflowTask(
@@ -71,7 +71,7 @@ class GenAuditSampleSizePlots {
     class OneAuditWorkflowTask(val name: String,
                                var workflow: RlauxWorkflow,
                                var testCvrs: List<Cvr>,
-                               val otherParameters: Map<String, Number>,
+                               val otherParameters: Map<String, Double>,
     ): ConcurrentTaskG<WorkflowResult> {
         override fun name() = name
         override fun run() : WorkflowResult {
@@ -277,6 +277,7 @@ class GenAuditSampleSizePlots {
         }
     }
 
+    /*
     @Test
     fun genAllWorkflowMarginPlots() {
         val N = 50000
@@ -295,7 +296,7 @@ class GenAuditSampleSizePlots {
                 AuditConfig(AuditType.ONEAUDIT, true, seed = Random.nextLong(), fuzzPct = null, ntrials = 10),
                 listOf(contestOA2), oaCvrs2, quiet = quiet
             )
-            val otherParameters2 = mapOf("auditType" to 4.0, "nruns" to nruns, "cvrPercent" to .20, "skewVotes" to 0.0, "undervotePercent" to 0.0,)
+            val otherParameters2 = mapOf("auditType" to 4.0, "nruns" to nruns.toDouble(), "cvrPercent" to .20, "skewVotes" to 0.0, "undervotePercent" to 0.0,)
             tasks.add(
                 RepeatedTaskRunner(nruns,
                     OneAuditWorkflowTask(
@@ -314,7 +315,7 @@ class GenAuditSampleSizePlots {
                 AuditConfig(AuditType.ONEAUDIT, true, seed = Random.nextLong(), fuzzPct = null, ntrials = 10),
                 listOf(contestOA), oaCvrs, quiet = quiet
             )
-            val otherParameters = mapOf("auditType" to 1.0, "nruns" to nruns, "cvrPercent" to .80, "skewVotes" to 0.0, "undervotePercent" to 0.0,)
+            val otherParameters = mapOf("auditType" to 1.0, "nruns" to nruns.toDouble(), "cvrPercent" to .80, "skewVotes" to 0.0, "undervotePercent" to 0.0,)
             tasks.add(
                 RepeatedTaskRunner(nruns,
                     OneAuditWorkflowTask(
@@ -412,4 +413,6 @@ class GenAuditSampleSizePlots {
             }
         }
     }
+
+     */
 }

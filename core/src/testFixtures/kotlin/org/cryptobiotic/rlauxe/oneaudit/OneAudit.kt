@@ -35,25 +35,45 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent:
 
     // reported results for the two strata
     val candidates = mapOf(     // candidateName -> [votes(cvr), votes(nocvr)]
-        "winner" to listOf((winner * cvrPercent + skewVotes).toInt(), (winner * noCvrPercent - skewVotes).toInt()),
-        "loser" to listOf((loser * cvrPercent - skewVotes).toInt(), (loser * noCvrPercent + skewVotes).toInt()),
+        "winner" to listOf((winner * noCvrPercent + skewVotes).toInt(), (winner * cvrPercent - skewVotes).toInt()),
+        "loser" to listOf((loser * noCvrPercent - skewVotes).toInt(), (loser * cvrPercent + skewVotes).toInt()),
     )
-    val stratumNames = listOf("hasCvr", "noCvr")
-    val stratumSizes = listOf((totalVotes * cvrPercent).toInt(), (totalVotes * noCvrPercent).toInt()) // hasCvr, noCvr
 
-    //    val strataName: String,
-    //    val info: ContestInfo,
-    //    val votes: Map<Int, Int>,   // candidateId -> nvotes
-    //    val Nc: Int,  // upper limit on number of ballots in this starata for this contest
-    //    val Np: Int,  // number of phantom ballots in this starata for this contest
+    val stratumNames = when {
+        (cvrPercent == 0.0) -> listOf("noCvr")
+        (cvrPercent == 1.0) -> listOf("hasCvr")
+        else -> listOf("noCvr", "hasCvr")
+    }
+    val stratumSizes = when {
+        (cvrPercent == 0.0) -> listOf((totalVotes * noCvrPercent).toInt())
+        (cvrPercent == 1.0) -> listOf((totalVotes * cvrPercent).toInt())
+        else -> listOf((totalVotes * noCvrPercent).toInt(), (totalVotes * cvrPercent).toInt())
+    }
+    val cvrIdx = if (cvrPercent == 1.0) 0 else 1
+
+    val votes = when {
+        (cvrPercent == 0.0) -> mapOf(
+            "winner" to listOf((winner * noCvrPercent + skewVotes).toInt()),
+            "loser" to listOf((loser * noCvrPercent - skewVotes).toInt()),
+        )
+        (cvrPercent == 1.0) -> mapOf(
+            "winner" to listOf((winner * cvrPercent - skewVotes).toInt()),
+            "loser" to listOf((loser * cvrPercent + skewVotes).toInt()),
+        )
+        else -> mapOf(
+            "winner" to listOf((winner * noCvrPercent + skewVotes).toInt(), (winner * cvrPercent - skewVotes).toInt()),
+            "loser" to listOf((loser * noCvrPercent - skewVotes).toInt(), (loser * cvrPercent + skewVotes).toInt()),
+        )
+    }
+
     val strata = mutableListOf<OneAuditStratum>()
-    repeat(2) { idx ->
+    repeat(stratumNames.size) { idx ->
         strata.add(
             OneAuditStratum(
                 stratumNames[idx],
-                hasCvrs = (idx == 0),
+                hasCvrs = (idx == cvrIdx),
                 info,
-                candidates.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
+                votes = votes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
                 Ng = stratumSizes[idx],
                 Np = 0  // TODO investigate
             )

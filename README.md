@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/15/2025
+last update: 01/16/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -819,17 +819,17 @@ Unclear about using nostyle with ONEAUDIT.
 
 ### Comparison of AuditTypes' sample sizes
 
-These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 20% and 80% of ballots having CVRs),
+These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
 when there are no errors between the MVRs and the CVRs.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/AllTypesNoErrorsRepeatedLinear.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/AllTypesNoErrorsRepeatedLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/AllTypesNoErrorsRepeatedLog.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/AllTypesNoErrorsRepeatedLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/OneAuditVsPollingLinear.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/OneAuditVsPollingLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/OneAuditVsPollingLog.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/OneAuditVsPollingLog.png)</a>
 
-* OneAudit results are about twice as high as polling, and have a similar O(margin).
-* Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
+* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
 * When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
-* OneAudit and Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
-* Its surprising that theres not more difference between the two OneAudit with 20% and 80% of ballots having CVRs. More investigation needed.
+* Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
+* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs. 
 
 ## Differences with SHANGRLA
 

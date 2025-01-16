@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -42,7 +41,7 @@ class TestPollingWorkflow {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, emptyList()), N)
-        runWorkflow(workflow, testMvrs)
+        runWorkflow("testPollingNoStyle", workflow, testMvrs)
     }
 
     // @Test
@@ -85,7 +84,7 @@ class TestPollingWorkflow {
                 else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, test.ballotStyles), N)
-        runWorkflow(workflow, testMvrs)
+        runWorkflow("testPollingWithStyle", workflow, testMvrs)
     }
 
     @Test
@@ -115,9 +114,10 @@ class TestPollingWorkflow {
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
         val workflow = PollingWorkflow(auditConfig, test.contests, BallotManifest(ballots, test.ballotStyles), N)
 
-        runWorkflow(workflow, testCvrs)
+        runWorkflow("testPollingOneContest", workflow, testCvrs)
     }
 
+    /*
     fun runWorkflow(workflow: PollingWorkflow, testMvrs: List<Cvr>) {
         val stopwatch = Stopwatch()
 
@@ -149,4 +149,6 @@ class TestPollingWorkflow {
         rounds.forEach { println(it) }
         workflow.showResults()
     }
+
+     */
 }

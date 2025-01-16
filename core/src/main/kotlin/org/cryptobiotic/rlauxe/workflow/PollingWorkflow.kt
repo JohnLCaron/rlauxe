@@ -6,14 +6,14 @@ import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 
 class PollingWorkflow(
-        val auditConfig: AuditConfig,
-        contests: List<ContestIF>, // the contests you want to audit
-        val ballotManifest: BallotManifest,
-        val N: Int, // total number of ballots/cards
-        val quiet: Boolean = false,
+    val auditConfig: AuditConfig,
+    val contestsToAudit: List<ContestIF>, // the contests you want to audit
+    val ballotManifest: BallotManifest,
+    val N: Int, // total number of ballots/cards
+    val quiet: Boolean = false,
 ): RlauxWorkflow {
-    val contestsUA: List<ContestUnderAudit> = contests.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-    val ballotsUA: List<BallotUnderAudit>
+    var contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
+    var ballotsUA: List<BallotUnderAudit>
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
@@ -30,6 +30,23 @@ class PollingWorkflow(
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
+        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
+    }
+
+    // reset, change the ordering, for multiple simulations
+    override fun shuffle(seed: Long) {
+        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
+        contestsUA.forEach {
+            if (it.choiceFunction != SocialChoiceFunction.IRV) {
+                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })
+            }
+        }
+
+        contestsUA.filter { !it.done }.forEach { contest ->
+            contest.makePollingAssertions()
+        }
+
+        val prng = Prng(seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
@@ -85,7 +102,7 @@ class PollingWorkflow(
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        return runAudit(auditConfig, contestsUA, mvrs, roundIdx)
+        return runAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
     }
     override fun getContests() : List<ContestUnderAudit> = contestsUA
 }
@@ -95,10 +112,10 @@ fun runAudit(
     contestsUA: List<ContestUnderAudit>,
     mvrs: List<Cvr>,
     roundIdx: Int,
+    quiet: Boolean = false
 ): Boolean {
     val contestsNotDone = contestsUA.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
-        println("all done")
         return true
     }
 
@@ -107,7 +124,7 @@ fun runAudit(
         var allAssertionsDone = true
         contestUA.pollingAssertions.forEach { assertion ->
             if (!assertion.proved) {
-                assertion.status = auditOneAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx)
+                assertion.status = auditOneAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
                 allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
             }
         }
@@ -126,6 +143,7 @@ fun auditOneAssertion(
     assertion: Assertion,
     mvrs: List<Cvr>,
     roundIdx: Int,
+    quiet: Boolean = false
 ): TestH0Status {
     val assorter = assertion.assorter
     val sampler = PollWithoutReplacement(contest, mvrs, assorter, allowReset=false)
@@ -158,7 +176,7 @@ fun auditOneAssertion(
         assertion.proved = true
         assertion.round = roundIdx
     } else {
-        println("testH0Result.status = ${testH0Result.status}")
+        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
     }
 
     val roundResult = AuditRoundResult(roundIdx,
@@ -170,6 +188,6 @@ fun auditOneAssertion(
     )
     assertion.roundResults.add(roundResult)
 
-    println(" ${contest.name} $roundResult")
+    if (!quiet) println(" ${contest.name} $roundResult")
     return testH0Result.status
 }

@@ -11,10 +11,11 @@ interface RlauxWorkflow {
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean
     fun showResults()
     fun getContests() : List<ContestUnderAudit>
+    fun shuffle(seed: Long)
 }
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
-fun runWorkflow(workflow: RlauxWorkflow, testMvrs: List<Cvr>, quiet: Boolean=false) {
+fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quiet: Boolean=false) {
     val stopwatch = Stopwatch()
 
     val previousSamples = mutableSetOf<Int>()
@@ -25,6 +26,8 @@ fun runWorkflow(workflow: RlauxWorkflow, testMvrs: List<Cvr>, quiet: Boolean=fal
     var done = false
     while (!done) {
         val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
+        // if (roundIdx == 1 && indices.size > 0) println(" $name: first index is ${indices[0]}")
+
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
         previousSamples.addAll(indices)
@@ -59,10 +62,24 @@ data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamp
     }
 }
 
-data class WorkflowResult(val N: Int, val margin: Double, val nrounds: Int,
-                           val samplesUsed: Int, val samplesNeeded: Int,
-                           val parameters: Map<String, Double>,
-)
+data class WorkflowResult(val N: Int, val margin: Double, val nrounds: Double,
+                           val samplesUsed: Double, val samplesNeeded: Double,
+                           val parameters: Map<String, Number>,
+) {
+    companion object {
+        fun avgRepeatedRuns(runs: List<WorkflowResult>): WorkflowResult {
+            val first = runs.first()
+            return WorkflowResult(
+                first.N,
+                first.margin,
+                runs.map { it.nrounds }.average(),
+                runs.map { it.samplesUsed }.average(),
+                runs.map { it.samplesNeeded }.average(),
+                first.parameters,
+            )
+        }
+    }
+}
 
 
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.

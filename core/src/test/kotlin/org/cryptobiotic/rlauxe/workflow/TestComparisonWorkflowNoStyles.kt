@@ -111,7 +111,7 @@ class TestComparisonWorkflowNoStyles {
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
-        runComparisonWorkflow(workflow, testMvrs, nassertions)
+        runWorkflow("TestComparisonWorkflowNoStyles", workflow, testMvrs)
     }
 
 }

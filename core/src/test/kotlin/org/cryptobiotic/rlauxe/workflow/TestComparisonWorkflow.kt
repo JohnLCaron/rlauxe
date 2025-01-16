@@ -89,11 +89,12 @@ class TestComparisonWorkflow {
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
-        runComparisonWorkflow(workflow, testMvrs, nassertions)
+        runWorkflow("testComparisonWorkflow", workflow, testMvrs)
     }
 
 }
 
+/*
 fun runComparisonWorkflow(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
@@ -123,3 +124,5 @@ fun runComparisonWorkflow(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nas
     workflow.showResults()
     println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
 }
+
+ */

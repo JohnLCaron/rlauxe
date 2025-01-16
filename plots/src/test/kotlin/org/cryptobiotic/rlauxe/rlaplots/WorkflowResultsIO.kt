@@ -54,15 +54,15 @@ class WorkflowResultsIO(val filename: String) {
 
     fun fromCSV(line: String): WorkflowResult {
         val tokens = line.split(",")
-        require(tokens.size != 6) { "Expected 6 tokens but got ${tokens.size}" }
+        require(tokens.size == 6) { "Expected 6 tokens but got ${tokens.size}" }
         val ttokens = tokens.map { it.trim() }
         var idx = 0
         val parameters = ttokens[idx++]
         val N = ttokens[idx++].toInt()
         val margin = ttokens[idx++].toDouble()
-        val nrounds = ttokens[idx++].toInt()
-        val samplesUsed = ttokens[idx++].toInt()
-        val samplesNeeded = ttokens[idx++].toInt()
+        val nrounds = ttokens[idx++].toDouble()
+        val samplesUsed = ttokens[idx++].toDouble()
+        val samplesNeeded = ttokens[idx++].toDouble()
 
         return WorkflowResult(N, margin, nrounds, samplesUsed, samplesNeeded, readParameters(parameters))
     }

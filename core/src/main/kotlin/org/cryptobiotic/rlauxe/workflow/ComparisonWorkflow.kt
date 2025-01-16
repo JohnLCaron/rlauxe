@@ -19,20 +19,21 @@ import org.cryptobiotic.rlauxe.util.*
 
 class ComparisonWorkflow(
     val auditConfig: AuditConfig,
-    contests: List<Contest>, // the contests you want to audit
-    raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
+    val contestsToAudit: List<Contest>, // the contests you want to audit
+    val raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
 ): RlauxWorkflow {
-    val contestsUA: List<ContestUnderAudit>
-    val cvrsUA: List<CvrUnderAudit>
+    var contestsUA: List<ContestUnderAudit>
+    var cvrsUA: List<CvrUnderAudit>
+
     init {
         require (auditConfig.auditType == AuditType.CARD_COMPARISON)
 
         // 2. Pre-processing and consistency checks
         // 	a) Check that the winners according to the CVRs are the reported winners.
         //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
-        contestsUA = (makeContestUAFromCvrs(contests, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
+        contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
                 checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
@@ -45,7 +46,7 @@ class ComparisonWorkflow(
 
         // val votes =  makeVotesPerContest(contests, cvrs)
         contestsUA.filter{ !it.done }.forEach { contest ->
-            contest.makeComparisonAssertions(cvrs) // , votes[contest.id]!!)
+            contest.makeComparisonAssertions(cvrs)
         }
 
         // must be done once and for all rounds
@@ -53,9 +54,21 @@ class ComparisonWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    // 4. Main audit loop. While A is not empty:
-    //   chooseSamples()
-    //   runAudit()
+    // change the ordering, for simulations
+    override fun shuffle(seed: Long) {
+        contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
+        contestsUA.forEach {
+            if (it.choiceFunction != SocialChoiceFunction.IRV) {
+                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
+            }
+        }
+        contestsUA.filter{ !it.done }.forEach { contest ->
+            contest.makeComparisonAssertions(cvrs)
+        }
+
+        val prng = Prng(seed)
+        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
+    }
 
     /**
      * Choose lists of ballots to sample.
@@ -130,7 +143,7 @@ class ComparisonWorkflow(
             var allAssertionsDone = true
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
+                    assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
             }
@@ -281,6 +294,7 @@ fun runOneAssertionAudit(
     cassertion: ComparisonAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
+    quiet: Boolean = false,
 ): TestH0Status {
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
@@ -324,6 +338,6 @@ fun runOneAssertionAudit(
         )
     cassertion.roundResults.add(roundResult)
 
-    println(" ${contestUA.name} $roundResult")
+    if (!quiet) println(" ${contestUA.name} $roundResult")
     return testH0Result.status
 }

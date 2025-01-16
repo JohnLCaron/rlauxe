@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sampling.Sampler
-import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.concur.RepeatedTask
@@ -58,7 +58,7 @@ class GenAdaptiveComparison {
             }
         }
 
-        val runner = RepeatedTaskRunner()
+        val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)
 
         val dirname = "/home/stormy/temp/p2errors"
@@ -117,7 +117,7 @@ class GenAdaptiveComparison {
 
         val writer = SRTcsvWriter("/home/stormy/temp/betting/plotAdaptiveComparison.csv")
 
-        val runner = RepeatedTaskRunner()
+        val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

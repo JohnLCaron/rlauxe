@@ -20,7 +20,7 @@ class TestRaireWorkflow {
         val workflow = ComparisonWorkflow(auditConfig, emptyList(), listOf(rcontest), cvrs)
         val nassertions = rcontest.assertions.size
 
-        runComparisonWorkflow(workflow, cvrs, nassertions)
+        runWorkflow("testRaireWorkflow", workflow, cvrs)
     }
 
 }

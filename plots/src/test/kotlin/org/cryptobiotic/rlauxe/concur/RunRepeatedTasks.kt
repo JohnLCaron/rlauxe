@@ -37,7 +37,7 @@ interface RepeatedTask {
     fun reportedMeanDiff() : Double
 }
 
-class RepeatedTaskRunner {
+class RunRepeatedTasks {
     private val showCalculation = false
     private val showTaskResult = false
     private val mutex = Mutex()

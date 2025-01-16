@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.rlaplots.dd
 import org.cryptobiotic.rlauxe.rlaplots.extractDecile
 import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
 import org.cryptobiotic.rlauxe.rlaplots.srtPlot
-import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import kotlin.test.Test
 import kotlin.collections.forEach
 import kotlin.math.max
@@ -136,7 +136,7 @@ class ComparisonChooseD {
 
         val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/testChooseDF.csv")
 
-        val runner = RepeatedTaskRunner()
+        val runner = RunRepeatedTasks()
         val results = runner.run(tasks, ntrials)
 
         writer.writeCalculations(results)

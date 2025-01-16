@@ -8,19 +8,27 @@ import org.cryptobiotic.rlauxe.util.*
 
 class OneAuditWorkflow(
     val auditConfig: AuditConfig,
-    contests: List<OneAuditContest>, // the contests you want to audit
+    val contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
 ): RlauxWorkflow {
-    val contestsUA: List<ContestUnderAudit>
-    val cvrsUA: List<CvrUnderAudit>
+    var contestsUA: List<ContestUnderAudit>
+    var cvrsUA: List<CvrUnderAudit>
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
 
-        contestsUA = contests.map { it.makeContestUnderAudit(cvrs) }
+        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
+        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
+    }
+
+    // change the ordering, for simulations
+    override fun shuffle(seed: Long) {
+        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
+
+        val prng = Prng(seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
@@ -78,7 +86,7 @@ class OneAuditWorkflow(
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
                     // assertion.status = runOneAuditAssertionBet(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
-                    assertion.status = runOneAuditAssertionAlpha(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
+                    assertion.status = runOneAuditAssertionAlpha(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
             }
@@ -176,6 +184,7 @@ fun runOneAuditAssertionAlpha(
     cassertion: ComparisonAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
+    quiet: Boolean = false,
 ): TestH0Status {
     val assorter = cassertion.cassorter as OneAuditComparisonAssorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassertion.cassorter, allowReset = false, trackStratum = false)
@@ -208,7 +217,7 @@ fun runOneAuditAssertionAlpha(
         cassertion.proved = true
         cassertion.round = roundIdx
     } else {
-        println("testH0Result.status = ${testH0Result.status}")
+        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
     }
 
     val roundResult = AuditRoundResult(roundIdx,
@@ -220,6 +229,6 @@ fun runOneAuditAssertionAlpha(
     )
     cassertion.roundResults.add(roundResult)
 
-    println(" ${contestUA.name} $roundResult")
+    if (!quiet) println(" ${contestUA.name} $roundResult")
     return testH0Result.status
 }

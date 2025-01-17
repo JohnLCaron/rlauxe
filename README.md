@@ -8,6 +8,7 @@ for the purpose of making a reusable and maintainable library.
 
 You can also read this on [github.io](https://johnlcaron.github.io/rlauxe/).
 
+
 Table of Contents
 <!-- TOC -->
 * [rlauxe](#rlauxe)

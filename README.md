@@ -832,14 +832,12 @@ when there are no errors between the MVRs and the CVRs.
 * OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
 * Its surprising that theres not more difference between the OneAudit results with different percents having CVRs. 
 
-Plots vs fuzzPct (percent ballots having randomly changed candidate) for margin = 4% (See [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz):
+Plots vs fuzzPct (percent ballots having randomly changed candidate, see [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz),
+with margin fixed at 4%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.html" rel="AuditsWithErrors NRounds">![AuditsWithErrorsNrounds](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.png)</a>
-
-* Not sure why so much variance at fuzzPct >= .08.
-
 ## Differences with SHANGRLA
 
 ### Limit audit to estimated samples

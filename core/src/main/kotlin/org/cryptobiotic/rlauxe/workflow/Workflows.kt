@@ -62,23 +62,31 @@ data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamp
     }
 }
 
-data class WorkflowResult(val N: Int, val margin: Double, val nrounds: Double,
-                           val samplesUsed: Double, val samplesNeeded: Double,
-                           val parameters: Map<String, Double>,
-) {
-    companion object {
-        fun avgRepeatedRuns(runs: List<WorkflowResult>): WorkflowResult {
-            val first = runs.first()
-            return WorkflowResult(
-                first.N,
-                first.margin,
-                runs.map { it.nrounds }.average(),
-                runs.map { it.samplesUsed }.average(),
-                runs.map { it.samplesNeeded }.average(),
-                first.parameters,
-            )
-        }
-    }
+data class WorkflowResult(val N: Int,
+                          val margin: Double,
+                          val status: TestH0Status,
+                          val nrounds: Double,
+                          val samplesUsed: Double,
+                          val samplesNeeded: Double,
+                          val parameters: Map<String, Double>,
+                          val failPct: Double = 0.0, // from avgWorkflowResult()
+)
+
+fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
+    val failures = runs.count{ it.status.fail }
+    val failPct = if (runs.isEmpty()) 0.0 else 100.0 * failures / runs.size
+
+    val first = runs.first()
+    return WorkflowResult(
+        first.N,
+        first.margin,
+        first.status,
+        runs.map { it.nrounds }.average(),
+        runs.map { it.samplesUsed }.average(),
+        runs.map { it.samplesNeeded }.average(),
+        first.parameters,
+        failPct,
+    )
 }
 
 

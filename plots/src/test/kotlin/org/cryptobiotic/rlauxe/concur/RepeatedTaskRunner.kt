@@ -11,7 +11,7 @@ class RepeatedTaskRunner<T> (val nruns: Int, val task: ConcurrentTaskG<T>): Conc
             task.shuffle()
             results.add(task.run())
         }
-        return results
+        return results // dont have a generic way to reduce this
     }
 
     override fun shuffle() {

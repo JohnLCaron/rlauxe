@@ -1,0 +1,46 @@
+parameters, N, margin, nrounds, samplesUsed, samplesNeeded
+"auditType=3.0 nruns=200.0 ", 50000, 0.02, 1.0, 441.0, 438.0
+"auditType=3.0 nruns=200.0 ", 50000, 0.04, 1.0, 198.0, 197.0
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.06, 1.0, 3120.0, 3119.0
+"auditType=3.0 nruns=200.0 ", 50000, 0.06, 1.0, 124.0, 123.0
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.05, 1.0, 4373.0, 4372.0
+"auditType=2.0 nruns=200.0 ", 50000, 0.07004, 1.405, 3154.145, 1474.105
+"auditType=3.0 nruns=200.0 ", 50000, 0.07004, 1.0, 104.0, 102.0
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.07, 1.0, 2331.0, 2330.0
+"auditType=3.0 nruns=200.0 ", 50000, 0.05, 1.0, 153.0, 152.0
+"auditType=3.0 nruns=200.0 ", 50000, 0.03, 1.0, 276.0, 275.0
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.06, 1.165, 5039.7, 3470.685
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.07, 1.25, 4856.19, 2989.7
+"auditType=2.0 nruns=200.0 ", 50000, 0.04, 1.275, 9199.445, 4162.725
+"auditType=2.0 nruns=200.0 ", 50000, 0.05, 1.27, 4147.725, 2073.665
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.06, 1.215, 6332.535, 3834.64
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.07, 1.225, 3879.805, 2650.09
+"auditType=2.0 nruns=200.0 ", 50000, 0.06, 1.32, 4329.175, 1909.965
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.05, 1.23, 8778.715, 5598.545
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.04, 1.0, 6513.0, 6512.0
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.03, 1.0, 10514.0, 10513.0
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.05, 1.215, 7147.995, 4998.015
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.04, 1.225, 10422.545, 7229.065
+"auditType=2.0 nruns=200.0 ", 50000, 0.03, 1.385, 15432.575, 8001.57
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.03, 1.18, 18887.925, 12159.0
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.04, 1.175, 12465.555, 7670.42
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.02, 1.0, 18733.0, 18732.0
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.03, 1.18, 16191.105, 11331.72
+"auditType=2.0 nruns=200.0 ", 50000, 0.02, 1.34, 26738.195, 14218.81
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.02, 1.155, 26253.01, 19423.84
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.02, 1.19, 29962.165, 21064.32
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.08, 1.0, 1804.0, 1803.0
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.08, 1.225, 3016.835, 2139.97
+"auditType=3.0 nruns=200.0 ", 50000, 0.1, 1.0, 69.0, 68.0
+"auditType=3.0 nruns=200.0 ", 50000, 0.08002, 1.0, 89.0, 88.0
+"auditType=2.0 nruns=200.0 ", 50000, 0.09, 1.335, 1467.39, 718.255
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.09, 1.18, 2343.695, 1528.33
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.09, 1.0, 1436.0, 1435.0
+"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.1, 1.0, 1169.0, 1168.0
+"auditType=2.0 nruns=200.0 ", 50000, 0.08002, 1.335, 1740.785, 888.475
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.09, 1.25, 3005.39, 1866.37
+"auditType=3.0 nruns=200.0 ", 50000, 0.09, 1.0, 78.0, 77.0
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.08, 1.19, 3711.665, 2259.04
+"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.1, 1.18, 1914.595, 1335.54
+"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.1, 1.23, 2385.91, 1452.735
+"auditType=2.0 nruns=200.0 ", 50000, 0.1, 1.38, 1319.98, 611.09

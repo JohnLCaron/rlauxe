@@ -5,7 +5,7 @@ enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
 data class AuditConfig(val auditType: AuditType,
                        val hasStyles: Boolean,
                        val seed: Long,
-                       val fuzzPct: Double?,
+                       val fuzzPct: Double? = null,
                        val errorRates: List<Double>? = null,
                        val useGeneratedErrorRates: Boolean = false,
                        val ntrials: Int = 100, // when estimating the sample size

@@ -324,7 +324,7 @@ fun runOneAssertionAudit(
         cassertion.proved = true
         cassertion.round = roundIdx
     } else {
-        println("testH0Result.status = ${testH0Result.status}")
+        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
     }
 
     val roundResult = AuditRoundResult(roundIdx,

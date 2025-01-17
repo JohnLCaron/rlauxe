@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/16/2025
+last update: 01/17/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -822,14 +822,22 @@ Unclear about using nostyle with ONEAUDIT.
 These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
 when there are no errors between the MVRs and the CVRs.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/OneAuditVsPollingLinear.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/OneAuditVsPollingLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/auditTypes/OneAuditVsPollingLog.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/auditTypes/OneAuditVsPollingLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
 
 * OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
 * When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
 * Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
 * OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
 * Its surprising that theres not more difference between the OneAudit results with different percents having CVRs. 
+
+Plots vs fuzzPct (percent ballots having randomly changed candidate) for margin = 4% (See [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz):
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.html" rel="AuditsWithErrors NRounds">![AuditsWithErrorsNrounds](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.png)</a>
+
+* Not sure why so much variance at fuzzPct >= .08.
 
 ## Differences with SHANGRLA
 

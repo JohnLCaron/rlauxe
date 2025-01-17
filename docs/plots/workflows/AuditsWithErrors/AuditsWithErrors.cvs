@@ -1,0 +1,40 @@
+parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, failPct
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.005 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.196, 10610.604, 7344.49, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.01 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.208, 10874.62, 7503.03, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.05 ", 50000, 0.04002, StatRejectNull, 1.24, 875.35, 433.85, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.005 ", 50000, 0.04002, StatRejectNull, 1.246, 264.34, 178.416, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.04 ", 50000, 0.04, StatRejectNull, 1.288, 7821.984, 4053.31, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.01 ", 50000, 0.04002, StatRejectNull, 1.276, 8973.048, 4141.292, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.02 ", 50000, 0.04, StatRejectNull, 1.278, 9397.358, 4112.346, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.07 ", 50000, 0.04, StatRejectNull, 1.276, 10661.292, 5014.994, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.04 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.148, 11683.864, 7734.892, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.05 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.21, 12325.274, 8306.162, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.03 ", 50000, 0.04, StatRejectNull, 1.38, 10382.414, 4986.018, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.04 ", 50000, 0.04, StatRejectNull, 1.412, 866.886, 453.102, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.005 ", 50000, 0.04002, StatRejectNull, 1.226, 6791.95, 3395.72, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.07 ", 50000, 0.04, StatRejectNull, 1.314, 2286.512, 1029.796, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.02 ", 50000, 0.04, StatRejectNull, 1.236, 677.61, 312.57, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.06 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.118, 12108.276, 7774.596, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.07 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.15, 12648.804, 8332.302, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.02 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.198, 10931.156, 7412.436, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.03 ", 50000, 0.04, StatRejectNull, 1.4, 1016.83, 488.014, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.03 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.238, 11600.612, 8174.654, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.06 ", 50000, 0.04002, StatRejectNull, 1.22, 962.168, 459.694, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.08 ", 50000, 0.04002, StatRejectNull, 1.202, 6671.082, 3300.46, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.01 ", 50000, 0.04002, StatRejectNull, 1.256, 378.546, 207.97, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.06 ", 50000, 0.04002, StatRejectNull, 1.222, 6956.868, 3479.048, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.08 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.204, 13512.562, 9184.816, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.09 ", 50000, 0.04, StatRejectNull, 1.422, 12230.726, 6395.924, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.09 ", 50000, 0.04, StatRejectNull, 1.388, 3312.01, 1600.652, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.05 ", 50000, 0.04002, StatRejectNull, 1.272, 7868.322, 3864.644, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.09 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.29, 14248.138, 9980.012, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.08 ", 50000, 0.04002, StatRejectNull, 1.236, 1238.548, 585.904, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.1 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.188, 14299.12, 9590.138, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.1 ", 50000, 0.04, StatRejectNull, 1.442, 12496.082, 6673.75, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.11 ", 50000, 0.04, StatRejectNull, 1.17, 11095.72, 4587.112, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.1 ", 50000, 0.04, StatRejectNull, 1.466, 4025.054, 1962.686, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.11 ", 50000, 0.04, StatRejectNull, 1.194, 3882.514, 1520.004, 0.0
+"auditType=2.0 nruns=500.0 fuzzPct=0.12 ", 50000, 0.04, StatRejectNull, 1.27, 12175.846, 5429.488, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.11 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.29, 15133.478, 10965.876, 0.0
+"auditType=1.0 nruns=500.0 cvrPercent=0.5 fuzzPct=0.12 undervotePercent=0.0 ", 50000, 0.04, StatRejectNull, 1.116, 14816.668, 9450.0, 0.0
+"auditType=3.0 nruns=500.0 fuzzPct=0.12 ", 50000, 0.04, StatRejectNull, 1.31, 4589.668, 2198.188, 0.0

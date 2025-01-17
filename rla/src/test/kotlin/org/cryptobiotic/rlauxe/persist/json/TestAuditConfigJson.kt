@@ -17,7 +17,7 @@ class TestAuditConfigJson {
 
     @Test
     fun testRoundtrip() {
-        val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null)
+        val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L)
         val json = target.publishJson()
         val roundtrip = json.import()
         assertNotNull(roundtrip)
@@ -27,7 +27,7 @@ class TestAuditConfigJson {
 
     @Test
     fun testRoundtripIO() {
-        val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, fuzzPct = null)
+        val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L)
 
         writeAuditConfigJsonFile(target, filename)
         val result = readAuditConfigJsonFile(filename)

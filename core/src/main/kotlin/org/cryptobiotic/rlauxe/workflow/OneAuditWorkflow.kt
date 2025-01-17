@@ -131,7 +131,8 @@ fun runOneAuditAssertionBet(
     cassertion: ComparisonAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
-): TestH0Status {
+    quiet: Boolean = false,
+    ): TestH0Status {
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false, trackStratum = false)
 
@@ -162,7 +163,7 @@ fun runOneAuditAssertionBet(
         cassertion.proved = true
         cassertion.round = roundIdx
     } else {
-        println("testH0Result.status = ${testH0Result.status}")
+        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
     }
 
     val roundResult = AuditRoundResult(roundIdx,
@@ -174,7 +175,7 @@ fun runOneAuditAssertionBet(
         )
     cassertion.roundResults.add(roundResult)
 
-    println(" ${contestUA.name} $roundResult")
+    if (!quiet) println(" ${contestUA.name} $roundResult")
     return testH0Result.status
 }
 

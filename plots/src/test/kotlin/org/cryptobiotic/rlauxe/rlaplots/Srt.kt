@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.sampling.SimulateSampleSizeTask
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.Deciles
@@ -158,7 +157,7 @@ class SRTcsvWriter(val filename: String) {
     }
 }
 
-fun writeParameters(params: Map<String, Number> ) = buildString {
+fun writeParameters(params: Map<String, Double> ) = buildString {
     append("\"")
     params.forEach { key, value ->
         append("$key=$value ")

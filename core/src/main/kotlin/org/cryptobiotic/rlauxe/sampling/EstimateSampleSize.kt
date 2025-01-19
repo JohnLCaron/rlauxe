@@ -208,7 +208,7 @@ fun simulateSampleSizeComparisonAssorter(
     val sampler = //if (auditConfig.errorRates != null) {
     //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
     //} else
-    if (auditConfig.fuzzPct == null) {
+    if (auditConfig.fuzzPct == null || auditConfig.fuzzPct == 0.0) {
         val cvrPairs = cvrs.zip( cvrs)
         ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=false)
     // } else if (auditConfig.useGeneratedErrorRates) {
@@ -304,7 +304,7 @@ fun simulateSampleSizePollingAssorter(
     val simContest = ContestSimulation(contest)
     val cvrs = simContest.makeCvrs()
 
-    val sampler = if (auditConfig.fuzzPct == null) {
+    val sampler = if (auditConfig.fuzzPct == null || auditConfig.fuzzPct == 0.0) {
         PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
     } else {
         PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire

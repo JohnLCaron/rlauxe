@@ -1,46 +1,46 @@
-parameters, N, margin, nrounds, samplesUsed, samplesNeeded
-"auditType=3.0 nruns=200.0 ", 50000, 0.02, 1.0, 441.0, 438.0
-"auditType=3.0 nruns=200.0 ", 50000, 0.04, 1.0, 198.0, 197.0
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.06, 1.0, 3120.0, 3119.0
-"auditType=3.0 nruns=200.0 ", 50000, 0.06, 1.0, 124.0, 123.0
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.05, 1.0, 4373.0, 4372.0
-"auditType=2.0 nruns=200.0 ", 50000, 0.07004, 1.405, 3154.145, 1474.105
-"auditType=3.0 nruns=200.0 ", 50000, 0.07004, 1.0, 104.0, 102.0
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.07, 1.0, 2331.0, 2330.0
-"auditType=3.0 nruns=200.0 ", 50000, 0.05, 1.0, 153.0, 152.0
-"auditType=3.0 nruns=200.0 ", 50000, 0.03, 1.0, 276.0, 275.0
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.06, 1.165, 5039.7, 3470.685
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.07, 1.25, 4856.19, 2989.7
-"auditType=2.0 nruns=200.0 ", 50000, 0.04, 1.275, 9199.445, 4162.725
-"auditType=2.0 nruns=200.0 ", 50000, 0.05, 1.27, 4147.725, 2073.665
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.06, 1.215, 6332.535, 3834.64
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.07, 1.225, 3879.805, 2650.09
-"auditType=2.0 nruns=200.0 ", 50000, 0.06, 1.32, 4329.175, 1909.965
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.05, 1.23, 8778.715, 5598.545
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.04, 1.0, 6513.0, 6512.0
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.03, 1.0, 10514.0, 10513.0
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.05, 1.215, 7147.995, 4998.015
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.04, 1.225, 10422.545, 7229.065
-"auditType=2.0 nruns=200.0 ", 50000, 0.03, 1.385, 15432.575, 8001.57
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.03, 1.18, 18887.925, 12159.0
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.04, 1.175, 12465.555, 7670.42
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.02, 1.0, 18733.0, 18732.0
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.03, 1.18, 16191.105, 11331.72
-"auditType=2.0 nruns=200.0 ", 50000, 0.02, 1.34, 26738.195, 14218.81
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.02, 1.155, 26253.01, 19423.84
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.02, 1.19, 29962.165, 21064.32
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.08, 1.0, 1804.0, 1803.0
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.08, 1.225, 3016.835, 2139.97
-"auditType=3.0 nruns=200.0 ", 50000, 0.1, 1.0, 69.0, 68.0
-"auditType=3.0 nruns=200.0 ", 50000, 0.08002, 1.0, 89.0, 88.0
-"auditType=2.0 nruns=200.0 ", 50000, 0.09, 1.335, 1467.39, 718.255
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.09, 1.18, 2343.695, 1528.33
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.09, 1.0, 1436.0, 1435.0
-"auditType=1.0 nruns=200.0 cvrPercent=1.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.1, 1.0, 1169.0, 1168.0
-"auditType=2.0 nruns=200.0 ", 50000, 0.08002, 1.335, 1740.785, 888.475
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.09, 1.25, 3005.39, 1866.37
-"auditType=3.0 nruns=200.0 ", 50000, 0.09, 1.0, 78.0, 77.0
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.08, 1.19, 3711.665, 2259.04
-"auditType=1.0 nruns=200.0 cvrPercent=0.5 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.1, 1.18, 1914.595, 1335.54
-"auditType=1.0 nruns=200.0 cvrPercent=0.0 skewVotes=0.0 undervotePercent=0.0 ", 50000, 0.1, 1.23, 2385.91, 1452.735
-"auditType=2.0 nruns=200.0 ", 50000, 0.1, 1.38, 1319.98, 611.09
+parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, failPct
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.06, StatRejectNull, 1.0, 99.0, 98.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.02, StatRejectNull, 1.0, 298.83, 296.83, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 147.81, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.07004, StatRejectNull, 1.0, 85.0, 83.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.05, StatRejectNull, 1.0, 119.0, 118.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.03, StatRejectNull, 1.0, 199.0, 197.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.06002, StatRejectNull, 1.32, 3912.04, 1929.43, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.07004, StatRejectNull, 1.33, 2883.41, 1496.53, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.05002, StatRejectNull, 1.31, 5739.11, 2828.13, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.39, 9063.14, 4009.81, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.03, StatRejectNull, 1.26, 13607.55, 6696.83, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.02, StatRejectNull, 1.28, 23917.27, 13027.7, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.08, StatRejectNull, 1.0, 74.0, 73.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.09, StatRejectNull, 1.0, 66.0, 65.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.08, StatRejectNull, 1.35, 2316.88, 1153.68, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.06, StatRejectNull, 1.0, 3120.0, 3119.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.09002, StatRejectNull, 1.5, 1811.77, 940.48, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.05, StatRejectNull, 1.0, 4373.0, 4372.0, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.10002, StatRejectNull, 1.32, 1391.44, 678.37, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.07, StatRejectNull, 1.0, 2331.0, 2330.0, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 6513.0, 6512.0, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.03, StatRejectNull, 1.0, 10514.0, 10513.0, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.05, StatRejectNull, 1.16, 7053.42, 4679.72, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.07, StatRejectNull, 1.17, 3779.11, 2588.65, 0.0
+"nruns=100.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.1, StatRejectNull, 1.0, 59.0, 58.0, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.05, StatRejectNull, 1.25, 8871.74, 5457.61, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.07, StatRejectNull, 1.26, 4974.81, 3171.53, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.06, StatRejectNull, 1.21, 5257.36, 3392.13, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.18, 10603.92, 7571.16, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.06, StatRejectNull, 1.28, 6664.06, 4103.21, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.21, 12515.54, 7627.22, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.03, StatRejectNull, 1.18, 19064.22, 12515.11, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.02, StatRejectNull, 1.0, 18733.0, 18732.0, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.03, StatRejectNull, 1.24, 16610.11, 11445.61, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.08, StatRejectNull, 1.0, 1804.0, 1803.0, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.09, StatRejectNull, 1.0, 1436.0, 1435.0, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.02, StatRejectNull, 1.26, 31367.84, 20669.32, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.08, StatRejectNull, 1.14, 2910.96, 1891.36, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.09, StatRejectNull, 1.23, 2882.78, 1853.79, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.09, StatRejectNull, 1.18, 2311.11, 1572.2, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.02, StatRejectNull, 1.26, 27615.54, 20253.94, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.08, StatRejectNull, 1.3, 3786.58, 2426.13, 0.0
+"nruns=100.0 cvrPercent=1.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.1, StatRejectNull, 1.0, 1169.0, 1168.0, 0.0
+"nruns=100.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.1, StatRejectNull, 1.25, 1972.64, 1356.7, 0.0
+"nruns=100.0 cvrPercent=0.0 fuzzPct=0.0 auditType=1.0 ", 50000, 0.1, StatRejectNull, 1.23, 2371.96, 1443.41, 0.0

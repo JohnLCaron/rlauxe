@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit
 interface ConcurrentTaskG<T> {
     fun name() : String
     fun run() : T
-    fun shuffle() // shuffle data for another trial run, used by RepeatedTaskRunner
 }
 
 // runs set of ConcurrentTask concurrently, whose run() returns T

@@ -9,13 +9,52 @@ import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.random.Random
 import kotlin.test.Test
 
 private val quiet = true
-private val nruns = 100  // number of times to run workflow
 
+interface WorkflowTaskGenerator {
+    fun name(): String
+    fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
+}
+
+class ClcaWorkflowTaskGenerator(
+    val N: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val fuzzPct: Double,
+    val parameters : Map<String, Double>,
+): WorkflowTaskGenerator {
+    override fun name() = "ClcaWorkflowTaskGenerator"
+
+    override fun generateNewTask(): ClcaWorkflowTask {
+        val test = MultiContestTestData(
+            1,
+            1,
+            N,
+            marginRange = margin..margin,
+            underVotePctRange = underVotePct..underVotePct,
+            phantomPctRange = phantomPct..phantomPct
+        )
+        val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
+        val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, fuzzPct)
+
+        val clca = ComparisonWorkflow(
+            AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, fuzzPct = fuzzPct),
+            test.contests, emptyList(), testCvrs, quiet = quiet
+        )
+        return ClcaWorkflowTask(
+            "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
+            clca,
+            testMvrs,
+            parameters + mapOf("fuzzPct" to fuzzPct, "auditType" to 3.0)
+        )
+    }
+}
 
 class ClcaWorkflowTask(val name: String,
                        val workflow: RlauxWorkflow,
@@ -42,9 +81,100 @@ class ClcaWorkflowTask(val name: String,
         )
         return srt
     }
+}
 
-    override fun shuffle() {
-        workflow.shuffle(Random.nextLong())
+class PollingWorkflowTaskGenerator(
+    val N: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val fuzzPct: Double,
+    val parameters : Map<String, Double>,
+    ) : WorkflowTaskGenerator {
+    override fun name() = "PollingWorkflowTaskGenerator"
+
+    override fun generateNewTask(): PollingWorkflowTask {
+        val test = MultiContestTestData(
+            1,
+            1,
+            N,
+            marginRange = margin..margin,
+            underVotePctRange = underVotePct..underVotePct,
+            phantomPctRange = phantomPct..phantomPct
+        )
+        val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
+        val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, fuzzPct)
+
+        val ballots = test.makeBallotsForPolling(true)
+        val polling = PollingWorkflow(
+            AuditConfig(AuditType.POLLING, true, seed = Random.nextLong(), ntrials = 10, fuzzPct = fuzzPct),
+            test.contests, BallotManifest(ballots, test.ballotStyles), N, quiet = quiet
+        )
+
+        return PollingWorkflowTask(
+            "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
+            polling,
+            testMvrs,
+            parameters + mapOf("fuzzPct" to fuzzPct, "auditType" to 2.0)
+        )
+    }
+}
+
+class PollingWorkflowTask(val name: String,
+                          val workflow: RlauxWorkflow,
+                          var testCvrs: List<Cvr>,
+                          val otherParameters: Map<String, Double>,
+): ConcurrentTaskG<WorkflowResult> {
+    override fun name() = name
+    override fun run() : WorkflowResult {
+        runWorkflow(name, workflow, testCvrs, quiet = quiet)
+
+        val contestUA = workflow.getContests().first() // theres only one
+        val minAssertion = contestUA.minPollingAssertion()!!
+
+        // val N: Int, val margin: Double, val nrounds: Int,
+        //                           val usedSamples: Int, val neededSamples: Int,
+        //                           val testParameters: Map<String, Double>
+        val lastRound = minAssertion.roundResults.last()
+        val srt = WorkflowResult(
+            contestUA.Nc,
+            minAssertion.assorter.reportedMargin(),
+            lastRound.status,
+            minAssertion.round.toDouble(),
+            lastRound.samplesUsed.toDouble(),
+            lastRound.samplesNeeded.toDouble(),
+            otherParameters
+        )
+        return srt
+    }
+}
+
+class OneAuditWorkflowTaskGenerator(
+    val N: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val cvrPercent: Double,
+    val fuzzPct: Double,
+    val parameters : Map<String, Double>,
+) : WorkflowTaskGenerator {
+    override fun name() = "OneAuditWorkflowTaskGenerator"
+
+    override fun generateNewTask(): OneAuditWorkflowTask {
+        val contestOA2 = makeContestOA(margin, N, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct)
+        val oaCvrs = contestOA2.makeTestCvrs()
+        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, fuzzPct)
+
+        val oneaudit = OneAuditWorkflow(
+            AuditConfig(AuditType.ONEAUDIT, true, seed = Random.nextLong(), ntrials = 10, fuzzPct = fuzzPct),
+            listOf(contestOA2), oaCvrs, quiet = quiet
+        )
+        return OneAuditWorkflowTask(
+            "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
+            oneaudit,
+            oaMvrs,
+            parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to fuzzPct, "auditType" to 1.0)
+        )
     }
 }
 
@@ -76,47 +206,50 @@ class OneAuditWorkflowTask(
         )
         return srt
     }
-
-    override fun shuffle() {
-        workflow.shuffle(Random.nextLong())
-    }
 }
 
-class PollingWorkflowTask(val name: String,
-                          val workflow: RlauxWorkflow,
-                          var testCvrs: List<Cvr>,
-                          val otherParameters: Map<String, Double>,
-): ConcurrentTaskG<WorkflowResult> {
-    override fun name() = name
-    override fun run() : WorkflowResult {
-        runWorkflow(name, workflow, testCvrs, quiet = quiet)
-
-        val contestUA = workflow.getContests().first() // theres only one
-        val minAssertion = contestUA.minPollingAssertion()!!
-
-        // val N: Int, val margin: Double, val nrounds: Int,
-        //                           val usedSamples: Int, val neededSamples: Int,
-        //                           val testParameters: Map<String, Double>
-        val lastRound = minAssertion.roundResults.last()
-        val srt = WorkflowResult(
-            contestUA.Nc,
-            minAssertion.assorter.reportedMargin(),
-            lastRound.status,
-            minAssertion.round.toDouble(),
-            lastRound.samplesUsed.toDouble(),
-            lastRound.samplesNeeded.toDouble(),
-            otherParameters
-        )
-        return srt
-    }
-
-    override fun shuffle() {
-        workflow.shuffle(Random.nextLong())
-    }
-}
 
 class TestWorkflowTasks {
+    val nruns = 10
 
+    // class ClcaWorkflowTaskGenerator(
+    //    val N: Int, // including undervotes but not phantoms
+    //    val margin: Double,
+    //    val underVotePct: Double,
+    //    val phantomPct: Double,
+    //    val fuzzPct: Double,
+    //)
+    @Test
+    fun genClcaWorkflowMarginPlots() {
+        val N = 50000
+        val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
+
+        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        margins.forEach { margin ->
+            val workflowGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
+                mapOf("nruns" to nruns.toDouble()))
+            tasks.add(RepeatedTaskRunner(nruns, workflowGenerator))
+        }
+
+        val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks)
+        val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
+
+        val dirName = "/home/stormy/temp/testWorkflowTasks"
+        val filename = "ClcaMargin"
+        val writer = WorkflowResultsIO("$dirName/${filename}.cvs")
+        writer.writeResults(results)
+
+        val plotter = WorkflowResultsPlotter(dirName, filename)
+        plotter.showSampleSizesVsMargin(results, "category") { "all" }
+    }
+
+    // class OneAuditWorkflowTaskGenerator(
+    //    val N: Int, // including undervotes but not phantoms
+    //    val margin: Double,
+    //    val underVotePct: Double,
+    //    val phantomPct: Double,
+    //    val cvrPercent: Double,
+    //    val fuzzPct: Double,
     @Test
     fun genOneAuditWorkflowMarginPlots() {
         val N = 50000
@@ -135,29 +268,16 @@ class TestWorkflowTasks {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         cvrPercents.forEach { cvrPercent ->
             margins.forEach { margin ->
-                val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.0)
-                val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-                val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs, quiet = quiet)
-                val otherParameters =
-                    mapOf("cvrPercent" to cvrPercent, "nruns" to nruns.toDouble(), "ntrials" to 10.toDouble(),)
-                tasks.add(
-                    RepeatedTaskRunner(
-                        10,
-                        OneAuditWorkflowTask(
-                            "genOneAuditWorkflowMarginPlots margin = $margin",
-                            workflow,
-                            testCvrs,
-                            otherParameters,
-                        )
-                    )
-                )
+                val workflowGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, 0.0,
+                    mapOf("nruns" to nruns.toDouble()))
+                tasks.add(RepeatedTaskRunner(nruns, workflowGenerator))
             }
         }
 
         val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks)
         val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
 
-        val dirName = "/home/stormy/temp/oneaudit"
+        val dirName = "/home/stormy/temp/testWorkflowTasks"
         val filename = "OneAuditMarginRepeated"
         val writer = WorkflowResultsIO("$dirName/${filename}.cvs")
         writer.writeResults(results)
@@ -166,111 +286,29 @@ class TestWorkflowTasks {
         plotter.showSampleSizesVsMargin(results, "cvrPercent") { df(it.parameters["cvrPercent"]!!.toDouble()) }
     }
 
+    // class PollingWorkflowTaskGenerator(
+    //    val N: Int, // including undervotes but not phantoms
+    //    val margin: Double,
+    //    val underVotePct: Double,
+    //    val phantomPct: Double,
+    //    val fuzzPct: Double,
     @Test
     fun genPollingWorkflowMarginPlots() {
         val N = 50000
         val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val underVotePct = 0.0..0.0
-        val phantomPct = 0.00..0.00
-        val ncontests = 1
-        val nbs = 1
-        val auditConfig = AuditConfig(
-            AuditType.POLLING,
-            hasStyles = true,
-            seed = Random.nextLong(),
-            quantile = .80,
-            ntrials = 10
-        )
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val marginRange = margin..margin
-            val test = MultiContestTestData(
-                ncontests,
-                nbs,
-                N,
-                marginRange = marginRange,
-                underVotePctRange = underVotePct,
-                phantomPctRange = phantomPct
-            )
-            val ballots = test.makeBallotsForPolling(true)
-            val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
-            val workflow = PollingWorkflow(
-                auditConfig,
-                test.contests,
-                BallotManifest(ballots, test.ballotStyles),
-                N,
-                quiet = quiet
-            )
-            tasks.add(
-                RepeatedTaskRunner(
-                    nruns,
-                    PollingWorkflowTask(
-                        "genPollingWorkflowMarginPlots margin = $margin",
-                        workflow,
-                        testCvrs,
-                        mapOf("nruns" to nruns.toDouble())
-                    )
-                )
-            )
+            val workflowGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
+                mapOf("nruns" to nruns.toDouble()))
+            tasks.add(RepeatedTaskRunner(nruns, workflowGenerator))
         }
 
         val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks)
         val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
 
-        val dirName = "/home/stormy/temp/oneaudit"
+        val dirName = "/home/stormy/temp/testWorkflowTasks"
         val filename = "PollingMarginRepeated"
-        val writer = WorkflowResultsIO("$dirName/${filename}.cvs")
-        writer.writeResults(results)
-
-        val plotter = WorkflowResultsPlotter(dirName, filename)
-        plotter.showSampleSizesVsMargin(results, "category") { "all" }
-    }
-
-    @Test
-    fun genClcaWorkflowMarginPlots() {
-        val N = 50000
-        val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val underVotePct = 0.0..0.0
-        val phantomPct = 0.00..0.00
-        val ncontests = 1
-        val nbs = 1
-
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
-        margins.forEach { margin ->
-            val marginRange = margin..margin
-            val test = MultiContestTestData(
-                ncontests,
-                nbs,
-                N,
-                marginRange = marginRange,
-                underVotePctRange = underVotePct,
-                phantomPctRange = phantomPct
-            )
-            val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
-            val auditConfig =
-                AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10)
-            val workflow = ComparisonWorkflow(auditConfig, test.contests, emptyList(), testCvrs, quiet = quiet)
-
-            val clcaRuns = 1
-            tasks.add(
-                RepeatedTaskRunner(
-                    clcaRuns,
-                    ClcaWorkflowTask(
-                        "genClcaWorkflowMarginPlots margin = $margin",
-                        workflow,
-                        testCvrs,
-                        mapOf("nruns" to clcaRuns.toDouble())
-                    )
-                )
-            )
-        }
-
-        val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks)
-        val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
-
-        val dirName = "/home/stormy/temp/oneaudit"
-        val filename = "ClcaMargin"
         val writer = WorkflowResultsIO("$dirName/${filename}.cvs")
         writer.writeResults(results)
 

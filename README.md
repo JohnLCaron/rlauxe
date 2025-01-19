@@ -6,6 +6,8 @@ for the purpose of making a reusable and maintainable library.
 
 **WORK IN PROGRESS**
 
+Click on plot images to get an interactive html plot.
+
 You can also read this on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 

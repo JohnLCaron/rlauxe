@@ -10,19 +10,19 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-private const val debug = false
+private const val debugAdjust = false
 
 // creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
 // It can create cvrs that reflect the contests' exact votes.
 data class MultiContestTestData(
     val ncontest: Int,
     val nballotStyles: Int,
-    val totalBallots: Int, // including undervotes but not phantoms
+    val totalBallots: Int, // including undervotes and phantoms
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
 ) {
-    // generate with ballotStyles; but if hasStyles = false, then these are not visible
+    // generate with ballotStyles; but if hasStyles = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
 
     val fcontests: List<ContestTestData>
@@ -47,19 +47,19 @@ data class MultiContestTestData(
         }
 
         // every contest has between 1 and 4 ballot styles, randomly chosen
-        val contestBs = mutableMapOf<ContestTestData, Set<Int>>()
+        val contestBstyles = mutableMapOf<ContestTestData, Set<Int>>()
         fcontests.forEach{
             val nbs = min(nballotStyles, 1 + Random.nextInt(4))
             val bset = mutableSetOf<Int>() // the ballot style idx, 0 based
             while (bset.size < nbs) { // randomly choose nbs ballot styles
                 bset.add(Random.nextInt(nballotStyles))
             }
-            contestBs[it] = bset
+            contestBstyles[it] = bset
         }
 
         // partition totalBallots amongst the ballotStyles
         ballotStyles = List(nballotStyles) { it }.map {
-            val contestsForThisBs = contestBs.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
+            val contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
             val contestList = contestsForThisBs.map { it.info.name }
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[it]!!
@@ -182,35 +182,24 @@ data class ContestTestData(
         }
         val votes: List<Pair<Int, Int>> = partition(nvotes, ncands)
         var svotes = votes.sortedBy { it.second }.reversed().toMutableList()
-        svotes.add(Pair(ncands, underCount)) // represents the undervotes, always at the end
 
         // adjust the margin between the first and second highest votes.
         var adjust = 100
         while (abs(adjust) > 2) {
-            if (debug) println("${this.info.name} before=$svotes")
+            if (debugAdjust) println("${this.info.name} before=$svotes")
             adjust = adjust(svotes, Nc)
-            if (debug) println("${this.info.name} after=$svotes adjust=$adjust")
+            if (debugAdjust) println("${this.info.name} after=$svotes adjust=$adjust")
             svotes = svotes.sortedBy { it.second }.reversed().toMutableList()
-            if (debug) println()
+            if (debugAdjust) println()
         }
+        val contest = Contest(this.info, svotes.toMap(), Nc, this.phantomCount)
+
+        svotes.add(Pair(ncands, underCount)) // the adjusted votes include the undervotes
         this.adjustedVotes = svotes // includes the undervotes
-
-        //    Let V_c = votes for contest C, V_c <= Nb_c <= N_c.
-        //    Let U_c = undervotes for contest C = Nb_c - V_c >= 0.
-        //    Let Np_c = nphantoms for contest C = N_c - Nb_c, and are added to the ballots before sampling or sample size estimation.
-        //    Then V_c + U_c + Np_c = N_c.
-        // V_c + U_c = ncards
-        // Np_c = ppct * N_c
-        // N_c = ncards + Np_c
-        // N_c = ncards + ppct * N_c
-        // 1 = ncards/N_c + ppct
-        // (1 - pcct) = ncards/N_c
-        // N_c = ncards / (1 - ppct)
-
-        val removeUndervotes = svotes.filter{ it.first != ncands }
-        return Contest(this.info, removeUndervotes.toMap(), Nc.toInt(), this.phantomCount)
+        return contest
     }
 
+    // maybe adjust doesnt need the undervotes?
     fun adjust(svotes: MutableList<Pair<Int, Int>>, Nc: Int): Int {
         val winner = svotes[0]
         val loser = svotes[1]
@@ -219,6 +208,22 @@ data class ContestTestData(
         val adjust: Int = ceil((wantMarginDiff - haveMarginDiff) * 0.5).toInt() // can be positive or negetive
         svotes[0] = Pair(winner.first, winner.second + adjust)
         svotes[1] = Pair(loser.first, loser.second - adjust)
+        return adjust // will be 0 when done
+    }
+
+    fun adjust2(svotes: MutableList<Pair<Int, Int>>, Nc: Int): Int {
+        // dont touch undervotes
+        val winnerIdx = if (svotes[0].first == ncands) 1 else 0
+        val loserIdx = if (svotes[winnerIdx+1].first == ncands) winnerIdx+2 else winnerIdx+1
+
+        val winner = svotes[winnerIdx]
+        var loser = svotes[loserIdx]
+
+        val wantMarginDiff = ceil(margin * Nc).toInt()
+        val haveMarginDiff = (winner.second - loser.second)
+        val adjust: Int = ceil((wantMarginDiff - haveMarginDiff) * 0.5).toInt() // can be positive or negetive
+        svotes[0] = Pair(winner.first, winner.second + adjust)
+        svotes[loserIdx] = Pair(loser.first, loser.second - adjust)
         return adjust // will be 0 when done
     }
 
@@ -250,8 +255,8 @@ data class ContestTestData(
         trackVotesRemaining[idx] = Pair(candidateIdx, nvotes - 1)
         votesLeft--
 
-        val check = trackVotesRemaining.sumOf { it.second }
-        require(check == votesLeft)
+        val checkVoteCount = trackVotesRemaining.sumOf { it.second }
+        require(checkVoteCount == votesLeft)
         return candidateIdx
     }
 

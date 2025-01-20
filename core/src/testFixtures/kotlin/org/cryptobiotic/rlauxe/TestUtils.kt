@@ -35,10 +35,10 @@ class SampleFromList(val list: List<Double>) {
 fun makeStandardContest(Nc: Int) =
     Contest(
         ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
-        mapOf(0 to 3, 1 to 33),
-        Nc = Nc,
-        Np=0, // TODO
-    )
+            mapOf(0 to 3, 1 to 33),
+            Nc = Nc,
+            Np=0, // TODO
+        )
 
 fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
     val contest = makeStandardContest(Nc)

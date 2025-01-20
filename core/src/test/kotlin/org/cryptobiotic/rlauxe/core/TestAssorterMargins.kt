@@ -64,7 +64,8 @@ class TestAssorterMargins {
                 Arb.int(min = 10000, max = 30000),
                 Arb.int(min = 0, max = 100)
             ) { reportedMargin, underVotePct, phantomPct, Nc, Np ->
-                val sim = ContestSimulation.make2wayTestContest(reportedMargin, underVotePct, phantomPct, Nc=Nc)
+                val sim = ContestSimulation.make2wayTestContest(Nc, reportedMargin, undervotePct=underVotePct, phantomPct=phantomPct)
+                // val sim = ContestSimulation.make2wayTestContestOld(reportedMargin, underVotePct, phantomPct, Nc=Nc)
                 val contestUA = ContestUnderAudit(sim.contest, isComparison = false).makePollingAssertions()
                 println(
                     "${sim.show()} margin=${df(reportedMargin)} under=${df(underVotePct)} phantom=${df(phantomPct)} votes: [${

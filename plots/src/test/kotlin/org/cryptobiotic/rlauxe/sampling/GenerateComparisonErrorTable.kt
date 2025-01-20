@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import kotlin.test.Test
@@ -25,7 +24,7 @@ class GenerateComparisonErrorTable {
         margins.forEach { margin ->
             ncands.forEach { ncand ->
                 //         fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
-                val sim = ContestSimulation.make2wayTestContest(margin, 0.0, 0.0, Nc=N) // TODO
+                val sim = ContestSimulation.make2wayTestContest(Nc=N, margin, 0.0, 0.0) // TODO
 
                 val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
                 fuzzPcts.forEach { fuzzPct ->

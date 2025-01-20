@@ -13,6 +13,7 @@ enum class TestH0Status(val fail: Boolean) {
     MinMargin(true), // margin too small for RLA to efficiently work
     ContestMisformed(true), // Contest incorrectly formed
     FailPct(true), // Simulations fail
+    AllFailPct(true), // all Simulations fail
 }
 
 data class TestH0Result(

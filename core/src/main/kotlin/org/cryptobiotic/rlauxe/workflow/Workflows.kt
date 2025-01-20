@@ -72,24 +72,6 @@ data class WorkflowResult(val N: Int,
                           val failPct: Double = 0.0, // from avgWorkflowResult()
 )
 
-fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
-    val failures = runs.count{ it.status.fail }
-    val failPct = if (runs.isEmpty()) 0.0 else 100.0 * failures / runs.size
-
-    val first = runs.first()
-    return WorkflowResult(
-        first.N,
-        first.margin,
-        first.status,
-        runs.map { it.nrounds }.average(),
-        runs.map { it.samplesUsed }.average(),
-        runs.map { it.samplesNeeded }.average(),
-        first.parameters,
-        failPct,
-    )
-}
-
-
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
 fun checkWinners(contestUA: ContestUnderAudit, sortedVotes: List<Map.Entry<Int, Int>>) {
     val contest = contestUA.contest

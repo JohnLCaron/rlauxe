@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/17/2025
+last update: 01/20/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -174,8 +174,10 @@ For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, 
 One only needs one assorter for each winner, not one for each winner/loser pair.
 
 Notes
+* "minimum fraction of the valid votes": so use V-c, not N_c as the denominator.
 * Someone has to enforce that each CVR has <= number of allowed votes.
-* multiple winners are not yet supported for auditing.
+* multiple winners are not yet supported for auditing. TODO is that true ??
+* TODO test when there are no winners.
 
 
 #### IRV
@@ -381,7 +383,7 @@ when estimating the sample size from the diluted margin, and also when doing the
 
 The comparison error rates are:
 
-        val p1: // rate of 1-vote overstatements; voted for other, cvr has winner
+        val p1: rate of 1-vote overstatements; voted for other, cvr has winner
         val p2: // rate of 2-vote overstatements; voted for loser, cvr has winner
         val p3: // rate of 1-vote understatements; voted for winner, cvr has other
         val p4: // rate of 2-vote understatements; voted for winner, cvr has loser
@@ -637,18 +639,18 @@ which corresponds to case 1.
 
     Let N_c = upper bound on ballots for contest C.
     Let Nb = N (physical ballots) = ncvrs (comparison) or nballots in manifest (polling).
+    When we have styles, we can calculate Nb_c = physical ballots for contest C.
 
-    When we have styles, we can calculate Nb_c = physical ballots for contest C
-    Let V_c = votes for contest C, V_c <= Nb_c <= N_c.
-    Let U_c = undervotes for contest C = Nb_c - V_c >= 0.
-    Let Np_c = nphantoms for contest C = N_c - Nb_c, and are added to the ballots before sampling or sample size estimation.
-    Then V_c + U_c + Np_c = N_c.
+    Let V_c = reported votes for contest C; V_c <= Nb_c <= N_c.
+    Let U_c = undervotes for contest C; U_c = Nb_c - V_c >= 0.
+    Let Np_c = nphantoms for contest C; Np_c = N_c - Nb_c.
+    Then N_c = V_c + U_c + Np_c.
 
     Comparison, no styles: we have cvrs, but the cvr doesnt record undervotes.
     We know V_c and N_c. Cant distinguish an undervote from a phantom, so we dont know U_c, or Nb_c or Np_c.
     For estimating, we can use some guess for U_c.
     For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
-    I think we must have a ballot manifest, which means we have Nb, and ... 
+    I think we must have a ballot manifest, which means we have Nb, and ...
 
 ------------------------------------------------------------------------------------
 
@@ -840,6 +842,20 @@ with margin fixed at 4%:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.html" rel="AuditsWithErrors NRounds">![AuditsWithErrorsNrounds](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.png)</a>
+
+* clca is much more sensitive to errors than polling or oneaudit.
+
+Varying undervotes percent:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotes Linear">![AuditsWithUndervotesLinear](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLog.html" rel="AuditsWithUndervotes Log">![AuditsWithUndervotesLog](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLog.png)</a>
+
+Varying phantom percent::
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
+
+
 ## Differences with SHANGRLA
 
 ### Limit audit to estimated samples
@@ -866,6 +882,8 @@ AFAICT, the calculation of the total_size using the probabilities as described i
 total_size estimate, but not do the consistent sampling, which gives you the total sample size.
 
 ### generation of phantoms
+
+One cant know Nc without knowing Np, in all cases. Not sure if SHANGRLA assumes that.
 
 From STYLISH paper:
 

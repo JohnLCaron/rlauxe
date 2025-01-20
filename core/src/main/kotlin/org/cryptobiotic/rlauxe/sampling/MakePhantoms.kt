@@ -121,7 +121,7 @@ fun makePhantomCvrs(
 
 fun makePhantomBallots(
     contests: List<Contest>,
-    ncvrs: Map<Int, Int>,
+    ncvrs: Map<Int, Int>,  // contest id -> ncards in contest
     prefix: String = "phantom-",
 ): List<Ballot> {
 

@@ -5,7 +5,11 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.roundToInt
+import org.cryptobiotic.rlauxe.workflow.Ballot
+import org.cryptobiotic.rlauxe.workflow.BallotManifest
+import org.cryptobiotic.rlauxe.workflow.BallotStyle
+import kotlin.math.round
 import kotlin.random.Random
 
 //    Let N_c = upper bound on ballots for contest C.
@@ -95,23 +99,39 @@ class ContestSimulation(val contest: Contest) {
         return candidateId
     }
 
+    fun makeBallotManifest(hasStyle: Boolean): BallotManifest {
+        val ncards: Int = contest.Nc - contest.Np
+        val contests = listOf("contest0")
+        val contestIds = listOf(0)
+        val bs = BallotStyle.make(0, contests, listOf(0), ncards)
+
+        val ballots = mutableListOf<Ballot>()
+        repeat(ncards) {
+            ballots.add(Ballot("ballot$it", false, if (hasStyle) bs else null))
+        }
+        // add phantoms
+        repeat(contest.Np) {
+            ballots.add(Ballot("phantom$it", true, null, contestIds))
+        }
+        return BallotManifest(ballots, listOf(bs))
+    }
+
     companion object {
         /** Make a 2 candidate plurality Contest with given margin etc. */
-        fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
-            val info = ContestInfo(
-                name = "AvB",
-                id = 0,
-                choiceFunction = SocialChoiceFunction.PLURALITY,
-                candidateNames = listToMap( "A", "B"),
+        fun make2wayTestContest(Nc: Int,
+                                margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
+                                undervotePct: Double, // needed to set Nc
+                                phantomPct: Double): ContestSimulation {
+            val nvotes = round(Nc * (1.0 - undervotePct - phantomPct))
+            val winner = roundToInt((margin * Nc + nvotes) / 2)
+            val loser = roundToInt(nvotes - winner)
+            val Np = roundToInt(Nc * phantomPct)
+            val contest = Contest(
+                ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
+                mapOf(0 to winner, 1 to loser),
+                Nc = Nc,
+                Np=Np,
             )
-            val underCount = (Nc * underVotePct).toInt()
-            val phantomCount = (Nc * phantomPct).toInt()
-            val voteCount = Nc - underCount - phantomCount
-
-            val winnerCount = ((reportedMargin * Nc + voteCount) / 2.0) .toInt()
-            val loserCount = ((voteCount - reportedMargin * Nc) / 2.0) .toInt()
-
-            val contest = Contest(info, mapOf(0 to winnerCount, 1 to loserCount), Nc=Nc, Np=phantomCount)
             return ContestSimulation(contest)
         }
     }

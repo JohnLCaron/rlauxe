@@ -57,14 +57,24 @@ interface ContestIF {
     val losers: List<Int>
 }
 
+//    When we have styles, we can calculate Nb_c = physical ballots for contest C.
+//    Let V_c = reported votes for contest C; V_c <= Nb_c <= N_c.
+
+//    Let N_c = upper bound on ballots for contest C.
+//    Let V_c = reported votes for contest C
+//    Let U_c = undervotes for contest C; U_c = Nb_c - V_c >= 0.
+//    Let Np_c = nphantoms for contest C; Np_c = N_c - Nb_c.
+//    Then N_c = V_c + U_c + Np_c.
+
 /**
  * Contest with the reported results.
  * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be ommitted.
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
+ * @parameter Np: number of phantoms for this contest.
  */
 class Contest(
         override val info: ContestInfo,
-        voteInput: Map<Int, Int>,   // candidateId -> nvotes
+        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
         override val Nc: Int,
         override val Np: Int,
     ): ContestIF {
@@ -73,11 +83,13 @@ class Contest(
     override val choiceFunction = info.choiceFunction
     override val ncandidates = info.candidateIds.size
 
-    val votes: Map<Int, Int>
+    val votes: Map<Int, Int>  // same as voteInput except zero vote candidates have been added
     override val winnerNames: List<String>
     override val winners: List<Int>
     override val losers: List<Int>
-    val minMargin: Double  // TODO should we remove Np in this calculation?
+
+    val undervotes: Int
+    val minMargin: Double  // minimum margin between top winner and top loser
 
     init {
         // construct votes, adding 0 votes if needed
@@ -92,35 +104,42 @@ class Contest(
             }
         }
         votes = voteBuilder.toMap()
+        val nvotes = votes.values.sum()
+        require(nvotes <= Nc) { "Nc $Nc must be <= totalVotes ${nvotes}"}
+        undervotes = Nc - nvotes - Np
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
         val useMin = info.minFraction ?: 0.0
-        val nvotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
-        require(nvotes <= Nc) { "Nc $Nc must be <= totalVotes ${nvotes}"}
 
-        // todo why use totalVotes instead of Nc?
+        // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()
         val useNwinners = min(overTheMin.size, info.nwinners)
-        winners = overTheMin.subList(0, useNwinners).map { it.first }
-        // invert the map
-        val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }
+        winners = overTheMin.subList(0, useNwinners).map { it.first } // TODO deal with when there are no winners
+        val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
         winnerNames = winners.map { mapIdToName[it]!! }
 
         // find losers
         val mlosers = mutableListOf<Int>()
-        // could require that all candidates are in votes, but this way, it allows candidates with no votes
         info.candidateNames.forEach { (_, id) ->
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
 
+        // TODO this assumes plurality with nwinners = 1. Maybe get rid of this ??
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
     override fun toString() = buildString {
         append("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
+    }
+
+    fun calcMargin(winner: Int, loser: Int): Double {
+        val winnerVotes = votes[winner] ?: 0
+        val loserVotes = votes[loser] ?: 0
+        val reportedMargin = (winnerVotes - loserVotes) / Nc.toDouble()
+        return reportedMargin
     }
 
     override fun equals(other: Any?): Boolean {
@@ -130,6 +149,8 @@ class Contest(
         other as Contest
 
         if (Nc != other.Nc) return false
+        if (Np != other.Np) return false
+        if (minMargin != other.minMargin) return false
         if (info != other.info) return false
         if (votes != other.votes) return false
         if (winnerNames != other.winnerNames) return false
@@ -141,19 +162,14 @@ class Contest(
 
     override fun hashCode(): Int {
         var result = Nc
+        result = 31 * result + Np
+        result = 31 * result + minMargin.hashCode()
         result = 31 * result + info.hashCode()
         result = 31 * result + votes.hashCode()
         result = 31 * result + winnerNames.hashCode()
         result = 31 * result + winners.hashCode()
         result = 31 * result + losers.hashCode()
         return result
-    }
-
-    fun calcMargin(winner: Int, loser: Int): Double {
-        val winnerVotes = votes[winner] ?: 0
-        val loserVotes = votes[loser] ?: 0
-        val reportedMargin = (winnerVotes - loserVotes) / Nc.toDouble()
-        return reportedMargin
     }
 
     companion object {
@@ -165,7 +181,7 @@ class Contest(
 /** Mutable form of Contest. */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    val isComparison: Boolean = true, // TODO change to AuditType
+    val isComparison: Boolean = true, // TODO change to AuditType?
     val hasStyle: Boolean = true,
 ) {
     val id = contest.info.id

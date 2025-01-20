@@ -6,8 +6,6 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.min
 
-// TODO regular Contest is a special case of ContestOA with only one stratum?
-// TODO is it better to always use "batches" because Nc may be smaller ?? just for nostyle??
 class OneAuditContest (
     override val info: ContestInfo,
     val strata: List<OneAuditStratum>,
@@ -17,21 +15,22 @@ class OneAuditContest (
     override val choiceFunction = info.choiceFunction
     override val ncandidates = info.candidateIds.size
 
-    val votes: Map<Int, Int>
+    val votes: Map<Int, Int>  // cand -> vote
     override val winnerNames: List<String>
     override val winners: List<Int>
     override val losers: List<Int>
 
     override val Nc: Int  // upper limit on number of ballots for all strata for this contest
     override val Np: Int  // number of phantom ballots for all strata for this contest
-    val minMargin: Double  // TODO should we remove Np in this calculation? Do we need this?
+
+    val undervotes: Int
+    val minMargin: Double
 
     init {
+        // construct votes, adding 0 votes if needed
         val svotes = strata.map { it.votes }
-        val voteBuilder = mutableMapOf<Int, Int>()
+        val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
         voteBuilder.mergeReduce(svotes)
-
-        // add 0 votes if needed
         info.candidateIds.forEach {
             if (!voteBuilder.contains(it)) {
                 voteBuilder[it] = 0
@@ -42,19 +41,15 @@ class OneAuditContest (
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
         val useMin = info.minFraction ?: 0.0
-        val nvotes = votes.values.sum() // this is plurality of the votes, not of the cards or the ballots
-
-        // todo why use totalVotes instead of Nc?
+        val nvotes = votes.values.sum()
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()
         val useNwinners = min(overTheMin.size, info.nwinners)
         winners = overTheMin.subList(0, useNwinners).map { it.first }
-        // invert the map
-        val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }
+        val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
         winnerNames = winners.map { mapIdToName[it]!! }
 
         // find losers
         val mlosers = mutableListOf<Int>()
-        // could require that all candidates are in votes, but this way, it allows candidates with no votes
         info.candidateNames.forEach { (_, id) ->
             if (!winners.contains(id)) mlosers.add(id)
         }
@@ -63,6 +58,7 @@ class OneAuditContest (
         Nc = strata.sumOf { it.Ng }
         Np = strata.sumOf { it.Np }
         require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
+        undervotes = Nc - nvotes - Np
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
@@ -128,11 +124,13 @@ class OneAuditStratum (
             repeat(nvotes) { cvrs.add(makeCvr(info.id, candId)) }
         }
         // undervotes
-        val nu = this.Ng - cvrs.size
-        repeat(nu) {
+        repeat(contest.undervotes) {
             cvrs.add(makeCvr(info.id))
         }
-        // TODO phantoms
+        // phantoms
+        repeat(this.Np) {
+            cvrs.add(Cvr(strataName, mapOf(info.id to IntArray(0)), phantom = true))
+        }
         return cvrs
     }
 

@@ -35,7 +35,7 @@ class TestPollingSimulationData {
             listOf(.04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
             phantomPcts.forEach { phantomPct ->
-                val sim = ContestSimulation.make2wayTestContest(margin, underVotePct, phantomPct, Nc=Nc) // TODO
+                val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, underVotePct, phantomPct)
                 val contest = sim.contest
                 val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
                 val cvrs = sim.makeCvrs()

@@ -1,0 +1,34 @@
+parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, failPct
+"nruns=100.0 undervote=0.45 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.2 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.25 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.15 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.15 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.27, 7664.82, 3881.16, 0.0
+"nruns=100.0 undervote=0.25 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.26, 6943.44, 3589.05, 0.0
+"nruns=100.0 undervote=0.45 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.18, 5268.75, 2883.03, 0.0
+"nruns=100.0 undervote=0.1 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.3 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.35 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.05 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.4 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.0 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.05 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.32, 8925.78, 4163.92, 0.0
+"nruns=100.0 undervote=0.3 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.29, 6357.93, 3566.6, 0.0
+"nruns=100.0 undervote=0.0 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.4, 9485.85, 4745.48, 0.0
+"nruns=100.0 undervote=0.4 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.28, 5888.45, 3139.95, 0.0
+"nruns=100.0 undervote=0.35 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.23, 5825.45, 2887.16, 0.0
+"nruns=100.0 undervote=0.1 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.39, 8573.27, 4072.15, 0.0
+"nruns=100.0 undervote=0.2 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.34, 7611.02, 3997.34, 0.0
+"nruns=100.0 undervote=0.5 fuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 148.0, 0.0
+"nruns=100.0 undervote=0.5 fuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.22, 5145.45, 2707.32, 0.0
+"nruns=100.0 undervote=0.15 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.18, 10105.53, 7160.45, 0.0
+"nruns=100.0 undervote=0.3 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.15, 9761.16, 6959.65, 0.0
+"nruns=100.0 undervote=0.0 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.19, 10640.11, 7366.16, 0.0
+"nruns=100.0 undervote=0.45 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.21, 9374.97, 6957.48, 0.0
+"nruns=100.0 undervote=0.05 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.17, 10080.67, 7307.16, 0.0
+"nruns=100.0 undervote=0.4 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.15, 9236.1, 6862.38, 0.0
+"nruns=100.0 undervote=0.1 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.27, 10476.86, 7561.21, 0.0
+"nruns=100.0 undervote=0.2 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.2, 9977.13, 6824.04, 0.0
+"nruns=100.0 undervote=0.35 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.18, 9475.81, 6649.85, 0.0
+"nruns=100.0 undervote=0.25 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.26, 10011.75, 7207.66, 0.0
+"nruns=100.0 undervote=0.5 cvrPercent=0.5 fuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.17, 8998.43, 6883.24, 0.0

@@ -1,48 +1,52 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.AlphaMart
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.EstimFn
-import org.cryptobiotic.rlauxe.core.TruncShrinkage
-import org.cryptobiotic.rlauxe.core.eps
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
-import kotlin.math.max
+import kotlin.math.abs
+import kotlin.math.round
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestMultiContestTestData {
+    val N = 50000
+    val ncontests = 40
+    val nbs = 11
+    val marginRange = 0.01..0.04
+    val underVotePct = 0.234..0.345
+    val phantomRange = 0.001..0.01
+    val test: MultiContestTestData
 
-    // @Test
-    fun testMakeSampleDataRepeat() {
-        repeat(100) { testMultiContestTestData() }
+    init {
+        test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        println(test)
     }
 
     @Test
-    fun testMultiContestTestData() {
-        val N = 50000
-        val ncontests = 40
-        val nbs = 11
-        val marginRange= 0.01 .. 0.04
-        val underVotePct= 0.234 .. 0.345
-        val phantomRange= 0.001 .. 0.01
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+    fun testBallotPartitions() {
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
-        println(test)
+    }
 
-        println("test makeContests")
+    @Test
+    fun testMakeContests() {
         assertEquals(ncontests, test.contests.size)
-
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]
+            assertEquals(fcontest.ncards + fcontest.phantomCount, contest.Nc)
+            val avotes = fcontest.adjustedVotes.sumOf { it.second }
+            assertEquals(fcontest.ncards, avotes, "failed for contest = ${contest.id}")
+            val nvotes = contest.votes.values.sum()
+            val aundervote = fcontest.adjustedVotes.first { it.first == contest.ncandidates}.second
+            assertEquals(fcontest.underCount, aundervote, "failed for contest = ${contest.id}")
+            assertEquals(fcontest.underCount, avotes - nvotes, "failed for contest = ${contest.id}")
+
             contest.winners.forEach { winner ->
                 contest.losers.forEach { loser ->
                     assertTrue(marginRange.contains(fcontest.margin))
@@ -58,11 +62,13 @@ class TestMultiContestTestData {
                 }
             }
         }
-        println()
+    }
 
-        println("test makeCvrsFromContests")
+    @Test
+    fun testCvrsFromContests() {
         val cvrs = test.makeCvrsFromContests()
-        val votes: Map<Int, Map<Int, Int>> = org.cryptobiotic.rlauxe.util.tabulateVotes(cvrs) // contestId -> candidateId -> nvotes
+        val votes: Map<Int, Map<Int, Int>> =
+            org.cryptobiotic.rlauxe.util.tabulateVotes(cvrs).toSortedMap() // contestId -> candidateId -> nvotes
         votes.forEach { vcontest ->
             println("  tabulate contest $vcontest")
             votes.forEach { vcontest ->
@@ -76,12 +82,28 @@ class TestMultiContestTestData {
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]
-            assertEquals(contest.Nc, fcontest.ncards + fcontest.phantomCount)
+            val Nc = fcontest.ncards + fcontest.phantomCount
+
+            assertEquals(contest.Nc, Nc)
             println(" ${contest.id} ncards ${fcontest.ncards} Nc=${contest.Nc}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
             val nbs = ballots.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, nbs)
+
+            val nphantom = cvrs.count { it.hasContest(contest.id) && it.phantom }
+            assertEquals(fcontest.phantomCount, nphantom)
+            val phantomPct = nphantom/ Nc.toDouble()
+            println("  nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} " +
+                    " rel=${abs(phantomPct - fcontest.phantomPct)/phantomPct}")
+            if (nphantom > 5) assertEquals(fcontest.phantomPct, phantomPct, .001)
+
+            val nunder = cvrs.count { it.hasContest(contest.id) && !it.phantom && it.votes[contest.id]!!.isEmpty() }
+            assertEquals(fcontest.underCount, nunder)
+            val underPct = nunder/ Nc.toDouble()
+            println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${fcontest.undervotePct} abs=${abs(underPct - fcontest.undervotePct)} " +
+                    " rel=${abs(underPct - fcontest.undervotePct)/underPct}")
+            if (nunder > 5) assertEquals(fcontest.undervotePct, underPct, .02)
         }
     }
 
@@ -90,9 +112,10 @@ class TestMultiContestTestData {
         val N = 50000
         val ncontests = 1
         val nbs = 1
-        val marginRange= 0.04 .. 0.04
-        val underVotePct= 0.20 .. 0.20
-        val phantomRange= 0.05 .. 0.05
+        val marginRange = 0.04..0.04
+        val underVotePct = 0.20..0.20
+        val phantomPct = .05
+        val phantomRange = phantomPct..phantomPct
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
@@ -104,6 +127,7 @@ class TestMultiContestTestData {
         val ballots = test.makeBallotsForPolling(true)
 
         test.contests.forEachIndexed { idx, contest ->
+            assertEquals(roundToInt(N * (1.0 + phantomPct)), contest.Nc)
             val fcontest = test.fcontests[idx]
             assertEquals(contest.Nc, fcontest.ncards + fcontest.phantomCount)
             println("contest $contest ncards=${fcontest.ncards}")
@@ -120,97 +144,4 @@ class TestMultiContestTestData {
             }
         }
     }
-
-
-    @Test
-    fun testRunAlphaMart() {
-        val N = 50000
-        val ncontests = 1
-        val nbs = 1
-        val marginRange= 0.01 .. 0.01
-        val underVotePct= 0.20 .. 0.20
-        val phantomRange= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
-
-        val contest = test.contests.first()
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
-        val assorter = contestUA.minPollingAssertion()!!.assorter
-
-        val cvrs = test.makeCvrsFromContests()
-        val ballots = test.makeBallotsForPolling(true)
-
-        val cvrSampler = PollWithoutReplacement(contestUA.contest as Contest, cvrs, assorter)
-
-        val d = 100
-        val margin = assorter.reportedMargin()
-        println("margin=$margin, mean=${margin2mean(margin)}")
-
-        // fun simulateSampleSizeAlphaMart(
-        //    auditConfig: AuditConfig,
-        //    sampleFn: SampleGenerator,
-        //    margin: Double,
-        //    upperBound: Double,
-        //    Nc: Int,
-        //    startingTestStatistic: Double = 1.0,
-        //    moreParameters: Map<String, Double> = emptyMap(),
-        //): RunTestRepeatedResult
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10)
-        val result = simulateSampleSizeAlphaMart(
-            auditConfig = auditConfig,
-            sampleFn = cvrSampler,
-            margin = margin,
-            upperBound = assorter.upperBound(),
-            Nc = contest.Nc,
-            moreParameters = mapOf("eta0" to margin2mean(margin)),
-        )
-        println("simulateSampleSizeAlphaMart = $result")
-
-        val result2 = runAlphaMartRepeated(
-            drawSample = cvrSampler,
-            eta0 = margin2mean(margin),
-            d = d,
-            ntrials = 10,
-            upperBound = assorter.upperBound()
-        )
-        println("runAlphaMartRepeated = $result2")
-    }
-}
-
-// run AlphaMart with TrunkShrinkage in repeated trials
-// this creates the riskTestingFn for you
-fun runAlphaMartRepeated(
-    drawSample: Sampler,
-    // maxSamples: Int,
-    eta0: Double,
-    d: Int = 500,
-    withoutReplacement: Boolean = true,
-    ntrials: Int = 1,
-    upperBound: Double = 1.0,
-    showDetails: Boolean = false,
-    estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
-): RunTestRepeatedResult {
-
-    val t = 0.5
-    val minsd = 1.0e-6
-    val c = max(eps, ((eta0 - t) / 2))
-
-    val useEstimFn = estimFn ?: TruncShrinkage(drawSample.maxSamples(), true, upperBound = upperBound, minsd = minsd, d = d, eta0 = eta0, c = c)
-
-    val alpha = AlphaMart(
-        estimFn = useEstimFn,
-        N = drawSample.maxSamples(),
-        upperBound = upperBound,
-        withoutReplacement = withoutReplacement,
-    )
-
-    return runTestRepeated(
-        drawSample = drawSample,
-        terminateOnNullReject = true,
-        ntrials = ntrials,
-        testFn = alpha,
-        testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
-        showDetails = showDetails,
-        margin = mean2margin(eta0),
-        Nc=drawSample.maxSamples(), // TODO ??
-    )
 }

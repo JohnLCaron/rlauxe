@@ -8,12 +8,12 @@ class TestOneAudit {
 
     @Test
     fun testMakeContest() {
-        val contest = makeContestOA(23000, 21000, cvrPercent = .70, 0.0, undervotePercent=.01)
+        val contest = makeContestOA(23000, 21000, cvrPercent = .70, 0.0, undervotePercent=.01, phantomPercent=.01)
         println(contest)
         val v0 = contest.strata[0].votes
         val v1 = contest.strata[1].votes
 
-        val contest7 = makeContestOA(23000, 21000, cvrPercent = .70, .007, undervotePercent=.01)
+        val contest7 = makeContestOA(23000, 21000, cvrPercent = .70, .007, undervotePercent=.01, phantomPercent=.01)
         println(contest7)
         val v07 = contest7.strata[0].votes
         val v17 = contest7.strata[1].votes
@@ -32,7 +32,7 @@ class TestOneAudit {
 
     @Test
     fun testAssorters() {
-        val contest = makeContestOA(23000, 21000, cvrPercent = .70, 0.0, undervotePercent=.01)
+        val contest = makeContestOA(23000, 21000, cvrPercent = .70, 0.0, undervotePercent=.01, phantomPercent=.01)
         val testCvrs = contest.makeTestCvrs()
         val contestOA = contest.makeContestUnderAudit(testCvrs)
         val minAllAsserter = contestOA.minComparisonAssertion()

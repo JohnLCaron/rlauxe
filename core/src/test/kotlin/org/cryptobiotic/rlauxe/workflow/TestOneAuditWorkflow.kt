@@ -8,7 +8,7 @@ class TestOneAuditWorkflow {
 
     @Test
     fun testOneAuditContestSmall() {
-        val contestOA = makeContestOA(100, 50, cvrPercent = .80, 0.0, undervotePercent=.0)
+        val contestOA = makeContestOA(100, 50, cvrPercent = .80, 0.0, undervotePercent=.0, phantomPercent = .0)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
@@ -20,7 +20,7 @@ class TestOneAuditWorkflow {
 
     @Test
     fun testOneAuditContest() {
-        val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, 0.01, undervotePercent=.01)
+        val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, 0.01, undervotePercent=.01, phantomPercent = .0)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS

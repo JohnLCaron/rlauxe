@@ -49,7 +49,7 @@ class CompareContestSimulation {
     fun testContestSimulationWithPhantoms() {
         val reportedMargin = .005
         val pctPhantoms = .01
-        val sim = ContestSimulation.make2wayTestContest(reportedMargin, 0.10, pctPhantoms, Nc=10000)
+        val sim = ContestSimulation.make2wayTestContest(Nc=10000, reportedMargin, 0.10, pctPhantoms)
         val contest = sim.contest
         val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
         val cvrs = sim.makeCvrs() // phantoms have been added

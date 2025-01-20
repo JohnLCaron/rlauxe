@@ -1,11 +1,10 @@
 package org.cryptobiotic.rlauxe.util
 
-import java.nio.file.Files
-import java.nio.file.Path
 import java.security.SecureRandom
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
+import kotlin.math.round
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
 
@@ -16,6 +15,8 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
     //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
     return abs(a - b) <= atol + rtol * abs(b)
 }
+
+fun roundToInt(x: Double) = round(x).toInt()
 
 fun listToMap(vararg names: String): Map<String, Int> {
     return names.mapIndexed { idx, value -> value to idx }.toMap()

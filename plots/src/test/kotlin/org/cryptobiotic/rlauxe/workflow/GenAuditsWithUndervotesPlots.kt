@@ -5,66 +5,63 @@ import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class GenAuditsNoErrorsPlots {
-    val nruns = 10  // number of times to run workflow
-    val name = "AuditsNoErrors"
+class GenAuditsWithUndervotesPlots {
+    val nruns = 100  // number of times to run workflow
+    val name = "AuditsWithUndervotes"
     val dirName = "/home/stormy/temp/workflow/$name"
 
     @Test
-    fun genAuditsNoErrorsPlots() {
+    fun genAuditWithUnderVotesPlots() {
         val N = 50000
-        val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val cvrPercents = listOf(0.0, 0.5, 1.0)
+        val margin = .04
+        val cvrPercent = .50
+        val undervotes = listOf(.00, .05, .10, .15, .20, .25, .30, .35, .40, .45, .50)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
-        margins.forEach { margin ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble()))
 
+        undervotes.forEach { undervote ->
+            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, undervote, 0.0, 0.0,
+                mapOf("nruns" to nruns.toDouble(), "undervote" to undervote))
             tasks.add(RepeatedTaskRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble()))
-
+            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, undervote, 0.0, 0.0,
+                mapOf("nruns" to nruns.toDouble(), "undervote" to undervote))
             tasks.add(RepeatedTaskRunner(nruns, clcaGenerator))
 
             // oneaudit
-            cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, 0.0,
-                    mapOf("nruns" to nruns.toDouble()))
-
-                tasks.add(RepeatedTaskRunner(nruns, oneauditGenerator))
-            }
+            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, undervote, 0.0, cvrPercent, 0.0,
+                mapOf("nruns" to nruns.toDouble(), "undervote" to undervote))
+            tasks.add(RepeatedTaskRunner(nruns, oneauditGenerator))
         }
 
         // run tasks concurrently and average the results
         val results: List<WorkflowResult> = runRepeatedTaskAndAverage(tasks)
         println(stopwatch.took())
 
+
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        plotLinearOrLog(true)
-        plotLinearOrLog(false)
+        showSampleSizesVsUndervotePct(true)
+        showSampleSizesVsUndervotePct(false)
     }
 
-    fun plotLinearOrLog(useLog: Boolean) {
+    fun showSampleSizesVsUndervotePct(useLog: Boolean) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "auditType", useLog=useLog) {
-            val cvrPercentR = it.parameters["cvrPercent"] ?: 0.0
+        plotter.showSampleSizesVsUndervotePct(results, "auditType", useLog=useLog) {
             when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit ${dfn(cvrPercentR, 3)}"
+                1.0 -> "oneaudit"
                 2.0 -> "polling"
                 3.0 -> "clca"
                 else -> "unknown"
             }
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
@@ -14,14 +15,15 @@ import org.jetbrains.kotlinx.kandy.util.color.Color
 fun wrsPlot(
     titleS: String,
     subtitleS: String,
-    srts: List<WorkflowResult>,
+    wrs: List<WorkflowResult>,
     writeFile: String, // no suffix
     xname: String, yname: String, catName: String,
     xfld: (WorkflowResult) -> Double,
     yfld: (WorkflowResult) -> Double,
     catfld: (WorkflowResult) -> String,
 ) {
-    val groups = makeGroups(srts, catfld)
+    val useWrs = wrs.filter { it.status != TestH0Status.AllFailPct }
+    val groups = makeGroups(useWrs, catfld)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()

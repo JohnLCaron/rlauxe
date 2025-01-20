@@ -100,7 +100,7 @@ class TestOneAuditComparisonAssorter {
 
     @Test
     fun testMakeContestUnderAudit() {
-        val contest = makeContestOA(2000, 1800, cvrPercent = .66, 0.05, undervotePercent = .0)
+        val contest = makeContestOA(2000, 1800, cvrPercent = .66, 0.05, undervotePercent = .0, phantomPercent = .0)
         val testCvrs = contest.makeTestCvrs()
         val contestUA = contest.makeContestUnderAudit(testCvrs)
         println(contestUA)
@@ -141,7 +141,7 @@ class TestOneAuditComparisonAssorter {
     @Test
     fun testONE() {
         // two candidate plurailty
-        val contest = makeContestOA(1000, 923, cvrPercent = .57, .007, undervotePercent = .0)
+        val contest = makeContestOA(1000, 923, cvrPercent = .57, .007, undervotePercent = .0, phantomPercent = .0)
         println(contest)
 
         val testCvrs = contest.makeTestCvrs()

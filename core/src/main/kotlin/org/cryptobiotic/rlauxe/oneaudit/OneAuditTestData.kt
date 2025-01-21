@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.OneAuditContest
-import org.cryptobiotic.rlauxe.core.OneAuditStratum
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.roundToInt
 import kotlin.math.round

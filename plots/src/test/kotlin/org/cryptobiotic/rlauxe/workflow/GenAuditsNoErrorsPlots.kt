@@ -42,7 +42,7 @@ class GenAuditsNoErrorsPlots {
         }
 
         // run tasks concurrently and average the results
-        val results: List<WorkflowResult> = runRepeatedTaskAndAverage(tasks)
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")

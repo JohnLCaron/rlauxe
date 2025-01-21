@@ -1,7 +1,9 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.PluralityAssorter
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.sampling.makeCvr
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
@@ -171,7 +173,7 @@ class TestOneAuditComparisonAssorter {
         assertEquals(cvrAvgp, bassorter.stratumInfos["hasCvr"]!!.avgBatchAssortValue)
         assertEquals(noAvgp, bassorter.stratumInfos["noCvr"]!!.avgBatchAssortValue)
 
-        assertEquals(0.5200312174817898, allAvgp, doublePrecision)
+        assertEquals(0.5200208008320333, allAvgp, doublePrecision)
 
         // whats the comparison assort value average?
         val allAvg = testCvrs.map { bassorter.bassort(it, it) }.average()

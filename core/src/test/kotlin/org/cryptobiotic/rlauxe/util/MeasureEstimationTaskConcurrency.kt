@@ -12,9 +12,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.EstimationResult
-import org.cryptobiotic.rlauxe.sampling.EstimationTask
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeEstimationTasks
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
@@ -33,7 +33,8 @@ class MeasureEstimationTaskConcurrency {
 
         val auditConfig =
             AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1234567890L, fuzzPct = null, ntrials = 10)
-        val tasks = mutableListOf<EstimationTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
+
         contestsUA.filter { !it.done }.forEach { contestUA ->
             tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, emptyList(), 1))
         }
@@ -49,7 +50,7 @@ class MeasureEstimationTaskConcurrency {
         runWest(16, tasks, one)
     }
 
-    fun runWest(nthreads: Int, tasks: List<EstimationTask>, one: Double): Long {
+    fun runWest(nthreads: Int, tasks: List<ConcurrentTaskG<EstimationResult>>, one: Double): Long {
         val runner = EstimationWTaskRunner()
         return runner.calc(nthreads, tasks, one)
     }
@@ -59,13 +60,13 @@ class EstimationWTaskRunner() {
     private val mutex = Mutex()
     private val results = mutableListOf<EstimationResult>()
 
-    fun calc(nthreads: Int, tasks: List<EstimationTask>, one: Double): Long {
+    fun calc(nthreads: Int, tasks: List<ConcurrentTaskG<EstimationResult>>, one: Double): Long {
         val stopWatch = Stopwatch()
         runBlocking {
             val jobs = mutableListOf<Job>()
             val producer = producer(tasks)
             repeat(nthreads) {
-                jobs.add(launchCalculations(producer) { task -> task.estimate() })
+                jobs.add(launchCalculations(producer) { task -> task.run() })
             }
             // wait for all calculations to be done, then close everything
             joinAll(*jobs.toTypedArray())
@@ -78,7 +79,7 @@ class EstimationWTaskRunner() {
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun CoroutineScope.producer(producer: Iterable<EstimationTask>): ReceiveChannel<EstimationTask> =
+    private fun CoroutineScope.producer(producer: Iterable<ConcurrentTaskG<EstimationResult>>): ReceiveChannel<ConcurrentTaskG<EstimationResult>> =
         produce {
             for (task in producer) {
                 send(task)
@@ -88,8 +89,8 @@ class EstimationWTaskRunner() {
         }
 
     private fun CoroutineScope.launchCalculations(
-        input: ReceiveChannel<EstimationTask>,
-        taskRunner: (EstimationTask) -> EstimationResult?,
+        input: ReceiveChannel<ConcurrentTaskG<EstimationResult>>,
+        taskRunner: (ConcurrentTaskG<EstimationResult>) -> EstimationResult?,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val result = taskRunner(task) // not inside the mutex!!

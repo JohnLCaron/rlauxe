@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.core.OneAuditComparisonAssorter
-import org.cryptobiotic.rlauxe.core.OneAuditContest
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.math.abs
 import kotlin.test.Test

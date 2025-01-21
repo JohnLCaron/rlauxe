@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/20/2025
+last update: 01/21/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -660,7 +660,7 @@ If the phantom pct is greater than the margin, the audit will fail.
 When hasStyles, we know what that percent is.
 So for estimation, we could calculate the margin with usePhantoms=true, since thats what were going to see during the audit.
 
-Ive convinced myself that one cant know Nc without knowing Np. Since Np has such a strong effect, we will keep it per 
+If we have styles, we can count undervotes, and so we know Np. Since Np has such a strong effect, we will keep it per 
 contest and use it in the estimation and also the betting strategy.
 
 Should use phantomPct for estimated 1-vote overstatement error rate estimate.
@@ -882,8 +882,6 @@ AFAICT, the calculation of the total_size using the probabilities as described i
 total_size estimate, but not do the consistent sampling, which gives you the total sample size.
 
 ### generation of phantoms
-
-One cant know Nc without knowing Np, in all cases. Not sure if SHANGRLA assumes that.
 
 From STYLISH paper:
 

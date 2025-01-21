@@ -1,5 +1,8 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.sampling.makeCvr

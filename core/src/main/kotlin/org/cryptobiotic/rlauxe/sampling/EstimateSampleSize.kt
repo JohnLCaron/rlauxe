@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
@@ -22,12 +24,12 @@ fun estimateSampleSizes(
     show: Boolean = false,
     nthreads: Int = 14,
 ): Int? {
-    val tasks = mutableListOf<EstimationTask>()
+    val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
     contestsUA.filter { !it.done }.forEach { contestUA ->
         tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, prevMvrs, roundIdx))
     }
     // run tasks concurrently
-    val estResults: List<EstimationResult> = EstimationTaskRunner(show).run(tasks, nthreads)
+    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(show).run(tasks, nthreads)
 
     // cant modify contestUA until out of the concurrent tasks
     estResults.forEach { estResult ->
@@ -63,46 +65,6 @@ fun estimateSampleSizes(
     return maxContestSize
 }
 
-// just runs the estimate again. Why is it different from last? Can we use prevVvrs?
-fun makeEstimationTasksFresh(
-    auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
-    cvrs: List<Cvr>,        // Comparison only
-    prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
-    roundIdx: Int,
-    moreParameters: Map<String, Double> = emptyMap(),
-): List<EstimationTask> {
-    val tasks = mutableListOf<EstimationTask>()
-
-    contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
-        if (!assert.proved) {
-            if (roundIdx > 1) {
-                val rr = assert.roundResults.last()
-                if (rr.samplesUsed == contestUA.Nc) {
-                    println("***LimitReached $contestUA")
-                    contestUA.done = true
-                    contestUA.status = TestH0Status.LimitReached
-                }
-            }
-
-            if (!contestUA.done) {
-                tasks.add(
-                    SimulateSampleSizeTask(
-                        auditConfig,
-                        contestUA,
-                        assert,
-                        cvrs,
-                        1.0,
-                        0,
-                        moreParameters
-                    )
-                )
-            }
-        }
-    }
-    return tasks
-}
-
 // tries to start from where the last left off. Otherwise, wouldnt you just get the previous estimate?
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
@@ -111,8 +73,8 @@ fun makeEstimationTasks(
     prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
-): List<EstimationTask> {
-    val tasks = mutableListOf<EstimationTask>()
+): List<ConcurrentTaskG<EstimationResult>> {
+    val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
 
     contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
         if (!assert.proved) {
@@ -156,12 +118,12 @@ class SimulateSampleSizeTask(
         val startingTestStatistic: Double,
         val prevSampleSize: Int,
         val moreParameters: Map<String, Double> = emptyMap(),
-    ) : EstimationTask {
+    ) : ConcurrentTaskG<EstimationResult> {
 
     val contest = contestUA.contest
 
     override fun name() = "task ${contest.info.name} ${assertion.assorter.desc()} ${df(assertion.assorter.reportedMargin())}"
-    override fun estimate(): EstimationResult {
+    override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (auditConfig.auditType) {
             AuditType.CARD_COMPARISON ->
                 simulateSampleSizeComparisonAssorter(

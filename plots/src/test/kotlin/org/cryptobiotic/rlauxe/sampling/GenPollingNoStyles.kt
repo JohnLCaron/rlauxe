@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.rlaplots.makeSRTnostyle
@@ -19,7 +20,7 @@ class GenPollingNoStyles {
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 123556667890L, quantile=.80, fuzzPct=null, ntrials = 100)
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile}")
 
-        val tasks = mutableListOf<EstimationTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
         Ns.forEach { N ->
             margins.forEach { margin ->
                 val fcontest = ContestTestData(0, 4, margin, 0.0, 0.0)
@@ -46,7 +47,9 @@ class GenPollingNoStyles {
         }
 
         // run tasks concurrently
-        val results: List<EstimationResult> = EstimationTaskRunner().run(tasks)
+        val results: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>().run(tasks)
+
+        // val results: List<EstimationResult> = EstimationTaskRunner().run(tasks)
         val srts = results.map { it.makeSRTnostyle(Nc) }
 
         val dirName = "/home/stormy/temp/estimate"

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.concur
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,35 +13,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.yield
 
+import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
-// TODO: can we generify?
-
-interface EstimationTask {
+interface ConcurrentTaskG<T> {
     fun name() : String
-    fun estimate() : EstimationResult
+    fun run() : T
 }
 
-data class EstimationResult(
-    val task: SimulateSampleSizeTask,
-    val repeatedResult: RunTestRepeatedResult,
-    val failed: Boolean
-)
-
-// runs set of EstimationTask concurrently, which return EstimationResult
-// the task itself typically calls runTestRepeated
-class EstimationTaskRunner(val showTime: Boolean = false) {
-    private val showTaskResult = false
+// runs set of ConcurrentTask concurrently, whose run() returns T
+class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
     private val mutex = Mutex()
-    private val results = mutableListOf<EstimationResult>()
+    private val results = mutableListOf<T>()
 
-    // run the tasks concurrently
-    fun run(tasks: List<EstimationTask>, nthreads: Int = 14): List<EstimationResult> {
+    // run all the tasks concurrently
+    fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int = 30): List<T> {
         val stopwatch = Stopwatch()
-        if (showTime) println("\nEstimationTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads")
+        if (show) println("\nConcurrentTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -53,22 +43,21 @@ class EstimationTaskRunner(val showTime: Boolean = false) {
         }
 
         // doesnt return until all tasks are done
-        if (showTime) println("EstimationTaskRunner took $stopwatch")
+        if (show) println("that took $stopwatch")
         // println("that ${stopwatch.tookPer(tasks.size, "task")}")
         return results
     }
 
     fun runTask(
-        task: EstimationTask,
-    ): EstimationResult {
+        task: ConcurrentTaskG<T>,
+    ): T {
         val stopwatch = Stopwatch()
-        if (showTaskResult) println(" starting ${task.name()} on thread ${Thread.currentThread().name}")
-        val result = task.estimate()
-        if (showTaskResult) println(" ${task.name()} (${results.size}): took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} msecs")
+        val result =  task.run()
+        if (showTaskResult) println("${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
         return result
     }
 
-    private fun CoroutineScope.produceTasks(producer: Iterable<EstimationTask>): ReceiveChannel<EstimationTask> =
+    private fun CoroutineScope.produceTasks(producer: Iterable<ConcurrentTaskG<T>>): ReceiveChannel<ConcurrentTaskG<T>> =
         produce {
             for (task in producer) {
                 send(task)
@@ -78,14 +67,15 @@ class EstimationTaskRunner(val showTime: Boolean = false) {
         }
 
     private fun CoroutineScope.launchCalculations(
-        input: ReceiveChannel<EstimationTask>,
-        taskRunner: (EstimationTask) -> EstimationResult?,
+        input: ReceiveChannel<ConcurrentTaskG<T>>,
+        taskRunner: (ConcurrentTaskG<T>) -> T?,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val result = taskRunner(task) // not inside the mutex!!
             if (result != null) {
                 mutex.withLock {
                     results.add(result)
+                    if (results.size % 100 == 0) print(" ${results.size}")
                 }
             }
             yield()

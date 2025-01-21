@@ -1,6 +1,5 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 

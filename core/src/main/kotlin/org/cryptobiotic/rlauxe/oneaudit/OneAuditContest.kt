@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -245,7 +246,7 @@ data class OneAuditComparisonAssorter(
     }
 
     // B(bi, ci)
-    override fun bassort(mvr: Cvr, cvr:Cvr): Double {
+    override fun bassort(mvr: Cvr, cvr: Cvr): Double {
         val stratumInfo = stratumInfos[cvr.id]
         if (stratumInfo == null) {
             if (cvrStrata != null) {

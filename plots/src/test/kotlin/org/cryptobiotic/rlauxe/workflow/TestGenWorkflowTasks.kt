@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.df
@@ -20,7 +20,7 @@ class TestGenWorkflowTasks {
         margins.forEach { margin ->
             val workflowGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble()))
-            tasks.add(RepeatedTaskRunner(nruns, workflowGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
         }
 
         // run tasks concurrently and average the results
@@ -44,7 +44,7 @@ class TestGenWorkflowTasks {
         margins.forEach { margin ->
             val workflowGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble()))
-            tasks.add(RepeatedTaskRunner(nruns, workflowGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
         }
 
         // run tasks concurrently and average the results
@@ -79,7 +79,7 @@ class TestGenWorkflowTasks {
             margins.forEach { margin ->
                 val workflowGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     mapOf("nruns" to nruns.toDouble()))
-                tasks.add(RepeatedTaskRunner(nruns, workflowGenerator))
+                tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
             }
         }
 

@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import io.kotest.core.config.AbstractProjectConfig
-import org.cryptobiotic.rlauxe.concur.ConcurrentTask
-import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunner
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunnerG
 
 class GenSampleSizeEstimates : AbstractProjectConfig() {
     override val parallelism = 3
@@ -24,7 +24,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
         val N = 10000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
-        val tasks = mutableListOf<ConcurrentTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<RunTestRepeatedResult>>()
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
@@ -45,7 +45,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             tasks.add(ComparisonTask("Comparison: margin = $margin", auditConfig, contestUAc, cassort, cvrs))
         }
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirname = "/home/stormy/temp/estimate"
@@ -62,7 +62,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
     fun plotComparisonVsStyleAndPoll() {
         val N = 10000
         val ntrials = 1000
-        val tasks = mutableListOf<ConcurrentTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<RunTestRepeatedResult>>()
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
             // polling
@@ -95,7 +95,8 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigNo, contestUAno, cassortNo, cvrsNo))
         }
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
+
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirname = "/home/stormy/temp/estimate"
@@ -122,7 +123,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
         val N = 10000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
-        val tasks = mutableListOf<ConcurrentTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<RunTestRepeatedResult>>()
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
@@ -139,7 +140,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             tasks.add(PollingTask("Polling fuzz=.01: margin = $margin", auditConfig, contestUA, assort, N))
         }
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirname = "/home/stormy/temp/estimate"
@@ -168,7 +169,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
         val N = 100000
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
-        val tasks = mutableListOf<ConcurrentTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<RunTestRepeatedResult>>()
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
@@ -203,7 +204,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             tasks.add(ComparisonTask("Comparison fuzz=.001: margin = $margin", configAlt2, contestUA, cassort, cvrs))
         }
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirname = "/home/stormy/temp/estimate"
@@ -266,7 +267,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             }
         }
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirName = "/home/stormy/temp/estimate"
@@ -322,7 +323,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             }
         }
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
         val srts = results.map { it.makeSRT(0.0, 0.0) }
 
         val dirName = "/home/stormy/temp/estimate"
@@ -346,7 +347,7 @@ class BettingTask(val name: String,
                   val Nc: Int,
                   val errorRates: List<Double>,
                   val otherParameters: Map<String, Double>,
-): ConcurrentTask {
+):  ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         //  this uses auditConfig p1,p4 to set apriori error rates. should be based on fuzzPct i think
@@ -363,7 +364,7 @@ class PollingTask(
     val assort: AssorterFunction,
     val Nc: Int,
     val moreParameters: Map<String, Double> = emptyMap(),
-) : ConcurrentTask {
+) : ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run(): RunTestRepeatedResult {
         return simulateSampleSizePollingAssorter(auditConfig, contestUA.contest as Contest, assort, moreParameters=moreParameters)
@@ -379,7 +380,7 @@ class AlphaTask(val name: String,
                 val maxSamples: Int,
                 val Nc: Int,
                 val otherParameters: Map<String, Double>,
-): ConcurrentTask {
+): ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         return simulateSampleSizeAlphaMart(auditConfig, sampleFn, margin, upperBound, Nc=Nc, moreParameters=otherParameters)
@@ -392,7 +393,7 @@ class ComparisonTask(val name: String,
                      val cassort: ComparisonAssorterIF,
                      val cvrs: List<Cvr>,
                      val moreParameters: Map<String, Double> = emptyMap(),
-): ConcurrentTask {
+): ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
         return simulateSampleSizeComparisonAssorter(auditConfig, contestUA.contest as Contest, cassort, cvrs, moreParameters=moreParameters)

@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.concur.ConcurrentTask
-import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunner
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
@@ -27,7 +27,7 @@ class GenPollingDvalues {
 
         val Nc = 10000
 
-        val tasks = mutableListOf<ConcurrentTask>()
+        val tasks = mutableListOf<ConcurrentTaskG<RunTestRepeatedResult>>()
         reportedMeans.forEach { reportedMean ->
             reportedMeanDiffs.forEach { reportedMeanDiff ->
                 val theta = reportedMean + reportedMeanDiff // the true mean, used to generate the mvrs
@@ -68,7 +68,7 @@ class GenPollingDvalues {
         }
 
         // run tasks concurrently
-        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunner().run(tasks)
+        val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
         val srts = results.map { it.makeSRT(it.testParameters["reportedMean"]?: 0.0, it.testParameters["reportedMeanDiff"]?: 0.0) }
 
         val dirName = "/home/stormy/temp/polling"

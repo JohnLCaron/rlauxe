@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.concur.RepeatedTaskRunner
+import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -25,19 +25,19 @@ class GenAuditsNoErrorsPlots {
             val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble()))
 
-            tasks.add(RepeatedTaskRunner(nruns, pollingGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble()))
 
-            tasks.add(RepeatedTaskRunner(nruns, clcaGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             // oneaudit
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     mapOf("nruns" to nruns.toDouble()))
 
-                tasks.add(RepeatedTaskRunner(nruns, oneauditGenerator))
+                tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
             }
         }
 

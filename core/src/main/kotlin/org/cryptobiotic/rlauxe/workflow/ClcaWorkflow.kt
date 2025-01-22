@@ -24,8 +24,8 @@ class ComparisonWorkflow(
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
 ): RlauxWorkflow {
-    var contestsUA: List<ContestUnderAudit>
-    var cvrsUA: List<CvrUnderAudit>
+    val contestsUA: List<ContestUnderAudit>
+    val cvrsUA: List<CvrUnderAudit>
 
     init {
         require (auditConfig.auditType == AuditType.CARD_COMPARISON)
@@ -51,22 +51,6 @@ class ComparisonWorkflow(
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
-    }
-
-    // change the ordering, for simulations
-    override fun shuffle(seed: Long) {
-        contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
-        contestsUA.forEach {
-            if (it.choiceFunction != SocialChoiceFunction.IRV) {
-                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
-            }
-        }
-        contestsUA.filter{ !it.done }.forEach { contest ->
-            contest.makeComparisonAssertions(cvrs)
-        }
-
-        val prng = Prng(seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
@@ -143,7 +127,7 @@ class ComparisonWorkflow(
             var allAssertionsDone = true
             contestUA.comparisonAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    assertion.status = runOneAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
+                    assertion.status = runClcaAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
             }
@@ -286,7 +270,7 @@ fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>)
 // need the upperBound and noerror for the AdaptiveComparison bettingFn
 // the testFn is independent, it assumes drawSample already does the assort.
 
-fun runOneAssertionAudit(
+fun runClcaAssertionAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     cassertion: ComparisonAssertion,
@@ -297,20 +281,50 @@ fun runOneAssertionAudit(
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
-    val errorRates = auditConfig.errorRates ?: ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
-    val optimal = AdaptiveComparison(
-        Nc = contestUA.Nc,
-        withoutReplacement = true,
-        a = cassorter.noerror(),
-        d1 = auditConfig.d1,
-        d2 = auditConfig.d2,
-        p2o = errorRates[0],
-        p1o = errorRates[1],
-        p1u = errorRates[2],
-        p2u = errorRates[3],
-    )
+    val clcaConfig = auditConfig.clcaConfig!!
+    val bettingFn = when (clcaConfig.simType) {
+        ClcaSimulationType.oracle -> {
+            // use the actual errors comparing mvrs to cvrs. Testing only
+            val errorRates = ClcaErrorRates.calcErrorRates(contestUA.id, cassorter, cvrPairs)
+            OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+        }
+        ClcaSimulationType.noerror -> {
+            // optimistic, no errors as apriori, but adapts to actual mvrs
+            AdaptiveComparison(
+                Nc = contestUA.Nc,
+                withoutReplacement = true,
+                a = cassorter.noerror(),
+                d1 = clcaConfig.d1,
+                d2 = clcaConfig.d2,
+                listOf(0.0, 0.0, 0.0, 0.0)
+            )
+        }
+        ClcaSimulationType.fuzzPct -> {
+            // adaptive, use known fuzz as apriori, but adapts to actual mvrs
+            val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct)
+            AdaptiveComparison(
+                Nc = contestUA.Nc,
+                withoutReplacement = true,
+                a = cassorter.noerror(),
+                d1 = clcaConfig.d1,
+                d2 = clcaConfig.d2,
+                errorRates
+            )
+        }
+     ClcaSimulationType.apriori ->
+        // adaptive, use given errors as apriori, but adapts to actual mvrs. TODO does this make sense? not assertion specific
+        AdaptiveComparison(
+            Nc = contestUA.Nc,
+            withoutReplacement = true,
+            a = cassorter.noerror(),
+            d1 = clcaConfig.d1,
+            d2 = clcaConfig.d2,
+            clcaConfig.errorRates!!
+        )
+    }
+
     val testFn = BettingMart(
-        bettingFn = optimal,
+        bettingFn = bettingFn,
         Nc = contestUA.Nc,
         noerror = cassorter.noerror(),
         upperBound = cassorter.upperBound(),

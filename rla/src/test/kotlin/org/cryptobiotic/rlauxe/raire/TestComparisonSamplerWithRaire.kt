@@ -3,9 +3,8 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ComparisonSimulation
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
+import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TestComparisonSamplerWithRaire {
 
@@ -36,7 +35,7 @@ class TestComparisonSamplerWithRaire {
     fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ComparisonAssorter) {
         println("\n${cassorter.assorter().desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA.contest, cassorter, ComparisonErrorRates.standard)
+        val sampler = ComparisonSimulation(cvrs, contestUA.contest, cassorter, ClcaErrorRates.standard)
 
         val orgCvrs = cvrs.map { cassorter.assorter().assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { cassorter.assorter().assort(it) }.average()

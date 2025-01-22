@@ -32,10 +32,7 @@ class GenBettingPayoff {
                     a = noerror,
                     d1 = 10000,
                     d2 = 10000,
-                    p2o = error,
-                    p1o = error,
-                    p1u = error,
-                    p2u = error
+                    errorRates = listOf(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
                 repeat(100) { samples.addSample(noerror) }
@@ -59,10 +56,7 @@ class GenBettingPayoff {
                     a = noerror,
                     d1 = 10000,
                     d2 = 10000,
-                    p2o = error,
-                    p1o = error,
-                    p1u = error,
-                    p2u = error
+                    errorRates = listOf(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
                 repeat(100) { samples.addSample(noerror) }
@@ -100,10 +94,7 @@ class GenBettingPayoff {
                     a = noerror,
                     d1 = 10000,
                     d2 = 10000,
-                    p2o = error,
-                    p1o = error,
-                    p1u = error,
-                    p2u = error
+                    errorRates = listOf(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
                 repeat(10) { samples.addSample(noerror) }

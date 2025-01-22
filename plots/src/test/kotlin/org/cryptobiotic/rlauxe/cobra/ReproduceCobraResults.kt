@@ -1,19 +1,13 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.core.BettingMart
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
-import org.cryptobiotic.rlauxe.core.FixedBet
-import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.core.AdaptiveComparison
-import org.cryptobiotic.rlauxe.core.BettingFn
-import org.cryptobiotic.rlauxe.core.OptimalLambda
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -168,11 +162,8 @@ class ReproduceCobraResults {
                         println("testTable2OracleBets: p1=${p1}  p2=${p2}")
 
                         val oracle = OracleComparison(
-                            N = N,
-                            upperBound = upperBound,
                             a = compareAssorter.noerror,
-                            p1 = p1,
-                            p2 = p2,
+                            listOf(p2, p1, 0.0, 0.0)
                         )
                         val betting =
                             BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
@@ -257,10 +248,7 @@ class ReproduceCobraResults {
                             a = compareAssorter.noerror,
                             d1 = d1,
                             d2 = d2,
-                            p2o = p2prior,
-                            p1o = p1prior,
-                            p1u = 0.0,
-                            p2u = 0.0,
+                            listOf(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
                         val betting =
@@ -367,28 +355,6 @@ fun findTable1Entry(margin: Double, p2: Double): CobraTable1Result? {
     return table1.find { it.p2 == p2 && it.margin == margin }
         ?.let { return it }
 }
-
-// We know the true rate of p1 and p2 errors
-class OracleComparison(
-    val N: Int, // not used
-    val withoutReplacement: Boolean = true,  // not used
-    val upperBound: Double,  // not used
-    val a: Double, // noerror
-    val p1: Double = 1.0e-2, // the rate of 1-vote overstatements
-    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
-): BettingFn {
-    val lam: Double
-    init {
-        require(upperBound > 1.0)
-        val kelly = OptimalLambda(a, p1, p2)
-        lam = kelly.solve()
-    }
-    // note lam is a constant
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
-        return lam
-    }
-}
-
 
 // this is optimal_comparison_noP1, a bet, not a sample estimate.
 // see cobra p 5

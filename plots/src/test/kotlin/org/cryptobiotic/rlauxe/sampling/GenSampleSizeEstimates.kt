@@ -316,7 +316,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
                     BettingTask(
                         "fuzzPct = $fuzzPct, margin = $margin", auditConfig,
                         sampleFn, margin, minAssort.noerror(), minAssort.upperBound(), N, N,
-                        ComparisonErrorRates.getErrorRates(contestUA.ncandidates, fuzzPct),
+                        ClcaErrorRates.getErrorRates(contestUA.ncandidates, fuzzPct),
                         otherParameters,
                     )
                 )
@@ -350,9 +350,17 @@ class BettingTask(val name: String,
 ):  ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        //  this uses auditConfig p1,p4 to set apriori error rates. should be based on fuzzPct i think
-        return simulateSampleSizeBetaMart(auditConfig, sampleFn, margin, noerror, upperBound, Nc=Nc,
-            errorRates, moreParameters=otherParameters)
+        val clcaConfig = auditConfig.clcaConfig!!
+        val optimal = AdaptiveComparison(
+            Nc = Nc,
+            withoutReplacement = true,
+            a = noerror,
+            d1 = clcaConfig.d1,
+            d2 = clcaConfig.d2,
+            errorRates,
+        )
+        return simulateSampleSizeBetaMart(auditConfig, sampleFn, optimal, margin, noerror, upperBound, Nc=Nc,
+            moreParameters=otherParameters)
     }
 }
 
@@ -396,7 +404,7 @@ class ComparisonTask(val name: String,
 ): ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return simulateSampleSizeComparisonAssorter(auditConfig, contestUA.contest as Contest, cassort, cvrs, moreParameters=moreParameters)
+        return simulateSampleSizeClcaAssorter(auditConfig, contestUA.contest as Contest, cassort, cvrs, moreParameters=moreParameters)
     }
 }
 

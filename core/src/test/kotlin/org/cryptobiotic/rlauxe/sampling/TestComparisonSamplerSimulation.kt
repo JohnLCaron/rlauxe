@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
+import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,7 +23,7 @@ class TestComparisonSamplerSimulation {
             val sampler = ComparisonSimulation(cvrs,
                 contestUA.contest as Contest,
                 compareAssorter,
-                ComparisonErrorRates.standard,
+                ClcaErrorRates.standard,
             )
 
             testLimits(sampler, N, compareAssorter.upperBound)
@@ -61,7 +61,7 @@ class TestComparisonSamplerSimulation {
     fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA.contest, assorter, ComparisonErrorRates.standard)
+        val sampler = ComparisonSimulation(cvrs, contestUA.contest, assorter, ClcaErrorRates.standard)
 
         val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()

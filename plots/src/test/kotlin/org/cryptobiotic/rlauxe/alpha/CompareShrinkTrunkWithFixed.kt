@@ -1,11 +1,10 @@
-package org.cryptobiotic.rlauxe.comparison
+package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.alpha.FixedEstimFn
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs

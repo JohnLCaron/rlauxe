@@ -9,10 +9,12 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
     fun showSampleSizesVsMargin(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
+        val fuzzPct = exemplar.parameters["fuzzPct"]
+        val fuzzPctLabel = if (fuzzPct != null) " fuzzPct=$fuzzPct" else ""
 
         wrsPlot(
             titleS = "$filename estimated sample sizes",
-            subtitleS = "N=${exemplar.N} nruns=${nruns.toInt()}",
+            subtitleS = "N=${exemplar.N} nruns=${nruns.toInt()}" + fuzzPctLabel,
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
             "margin", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,

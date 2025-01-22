@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.comparison.makeCvrsByMargin
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -15,6 +14,7 @@ import org.cryptobiotic.rlauxe.concur.RepeatedTask
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
+import kotlin.random.Random
 import kotlin.test.Test
 
 class GenAdaptiveComparison {
@@ -158,10 +158,7 @@ data class CobraTask(
             a = compareAssorter.noerror,
             d1 = 0,
             d2 = d2,
-            p2o = p2prior,
-            p1o = 0.0,
-            p1u = 0.0,
-            p2u = 0.0,
+            listOf(p2prior, 0.0, 0.0, 0.0)
         )
         return BettingMart(
             bettingFn = adaptive, Nc = N, noerror = compareAssorter.noerror,
@@ -178,4 +175,18 @@ data class CobraTask(
     override fun N(): Int  = N
     override fun reportedMean() = cvrMean
     override fun reportedMeanDiff() = -p2oracle // TODO
+}
+
+// default one contest, two candidates ("A" and "B"), no phantoms, plurality
+// margin = percent margin of victory of A over B (between += .5)
+fun makeCvrsByMargin(ncards: Int, margin: Double = 0.0) : List<Cvr> {
+    val result = mutableListOf<Cvr>()
+    repeat(ncards) {
+        val random = Random.nextDouble(1.0)
+        val cand = if (random < .5 + margin/2.0) 0 else 1
+        val votes = mutableMapOf<Int, IntArray>()
+        votes[0] = intArrayOf(cand)
+        result.add(Cvr("card-$it", votes))
+    }
+    return result
 }

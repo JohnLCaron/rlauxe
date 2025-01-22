@@ -1,6 +1,11 @@
 package org.cryptobiotic.rlauxe.workflow
 
-object ComparisonErrorRates {
+import org.cryptobiotic.rlauxe.core.ComparisonAssertion
+import org.cryptobiotic.rlauxe.core.ComparisonAssorterIF
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+
+object ClcaErrorRates {
     val errorRatios = mutableMapOf<Int, List<Double>>()
     val standard = listOf(.01, 1.0e-4, 0.01, 1.0e-4)
 
@@ -15,6 +20,17 @@ object ComparisonErrorRates {
         return errorRatios[useCand]!!.map { it * fuzzPct }
     }
 
+    fun calcErrorRates(contestId: Int, cassorter: ComparisonAssorterIF,
+                       cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+    ) : List<Double> {
+        require(cvrPairs.size > 0)
+        val samples = PrevSamplesWithRates(cassorter.noerror()) // accumulate error counts here
+        cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second)) }
+        // require( samples.errorCounts().sum() ==  cvrPairs.size)
+        return samples.errorRates()
+    }
+
+    // TODO REDO?
     init {
         // GenerateComparisonErrorTable.generateErrorTable()
         // N=100000 ntrials = 1000

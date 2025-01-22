@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.alpha.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean

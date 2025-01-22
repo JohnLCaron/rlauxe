@@ -8,10 +8,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Publisher
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.ComparisonWorkflow
-import org.cryptobiotic.rlauxe.workflow.runPersistentWorkflow
+import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -24,7 +21,9 @@ class TestAuditRoundJson {
     fun testRoundtrip() {
         val publish = Publisher("/home/stormy/temp/persist/TestAuditRoundJson/")
         val auditConfig =
-            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, fuzzPct = 0.01, ntrials = 10)
+            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, ntrials = 10,
+                pollingConfig = PollingConfig(fuzzPct = .01))
+
         val N = 5000
         val testData = MultiContestTestData(11, 4, N, marginRange = 0.01..0.011)
 
@@ -75,7 +74,9 @@ class TestAuditRoundJson {
     fun testRoundtripIO() {
         val publish = Publisher("/home/stormy/temp/persist/testRoundtripIO/")
         val auditConfig =
-            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, fuzzPct = 0.01, ntrials = 10)
+            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, ntrials = 10,
+                pollingConfig = PollingConfig(fuzzPct = .01))
+
         val N = 5000
         val testData = MultiContestTestData(11, 4, N, marginRange = 0.01..0.011)
 

@@ -30,8 +30,8 @@ class TestSampleGenerator {
         println("testComparisonWithErrors N=$N cvrMean=$cvrMean meanDiff=$meanDiff")
         repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
-            val contest = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
-            val bassorter = contest.comparisonAssertions.first().cassorter as ComparisonAssorter
+            val contest = ContestUnderAudit(info, cvrs).makeClcaAssertions(cvrs)
+            val bassorter = contest.clcaAssertions.first().cassorter as ClcaAssorter
             assertEquals(.02, bassorter.assorter().reportedMargin(), doublePrecision)
             assertEquals(0.5050505050505051, bassorter.noerror(), doublePrecision)
             assertEquals(1.0101010101010102, bassorter.upperBound(), doublePrecision)
@@ -70,8 +70,8 @@ class TestSampleGenerator {
         val reportedAvg = margin2mean(reportedMargin)
         val cvrs = makeCvrsByExactMean(N, reportedAvg)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-        val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
+        val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+        val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
 
         val meanDiff = .01
         val sampler = ComparisonWithErrors(cvrs, compareAssorter, reportedAvg - meanDiff)
@@ -96,8 +96,8 @@ class TestSampleGenerator {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
-                val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-                val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
+                val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+                val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
 
                 val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2)
                 testLimits(sampler, N, compareAssorter.upperBound())
@@ -124,8 +124,8 @@ class TestSampleGenerator {
                     val theta = margin2mean(margin)
                     val cvrs = makeCvrsByExactMean(N, theta)
                     val contest = makeContestsFromCvrs(cvrs).first()
-                    val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-                    val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
+                    val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+                    val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
 
                     val sampler = ComparisonWithErrorRates(
                         cvrs,
@@ -156,7 +156,7 @@ class TestSampleGenerator {
 // TODO candidate for removal
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only)
 // to make mvrs have mvrMean.
-data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter, val mvrMean: Double,
+data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ClcaAssorter, val mvrMean: Double,
                                 val withoutReplacement: Boolean = true): Sampler {
     val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
     val mvrs : List<Cvr>
@@ -207,7 +207,7 @@ data class ComparisonWithErrors(val cvrs : List<Cvr>, val cassorter: ComparisonA
 // TODO candidate for removal
 // generate mvr by starting with cvrs and flipping (N * p2) votes (type 2 errors) and (N * p1) votes (type 1 errors)
 // TODO: generalize to p3, p4
-data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ComparisonAssorter,
+data class ComparisonWithErrorRates(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
                                     val p2: Double, val p1: Double = 0.0,
                                     val withoutReplacement: Boolean = true): Sampler {
     val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }

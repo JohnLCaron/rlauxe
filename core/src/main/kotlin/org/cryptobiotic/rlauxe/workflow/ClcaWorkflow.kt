@@ -46,7 +46,7 @@ class ComparisonWorkflow(
 
         // val votes =  makeVotesPerContest(contests, cvrs)
         contestsUA.filter{ !it.done }.forEach { contest ->
-            contest.makeComparisonAssertions(cvrs)
+            contest.makeClcaAssertions(cvrs)
         }
 
         // must be done once and for all rounds
@@ -125,7 +125,7 @@ class ComparisonWorkflow(
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
-            contestUA.comparisonAssertions.forEach { assertion ->
+            contestUA.clcaAssertions.forEach { assertion ->
                 if (!assertion.proved) {
                     assertion.status = runClcaAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
@@ -144,7 +144,7 @@ class ComparisonWorkflow(
     override fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
-            val minAssertion = contest.minComparisonAssertion()
+            val minAssertion = contest.minClcaAssertion()
             if (minAssertion == null) {
                 println(" $contest has no assertions; status=${contest.status}")
             } else {
@@ -273,7 +273,7 @@ fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>)
 fun runClcaAssertionAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
-    cassertion: ComparisonAssertion,
+    cassertion: ClcaAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = false,
@@ -281,7 +281,7 @@ fun runClcaAssertionAudit(
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
-    val clcaConfig = auditConfig.clcaConfig!!
+    val clcaConfig = auditConfig.clcaConfig
     val bettingFn = when (clcaConfig.simType) {
         ClcaSimulationType.oracle -> {
             // use the actual errors comparing mvrs to cvrs. Testing only

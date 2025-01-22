@@ -65,7 +65,7 @@ class OneAuditContest (
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
-    fun makeContestUnderAudit(cvrs: List<Cvr>) = OneAuditContestUnderAudit(this).makeComparisonAssertions(cvrs)
+    fun makeContestUnderAudit(cvrs: List<Cvr>) = OneAuditContestUnderAudit(this).makeClcaAssertions(cvrs)
 
     fun makeContest() = Contest(info, votes, Nc, Np)
 
@@ -155,7 +155,7 @@ class OneAuditContestUnderAudit(
     val contestOA: OneAuditContest,
 ): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=true) {
 
-    override fun makeComparisonAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
+    override fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         // TODO assume its plurality for now
         val assertions = mutableListOf<Assertion>()
         contest.winners.forEach { winner ->
@@ -165,9 +165,9 @@ class OneAuditContestUnderAudit(
             }
         }
         // turn into comparison assertions
-        this.comparisonAssertions = assertions.map { assertion ->
+        this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            ComparisonAssertion(contest, OneAuditComparisonAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
+            ClcaAssertion(contest, OneAuditComparisonAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
         }
         return this
     }
@@ -205,7 +205,7 @@ data class OneAuditComparisonAssorter(
     val contestOA: OneAuditContest,
     val assorter: AssorterFunction,   // A(mvr)
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value TODO why?
-) : ComparisonAssorterIF {
+) : ClcaAssorterIF {
     val stratumInfos: Map<String, StratumInfo>   // strataName -> average batch assorter value
     val clcaMargin: Double // estimated assorter mean, if all cards agree; used for alphaMart
     var cvrStrata: StratumInfo? = null
@@ -225,7 +225,7 @@ data class OneAuditComparisonAssorter(
             val avgBatchAssortValue = margin2mean(stratumMargin)
 
             if (stratum.hasCvrs) {
-                val cassorter = ComparisonAssorter(contestOA.makeContest(), assorter, avgBatchAssortValue)
+                val cassorter = ClcaAssorter(contestOA.makeContest(), assorter, avgBatchAssortValue)
                 weightedMeanAssortValue += cassorter.noerror * stratum.Ng
                 Pair(stratum.strataName, StratumInfo(avgBatchAssortValue, cassorter))
             } else {
@@ -287,5 +287,5 @@ data class OneAuditComparisonAssorter(
     }
 }
 
-data class StratumInfo(val avgBatchAssortValue: Double, val cassorter: ComparisonAssorter?)
+data class StratumInfo(val avgBatchAssortValue: Double, val cassorter: ClcaAssorter?)
 

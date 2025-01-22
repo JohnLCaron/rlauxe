@@ -9,11 +9,11 @@ private val show = true
 
 // create internal cvr and mvr with the correct under/over statements that match the passed in error rates.
 // specific to a contest. only used for estimating the sample size
-class ComparisonSimulation(
-        rcvrs: List<Cvr>,
-        val contest: ContestIF,
-        val cassorter: ComparisonAssorter,
-        errorRates: List<Double>,
+class ClcaSimulation(
+    rcvrs: List<Cvr>,
+    val contest: ContestIF,
+    val cassorter: ClcaAssorter,
+    errorRates: List<Double>,
     ): Sampler {
     val p1: Double = errorRates[0] // rate of 1-vote overstatements; voted for other, cvr has winner
     val p2: Double = errorRates[1] // rate of 2-vote overstatements; voted for loser, cvr has winner

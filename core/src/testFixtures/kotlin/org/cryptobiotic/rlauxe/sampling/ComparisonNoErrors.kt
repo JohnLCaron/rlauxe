@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.ComparisonAssorterIF
+import org.cryptobiotic.rlauxe.core.ClcaAssorterIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
 // the mvr and cvr always agree.
-class ComparisonNoErrors(val contestId: Int, val cvrs : List<Cvr>, val cassorter: ComparisonAssorterIF): Sampler {
+class ComparisonNoErrors(val contestId: Int, val cvrs : List<Cvr>, val cassorter: ClcaAssorterIF): Sampler {
     val maxSamples = cvrs.count { it.hasContest(contestId) }
     val permutedIndex = MutableList(cvrs.size) { it }
     val sampleMean: Double

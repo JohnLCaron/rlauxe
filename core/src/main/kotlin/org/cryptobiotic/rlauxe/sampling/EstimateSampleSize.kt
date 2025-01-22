@@ -130,7 +130,7 @@ class SimulateSampleSizeTask(
                 simulateSampleSizeClcaAssorter(
                     auditConfig,
                     contest,
-                    (assertion as ComparisonAssertion).cassorter,
+                    (assertion as ClcaAssertion).cassorter,
                     cvrs,
                     startingTestStatistic
                 )
@@ -146,7 +146,7 @@ class SimulateSampleSizeTask(
                 simulateSampleSizeOneAuditAssorter(
                     auditConfig,
                     contest,
-                    (assertion as ComparisonAssertion).cassorter,
+                    (assertion as ClcaAssertion).cassorter,
                     cvrs,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -162,12 +162,12 @@ class SimulateSampleSizeTask(
 fun simulateSampleSizeClcaAssorter(
     auditConfig: AuditConfig,
     contest: ContestIF,
-    cassorter: ComparisonAssorterIF,
+    cassorter: ClcaAssorterIF,
     cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val clcaConfig = auditConfig.clcaConfig!!
+    val clcaConfig = auditConfig.clcaConfig
 
     val sampler = // if (auditConfig.errorRates != null) {
     //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
@@ -283,10 +283,11 @@ fun simulateSampleSizePollingAssorter(
     val simContest = ContestSimulation(contest)
     val cvrs = simContest.makeCvrs()
 
-    val sampler = if (auditConfig.fuzzPct == null || auditConfig.fuzzPct == 0.0) {
+    val pollingConfig = auditConfig.pollingConfig
+    val sampler = if (pollingConfig.fuzzPct == null || pollingConfig.fuzzPct == 0.0) {
         PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
     } else {
-        PollingFuzzSampler(auditConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire
+        PollingFuzzSampler(pollingConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire
     }
 
     return simulateSampleSizeAlphaMart(
@@ -318,7 +319,7 @@ fun simulateSampleSizeAlphaMart(
         N = Nc,
         withoutReplacement = true,
         upperBound = upperBound,
-        d = auditConfig.pollingConfig!!.d,
+        d = auditConfig.pollingConfig.d,
         eta0 = eta0,
         minsd = minsd,
         c = c,
@@ -350,7 +351,7 @@ fun simulateSampleSizeAlphaMart(
 fun simulateSampleSizeOneAuditAssorter(
     auditConfig: AuditConfig,
     contest: ContestIF,
-    cassorter: ComparisonAssorterIF,
+    cassorter: ClcaAssorterIF,
     cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -360,14 +361,14 @@ fun simulateSampleSizeOneAuditAssorter(
     val sampler = //if (auditConfig.errorRates != null) {
     //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
         //} else
-        if (auditConfig.fuzzPct == null) {
+        if (auditConfig.pollingConfig.fuzzPct == null) {
             val cvrPairs = cvrs.zip( cvrs)
             ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=false)
             // } else if (auditConfig.useGeneratedErrorRates) {
             //  val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
             //  ComparisonSimulation(cvrs, contest, cassorter, errorRates)
         } else {
-            ComparisonFuzzSampler(auditConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
+            ComparisonFuzzSampler(auditConfig.pollingConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
         }
     sampler.reset()
 
@@ -401,7 +402,7 @@ fun simulateSampleSizeOneAudit(
         N = Nc,
         withoutReplacement = true,
         upperBound = upperBound,
-        d = auditConfig.pollingConfig!!.d,
+        d = auditConfig.pollingConfig.d,
         eta0 = eta0,
         minsd = minsd,
         c = c,

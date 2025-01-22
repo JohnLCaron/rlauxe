@@ -73,12 +73,12 @@ class TestGenWorkflowTasks {
             quantile = .80,
             ntrials = 10
         )
-        println("N=${N} ntrials=${auditConfig.ntrials} fuzzPct = ${auditConfig.fuzzPct}")
+        println("N=${N} ntrials=${auditConfig.ntrials}")
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         cvrPercents.forEach { cvrPercent ->
             margins.forEach { margin ->
-                val workflowGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, 0.0,
+                val workflowGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, fuzzPct = 0.0,
                     mapOf("nruns" to nruns.toDouble()))
                 tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
             }

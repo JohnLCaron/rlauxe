@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.workflow.PollingConfig
 import org.junit.jupiter.api.Test
 
 class TestComparisonFuzzSampler {
@@ -29,8 +30,8 @@ class TestComparisonFuzzSampler {
             println(" fuzzPct = $fuzzPct")
             val avgRates = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             test.contests.forEach { contest ->
-                val contestUA = ContestUnderAudit(contest.info, cvrs).makeComparisonAssertions(cvrs)
-                val minAssert = contestUA.minComparisonAssertion()
+                val contestUA = ContestUnderAudit(contest.info, cvrs).makeClcaAssertions(cvrs)
+                val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter
                     val samples = PrevSamplesWithRates(minAssort.noerror())
@@ -65,7 +66,7 @@ class TestComparisonFuzzSampler {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it) }
         val cvrs = test.makeCvrsFromContests()
         contestsUA.forEach { contest ->
-            contest.makeComparisonAssertions(cvrs)
+            contest.makeClcaAssertions(cvrs)
         }
         println("total ncvrs = ${cvrs.size}\n")
 
@@ -74,12 +75,12 @@ class TestComparisonFuzzSampler {
             hasStyles = true,
             seed = secureRandom.nextLong(),
             quantile = .50,
-            fuzzPct = .01
+            pollingConfig = PollingConfig(fuzzPct = .01)
         )
 
         contestsUA.forEach { contestUA ->
             val sampleSizes = mutableListOf<Pair<Int, Double>>()
-            contestUA.comparisonAssertions.map { assertion ->
+            contestUA.clcaAssertions.map { assertion ->
                 val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contestUA, assertion, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
                 assertion.estSampleSize = size
@@ -99,11 +100,11 @@ class TestComparisonFuzzSampler {
 private fun runWithComparisonFuzzSampler(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
-    assertion: ComparisonAssertion,
+    assertion: ClcaAssertion,
     cvrs: List<Cvr>, // (mvr, cvr)
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val clcaConfig = auditConfig.clcaConfig!!
+    val clcaConfig = auditConfig.clcaConfig
     val assorter = assertion.cassorter
     val sampler = ComparisonFuzzSampler(clcaConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
     val optimal = AdaptiveComparison(

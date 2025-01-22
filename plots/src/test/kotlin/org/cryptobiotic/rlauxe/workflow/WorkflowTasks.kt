@@ -33,7 +33,7 @@ class ClcaWorkflowTaskGenerator(
         val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clca = ComparisonWorkflow(
-                AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, clcaConfigInput = clcaConfig),
+                AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, clcaConfig = clcaConfig),
                 listOf(sim.contest), emptyList(), testCvrs, quiet = quiet
             )
         return WorkflowTask(
@@ -63,7 +63,8 @@ class PollingWorkflowTaskGenerator(
         val ballotManifest = sim.makeBallotManifest(true)
 
         val polling = PollingWorkflow(
-                AuditConfig(AuditType.POLLING, true, seed = Random.nextLong(), ntrials = 10, fuzzPct = fuzzPct),
+                AuditConfig(AuditType.POLLING, true, seed = Random.nextLong(), ntrials = 10,
+                    pollingConfig = PollingConfig(fuzzPct = fuzzPct)),
                 listOf(sim.contest), ballotManifest, N, quiet = quiet
             )
 
@@ -93,7 +94,8 @@ class OneAuditWorkflowTaskGenerator(
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, fuzzPct)
 
         val oneaudit = OneAuditWorkflow(
-            AuditConfig(AuditType.ONEAUDIT, true, seed = Random.nextLong(), ntrials = 10, fuzzPct = fuzzPct),
+            AuditConfig(AuditType.ONEAUDIT, true, seed = Random.nextLong(), ntrials = 10,
+                pollingConfig = PollingConfig(fuzzPct = fuzzPct)),
             listOf(contestOA2), oaCvrs, quiet = quiet
         )
         return WorkflowTask(

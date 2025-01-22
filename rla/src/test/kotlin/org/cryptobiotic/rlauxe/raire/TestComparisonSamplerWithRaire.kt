@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ComparisonSimulation
+import org.cryptobiotic.rlauxe.sampling.ClcaSimulation
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import kotlin.test.Test
@@ -25,17 +25,17 @@ class TestComparisonSamplerWithRaire {
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()
 
-        contestUA.makeComparisonAssertions(cvrs)
+        contestUA.makeClcaAssertions(cvrs)
 
-        contestUA.comparisonAssertions.forEach { assert ->
-            run(cvrs, contestUA, assert.cassorter as ComparisonAssorter)
+        contestUA.clcaAssertions.forEach { assert ->
+            run(cvrs, contestUA, assert.cassorter as ClcaAssorter)
         }
     }
 
-    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ComparisonAssorter) {
+    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ClcaAssorter) {
         println("\n${cassorter.assorter().desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA.contest, cassorter, ClcaErrorRates.standard)
+        val sampler = ClcaSimulation(cvrs, contestUA.contest, cassorter, ClcaErrorRates.standard)
 
         val orgCvrs = cvrs.map { cassorter.assorter().assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { cassorter.assorter().assort(it) }.average()

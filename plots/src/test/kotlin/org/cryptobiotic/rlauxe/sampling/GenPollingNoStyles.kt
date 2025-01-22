@@ -17,7 +17,7 @@ class GenPollingNoStyles {
         val Ns = listOf(10000, 20000, 50000, 100000)
         val margins = listOf(.01, .02, .04, .06, .08, .10, .12, .16, .20)
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 123556667890L, quantile=.80, fuzzPct=null, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 123556667890L, quantile=.80, ntrials = 100)
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile}")
 
         val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()

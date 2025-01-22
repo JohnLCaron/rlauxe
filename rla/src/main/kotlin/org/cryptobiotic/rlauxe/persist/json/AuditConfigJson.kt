@@ -44,7 +44,6 @@ fun AuditConfigJson.import(): AuditConfig {
         auditType,
         this.hasStyles,
         this.seed,
-        fuzzPct=null,
         riskLimit=this.riskLimit,
     )
 }

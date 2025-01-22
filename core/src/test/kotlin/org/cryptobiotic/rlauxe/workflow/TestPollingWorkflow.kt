@@ -16,7 +16,7 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingNoStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.80, ntrials=10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
@@ -36,10 +36,7 @@ class TestPollingWorkflow {
         val testCvrs = test.makeCvrsFromContests()
         val ballots = test.makeBallotsForPolling(auditConfig.hasStyles)
 
-        val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
-            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
-
+        val testMvrs = testCvrs
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, emptyList()), N)
         runWorkflow("testPollingNoStyle", workflow, testMvrs)
     }
@@ -51,7 +48,7 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingWithStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -79,9 +76,7 @@ class TestPollingWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
-        val testMvrs = if (auditConfig.fuzzPct == null) testCvrs
-                // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-                else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.fuzzPct!!)
+        val testMvrs = testCvrs
 
         val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, test.ballotStyles), N)
         runWorkflow("testPollingWithStyle", workflow, testMvrs)
@@ -111,7 +106,7 @@ class TestPollingWorkflow {
         val ballots = test.makeBallotsForPolling(true)
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
         val workflow = PollingWorkflow(auditConfig, test.contests, BallotManifest(ballots, test.ballotStyles), N)
 
         runWorkflow("testPollingOneContest", workflow, testCvrs)

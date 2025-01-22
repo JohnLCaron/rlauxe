@@ -272,6 +272,7 @@ class TestAssorterComparison {
         return cwinnerAvg
     }
 
+    // referenced in PollingVsComparison.md
     @Test
     fun testBvsV() {
         val thetas = listOf(.501, .5025, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)

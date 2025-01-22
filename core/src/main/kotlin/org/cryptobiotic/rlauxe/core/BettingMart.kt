@@ -12,7 +12,7 @@ class BettingMart(
     val bettingFn : BettingFn,
     val Nc: Int,             // max number of cards for this contest, only used by populationMeanIfH0
     val withoutReplacement: Boolean = true,
-    val noerror: Double, // for comparison assorters who need rate counting
+    val noerror: Double, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double,  // aka u
 ): RiskTestingFn {
@@ -119,6 +119,6 @@ class BettingMart(
             }
         }
 
-        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.samplingErrors())
+        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.errorCounts())
     }
 }

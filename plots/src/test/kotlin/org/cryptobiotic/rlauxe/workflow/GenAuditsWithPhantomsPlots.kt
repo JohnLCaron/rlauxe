@@ -28,6 +28,7 @@ class GenAuditsWithPhantomsPlots {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantom, 0.0,
+                ClcaConfig(ClcaSimulationType.oracle, 0.0),
                 mapOf("nruns" to nruns.toDouble(), "phantom" to phantom))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 

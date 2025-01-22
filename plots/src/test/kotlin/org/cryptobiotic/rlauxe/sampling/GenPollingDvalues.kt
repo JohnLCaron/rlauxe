@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.workflow.PollingConfig
 import kotlin.test.Test
 import kotlin.math.ceil
 
@@ -45,9 +46,8 @@ class GenPollingDvalues {
                         hasStyles = true,
                         seed = 12356667890L,
                         quantile = .80,
-                        fuzzPct = null,
                         ntrials = 10,
-                        d1 = d
+                        pollingConfigInput = PollingConfig(d=d)
                     )
 
                     val sampler = PollWithoutReplacement(contestUA.contest as Contest, mvrs, assorter)

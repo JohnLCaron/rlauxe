@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.unittest
 
-import org.cryptobiotic.rlauxe.core.ComparisonAssertion
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ComparisonFuzzSampler
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
@@ -13,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.ComparisonErrorRates
+import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.junit.jupiter.api.Test
 
@@ -50,11 +46,10 @@ class TestComparisonFuzzSampler {
                     val fuzz = count.toDouble() / ccount
                     println("$it ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
                     if (detail) {
-                        println("  errors = ${samples.samplingErrors()}")
-                        println("  rates =  ${samples.samplingErrors(ccount.toDouble())}")
-                        println("  error% = ${samples.samplingErrors(ccount * fuzz)}")
+                        println("  errorCounts = ${samples.errorCounts()}")
+                        println("  errorRates =  ${samples.errorRates()}")
                     }
-                    samples.samplingErrors()
+                    samples.errorRates()
                         .forEachIndexed { idx, it -> avgRates[idx] = avgRates[idx] + it / ccount.toDouble() }
                 }
             }
@@ -108,19 +103,26 @@ private fun runWithComparisonFuzzSampler(
     cvrs: List<Cvr>, // (mvr, cvr)
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-
+    val clcaConfig = auditConfig.clcaConfig!!
     val assorter = assertion.cassorter
-    val sampler = ComparisonFuzzSampler(auditConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
+    val sampler = ComparisonFuzzSampler(clcaConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
+    val optimal = AdaptiveComparison(
+        Nc = contestUA.Nc,
+        withoutReplacement = true,
+        a = assorter.noerror(),
+        d1 = clcaConfig.d1,
+        d2 = clcaConfig.d2,
+        ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct),
+    )
 
     return simulateSampleSizeBetaMart(
         auditConfig,
         sampler,
+        optimal,
         assorter.assorter().reportedMargin(),
         assorter.noerror(),
         assorter.upperBound(),
         Nc=contestUA.Nc,
-        ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct),
-        // maxSamples=sampler.maxSamples(),
         moreParameters=moreParameters,
     )
 }

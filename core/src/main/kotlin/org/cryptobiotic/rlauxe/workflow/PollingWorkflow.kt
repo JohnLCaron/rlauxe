@@ -12,8 +12,8 @@ class PollingWorkflow(
     val N: Int, // total number of ballots/cards
     val quiet: Boolean = false,
 ): RlauxWorkflow {
-    var contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-    var ballotsUA: List<BallotUnderAudit>
+    val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
+    val ballotsUA: List<BallotUnderAudit>
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
@@ -30,23 +30,6 @@ class PollingWorkflow(
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
-        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
-    }
-
-    // reset, change the ordering, for multiple simulations
-    override fun shuffle(seed: Long) {
-        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-        contestsUA.forEach {
-            if (it.choiceFunction != SocialChoiceFunction.IRV) {
-                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })
-            }
-        }
-
-        contestsUA.filter { !it.done }.forEach { contest ->
-            contest.makePollingAssertions()
-        }
-
-        val prng = Prng(seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
@@ -124,7 +107,7 @@ fun runAudit(
         var allAssertionsDone = true
         contestUA.pollingAssertions.forEach { assertion ->
             if (!assertion.proved) {
-                assertion.status = auditOneAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
+                assertion.status = auditPollingAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
                 allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
             }
         }
@@ -137,7 +120,7 @@ fun runAudit(
     return allDone
 }
 
-fun auditOneAssertion(
+fun auditPollingAssertion(
     auditConfig: AuditConfig,
     contest: Contest,
     assertion: Assertion,
@@ -157,7 +140,7 @@ fun auditOneAssertion(
         N = contest.Nc,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
-        d = auditConfig.d1,
+        d = auditConfig.pollingConfig!!.d,
         eta0 = eta0,
         minsd = minsd,
         c = c,

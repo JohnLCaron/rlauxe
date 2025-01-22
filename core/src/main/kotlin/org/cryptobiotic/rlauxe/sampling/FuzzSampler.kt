@@ -101,6 +101,8 @@ class PollingFuzzSampler(
 
 // TODO cant be used on raire, approval
 fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> {
+    if (fuzzPct == 0.0) return cvrs
+
     var count = 0
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
     cvrbs.filter { !it.phantom }.forEach { cvrb: CvrBuilder ->

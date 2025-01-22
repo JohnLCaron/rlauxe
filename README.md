@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/21/2025
+last update: 01/22/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -384,9 +384,9 @@ when estimating the sample size from the diluted margin, and also when doing the
 The comparison error rates are:
 
         val p1: rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: // rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: // rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: // rate of 2-vote understatements; voted for winner, cvr has loser
+        val p2: rate of 2-vote overstatements; voted for loser, cvr has winner
+        val p3: rate of 1-vote understatements; voted for winner, cvr has other
+        val p4: rate of 2-vote understatements; voted for winner, cvr has loser
 
 For IRV, the corresponding descriptions of the errror rates are:
 
@@ -402,6 +402,8 @@ For IRV, the corresponding descriptions of the errror rates are:
 
 See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
 with varying p2error rates.
+
+See [Comparison Error Rates](docs/ComparisonErrorRates.md) for technical details.
 
 #### Estimating Sample sizes and error rates with fuzz
 

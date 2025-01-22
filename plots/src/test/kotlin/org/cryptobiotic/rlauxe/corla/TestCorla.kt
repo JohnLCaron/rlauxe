@@ -80,10 +80,7 @@ class TestCorla {
                             a = compareAssorter.noerror,
                             d1 = d1,
                             d2 = d1,
-                            p2o = p2prior,
-                            p1o = p1prior,
-                            p1u = 0.0,
-                            p2u = 0.0,
+                            listOf(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
                         val betting =

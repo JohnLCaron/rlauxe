@@ -9,14 +9,14 @@ import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
 class GenAuditsNoErrorsPlots {
-    val nruns = 10  // number of times to run workflow
+    val nruns = 100  // number of times to run workflow
     val name = "AuditsNoErrors"
     val dirName = "/home/stormy/temp/workflow/$name"
 
     @Test
     fun genAuditsNoErrorsPlots() {
         val N = 50000
-        val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
+        val margins = listOf(.005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10)
         val cvrPercents = listOf(0.0, 0.5, 1.0)
         val stopwatch = Stopwatch()
 
@@ -28,6 +28,7 @@ class GenAuditsNoErrorsPlots {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
+                ClcaConfig(ClcaSimulationType.oracle, 0.0),
                 mapOf("nruns" to nruns.toDouble()))
 
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))

@@ -21,7 +21,8 @@ class ClcaWorkflowTaskGenerator(
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
-    val fuzzPct: Double,
+    val mvrsFuzzPct: Double,
+    val clcaConfig: ClcaConfig,
     val parameters : Map<String, Double>,
 ): WorkflowTaskGenerator {
     override fun name() = "ClcaWorkflowTaskGenerator"
@@ -29,17 +30,17 @@ class ClcaWorkflowTaskGenerator(
     override fun generateNewTask(): WorkflowTask {
         val sim = ContestSimulation.make2wayTestContest(Nc=N, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, fuzzPct)
+        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clca = ComparisonWorkflow(
-            AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, fuzzPct = fuzzPct),
-            listOf(sim.contest), emptyList(), testCvrs, quiet = quiet
-        )
+                AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, clcaConfigInput = clcaConfig),
+                listOf(sim.contest), emptyList(), testCvrs, quiet = quiet
+            )
         return WorkflowTask(
-            "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
+            "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
             testMvrs,
-            parameters + mapOf("fuzzPct" to fuzzPct, "auditType" to 3.0)
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
         )
     }
 }

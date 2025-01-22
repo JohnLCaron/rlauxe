@@ -1,4 +1,23 @@
-#### Comparison error rates
+# Comparison error rates
+last updated Jan 22, 2025
+
+## Calculate Error Rates from actual Mvcrs (oracle)
+
+One could do a CLCA audit with the actual, not estimated error rates. At each round, before you run
+the audit, compare the selected CVRs and the corresponding MVRs and count the number of errors for each 
+of the four categories. Use those rates in the OptimalLambda algorithm
+
+The benefit is that you immediately start your bets knowing what errors you're going to see in that sample. 
+That gives us a fixed lamda for that sample. I assume optimal_lambda() wont choose a lambda that will go off the rails for the sample.
+
+It does seem that the algorithm violates the "predictable sequence in the sense that ηj may depend on X j−1 , but not on Xk for k ≥ j ."
+But could you use the measured error rate of round n as the starting error rate of round n+1 using shrink_trunc?
+Or would that also invalidate the predictable sequence requirement?
+
+I think it does if one starts from the beginning, but ok if one simply starts with the curret p-value with new samples.
+
+
+### ComparisonSamplerSimulation
 
 The assumptions that one makes about the comparison error rates greatly affect the sample size estimation. These rates should
 be empirically determined, and public tables for different voting machines should be published

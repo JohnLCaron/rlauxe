@@ -72,21 +72,36 @@ class AdaptiveComparison(
     val Nc: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
-    val d1: Int,  // weight p1, p3
-    val d2: Int, // weight p2, p4
-    val p2o: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-    val p1o: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-    val p1u: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-    val p2u: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
+    val d1: Int,  // weight p1o, p1u
+    val d2: Int, // weight p2o, p2u
+    errorRates: List<Double>? = null,  // a priori estimate of the error rates
     val eps: Double = .00001
 ): BettingFn {
+    val p2o: Double // apriori rate of 2-vote overstatements; set < 0 to remove consideration
+    val p1o: Double // apriori rate of 1-vote overstatements; set < 0 to remove consideration
+    val p1u: Double // apriori rate of 1-vote understatements; set < 0 to remove consideration
+    val p2u: Double // apriori rate of 2-vote understatements; set < 0 to remove consideration
+
+    init {
+        if (errorRates == null) {
+            p2o = -1.0
+            p1o = -1.0
+            p1u = -1.0
+            p2u = -1.0
+        } else {
+            p2o = errorRates[0]
+            p1o = errorRates[1]
+            p1u = errorRates[2]
+            p2u = errorRates[3]
+        }
+    }
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastj = prevSamples.numberOfSamples() // TODO lastj = 0
-        val p2oest = if (p2o == 0.0) 0.0 else estimateRate(d2, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
-        val p1oest = if (p1o == 0.0) 0.0 else estimateRate(d1, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
-        val p1uest = if (p1u == 0.0) 0.0 else estimateRate(d1, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
-        val p2uest = if (p2u == 0.0) 0.0 else estimateRate(d2, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
+        val p2oest = if (p2o < 0.0) 0.0 else estimateRate(d2, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
+        val p1oest = if (p1o < 0.0) 0.0 else estimateRate(d1, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
+        val p1uest = if (p1u < 0.0) 0.0 else estimateRate(d1, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
+        val p2uest = if (p2u < 0.0) 0.0 else estimateRate(d2, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, p2oest, p1oest, p1uest, p2uest, mui)
@@ -102,6 +117,23 @@ class AdaptiveComparison(
         //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
         val est = (d * apriori + sampleNum * sampleRate) / (d + sampleNum - 1)
         return max(est, eps) // lower bound on the estimated rate
+    }
+}
+
+// We know the true rate of all errors
+class OracleComparison(
+    val a: Double, // noerror
+    val errorRates: List<Double>,
+): BettingFn {
+    val lam: Double
+    init {
+        require(errorRates.size == 4)
+        val kelly = OptimalLambda(a, errorRates[0], errorRates[1], errorRates[2], errorRates[3], )
+        lam = kelly.solve()
+    }
+    // note lam is a constant
+    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+        return lam
     }
 }
 

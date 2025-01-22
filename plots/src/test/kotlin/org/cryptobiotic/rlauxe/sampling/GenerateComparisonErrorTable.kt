@@ -26,7 +26,7 @@ class GenerateComparisonErrorTable {
                 //         fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
                 val sim = ContestSimulation.make2wayTestContest(Nc=N, margin, 0.0, 0.0) // TODO
 
-                val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
+                val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0)
                 fuzzPcts.forEach { fuzzPct ->
                     // println("margin= $margin ncand=$ncand fuzzPct=$fuzzPct")
 
@@ -45,18 +45,16 @@ class GenerateComparisonErrorTable {
                         }
                         //samples.samplingErrors()
                         //    .forEachIndexed { idx, it -> avgRates[idx] = avgRates[idx] + it / ccount.toDouble() }
-                        samples.samplingErrors()
-                            .forEachIndexed { idx, it ->
-                                avgRatesForNcand[idx] = avgRatesForNcand[idx] + it / (N * fuzzPct)
-                            }
+                        samples.errorRates()
+                            .forEachIndexed { idx, it -> avgRatesForNcand[idx] = avgRatesForNcand[idx] + it }
                     }
                     //println("  errors = ${samples.samplingErrors()}")
                     //println("  rates =  ${samples.samplingErrors(total.toDouble())}")
                     //println("  error% = ${samples.samplingErrors(total * fuzzPct)}")
                 }
                 print("| $ncand | ")
-                for (p in 1 until 5) {
-                    print(" ${df(avgRatesForNcand[p]/(auditConfig.ntrials * fuzzPcts.size))} |")
+                avgRatesForNcand.forEachIndexed { p, it ->
+                    print(" ${ df(it/(auditConfig.ntrials * fuzzPcts.size))} |") // TODO ??
                 }
                 println()
             }

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /** keeps track of the latest sample, number of samples, and the sample sum. */
@@ -39,6 +39,7 @@ class PrevSamples : SampleTracker {
 
 /** This also counts the under/overstatements for comparison audits. */
 class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
+    private val isClca = (noerror > 0.0)
     private var last = 0.0
     private var sum = 0.0
     private val welford = Welford()
@@ -65,24 +66,21 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
         sum += sample
         welford.update(sample)
 
-        if (noerror != 0.0) {
+        if (isClca) {
             // or just say which overstatement it is?
             if (doubleIsClose(sample, 0.0)) countP2o++
-            if (doubleIsClose(sample, noerror * 0.5)) countP1o++
-            if (doubleIsClose(sample, noerror)) countP0++
-            if (doubleIsClose(sample, noerror * 1.5)) countP1u++
-            if (doubleIsClose(sample, noerror * 2.0)) countP2u++
+            else if (doubleIsClose(sample, noerror * 0.5)) countP1o++
+            else if (doubleIsClose(sample, noerror)) countP0++
+            else if (doubleIsClose(sample, noerror * 1.5)) countP1u++
+            else if (doubleIsClose(sample, noerror * 2.0)) countP2u++
+            else println(" mot assigned ${df(sample / noerror)}")
         }
     }
 
-    fun samplingErrors() = listOf(countP0,countP1o,countP2o,countP1u,countP2u)
-
-    fun samplingErrors(denom:Double) = buildString {
-        append("[${dfn(countP0/denom, 4)},")
-        append("${dfn(countP1o/denom, 4)},")
-        append("${dfn(countP2o/denom, 4)},")
-        append("${dfn(countP1u/denom, 4)},")
-        append("${dfn(countP2u/denom, 4)}]")
+    fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
+    fun errorRates() = errorCounts().subList(1,5).map {
+        it / numberOfSamples().toDouble()  // skip p0
     }
+
 }
 

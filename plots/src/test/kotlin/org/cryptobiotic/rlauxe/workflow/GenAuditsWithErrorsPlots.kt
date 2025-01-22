@@ -28,6 +28,7 @@ class GenAuditsWithErrorsPlots {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+                ClcaConfig(ClcaSimulationType.oracle, fuzzPct),
                 mapOf("nruns" to nruns.toDouble()))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 

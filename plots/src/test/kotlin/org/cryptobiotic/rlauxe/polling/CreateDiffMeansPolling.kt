@@ -18,7 +18,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.comparison.runAlphaMartRepeated
+import org.cryptobiotic.rlauxe.alpha.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.createPctRatio
 import org.cryptobiotic.rlauxe.plots.plotPctRatio
 import org.cryptobiotic.rlauxe.plots.plotSRTpct

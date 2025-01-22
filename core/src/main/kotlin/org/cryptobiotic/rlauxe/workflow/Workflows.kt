@@ -11,7 +11,6 @@ interface RlauxWorkflow {
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean
     fun showResults()
     fun getContests() : List<ContestUnderAudit>
-    fun shuffle(seed: Long)
 }
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those

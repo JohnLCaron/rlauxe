@@ -14,8 +14,8 @@ class OneAuditWorkflow(
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
 ): RlauxWorkflow {
-    var contestsUA: List<ContestUnderAudit>
-    var cvrsUA: List<CvrUnderAudit>
+    val contestsUA: List<ContestUnderAudit>
+    val cvrsUA: List<CvrUnderAudit>
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
 
@@ -23,14 +23,6 @@ class OneAuditWorkflow(
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
-    }
-
-    // change the ordering, for simulations
-    override fun shuffle(seed: Long) {
-        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
-
-        val prng = Prng(seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
@@ -127,60 +119,6 @@ class OneAuditWorkflow(
     }
 }
 
-fun runOneAuditAssertionBet(
-    auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
-    cassertion: ComparisonAssertion,
-    cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    roundIdx: Int,
-    quiet: Boolean = false,
-    ): TestH0Status {
-    val cassorter = cassertion.cassorter
-    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false, trackStratum = false)
-
-    val errorRates = auditConfig.errorRates ?: ComparisonErrorRates.getErrorRates(contestUA.ncandidates, auditConfig.fuzzPct)
-    val optimal = AdaptiveComparison(
-        Nc = contestUA.Nc,
-        withoutReplacement = true,
-        a = cassorter.noerror(),
-        d1 = auditConfig.d1,
-        d2 = auditConfig.d2,
-        p2o = errorRates[0],
-        p1o = errorRates[1],
-        p1u = errorRates[2],
-        p2u = errorRates[3],
-    )
-    val testFn = BettingMart(
-        bettingFn = optimal,
-        Nc = contestUA.Nc,
-        noerror = cassorter.noerror(),
-        upperBound = cassorter.upperBound(),
-        riskLimit = auditConfig.riskLimit,
-        withoutReplacement = true
-    )
-
-    // do not terminate on null reject, continue to use all samples
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
-    if (!testH0Result.status.fail) {
-        cassertion.proved = true
-        cassertion.round = roundIdx
-    } else {
-        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
-    }
-
-    val roundResult = AuditRoundResult(roundIdx,
-        estSampleSize=cassertion.estSampleSize,
-        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit },
-        samplesUsed = testH0Result.sampleCount,
-        pvalue = testH0Result.pvalues.last(),
-        status = testH0Result.status,
-        )
-    cassertion.roundResults.add(roundResult)
-
-    if (!quiet) println(" ${contestUA.name} $roundResult")
-    return testH0Result.status
-}
-
 fun runOneAuditAssertionAlpha(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
@@ -201,7 +139,7 @@ fun runOneAuditAssertionAlpha(
         N = contestUA.Nc,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
-        d = auditConfig.d1,
+        d = auditConfig.pollingConfig!!.d,
         eta0 = eta0,
         minsd = minsd,
         c = c,

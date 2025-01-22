@@ -47,7 +47,7 @@ class GenPollingDvalues {
                         seed = 12356667890L,
                         quantile = .80,
                         ntrials = 10,
-                        pollingConfigInput = PollingConfig(d=d)
+                        pollingConfig = PollingConfig(d=d)
                     )
 
                     val sampler = PollWithoutReplacement(contestUA.contest as Contest, mvrs, assorter)

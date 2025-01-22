@@ -9,7 +9,7 @@ class ComparisonFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
     val contest: Contest,
-    val cassorter: ComparisonAssorterIF
+    val cassorter: ClcaAssorterIF
 ): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size

@@ -41,8 +41,8 @@ class CompareAlphaPaper {
             val pollingAssertion = contestUA.pollingAssertions.first()
 
             val contestUAc = ContestUnderAudit(contest, isComparison = true)
-            contestUAc.makeComparisonAssertions(cvrs)
-            val compareAssertion = contestUAc.comparisonAssertions.first()
+            contestUAc.makeClcaAssertions(cvrs)
+            val compareAssertion = contestUAc.clcaAssertions.first()
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(

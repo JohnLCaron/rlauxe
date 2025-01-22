@@ -77,7 +77,7 @@ class OneAuditWorkflow(
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
-            contestUA.comparisonAssertions.forEach { assertion ->
+            contestUA.clcaAssertions.forEach { assertion ->
                 if (!assertion.proved) {
                     // assertion.status = runOneAuditAssertionBet(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
                     assertion.status = runOneAuditAssertionAlpha(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
@@ -97,7 +97,7 @@ class OneAuditWorkflow(
     override fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
-            val minAssertion = contest.minComparisonAssertion()
+            val minAssertion = contest.minClcaAssertion()
             if (minAssertion == null) {
                 println(" $contest has no assertions; status=${contest.status}")
             } else {
@@ -122,7 +122,7 @@ class OneAuditWorkflow(
 fun runOneAuditAssertionAlpha(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
-    cassertion: ComparisonAssertion,
+    cassertion: ClcaAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = false,
@@ -139,7 +139,7 @@ fun runOneAuditAssertionAlpha(
         N = contestUA.Nc,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
-        d = auditConfig.pollingConfig!!.d,
+        d = auditConfig.pollingConfig.d,
         eta0 = eta0,
         minsd = minsd,
         c = c,

@@ -68,7 +68,7 @@ class PollWithoutReplacement(
 class ComparisonWithoutReplacement(
     val contestUA: ContestIF,
     val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    val cassorter: ComparisonAssorterIF,
+    val cassorter: ClcaAssorterIF,
     val allowReset: Boolean,
     val trackStratum: Boolean = false,
 ): Sampler {

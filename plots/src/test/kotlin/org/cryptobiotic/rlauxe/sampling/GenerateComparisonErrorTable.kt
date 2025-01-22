@@ -11,7 +11,7 @@ import kotlin.test.Test
 class GenerateComparisonErrorTable {
     @Test
     fun generateErrorTable() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, fuzzPct = null, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials = 100)
         val N = 100000
 
         val margins = listOf(.01) // listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
@@ -34,8 +34,8 @@ class GenerateComparisonErrorTable {
                         val cvrs = sim.makeCvrs()
                         val contestUA = ContestUnderAudit(sim.contest, true, true)
                         // val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
-                        contestUA.makeComparisonAssertions(cvrs)
-                        val minAssert = contestUA.minComparisonAssertion()!!
+                        contestUA.makeClcaAssertions(cvrs)
+                        val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 
                         val samples = PrevSamplesWithRates(minAssort.noerror())

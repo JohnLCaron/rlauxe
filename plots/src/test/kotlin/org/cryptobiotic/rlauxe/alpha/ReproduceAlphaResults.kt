@@ -480,8 +480,8 @@ class ReproduceAlphaResults {
             for (N in nlist) {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
-                val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-                val assorter = contestUA.minComparisonAssertion()!!.cassorter
+                val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+                val assorter = contestUA.minClcaAssertion()!!.cassorter
 
                 val margin = assorter.assorter().reportedMargin()
                 val compareUpper = 2.0/(2-margin)
@@ -570,8 +570,8 @@ class ReproduceAlphaResults {
         for (factor in factors) {
             val srs = mutableListOf<SRT>()
             val cvrs = makeCvrsByExactMean(N, theta)
-            val contestUA = ContestUnderAudit(info, cvrs).makeComparisonAssertions(cvrs)
-            val compareAssorter = contestUA.minComparisonAssertion()!!.cassorter
+            val contestUA = ContestUnderAudit(info, cvrs).makeClcaAssertions(cvrs)
+            val compareAssorter = contestUA.minClcaAssertion()!!.cassorter
             val margin = compareAssorter.assorter().reportedMargin()
             val drawSample = ComparisonNoErrors(info.id, cvrs, compareAssorter)
             val etaActual = drawSample.sampleMean()

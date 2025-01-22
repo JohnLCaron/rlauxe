@@ -192,7 +192,7 @@ open class ContestUnderAudit(
     val Np = contest.Np
 
     var pollingAssertions: List<Assertion> = emptyList()
-    var comparisonAssertions: List<ComparisonAssertion> = emptyList()
+    var clcaAssertions: List<ClcaAssertion> = emptyList()
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
     var done = false
@@ -247,7 +247,7 @@ open class ContestUnderAudit(
 
     // cvrs must be complete in order to get the margin right.
     // open fun makeComparisonAssertions(cvrs : Iterable<Cvr>, votes: Map<Int, Int>? = null): ContestUnderAudit {
-    open fun makeComparisonAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
+    open fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         // val useVotes = if (votes != null) votes else (contest as Contest).votes
         val useVotes = (contest as Contest).votes
@@ -258,22 +258,22 @@ open class ContestUnderAudit(
             else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
         }
 
-        this.comparisonAssertions = assertions.map { assertion ->
+        this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            val comparisonAssorter = ComparisonAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
-            ComparisonAssertion(contest, comparisonAssorter)
+            val clcaAssorter = ClcaAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
+            ClcaAssertion(contest, clcaAssorter)
         }
         return this
     }
 
     fun assertions(): List<Assertion> {
-        return if (isComparison) comparisonAssertions else pollingAssertions
+        return if (isComparison) clcaAssertions else pollingAssertions
     }
 
-    fun minComparisonAssertion(): ComparisonAssertion? {
-        val margins = comparisonAssertions.map { it.assorter.reportedMargin()  }
+    fun minClcaAssertion(): ClcaAssertion? {
+        val margins = clcaAssertions.map { it.assorter.reportedMargin()  }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return comparisonAssertions.find { it.assorter.reportedMargin()  == minMargin }
+        return clcaAssertions.find { it.assorter.reportedMargin()  == minMargin }
     }
 
     fun minPollingAssertion(): Assertion? {
@@ -283,11 +283,11 @@ open class ContestUnderAudit(
     }
 
     fun minAssertion(): Assertion? {
-        return if (isComparison) minComparisonAssertion() else minPollingAssertion()
+        return if (isComparison) minClcaAssertion() else minPollingAssertion()
     }
 
     fun minMargin(): Double {
-        return if (isComparison) (minComparisonAssertion()?.assorter?.reportedMargin() ?: 0.0)
+        return if (isComparison) (minClcaAssertion()?.assorter?.reportedMargin() ?: 0.0)
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 }

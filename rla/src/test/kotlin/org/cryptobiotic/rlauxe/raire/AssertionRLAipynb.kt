@@ -626,7 +626,7 @@ fun replicate_p_values(
 
 
     val contest = contests.first()
-    val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
+    val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: Sampler = ComparisonNoErrors(contest.id, cvrs, minAssorter)
 
@@ -656,8 +656,8 @@ fun calc_sample_sizes(
     //val minAssertion = comparisonAssertions.minBy { it.margin }
     //val minAssorter = minAssertion.assorter
 
-    val contest = contests.first().makeComparisonAssertions(cvrs)
-    val minAssorter = contest.minComparisonAssertion()!!.cassorter // the one with the smallest margin
+    val contest = contests.first().makeClcaAssertions(cvrs)
+    val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: Sampler = ComparisonNoErrors(contest.id, cvrs, minAssorter)
 

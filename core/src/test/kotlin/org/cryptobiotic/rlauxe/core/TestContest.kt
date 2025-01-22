@@ -136,7 +136,7 @@ class TestContest {
         assertEquals("choice function IRV is not supported", mess1)
 
         val mess2 = assertFailsWith<RuntimeException> {
-            contestUAp.makeComparisonAssertions(emptyList())
+            contestUAp.makeClcaAssertions(emptyList())
         }.message
         assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess2)
 
@@ -147,7 +147,7 @@ class TestContest {
         assertEquals("makePollingAssertions() can be called only on polling contest", mess3)
 
         val mess4 = assertFailsWith<RuntimeException> {
-            contestUAc.makeComparisonAssertions(emptyList())
+            contestUAc.makeClcaAssertions(emptyList())
         }.message
         assertEquals("choice function IRV is not supported", mess4)
     }

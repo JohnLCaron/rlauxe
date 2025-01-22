@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.ComparisonAssertion
-import org.cryptobiotic.rlauxe.core.ComparisonAssorterIF
+import org.cryptobiotic.rlauxe.core.ClcaAssorterIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 
@@ -20,7 +19,7 @@ object ClcaErrorRates {
         return errorRatios[useCand]!!.map { it * fuzzPct }
     }
 
-    fun calcErrorRates(contestId: Int, cassorter: ComparisonAssorterIF,
+    fun calcErrorRates(contestId: Int, cassorter: ClcaAssorterIF,
                        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     ) : List<Double> {
         require(cvrPairs.size > 0)

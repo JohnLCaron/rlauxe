@@ -44,7 +44,7 @@ class TestAlphaMart {
         val margin = assorter.reportedMargin()
         println("margin=$margin, mean=${margin2mean(margin)}")
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, fuzzPct = null, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, ntrials=10)
         val result = simulateSampleSizeAlphaMart(
             auditConfig = auditConfig,
             sampleFn = cvrSampler,

@@ -36,7 +36,7 @@ import kotlin.test.assertEquals
 //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
 //    otherwise = 1/2
 
-class TestOneAuditComparisonAssorter {
+class TestOneAuditClcaAssorter {
 
     @Test
     fun testOABasics() {
@@ -111,7 +111,7 @@ class TestOneAuditComparisonAssorter {
         val loserCvr = makeCvr(1, "noCvr")
         val otherCvr = makeCvr(2, "noCvr")
 
-        val bassorter = contestUA.minComparisonAssertion()!!.cassorter as OneAuditComparisonAssorter
+        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditComparisonAssorter
         println(bassorter)
 
         val assorter_mean_poll = bassorter.stratumInfos["noCvr"]!!.avgBatchAssortValue
@@ -150,7 +150,7 @@ class TestOneAuditComparisonAssorter {
         val contestOA = contest.makeContestUnderAudit(testCvrs)
         println(contestOA)
 
-        val bassorter = contestOA.minComparisonAssertion()!!.cassorter as OneAuditComparisonAssorter
+        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditComparisonAssorter
         println(bassorter)
         println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${bassorter.clcaMargin} ")
 

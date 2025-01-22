@@ -110,7 +110,7 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 
 /////////////////////////////////////////////////////////////////////////////////
 
-interface ComparisonAssorterIF {
+interface ClcaAssorterIF {
     fun noerror(): Double
     fun upperBound(): Double
 
@@ -119,13 +119,13 @@ interface ComparisonAssorterIF {
 }
 
 /** See SHANGRLA Section 3.2 */
-data class ComparisonAssorter(
+data class ClcaAssorter(
     val contest: ContestIF,
     val assorter: AssorterFunction,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
     val hasStyle: Boolean = true, // TODO could be on the Contest ??
     val check: Boolean = true, // TODO get rid of
-) : ComparisonAssorterIF {
+) : ClcaAssorterIF {
     private val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
@@ -230,7 +230,6 @@ open class Assertion(
 ) {
     val winner = assorter.winner()
     val loser = assorter.loser()
-    // val margin = assorter.reportedMargin()
 
     val roundResults = mutableListOf<AuditRoundResult>()
 
@@ -245,9 +244,9 @@ open class Assertion(
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"
 }
 
-open class ComparisonAssertion(
+open class ClcaAssertion(
     contest: ContestIF,
-    val cassorter: ComparisonAssorterIF,
+    val cassorter: ClcaAssorterIF,
 ): Assertion(contest, cassorter.assorter()) {
     override fun toString() = "${cassorter.assorter().desc()} estSampleSize=$estSampleSize"
 }

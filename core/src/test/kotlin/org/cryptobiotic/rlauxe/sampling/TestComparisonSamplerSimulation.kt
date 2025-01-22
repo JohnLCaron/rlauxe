@@ -17,10 +17,10 @@ class TestComparisonSamplerSimulation {
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-            val compareAssorter = contestUA.comparisonAssertions.first().cassorter as ComparisonAssorter
+            val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+            val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
 
-            val sampler = ComparisonSimulation(cvrs,
+            val sampler = ClcaSimulation(cvrs,
                 contestUA.contest as Contest,
                 compareAssorter,
                 ClcaErrorRates.standard,
@@ -51,17 +51,17 @@ class TestComparisonSamplerSimulation {
             val theta = margin2mean(margin)
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeComparisonAssertions(cvrs)
-            val compareAssorter = contestUA.comparisonAssertions.first().cassorter
+            val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+            val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
-            run(cvrs, contestUA, compareAssorter as ComparisonAssorter)
+            run(cvrs, contestUA, compareAssorter as ClcaAssorter)
         }
     }
 
-    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ComparisonAssorter) {
+    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ClcaAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val sampler = ComparisonSimulation(cvrs, contestUA.contest, assorter, ClcaErrorRates.standard)
+        val sampler = ClcaSimulation(cvrs, contestUA.contest, assorter, ClcaErrorRates.standard)
 
         val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()

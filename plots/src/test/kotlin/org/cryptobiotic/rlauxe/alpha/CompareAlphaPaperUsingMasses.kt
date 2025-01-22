@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
+import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrors
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
@@ -92,11 +92,11 @@ class CompareAlphaPaperUsingMasses {
 
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeComparisonAssertions(cvrs)
-        val compareAssorter = contestUA.comparisonAssertions.first().cassorter
+        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=true).makeClcaAssertions(cvrs)
+        val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
         // sanity checks
-        val sampler = ComparisonWithErrors(cvrs, compareAssorter as ComparisonAssorter, theta, withoutReplacement = true)
+        val sampler = ComparisonWithErrors(cvrs, compareAssorter as ClcaAssorter, theta, withoutReplacement = true)
         val actualMvrMean = sampler.mvrs.map{ it.hasMarkFor(0,0) }.average()
         assertEquals(theta, actualMvrMean, doublePrecision)
         println("flippedVotes = ${sampler.flippedVotes} = ${100.0 * abs(sampler.flippedVotes)/N}%  actualMvrMean=$actualMvrMean")

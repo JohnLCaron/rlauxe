@@ -27,12 +27,12 @@ class MeasureEstimationTaskConcurrency {
         val test = MultiContestTestData(15, 1, 20000)
         val cvrs = test.makeCvrsFromContests()
         val contestsUA: List<ContestUnderAudit> =
-            test.contests.map { ContestUnderAudit(it).makeComparisonAssertions(cvrs) }
+            test.contests.map { ContestUnderAudit(it).makeClcaAssertions(cvrs) }
         val nassertions = contestsUA.sumOf { it.assertions().size }
         println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
 
         val auditConfig =
-            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1234567890L, fuzzPct = null, ntrials = 10)
+            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1234567890L, ntrials = 10)
         val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
 
         contestsUA.filter { !it.done }.forEach { contestUA ->

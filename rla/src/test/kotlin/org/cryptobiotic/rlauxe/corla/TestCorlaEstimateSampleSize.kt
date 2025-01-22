@@ -34,8 +34,8 @@ class TestCorlaEstimateSampleSize {
 
         contestsUA.forEach { contest ->
             println("contest = ${contest}")
-            contest.makeComparisonAssertions(cvrs)
-            contest.comparisonAssertions.forEach {
+            contest.makeClcaAssertions(cvrs)
+            contest.clcaAssertions.forEach {
                 println("  comparison assertion = ${it}")
             }
         }
@@ -56,7 +56,7 @@ class TestCorlaEstimateSampleSize {
         contestsUA.forEach { contestUA ->
             val cn = contestUA.Nc
             val estSizes = mutableListOf<Int>()
-            val sampleSizes = contestUA.comparisonAssertions.map { assert ->
+            val sampleSizes = contestUA.clcaAssertions.map { assert ->
                 val result = simulateSampleSizeClcaAssorter(auditConfig, contestUA.contest as Contest, assert.cassorter, cvrs)
                 val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.assorter.reportedMargin(), gamma,

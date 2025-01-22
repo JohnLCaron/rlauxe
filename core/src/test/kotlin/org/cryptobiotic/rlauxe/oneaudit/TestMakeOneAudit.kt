@@ -82,7 +82,7 @@ class TestMakeOneAudit {
         val testCvrs = contest.makeTestCvrs()
         val contestOA = contest.makeContestUnderAudit(testCvrs)
 
-        val bassorter = contestOA.minComparisonAssertion()!!.cassorter as OneAuditComparisonAssorter
+        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditComparisonAssorter
         println(bassorter)
         println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${bassorter.clcaMargin} ")
 

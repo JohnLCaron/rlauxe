@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe
 
-import org.cryptobiotic.rlauxe.core.ComparisonAssorter
+import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
@@ -46,6 +46,6 @@ fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
 }
 
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int) =
-    ComparisonAssorter(makeStandardContest(Nc), makeStandardPluralityAssorter(Nc), avgCvrAssortValue, check=false)
+    ClcaAssorter(makeStandardContest(Nc), makeStandardPluralityAssorter(Nc), avgCvrAssortValue, check=false)
 
 

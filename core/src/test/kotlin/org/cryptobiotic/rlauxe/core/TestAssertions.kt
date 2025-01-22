@@ -101,14 +101,14 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = true).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
 
-        val assertions = contestUA.comparisonAssertions
+        val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
-            assertIs<ComparisonAssertion>(it)
-            assertIs<ComparisonAssorter>(it.cassorter)
+            assertIs<ClcaAssertion>(it)
+            assertIs<ClcaAssorter>(it.cassorter)
             assertIs< PluralityAssorter>(it.cassorter.assorter())
             assertEquals(1.0, it.cassorter.assorter().upperBound())
         }
@@ -127,14 +127,14 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = true).makeComparisonAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
 
-        val assertions = contestUA.comparisonAssertions
+        val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
-            assertIs<ComparisonAssertion>(it)
-            assertIs<ComparisonAssorter>(it.cassorter)
+            assertIs<ClcaAssertion>(it)
+            assertIs<ClcaAssorter>(it.cassorter)
             assertIs< SuperMajorityAssorter>(it.cassorter.assorter())
             assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.cassorter.assorter().upperBound())
         }
@@ -156,7 +156,7 @@ class TestAssertions {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         //val exception = assertFailsWith<RuntimeException> {
-            val contestUA = ContestUnderAudit(contest, isComparison = true).makeComparisonAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
         //}
         //println(exception)
         //assertNotNull(exception.message)

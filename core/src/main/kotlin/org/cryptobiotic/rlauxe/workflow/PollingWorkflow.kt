@@ -140,7 +140,7 @@ fun auditPollingAssertion(
         N = contest.Nc,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
-        d = auditConfig.pollingConfig!!.d,
+        d = auditConfig.pollingConfig.d,
         eta0 = eta0,
         minsd = minsd,
         c = c,

@@ -30,9 +30,9 @@ class TestReadRaireAssertions {
         // val cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) } // + phantomCVRs
 
         contestsUA.forEach { contest ->
-            contest.makeComparisonAssertions(cvrs)
+            contest.makeClcaAssertions(cvrs)
         }
-        val cassertions = contestsUA.first().comparisonAssertions
+        val cassertions = contestsUA.first().clcaAssertions
         assertTrue(cassertions.isNotEmpty())
         cassertions.forEach { cassertion ->
             assertTrue(0.5 < margin2mean(cassertion.assorter.reportedMargin()))

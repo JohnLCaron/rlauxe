@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ComparisonFuzzSampler
+import org.cryptobiotic.rlauxe.sampling.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeBetaMart
@@ -14,51 +14,9 @@ import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.PollingConfig
 import org.junit.jupiter.api.Test
 
-class TestComparisonFuzzSampler {
+// TODO make into a test with asserts ?
 
-    @Test
-    fun testFuzzedCvrs() {
-        val ncontests = 1
-        val test = MultiContestTestData(ncontests, 1, 50000)
-        print("contest = ${test.contests.first()}")
-        val cvrs = test.makeCvrsFromContests()
-        val detail = true
-        val ntrials = 1
-        val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
-        fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = makeFuzzedCvrsFrom(test.contests, cvrs, fuzzPct)
-            println(" fuzzPct = $fuzzPct")
-            val avgRates = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
-            test.contests.forEach { contest ->
-                val contestUA = ContestUnderAudit(contest.info, cvrs).makeClcaAssertions(cvrs)
-                val minAssert = contestUA.minClcaAssertion()
-                if (minAssert != null) repeat(ntrials) {
-                    val minAssort = minAssert.cassorter
-                    val samples = PrevSamplesWithRates(minAssort.noerror())
-                    var ccount = 0
-                    var count = 0
-                    fcvrs.forEachIndexed { idx, fcvr ->
-                        if (fcvr.hasContest(contest.id)) {
-                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx]))
-                            ccount++
-                            if (cvrs[idx] != fcvr) count++
-                        }
-                    }
-                    val fuzz = count.toDouble() / ccount
-                    println("$it ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
-                    if (detail) {
-                        println("  errorCounts = ${samples.errorCounts()}")
-                        println("  errorRates =  ${samples.errorRates()}")
-                    }
-                    samples.errorRates()
-                        .forEachIndexed { idx, it -> avgRates[idx] = avgRates[idx] + it / ccount.toDouble() }
-                }
-            }
-            val total = ntrials * ncontests
-            println("  avgRates = ${avgRates.map { it / total }}")
-            println("  error% = ${avgRates.map { it / (total * fuzzPct) }}")
-        }
-    }
+class TestClcaFuzzSampler {
 
     @Test
     fun testComparisonFuzzed() {
@@ -106,7 +64,7 @@ private fun runWithComparisonFuzzSampler(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val assorter = assertion.cassorter
-    val sampler = ComparisonFuzzSampler(clcaConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
+    val sampler = ClcaFuzzSampler(clcaConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,
         withoutReplacement = true,

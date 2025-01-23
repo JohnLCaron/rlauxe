@@ -3,12 +3,12 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
-import org.cryptobiotic.rlauxe.workflow.ClcaSimulationType
 import kotlin.math.min
 import kotlin.math.max
 
@@ -121,15 +121,13 @@ class SimulateSampleSizeTask(
         val moreParameters: Map<String, Double> = emptyMap(),
     ) : ConcurrentTaskG<EstimationResult> {
 
-    val contest = contestUA.contest
-
-    override fun name() = "task ${contest.info.name} ${assertion.assorter.desc()} ${df(assertion.assorter.reportedMargin())}"
+    override fun name() = "task ${contestUA.name} ${assertion.assorter.desc()} ${df(assertion.assorter.reportedMargin())}"
     override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (auditConfig.auditType) {
             AuditType.CARD_COMPARISON ->
                 simulateSampleSizeClcaAssorter(
                     auditConfig,
-                    contest,
+                    contestUA.contest,
                     (assertion as ClcaAssertion).cassorter,
                     cvrs,
                     startingTestStatistic
@@ -137,7 +135,7 @@ class SimulateSampleSizeTask(
             AuditType.POLLING ->
                 simulateSampleSizePollingAssorter(
                     auditConfig,
-                    contest as Contest, // TODO cant use Raire
+                    contestUA.contest as Contest, // TODO cant use Raire
                     assertion.assorter,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -145,8 +143,8 @@ class SimulateSampleSizeTask(
             AuditType.ONEAUDIT ->
                 simulateSampleSizeOneAuditAssorter(
                     auditConfig,
-                    contest,
-                    (assertion as ClcaAssertion).cassorter,
+                    contestUA as OneAuditContestUnderAudit,
+                    (assertion as ClcaAssertion).cassorter as OneAuditComparisonAssorter,
                     cvrs,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -169,58 +167,63 @@ fun simulateSampleSizeClcaAssorter(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
 
-    val sampler = // if (auditConfig.errorRates != null) {
-    //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
-    //} else
-    if (clcaConfig.fuzzPct == null || clcaConfig.fuzzPct == 0.0) {
-        val cvrPairs = cvrs.zip( cvrs)
-        ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=false)
-    // } else if (auditConfig.useGeneratedErrorRates) {
-      //  val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
-      //  ComparisonSimulation(cvrs, contest, cassorter, errorRates)
-    } else {
-        ComparisonFuzzSampler(clcaConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
-    }
-
-    // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros
-    // at the beginning
-    sampler.reset()
-
-    val bettingFn = when (clcaConfig.simType) {
-        ClcaSimulationType.noerror -> {
-            // optimistic, no errors as apriori, but adapts to actual mvrs
-            AdaptiveComparison(
-                Nc = contest.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
-                listOf(0.0, 0.0, 0.0, 0.0)
+    val (sampler: Sampler, bettingFn: BettingFn) = when {
+        clcaConfig.errorRates != null -> {
+            Pair(
+                ClcaSimulation(cvrs, contest, cassorter, clcaConfig.errorRates),
+                AdaptiveComparison(
+                    Nc = contest.Nc,
+                    withoutReplacement = true,
+                    a = cassorter.noerror(),
+                    d1 = clcaConfig.d1,
+                    d2 = clcaConfig.d2,
+                    clcaConfig.errorRates
+                )
             )
         }
-        ClcaSimulationType.oracle, ClcaSimulationType.fuzzPct -> {
-            // adaptive, use known fuzz as apriori, but adapts to actual mvrs
+        clcaConfig.fuzzPct == null || clcaConfig.fuzzPct == 0.0 -> {
+            // this is noerrors
+            Pair(
+                ComparisonWithoutReplacement(
+                    contest,
+                    cvrs.zip(cvrs),
+                    cassorter,
+                    allowReset = true,
+                    trackStratum = false
+                ),
+                AdaptiveComparison(
+                    Nc = contest.Nc,
+                    withoutReplacement = true,
+                    a = cassorter.noerror(),
+                    d1 = clcaConfig.d1,
+                    d2 = clcaConfig.d2,
+                    listOf(0.0, 0.0, 0.0, 0.0)
+                )
+            )
+        }
+        else -> {
             val errorRates = ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
-            AdaptiveComparison(
-                Nc = contest.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
-                errorRates
+            Pair(
+                ClcaFuzzSampler(
+                    clcaConfig.fuzzPct,
+                    cvrs,
+                    contest as Contest, // TODO cant use Raire here
+                    cassorter
+                ),
+                AdaptiveComparison(
+                    Nc = contest.Nc,
+                    withoutReplacement = true,
+                    a = cassorter.noerror(),
+                    d1 = clcaConfig.d1,
+                    d2 = clcaConfig.d2,
+                    errorRates
+                )
             )
         }
-        ClcaSimulationType.apriori ->
-            // adaptive, use previous round errors as apriori, but adapts to actual mvrs
-            AdaptiveComparison(
-                Nc = contest.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
-                clcaConfig.errorRates!!
-            )
     }
+
+    // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros at the beginning
+    sampler.reset()
 
     return simulateSampleSizeBetaMart(
         auditConfig,
@@ -260,7 +263,6 @@ fun simulateSampleSizeBetaMart(
         ntrials = auditConfig.ntrials,
         testFn = testFn,
         testParameters = moreParameters,
-        showDetails = false,
         startingTestStatistic = startingTestStatistic,
         margin = margin,
         Nc = Nc,
@@ -281,7 +283,7 @@ fun simulateSampleSizePollingAssorter(
 ): RunTestRepeatedResult {
     val margin = assorter.reportedMargin()
     val simContest = ContestSimulation(contest)
-    val cvrs = simContest.makeCvrs()
+    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin.
 
     val pollingConfig = auditConfig.pollingConfig
     val sampler = if (pollingConfig.fuzzPct == null || pollingConfig.fuzzPct == 0.0) {
@@ -311,17 +313,13 @@ fun simulateSampleSizeAlphaMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val eta0 = margin2mean(margin)
-    val minsd = 1.0e-6
-    val t = 0.5
-    val c = (eta0 - t) / 2 // TODO
+    val c = (eta0 - 0.5) / 2 // TODO
 
     val estimFn = TruncShrinkage(
         N = Nc,
-        withoutReplacement = true,
         upperBound = upperBound,
         d = auditConfig.pollingConfig.d,
         eta0 = eta0,
-        minsd = minsd,
         c = c,
     )
     val testFn = AlphaMart(
@@ -329,7 +327,6 @@ fun simulateSampleSizeAlphaMart(
         N = Nc,
         upperBound = upperBound,
         riskLimit = auditConfig.riskLimit,
-        withoutReplacement = true
     )
 
     val result: RunTestRepeatedResult = runTestRepeated(
@@ -337,7 +334,6 @@ fun simulateSampleSizeAlphaMart(
         ntrials = auditConfig.ntrials,
         testFn = testFn,
         testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
-        showDetails = false,
         startingTestStatistic = startingTestStatistic,
         margin = margin,
         Nc = Nc,
@@ -350,82 +346,32 @@ fun simulateSampleSizeAlphaMart(
 
 fun simulateSampleSizeOneAuditAssorter(
     auditConfig: AuditConfig,
-    contest: ContestIF,
-    cassorter: ClcaAssorterIF,
+    contestUA: OneAuditContestUnderAudit,
+    cassorter: OneAuditComparisonAssorter,
     cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val cassorterOA = cassorter as OneAuditComparisonAssorter
+    val pollingConfig = auditConfig.pollingConfig
 
-    val sampler = //if (auditConfig.errorRates != null) {
-    //    ComparisonSimulation(cvrs, contest, cassorter, auditConfig.errorRates)
-        //} else
-        if (auditConfig.pollingConfig.fuzzPct == null) {
-            val cvrPairs = cvrs.zip( cvrs)
-            ComparisonWithoutReplacement(contest, cvrPairs, cassorter, allowReset=true, trackStratum=false)
-            // } else if (auditConfig.useGeneratedErrorRates) {
-            //  val errorRates = ComparisonErrorRates.getErrorRates(contest.ncandidates, auditConfig.fuzzPct)
-            //  ComparisonSimulation(cvrs, contest, cassorter, errorRates)
-        } else {
-            ComparisonFuzzSampler(auditConfig.pollingConfig.fuzzPct, cvrs, contest as Contest, cassorter) // TODO cant use Raire here
-        }
+    // TODO is this right, no special processing for the "hasCvr" strata?
+    val sampler = if (pollingConfig.fuzzPct == null) {
+        ComparisonWithoutReplacement(contestUA.contest, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
+    } else {
+        OneAuditFuzzSampler(pollingConfig.fuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
+    }
+
     sampler.reset()
 
-    return simulateSampleSizeOneAudit(
+    return simulateSampleSizeAlphaMart(
         auditConfig,
         sampler,
-        cassorterOA.clcaMargin,
+        cassorter.clcaMargin,
         cassorter.upperBound(),
-        contest.Nc,
+        contestUA.Nc,
         startingTestStatistic,
         moreParameters
     )
-}
-
-fun simulateSampleSizeOneAudit(
-    auditConfig: AuditConfig,
-    sampleFn: Sampler,
-    margin: Double,
-    upperBound: Double,
-    Nc: Int,
-    startingTestStatistic: Double = 1.0,
-    moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
-
-    val eta0 = margin2mean(margin)
-    val minsd = 1.0e-6
-    val t = 0.5
-    val c = (eta0 - t) / 2
-
-    val estimFn = TruncShrinkage(
-        N = Nc,
-        withoutReplacement = true,
-        upperBound = upperBound,
-        d = auditConfig.pollingConfig.d,
-        eta0 = eta0,
-        minsd = minsd,
-        c = c,
-    )
-    val testFn = AlphaMart(
-        estimFn = estimFn,
-        N = Nc,
-        withoutReplacement = true,
-        riskLimit = auditConfig.riskLimit,
-        upperBound = upperBound,
-    )
-
-    val result: RunTestRepeatedResult = runTestRepeated(
-        drawSample = sampleFn,
-        ntrials = auditConfig.ntrials,
-        testFn = testFn,
-        testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
-        showDetails = false,
-        startingTestStatistic = startingTestStatistic,
-        margin = margin,
-        Nc = Nc,
-    )
-    return result
 }
 
 /////////////////////////////////////////////////////////////////////////////////

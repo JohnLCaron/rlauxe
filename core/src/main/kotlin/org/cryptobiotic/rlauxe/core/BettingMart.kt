@@ -4,8 +4,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /**
- * Finds the betting martingale for the hypothesis that the population
- * mean is less than or equal to t,
+ * Finds the betting martingale for the hypothesis that the population mean is less than or equal to t,
  * for a population of size Nc, based on a series of draws x.
  */
 class BettingMart(
@@ -16,7 +15,7 @@ class BettingMart(
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double,  // aka u
 ): RiskTestingFn {
-    private val showDetail = false
+    private val showEachSample = false
 
     init {
         require(riskLimit > 0.0 && riskLimit < 1.0 )
@@ -26,7 +25,7 @@ class BettingMart(
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
     override fun testH0(maxSamples: Int,
                         terminateOnNullReject: Boolean,
-                        showDetails: Boolean,
+                        showSequences: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
         require(maxSamples <= Nc)
@@ -36,18 +35,18 @@ class BettingMart(
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
         val prevSamples = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
 
-        // keep series for debugging, remove for production
+        val bets = mutableListOf<Double>()  // for some tests, could remove in production
+        val pvalues = mutableListOf<Double>()
+
+        // keep sequences for debugging, when showSequences is true
         val xs = mutableListOf<Double>()
         val etas = mutableListOf<Double>()
-        val bets = mutableListOf<Double>()
         val tjs = mutableListOf<Double>()
         val testStatistics = mutableListOf<Double>()
-        val pvalues = mutableListOf<Double>()
 
         while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
-            xs.add(xj)
             require(xj >= 0.0)
             require(xj <= upperBound)
 
@@ -58,7 +57,6 @@ class BettingMart(
             mj = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
             val eta = lamToEta(lamj, mu=mj, upper=upperBound)
             //println(" testH0: lamj=$lamj eta=$eta mean=$mj upperBound=$upperBound round=${lamToEta(lamj, mj, upperBound)}")
-            etas.add(eta)
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
@@ -73,18 +71,20 @@ class BettingMart(
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) { // 2, 3
                 1.0
             } else {
-                // AlphaMart
-                // val ttj = (xj * etaj / mj + (upperBound - xj) * (upperBound - etaj) / (upperBound - mj)) / upperBound // ALPHA eq 4
-
                 // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10
                 val ttj = 1.0 + lamj * (xj - mj) // (1 + λi (Xi − µi )) ALPHA eq 10, SmithRamdas eq 34 (WoR)
                 if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // 4
             }
-            tjs.add(tj)
             testStatistic *= tj // Tj ← Tj-1 & tj
-            testStatistics.add(testStatistic)
 
-            if (showDetail) println("    bet=${df(lamj)} (eta=${df(eta)}) $sampleNumber: $xj tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
+            if (showSequences) {
+                xs.add(xj)
+                etas.add(eta)
+                tjs.add(tj)
+                testStatistics.add(testStatistic)
+            }
+
+            if (showEachSample) println("    bet=${df(lamj)} (eta=${df(eta)}) $sampleNumber: $xj tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
 
             // – S ← S + Xj
             prevSamples.addSample(xj)
@@ -97,7 +97,7 @@ class BettingMart(
             }
         }
 
-        if (showDetails) {
+        if (showSequences) {
             println("xs = ${xs}")
             println("bets = ${bets}")
             println("tjs = ${tjs}")
@@ -109,14 +109,7 @@ class BettingMart(
             (pvalue < riskLimit) -> TestH0Status.StatRejectNull
             (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
             (mj > upperBound) -> TestH0Status.AcceptNull
-            else -> {
-                val xr = xs.reversed() // debugging
-                val retas = etas.reversed()
-                val rbets = bets.reversed()
-                val rtjs = tjs.reversed()
-                val rTjs = testStatistics.reversed()
-                TestH0Status.LimitReached
-            }
+            else -> TestH0Status.LimitReached
         }
 
         return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.errorCounts())

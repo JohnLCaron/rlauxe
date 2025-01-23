@@ -3,9 +3,11 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
+import kotlin.random.Random
 import kotlin.test.Test
 
-class TestComparisonWorkflowNoStyles {
+class TestClcaWorkflow {
+    val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = Random.nextLong(), ntrials=10)
 
     @Test
     fun testComparisonOneContest() {
@@ -19,40 +21,14 @@ class TestComparisonWorkflowNoStyles {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, ntrials=10,
             clcaConfig = ClcaConfig(ClcaSimulationType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
-    }
-
-    @Test
-    fun testComparisonTwoContests() {
-        val N = 100000
-        val ncontests = 2
-        val nbs = 1
-        val marginRange= 0.01 .. 0.01
-        val underVotePct= 0.02 .. 0.12
-        val phantomPct= 0.005
-        val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
-
-        val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, ntrials=10,
-            clcaConfig = ClcaConfig(ClcaSimulationType.apriori, errorRates=errorRates))
-
-        testComparisonWorkflow(auditConfig, testData)
-    }
-
-    // @Test
-    fun noErrorsNoPhantomsRepeat() {
-        repeat(100) {
-            noErrorsNoPhantoms()
-        }
     }
 
     @Test
     fun noErrorsNoPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, ntrials=10)
         val N = 100000
         val ncontests = 11
         val nbs = 4
@@ -65,19 +41,18 @@ class TestComparisonWorkflowNoStyles {
 
     @Test
     fun noErrorsWithPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, ntrials=10)
         val N = 100000
         val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 .. 0.05
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005 .. 0.005
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange=underVotePct, phantomPctRange=phantomPct)
         testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
-    fun p2ErrorsEqualPhantoms() {
+    fun p1ErrorsEqualPhantoms() {
         val N = 100000
         val ncontests = 42
         val nbs = 11
@@ -87,17 +62,17 @@ class TestComparisonWorkflowNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, ntrials=10,
+        val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
             clcaConfig = ClcaConfig(ClcaSimulationType.apriori, errorRates=errorRates))
+
         testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun testComparisonWithFuzz() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, ntrials=10,
-            clcaConfig = ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct = 0.01))
-
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
+            clcaConfig = ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct=0.01))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, testData)
@@ -116,8 +91,6 @@ class TestComparisonWorkflowNoStyles {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.fuzzPct!!)
 
         val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
-        runWorkflow("TestComparisonWorkflowNoStyles", workflow, testMvrs)
+        runWorkflow("testComparisonWorkflow", workflow, testMvrs)
     }
-
 }

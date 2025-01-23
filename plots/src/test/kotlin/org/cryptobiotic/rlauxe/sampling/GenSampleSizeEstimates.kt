@@ -315,7 +315,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
                 // comparison; regen mvrs each repition to smoothe things out
                 contestUA.makeClcaAssertions(cvrs)
                 val minAssort = contestUA.minClcaAssertion()!!.cassorter
-                val sampleFn = ComparisonFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
+                val sampleFn = ClcaFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
 
                 val otherParameters = mapOf("fuzzPct" to fuzzPct)
                 tasks.add(

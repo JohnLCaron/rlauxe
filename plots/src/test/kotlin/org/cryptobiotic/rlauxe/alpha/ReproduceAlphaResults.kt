@@ -140,7 +140,7 @@ class ReproduceAlphaResults {
                     val c = c_base*(eta0 - 0.5) // TODO wtf?
 
                     for (d in dl) {
-                        val trunc = TruncShrinkage(N = N, upperBound = upperBound, minsd = 0.0, d = d, eta0 = eta0, c = c)
+                        val trunc = TruncShrinkage(N = N, upperBound = upperBound, d = d, eta0 = eta0, c = c)
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
 
                         print("  eta0=$eta0 d=$d")

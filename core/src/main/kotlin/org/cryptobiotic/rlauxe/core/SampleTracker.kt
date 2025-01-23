@@ -55,11 +55,18 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
 
-    // these are the rates from the previous samples.
     fun countP1o() = countP1o
     fun countP2o() = countP2o
     fun countP1u() = countP1u
     fun countP2u() = countP2u
+
+    private var countZero = 0
+    private var countHalf = 0
+    private var countOne = 0
+
+    fun countZero() = countZero
+    fun countHalf() = countHalf
+    fun countOne() = countOne
 
     fun addSample(sample : Double) {
         last = sample
@@ -67,13 +74,17 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
         welford.update(sample)
 
         if (isClca) {
-            // or just say which overstatement it is?
             if (doubleIsClose(sample, 0.0)) countP2o++
             else if (doubleIsClose(sample, noerror * 0.5)) countP1o++
             else if (doubleIsClose(sample, noerror)) countP0++
             else if (doubleIsClose(sample, noerror * 1.5)) countP1u++
             else if (doubleIsClose(sample, noerror * 2.0)) countP2u++
-            else println(" mot assigned ${df(sample / noerror)}")
+            else println(" isClca not assigned ${df(sample / noerror)}")
+        } else {
+            if (doubleIsClose(sample, 0.0)) countZero++
+            else if (doubleIsClose(sample, 0.5)) countHalf++
+            else if (doubleIsClose(sample, 1.0)) countOne++
+            else println(" not assigned ${df(sample)}")
         }
     }
 
@@ -81,6 +92,9 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     fun errorRates() = errorCounts().subList(1,5).map {
         it / numberOfSamples().toDouble()  // skip p0
     }
+
+    fun pollCounts() = listOf(countZero,countHalf,countOne)
+    fun pollRates() = pollCounts().map { it / numberOfSamples().toDouble() }
 
 }
 

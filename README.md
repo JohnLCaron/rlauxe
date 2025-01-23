@@ -1,5 +1,5 @@
 # rlauxe
-last update: 01/22/2025
+last update: 01/23/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -22,13 +22,12 @@ Table of Contents
       * [SuperMajority](#supermajority)
       * [IRV](#irv)
     * [Betting martingales](#betting-martingales)
+  * [Audit Types](#audit-types)
     * [Polling audits](#polling-audits)
     * [Comparison audits](#comparison-audits)
       * [Comparison Betting Payoffs](#comparison-betting-payoffs)
-    * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
-    * [Estimating Error](#estimating-error)
-      * [Comparison error rates](#comparison-error-rates)
-      * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
+    * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
+    * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
   * [Sampling](#sampling)
     * [Estimating Sample sizes](#estimating-sample-sizes)
     * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
@@ -36,9 +35,11 @@ Table of Contents
       * [Uniform Sampling](#uniform-sampling)
     * [Comparison audits and CSDs](#comparison-audits-and-csds)
     * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-    * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
-  * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
-    * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
+    * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
+  * [Estimating Error](#estimating-error)
+    * [Comparison error rates](#comparison-error-rates)
+    * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
+  * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
@@ -179,7 +180,6 @@ Notes
 * multiple winners are not yet supported for auditing. TODO is that true ??
 * TODO test when there are no winners.
 
-
 #### IRV
 
 We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions. 
@@ -205,6 +205,9 @@ gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corres
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
 
 See BettingMart.kt and related code for current implementation.
+
+
+## Audit Types
 
 ### Polling audits
 
@@ -284,10 +287,7 @@ and so B is an half-average assorter.
     ωi ≡ A(ci) − A(bi)   overstatementError for ith ballot
     ωi in [-1, -.5, 0, .5, 1] (for plurality assorter, which is in {0, .5, 1}))
   
-    
     We know Āb = Āc − ω̄, so Āb > 1/2 iff ω̄ < Āc − 1/2 iff ω̄/(2*Āc − 1) < 1/2 = ω̄/v < 1/2
-    
-    
     
     scale so that B(0) = (2*Āc − 1)
     
@@ -349,110 +349,193 @@ Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates (see 
 
 See [Ballot Payoff Plots](docs/BettingPayoffs.md) for details.
 
+### Stratified audits using OneAudit
 
-### Polling Vs Comparison Estimated Sample sizes with no errors
+OneAudit is a comparison audit that uses AlphaMart instead of BettingMart. 
 
-This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
-audit at different margins, where the MVRS match the CVRS ("no errors").
+When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
+This is "overstatement-net-equivalent" (aka ONE).
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
+OneAudit, 2.3 pp 5-7:
+````
+      "assorter" here is the plurality assorter
+      from oa_polling.ipynb
+      assorter_mean_all = (whitmer-schuette)/N
+      v = 2*assorter_mean_all-1
+      u_b = 2*u/(2*u-v)  # upper bound on the overstatement assorter
+      noerror = u/(2*u-v)
 
-Polling at margins < 4% needs prohibitively large sample sizes.
-Comparison audits are perhaps useful down to margins = .4% .
+      Let bi denote the true votes on the ith ballot card; there are N cards in all.
+      Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
+      Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
 
-"In a card-level comparison audit, the estimated sample size scales with
-the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
+          Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
+          margin ≡ 2Ā(c) − 1, the _reported assorter margin_
 
-### Estimating Error
+          ωi ≡ A(ci) − A(bi)   overstatementError
+          τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
+          B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
 
-The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
-These rates should be empirically determined, and public tables for different voting machines should be published.
-While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
+         Ng = |G_g|
+         Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng; > 0
+         margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
+         
+         mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
+         mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
+         otherwise = 1/2
+````
 
-If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
-are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
-fetching and interpreting ballots.
+````
+Plurality assort values:
+  assort in {0, .5, 1}
 
-We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4. 
-Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. In both cases, we use
-CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates. This is used 
-when estimating the sample size from the diluted margin, and also when doing the actual audit comparing the CVRs and the MVRs. 
+Regular Comparison:
+  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
+  find B transform to interval [0, u],  where H0 is B < 1/2
+  Bi = (1 - ωi/u) / (2 - v/u)
+  Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
 
+  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
+  
+Batch Comparison:
+  mvr assort in {0, .5, 1} as before
+  cvr assort is always Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
+  overstatementError == A(ci) − A(bi) = Ā(g) - {0, .5, 1} = { Ā(g), Ā(g)-.5, Ā(g)-1} = [loser, nuetral, winner]
+  
+  ωi ≡ A(ci) − A(bi)   overstatementError
+  τi ≡ (1 − ωi /u) = {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u}
+  B(bi, ci) ≡ {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u} / (2 − v/u)
+          
+  mvr has loser vote = (1 - Ā(g)/u) / (2-v/u)
+  mvr has winner vote = (1 - (Ā(g)-1)/u) / (2-v/u)
+  mvr has other vote = (1 - (Ā(g)-.5)/u) / (2-v/u) = 1/2
+  
+  when u = 1
+   mvr has loser vote = (1 - A) / (2-v)
+   mvr has winner vote = (2 - A) / (2-v)
+   mvr has other vote = (1.5 - A) / (2-v) 
+  
+  v = 2A-1
+  2-v = 2-(2A-1) = 3-2A = 2*(1.5-A)
+  other = (1.5-A) / (2-v) = (1.5-A)/2*(1.5-A) = 1/2
+  
+  Bi in [ (1 - Ā(g)), .5, (2 - Ā(g))] * noerror(g)
+````
+Using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that give the same assorter
+batch subtotals.
 
-#### Comparison error rates
+````
+    v ≡ 2Ā(c) − 1, the reported _assorter margin_, aka the _diluted margin_.
 
-The comparison error rates are:
+    Ā(b) > 1/2 iff
 
-        val p1: rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: rate of 2-vote understatements; voted for winner, cvr has loser
+    Sum(A(ci) - A(bi)) / N < v / 2   (5)
 
-For IRV, the corresponding descriptions of the errror rates are:
+Following SHANGRLA Section 3.2 define
 
-    NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
-    NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
-    NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
-    NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
-    
-    NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
-    NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
-    NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
-    NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
+    B(bi) ≡ (upper + A(bi) - A(ci)) / (2*upper - v)  in [0, 2*upper/(2*upper - v)] (6)
 
-See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
-with varying p2error rates.
+    and Ā(b) > 1/2 iff B̄(b) > 1/2
 
-See [Comparison Error Rates](docs/ComparisonErrorRates.md) for technical details.
+    see OneAudit section 2.3
+````
+Section 2
+````
+    Ng = |G_g|
+    assorter_mean_poll = (winner total - loser total) / Ng
+    mvr has loser vote = (1-assorter_mean_poll)/(2-v)
+    mvr has winner vote = (2-assorter_mean_poll)/(2-v)
+    otherwise = 1/2
+  
+````
+See "Algorithm for a CLCA using ONE CVRs from batch subtotals" in Section 3.
+````
+This algorithm can be made more efficient statistically and logistically in a variety
+of ways, for instance, by making an affine translation of the data so that the
+minimum possible value is 0 (by subtracting the minimum of the possible over-
+statement assorters across batches and re-scaling so that the null mean is still
+1/2) and by starting with a sample size that is expected to be large enough to
+confirm the contest outcome if the reported results are correct.
+````
 
-#### Estimating Sample sizes and error rates with fuzz
+Section 4: Auditing heterogenous voting systems: When the voting system can report linked CVRs for some but not all cards.
 
-We can also estimate comparison error rates as follows:
+See "Auditing heterogenous voting systems" Section 4 for comparision to SUITE:
+````
+The statistical tests used in RLAs are not affine equivariant because
+they rely on a priori bounds on the assorter values. The original assorter values
+will generally be closer to the endpoints of [0, u] than the transformed values
+are to the endpoints of [0, 2u/(2u − v)]
 
-The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
-and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
-When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
+An affine transformation of the overstatement assorter values can move them back to the endpoints of the support
+constraint by subtracting the minimum possible value then re-scaling so that the
+null mean is 1/2 once again, which reproduces the original assorter.
+````
 
-The first plot below shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
-have greater spread, but on average are not much affected.
+Section 5.2
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
+````
+While CLCA with ONE CVRs is algebraically equivalent to BPA, the perfor-
+mance of a given statistical test will be different for the two formulations.
 
-We use this strategy and run simulations that generate comparison error rates, as a function of number of candidates in the contest.
-(see GenerateComparisonErrorTable.kt):
+Transforming the assorter into an overstatement assorter using the ONEAudit transformation, then testing whether 
+the mean of the resulting population is ≤ 1/2 using the ALPHA test martingale with the
+truncated shrinkage estimator of [22] with d = 10 and η between 0.505 and 0.55
+performed comparably to—but slightly worse than—using ALPHA on the raw
+assorter values for the same d and η, and within 4.8% of the overall performance
+of the best-performing method.
+````
 
-N=100000 ntrials = 1000
-generated 12/01/2024
+"ALPHA on the raw assorter values" I think is regular BPA.
+"Transforming the assorter into an overstatement assorter" is ONEAIDIT I think, but using Alpha instead of Betting?
+This paper came out at the same time as COBRA.
 
-| ncand | r1     | r2     | r3     | r4     |
-|-------|--------|--------|--------|--------|
-| 2     | 0.2535 | 0.2524 | 0.2474 | 0.2480 |
-| 3     | 0.3367 | 0.1673 | 0.3300 | 0.1646 |
-| 4     | 0.3357 | 0.0835 | 0.3282 | 0.0811 |
-| 5     | 0.3363 | 0.0672 | 0.3288 | 0.0651 |
-| 6     | 0.3401 | 0.0575 | 0.3323 | 0.0557 |
-| 7     | 0.3240 | 0.0450 | 0.3158 | 0.0434 |
-| 8     | 0.2886 | 0.0326 | 0.2797 | 0.0314 |
-| 9     | 0.3026 | 0.0318 | 0.2938 | 0.0306 |
-| 10    | 0.2727 | 0.0244 | 0.2624 | 0.0233 |
+If ONEAUDIT is better than current BPA, perhaps can unify all 3 (comparison, polling, oneaudit) into a single workflow??
+The main difference is preparing the contest with strata.
 
-Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
-For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a 
-vote between winner and loser, than switch a vote to/from other.
-(NOTE: Currently the percentage of ballots with no votes cast for a contest is not well accounted for)
+Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appears if the MVR is missing?
 
-We give the user the option to specify a fuzzPct and use this table for the apriori error rates error rates,
+Unclear about using nostyle with ONEAUDIT.
 
-Possible refinement of this algorithm might measure:
-   1. percent time a mark is seen when its not there
-   2. percent time a mark is not seen when it is there
-   3. percent time a mark is given to the wrong candidate
+### Comparison of AuditTypes' sample sizes
+
+These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
+when there are no errors between the MVRs and the CVRs.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
+
+* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
+* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
+* Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
+* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
+
+Plots vs fuzzPct (percent ballots having randomly changed candidate, see [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz),
+with margin fixed at 4%:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.html" rel="AuditsWithErrors NRounds">![AuditsWithErrorsNrounds](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.png)</a>
+
+* clca is much more sensitive to errors than polling or oneaudit.
+
+Varying undervotes percent:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotes Linear">![AuditsWithUndervotesLinear](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLog.html" rel="AuditsWithUndervotes Log">![AuditsWithUndervotesLog](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLog.png)</a>
+
+Varying phantom percent::
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
+
 
 ## Sampling
 
-SHANGRLA provides a very elegant separation between the implementation of risk testing (mostly described
-above) and sampling.
+SHANGRLA provides a very elegant separation between the implementation of risk testing and sampling. Specifically,
+the risk testing function deals only with (the mean of a sequence of) samples values. The sample values are 
+calculated by assorters. The assorters themselves are independent of the risk function.
 
 ### Estimating Sample sizes
 
@@ -477,7 +560,7 @@ Ideally N_c doesnt change, so it just makes less evil zombies.
 
 Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
 This step is highly dependent on how much we know about which ballots contain which contests. In particular,
-whether you have Card Style Data (CSD), (see MoreStyle, p2).
+whether you have Card Style Data (CSD), (see MoreStyle, p.2)
 
 For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
 If it does not record contests with no votes, I think we have to use uniform sampling instead of consistent sampling.
@@ -574,8 +657,105 @@ since it depends on N/Nc scaling.
 
 See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
 
+### Polling Vs Comparison Estimated Sample sizes with no errors
 
-### Missing Ballots (aka phantoms-to-evil zombies)
+This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
+audit at different margins, where the MVRS match the CVRS ("no errors").
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
+
+Polling at margins < 4% needs prohibitively large sample sizes.
+Comparison audits are perhaps useful down to margins = .4% .
+
+"In a card-level comparison audit, the estimated sample size scales with
+the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
+
+## Estimating Error
+
+The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+These rates should be empirically determined, and public tables for different voting machines should be published.
+While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
+
+If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
+are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
+fetching and interpreting ballots.
+
+We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4.
+Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. In both cases, we use
+CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates. This is used
+when estimating the sample size from the diluted margin, and also when doing the actual audit comparing the CVRs and the MVRs.
+
+### Comparison error rates
+
+The comparison error rates are:
+
+        val p1: rate of 1-vote overstatements; voted for other, cvr has winner
+        val p2: rate of 2-vote overstatements; voted for loser, cvr has winner
+        val p3: rate of 1-vote understatements; voted for winner, cvr has other
+        val p4: rate of 2-vote understatements; voted for winner, cvr has loser
+
+For IRV, the corresponding descriptions of the errror rates are:
+
+    NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
+    NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
+    NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
+    NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
+    
+    NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
+    NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
+    NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
+    NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
+
+See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
+with varying p2error rates.
+
+See [Comparison Error Rates](docs/ComparisonErrorRates.md) for technical details.
+
+### Estimating Sample sizes and error rates with fuzz
+
+We can also estimate comparison error rates as follows:
+
+The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
+and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
+When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
+
+The first plot below shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
+have greater spread, but on average are not much affected.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
+
+We use this strategy and run simulations that generate comparison error rates, as a function of number of candidates in the contest.
+(see GenerateComparisonErrorTable.kt):
+
+N=100000 ntrials = 1000
+generated 12/01/2024
+
+| ncand | r1     | r2     | r3     | r4     |
+|-------|--------|--------|--------|--------|
+| 2     | 0.2535 | 0.2524 | 0.2474 | 0.2480 |
+| 3     | 0.3367 | 0.1673 | 0.3300 | 0.1646 |
+| 4     | 0.3357 | 0.0835 | 0.3282 | 0.0811 |
+| 5     | 0.3363 | 0.0672 | 0.3288 | 0.0651 |
+| 6     | 0.3401 | 0.0575 | 0.3323 | 0.0557 |
+| 7     | 0.3240 | 0.0450 | 0.3158 | 0.0434 |
+| 8     | 0.2886 | 0.0326 | 0.2797 | 0.0314 |
+| 9     | 0.3026 | 0.0318 | 0.2938 | 0.0306 |
+| 10    | 0.2727 | 0.0244 | 0.2624 | 0.0233 |
+
+Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
+For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a
+vote between winner and loser, than switch a vote to/from other.
+(NOTE: Currently the percentage of ballots with no votes cast for a contest is not well accounted for)
+
+We give the user the option to specify a fuzzPct and use this table for the apriori error rates error rates,
+
+Possible refinement of this algorithm might measure:
+1. percent time a mark is seen when its not there
+2. percent time a mark is not seen when it is there
+3. percent time a mark is given to the wrong candidate
+
+## Missing Ballots (aka phantoms-to-evil zombies)
 
 From P2Z paper:
 
@@ -675,187 +855,6 @@ From OneAudit, p 9:
 
 1 - 5218/5294 = .0143
 1 - 22082/22372 = .0129
-
-## Stratified audits using OneAudit
-
-When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
-This is "overstatement-net-equivalent" (aka ONE).
-
-OneAudit, 2.3 pp 5-7:
-````
-      "assorter" here is the plurality assorter
-      from oa_polling.ipynb
-      assorter_mean_all = (whitmer-schuette)/N
-      v = 2*assorter_mean_all-1
-      u_b = 2*u/(2*u-v)  # upper bound on the overstatement assorter
-      noerror = u/(2*u-v)
-
-      Let bi denote the true votes on the ith ballot card; there are N cards in all.
-      Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
-      Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
-
-          Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-          margin ≡ 2Ā(c) − 1, the _reported assorter margin_
-
-          ωi ≡ A(ci) − A(bi)   overstatementError
-          τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-          B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
-
-         Ng = |G_g|
-         Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng; > 0
-         margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
-         
-         mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
-         mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
-         otherwise = 1/2
-````
-
-````
-Plurality assort values:
-  assort in {0, .5, 1}
-
-Regular Comparison:
-  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
-  find B transform to interval [0, u],  where H0 is B < 1/2
-  Bi = (1 - ωi/u) / (2 - v/u)
-  Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
-
-  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
-  
-Batch Comparison:
-  mvr assort in {0, .5, 1} as before
-  cvr assort is always Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
-  overstatementError == A(ci) − A(bi) = Ā(g) - {0, .5, 1} = { Ā(g), Ā(g)-.5, Ā(g)-1} = [loser, nuetral, winner]
-  
-  ωi ≡ A(ci) − A(bi)   overstatementError
-  τi ≡ (1 − ωi /u) = {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u}
-  B(bi, ci) ≡ {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u} / (2 − v/u)
-          
-  mvr has loser vote = (1 - Ā(g)/u) / (2-v/u)
-  mvr has winner vote = (1 - (Ā(g)-1)/u) / (2-v/u)
-  mvr has other vote = (1 - (Ā(g)-.5)/u) / (2-v/u) = 1/2
-  
-  when u = 1
-   mvr has loser vote = (1 - A) / (2-v)
-   mvr has winner vote = (2 - A) / (2-v)
-   mvr has other vote = (1.5 - A) / (2-v) 
-  
-  v = 2A-1
-  2-v = 2-(2A-1) = 3-2A = 2*(1.5-A)
-  other = (1.5-A) / (2-v) = (1.5-A)/2*(1.5-A) = 1/2
-  
-  Bi in [ (1 - Ā(g)), .5, (2 - Ā(g))] * noerror(g)
-````
-
-
-Using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that give the same assorter 
-batch subtotals.
-
-````
-    v ≡ 2Ā(c) − 1, the reported _assorter margin_, aka the _diluted margin_.
-
-    Ā(b) > 1/2 iff
-
-    Sum(A(ci) - A(bi)) / N < v / 2   (5)
-
-Following SHANGRLA Section 3.2 define
-
-    B(bi) ≡ (upper + A(bi) - A(ci)) / (2*upper - v)  in [0, 2*upper/(2*upper - v)] (6)
-
-    and Ā(b) > 1/2 iff B̄(b) > 1/2
-
-    see OneAudit section 2.3
-````
-Section 2
-````
-    Ng = |G_g|
-    assorter_mean_poll = (winner total - loser total) / Ng
-    mvr has loser vote = (1-assorter_mean_poll)/(2-v)
-    mvr has winner vote = (2-assorter_mean_poll)/(2-v)
-    otherwise = 1/2
-  
-````
-See "Algorithm for a CLCA using ONE CVRs from batch subtotals" in Section 3.
-````
-This algorithm can be made more efficient statistically and logistically in a variety
-of ways, for instance, by making an affine translation of the data so that the
-minimum possible value is 0 (by subtracting the minimum of the possible over-
-statement assorters across batches and re-scaling so that the null mean is still
-1/2) and by starting with a sample size that is expected to be large enough to
-confirm the contest outcome if the reported results are correct.
-````
-
-Section 4: Auditing heterogenous voting systems: When the voting system can report linked CVRs for some but not all cards.
-
-See "Auditing heterogenous voting systems" Section 4 for comparision to SUITE:
-````
-The statistical tests used in RLAs are not affine equivariant because
-they rely on a priori bounds on the assorter values. The original assorter values
-will generally be closer to the endpoints of [0, u] than the transformed values
-are to the endpoints of [0, 2u/(2u − v)]
-
-An affine transformation of the overstatement assorter values can move them back to the endpoints of the support
-constraint by subtracting the minimum possible value then re-scaling so that the
-null mean is 1/2 once again, which reproduces the original assorter.
-````
-
-Section 5.2
-
-````
-While CLCA with ONE CVRs is algebraically equivalent to BPA, the perfor-
-mance of a given statistical test will be different for the two formulations.
-
-Transforming the assorter into an overstatement assorter using the ONEAudit transformation, then testing whether 
-the mean of the resulting population is ≤ 1/2 using the ALPHA test martingale with the
-truncated shrinkage estimator of [22] with d = 10 and η between 0.505 and 0.55
-performed comparably to—but slightly worse than—using ALPHA on the raw
-assorter values for the same d and η, and within 4.8% of the overall performance
-of the best-performing method.
-````
-
-"ALPHA on the raw assorter values" I think is regular BPA.
-"Transforming the assorter into an overstatement assorter" is ONEAIDIT I think, but using Alpha instead of Betting? 
-This paper came out at the same time as COBRA.
-
-If ONEAUDIT is better than current BPA, perhaps can unify all 3 (comparison, polling, oneaudit) into a single workflow??
-The main difference is preparing the contest with strata.
-
-Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appears if the MVR is missing?
-
-Unclear about using nostyle with ONEAUDIT.
-
-### Comparison of AuditTypes' sample sizes
-
-These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
-when there are no errors between the MVRs and the CVRs.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
-
-* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
-* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
-* Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
-* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
-* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs. 
-
-Plots vs fuzzPct (percent ballots having randomly changed candidate, see [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz),
-with margin fixed at 4%:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.html" rel="AuditsWithErrors NRounds">![AuditsWithErrorsNrounds](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.png)</a>
-
-* clca is much more sensitive to errors than polling or oneaudit.
-
-Varying undervotes percent:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotes Linear">![AuditsWithUndervotesLinear](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLog.html" rel="AuditsWithUndervotes Log">![AuditsWithUndervotesLog](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLog.png)</a>
-
-Varying phantom percent::
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
 
 
 ## Differences with SHANGRLA

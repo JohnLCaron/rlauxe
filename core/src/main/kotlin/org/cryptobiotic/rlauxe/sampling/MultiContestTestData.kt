@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.sampling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Ballot
+import org.cryptobiotic.rlauxe.workflow.BallotManifest
 import org.cryptobiotic.rlauxe.workflow.BallotStyle
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -93,7 +94,7 @@ data class MultiContestTestData(
     }
 
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeBallotsForPolling(hasStyle: Boolean): List<Ballot> {
+    fun makeBallotManifest(hasStyle: Boolean): BallotManifest {
         val ballots = mutableListOf<Ballot>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->
@@ -106,7 +107,7 @@ data class MultiContestTestData(
         // add phantoms
         val ncardsByContest = fcontests.associate { Pair(it.contestId, it.ncards) }
         val phantoms = makePhantomBallots(contests, ncardsByContest)
-        return ballots + phantoms
+        return BallotManifest(ballots + phantoms, ballotStyles)
     }
 
     // create new partitions each time this is called

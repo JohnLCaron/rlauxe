@@ -33,11 +33,9 @@ class TestCorla {
 
         val corlaResult = runTestRepeated(
             drawSample = sampler,
-            // maxSamples = N,
             ntrials = ntrials,
             testFn = corla,
             testParameters = mapOf("p1" to p1, "p2" to p2),
-            showDetails = false,
             margin = margin,
             Nc=N,
             )
@@ -88,11 +86,9 @@ class TestCorla {
 
                         val bettingResult = runTestRepeated(
                             drawSample = sampler,
-                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),
-                            showDetails = false,
                             margin = margin,
                             Nc=N,
                         )
@@ -103,11 +99,9 @@ class TestCorla {
 
                         val corlaResult = runTestRepeated(
                             drawSample = sampler,
-                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = corla,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),
-                            showDetails = false,
                             margin = margin,
                             Nc=N,
                             )

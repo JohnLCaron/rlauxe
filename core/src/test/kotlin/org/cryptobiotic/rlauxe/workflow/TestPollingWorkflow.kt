@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -34,10 +33,10 @@ class TestPollingWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests()
-        val ballots = test.makeBallotsForPolling(auditConfig.hasStyles)
+        val ballotManifest = test.makeBallotManifest(auditConfig.hasStyles)
 
         val testMvrs = testCvrs
-        val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, emptyList()), N)
+        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, N)
         runWorkflow("testPollingNoStyle", workflow, testMvrs)
     }
 
@@ -72,13 +71,13 @@ class TestPollingWorkflow {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
         println()
-        val ballots = test.makeBallotsForPolling(auditConfig.hasStyles)
+        val ballotManifest = test.makeBallotManifest(auditConfig.hasStyles)
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
         val testMvrs = testCvrs
 
-        val workflow = PollingWorkflow(auditConfig, contests, BallotManifest(ballots, test.ballotStyles), N)
+        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, N)
         runWorkflow("testPollingWithStyle", workflow, testMvrs)
     }
 
@@ -103,11 +102,11 @@ class TestPollingWorkflow {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val ballots = test.makeBallotsForPolling(true)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
+        val ballotManifest = test.makeBallotManifest(auditConfig.hasStyles)
         val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
-        val workflow = PollingWorkflow(auditConfig, test.contests, BallotManifest(ballots, test.ballotStyles), N)
+        val workflow = PollingWorkflow(auditConfig, test.contests, ballotManifest, N)
 
         runWorkflow("testPollingOneContest", workflow, testCvrs)
     }

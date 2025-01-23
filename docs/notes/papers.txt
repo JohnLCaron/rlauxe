@@ -85,9 +85,6 @@ RLA papers
 2024	Efficient Weighting Schemes for Auditing Instant-Runoff Voting Elections	Ek, Stark, Stuckey, Vukcevic	6 May 2024
 	more advanced stuff on AWAIRE
 	
-2024 	DVSorder: Ballot Randomization Flaws Threaten Voter Privacy	Braden L. Crimmins, Dhanya Y. Narayanan, Drew Springall,  J. Alex Halderman
-	privacy flaw that affects Dominion Voting Systems (DVS) ImageCast Precinct (ICP) and ImageCast Evolution (ICE) ballot scanners,
-	
 2024	Sequential stratified inference for the mean		Jacob V. Spertus, Mayuri Sridhar, Philip B. Stark		September 11, 2024
 	https://github.com/spertus/UI-NNSMs
 
@@ -109,6 +106,9 @@ Related
 	an efficient procedure for sampling representatives from a weighted set
 
 2018	Consistent Sampling with Replacement				Rivest
+
+2024 	DVSorder: Ballot Randomization Flaws Threaten Voter Privacy	Braden L. Crimmins, Dhanya Y. Narayanan, Drew Springall,  J. Alex Halderman
+	privacy flaw that affects Dominion Voting Systems (DVS) ImageCast Precinct (ICP) and ImageCast Evolution (ICE) ballot scanners,
 
 ==================================================
 

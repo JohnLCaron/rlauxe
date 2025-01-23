@@ -289,7 +289,7 @@ fun runClcaAssertionAudit(
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
         ClcaSimulationType.noerror -> {
-            // optimistic, no errors as apriori, but adapts to actual mvrs
+            // optimistic, no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
@@ -300,7 +300,7 @@ fun runClcaAssertionAudit(
             )
         }
         ClcaSimulationType.fuzzPct -> {
-            // adaptive, use known fuzz as apriori, but adapts to actual mvrs
+            // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
             val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct)
             AdaptiveComparison(
                 Nc = contestUA.Nc,
@@ -312,7 +312,7 @@ fun runClcaAssertionAudit(
             )
         }
      ClcaSimulationType.apriori ->
-        // adaptive, use given errors as apriori, but adapts to actual mvrs. TODO does this make sense? not assertion specific
+        // use given errors as apriori, then adapt to actual mvrs.
         AdaptiveComparison(
             Nc = contestUA.Nc,
             withoutReplacement = true,

@@ -24,7 +24,7 @@ data class Cvr(
     // Is there exactly one vote in the contest among the given candidates?
     fun hasOneVote(contestId: Int, candidates: List<Int>): Boolean {
         val contestVotes = this.votes[contestId] ?: return false
-        val totalVotes = contestVotes.filter{ candidates.contains(it) }.count()
+        val totalVotes = contestVotes.count { candidates.contains(it) }
         return (totalVotes == 1)
     }
 
@@ -62,7 +62,7 @@ data class Cvr(
 
 /** Mutable version of Cvr. sampleNum >= 0  */
 data class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCard {
-    var sampled = false //  # is this CVR in the sample?
+    var sampled = false // is this CVR in the sample?
 
     val id = cvr.id
     val votes = cvr.votes

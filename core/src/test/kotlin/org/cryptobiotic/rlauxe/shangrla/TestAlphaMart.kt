@@ -108,7 +108,7 @@ class TestAlphaMart {
         assertEquals(alpha2.sampleMean, 0.42857142857142855, doublePrecision)
     }
 
-    @Test
+    // @Test not supporting f1
     fun test_shrink_trunk_f1() {
         val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 )
         val eta0 = .51
@@ -116,13 +116,11 @@ class TestAlphaMart {
         println("test_shrink_trunk_f1 $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val f = 0.5
-        val minsd = 1.0e-6
         val t= 0.5
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val sampler = SampleFromArray(x.toDoubleArray())
 
@@ -141,7 +139,7 @@ class TestAlphaMart {
         assertEquals(result.sampleMean, 0.5714285714285714)
     }
 
-    @Test
+    // @Test not supporting f1
     fun test_shrink_trunk_f1_wreplacement() {
         val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 )
         val eta0 = .51
@@ -149,8 +147,6 @@ class TestAlphaMart {
         println("test_shrink_trunk_f1 $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val f = 0.5
-        val minsd = 1.0e-6
         val t= 0.5
         val c = (eta0 - t) / 2
         val N = x.size
@@ -159,10 +155,8 @@ class TestAlphaMart {
             N = N,
             withoutReplacement = false,
             upperBound = u,
-            minsd = minsd,
             d = d,
             eta0 = eta0,
-            f = f,
             c = c
         )
         val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
@@ -222,13 +216,11 @@ class TestAlphaMart {
         // println("testAlphaMartWithTermination $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val f = 0.0
-        val minsd = 1.0e-6
         val t = 0.5
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
         val sampler = SampleFromArray(x.toDoubleArray())
@@ -239,13 +231,11 @@ class TestAlphaMart {
         println("testAlphaMartBatch $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val f = 0.0
-        val minsd = 1.0e-6
         val t = 0.5
         val c = max(eps, (eta0 - t) / 2)
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, f = f, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
         val sampler = SampleFromArray(x.toDoubleArray())

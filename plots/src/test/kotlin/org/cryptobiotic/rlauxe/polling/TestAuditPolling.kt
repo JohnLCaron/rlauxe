@@ -45,8 +45,6 @@ class TestAuditPolling {
         val assorter = contestUA.pollingAssertions.first().assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val ballots = test.makeBallotsForPolling(true)
-
         val cvrSampler = PollWithoutReplacement(contestUA.contest as Contest, cvrs, assorter)
 
         val d = 100

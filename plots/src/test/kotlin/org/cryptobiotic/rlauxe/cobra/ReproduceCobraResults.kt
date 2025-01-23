@@ -260,7 +260,6 @@ class ReproduceCobraResults {
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o),
-                            showDetails = false,
                             margin = margin,
                             Nc=N,
                             )

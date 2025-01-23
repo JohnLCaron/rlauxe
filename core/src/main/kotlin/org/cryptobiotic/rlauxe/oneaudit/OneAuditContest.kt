@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.mergeReduce
 import kotlin.math.min
 
 class OneAuditContest (
@@ -146,9 +147,6 @@ class OneAuditStratum (
     }
 }
 
-fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
-    others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 class OneAuditContestUnderAudit(
@@ -247,7 +245,7 @@ data class OneAuditComparisonAssorter(
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
-        val stratumInfo = stratumInfos[cvr.id]
+        val stratumInfo = stratumInfos[cvr.id] // TODO cant rely on cvr ids ??
         if (stratumInfo == null) {
             if (cvrStrata != null) {
                 return cvrStrata!!.cassorter!!.bassort(mvr, cvr)

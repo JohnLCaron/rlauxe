@@ -75,3 +75,9 @@ inline fun <reified T : Enum<T>> safeEnumValueOf(name: String?): T? {
     }
 }
 
+fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
+    others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
+
+fun MutableMap<String, Int>.mergeReduceS(others: List<Map<String, Int>>) =
+    others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
+

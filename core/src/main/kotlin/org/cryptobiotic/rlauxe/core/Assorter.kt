@@ -231,12 +231,11 @@ open class Assertion(
     val winner = assorter.winner()
     val loser = assorter.loser()
 
-    val roundResults = mutableListOf<AuditRoundResult>()
-
     // these values are set during estimateSampleSizes()
     var estSampleSize = 0   // estimated sample size for current round
 
     // these values are set during runAudit()
+    val roundResults = mutableListOf<AuditRoundResult>()
     var status = TestH0Status.InProgress
     var proved = false
     var round = 0           // round when set to proved or disproved

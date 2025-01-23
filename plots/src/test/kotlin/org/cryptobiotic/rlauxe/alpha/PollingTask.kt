@@ -36,13 +36,12 @@ data class PollingTask(
             AlphaMart(estimFn = FixedEstimFn(cvrMean), N = N)
         } else {
             val t = 0.5
-            val minsd = 1.0e-6
             eta0 = cvrMean
             val c = max(eps, ((eta0 - t) / 2))
 
             val useEstimFn = TruncShrinkage(
                 N, withoutReplacement = withoutReplacement, upperBound = pollingAssorter.upperBound(),
-                minsd = minsd, d = d, eta0 = eta0, c = c
+                d = d, eta0 = eta0, c = c
             )
             AlphaMart(
                 estimFn = useEstimFn,

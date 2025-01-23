@@ -25,7 +25,6 @@ fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quie
     var done = false
     while (!done) {
         val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
-        // if (roundIdx == 1 && indices.size > 0) println(" $name: first index is ${indices[0]}")
 
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
@@ -55,7 +54,6 @@ data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamp
     init {
         newSamples = sampledIndices.count { it !in previousSamples }
     }
-
     override fun toString(): String {
         return "Round(round=$round, newSamples=$newSamples)"
     }

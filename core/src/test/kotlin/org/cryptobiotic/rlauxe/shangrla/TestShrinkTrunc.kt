@@ -44,12 +44,11 @@ class TestShrinkTrunc {
         val t = .5
         val u = 1.0
         val d = 10
-        val minsd = 1.0e-6
         val eta0 = .51
         val c = (eta0 - t) / 2
 
         val N = x.size
-        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
         val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
         x.forEach {
@@ -80,11 +79,10 @@ class TestShrinkTrunc {
         val t = .5
         val u = 1.0
         val d = 10
-        val minsd = 1.0e-6
         val c = (eta0 - t) / 2
 
         val N = x.size
-        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
         val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
         x.forEach {
@@ -104,12 +102,11 @@ class TestShrinkTrunc {
         println("test_shrink_trunc_problem $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val minsd = 1.0e-6
         val t= 0.5
         val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, minsd = minsd, d = d, eta0 = eta0, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
 
         val assortValues = PrevSamples()
         val etaValues = mutableListOf<Double>()
@@ -137,7 +134,6 @@ class TestShrinkTrunc {
         println("test_leading_zeros_wreplace $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val minsd = 1.0e-6
         val t= 0.5
         val c = (eta0 - t) / 2
         val N = x.size
@@ -146,7 +142,6 @@ class TestShrinkTrunc {
             N = N,
             withoutReplacement = false,
             upperBound = u,
-            minsd = minsd,
             d = d,
             eta0 = eta0,
             c = c

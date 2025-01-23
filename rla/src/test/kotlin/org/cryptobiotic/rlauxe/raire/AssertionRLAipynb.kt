@@ -638,7 +638,7 @@ fun replicate_p_values(
     )
 
     val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
-    val result = betta.testH0(sample_size, true, showDetails = false) { sampler.sample() }
+    val result = betta.testH0(sample_size, true) { sampler.sample() }
     println(result)
     println("pvalues = ${result.pvalues}")
 }
@@ -689,7 +689,6 @@ fun calc_sample_sizes(
         ntrials = ntrials,
         testFn = betta,
         testParameters = mapOf("p2o" to optimal.p2o),
-        showDetails = false,
         margin = minAssorter.assorter().reportedMargin(),
         Nc = N,
     )

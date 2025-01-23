@@ -35,7 +35,7 @@ interface RiskTestingFn {
     fun testH0(
         maxSamples: Int,
         terminateOnNullReject: Boolean,
-        showDetails: Boolean = false,
+        showSequences: Boolean = false,
         startingTestStatistic: Double = 1.0,
         drawSample: () -> Double,
     ): TestH0Result

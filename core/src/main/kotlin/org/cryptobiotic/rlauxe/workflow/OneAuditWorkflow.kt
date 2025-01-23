@@ -131,17 +131,15 @@ fun runOneAuditAssertionAlpha(
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassertion.cassorter, allowReset = false, trackStratum = false)
 
     val eta0 = margin2mean(assorter.clcaMargin)
-    val minsd = 1.0e-6
-    val t = 0.5
-    val c = (eta0 - t) / 2
+    val c = (eta0 - 0.5) / 2
 
+    // TODO is this right, no special processing for the "hasCvr" strata?
     val estimFn = TruncShrinkage(
         N = contestUA.Nc,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
         d = auditConfig.pollingConfig.d,
         eta0 = eta0,
-        minsd = minsd,
         c = c,
     )
     val testFn = AlphaMart(

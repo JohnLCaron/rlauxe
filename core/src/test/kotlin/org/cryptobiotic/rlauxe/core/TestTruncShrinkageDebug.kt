@@ -34,7 +34,6 @@ class TestTruncShrinkageDebug {
             N = N,
             withoutReplacement = true,
             upperBound = 1.0,
-            minsd = 1.0e-6,
             d = d,
             eta0 = eta0,
             c = c
@@ -66,11 +65,9 @@ class TruncShrinkageDebug(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
-    val minsd: Double,
     val eta0: Double,
     val c: Double,
     val d: Int,
-    val f: Double = 0.0,
 ) {
     val capAbove = upperBound * (1 - eps)
     val wterm = d * eta0

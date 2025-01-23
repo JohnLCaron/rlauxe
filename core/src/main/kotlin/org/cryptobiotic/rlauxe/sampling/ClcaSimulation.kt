@@ -12,7 +12,7 @@ private val show = true
 class ClcaSimulation(
     rcvrs: List<Cvr>,
     val contest: ContestIF,
-    val cassorter: ClcaAssorter,
+    val cassorter: ClcaAssorterIF,
     errorRates: List<Double>,
     ): Sampler {
     val p1: Double = errorRates[0] // rate of 1-vote overstatements; voted for other, cvr has winner
@@ -96,34 +96,34 @@ class ClcaSimulation(
     fun flip2votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
-        val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val startingAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         var changed = 0
 
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx] // this is the cvr
-            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
-                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter.loser())
-                            else mapOf(contest.id to intArrayOf(cassorter.assorter.loser()))
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 1.0) {
+                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().loser())
+                            else mapOf(contest.id to intArrayOf(cassorter.assorter().loser()))
 
                 val alteredMvr = makeNewCvr(cvr, votes) // this is the altered mvr
                 mcvrs[cardIdx] = alteredMvr
-                if (show && cassorter.assorter.assort(alteredMvr) != 0.0) {
-                    println("  flip2votes ${cassorter.assorter.assort(alteredMvr)} != 0.0")
+                if (show && cassorter.assorter().assort(alteredMvr) != 0.0) {
+                    println("  flip2votes ${cassorter.assorter().assort(alteredMvr)} != 0.0")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
                 }
-                require(cassorter.assorter.assort(alteredMvr) == 0.0)
+                require(cassorter.assorter().assort(alteredMvr) == 0.0)
                 val bassort = cassorter.bassort(alteredMvr, cvr) // mvr, cvr
-                if (bassort != 0.0 * cassorter.noerror) { // p1
+                if (bassort != 0.0 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr)
                 }
-                require(cassorter.bassort(alteredMvr, cvr) == 0.0 * cassorter.noerror)
+                require(cassorter.bassort(alteredMvr, cvr) == 0.0 * cassorter.noerror())
                 changed++
             }
             cardIdx++
         }
-        val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip2votes could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
@@ -136,34 +136,34 @@ class ClcaSimulation(
     fun flip4votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
-        val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.0 }.count()
+        val startingAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.0 }.count()
         var changed = 0
 
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.0) {
-                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter.winner())
-                            else mapOf(contest.id to intArrayOf(cassorter.assorter.winner()))
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 0.0) {
+                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().winner())
+                            else mapOf(contest.id to intArrayOf(cassorter.assorter().winner()))
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
-                if (show && cassorter.assorter.assort(alteredMvr) != 1.0) {
-                    println("  flip4votes ${cassorter.assorter.assort(alteredMvr)} != 1.0")
+                if (show && cassorter.assorter().assort(alteredMvr) != 1.0) {
+                    println("  flip4votes ${cassorter.assorter().assort(alteredMvr)} != 1.0")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
                 }
-                require(cassorter.assorter.assort(alteredMvr) == 1.0)
+                require(cassorter.assorter().assort(alteredMvr) == 1.0)
                 val bassort = cassorter.bassort(alteredMvr, cvr)
-                if (bassort != 2.0 * cassorter.noerror) { // p1
+                if (bassort != 2.0 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr) // mvr, cvr
                 }
-                require(cassorter.bassort(alteredMvr, cvr) == 2.0 * cassorter.noerror)
+                require(cassorter.bassort(alteredMvr, cvr) == 2.0 * cassorter.noerror())
                 changed++
             }
             cardIdx++
         }
 
-        val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.0 }.count()
+        val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip4votes could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
@@ -179,30 +179,30 @@ class ClcaSimulation(
         var changed = 0
 
         // we need winner -> other vote, needToChangeVotesFromA > 0
-        val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val startingAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 1.0) {
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 1.0) {
                 val votes = emptyList(cvr.votes, contest.id)
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
-                if (show && cassorter.assorter.assort(alteredMvr) != 0.5) {
-                    println("  flip1votes ${cassorter.assorter.assort(alteredMvr)} != 0.5")
+                if (show && cassorter.assorter().assort(alteredMvr) != 0.5) {
+                    println("  flip1votes ${cassorter.assorter().assort(alteredMvr)} != 0.5")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
                 }
-                require(cassorter.assorter.assort(alteredMvr) == 0.5)
+                require(cassorter.assorter().assort(alteredMvr) == 0.5)
                 val bassort = cassorter.bassort(alteredMvr, cvr)
-                if (bassort != 0.5 * cassorter.noerror) { // p1
+                if (bassort != 0.5 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr)
                 }
-                require(cassorter.bassort(alteredMvr, cvr) == 0.5 * cassorter.noerror)
+                require(cassorter.bassort(alteredMvr, cvr) == 0.5 * cassorter.noerror())
                 changed++
             }
             cardIdx++
         }
-        val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip1votes could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
@@ -218,25 +218,25 @@ class ClcaSimulation(
         val ncards = mcvrs.size
         var changed = 0
 
-        val startingAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.5 }.count()
+        val startingAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.5 }.count()
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
-            if (!usedCvrs.contains(cvr.id) && cassorter.assorter.assort(cvr) == 0.5) {
-                val votes = moveToFront(cvr.votes, contest.id, cassorter.assorter.winner())
+            if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 0.5) {
+                val votes = moveToFront(cvr.votes, contest.id, cassorter.assorter().winner())
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
-                require(cassorter.assorter.assort(alteredMvr) == 1.0)
+                require(cassorter.assorter().assort(alteredMvr) == 1.0)
                 val bassort = cassorter.bassort(alteredMvr, cvr)
-                if (bassort != 1.5 * cassorter.noerror) { // p3
+                if (bassort != 1.5 * cassorter.noerror()) { // p3
                     cassorter.bassort(alteredMvr, cvr)
                 }
-                require(cassorter.bassort(alteredMvr, cvr) == 1.5 * cassorter.noerror)
+                require(cassorter.bassort(alteredMvr, cvr) == 1.5 * cassorter.noerror())
                 changed++
             }
             cardIdx++
         }
-        val checkAvotes = mcvrs.filter { cassorter.assorter.assort(it) == 0.5 }.count()
+        val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.5 }.count()
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votes could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
@@ -248,29 +248,29 @@ class ClcaSimulation(
     fun flip3votesP(mcvrs: MutableList<Cvr>, cvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
-        val otherCandidate = max(cassorter.assorter.winner(), cassorter.assorter.loser()) + 1
+        val otherCandidate = max(cassorter.assorter().winner(), cassorter.assorter().loser()) + 1
         var changed = 0
 
-        val startingAvotes = cvrs.filter { cassorter.assorter.assort(it) == 1.0 }.count()
+        val startingAvotes = cvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         var cardIdx = 0
         while (changed < needToChange && cardIdx < ncards) {
             val mvr = mcvrs[cardIdx]
-            if (!usedCvrs.contains(mvr.id) && (mvr.hasMarkFor(contest.id, cassorter.assorter.winner()) == 1)) { // aka cassorter.assorter.assort(it) == 1.0
+            if (!usedCvrs.contains(mvr.id) && (mvr.hasMarkFor(contest.id, cassorter.assorter().winner()) == 1)) { // aka cassorter.assorter().assort(it) == 1.0
                 val votes = mapOf(contest.id to intArrayOf(otherCandidate))
 
                 val alteredCvr = makeNewCvr(mvr, votes)
-                require(cassorter.assorter.assort(alteredCvr) == 0.5)
+                require(cassorter.assorter().assort(alteredCvr) == 0.5)
                 val bassort = cassorter.bassort(mvr, alteredCvr)
-                if (bassort != 1.5 * cassorter.noerror) { // p3
+                if (bassort != 1.5 * cassorter.noerror()) { // p3
                     cassorter.bassort(mvr, alteredCvr)
                 }
-                require(cassorter.bassort(mvr, alteredCvr) == 1.5 * cassorter.noerror)
+                require(cassorter.bassort(mvr, alteredCvr) == 1.5 * cassorter.noerror())
                 cvrs[cardIdx] = alteredCvr // Note we are changing the cvr, not the mvr
                 changed++
             }
             cardIdx++
         }
-        val checkAvotes = cvrs.count { cassorter.assorter.assort(it) == 1.0 }
+        val checkAvotes = cvrs.count { cassorter.assorter().assort(it) == 1.0 }
         if (checkAvotes != startingAvotes - needToChange)
             println("flip3votesP could only flip $changed, wanted $needToChange")
        // require(checkAvotes == startingAvotes - needToChange)

@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.BallotManifest
 import org.cryptobiotic.rlauxe.workflow.BallotUnderAudit
 import kotlin.random.Random
 import kotlin.test.Test
@@ -48,8 +47,7 @@ class TestConsistentSampling {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
         contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
 
-        val ballots = test.makeBallotsForPolling(true)
-        val ballotManifest = BallotManifest(ballots, test.ballotStyles)
+        val ballotManifest = test.makeBallotManifest(true)
 
         val prng = Prng(secureRandom.nextLong())
         val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
@@ -85,11 +83,9 @@ class TestConsistentSampling {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
         contestsUA.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
-        val ballots = test.makeBallotsForPolling(false)
-        // val ballotManifest = BallotManifest(ballots, test.ballotStyles)
-
+        val ballotManifest = test.makeBallotManifest(false)
         val prng = Prng(secureRandom.nextLong())
-        val ballotsUA = ballots.map { BallotUnderAudit(it, prng.next()) }
+        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
 
         //    contests: List<ContestUnderAudit>,
         //    ballots: List<BallotUnderAudit>, // all the ballots available to sample

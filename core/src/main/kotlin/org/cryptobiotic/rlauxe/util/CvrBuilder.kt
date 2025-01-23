@@ -127,7 +127,7 @@ class CvrBuilder(
 
     companion object {
         fun fromCvr(builders: CvrBuilders, cvr: Cvr): CvrBuilder {
-            val cvrb: CvrBuilder = if (cvr.phantom) builders.addPhantomCvr(cvr.id) else builders.addCvr( cvr.id)
+            val cvrb: CvrBuilder = if (cvr.phantom) builders.addPhantomCvr(cvr.id) else builders.addCvr(cvr.id)
             cvr.votes.forEach { contestId, votes ->
                 cvrb.addContest(contestId, votes)
             }

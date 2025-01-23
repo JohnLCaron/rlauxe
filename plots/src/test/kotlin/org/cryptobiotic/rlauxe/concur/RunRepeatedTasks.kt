@@ -89,7 +89,6 @@ class RunRepeatedTasks {
             ntrials = ntrials,
             testFn = task.makeTestFn(),
             testParameters = task.makeTestParameters(),
-            showDetails = false,
             margin = mean2margin(task.reportedMean()),
             Nc=task.N(),
             )

@@ -16,14 +16,11 @@ class TruncShrinkage(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
-    val minsd: Double, // only used if f > 0
     val eta0: Double,
     val c: Double,
     val d: Int,
-    val f: Double = 0.0, // TODO remove?
 ) : EstimFn {
     val capAbove = upperBound * (1 - eps)
-    val wterm = d * eta0  // eta0 given weight of d. eta is weighted average of eta0 and samples
 
     init {
         require(upperBound > 0.0)
@@ -31,7 +28,6 @@ class TruncShrinkage(
         require(eta0 >= 0.5) // ??
         require(c > 0.0)
         require(d >= 0)
-        // println("TruncShrinkage eta0=$eta0 ")
     }
 
     val welford = Welford()
@@ -49,13 +45,7 @@ class TruncShrinkage(
         // (2.5.2, eq 14, "truncated shrinkage")
         // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
         // val est = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        val est = if (f == 0.0) (d * eta0 + sampleSum) / dj1 else {
-            // note stdev not used if f = 0
-            val (_, variance, _) = welford.result()
-            val stdev = sqrt(variance) // stddev of sample
-            val sdj3 = if (lastj < 2) 1.0 else max(stdev, minsd) // LOOK
-            ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
-        }
+        val est = (d * eta0 + sampleSum) / dj1
 
         // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
@@ -71,9 +61,6 @@ class TruncShrinkage(
         //    where ǫi → 0 as the sample size grows.
         //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
         val boundedEst = min(max(capBelow, est), capAbove)
-        val lam = etaToLam(boundedEst, mean, upperBound)
-        val roundtrip = lamToEta(lam, mean, upperBound)
-        // println(" TruncShrinkage: eta=$boundedEst mean=$mean upperBound=$upperBound lam=$lam round=$roundtrip")
         return boundedEst
     }
 }

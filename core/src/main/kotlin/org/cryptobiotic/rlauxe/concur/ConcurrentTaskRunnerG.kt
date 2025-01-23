@@ -23,7 +23,7 @@ interface ConcurrentTaskG<T> {
     fun run() : T
 }
 
-// runs set of ConcurrentTask concurrently, whose run() returns T
+// runs set of ConcurrentTaskG<T> concurrently, whose run() returns T
 class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
     private val mutex = Mutex()
     private val results = mutableListOf<T>()

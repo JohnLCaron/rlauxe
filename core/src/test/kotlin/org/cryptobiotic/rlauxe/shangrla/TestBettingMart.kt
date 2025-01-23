@@ -44,7 +44,7 @@ class TestBettingMart {
                 val betta = BettingMart(bettingFn = FixedBet(lam), noerror=0.0, Nc = N, upperBound = u, withoutReplacement = false)
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+                val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
 
                 // return min(1, 1 / np.max(terms)), np.minimum(1, 1 / terms)
@@ -83,7 +83,7 @@ class TestBettingMart {
                 val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u, withoutReplacement = false)
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+                val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
                 println("   bets=  ${result.bets}")
 
@@ -121,7 +121,7 @@ class TestBettingMart {
                 val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u, withoutReplacement = false)
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+                val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
                 println("   bets=  ${result.bets}")
 
@@ -190,7 +190,7 @@ class TestBettingMart {
         )
         val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u, withoutReplacement = false)
         val sampler = SampleFromList(x)
-        val result = betta.testH0(x.size, false, showDetails = false) { sampler.sample() }
+        val result = betta.testH0(x.size, false) { sampler.sample() }
         println("  ${result}")
         println("   bets=  ${result.bets}") // these are the bets, despite the name
 

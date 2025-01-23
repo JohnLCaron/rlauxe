@@ -9,12 +9,11 @@ import kotlin.math.sqrt
 // runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
 fun runTestRepeated(
     drawSample: Sampler,
-        // maxSamples2: Int,
     ntrials: Int,
     testFn: RiskTestingFn,
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
-    showDetails: Boolean = false,
+    showSequences: Boolean = false,
     startingTestStatistic: Double = 1.0,
     margin: Double?,
     Nc:Int, // maximum cards in the contest
@@ -36,7 +35,7 @@ fun runTestRepeated(
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
-            showDetails = showDetails,
+            showSequences = showSequences,
             startingTestStatistic = startingTestStatistic) { drawSample.sample() }
 
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
@@ -62,7 +61,7 @@ fun runTestRepeated(
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, Nc=Nc, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, statusMap, sampleCounts, errorCounts.map { 100.0 * it / ntrials}, margin = margin)
+        ntrials=ntrials, variance, percentHist, statusMap, sampleCounts, errorCounts.map { 100.0 * it / ntrials }, margin = margin)
 }
 
 data class RunTestRepeatedResult(

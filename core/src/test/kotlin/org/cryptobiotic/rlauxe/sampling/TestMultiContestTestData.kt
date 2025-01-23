@@ -1,15 +1,11 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
 import kotlin.math.abs
-import kotlin.math.round
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -77,8 +73,8 @@ class TestMultiContestTestData {
             }
         }
 
-        val ballots = test.makeBallotsForPolling(true)
-        println("test makeBallotsForPolling nballots= ${ballots.size}")
+        val ballotManifest = test.makeBallotManifest(true)
+        println("test makeBallotsForPolling nballots= ${ballotManifest.ballots.size}")
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]
@@ -88,7 +84,7 @@ class TestMultiContestTestData {
             println(" ${contest.id} ncards ${fcontest.ncards} Nc=${contest.Nc}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
-            val nbs = ballots.count { it.hasContest(contest.id) }
+            val nbs = ballotManifest.ballots.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, nbs)
 
             val nphantom = cvrs.count { it.hasContest(contest.id) && it.phantom }
@@ -124,7 +120,7 @@ class TestMultiContestTestData {
         assertEquals(ncontests, test.contests.size)
 
         val cvrs = test.makeCvrsFromContests()
-        val ballots = test.makeBallotsForPolling(true)
+        val ballotManifest = test.makeBallotManifest(true)
 
         test.contests.forEachIndexed { idx, contest ->
             assertEquals(roundToInt(N * (1.0 + phantomPct)), contest.Nc)
@@ -133,7 +129,7 @@ class TestMultiContestTestData {
             println("contest $contest ncards=${fcontest.ncards}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
-            val nbs = ballots.count { it.hasContest(contest.id) }
+            val nbs = ballotManifest.ballots.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, nbs)
 
             print(" fcontest margin=${df(fcontest.margin)} undervotePct=${fcontest.undervotePct} phantomPct=${fcontest.phantomPct}")

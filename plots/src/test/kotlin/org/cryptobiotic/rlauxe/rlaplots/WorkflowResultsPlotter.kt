@@ -24,7 +24,25 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showSampleSizesVsErrorPct(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
+    fun showFailuresVsMargin(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
+        val exemplar = data[0]
+        val nruns = exemplar.parameters["nruns"]!!
+        val fuzzPct = exemplar.parameters["fuzzPct"]
+        val fuzzPctLabel = if (fuzzPct != null) " fuzzPct=$fuzzPct" else ""
+
+        wrsPlot(
+            titleS = "$filename failurePct",
+            subtitleS = "N=${exemplar.N} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            data,
+            "$dir/${filename}Failures",
+            "margin", "failurePct", catName,
+            xfld = { it.margin },
+            yfld = { it.failPct},
+            catfld = catfld,
+        )
+    }
+
+    fun showSampleSizesVsFuzzPct(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
 
@@ -33,14 +51,14 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${exemplar.margin} N=${exemplar.N} nruns=${nruns.toInt()}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
-            "errorPct", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,
+            "fuzzPct", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,
             xfld = { it.parameters["fuzzPct"]!! },
             yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
             catfld = catfld,
         )
     }
 
-    fun showFailuresVsErrorPct(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
+    fun showFailuresVsFuzzPct(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
 
@@ -49,14 +67,14 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${exemplar.margin} N=${exemplar.N} nruns=${nruns.toInt()}",
             data,
             "$dir/${filename}Failures",
-            "errorPct", "failurePct", catName,
+            "fuzzPct", "failurePct", catName,
             xfld = { it.parameters["fuzzPct"]!! },
             yfld = { it.failPct},
             catfld = catfld,
         )
     }
 
-    fun showNroundsVsErrorPct(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
+    fun showNroundsVsFuzzPct(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
 
@@ -65,7 +83,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${exemplar.margin} N=${exemplar.N} nruns=${nruns.toInt()}",
             data,
             "$dir/${filename}Nrounds",
-            "errorPct", "auditRounds", catName,
+            "fuzzPct", "auditRounds", catName,
             xfld = { it.parameters["fuzzPct"]!! },
             yfld = { it.nrounds},
             catfld = catfld,

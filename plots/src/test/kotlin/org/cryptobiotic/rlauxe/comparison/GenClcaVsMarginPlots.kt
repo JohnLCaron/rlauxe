@@ -16,7 +16,7 @@ class GenClcaVsMarginPlots {
     @Test
     fun genClcaMarginPlots() {
         val N = 50000
-        val margins = listOf(.005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10)
+        val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
         val fuzzPct = .05
         val stopwatch = Stopwatch()
 
@@ -28,18 +28,17 @@ class GenClcaVsMarginPlots {
                 mapOf("nruns" to nruns.toDouble(), "simType" to 1.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
-            /*
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 ClcaConfig(ClcaSimulationType.noerror, fuzzPct),
                 mapOf("nruns" to nruns.toDouble(), "simType" to 2.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
-             */
 
             val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct),
                 mapOf("nruns" to nruns.toDouble(), "simType" to 3.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
+            //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 ClcaConfig(ClcaSimulationType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
                 mapOf("nruns" to nruns.toDouble(), "simType" to 4.0, "fuzzPct" to fuzzPct))
@@ -60,6 +59,7 @@ class GenClcaVsMarginPlots {
 
         showSampleSizesVsMargin(true)
         showSampleSizesVsMargin(false)
+        showFailuresVsMargin()
     }
 
     fun showSampleSizesVsMargin(useLog: Boolean) {
@@ -68,6 +68,14 @@ class GenClcaVsMarginPlots {
 
         val plotter = WorkflowResultsPlotter(dirName, name)
         plotter.showSampleSizesVsMargin(results, "auditType", useLog=useLog) { category(it) }
+    }
+
+    fun showFailuresVsMargin() {
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val results = io.readResults()
+
+        val plotter = WorkflowResultsPlotter(dirName, name)
+        plotter.showFailuresVsMargin(results, "auditType") { category(it) }
     }
 
     fun category(wr: WorkflowResult): String {

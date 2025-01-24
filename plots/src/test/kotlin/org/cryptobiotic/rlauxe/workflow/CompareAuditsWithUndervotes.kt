@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
-class GenAuditsWithUndervotesPlots {
+class CompareAuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
     val name = "AuditsWithUndervotes"
     val dirName = "/home/stormy/temp/workflow/$name"
@@ -55,14 +55,7 @@ class GenAuditsWithUndervotesPlots {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsUndervotePct(results, "auditType", useLog=useLog) {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        }
+        plotter.showSampleSizesVsUndervotePct(results, "auditType", useLog=useLog)   { compareCategories(it) }
     }
 
 }

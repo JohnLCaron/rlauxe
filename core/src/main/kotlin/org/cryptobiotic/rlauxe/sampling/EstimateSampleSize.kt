@@ -25,7 +25,7 @@ fun estimateSampleSizes(
     show: Boolean = false,
     nthreads: Int = 14,
 ): Int? {
-    val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
+    val tasks = mutableListOf<SimulateSampleSizeTask>()
     contestsUA.filter { !it.done }.forEach { contestUA ->
         tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, prevMvrs, roundIdx))
     }
@@ -38,12 +38,11 @@ fun estimateSampleSizes(
         val result = estResult.repeatedResult
         if (estResult.failed) { // TODO 80% ?? settable ??
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            println("***FailPct ${task.contestUA} ${result.failPct()} > 80% size=${task.assertion.estSampleSize}")
+            println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.ntrials} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
         } else {
             var size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            // val size = task.prevSampleSize + ceil(result.totalSamplesNeeded / result.ntrials.toDouble()).toInt()
             if (roundIdx > 1) {
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
@@ -74,8 +73,8 @@ fun makeEstimationTasks(
     prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
-): List<ConcurrentTaskG<EstimationResult>> {
-    val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
+): List<SimulateSampleSizeTask> {
+    val tasks = mutableListOf<SimulateSampleSizeTask>()
 
     contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
         if (!assert.proved) {
@@ -121,7 +120,7 @@ class SimulateSampleSizeTask(
         val moreParameters: Map<String, Double> = emptyMap(),
     ) : ConcurrentTaskG<EstimationResult> {
 
-    override fun name() = "task ${contestUA.name} ${assertion.assorter.desc()} ${df(assertion.assorter.reportedMargin())}"
+    override fun name() = "task ${contestUA.name} ${assertion.assorter.desc()}}"
     override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (auditConfig.auditType) {
             AuditType.CARD_COMPARISON ->

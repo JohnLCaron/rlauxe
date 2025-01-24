@@ -264,11 +264,6 @@ fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// run audit for one assertion; could be parallel
-// TODO could pass the testFn into the workflow
-// note that you need the assorter for the sampler
-// need the upperBound and noerror for the AdaptiveComparison bettingFn
-// the testFn is independent, it assumes drawSample already does the assort.
 
 fun runClcaAssertionAudit(
     auditConfig: AuditConfig,
@@ -288,6 +283,7 @@ fun runClcaAssertionAudit(
             val errorRates = ClcaErrorRates.calcErrorRates(contestUA.id, cassorter, cvrPairs)
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
+
         ClcaSimulationType.noerror -> {
             // optimistic, no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(
@@ -299,6 +295,7 @@ fun runClcaAssertionAudit(
                 listOf(0.0, 0.0, 0.0, 0.0)
             )
         }
+
         ClcaSimulationType.fuzzPct -> {
             // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
             val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct)
@@ -311,16 +308,17 @@ fun runClcaAssertionAudit(
                 errorRates
             )
         }
-     ClcaSimulationType.apriori ->
-        // use given errors as apriori, then adapt to actual mvrs.
-        AdaptiveComparison(
-            Nc = contestUA.Nc,
-            withoutReplacement = true,
-            a = cassorter.noerror(),
-            d1 = clcaConfig.d1,
-            d2 = clcaConfig.d2,
-            clcaConfig.errorRates!!
-        )
+
+        ClcaSimulationType.apriori ->
+            // use given errors as apriori, then adapt to actual mvrs.
+            AdaptiveComparison(
+                Nc = contestUA.Nc,
+                withoutReplacement = true,
+                a = cassorter.noerror(),
+                d1 = clcaConfig.d1,
+                d2 = clcaConfig.d2,
+                clcaConfig.errorRates!!
+            )
     }
 
     val testFn = BettingMart(

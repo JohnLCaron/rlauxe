@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
-class GenAuditsWithPhantomsPlots {
+class CompareAuditsWithPhantoms {
     val name = "AuditsWithPhantoms"
     val dirName = "/home/stormy/temp/workflow/$name"
 
@@ -56,14 +56,7 @@ class GenAuditsWithPhantomsPlots {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsPhantomPct(results, "auditType", useLog=useLog) {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        }
+        plotter.showSampleSizesVsPhantomPct(results, "auditType", useLog=useLog)  { compareCategories(it) }
     }
 
     fun showFailuresVsPhantomPct() {
@@ -71,14 +64,7 @@ class GenAuditsWithPhantomsPlots {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsPhantomPct(results, "auditType") {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        }
+        plotter.showFailuresVsPhantomPct(results, "auditType")   { compareCategories(it) }
     }
 
 }

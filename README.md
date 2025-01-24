@@ -1,5 +1,6 @@
-RLAUXE
-last update: 01/23/2025
+**RLAUXE**
+
+_last update: 01/23/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -24,17 +25,13 @@ Table of Contents
   * [Polling audits](#polling-audits)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
+  * [Polling Vs Comparison Estimated Sample sizes with no errors (outdated))](#polling-vs-comparison-estimated-sample-sizes-with-no-errors-outdated)
 * [Sampling](#sampling)
   * [Estimating Sample sizes](#estimating-sample-sizes)
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
     * [Consistent Sampling](#consistent-sampling)
     * [Uniform Sampling](#uniform-sampling)
-  * [Comparison audits and CSDs](#comparison-audits-and-csds)
   * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-  * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
-* [Estimating Error](#estimating-error)
-  * [Comparison error rates](#comparison-error-rates)
-  * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
 * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
@@ -209,7 +206,7 @@ For the risk function, Rlaux uses the BettingMart function with the AdaptiveComp
 AdaptiveComparison needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
 AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 
-See [CLCA Error Rates function](docs/ClcaErrorRates.md) for estimating error rates and plots.
+See [CLCA Error Rates](docs/ClcaErrorRates.md) for estimating error rates and plots.
 
 See [CLCA Betting function](docs/BettingRiskFunction.md) for more details on BettingMart.
 
@@ -278,6 +275,20 @@ Varying phantom percent::
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
 
+
+
+## Polling Vs Comparison Estimated Sample sizes with no errors (outdated))
+
+This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
+audit at different margins, where the MVRS match the CVRS ("no errors").
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
+
+Polling at margins < 4% needs prohibitively large sample sizes.
+Comparison audits are perhaps useful down to margins = .4% .
+
+"In a card-level comparison audit, the estimated sample size scales with
+the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
 
 # Sampling
 
@@ -369,31 +380,6 @@ In the following plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case w
 
 See _PlotPollingNoStyles.kt_.
 
-## Comparison audits and CSDs
-
-ConsistentSampling is used in either case. This assigns large psuedo-random numbers to each ballot, orders the ballots
-by that number, and selects the first ballots that use any contest that needs more samples, until all contests have 
-at least contest.estSampleSize in the sample of selected ballots.
-
-In practice, its unclear whether there's much difference for Comparison audits when the CSD is complete or not (see plots below). 
-It appears that the assort value changes when there is a discrepency between the CVR and MVR, but not otherwise. 
-
-See ComparisonAssorter.overstatementError() in core/Assorter.kt (from SHANGRLA Audit.py class Assorter):
-
-    assorter that corresponds to normalized overstatement error for an assertion
-
-    If `use_style == true`, then if the CVR contains the contest but the MVR does not,
-    that is considered to be an overstatement, because the ballot is presumed to contain
-    the contest .
-
-    If `use_style == False`, then if the CVR contains the contest but the MVR does not,
-    the MVR is considered to be a non-vote in the contest .
-
-TODO: whats the reasoning for the above?
-
-For !hasCSD, we wont select unvoted contests to be in the sample, since they arent recorded.
-So then if we see an unvoted contest on the MVR, the case where the MVR contains the contest but not the CVR, then...
-
 ## Polling Vs Comparison with/out CSD Estimated Sample sizes
 
 The following plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
@@ -404,104 +390,6 @@ Little difference between comparison with/out CSD. Large difference with polling
 since it depends on N/Nc scaling.
 
 See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
-
-## Polling Vs Comparison Estimated Sample sizes with no errors
-
-This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
-audit at different margins, where the MVRS match the CVRS ("no errors").
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
-
-Polling at margins < 4% needs prohibitively large sample sizes.
-Comparison audits are perhaps useful down to margins = .4% .
-
-"In a card-level comparison audit, the estimated sample size scales with
-the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
-
-# Estimating Error
-
-The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
-These rates should be empirically determined, and public tables for different voting machines should be published.
-While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
-
-If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
-are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
-fetching and interpreting ballots.
-
-We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4.
-Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. In both cases, we use
-CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates. This is used
-when estimating the sample size from the diluted margin, and also when doing the actual audit comparing the CVRs and the MVRs.
-
-## Comparison error rates
-
-The comparison error rates are:
-
-        val p1: rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: rate of 2-vote understatements; voted for winner, cvr has loser
-
-For IRV, the corresponding descriptions of the errror rates are:
-
-    NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
-    NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
-    NEB two vote understatement: cvr has loser preceeding winner(0), mvr has winner as first pref (1)
-    NEB one vote understatement: cvr has winner preceding loser, but not first (1/2), mvr has winner as first pref (1)
-    
-    NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
-    NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
-    NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
-    NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
-
-See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
-with varying p2error rates.
-
-See [Comparison Error Rates](docs/ClcaErrorRates) for technical details.
-
-## Estimating Sample sizes and error rates with fuzz
-
-We can also estimate comparison error rates as follows:
-
-The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
-and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
-When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
-
-The first plot below shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
-have greater spread, but on average are not much affected.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
-
-We use this strategy and run simulations that generate comparison error rates, as a function of number of candidates in the contest.
-(see GenerateComparisonErrorTable.kt):
-
-N=100000 ntrials = 1000
-generated 12/01/2024
-
-| ncand | r1     | r2     | r3     | r4     |
-|-------|--------|--------|--------|--------|
-| 2     | 0.2535 | 0.2524 | 0.2474 | 0.2480 |
-| 3     | 0.3367 | 0.1673 | 0.3300 | 0.1646 |
-| 4     | 0.3357 | 0.0835 | 0.3282 | 0.0811 |
-| 5     | 0.3363 | 0.0672 | 0.3288 | 0.0651 |
-| 6     | 0.3401 | 0.0575 | 0.3323 | 0.0557 |
-| 7     | 0.3240 | 0.0450 | 0.3158 | 0.0434 |
-| 8     | 0.2886 | 0.0326 | 0.2797 | 0.0314 |
-| 9     | 0.3026 | 0.0318 | 0.2938 | 0.0306 |
-| 10    | 0.2727 | 0.0244 | 0.2624 | 0.0233 |
-
-Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
-For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a
-vote between winner and loser, than switch a vote to/from other.
-(NOTE: Currently the percentage of ballots with no votes cast for a contest is not well accounted for)
-
-We give the user the option to specify a fuzzPct and use this table for the apriori error rates error rates,
-
-Possible refinement of this algorithm might measure:
-1. percent time a mark is seen when its not there
-2. percent time a mark is not seen when it is there
-3. percent time a mark is given to the wrong candidate
 
 # Missing Ballots (aka phantoms-to-evil zombies)
 

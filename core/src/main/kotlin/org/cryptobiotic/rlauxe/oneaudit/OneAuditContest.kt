@@ -66,7 +66,11 @@ class OneAuditContest (
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
-    fun makeContestUnderAudit(cvrs: List<Cvr>) = OneAuditContestUnderAudit(this).makeClcaAssertions(cvrs)
+    fun makeContestUnderAudit(cvrs: List<Cvr>):OneAuditContestUnderAudit {
+        val contestUA = OneAuditContestUnderAudit(this)
+        contestUA.makeClcaAssertions(cvrs)
+        return contestUA
+    }
 
     fun makeContest() = Contest(info, votes, Nc, Np)
 

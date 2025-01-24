@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.mergeReduceS
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class TestFuzzSampler {
+class TestMakeFuzzedCvrsFrom {
 
     @Test
     fun testFuzzTwoPersonContest() {
@@ -161,7 +161,7 @@ class TestFuzzSampler {
                 //    val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
                 //    val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
                 //    val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
-                val test = MultiContestTestData(1, 1, N, margin..margin, underVotePctRange = 0.1.. 0.1)
+                val test = MultiContestTestData(1, 1, N, margin..margin, underVotePctRange = 0.1..0.1)
                 val cvrs = test.makeCvrsFromContests()
                 val contest = test.contests.first()
                 val ncands = contest.ncandidates
@@ -211,7 +211,8 @@ class TestFuzzSampler {
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-                val contest = makeContestOA(margin, N, cvrPercent = .70, 0.0, undervotePercent = .01, phantomPercent = .01)
+                val contest =
+                    makeContestOA(margin, N, cvrPercent = .70, 0.0, undervotePercent = .01, phantomPercent = .01)
                 val cvrs = contest.makeTestCvrs()
                 val ncands = contest.ncandidates
 
@@ -251,7 +252,7 @@ class TestFuzzSampler {
 
 fun sumDiagonal(ncands: Int, choices: Map<String, Int>): Int {
     var sum = 0
-    for (cand in 0.. ncands) {
+    for (cand in 0..ncands) {
         val key = cand.toString() + cand.toString()
         sum += choices[key]!!
     }
@@ -260,7 +261,7 @@ fun sumDiagonal(ncands: Int, choices: Map<String, Int>): Int {
 
 fun checkOffDiagonals(cand: Int, ncands: Int, choicePct: Map<String, Double>) {
     var first: Double = -1.0
-    for (other in 0.. ncands) {
+    for (other in 0..ncands) {
         if (other != cand) {
             val key = cand.toString() + other.toString()
             val value = choicePct[key]

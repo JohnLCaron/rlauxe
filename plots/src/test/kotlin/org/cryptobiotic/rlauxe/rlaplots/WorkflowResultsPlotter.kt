@@ -4,9 +4,10 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.math.log10
 
+enum class Scale { Linear, Log, Pct }
 class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
-    fun showSampleSizesVsMargin(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
+    fun showSampleSizesVsMargin(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
@@ -16,10 +17,20 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             titleS = "$filename estimated sample sizes",
             subtitleS = "N=${exemplar.N} nruns=${nruns.toInt()}" + fuzzPctLabel,
             data,
-            if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
-            "margin", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,
+            "$dir/${filename}${yscale.name}",
+            "margin",
+            when (yscale) {
+                Scale.Linear -> "samplesNeeded"
+                Scale.Log -> "log10(samplesNeeded)"
+                Scale.Pct -> "samplesNeeded %"
+            },
+            catName,
             xfld = { it.margin },
-            yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
+            yfld = { it: WorkflowResult -> when (yscale) {
+                Scale.Linear -> it.samplesNeeded
+                Scale.Log -> log10(it.samplesNeeded)
+                Scale.Pct -> (100*it.samplesNeeded/it.N.toDouble())
+            }},
             catfld = catfld,
         )
     }

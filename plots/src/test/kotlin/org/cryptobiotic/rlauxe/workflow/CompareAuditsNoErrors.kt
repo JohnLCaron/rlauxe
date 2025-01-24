@@ -10,15 +10,14 @@ import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
 class CompareAuditsNoErrors {
-    val nruns = 5  // number of times to run workflow
-    val N = 20000
-    val margins =
-        listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+    val nruns = 100  // number of times to run workflow
+    val N = 10000
 
     @Test
     fun genAuditsNoErrorsPlots() {
         val name = "AuditsNoErrors"
         val dirName = "/home/stormy/temp/workflow/$name"
+        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
 
         val cvrPercents = listOf(0.0, 0.5, 1.0)
         val stopwatch = Stopwatch()
@@ -61,6 +60,9 @@ class CompareAuditsNoErrors {
     fun clcaNoErrorsPlots() {
         val name = "clcaNoErrors"
         val dirName = "/home/stormy/temp/workflow/$name"
+        val margins =
+            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

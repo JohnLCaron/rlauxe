@@ -23,7 +23,7 @@ Table of Contents
   * [Polling audits](#polling-audits)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
-  * [Estimated Sample sizes with no errors](#estimated-sample-sizes-with-no-errors)
+  * [Estimated sample sizes with no errors](#estimated-sample-sizes-with-no-errors)
 * [Sampling](#sampling)
   * [Estimating Sample sizes](#estimating-sample-sizes)
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
@@ -209,7 +209,7 @@ See [CLCA Error Rates](docs/ClcaErrorRates.md) for estimating error rates and pl
 See [CLCA Betting function](docs/BettingRiskFunction.md) for more details on BettingMart.
 
 
-## Polling audits
+## Polling Audits
 
 When CVRs are not available, a polling audit can be done instead. A polling audit  
 creates an MVR for each ballot card selected for sampling, just as with a CLCA, except without the CVR.
@@ -233,7 +233,7 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 See [ALPHA testing statistic](docs/AlphaMart.md) for more details and plots.
 
 
-## Stratified audits using OneAudit
+## Stratified Audits using OneAudit
 
 OneAudit is a comparison audit that uses AlphaMart instead of BettingMart. 
 
@@ -242,20 +242,39 @@ This is "overstatement-net-equivalent" (aka ONE).
 
 See [OneAudit Notes](docs/OneAudit.md) for more details and plots.
 
+# Measured Sample sizes
 
-## Comparison of AuditTypes' sample sizes
+The following plots are simulated complete workflows, averaging the results from the given number of runs.
 
-These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
-when there are no errors between the MVRs and the CVRs.
+In general samples sizes are independent of N, which is helpful to keep in mind
+
+Actually there is a slight dependence on N for "without replacement" audits when the sample size approaches N, 
+but that case approaches a full hand audit, and isnt very interesting.
+
+When Card Style Data (CSD) is missing, the sample sizes have to be scaled by N / Nc, where M is the number of physical ballots
+that a contest might be on, and Nc is the number of ballots it is actually on. 
+See [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample), below.
+
+## Sample sizes with no errors
+
+The audit needing the least samples is CLCA when there are no errors in the CVRs. In that case, the sample sizes depend only on the margin:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
+
+So, for example we need 1,128 samples to audit a contest with a 0.5% margin.
+(Click on the plot to get an interactive html plot).
+For a 10,000 vote election, thats 11.28% of the total ballots. For a 100,000 vote election, its only 1.13%.
+
+Here are sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
+when there are no errors in the CVRs:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
 
-* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
-* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
-* Need to investigate how the presence of errors between the MVRs and the CVRs affects the results.
-* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
-* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
+"In a card-level comparison audit, the estimated sample size scales with
+the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
+
+## Sample sizes with errors
 
 Plots vs fuzzPct (percent ballots having randomly changed candidate, see [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz),
 with margin fixed at 4%:
@@ -263,37 +282,22 @@ with margin fixed at 4%:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
 
-* clca is much more sensitive to errors than polling or oneaudit.
+* CLCA is much more sensitive to errors than polling or oneaudit.
+* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
+* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
+* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
 
 Varying undervotes percent:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotes Linear">![AuditsWithUndervotesLinear](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLog.html" rel="AuditsWithUndervotes Log">![AuditsWithUndervotesLog](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLog.png)</a>
 
-Varying phantom percent::
+Varying phantom percent, up to and over the margin of 5%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
 
-## Estimated Sample sizes with no errors
+* Increased phantoms have a strong effect on sample size.
 
-The best possible audit is CLCA when there are no errors in the CVRs. In that case, the sample sizes depend only on the margin:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
-
-Remarkably, this value is independent of N. So, for example we need 1,128 samples to audit a contest with a 0.5% margin.
-For a 10,000 vote election, thats 11.28% For a 100,000 vote election, its only 1.13%.
-
-This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
-audit at different margins, where the MVRS match the CVRS ("no errors").
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
-
-Polling at margins < 4% needs prohibitively large sample sizes.
-Comparison audits are useful down to any margin, depending on N and the error rates.
-
-"In a card-level comparison audit, the estimated sample size scales with
-the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
 
 # Sampling
 

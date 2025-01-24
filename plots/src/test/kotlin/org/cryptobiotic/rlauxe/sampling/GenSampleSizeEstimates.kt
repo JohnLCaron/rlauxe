@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunnerG
 class GenSampleSizeEstimates : AbstractProjectConfig() {
     override val parallelism = 3
 
+    // TODO candidate for removal
     @Test
     fun plotComparisonVsPoll() {
         val auditConfig = AuditConfig(

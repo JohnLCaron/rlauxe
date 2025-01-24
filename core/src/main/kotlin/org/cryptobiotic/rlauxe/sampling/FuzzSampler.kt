@@ -116,9 +116,9 @@ class OneAuditFuzzSampler(
     var idx = 0
 
     init {
+        stratumNames = contestUA.contestOA.strata.map { it.strataName }.toSet()
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(cvrs)
-        stratumNames = contestUA.contestOA.strata.map { it.strataName }.toSet()
     }
 
     override fun sample(): Double {

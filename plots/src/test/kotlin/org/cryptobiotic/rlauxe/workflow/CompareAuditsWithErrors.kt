@@ -13,7 +13,7 @@ class CompareAuditsWithErrors {
     val dirName = "/home/stormy/temp/workflow/$name"
 
     @Test
-    fun genAuditWithErrorsPlots() {
+    fun genAuditWithFuzzPlots() {
         val N = 50000
         val margin = .04
         val cvrPercent = .50
@@ -24,16 +24,16 @@ class CompareAuditsWithErrors {
 
         fuzzPcts.forEach { fuzzPct ->
             val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble()))
+                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                     ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct),
-                    mapOf("nruns" to nruns.toDouble()))
+                    mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, fuzzPct,
-                mapOf("nruns" to nruns.toDouble()))
+                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
 

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class GenAuditsNoErrorsPlots {
+class CompareAuditsNoErrors {
     val nruns = 100  // number of times to run workflow
     val name = "AuditsNoErrors"
     val dirName = "/home/stormy/temp/workflow/$name"

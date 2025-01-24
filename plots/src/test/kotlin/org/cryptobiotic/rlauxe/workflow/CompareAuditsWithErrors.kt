@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
-class GenAuditsWithErrorsPlots {
+class CompareAuditsWithErrors {
     val nruns = 100  // number of times to run workflow
     val name = "AuditsWithErrors"
     val dirName = "/home/stormy/temp/workflow/$name"
@@ -28,11 +28,10 @@ class GenAuditsWithErrorsPlots {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.oracle, fuzzPct),
-                mapOf("nruns" to nruns.toDouble()))
+                    ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct),
+                    mapOf("nruns" to nruns.toDouble()))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            // oneaudit
             val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, fuzzPct,
                 mapOf("nruns" to nruns.toDouble()))
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
@@ -45,54 +44,42 @@ class GenAuditsWithErrorsPlots {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsErrorPct(true)
-        showSampleSizesVsErrorPct(false)
-        showFailuresVsErrorPct()
-        showNroundsVsErrorPct()
+        showSampleSizesVsFuzzPct(true)
+        showSampleSizesVsFuzzPct(false)
+        showFailuresVsFuzzPct()
+        showNroundsVsFuzzPct()
     }
 
-    fun showSampleSizesVsErrorPct(useLog: Boolean) {
+    fun showSampleSizesVsFuzzPct(useLog: Boolean) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsErrorPct(results, "auditType", useLog=useLog) {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        }
+        plotter.showSampleSizesVsFuzzPct(results, "auditType", useLog=useLog)  { compareCategories(it) }
     }
 
-    fun showFailuresVsErrorPct() {
+    fun showFailuresVsFuzzPct() {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsErrorPct(results, "auditType") {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        }
+        plotter.showFailuresVsFuzzPct(results, "auditType") { compareCategories(it) }
     }
 
-    fun showNroundsVsErrorPct() {
+    fun showNroundsVsFuzzPct() {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsErrorPct(results, "auditType") {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        }
+        plotter.showNroundsVsFuzzPct(results, "auditType")  { compareCategories(it) }
+    }
+}
+
+fun compareCategories(wr: WorkflowResult): String {
+    return when (wr.parameters["auditType"]) {
+        1.0 -> "oneaudit"
+        2.0 -> "polling"
+        3.0 -> "clca"
+        else -> "unknown"
     }
 }

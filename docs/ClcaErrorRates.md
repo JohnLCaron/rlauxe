@@ -1,5 +1,5 @@
 # Comparison error rates
-last updated Jan 22, 2025
+last updated Jan 24, 2025
 
 ## Calculate Error Rates from actual Mvcrs (oracle)
 
@@ -16,8 +16,7 @@ Or would that also invalidate the predictable sequence requirement?
 
 I think it does if one starts from the beginning, but ok if one simply starts with the curret p-value with new samples.
 
-
-### ComparisonSamplerSimulation
+## ComparisonSamplerSimulation
 
 The assumptions that one makes about the comparison error rates greatly affect the sample size estimation. These rates should
 be empirically determined, and public tables for different voting machines should be published
@@ -55,7 +54,7 @@ fetching and interpreting ballots.
 In any case, currrently all assumptions on the a-priori error rates are arbitrary. These need to be measured for existing
 machines and practices. While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
-#### Estimating Sample sizes with fuzz
+## Estimating Sample sizes with fuzz
 
 Estimated sample size vs margin at different "fuzz" percentages. The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
 and randomly changing the candidate voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
@@ -68,7 +67,7 @@ have greater spread, but on average are not much affected.
 * [Comparison Sample sizes with fuzz](docs/plots/ComparisonFuzzConcurrent.html)
 * [Polling Sample sizes with fuzz](docs/plots/PollingFuzzConcurrent.html)
 
-#### Comparison fuzz effect on under/overstatement error rates
+## Comparison fuzz effect on under/overstatement error rates
 
 With a mixture of contests with different candidate sizes, and empty votes allowed, here is a representative table of
 how the fuzzing generates p1, p2, p3 and p4 error rates:
@@ -91,3 +90,34 @@ For example, a two-candidate contest has significantly higher two-vote error rat
 vote between winner and loser, than switch a vote to/from other.
 
 For now, we will use this table to generate the error rates when estimating the sample sizes.
+
+## CLCA sample sizes with different error rate strategies
+
+These are plots of sample sizes for various error estimation strategies. In all cases, synthetic CVRs are generated with the given margin, 
+and MVRs have been fuzzed at the given fuzzPct. Except for the oracle strategy, the AdaptiveComparison betting function is used.
+
+The error estimation strategies are:
+
+* oracle : The true error rate for the sample is computed. This voilates the "predictable sequence requirement", so cant be used in a real audit.
+* noerror : The apriori error rates are 0.
+* fuzzPct: The apriori error rates are calculated from the true fuzzPct. 
+* 2*fuzzPct: The fuzzPct is overestimated by a factor of 2.
+* fuzzPct/2: The fuzzPct is underestimated by a factor of 1/2.
+
+The sample size as a function of fuzzPct, fixed margin of .04:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaFuzzed/clcaFuzzedLinear.html" rel="clcaFuzzedLinear">![clcaFuzzedLinear](./docs/plots/workflows/clcaFuzzed/clcaFuzzedLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaFuzzed/clcaFuzzedLog.html" rel="clcaFuzzedLog Log">![clcaFuzzedLog](./docs/plots/workflows/clcaFuzzed/clcaFuzzedLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaFuzzed/clcaFuzzedFailures.html" rel="clcaFuzzedFailures Log">![clcaFuzzedFailures](./docs/plots/workflows/clcaFuzzed/clcaFuzzedFailures.png)</a>
+
+The sample size as a function of margin, fixed fuzzPct of .05:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaMargin/clcaMarginLinear.html" rel="clcaMarginLinear">![clcaMarginLinear](./docs/plots/workflows/clcaMargin/clcaMarginLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaMargin/clcaMarginLog.html" rel="clcaMarginLog Log">![clcaMarginLog](./docs/plots/workflows/clcaMargin/clcaMarginLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaMargin/clcaMarginFailures.html" rel="clcaMarginFailures Log">![clcaMarginFailures](./docs/plots/workflows/clcaMargin/clcaMarginFailures.png)</a>
+
+Notes:
+
+* The oracle results show the lowest sample sizes possible. 
+* The noerror strategy is significantly worse.
+* If you can guess the fuzzPct to within a factor of 2, theres not much differene, especially for low values of fuzzPct.

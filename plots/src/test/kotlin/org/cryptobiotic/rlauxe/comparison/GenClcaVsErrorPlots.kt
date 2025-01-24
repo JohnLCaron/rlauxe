@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenClcaVsErrorPlots {
-    val nruns = 200  // number of times to run workflow
-    val name = "clca"
+    val nruns = 100  // number of times to run workflow
+    val name = "clcaFuzzed"
     val dirName = "/home/stormy/temp/workflow/$name"
 
     @Test
@@ -38,6 +38,7 @@ class GenClcaVsErrorPlots {
                 mapOf("nruns" to nruns.toDouble(), "simType" to 3.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
+            //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 ClcaConfig(ClcaSimulationType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
                 mapOf("nruns" to nruns.toDouble(), "simType" to 4.0, "fuzzPct" to fuzzPct))
@@ -56,34 +57,34 @@ class GenClcaVsErrorPlots {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsErrorPct(true)
-        showSampleSizesVsErrorPct(false)
-        showFailuresVsErrorPct()
-        showNroundsVsErrorPct()
+        showSampleSizesVsFuzzPct(true)
+        showSampleSizesVsFuzzPct(false)
+        showFailuresVsFuzzPct()
+        showNroundsVsFuzzPct()
     }
 
-    fun showSampleSizesVsErrorPct(useLog: Boolean) {
+    fun showSampleSizesVsFuzzPct(useLog: Boolean) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsErrorPct(results, "auditType", useLog=useLog) { category(it) }
+        plotter.showSampleSizesVsFuzzPct(results, "auditType", useLog=useLog) { category(it) }
     }
 
-    fun showFailuresVsErrorPct() {
+    fun showFailuresVsFuzzPct() {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsErrorPct(results, "auditType") { category(it) }
+        plotter.showFailuresVsFuzzPct(results, "auditType") { category(it) }
     }
 
-    fun showNroundsVsErrorPct() {
+    fun showNroundsVsFuzzPct() {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsErrorPct(results, "auditType") { category(it) }
+        plotter.showNroundsVsFuzzPct(results, "auditType") { category(it) }
     }
 
     fun category(wr: WorkflowResult): String {

@@ -84,7 +84,7 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
             if (doubleIsClose(sample, 0.0)) countZero++
             else if (doubleIsClose(sample, 0.5)) countHalf++
             else if (doubleIsClose(sample, 1.0)) countOne++
-            else println(" not assigned ${df(sample)}")
+            // else println(" not assigned ${df(sample)}") // get these messages in oneaudit
         }
     }
 

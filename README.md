@@ -1,4 +1,4 @@
-# rlauxe
+RLAUXE
 last update: 01/23/2025
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
@@ -10,36 +10,33 @@ Click on plot images to get an interactive html plot.
 
 You can also read this on [github.io](https://johnlcaron.github.io/rlauxe/).
 
-
 Table of Contents
 <!-- TOC -->
-* [rlauxe](#rlauxe)
-  * [Reference Papers](#reference-papers)
-  * [SHANGRLA framework](#shangrla-framework)
-    * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
-      * [Plurality](#plurality)
-      * [Approval](#approval)
-      * [SuperMajority](#supermajority)
-      * [IRV](#irv)
-    * [Betting martingales](#betting-martingales)
-  * [Audit Types](#audit-types)
-    * [Polling audits](#polling-audits)
-    * [Comparison audits](#comparison-audits)
-      * [Comparison Betting Payoffs](#comparison-betting-payoffs)
-    * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
-    * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
-  * [Sampling](#sampling)
-    * [Estimating Sample sizes](#estimating-sample-sizes)
-    * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
-      * [Consistent Sampling](#consistent-sampling)
-      * [Uniform Sampling](#uniform-sampling)
-    * [Comparison audits and CSDs](#comparison-audits-and-csds)
-    * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-    * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
-  * [Estimating Error](#estimating-error)
-    * [Comparison error rates](#comparison-error-rates)
-    * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
-  * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
+* [Reference Papers](#reference-papers)
+* [SHANGRLA framework](#shangrla-framework)
+  * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
+    * [Plurality](#plurality)
+    * [Approval](#approval)
+    * [SuperMajority](#supermajority)
+    * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
+* [Audit Types](#audit-types)
+  * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
+  * [Polling audits](#polling-audits)
+  * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
+  * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
+* [Sampling](#sampling)
+  * [Estimating Sample sizes](#estimating-sample-sizes)
+  * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
+    * [Consistent Sampling](#consistent-sampling)
+    * [Uniform Sampling](#uniform-sampling)
+  * [Comparison audits and CSDs](#comparison-audits-and-csds)
+  * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
+  * [Polling Vs Comparison Estimated Sample sizes with no errors](#polling-vs-comparison-estimated-sample-sizes-with-no-errors)
+* [Estimating Error](#estimating-error)
+  * [Comparison error rates](#comparison-error-rates)
+  * [Estimating Sample sizes and error rates with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz)
+* [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
+* [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
@@ -50,7 +47,7 @@ Table of Contents
   * [Development Notes](#development-notes)
 <!-- TOC -->
 
-## Reference Papers
+# Reference Papers
 
     P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
 
@@ -80,7 +77,7 @@ Table of Contents
     VERIFIABLE  Publicly Verifiable RLAs.     Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
 
 
-## SHANGRLA framework
+# SHANGRLA framework
 
 SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
 It uses an _assorter_ to assign a number to each ballot, and a _statistical risk testing function_ that allows an audit to statistically
@@ -109,9 +106,9 @@ batches of ballot cards instead of individual cards (_cluster sampling_).
 | audit         | iterative process of picking ballots and checking if all the assertions are true.              |
 
 
-### Assorters and supported SocialChoices
+## Assorters and supported SocialChoices
 
-#### Plurality
+### Plurality
 
 "Top k candidates are elected."
 The rules may allow the voter to vote for one candidate, k candidates or some other number, including n, which
@@ -143,7 +140,7 @@ Notes
 * Someone has to enforce that each CVR has <= number of allowed votes.
 
 
-#### Approval
+### Approval
 
 See SHANGRLA, section 2.2.
 
@@ -153,7 +150,7 @@ The top K candidates are elected.
 The plurality voting algorithm is used, with K winners and C-K losers.
 
 
-#### SuperMajority
+### SuperMajority
 
 "Top k candidates are elected, whose percent vote is above a fraction, f."
 
@@ -180,62 +177,57 @@ Notes
 * multiple winners are not yet supported for auditing. TODO is that true ??
 * TODO test when there are no winners.
 
-#### IRV
+### Instant Runoff Voting (IRV)
 
-We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions. 
+Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
+In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated. 
+This continues until only one candidate is left.
+
+We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions 
+that fit into the SHANGRLA framewok, and makes them IRV contests amenable to risk limiting auditing, just like plurality contests.
 
 See the RAIRE guides for details:
 * [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)
 * [Part 2: Generating Assertions with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_2.pdf)
 
-### Betting martingales
+# Audit Types
 
-In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using 
-betting martingales of the form
+## Card Level Comparison Audits (CLCA)
 
-    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
+When the election system produces an electronic record for each ballot card, known as a Cast Vote Record (CVR), then
+Card Level Comparison Audits can be done that compare sampled CVRs with the corresponding ballot card that has been 
+hand audited to produce a Manual Vote Record (MVR). A CLCA typically needs many fewer sampled ballots to validate contest
+results than other methods.
 
-where µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
-(For large N, µ_i is very close to 1/2.)
+The requirements for CLCA audits:
 
-The sequence (M_j) can be viewed as the fortune of a gambler in a series of wagers.
-The gambler starts with a stake of 1 unit and bets a fraction λi of their current wealth on
-the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
-gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
-losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
+* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot, which is compared to the MVR during the audit.
+* Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR.
+* There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
-See BettingMart.kt and related code for current implementation.
+For the risk function, Rlaux uses the BettingMart function with the AdaptiveComparison betting function. 
+AdaptiveComparison needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
+AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
+
+See [CLCA Error Rates function](docs/ClcaErrorRates.md) for estimating error rates and plots.
+
+See [CLCA Betting function](docs/BettingRiskFunction.md) for more details on BettingMart.
 
 
-## Audit Types
+## Polling audits
 
-### Polling audits
+When CVRs are not available, a polling audit can be done instead. A polling audit  
+creates an MVR for each ballot card selected for sampling, just as with a CLCA, except without the CVR.
 
 The requirements for Polling audits:
 
 * There must be a BallotManifest defining the population of ballots, that contains a unique identifier that can be matched to the corresponding physical ballot.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
-A polling audit retrieves a physical ballot and the auditors manually agree on what it says, creating an MVR (manual voting record) for it.
-The assorter assigns an assort value in [0, upper] to the ballot, which is used in the testing statistic.
-
-For the risk function, we use AlphaMart (or equivilent BettingMart) with ShrinkTrunkage, which estimates the true
+For the risk function, Rlaux uses the AlphaMart function with ShrinkTrunkage, which estimates the true
 population mean (theta) using a weighted average of an initial estimate (eta0) with the actual sampled mean. 
 The average assort value is used as the initial estimate (eta0) when testing each assertion. These assort values
 are specified in SHANGRLA, section 2. See Assorter.kt for our implementation.
-
-The only settable parameter for the risk function is d, which is used for estimating theta (the true population assort value average) 
-at the ith sample:
-
-    estTheta_i = (d*eta0 + sampleSum_i) / (d + sampleSize_i)
-
-which trades off smaller sample sizes when theta = eta0 (large d) vs quickly adapting to when theta < eta0 (smaller d).
-
-To use BettingMart rather than AlphaMart, we just have to set
-
-    λ_i = (estTheta_i/µ_i − 1) / (upper − µ_i)
-
-where upper is the upper bound of the assorter (1 for plurality, 1/(2f) for supermajority), and µ_i := E(Xi | Xi−1) as above.
 
 A few representative plots showing the effect of d are at [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629).
 * High values of d do significantly better when the reported mean is close to the true mean. 
@@ -243,261 +235,17 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 * Low values of d are much better when true mean < reported mean, at the cost of larger samples sizes.
 * Tentatively, we will use d = 100 as default, and allow the user to override.
 
-See [Polling Simulations](docs/PollingSimulations.md) for more details and plots.
+See [AlphaMart function for Polling](docs/AlphaMart.md) for more details and plots.
 
-### Comparison audits
 
-The requirements for Comparison audits:
-
-* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot, which is compared to the MVR during the audit.
-* Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR. 
-* There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
-
-For the risk function, we use BettingMart with AdaptiveComparison. AdaptiveComparison needs estimates of the rates of 
-over(under)statements. If these estimates are correct, one gets optimal sample sizes. 
-AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
-
-See Cobra section 4.2 and SHANGRLA Section 3.2.
-
-The overstatement error for the ith ballot is:
-````
-    ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ upper    "overstatement error" (SHANGRLA eq 2, p 9)
-      bi is the manual voting record (MVR) for the ith ballot
-      ci is the cast-vote record for the ith ballot
-      A() is the assorter function
-Let
-     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-     v ≡ 2Ā(c) − 1, the _reported assorter margin_
-     τi ≡ (1 − ωi /upper) ≥ 0
-     B(bi, ci) ≡ τi /(2 − v/upper) = (1 − ωi /upper) / (2 − v/upper) ≡ "comparison assorter" ≡ B(MVR, CVR)
-
-Then B assigns nonnegative numbers to ballots, and the outcome is correct iff
-    B̄ ≡ Sum(B(bi, ci)) / N > 1/2
-and so B is an half-average assorter.
-````
-
-````
-  "assorter" here is the plurality assorter
-  Let 
-    bi denote the true votes on the ith ballot card; there are N cards in all.
-    ci denote the voting system’s interpretation of the ith card
-    Ā(c) ≡ Sum(A(ci))/N is the average assorter value across all the CVRs
-    margin ≡ v ≡ 2Ā(c) − 1, the _reported assorter margin_
-  
-    ωi ≡ A(ci) − A(bi)   overstatementError for ith ballot
-    ωi in [-1, -.5, 0, .5, 1] (for plurality assorter, which is in {0, .5, 1}))
-  
-    We know Āb = Āc − ω̄, so Āb > 1/2 iff ω̄ < Āc − 1/2 iff ω̄/(2*Āc − 1) < 1/2 = ω̄/v < 1/2
-    
-    scale so that B(0) = (2*Āc − 1)
-    
-        find B affine transform to interval [0, u], where H0 is average B < 1/2
-    shift to 0, just add 1 to ωi, B(-1) = 0
-    
-    so B(-1) = 0
-       B(0) = 1/2 
-       B(1) = u 
-    
-    Bi = (1 - ωi/u) / (2 - v/u)
-    Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)    
-    
-    τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-    B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
-  
-  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
-  find B transform to interval [0, u],  where H0 is B < 1/2
-  Bi = (1 - ωi/u) / (2 - v/u)
-  Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
-  
-  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
-````
-
-Notes 
-* The comparison assorter B needs Ā(c) ≡ the average CVR assort value > 0.5.
-* Ā(c) should have the diluted margin as the denominator. 
-    (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
-    Diluted refers to the fact that the denominator is the number of ballot cards containing that contest, which is
-    greater than or equal to the number of valid votes.)
-* If overstatement error is always zero (no errors in CRV), the assort value is always
-  ````
-      noerror = 1 / (2 - margin/assorter.upperBound()) 
-              = 1 / (3 - 2 * awinnerAvg/assorter.upperBound())
-              > 0.5 since awinnerAvg > 0.5
-  ````
-* The possible values of the bassort function are then:
-      {0, .5, 1, 1.5, 2} * noerror
-* When the cvrs always equal the corresponding mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
-
-#### Comparison Betting Payoffs
-
-For the ith sample with bet λ_i, the BettingMart payoff is
-
-    t_i = 1 + λ_i * (X_i − µ_i)
-
-where
-
-    λ_i in [0, 1/u_i]
-    X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
-    µ_i ~= 1/2
-    λ_i ~in [0, 2]
-
-then 
-
-    payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
-
-Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates (see next section) and the margin. 
-
-See [Ballot Payoff Plots](docs/BettingPayoffs.md) for details.
-
-### Stratified audits using OneAudit
+## Stratified audits using OneAudit
 
 OneAudit is a comparison audit that uses AlphaMart instead of BettingMart. 
 
 When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
 This is "overstatement-net-equivalent" (aka ONE).
 
-OneAudit, 2.3 pp 5-7:
-````
-      "assorter" here is the plurality assorter
-      from oa_polling.ipynb
-      assorter_mean_all = (whitmer-schuette)/N
-      v = 2*assorter_mean_all-1
-      u_b = 2*u/(2*u-v)  # upper bound on the overstatement assorter
-      noerror = u/(2*u-v)
-
-      Let bi denote the true votes on the ith ballot card; there are N cards in all.
-      Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
-      Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
-
-          Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-          margin ≡ 2Ā(c) − 1, the _reported assorter margin_
-
-          ωi ≡ A(ci) − A(bi)   overstatementError
-          τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-          B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
-
-         Ng = |G_g|
-         Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng; > 0
-         margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
-         
-         mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
-         mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
-         otherwise = 1/2
-````
-
-````
-Plurality assort values:
-  assort in {0, .5, 1}
-
-Regular Comparison:
-  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
-  find B transform to interval [0, u],  where H0 is B < 1/2
-  Bi = (1 - ωi/u) / (2 - v/u)
-  Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
-
-  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
-  
-Batch Comparison:
-  mvr assort in {0, .5, 1} as before
-  cvr assort is always Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
-  overstatementError == A(ci) − A(bi) = Ā(g) - {0, .5, 1} = { Ā(g), Ā(g)-.5, Ā(g)-1} = [loser, nuetral, winner]
-  
-  ωi ≡ A(ci) − A(bi)   overstatementError
-  τi ≡ (1 − ωi /u) = {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u}
-  B(bi, ci) ≡ {1 - Ā(g)/u, 1 - (Ā(g)-.5)/u, 1 - (Ā(g)-1)/u} / (2 − v/u)
-          
-  mvr has loser vote = (1 - Ā(g)/u) / (2-v/u)
-  mvr has winner vote = (1 - (Ā(g)-1)/u) / (2-v/u)
-  mvr has other vote = (1 - (Ā(g)-.5)/u) / (2-v/u) = 1/2
-  
-  when u = 1
-   mvr has loser vote = (1 - A) / (2-v)
-   mvr has winner vote = (2 - A) / (2-v)
-   mvr has other vote = (1.5 - A) / (2-v) 
-  
-  v = 2A-1
-  2-v = 2-(2A-1) = 3-2A = 2*(1.5-A)
-  other = (1.5-A) / (2-v) = (1.5-A)/2*(1.5-A) = 1/2
-  
-  Bi in [ (1 - Ā(g)), .5, (2 - Ā(g))] * noerror(g)
-````
-Using a “mean CVR” for the batch is overstatement-net-equivalent to any CVRs that give the same assorter
-batch subtotals.
-
-````
-    v ≡ 2Ā(c) − 1, the reported _assorter margin_, aka the _diluted margin_.
-
-    Ā(b) > 1/2 iff
-
-    Sum(A(ci) - A(bi)) / N < v / 2   (5)
-
-Following SHANGRLA Section 3.2 define
-
-    B(bi) ≡ (upper + A(bi) - A(ci)) / (2*upper - v)  in [0, 2*upper/(2*upper - v)] (6)
-
-    and Ā(b) > 1/2 iff B̄(b) > 1/2
-
-    see OneAudit section 2.3
-````
-Section 2
-````
-    Ng = |G_g|
-    assorter_mean_poll = (winner total - loser total) / Ng
-    mvr has loser vote = (1-assorter_mean_poll)/(2-v)
-    mvr has winner vote = (2-assorter_mean_poll)/(2-v)
-    otherwise = 1/2
-  
-````
-See "Algorithm for a CLCA using ONE CVRs from batch subtotals" in Section 3.
-````
-This algorithm can be made more efficient statistically and logistically in a variety
-of ways, for instance, by making an affine translation of the data so that the
-minimum possible value is 0 (by subtracting the minimum of the possible over-
-statement assorters across batches and re-scaling so that the null mean is still
-1/2) and by starting with a sample size that is expected to be large enough to
-confirm the contest outcome if the reported results are correct.
-````
-
-Section 4: Auditing heterogenous voting systems: When the voting system can report linked CVRs for some but not all cards.
-
-See "Auditing heterogenous voting systems" Section 4 for comparision to SUITE:
-````
-The statistical tests used in RLAs are not affine equivariant because
-they rely on a priori bounds on the assorter values. The original assorter values
-will generally be closer to the endpoints of [0, u] than the transformed values
-are to the endpoints of [0, 2u/(2u − v)]
-
-An affine transformation of the overstatement assorter values can move them back to the endpoints of the support
-constraint by subtracting the minimum possible value then re-scaling so that the
-null mean is 1/2 once again, which reproduces the original assorter.
-````
-
-Section 5.2
-
-````
-While CLCA with ONE CVRs is algebraically equivalent to BPA, the perfor-
-mance of a given statistical test will be different for the two formulations.
-
-Transforming the assorter into an overstatement assorter using the ONEAudit transformation, then testing whether 
-the mean of the resulting population is ≤ 1/2 using the ALPHA test martingale with the
-truncated shrinkage estimator of [22] with d = 10 and η between 0.505 and 0.55
-performed comparably to—but slightly worse than—using ALPHA on the raw
-assorter values for the same d and η, and within 4.8% of the overall performance
-of the best-performing method.
-````
-
-"ALPHA on the raw assorter values" I think is regular BPA.
-"Transforming the assorter into an overstatement assorter" is ONEAIDIT I think, but using Alpha instead of Betting?
-This paper came out at the same time as COBRA.
-
-If ONEAUDIT is better than current BPA, perhaps can unify all 3 (comparison, polling, oneaudit) into a single workflow??
-The main difference is preparing the contest with strata.
-
-Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appears if the MVR is missing?
-
-Unclear about using nostyle with ONEAUDIT.
-
-### Comparison of AuditTypes' sample sizes
+## Comparison of AuditTypes' sample sizes
 
 These are plots of sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
 when there are no errors between the MVRs and the CVRs.
@@ -531,13 +279,13 @@ Varying phantom percent::
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
 
 
-## Sampling
+# Sampling
 
 SHANGRLA provides a very elegant separation between the implementation of risk testing and sampling. Specifically,
 the risk testing function deals only with (the mean of a sequence of) samples values. The sample values are 
 calculated by assorters. The assorters themselves are independent of the risk function.
 
-### Estimating Sample sizes
+## Estimating Sample sizes
 
 For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
 running simulations, we can use estimated error rates and add errors to the manufactured data.
@@ -556,7 +304,7 @@ Note: I _think_ its ok if more ballots come in between rounds (although this may
 Just add the new ballots to the "all cvrs list", and do the next round as usual. 
 Ideally N_c doesnt change, so it just makes less evil zombies.
 
-### Choosing which ballots/cards to sample
+## Choosing which ballots/cards to sample
 
 Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
 This step is highly dependent on how much we know about which ballots contain which contests. In particular,
@@ -579,7 +327,7 @@ So far, we can distinguish the following cases:
   * information about which containers have which card styles, even without information about which cards contain which
     contests, can still yield substantial efficiency gains for ballot-polling audits.
 
-#### Consistent Sampling
+### Consistent Sampling
 
 When we can tell which ballots/CVRs contain a given contest, we can use consistent sampling, as follows:
 
@@ -589,7 +337,7 @@ When we can tell which ballots/CVRs contain a given contest, we can use consiste
 * Select the first ballots/cvrs that use any contest that needs more samples, until all contests have
 at least contest.estSampleSize in the sample of selected ballots.
 
-#### Uniform Sampling
+### Uniform Sampling
 
 When we can't tell which ballots/CVRs contain a given contest, we can use uniform sampling, as follows:
 
@@ -621,7 +369,7 @@ In the following plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case w
 
 See _PlotPollingNoStyles.kt_.
 
-### Comparison audits and CSDs
+## Comparison audits and CSDs
 
 ConsistentSampling is used in either case. This assigns large psuedo-random numbers to each ballot, orders the ballots
 by that number, and selects the first ballots that use any contest that needs more samples, until all contests have 
@@ -646,7 +394,7 @@ TODO: whats the reasoning for the above?
 For !hasCSD, we wont select unvoted contests to be in the sample, since they arent recorded.
 So then if we see an unvoted contest on the MVR, the case where the MVR contains the contest but not the CVR, then...
 
-### Polling Vs Comparison with/out CSD Estimated Sample sizes
+## Polling Vs Comparison with/out CSD Estimated Sample sizes
 
 The following plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
 
@@ -657,7 +405,7 @@ since it depends on N/Nc scaling.
 
 See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
 
-### Polling Vs Comparison Estimated Sample sizes with no errors
+## Polling Vs Comparison Estimated Sample sizes with no errors
 
 This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
 audit at different margins, where the MVRS match the CVRS ("no errors").
@@ -670,7 +418,7 @@ Comparison audits are perhaps useful down to margins = .4% .
 "In a card-level comparison audit, the estimated sample size scales with
 the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
 
-## Estimating Error
+# Estimating Error
 
 The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
 These rates should be empirically determined, and public tables for different voting machines should be published.
@@ -685,7 +433,7 @@ Otherwise, they can specify a "fuzz pct" (explained below), and the apriori erro
 CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates. This is used
 when estimating the sample size from the diluted margin, and also when doing the actual audit comparing the CVRs and the MVRs.
 
-### Comparison error rates
+## Comparison error rates
 
 The comparison error rates are:
 
@@ -709,9 +457,9 @@ For IRV, the corresponding descriptions of the errror rates are:
 See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more details and plots of 2-way contests
 with varying p2error rates.
 
-See [Comparison Error Rates](docs/ComparisonErrorRates.md) for technical details.
+See [Comparison Error Rates](docs/ClcaErrorRates) for technical details.
 
-### Estimating Sample sizes and error rates with fuzz
+## Estimating Sample sizes and error rates with fuzz
 
 We can also estimate comparison error rates as follows:
 
@@ -755,7 +503,7 @@ Possible refinement of this algorithm might measure:
 2. percent time a mark is not seen when it is there
 3. percent time a mark is given to the wrong candidate
 
-## Missing Ballots (aka phantoms-to-evil zombies)
+# Missing Ballots (aka phantoms-to-evil zombies)
 
 From P2Z paper:
 
@@ -856,7 +604,7 @@ From OneAudit, p 9:
 1 - 5218/5294 = .0143
 1 - 22082/22372 = .0129
 
-
+# Appendices
 ## Differences with SHANGRLA
 
 ### Limit audit to estimated samples

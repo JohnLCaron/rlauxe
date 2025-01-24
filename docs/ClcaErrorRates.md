@@ -119,7 +119,11 @@ The sample size as a function of fuzzPct, fixed margin of .04:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaFuzzed/clcaFuzzedLinear.html" rel="clcaFuzzedLinear">![clcaFuzzedLinear](plots/workflows/clcaFuzzed/clcaFuzzedLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaFuzzed/clcaFuzzedLog.html" rel="clcaFuzzedLog Log">![clcaFuzzedLog](plots/workflows/clcaFuzzed/clcaFuzzedLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaFuzzed/clcaFuzzedFailures.html" rel="clcaFuzzedFailures Log">![clcaFuzzedFailures](plots/workflows/clcaFuzzed/clcaFuzzedFailures.png)</a>
+
+Notes:
+* The oracle results show the lowest sample sizes possible.
+* The noerror strategy is significantly worse in te presence of errors.
+* If you can guess the fuzzPct to within a factor of 2, theres not much differene, especially for low values of fuzzPct.
 
 The sample size as a function of margin, fixed fuzzPct of .05:
 
@@ -127,8 +131,3 @@ The sample size as a function of margin, fixed fuzzPct of .05:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaMargin/clcaMarginLog.html" rel="clcaMarginLog Log">![clcaMarginLog](plots/workflows/clcaMargin/clcaMarginLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaMargin/clcaMarginFailures.html" rel="clcaMarginFailures Log">![clcaMarginFailures](plots/workflows/clcaMargin/clcaMarginFailures.png)</a>
 
-Notes:
-
-* The oracle results show the lowest sample sizes possible. 
-* The noerror strategy is significantly worse.
-* If you can guess the fuzzPct to within a factor of 2, theres not much differene, especially for low values of fuzzPct.

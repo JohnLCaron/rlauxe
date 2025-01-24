@@ -5,12 +5,12 @@
        &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
    &lt;/head>
    &lt;body>
-          &lt;div id=&quot;ehZFrN&quot;>&lt;/div>
+          &lt;div id=&quot;4RI3os&quot;>&lt;/div>
    &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
        var plotSpec={
 &quot;ggtitle&quot;:{
 &quot;text&quot;:&quot;AuditsWithErrors estimated sample sizes&quot;,
-&quot;subtitle&quot;:&quot;margin=0.04 N=50000 nruns=100&quot;
+&quot;subtitle&quot;:&quot;margin=0.04 N=50000 nruns=200&quot;
 },
 &quot;mapping&quot;:{
 },
@@ -35,33 +35,33 @@
 }],
 &quot;layers&quot;:[{
 &quot;mapping&quot;:{
-&quot;x&quot;:&quot;errorPct&quot;,
+&quot;x&quot;:&quot;fuzzPct&quot;,
 &quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
 &quot;color&quot;:&quot;auditType&quot;,
 &quot;group&quot;:&quot;&amp;merged_groups&quot;
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12],
 &quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
-&quot;log10(samplesNeeded)&quot;:[2.1702617153949575,2.3012904942113717,2.3927848582254354,2.498613764699758,2.6605998892677434,2.8002082709848084,2.8797895080199587,2.8936619127686423,3.03610966706058,3.0801645329020197,3.140906958175433,3.1532598319626945,3.2483239953853222,3.2872730913233195,3.8584632048106946,3.8547631769950197,3.866289702585148,3.8795528816383347,3.891111316726946,3.9024239201942854,3.8993936558360076,3.9465092501429777,3.9478007073839274,3.941858630018308,3.944663261621525,3.9698593000472666,4.017240832375301,3.9654416024522816,3.6750015980556245,3.6429361512312695,3.6852857139220974,3.709007778346534,3.6197255204079997,3.600530757017496,3.641907197432925,3.698224114848703,3.756018834710759,3.7250593508010676,3.7082355842875137,3.7835813103714795,3.7595205372335263,3.816269809991422],
-&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
-&quot;errorPct&quot;:[0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12]
+&quot;log10(samplesNeeded)&quot;:[2.1702617153949575,2.291391053078407,2.3815572760875012,2.5385486002970885,2.6431367110434376,2.745207559167046,2.838518523508408,2.9351014996945137,2.9895054358369544,3.1048932188887437,3.139324850082506,3.249848700254059,3.2485078310028372,3.32306844039817,3.85619127689946,3.872687302885998,3.878402003320802,3.882725416722564,3.89184453298739,3.913270114415161,3.930975250969006,3.935410017309818,3.9482816305296855,3.9571598338708793,3.9853334972668715,3.983762236546121,4.0034017174160805,4.017892100454906,3.6276561427770178,3.5882913196986443,3.6623686805867006,3.665180749201087,3.600311699008486,3.72566339308743,3.6939695234273717,3.6880703769782643,3.711320799899071,3.7305590167585176,3.7673477298890194,3.7606644447036137,3.74542926863141,3.7916060971954297],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;]
 },
 &quot;sampling&quot;:&quot;none&quot;,
 &quot;position&quot;:&quot;identity&quot;,
 &quot;geom&quot;:&quot;line&quot;
 },{
 &quot;mapping&quot;:{
-&quot;x&quot;:&quot;errorPct&quot;,
+&quot;x&quot;:&quot;fuzzPct&quot;,
 &quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
 &quot;group&quot;:&quot;&amp;merged_groups&quot;
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12],
 &quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
-&quot;log10(samplesNeeded)&quot;:[2.1702617153949575,2.3012904942113717,2.3927848582254354,2.498613764699758,2.6605998892677434,2.8002082709848084,2.8797895080199587,2.8936619127686423,3.03610966706058,3.0801645329020197,3.140906958175433,3.1532598319626945,3.2483239953853222,3.2872730913233195,3.8584632048106946,3.8547631769950197,3.866289702585148,3.8795528816383347,3.891111316726946,3.9024239201942854,3.8993936558360076,3.9465092501429777,3.9478007073839274,3.941858630018308,3.944663261621525,3.9698593000472666,4.017240832375301,3.9654416024522816,3.6750015980556245,3.6429361512312695,3.6852857139220974,3.709007778346534,3.6197255204079997,3.600530757017496,3.641907197432925,3.698224114848703,3.756018834710759,3.7250593508010676,3.7082355842875137,3.7835813103714795,3.7595205372335263,3.816269809991422],
-&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
-&quot;errorPct&quot;:[0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12]
+&quot;log10(samplesNeeded)&quot;:[2.1702617153949575,2.291391053078407,2.3815572760875012,2.5385486002970885,2.6431367110434376,2.745207559167046,2.838518523508408,2.9351014996945137,2.9895054358369544,3.1048932188887437,3.139324850082506,3.249848700254059,3.2485078310028372,3.32306844039817,3.85619127689946,3.872687302885998,3.878402003320802,3.882725416722564,3.89184453298739,3.913270114415161,3.930975250969006,3.935410017309818,3.9482816305296855,3.9571598338708793,3.9853334972668715,3.983762236546121,4.0034017174160805,4.017892100454906,3.6276561427770178,3.5882913196986443,3.6623686805867006,3.665180749201087,3.600311699008486,3.72566339308743,3.6939695234273717,3.6880703769782643,3.711320799899071,3.7305590167585176,3.7673477298890194,3.7606644447036137,3.74542926863141,3.7916060971954297],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;]
 },
 &quot;size&quot;:1.0,
 &quot;shape&quot;:1.0,
@@ -70,12 +70,12 @@
 &quot;position&quot;:&quot;identity&quot;,
 &quot;geom&quot;:&quot;point&quot;,
 &quot;tooltips&quot;:{
-&quot;variables&quot;:[&quot;errorPct&quot;,&quot;log10(samplesNeeded)&quot;,&quot;auditType&quot;],
+&quot;variables&quot;:[&quot;fuzzPct&quot;,&quot;log10(samplesNeeded)&quot;,&quot;auditType&quot;],
 &quot;disable_splitting&quot;:true
 }
 }]
 };
-       var plotContainer = document.getElementById(&quot;ehZFrN&quot;);
+       var plotContainer = document.getElementById(&quot;4RI3os&quot;);
        LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
    &lt;/script>
    &lt;/body>

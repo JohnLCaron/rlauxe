@@ -1,15 +1,13 @@
-**RLAUXE**
+**RLAUXE (WORK IN PROGRESS)**
 
 _last update: 01/24/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
-**WORK IN PROGRESS**
-
 Click on plot images to get an interactive html plot.
 
-You can also read this on [github.io](https://johnlcaron.github.io/rlauxe/).
+You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 Table of Contents
 <!-- TOC -->
@@ -25,14 +23,14 @@ Table of Contents
   * [Polling audits](#polling-audits)
   * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
   * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
-  * [Polling Vs Comparison Estimated Sample sizes with no errors (outdated))](#polling-vs-comparison-estimated-sample-sizes-with-no-errors-outdated)
+  * [Estimated Sample sizes with no errors](#estimated-sample-sizes-with-no-errors)
 * [Sampling](#sampling)
   * [Estimating Sample sizes](#estimating-sample-sizes)
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
     * [Consistent Sampling](#consistent-sampling)
     * [Uniform Sampling](#uniform-sampling)
   * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-* [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
+  * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -232,7 +230,7 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 * Low values of d are much better when true mean < reported mean, at the cost of larger samples sizes.
 * Tentatively, we will use d = 100 as default, and allow the user to override.
 
-See [AlphaMart function for Polling](docs/AlphaMart.md) for more details and plots.
+See [ALPHA testing statistic](docs/AlphaMart.md) for more details and plots.
 
 
 ## Stratified audits using OneAudit
@@ -241,6 +239,9 @@ OneAudit is a comparison audit that uses AlphaMart instead of BettingMart.
 
 When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
 This is "overstatement-net-equivalent" (aka ONE).
+
+See [OneAudit Notes](docs/OneAudit.md) for more details and plots.
+
 
 ## Comparison of AuditTypes' sample sizes
 
@@ -261,7 +262,6 @@ with margin fixed at 4%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.html" rel="AuditsWithErrors NRounds">![AuditsWithErrorsNrounds](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsNrounds.png)</a>
 
 * clca is much more sensitive to errors than polling or oneaudit.
 
@@ -275,9 +275,14 @@ Varying phantom percent::
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsNoErrors Log">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
 
+## Estimated Sample sizes with no errors
 
+The best possible audit is CLCA when there are no errors in the CVRs. In that case, the sample sizes depend only on the margin:
 
-## Polling Vs Comparison Estimated Sample sizes with no errors (outdated))
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
+
+Remarkably, this value is independent of N. So, for example we need 1,128 samples to audit a contest with a 0.5% margin.
+For a 10,000 vote election, thats 11.28% For a 100,000 vote election, its only 1.13%.
 
 This plot (_PlotSampleSizeEstimates.plotComparisonVsPoll()_) shows the difference between a polling audit and a comparison
 audit at different margins, where the MVRS match the CVRS ("no errors").
@@ -285,7 +290,7 @@ audit at different margins, where the MVRS match the CVRS ("no errors").
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsPoll.html" rel="Polling Vs Comparison Estimated Sample sizes">![ComparisonVsPoll](./docs/plots/samples/ComparisonVsPoll.png)</a>
 
 Polling at margins < 4% needs prohibitively large sample sizes.
-Comparison audits are perhaps useful down to margins = .4% .
+Comparison audits are useful down to any margin, depending on N and the error rates.
 
 "In a card-level comparison audit, the estimated sample size scales with
 the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
@@ -391,9 +396,9 @@ since it depends on N/Nc scaling.
 
 See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
 
-# Missing Ballots (aka phantoms-to-evil zombies)
+## Missing Ballots (aka phantoms-to-evil zombies)
 
-From P2Z paper:
+From Phantoms to Zombies (P2Z) paper:
 
     A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
 
@@ -404,93 +409,8 @@ From P2Z paper:
     The dead (not found, phantom) ballots are re-animated as evil zombies: We suppose that they reflect whatever would
     increase the P-value most: a 2-vote overstatement for a ballot-level comparison audit, 
     or a valid vote for every loser in a ballot-polling audit.
- 
-From SHANGRLA, section 3.4:
 
-    Let NC denote an upper bound on the number of ballot cards that contain the contest. 
-    Suppose that n ≤ NC CVRs contain the contest and that each of those CVRs is associated with a unique,
-    identifiable physical ballot card that can be retrieved if that CVR is selected for audit.
-    
-    If NC > n, create NC − n “phantom ballots” and NC − n “phantom CVRs.” Calculate the assorter mean for all the CVRs,
-    including the phantoms by treating the phantom CVRs as if they contain no valid vote in the contest 
-    (i.e., the assorter assigns the value 1/2 to phantom CVRs). Find the corresponding assorter margin (v ≡ 2Ā − 1).
-    [comment: so use 1/2 for assorter margin calculation].
-
-    To conduct the audit, sample integers between 1 and NC.
-    
-    1. If the resulting integer is between 1 and n, retrieve and inspect the ballot card associated with the corresponding CVR.
-        1. If the associated ballot contains the contest, calculate the overstatement error as in (SHANGRLA eq 2, above).
-        2. If the associated ballot does not contain the contest, calculate the overstatement error using the value the 
-           assorter assigned to the CVR, but as if the value the assorter assigns to the physical ballot is zero
-           (that is, the overstatement error is equal to the value the assorter assigned to the CVR).
-       2. If the resulting integer is between n + 1 and NC , we have drawn a phantom CVR and a phantom ballot. Calculate the
-          overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
-          and as if the value the assorter assigned to the CVR was 1/2.
-    
-    Some jurisdictions, notably Colorado, redact CVRs if revealing them might compromise
-    vote anonymity. If such CVRs are omitted from the tally and the number of phantom
-    CVRs and ballots are increased correspondingly, this approach still leads to a valid RLA.
-    But if they are included in the tally, then if they are selected for audit they should be
-    treated as if they had the value u TODO (the largest value the assorter can assign) in calculating
-    the overstatement error.
-
-From SHANGRLA python code, assertion-RLA.ipynb:
-
-    Any sampled phantom card (i.e., a card for which there is no CVR) is treated as if its CVR is a non-vote (which it is), 
-    and as if its MVR was least favorable (an "evil zombie" producing the greatest doubt in every assertion, separately). 
-    Any sampled card for which there is a CVR is compared to its corresponding CVR.
-    If the card turns out not to contain the contest (despite the fact that the CVR says it does), 
-    the MVR is treated in the least favorable way for each assertion (i.e., as a zombie rather than as a non-vote).
-
-So it seems (case 1) we use 1/2 when calculating assorter margins, but during the actual audit, (case 2) we use 0 (polling) and 0? (comparison).
-
-So we need a different routine for "find assorter margin" than "find assorter value". Probably.
-Python code (Audit.py, Assorter) doesnt seem to reflect polling case 2 that I can find, but perhaps because the assort is passed in?
-
-    The basic method is assort, but the constructor can be called with (winner, loser)
-    instead. In that case,
-        assort = (winner - loser + 1)/2
-
-which corresponds to case 1.
-
-------------------------------------------------------------------------------------
-
-    Let N_c = upper bound on ballots for contest C.
-    Let Nb = N (physical ballots) = ncvrs (comparison) or nballots in manifest (polling).
-    When we have styles, we can calculate Nb_c = physical ballots for contest C.
-
-    Let V_c = reported votes for contest C; V_c <= Nb_c <= N_c.
-    Let U_c = undervotes for contest C; U_c = Nb_c - V_c >= 0.
-    Let Np_c = nphantoms for contest C; Np_c = N_c - Nb_c.
-    Then N_c = V_c + U_c + Np_c.
-
-    Comparison, no styles: we have cvrs, but the cvr doesnt record undervotes.
-    We know V_c and N_c. Cant distinguish an undervote from a phantom, so we dont know U_c, or Nb_c or Np_c.
-    For estimating, we can use some guess for U_c.
-    For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
-    I think we must have a ballot manifest, which means we have Nb, and ...
-
-------------------------------------------------------------------------------------
-
-The margin is calculated with both undervotes and phantoms = 1/2.
-But in reality, the phantoms use "worst case" vote for the loser.
-If the phantom pct is greater than the margin, the audit will fail.
-When hasStyles, we know what that percent is.
-So for estimation, we could calculate the margin with usePhantoms=true, since thats what were going to see during the audit.
-
-If we have styles, we can count undervotes, and so we know Np. Since Np has such a strong effect, we will keep it per 
-contest and use it in the estimation and also the betting strategy.
-
-Should use phantomPct for estimated 1-vote overstatement error rate estimate.
-
--------------------
-From OneAudit, p 9:
-
-    The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest; 
-    the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
-
-1 - 5218/5294 = .0143
-1 - 22082/22372 = .0129
+See [Missing Ballots](docs/MissingBallots.md) for details.
 
 # Appendices
 ## Differences with SHANGRLA

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.comparison
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.rlaplots.Scale
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -57,17 +58,18 @@ class GenClcaVsMarginPlots {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsMargin(true)
-        showSampleSizesVsMargin(false)
+        showSampleSizesVsMargin(Scale.Linear)
+        showSampleSizesVsMargin(Scale.Log)
+        showSampleSizesVsMargin(Scale.Pct)
         showFailuresVsMargin()
     }
 
-    fun showSampleSizesVsMargin(useLog: Boolean) {
+    fun showSampleSizesVsMargin(yscale: Scale) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "auditType", useLog=useLog) { category(it) }
+        plotter.showSampleSizesVsMargin(results, "auditType", yscale) { category(it) }
     }
 
     fun showFailuresVsMargin() {

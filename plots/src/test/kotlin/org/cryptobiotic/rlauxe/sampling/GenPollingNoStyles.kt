@@ -71,6 +71,8 @@ class GenPollingNoStyles {
         return nfn(Nb.toInt(), 6)
     }
 
+    // candidate for removal
+
     @Test
     fun plotPollingNoStyleOrg() {
         val Nc = 10000

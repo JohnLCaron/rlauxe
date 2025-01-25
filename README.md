@@ -388,18 +388,20 @@ since it works out that Nc cancels out:
 The scale factor Nb/Nc depends on how many contests there are and how they are distributed across the ballots.
 In the following plot we show polling audits, no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflow/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/workflow/pollingNoStyle/pollingNoStyleLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflow/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/workflow/pollingNoStyle/pollingNoStyleLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflow/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/workflow/pollingNoStyle/pollingNoStylePct.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/workflows/pollingNoStyle/pollingNoStylePct.png)</a>
 
 * The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
 * We need to sample more than 50% of Nb when the margin < 5%
 
 ### Polling Vs Comparison with/out CSD Estimated Sample sizes (outdated, redo)
 
-The following plot shows polling vs comparison with and without CSD at different margins:
+The following plot shows polling vs comparison with and without CSD at different margins, where Nb/Nc = 2.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsStyleAndPoll.html" rel="ComparisonVsStyleAndPoll">![ComparisonVsStyleAndPoll](./docs/plots/samples/ComparisonVsStyleAndPoll.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLog.html" rel="compareWithStyle">![compareWithStyle](./docs/plots/workflows/compareWithStyle/compareWithStyleLog.png)</a>
+
+* For both polling and clca, the sample sizes are a factor of Nb/Nc = 2 greater. 
 
 
 # Appendices

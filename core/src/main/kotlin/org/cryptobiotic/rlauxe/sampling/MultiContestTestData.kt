@@ -110,6 +110,16 @@ data class MultiContestTestData(
         return BallotManifest(ballots + phantoms, ballotStyles)
     }
 
+    fun makeCvrsAndBallotManifest(hasStyle: Boolean): Pair<List<Cvr>, BallotManifest> {
+        val cvrs = makeCvrsFromContests()
+        val ballots = mutableListOf<Ballot>()
+        cvrs.forEach { cvr ->
+            val ballot = Ballot(cvr.id, cvr.phantom, null, if (hasStyle) cvr.votes.keys.toList() else emptyList())
+            ballots.add(ballot)
+        }
+        return Pair( cvrs, BallotManifest(ballots, ballotStyles))
+    }
+
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
     fun makeCvrsFromContests(): List<Cvr> {

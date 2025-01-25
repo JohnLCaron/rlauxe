@@ -9,7 +9,7 @@ class PollingWorkflow(
     val auditConfig: AuditConfig,
     val contestsToAudit: List<ContestIF>, // the contests you want to audit
     val ballotManifest: BallotManifest,
-    val N: Int, // total number of ballots/cards
+    val Nb: Int, // total number of ballots/cards
     val quiet: Boolean = false,
 ): RlauxWorkflow {
     val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
@@ -17,6 +17,7 @@ class PollingWorkflow(
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
+        require (ballotManifest.ballots.size == Nb)
 
         contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
@@ -54,7 +55,7 @@ class PollingWorkflow(
                 sampleIndices
             } else {
                 if (!quiet) println("\nuniformSampling round $roundIdx")
-                val sampleIndices = uniformSampling(contestsNotDone, ballotsUA, auditConfig.samplePctCutoff, N, roundIdx)
+                val sampleIndices = uniformSampling(contestsNotDone, ballotsUA, auditConfig.samplePctCutoff, Nb, roundIdx)
                 if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
                 sampleIndices
             }

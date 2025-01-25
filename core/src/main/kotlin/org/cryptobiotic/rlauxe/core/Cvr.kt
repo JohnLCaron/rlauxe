@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.workflow.BallotOrCard
+import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 
 // immutable
 data class Cvr(
@@ -61,7 +61,7 @@ data class Cvr(
 }
 
 /** Mutable version of Cvr. sampleNum >= 0  */
-data class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCard {
+data class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCvr {
     var sampled = false // is this CVR in the sample?
 
     val id = cvr.id

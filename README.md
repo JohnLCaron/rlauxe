@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 01/24/2025_
+_last update: 01/25/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -18,19 +18,20 @@ Table of Contents
     * [Approval](#approval)
     * [SuperMajority](#supermajority)
     * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
+  * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
-  * [Polling audits](#polling-audits)
-  * [Stratified audits using OneAudit](#stratified-audits-using-oneaudit)
-  * [Comparison of AuditTypes' sample sizes](#comparison-of-audittypes-sample-sizes)
-  * [Estimated sample sizes with no errors](#estimated-sample-sizes-with-no-errors)
+  * [Polling Audits](#polling-audits)
+  * [Stratified Audits using OneAudit](#stratified-audits-using-oneaudit)
+* [Measured Sample sizes](#measured-sample-sizes)
+  * [Sample sizes with no errors](#sample-sizes-with-no-errors)
+  * [Sample sizes with errors](#sample-sizes-with-errors)
 * [Sampling](#sampling)
   * [Estimating Sample sizes](#estimating-sample-sizes)
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
-    * [Consistent Sampling](#consistent-sampling)
-    * [Uniform Sampling](#uniform-sampling)
-  * [Polling Vs Comparison with/out CSD Estimated Sample sizes](#polling-vs-comparison-without-csd-estimated-sample-sizes)
-  * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
+    * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
+    * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
+    * [Polling Vs Comparison with/out CSD Estimated Sample sizes (outdated, redo)](#polling-vs-comparison-without-csd-estimated-sample-sizes-outdated-redo)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -185,6 +186,23 @@ See the RAIRE guides for details:
 * [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)
 * [Part 2: Generating Assertions with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_2.pdf)
 
+
+## Missing Ballots (aka phantoms-to-evil zombies)
+
+From Phantoms to Zombies (P2Z) paper:
+
+    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
+
+    What if the ballot manifest is not accurate?
+    It suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
+    This ensures that the true risk limit remains smaller than the nominal risk limit.
+
+    The dead (not found, phantom) ballots are re-animated as evil zombies: We suppose that they reflect whatever would
+    increase the P-value most: a 2-vote overstatement for a ballot-level comparison audit, 
+    or a valid vote for every loser in a ballot-polling audit.
+
+See [Missing Ballots](docs/MissingBallots.md) for details.
+
 # Audit Types
 
 ## Card Level Comparison Audits (CLCA)
@@ -251,7 +269,7 @@ In general samples sizes are independent of N, which is helpful to keep in mind
 Actually there is a slight dependence on N for "without replacement" audits when the sample size approaches N, 
 but that case approaches a full hand audit, and isnt very interesting.
 
-When Card Style Data (CSD) is missing, the sample sizes have to be scaled by N / Nc, where M is the number of physical ballots
+When Card Style Data (CSD) is missing, the sample sizes have to be scaled by N / Nc, where N is the number of physical ballots
 that a contest might be on, and Nc is the number of ballots it is actually on. 
 See [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample), below.
 
@@ -276,8 +294,11 @@ the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of
 
 ## Sample sizes with errors
 
-Plots vs fuzzPct (percent ballots having randomly changed candidate, see [sampling with fuzz](#estimating-sample-sizes-and-error-rates-with-fuzz),
-with margin fixed at 4%:
+In these simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the ballots
+and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
+When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
+
+These are plots vs fuzzPct, with margin fixed at 4%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
@@ -292,64 +313,48 @@ Varying undervotes percent:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotes Linear">![AuditsWithUndervotesLinear](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
 
-Varying phantom percent, up to and over the margin of 5%:
+Varying phantom percent, up to and over the margin of 4.5%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
-
+* Invetsingate why OneAudits seem much less affected.
 
 # Sampling
 
-SHANGRLA provides a very elegant separation between the implementation of risk testing and sampling. Specifically,
-the risk testing function deals only with (the mean of a sequence of) samples values. The sample values are 
-calculated by assorters. The assorters themselves are independent of the risk function.
+Sampling refers to choosing which ballots to hand review to create Manual Voting Records (MVRs) for. Once the MVRs
+are created, the actual audit takes place.
+
+There are two phases to sampling: estimating sample sizes for each contest, and then randomly choosing ballots that 
+contain at least that many contests.
 
 ## Estimating Sample sizes
 
 For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
-running simulations, we can use estimated error rates and add errors to the manufactured data.
+running simulations, we can use estimated error rates to add errors to the manufactured data.
 
 For each contest assertion we estimate the required sample size that will satisfy the risk limit some fraction 
-(_auditConfig.quantile_) of the time. The contest sample_size is then the maximum of the contests' assertion estimates.
+(_auditConfig.quantile_) of the time. The contest estimated sample size is then the maximum of the contests' assertion estimates.
 
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
 
-Note that each round does its own sampling without regard to the previous round's sampled ballots. 
-Since the seed remains the same and the ballot ordering is the same, then previously audited MVRS are used as much as 
-possible in subsequent rounds.
-
-Note: I _think_ its ok if more ballots come in between rounds (although this may be disallowed for security reasons). 
-Just add the new ballots to the "all cvrs list", and do the next round as usual. 
-Ideally N_c doesnt change, so it just makes less evil zombies.
-
 ## Choosing which ballots/cards to sample
 
 Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
-This step is highly dependent on how much we know about which ballots contain which contests. In particular,
-whether you have Card Style Data (CSD), (see MoreStyle, p.2)
+This step depends whether you have Card Style Data (CSD, see MoreStyle, p.2), which tells us which ballots
+have which contests. 
 
 For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
-If it does not record contests with no votes, I think we have to use uniform sampling instead of consistent sampling.
-This has such a dramatic effect on sample sizes that I would consider this an bug of the CVR software.
-Nonetheless we handle this case in the library.
+For polling audits, the BallotManifest may contain BallotStyles which comprise the CSD.
 
-So far, we can distinguish the following cases:
+If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
 
-1. Comparison, hasCSD: CVR is a CSD.
-2. Comparison, !hasCSD: contests with no votes are not recorded on the CVR.
+Note that each round does its own sampling without regard to the previous round's results.
+However, since the seed remains the same, the ballot ordering is the same. We choose the lowest ordered ballots first,
+so previously audited MVRS are always used again in subsequent rounds.
 
-3. Polling, hasCSD: has a ballot manifest with ballot.hasContest(contestId)
-4. Polling, !hasCSD: doesnt know which ballots have which contests
-5. Polling, precinct batches/containers (TODO). See MoreStyle, p.13:
-  * precinct-based voting where each voter in a precinct gets the same ballot style, and the balots are stored by precinct.
-  * information about which containers have which card styles, even without information about which cards contain which
-    contests, can still yield substantial efficiency gains for ballot-polling audits.
-
-### Consistent Sampling
-
-When we can tell which ballots/CVRs contain a given contest, we can use consistent sampling, as follows:
+### Consistent Sampling with Card Style Data
 
 * For each contest, estimate the number of samples needed (contest.estSamples).
 * For each ballot/cvr, assign a large psuedo-random number, using a high-quality PRNG.
@@ -357,16 +362,14 @@ When we can tell which ballots/CVRs contain a given contest, we can use consiste
 * Select the first ballots/cvrs that use any contest that needs more samples, until all contests have
 at least contest.estSampleSize in the sample of selected ballots.
 
-### Uniform Sampling
-
-When we can't tell which ballots/CVRs contain a given contest, we can use uniform sampling, as follows:
+### Uniform Sampling without Card Style Data
 
 * For each contest, estimate the number of samples needed (contest.estSamples).
-* Let N be the total number of ballots, and Nc the maximum number of cards for a contest C. Then we assume that the
-  probability of a ballot containing contest C is Nc / N.
-* Over all contests, compute contest.estSamples / Nc / N and choose the maximum = audit.estSamples.
 * For each ballot/cvr, assign a large psuedo-random number, using a high-quality PRNG.
 * Sort the ballots/cvrs by that number
+* Let Nb be the total number of ballots that may contain a contest, and Nc the maximum number of cards for a contest C. 
+  Then we assume that the probability of a ballot containing contest C is Nc / Nb.
+* Over all contests, compute contest.estSamples * ( Nb / Nc) and set audit.estSamples to the maximum.
 * Take the first audit.estSamples of the sorted ballots.
 
 We need Nc as a condition of the audit, but its straightforward to estimate a contests' sample size without Nc,
@@ -376,45 +379,28 @@ since it works out that Nc cancels out:
         where 
           dilutedMargin = (vw - vl)/ Nc
         sampleEstimate = rho * Nc / (vw - vl)
-        totalEstimate = sampleEstimate * N / Nc               // must scale by proportion of ballots with that contest
-                      = rho * N / (vw - vl) 
+        totalEstimate = sampleEstimate * Nb / Nc               // must scale by proportion of ballots with that contest
+                      = rho * Nb / (vw - vl) 
                       = rho / fullyDilutedMargin
         where
-          fullyDilutedMargin = (vw - vl)/ N
+          fullyDilutedMargin = (vw - vl)/ Nb
 
-The scale factor N/Nc depends on how many contests there are and how they are distributed across the ballots.
-In the following plot we just show N/Nc = 1, 2, 5 and 10. N/Nc = 1 is the case where the audit has CSDs:
+The scale factor Nb/Nc depends on how many contests there are and how they are distributed across the ballots.
+In the following plot we show polling audits, no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingNoStyle.html" rel="PollingNoStyle">![PollingNoStyle](./docs/plots/samples/PollingNoStyle.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflow/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/workflow/pollingNoStyle/pollingNoStyleLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflow/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/workflow/pollingNoStyle/pollingNoStyleLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflow/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/workflow/pollingNoStyle/pollingNoStylePct.png)</a>
 
-See _PlotPollingNoStyles.kt_.
+* The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
+* We need to sample more than 50% of Nb when the margin < 5%
 
-## Polling Vs Comparison with/out CSD Estimated Sample sizes
+### Polling Vs Comparison with/out CSD Estimated Sample sizes (outdated, redo)
 
-The following plot shows polling with CSD vs comparison with CSD vs comparison without CSD at different margins:
+The following plot shows polling vs comparison with and without CSD at different margins:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonVsStyleAndPoll.html" rel="ComparisonVsStyleAndPoll">![ComparisonVsStyleAndPoll](./docs/plots/samples/ComparisonVsStyleAndPoll.png)</a>
 
-Little difference between comparison with/out CSD. Large difference with polling with CSD. Not showing polling without CSD,
-since it depends on N/Nc scaling.
-
-See _PlotSampleSizeEstimates.plotComparisonVsStyleAndPoll()_.
-
-## Missing Ballots (aka phantoms-to-evil zombies)
-
-From Phantoms to Zombies (P2Z) paper:
-
-    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
-
-    What if the ballot manifest is not accurate?
-    It suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
-    This ensures that the true risk limit remains smaller than the nominal risk limit.
-
-    The dead (not found, phantom) ballots are re-animated as evil zombies: We suppose that they reflect whatever would
-    increase the P-value most: a 2-vote overstatement for a ballot-level comparison audit, 
-    or a valid vote for every loser in a ballot-polling audit.
-
-See [Missing Ballots](docs/MissingBallots.md) for details.
 
 # Appendices
 ## Differences with SHANGRLA

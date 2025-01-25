@@ -28,6 +28,11 @@ fun makeCvr(winner: Int, name:String?=null): Cvr {
     votes[0] = intArrayOf(winner)
     return Cvr(name?:"card", votes)
 }
+fun makeOtherCvrForContest(contestId: Int, name:String?=null): Cvr {
+    val votes = mutableMapOf<Int, IntArray>()
+    votes[contestId] = IntArray(0)
+    return Cvr(name?:"other", votes)
+}
 
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()

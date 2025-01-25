@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class TestMakeFuzzedCvrsFrom {
+    val show = false
 
     @Test
     fun testFuzzTwoPersonContest() {
@@ -98,7 +99,6 @@ class TestMakeFuzzedCvrsFrom {
 
     @Test
     fun testMakeFuzzedCvrsFromContestSimulation() {
-        val show = false
         val N = 10000
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins =
@@ -146,7 +146,6 @@ class TestMakeFuzzedCvrsFrom {
 
     @Test
     fun testMakeFuzzedCvrsFromMultiContestTestData() {
-        val show = false
         val N = 10000
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins =
@@ -155,12 +154,6 @@ class TestMakeFuzzedCvrsFrom {
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                //     val ncontest: Int,
-                //    val nballotStyles: Int,
-                //    val totalBallots: Int, // including undervotes and phantoms
-                //    val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
-                //    val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
-                //    val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
                 val test = MultiContestTestData(1, 1, N, margin..margin, underVotePctRange = 0.1..0.1)
                 val cvrs = test.makeCvrsFromContests()
                 val contest = test.contests.first()
@@ -201,7 +194,6 @@ class TestMakeFuzzedCvrsFrom {
 
     @Test
     fun testMakeFuzzedCvrsFromContestOA() {
-        val show = false
         val N = 10000
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins =

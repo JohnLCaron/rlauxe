@@ -32,11 +32,10 @@ class TestPollingWorkflow {
         println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
-        val testCvrs = test.makeCvrsFromContests()
-        val ballotManifest = test.makeBallotManifest(auditConfig.hasStyles)
+        val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
 
         val testMvrs = testCvrs
-        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, N)
+        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
         runWorkflow("testPollingNoStyle", workflow, testMvrs)
     }
 
@@ -71,25 +70,23 @@ class TestPollingWorkflow {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
         println()
-        val ballotManifest = test.makeBallotManifest(auditConfig.hasStyles)
-
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
-        val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
+        val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = testCvrs
 
-        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, N)
+        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
         runWorkflow("testPollingWithStyle", workflow, testMvrs)
     }
 
     @Test
     fun testPollingOneContest() {
-        val N = 50000
+        val Nc = 50000
         val ncontests = 1
         val nbs = 1
         val marginRange= 0.05 .. 0.05
         val underVotePct= 0.05 .. 0.05
         val phantomPct= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        val test = MultiContestTestData(ncontests, nbs, Nc, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         test.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
             val fcontest = test.fcontests[idx]
@@ -103,10 +100,8 @@ class TestPollingWorkflow {
         }
 
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
-        val ballotManifest = test.makeBallotManifest(auditConfig.hasStyles)
-        val testCvrs = test.makeCvrsFromContests() // includes undervotes and phantoms
-
-        val workflow = PollingWorkflow(auditConfig, test.contests, ballotManifest, N)
+        val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
+        val workflow = PollingWorkflow(auditConfig, test.contests, ballotManifest, testCvrs.size)
 
         runWorkflow("testPollingOneContest", workflow, testCvrs)
     }

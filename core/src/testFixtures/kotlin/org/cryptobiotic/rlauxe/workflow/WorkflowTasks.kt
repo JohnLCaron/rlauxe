@@ -88,18 +88,27 @@ class ClcaWorkflowTaskGenerator(
     val mvrsFuzzPct: Double,
     val clcaConfig: ClcaConfig,
     val parameters : Map<String, Double>,
-): WorkflowTaskGenerator {
+    val auditConfigIn: AuditConfig? = null,
+    val Nb: Int = Nc
+    ): WorkflowTaskGenerator {
     override fun name() = "ClcaWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
-        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        val auditConfig = auditConfigIn ?:
+            AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, clcaConfig = clcaConfig)
 
-        val clca = ComparisonWorkflow(
-                AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, clcaConfig = clcaConfig),
-                listOf(sim.contest), emptyList(), testCvrs, quiet = quiet
-            )
+        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
+        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+
+        if (!auditConfig.hasStyles && Nb > Nc) {
+            val otherContestId = 42
+            val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
+            testCvrs = testCvrs + otherCvrs
+            testMvrs = testMvrs + otherCvrs
+        }
+
+        val clca = ComparisonWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
         return WorkflowTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
@@ -141,11 +150,7 @@ class PollingWorkflowTaskGenerator(
             ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
         }
 
-        val polling = PollingWorkflow(
-                auditConfig,
-                listOf(sim.contest), ballotManifest, Nb, quiet = quiet
-            )
-
+        val polling = PollingWorkflow(auditConfig, listOf(sim.contest), ballotManifest, Nb, quiet = quiet)
         return WorkflowTask(
             "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
             polling,

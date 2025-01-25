@@ -33,7 +33,8 @@ class ComparisonWorkflow(
         // 2. Pre-processing and consistency checks
         // 	a) Check that the winners according to the CVRs are the reported winners.
         //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
-        contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
+        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        //contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
                 checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
@@ -218,7 +219,8 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
 
     return allVotes.keys.map { conId ->
         val contest = contests.find { it.id == conId }
-        if (contest == null) throw RuntimeException("no contest for contest id= $conId")
+        if (contest == null)
+            throw RuntimeException("no contest for contest id= $conId")
         val accumVotes = allVotes[conId]!!
         val contestUA = ContestUnderAudit(contest, true, hasStyles)
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))

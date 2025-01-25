@@ -7,9 +7,73 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
+// for running workflows with one contest multiple times for testing
+
 private val quiet = true
+
+// runs test workflow with fake mvrs already generated, and the cvrs are variants of those
+// return number of mvrs hand counted
+fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quiet: Boolean=false): Int {
+    val stopwatch = Stopwatch()
+
+    val previousSamples = mutableSetOf<Int>()
+    var rounds = mutableListOf<Round>()
+    var roundIdx = 1
+
+    var prevMvrs = emptyList<Cvr>()
+    var done = false
+    while (!done) {
+        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
+
+        val currRound = Round(roundIdx, indices, previousSamples.toSet())
+        rounds.add(currRound)
+        previousSamples.addAll(indices)
+
+        if (!quiet) println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+        stopwatch.start()
+
+        val sampledMvrs = indices.map {
+            testMvrs[it]
+        }
+
+        done = workflow.runAudit(indices, sampledMvrs, roundIdx)
+        if (!quiet) println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+        prevMvrs = sampledMvrs
+        roundIdx++
+    }
+
+    if (!quiet) {
+        rounds.forEach { println(it) }
+        workflow.showResults()
+    }
+    return rounds.last().sampledIndices.size
+}
+
+data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamples: Set<Int>) {
+    var newSamples: Int = 0
+    init {
+        newSamples = sampledIndices.count { it !in previousSamples }
+    }
+    override fun toString(): String {
+        return "Round(round=$round, newSamples=$newSamples)"
+    }
+}
+
+data class WorkflowResult(val Nc: Int,
+                          val margin: Double,
+                          val status: TestH0Status,
+                          val nrounds: Double,
+                          val samplesUsed: Double,
+                          val samplesNeeded: Double,
+                          val nmvrs: Double,
+                          val parameters: Map<String, Double>,
+                          val failPct: Double, // from avgWorkflowResult()
+)
 
 interface WorkflowTaskGenerator {
     fun name(): String
@@ -17,7 +81,7 @@ interface WorkflowTaskGenerator {
 }
 
 class ClcaWorkflowTaskGenerator(
-    val N: Int, // including undervotes but not phantoms
+    val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -28,7 +92,7 @@ class ClcaWorkflowTaskGenerator(
     override fun name() = "ClcaWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
-        val sim = ContestSimulation.make2wayTestContest(Nc=N, margin, undervotePct=underVotePct, phantomPct=phantomPct)
+        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
@@ -46,26 +110,40 @@ class ClcaWorkflowTaskGenerator(
 }
 
 class PollingWorkflowTaskGenerator(
-    val N: Int, // including undervotes but not phantoms
+    val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
     val fuzzPct: Double,
     val parameters : Map<String, Double>,
+    val auditConfigIn: AuditConfig? = null,
+    val Nb: Int = Nc,
     ) : WorkflowTaskGenerator {
     override fun name() = "PollingWorkflowTaskGenerator"
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
+        val auditConfig = auditConfigIn ?: AuditConfig(
+            AuditType.POLLING, true, seed = Random.nextLong(), ntrials = 10,
+            pollingConfig = PollingConfig(fuzzPct = fuzzPct)
+        )
 
-        val sim = ContestSimulation.make2wayTestContest(Nc=N, margin, undervotePct=underVotePct, phantomPct=phantomPct)
+        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, fuzzPct)
-        val ballotManifest = sim.makeBallotManifest(true)
+        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, fuzzPct)
+        var ballotManifest = sim.makeBallotManifest(auditConfig.hasStyles)
+
+        if (!auditConfig.hasStyles && Nb > Nc) {
+            val otherContestId = 42
+            val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
+            testMvrs = testMvrs + otherCvrs
+
+            val otherBallots = List<Ballot>(Nb - Nc) { Ballot("other${Nc+it}", false, null) }
+            ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
+        }
 
         val polling = PollingWorkflow(
-                AuditConfig(AuditType.POLLING, true, seed = Random.nextLong(), ntrials = 10,
-                    pollingConfig = PollingConfig(fuzzPct = fuzzPct)),
-                listOf(sim.contest), ballotManifest, N, quiet = quiet
+                auditConfig,
+                listOf(sim.contest), ballotManifest, Nb, quiet = quiet
             )
 
         return WorkflowTask(
@@ -78,7 +156,7 @@ class PollingWorkflowTaskGenerator(
 }
 
 class OneAuditWorkflowTaskGenerator(
-    val N: Int, // including undervotes but not phantoms
+    val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -89,13 +167,15 @@ class OneAuditWorkflowTaskGenerator(
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
-        val contestOA2 = makeContestOA(margin, N, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
+        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, fuzzPct)
 
         val oneaudit = OneAuditWorkflow(
-            AuditConfig(AuditType.ONEAUDIT, true, seed = Random.nextLong(), ntrials = 10,
-                pollingConfig = PollingConfig(fuzzPct = fuzzPct)),
+            AuditConfig(
+                AuditType.ONEAUDIT, true, seed = Random.nextLong(), ntrials = 10,
+                pollingConfig = PollingConfig(fuzzPct = fuzzPct)
+            ),
             listOf(contestOA2), oaCvrs, quiet = quiet
         )
         return WorkflowTask(
@@ -115,7 +195,7 @@ class WorkflowTask(
 ) : ConcurrentTaskG<WorkflowResult> {
     override fun name() = name
     override fun run(): WorkflowResult {
-        runWorkflow(name, workflow, testCvrs, quiet = quiet)
+        val nmvrs = runWorkflow(name, workflow, testCvrs, quiet = quiet)
 
         val contestUA = workflow.getContests().first() // theres only one
         val minAssertion = contestUA.minAssertion()!!
@@ -125,8 +205,9 @@ class WorkflowTask(
                 contestUA.Nc,
                 minAssertion.assorter.reportedMargin(),
                 TestH0Status.FailPct,
-                0.0, 0.0, 0.0,
-                otherParameters
+                0.0, 0.0, 0.0, 0.0,
+                otherParameters,
+                100.0,
             )
         } else {
             val lastRound = minAssertion.roundResults.last()
@@ -137,7 +218,9 @@ class WorkflowTask(
                 minAssertion.round.toDouble(),
                 lastRound.samplesUsed.toDouble(),
                 lastRound.samplesNeeded.toDouble(),
-                otherParameters
+                nmvrs.toDouble(),
+                otherParameters,
+                if (lastRound.status.fail) 100.0 else 0.0
             )
         }
     }
@@ -150,36 +233,43 @@ fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResu
 }
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
-    val failures = runs.count{ it.status.fail }
-    val failPct = if (runs.isEmpty()) 0.0 else 100.0 * failures / runs.size
+    val failures = runs.count { it.status.fail }
+    val failPct = if (runs.isEmpty()) 100.0 else 100.0 * failures / runs.size
     val successRuns = runs.filter { !it.status.fail }
+    /*if (!successRuns.isEmpty() && successRuns[0].margin <= 0.03) {
+        val wtf = successRuns.map { it.nmvrs }.average()
+        println("${successRuns[0].margin} = $wtf")
+    }*/
 
     return if (runs.isEmpty()) {
         WorkflowResult(
             0,
             0.0,
             TestH0Status.AllFailPct,
-            0.0, 0.0, 0.0,
-            emptyMap()
-        )
+            0.0, 0.0, 0.0,0.0,
+            emptyMap(),
+            100.0,
+            )
     } else if (successRuns.isEmpty()) {
         val first = runs.first()
         WorkflowResult(
-            first.N,
+            first.Nc,
             first.margin,
             TestH0Status.FailPct,
-            0.0, first.N.toDouble(), first.N.toDouble(),
+            0.0, first.Nc.toDouble(), first.Nc.toDouble(), first.Nc.toDouble(),
             first.parameters,
-        )
+            100.0,
+            )
     } else {
         val first = successRuns.first()
         WorkflowResult(
-            first.N,
+            first.Nc,
             first.margin,
             first.status,
             successRuns.map { it.nrounds }.average(),
             successRuns.map { it.samplesUsed }.average(),
             successRuns.map { it.samplesNeeded }.average(),
+            successRuns.map { it.nmvrs }.average(),
             first.parameters,
             failPct,
         )

@@ -9,10 +9,13 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
+
 class GenClcaVsMarginPlots {
     val nruns = 100  // number of times to run workflow
     val name = "clcaMargin"
     val dirName = "/home/stormy/temp/workflow/$name"
+
+    // Used in docs
 
     @Test
     fun genClcaMarginPlots() {

@@ -24,10 +24,10 @@ package org.cryptobiotic.rlauxe.workflow
 
 data class BallotManifest(
     val ballots: List<Ballot>,
-    val ballotStyles: List<BallotStyle> // empty if style info not available, auditConfig.hasStyles = false
+    val ballotStyles: List<BallotStyle> // empty if style info not available
 )
 
-interface BallotOrCard {
+interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
     fun setIsSampled(isSampled: Boolean)
@@ -40,19 +40,13 @@ data class Ballot(
     val contestIds: List<Int>? = null, // if hasStyles
 ) {
     fun hasContest(contestId: Int): Boolean {
-        if (ballotStyle != null) return ballotStyle.hasContest(contestId) == true
+        if (ballotStyle != null) return ballotStyle.hasContest(contestId)
         if (contestIds != null) return contestIds.find{ it == contestId } != null
         return false
     }
-
-    fun contestIds(): List<Int> {
-        if (ballotStyle != null) return ballotStyle.contestIds
-        if (contestIds != null) return contestIds
-        return emptyList()
-    }
 }
 
-class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) : BallotOrCard {
+class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) : BallotOrCvr {
     var sampled = false //  # is this in the sample?
     val id = ballot.id
     val phantom = ballot.phantom

@@ -76,7 +76,9 @@ class Contest(
         override val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
         override val Nc: Int,
-        override val Np: Int,
+        override val Np: Int,       // may not know this, if !hasStyles
+        // val hasStyles: Boolean,
+        // val Nb: Int?,  // needed to form the factor N / Nc when !hasStyles
     ): ContestIF {
     override val id = info.id
     val name = info.name
@@ -173,8 +175,10 @@ class Contest(
     }
 
     companion object {
-        fun makeWithCandidateNames(info: ContestInfo, votesByName: Map<String, Int>, Nc: Int, Np: Int) =
-            Contest(info, votesByName.map { (key, value) -> Pair(info.candidateNames[key]!!, value) }.toMap(), Nc, Np)
+        fun makeWithCandidateNames(info: ContestInfo, votesByName: Map<String, Int>, Nc: Int, Np: Int): Contest {
+            val votesById = votesByName.map { (key, value) -> Pair(info.candidateNames[key]!!, value) }.toMap()
+            return Contest(info, votesById, Nc, Np)
+        }
     }
 }
 

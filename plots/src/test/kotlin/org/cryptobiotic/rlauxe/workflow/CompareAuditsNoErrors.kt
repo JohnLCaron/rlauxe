@@ -24,22 +24,25 @@ class CompareAuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble()))
-
+            val pollingGenerator = PollingWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, 0.0,
+                mapOf("nruns" to nruns.toDouble())
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
+            val clcaGenerator = ClcaWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, 0.0,
                 ClcaConfig(ClcaSimulationType.oracle, 0.0),
-                mapOf("nruns" to nruns.toDouble()))
-
+                mapOf("nruns" to nruns.toDouble())
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             // oneaudit
             cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, 0.0,
-                    mapOf("nruns" to nruns.toDouble()))
-
+                val oneauditGenerator = OneAuditWorkflowTaskGenerator(
+                    N, margin, 0.0, 0.0, cvrPercent, 0.0,
+                    mapOf("nruns" to nruns.toDouble())
+                )
                 tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
             }
         }
@@ -67,9 +70,11 @@ class CompareAuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
+            val clcaGenerator = ClcaWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, 0.0,
                 ClcaConfig(ClcaSimulationType.oracle, 0.0),
-                mapOf("nruns" to nruns.toDouble()))
+                mapOf("nruns" to nruns.toDouble())
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
         }
 

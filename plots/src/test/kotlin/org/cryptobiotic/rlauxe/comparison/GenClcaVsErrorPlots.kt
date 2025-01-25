@@ -13,6 +13,8 @@ class GenClcaVsErrorPlots {
     val name = "clcaFuzzed"
     val dirName = "/home/stormy/temp/workflow/$name"
 
+    // Used in docs
+
     @Test
     fun genClcaErrorPlots() {
         val N = 50000

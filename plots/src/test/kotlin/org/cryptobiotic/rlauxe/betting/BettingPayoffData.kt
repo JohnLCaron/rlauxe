@@ -12,6 +12,8 @@ import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.math.log10
 import kotlin.math.ln
 
+// used in docs
+
 data class BettingPayoffData(
     val Nc: Int,
     val margin: Double,

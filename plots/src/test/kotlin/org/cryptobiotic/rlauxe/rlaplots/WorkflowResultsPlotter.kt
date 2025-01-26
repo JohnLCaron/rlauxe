@@ -4,7 +4,15 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.math.log10
 
-enum class Scale { Linear, Log, Pct }
+enum class Scale { Linear, Log, Pct;
+    fun desc(what: String): String =
+        when (this) {
+            Linear -> what
+            Log -> "log10($what)"
+            Pct -> "$what %"
+        }
+}
+
 class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
     fun showNmvrsVsMargin(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
@@ -19,11 +27,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             data,
             "$dir/${filename}${yscale.name}",
             "margin",
-            when (yscale) {
-                Scale.Linear -> "number of Mvrs"
-                Scale.Log -> "log10(number of Mvrs)"
-                Scale.Pct -> "number of Mvrs % of Nb"
-            },
+            yscale.desc("number of Mvrs"),
             catName,
             xfld = { it.margin },
             yfld = { it: WorkflowResult -> when (yscale) {
@@ -50,17 +54,37 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             data,
             "$dir/${filename}${yscale.name}",
             "margin",
-            when (yscale) {
-                Scale.Linear -> "samplesNeeded"
-                Scale.Log -> "log10(samplesNeeded)"
-                Scale.Pct -> "samplesNeeded %"
-            },
+            yscale.desc("samplesNeeded"),
             catName,
             xfld = { it.margin },
             yfld = { it: WorkflowResult -> when (yscale) {
                 Scale.Linear -> it.samplesNeeded
                 Scale.Log -> log10(it.samplesNeeded)
                 Scale.Pct -> (100*it.samplesNeeded/it.Nc.toDouble())
+            }},
+            catfld = catfld,
+        )
+    }
+
+    fun showEstSizesVsMargin(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
+        val exemplar = data[0]
+        val nruns = exemplar.parameters["nruns"]!!
+        val fuzzPct = exemplar.parameters["fuzzPct"]
+        val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
+
+        wrsPlot(
+            titleS = "$filename nmvrs - estimated sample sizes",
+            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            data,
+            "$dir/${filename}${yscale.name}",
+            "margin",
+            yscale.desc("extra samples"),
+            catName,
+            xfld = { it.margin },
+            yfld = { it: WorkflowResult -> when (yscale) {
+                Scale.Linear -> (it.nmvrs - it.samplesNeeded)
+                Scale.Log -> log10( (it.nmvrs - it.samplesNeeded))// needed?
+                Scale.Pct -> (100* (it.nmvrs - it.samplesNeeded)/it.Nc.toDouble())
             }},
             catfld = catfld,
         )
@@ -77,7 +101,9 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
             data,
             "$dir/${filename}Failures",
-            "margin", "failurePct", catName,
+            "margin",
+            "failurePct",
+            catName,
             xfld = { it.margin },
             yfld = { it.failPct },
             catfld = catfld,
@@ -94,11 +120,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             data,
             "$dir/${filename}${yscale.name}",
             xname="fuzzPct",
-            when (yscale) {
-                Scale.Linear -> "samplesNeeded"
-                Scale.Log -> "log10(samplesNeeded)"
-                Scale.Pct -> "samplesNeeded %"
-            },
+            yscale.desc("samplesNeeded"),
             catName=catName,
             xfld = { it.parameters["fuzzPct"]!! },
             yfld = { it: WorkflowResult -> when (yscale) {
@@ -119,7 +141,9 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
             "$dir/${filename}Failures",
-            "fuzzPct", "failurePct", catName,
+            "fuzzPct",
+            "failurePct",
+            catName,
             xfld = { it.parameters["fuzzPct"]!! },
             yfld = { it.failPct},
             catfld = catfld,
@@ -135,7 +159,9 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
             "$dir/${filename}Nrounds",
-            "fuzzPct", "auditRounds", catName,
+            "fuzzPct",
+            "auditRounds",
+            catName,
             xfld = { it.parameters["fuzzPct"]!! },
             yfld = { it.nrounds},
             catfld = catfld,
@@ -151,7 +177,9 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
-            "underVotePct", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,
+            "underVotePct",
+            if (useLog) "log10(samplesNeeded)" else "samplesNeeded",
+            catName,
             xfld = { it.parameters["undervote"]!! },
             yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
             catfld = catfld,
@@ -167,7 +195,9 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
-            "phantomPct", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,
+            "phantomPct",
+            if (useLog) "log10(samplesNeeded)" else "samplesNeeded",
+            catName,
             xfld = { it.parameters["phantom"]!! },
             yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
             catfld = catfld,
@@ -183,7 +213,9 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
             "$dir/${filename}Failures",
-            "phantomPct", "failurePct", catName,
+            "phantomPct",
+            "failurePct",
+            catName,
             xfld = { it.parameters["phantom"]!! },
             yfld = { it.failPct},
             catfld = catfld,

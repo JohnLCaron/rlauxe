@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.comparison
+package org.cryptobiotic.rlauxe.clca
 
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -30,8 +30,9 @@ class GenVsMarginByFuzzPct {
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
                 val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, actualFuzz,
-                    ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
-                        mapOf("nruns" to nruns.toDouble(), "estFuzzPct" to fuzzPct))
+                    clcaConfig=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                    parameters=mapOf("nruns" to nruns.toDouble(), "estFuzzPct" to fuzzPct)
+                )
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
             }
         }

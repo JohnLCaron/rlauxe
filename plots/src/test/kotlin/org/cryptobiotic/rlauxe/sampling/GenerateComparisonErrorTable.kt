@@ -4,60 +4,87 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import kotlin.test.Test
 
+// theory is that the errorRates are proportional to fuzzPct
+// Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
+// margin doesnt matter (TODO show this)
+// TODO: Currently the percentage of ballots with no votes cast for a contest is not well accounted for?
+
 class GenerateComparisonErrorTable {
+    val showRates = false
+
     @Test
     fun generateErrorTable() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, ntrials = 100)
         val N = 100000
 
-        val margins = listOf(.01) // listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        // TODO how much do the rates depend on the margin?
+        val margin = .05
         val ncands = listOf(2, 3, 4, 5, 6, 7, 8, 9, 10)
+        val underVotePcts = listOf(0.01, .05, .1, .2, .5)
         val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
-        println("N=$N ntrials = ${auditConfig.ntrials}")
-        println("| ncand | p1     | p2     | p3     | p4     |")
-        println("|-------|--------|--------|--------|--------|")
 
-        margins.forEach { margin ->
+        underVotePcts.forEach { underVotePct ->
+
+            val result = mutableMapOf<Int, List<Double>>()
+            println("underVotePct=$underVotePct N=$N ntrials = ${auditConfig.ntrials}")
+            println("| ncand | r2o    | r1o    | r1u    | r2u    |")
+            println("|-------|--------|--------|--------|--------|")
             ncands.forEach { ncand ->
-                //         fun make2wayTestContest(reportedMargin: Double, underVotePct: Double, phantomPct: Double, Nc: Int): ContestSimulation {
-                val sim = ContestSimulation.make2wayTestContest(Nc=N, margin, 0.0, 0.0) // TODO
+                val fcontest = ContestTestData(0, ncand, margin, underVotePct, 0.0)
+                fcontest.ncards = N
+                val contest = fcontest.makeContest()
+                // print("contest votes = ${contest.votes} ")
+                val sim = ContestSimulation(contest)
 
-                val avgRatesForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0)
+                val sumRForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0)
                 fuzzPcts.forEach { fuzzPct ->
-                    // println("margin= $margin ncand=$ncand fuzzPct=$fuzzPct")
+                    val sumRForPct = mutableListOf(0.0, 0.0, 0.0, 0.0)
 
                     repeat(auditConfig.ntrials) {
                         val cvrs = sim.makeCvrs()
-                        val contestUA = ContestUnderAudit(sim.contest, true, true)
+                        val contestUA = ContestUnderAudit(contest, true, true)
                         // val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
                         contestUA.makeClcaAssertions(cvrs)
                         val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 
-                        val samples = PrevSamplesWithRates(minAssort.noerror())
+                        val tracker = PrevSamplesWithRates(minAssort.noerror())
                         val sampler = ClcaFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
                         while (sampler.hasNext()) {
-                            samples.addSample(sampler.next())
+                            tracker.addSample(sampler.next())
                         }
-                        //samples.samplingErrors()
-                        //    .forEachIndexed { idx, it -> avgRates[idx] = avgRates[idx] + it / ccount.toDouble() }
-                        samples.errorRates()
-                            .forEachIndexed { idx, it -> avgRatesForNcand[idx] = avgRatesForNcand[idx] + it }
+                        tracker.errorRates()
+                            .forEachIndexed { idx, rate -> sumRForNcand[idx] = sumRForNcand[idx] + (rate / fuzzPct) }
+                        tracker.errorRates()
+                            .forEachIndexed { idx, rate -> sumRForPct[idx] = sumRForPct[idx] + (rate / fuzzPct) }
                     }
-                    //println("  errors = ${samples.samplingErrors()}")
-                    //println("  rates =  ${samples.samplingErrors(total.toDouble())}")
-                    //println("  error% = ${samples.samplingErrors(total * fuzzPct)}")
+                    if (showRates) {
+                        print("   $fuzzPct = [")
+                        sumRForPct.forEach { R -> print(" ${df(R / auditConfig.ntrials)},") }
+                        println("]")
+                    }
                 }
+                val avgRforNcand = sumRForNcand.map { it / (auditConfig.ntrials * fuzzPcts.size) }
                 print("| $ncand | ")
-                avgRatesForNcand.forEachIndexed { p, it ->
-                    print(" ${ df(it/(auditConfig.ntrials * fuzzPcts.size))} |") // TODO ??
-                }
+                avgRforNcand.forEach { avgR -> print(" ${df(avgR)} |") }
                 println()
+
+                result[ncand] = avgRforNcand
             }
+            val code = buildString {
+                result.toSortedMap().forEach { (key, value) ->
+                    append("rrates[$key] = listOf(")
+                    value.forEach { append("${dfn(it, 7)}, ") }
+                    append(")\n")
+                }
+            }
+            println(code)
         }
     }
+
 }

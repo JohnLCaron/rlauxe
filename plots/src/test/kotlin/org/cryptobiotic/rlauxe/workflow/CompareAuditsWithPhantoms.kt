@@ -28,7 +28,7 @@ class CompareAuditsWithPhantoms {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantom, 0.0,
-                ClcaConfig(ClcaSimulationType.oracle, 0.0),
+                ClcaConfig(ClcaStrategyType.oracle, 0.0),
                 mapOf("nruns" to nruns.toDouble(), "phantom" to phantom))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
@@ -49,7 +49,6 @@ class CompareAuditsWithPhantoms {
         showSampleSizesVsPhantomPct(false)
         showFailuresVsPhantomPct()
     }
-
 
     fun showSampleSizesVsPhantomPct(useLog: Boolean) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")

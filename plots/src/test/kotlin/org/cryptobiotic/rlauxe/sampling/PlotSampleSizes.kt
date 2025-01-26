@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.log10
 
+// TODO candidate for removal
+
 class PlotSampleSizes(val dir: String, val filename: String) {
     fun showSamples(catfld: (SRT) -> String) {
         val reader = SRTcsvReader("$dir/${filename}.cvs")

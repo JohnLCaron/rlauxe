@@ -9,16 +9,15 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-
-class GenClcaVsMarginPlots {
+class GenVsMarginByStrategy {
     val nruns = 100  // number of times to run workflow
-    val name = "clcaMargin"
+    val name = "clcaVsMarginByStrategy"
     val dirName = "/home/stormy/temp/workflow/$name"
 
     // Used in docs
 
     @Test
-    fun genClcaMarginPlots() {
+    fun genSamplesVsMarginByStrategy() {
         val N = 50000
         val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
         val fuzzPct = .05
@@ -28,29 +27,29 @@ class GenClcaVsMarginPlots {
 
         margins.forEach { margin ->
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.oracle, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 1.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.oracle, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 1.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.noerror, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 2.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 2.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 3.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 4.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 4.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 5.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 5.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
 
@@ -72,7 +71,7 @@ class GenClcaVsMarginPlots {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "auditType", yscale) { category(it) }
+        plotter.showSampleSizesVsMargin(results, "auditType", yscale) { categoryStrategy(it) }
     }
 
     fun showFailuresVsMargin() {
@@ -80,17 +79,17 @@ class GenClcaVsMarginPlots {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "auditType") { category(it) }
+        plotter.showFailuresVsMargin(results, "auditType") { categoryStrategy(it) }
     }
+}
 
-    fun category(wr: WorkflowResult): String {
-        return when (wr.parameters["simType"]) {
-            1.0 -> "oracle"
-            2.0 -> "noerror"
-            3.0 -> "fuzzPct"
-            4.0 -> "2*fuzzPct"
-            5.0 -> "fuzzPct/2"
-            else -> "unknown"
-        }
+fun categoryStrategy(wr: WorkflowResult): String {
+    return when (wr.parameters["strat"]) {
+        1.0 -> "oracle"
+        2.0 -> "noerror"
+        3.0 -> "fuzzPct"
+        4.0 -> "2*fuzzPct"
+        5.0 -> "fuzzPct/2"
+        else -> "unknown"
     }
 }

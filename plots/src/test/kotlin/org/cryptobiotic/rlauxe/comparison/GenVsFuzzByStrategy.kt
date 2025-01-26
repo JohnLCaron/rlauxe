@@ -1,54 +1,53 @@
 package org.cryptobiotic.rlauxe.comparison
 
-import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-class GenClcaVsErrorPlots {
-    val nruns = 100  // number of times to run workflow
-    val name = "clcaFuzzed"
-    val dirName = "/home/stormy/temp/workflow/$name"
+class GenVsFuzzByStrategy {
 
     // Used in docs
 
     @Test
-    fun genClcaErrorPlots() {
+    fun genSamplesVsFuzzByStrategy() {
+        val name = "clcaVsFuzzByStrategy"
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val N = 50000
         val margin = .04
+        val nruns = 100  // number of times to run workflow
         val fuzzPcts = listOf(.00, .005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10, .11, .12, .13, .14, .15)
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<RepeatedWorkflowRunner>()
 
         fuzzPcts.forEach { fuzzPct ->
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.oracle, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 1.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.oracle, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 1.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.noerror, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 2.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 2.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 3.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 4.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 4.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaSimulationType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
-                mapOf("nruns" to nruns.toDouble(), "simType" to 5.0, "fuzzPct" to fuzzPct))
+                ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
+                mapOf("nruns" to nruns.toDouble(), "strat" to 5.0, "fuzzPct" to fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
 
@@ -59,44 +58,40 @@ class GenClcaVsErrorPlots {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsFuzzPct(true)
-        showSampleSizesVsFuzzPct(false)
-        showFailuresVsFuzzPct()
-        showNroundsVsFuzzPct()
+        showSampleSizesVsFuzzPct(name, Scale.Linear)
+        showSampleSizesVsFuzzPct(name, Scale.Log)
+        showSampleSizesVsFuzzPct(name, Scale.Pct)
+        showFailuresVsFuzzPct(name, )
+        // showNroundsVsFuzzPct(name, )
     }
 
-    fun showSampleSizesVsFuzzPct(useLog: Boolean) {
+    fun showSampleSizesVsFuzzPct(name:String, yscale: Scale) {
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsFuzzPct(results, "auditType", useLog=useLog) { category(it) }
+        plotter.showSampleSizesVsFuzzPct(results, "auditType", yscale=yscale) { categoryStrategy(it) }
     }
 
-    fun showFailuresVsFuzzPct() {
+    fun showFailuresVsFuzzPct(name:String, ) {
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsFuzzPct(results, "auditType") { category(it) }
+        plotter.showFailuresVsFuzzPct(results, "auditType") { categoryStrategy(it) }
     }
 
-    fun showNroundsVsFuzzPct() {
+    fun showNroundsVsFuzzPct(name:String, ) {
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsFuzzPct(results, "auditType") { category(it) }
-    }
-
-    fun category(wr: WorkflowResult): String {
-        return when (wr.parameters["simType"]) {
-            1.0 -> "oracle"
-            2.0 -> "noerror"
-            3.0 -> "fuzzPct"
-            4.0 -> "2*fuzzPct"
-            5.0 -> "fuzzPct/2"
-            else -> "unknown"
-        }
+        plotter.showNroundsVsFuzzPct(results, "auditType") { categoryStrategy(it) }
     }
 }

@@ -1,6 +1,6 @@
 # Ballot Comparison using Betting Martingales
 
-## 12/10/24
+last changed: 12/10/24
 
 The BETTING paper presents general techniques for estimating an unknown mean from bounded observations.
 

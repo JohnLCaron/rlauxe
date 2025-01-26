@@ -279,14 +279,14 @@ fun runClcaAssertionAudit(
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
     val clcaConfig = auditConfig.clcaConfig
-    val bettingFn = when (clcaConfig.simType) {
-        ClcaSimulationType.oracle -> {
+    val bettingFn = when (clcaConfig.strategy) {
+        ClcaStrategyType.oracle -> {
             // use the actual errors comparing mvrs to cvrs. Testing only
             val errorRates = ClcaErrorRates.calcErrorRates(contestUA.id, cassorter, cvrPairs)
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
 
-        ClcaSimulationType.noerror -> {
+        ClcaStrategyType.noerror -> {
             // optimistic, no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(
                 Nc = contestUA.Nc,
@@ -298,7 +298,7 @@ fun runClcaAssertionAudit(
             )
         }
 
-        ClcaSimulationType.fuzzPct -> {
+        ClcaStrategyType.fuzzPct -> {
             // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
             val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct)
             AdaptiveComparison(
@@ -311,7 +311,7 @@ fun runClcaAssertionAudit(
             )
         }
 
-        ClcaSimulationType.apriori ->
+        ClcaStrategyType.apriori ->
             // use given errors as apriori, then adapt to actual mvrs.
             AdaptiveComparison(
                 Nc = contestUA.Nc,

@@ -1,5 +1,7 @@
 # Missing Ballots (aka phantoms-to-evil zombies)
 
+TODO: rewrite
+
 From P2Z paper:
 
     A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
@@ -96,5 +98,5 @@ From OneAudit, p 9:
     The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest; 
     the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
 
-1 - 5218/5294 = .0143
-1 - 22082/22372 = .0129
+    * 5218/5294 = .0143
+    * 22082/22372 = .0129

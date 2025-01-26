@@ -1,10 +1,11 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -43,7 +44,7 @@ class TestGenWorkflowTasks {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val workflowGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                ClcaConfig(ClcaSimulationType.oracle, 0.0),
+                ClcaConfig(ClcaStrategyType.oracle, 0.0),
                 mapOf("nruns" to nruns.toDouble()))
             tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
         }

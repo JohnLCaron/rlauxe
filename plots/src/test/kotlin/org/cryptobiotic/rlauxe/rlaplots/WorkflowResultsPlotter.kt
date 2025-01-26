@@ -42,7 +42,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
-        val fuzzPctLabel = if (fuzzPct != null) " fuzzPct=$fuzzPct" else ""
+        val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
 
         wrsPlot(
             titleS = "$filename estimated sample sizes",
@@ -70,7 +70,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
-        val fuzzPctLabel = if (fuzzPct != null) " fuzzPct=$fuzzPct" else ""
+        val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
 
         wrsPlot(
             titleS = "$filename failurePct",
@@ -84,7 +84,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showSampleSizesVsFuzzPct(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
+    fun showSampleSizesVsFuzzPct(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
 
@@ -92,10 +92,20 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             titleS = "$filename estimated sample sizes",
             subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
-            if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
-            "fuzzPct", if (useLog) "log10(samplesNeeded)" else "samplesNeeded", catName,
+            "$dir/${filename}${yscale.name}",
+            xname="fuzzPct",
+            when (yscale) {
+                Scale.Linear -> "samplesNeeded"
+                Scale.Log -> "log10(samplesNeeded)"
+                Scale.Pct -> "samplesNeeded %"
+            },
+            catName=catName,
             xfld = { it.parameters["fuzzPct"]!! },
-            yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
+            yfld = { it: WorkflowResult -> when (yscale) {
+                Scale.Linear -> it.samplesNeeded
+                Scale.Log -> log10(it.samplesNeeded)
+                Scale.Pct -> (100*it.samplesNeeded/it.Nc.toDouble())
+            }},
             catfld = catfld,
         )
     }

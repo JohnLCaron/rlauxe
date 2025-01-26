@@ -19,6 +19,8 @@ import kotlin.math.ceil
 
 class GenPollingDvalues {
 
+    // TODO candidate for removal
+
     @Test
     fun genPollingDvalues() {
         val reportedMeans = listOf(.55) // .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)

@@ -1,29 +1,39 @@
 # Comparison error rates
-last updated Jan 24, 2025
+last updated Jan 26, 2025
 
 ## Estimating Error
 
-The assumptions that one makes about the comparison error rates greatly affect the sample size estimation.
+The assumptions that one makes about the CLCA error rates greatly affect the sample size estimation.
 These rates should be empirically determined, and public tables for different voting machines should be published.
 While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
+
+In a real-world measurement of a voting machine, one might measure:
+
+1. percent time a mark is seen when its not there
+2. percent time a mark is not seen when it is there
+3. percent time a mark is given to the wrong candidate
 
 If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
 are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
 fetching and interpreting ballots.
 
 We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4.
-Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. In both cases, we use
-CORBRA's adaptive estimate of the error rates that does a weighted average of the aproiri and the samples error rates. This is used
-when estimating the sample size from the diluted margin, and also when doing the actual audit comparing the CVRs and the MVRs.
+Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. 
+
+In both cases, we use CORBRA's adaptive estimate of the error rates that does a weighted average of the apriori and the 
+actual error rate from previous samples. These estimates are used in COBRA's OptimalLambda algorithm, which finds the 
+optimal bet given the error rates. 
+
+This algorithm is used when estimating the sample size, and also when doing the actual audit.
 
 ## Comparison error rates
 
-The comparison error rates are:
+The CLCA error rates are:
 
-        val p1: rate of 1-vote overstatements; voted for other, cvr has winner
-        val p2: rate of 2-vote overstatements; voted for loser, cvr has winner
-        val p3: rate of 1-vote understatements; voted for winner, cvr has other
-        val p4: rate of 2-vote understatements; voted for winner, cvr has loser
+        p2o: rate of 2-vote overstatements; voted for loser, cvr has winner
+        p1o: rate of 1-vote overstatements; voted for other, cvr has winner
+        p1u: rate of 1-vote understatements; voted for winner, cvr has other
+        p2u: rate of 2-vote understatements; voted for winner, cvr has loser
 
 For IRV, the corresponding descriptions of the errror rates are:
 
@@ -41,49 +51,50 @@ See [Ballot Comparison using Betting Martingales](docs/Betting.md) for more deta
 with varying p2error rates.
 
 
-## Estimating Sample sizes and error rates with fuzz
+## Estimating CLCA error rates with fuzz
 
-We can estimate comparison error rates as follows:
+We can estimate CLCA error rates as follows:
 
 The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
+In the plots that follow, the actual fuzz of the MVRs is 1%. We use different fuzz rates for estimating and auditing, 
+and see how the resulting sample sizes vary. 
+
 The first plot below shows that Comparison sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
 have greater spread, but on average are not much affected.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](./docs/plots/samples/ComparisonFuzzed.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](./docs/plots/samples/PollingFuzzed.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](plots/samples/ComparisonFuzzed.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](plots/samples/PollingFuzzed.png)</a>
 
-We use this strategy and run simulations that generate comparison error rates, as a function of number of candidates in the contest.
-(see GenerateComparisonErrorTable.kt):
+We use this strategy and run simulations that generate CLCA error rates, as a function of number of candidates in the contest.
 
-N=100000 ntrials = 1000
-generated 12/01/2024
+// GenerateComparisonErrorTable.generateErrorTable()
+// N=100000 ntrials = 200
+// generated 1/26/2026
 
-| ncand | r1     | r2     | r3     | r4     |
+| ncand | r2o    | r1o    | r1u    | r2u    |
 |-------|--------|--------|--------|--------|
-| 2     | 0.2535 | 0.2524 | 0.2474 | 0.2480 |
-| 3     | 0.3367 | 0.1673 | 0.3300 | 0.1646 |
-| 4     | 0.3357 | 0.0835 | 0.3282 | 0.0811 |
-| 5     | 0.3363 | 0.0672 | 0.3288 | 0.0651 |
-| 6     | 0.3401 | 0.0575 | 0.3323 | 0.0557 |
-| 7     | 0.3240 | 0.0450 | 0.3158 | 0.0434 |
-| 8     | 0.2886 | 0.0326 | 0.2797 | 0.0314 |
-| 9     | 0.3026 | 0.0318 | 0.2938 | 0.0306 |
-| 10    | 0.2727 | 0.0244 | 0.2624 | 0.0233 |
+| 2     | 0.2624 | 0.2625 | 0.2372 | 0.2370 |
+| 3     | 0.1401 | 0.3493 | 0.3168 | 0.1245 |
+| 4     | 0.1278 | 0.3913 | 0.3520 | 0.1158 |
+| 5     | 0.0693 | 0.3496 | 0.3077 | 0.0600 |
+| 6     | 0.0554 | 0.3399 | 0.2994 | 0.0473 |
+| 7     | 0.0335 | 0.2816 | 0.2398 | 0.0259 |
+| 8     | 0.0351 | 0.3031 | 0.2592 | 0.0281 |
+| 9     | 0.0309 | 0.3043 | 0.2586 | 0.0255 |
+| 10    | 0.0277 | 0.2947 | 0.2517 | 0.0226 |
 
 Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
 For example, a two-candidate contest has significantly higher two-vote error rates (p2), since its more likely to flip a
-vote between winner and loser, than switch a vote to/from other.
-(NOTE: Currently the percentage of ballots with no votes cast for a contest is not well accounted for)
+vote between winner and loser, than switch a vote to/from other. margin doesnt matter.
+
+(TODO: Currently the percentage of ballots with no votes cast for a contest is not well accounted for)
 
 We give the user the option to specify a fuzzPct and use this table for the apriori error rates error rates,
 
-Possible refinement of this algorithm might measure:
-1. percent time a mark is seen when its not there
-2. percent time a mark is not seen when it is there
-3. percent time a mark is given to the wrong candidate
+
 
 
 ## Calculate Error Rates from actual Mvcrs (oracle strategy)

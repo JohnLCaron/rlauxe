@@ -22,7 +22,7 @@ class TestClcaWorkflow {
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, ntrials=10,
-            clcaConfig = ClcaConfig(ClcaSimulationType.apriori, errorRates=errorRates))
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
     }
@@ -64,7 +64,7 @@ class TestClcaWorkflow {
 
         val errorRates = listOf(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
-            clcaConfig = ClcaConfig(ClcaSimulationType.apriori, errorRates=errorRates))
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
     }
@@ -72,7 +72,7 @@ class TestClcaWorkflow {
     @Test
     fun testComparisonWithFuzz() {
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
-            clcaConfig = ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct=0.01))
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct=0.01))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, testData)
@@ -86,7 +86,7 @@ class TestClcaWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (auditConfig.clcaConfig.simType != ClcaSimulationType.fuzzPct) testCvrs
+        val testMvrs = if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.fuzzPct!!)
 

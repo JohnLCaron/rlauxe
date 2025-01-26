@@ -89,8 +89,8 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     }
 
     fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
-    fun errorRates() = errorCounts().subList(1,5).map {
-        it / numberOfSamples().toDouble()  // skip p0
+    fun errorRates(): List<Double> {
+        return errorCounts().subList(1,5).map { it / numberOfSamples().toDouble()  /* skip p0 */ }
     }
 
     fun pollCounts() = listOf(countZero,countHalf,countOne)

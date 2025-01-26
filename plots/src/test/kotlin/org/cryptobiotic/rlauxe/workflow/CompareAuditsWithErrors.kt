@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.rlaplots.Scale
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -23,17 +24,23 @@ class CompareAuditsWithErrors {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
 
         fuzzPcts.forEach { fuzzPct ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct))
+            val pollingGenerator = PollingWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, fuzzPct,
+                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                    ClcaConfig(ClcaSimulationType.fuzzPct, fuzzPct),
-                    mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct))
+            val clcaGenerator = ClcaWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, fuzzPct,
+                ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct))
+            val oneauditGenerator = OneAuditWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, cvrPercent, fuzzPct,
+                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
 
@@ -44,18 +51,26 @@ class CompareAuditsWithErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsFuzzPct(true)
-        showSampleSizesVsFuzzPct(false)
+        showSampleSizesVsFuzzPct(Scale.Linear)
+        showSampleSizesVsFuzzPct(Scale.Log)
+        showSampleSizesVsFuzzPct(Scale.Pct)
         showFailuresVsFuzzPct()
         showNroundsVsFuzzPct()
     }
 
-    fun showSampleSizesVsFuzzPct(useLog: Boolean) {
+    @Test
+    fun regenPlots() {
+        showSampleSizesVsFuzzPct(Scale.Linear)
+        showSampleSizesVsFuzzPct(Scale.Log)
+        showSampleSizesVsFuzzPct(Scale.Pct)
+    }
+
+    fun showSampleSizesVsFuzzPct(yscale: Scale) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsFuzzPct(results, "auditType", useLog=useLog)  { compareCategories(it) }
+        plotter.showSampleSizesVsFuzzPct(results, "auditType", yscale = yscale) { compareCategories(it) }
     }
 
     fun showFailuresVsFuzzPct() {
@@ -71,7 +86,7 @@ class CompareAuditsWithErrors {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsFuzzPct(results, "auditType")  { compareCategories(it) }
+        plotter.showNroundsVsFuzzPct(results, "auditType") { compareCategories(it) }
     }
 }
 

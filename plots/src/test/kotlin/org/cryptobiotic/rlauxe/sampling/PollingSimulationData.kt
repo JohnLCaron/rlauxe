@@ -13,6 +13,8 @@ import org.jetbrains.kotlinx.kandy.util.color.Color
 import org.junit.jupiter.api.Test
 import kotlin.math.ln
 
+// TODO candidate for removal
+
 data class PollingSimulationData(
     val reportedMargin: Double,
     val underVotePct: Double,

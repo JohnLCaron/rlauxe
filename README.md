@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 01/25/2025_
+_last update: 01/26/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -31,13 +31,13 @@ Table of Contents
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
-    * [Polling Vs Comparison with/out CSD Estimated Sample sizes (outdated, redo)](#polling-vs-comparison-without-csd-estimated-sample-sizes-outdated-redo)
+    * [Polling Vs Clca with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
     * [generation of phantoms](#generation-of-phantoms)
-    * [estimate comparison error rates](#estimate-comparison-error-rates)
+    * [estimate CLCA error rates](#estimate-clca-error-rates)
     * [use of previous round's sampled_cvr_indices](#use-of-previous-rounds-sampled_cvr_indices)
   * [Other Notes](#other-notes)
   * [Development Notes](#development-notes)
@@ -76,24 +76,21 @@ Table of Contents
 # SHANGRLA framework
 
 SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
-It uses an _assorter_ to assign a number to each ballot, and a _statistical risk testing function_ that allows an audit to statistically
-prove that an election outcome is correct (or not) to within a _risk level α_, for example,  risk limit = 5% means that
+It uses _statistical risk testing function_ that allows an audit to statistically
+prove that an election outcome is correct (or not) to within a _risk level α_. For example, a risk limit of 5% means that
 the election is correct with 95% probability.
 
-It checks outcomes by testing _half-average assertions_, each of which claims that the mean of a finite list of numbers 
-between 0 and upper is greater than 1/2. The complementary _null hypothesis_ is that each assorter mean is not greater than 1/2.
+It uses an _assorter_ to assign a number to each ballot, and checks outcomes by testing _half-average assertions_, 
+each of which claims that the mean of a finite list of numbers is greater than 1/2. 
+The complementary _null hypothesis_ is that the assorter mean is not greater than 1/2.
 If that hypothesis is rejected for every assertion, the audit concludes that the outcome is correct.
 Otherwise, the audit expands, potentially to a full hand count. If every null is tested at risk level α, this results 
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
-This formulation unifies polling audits and comparison audits, with or without replacement. It allows for the ballots to
-be divided into _strata_, each of which is sampled independently (_stratified sampling_), or to use
-batches of ballot cards instead of individual cards (_cluster sampling_).
-
 | term          | definition                                                                                     |
 |---------------|------------------------------------------------------------------------------------------------|
-| N             | the number of ballot cards validly cast in the contest                                         |
+| Nc            | the number of ballot cards validly cast in the contest                                         |
 | risk	         | we want to confirm or reject the null hypothesis with risk level α.                            |
 | assorter      | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
 | assertion     | the mean of assorter values is > 1/2: "half-average assertion"                                 |
@@ -128,13 +125,12 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
     assign the value 1/2, otherwise.
  ````
 
-For polling, the assorter function is this A_wk,ℓj(MVR).
+For a Polling audit, the assorter function is this A_wk,ℓj(MVR).
 
-For a comparison audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
+For a ClCA audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
 
 Notes
 * Someone has to enforce that each CVR has <= number of allowed votes.
-
 
 ### Approval
 
@@ -144,7 +140,6 @@ In approval voting, voters may vote for as many candidates as they like.
 The top K candidates are elected.
 
 The plurality voting algorithm is used, with K winners and C-K losers.
-
 
 ### SuperMajority
 
@@ -161,9 +156,9 @@ For the ith ballot, define `A_wk,ℓj(bi)` as
     assign the value “0” if it has a mark for exactly one candidate and not wk
     assign the value 1/2, otherwise.
 ````
-For polling, the assorter function is this A_wk,ℓj(bi).
+For a Polling audit, the assorter function is this A_wk,ℓj(bi).
 
-For a comparisian audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
+For a CLCA audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
 
 One only needs one assorter for each winner, not one for each winner/loser pair.
 
@@ -191,17 +186,21 @@ See the RAIRE guides for details:
 
 From Phantoms to Zombies (P2Z) paper:
 
-    A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
+    A listing of the groups of ballots and the number of ballots in each group is called 
+    a ballot manifest.
 
     What if the ballot manifest is not accurate?
-    It suffices to make worst-case assumptions about the individual randomly selected ballots that the audit cannot find.
-    This ensures that the true risk limit remains smaller than the nominal risk limit.
+    It suffices to make worst-case assumptions about the individual randomly selected ballots 
+    that the audit cannot find. This ensures that the true risk limit remains smaller than 
+    the nominal risk limit.
 
-    The dead (not found, phantom) ballots are re-animated as evil zombies: We suppose that they reflect whatever would
-    increase the P-value most: a 2-vote overstatement for a ballot-level comparison audit, 
+    The dead (not found, phantom) ballots are re-animated as evil zombies: 
+    We suppose that they reflect whatever would increase the P-value most: 
+    a 2-vote overstatement for a ballot-level comparison audit, 
     or a valid vote for every loser in a ballot-polling audit.
 
 See [Missing Ballots](docs/MissingBallots.md) for details.
+
 
 # Audit Types
 
@@ -229,7 +228,7 @@ See [CLCA Betting function](docs/BettingRiskFunction.md) for more details on Bet
 
 ## Polling Audits
 
-When CVRs are not available, a polling audit can be done instead. A polling audit  
+When CVRs are not available, a Polling audit can be done instead. A Polling audit  
 creates an MVR for each ballot card selected for sampling, just as with a CLCA, except without the CVR.
 
 The requirements for Polling audits:
@@ -253,12 +252,13 @@ See [ALPHA testing statistic](docs/AlphaMart.md) for more details and plots.
 
 ## Stratified Audits using OneAudit
 
-OneAudit is a comparison audit that uses AlphaMart instead of BettingMart. 
+OneAudit is a CLCA audit that uses AlphaMart instead of BettingMart. 
 
-When there is a CVR, use standard Comparison assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
+When there is a CVR, use the standard CLCA assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
 This is "overstatement-net-equivalent" (aka ONE).
 
 See [OneAudit Notes](docs/OneAudit.md) for more details and plots.
+
 
 # Measured Sample sizes
 
@@ -266,10 +266,10 @@ The following plots are simulated complete workflows, averaging the results from
 
 In general samples sizes are independent of N, which is helpful to keep in mind
 
-Actually there is a slight dependence on N for "without replacement" audits when the sample size approaches N, 
-but that case approaches a full hand audit, and isnt very interesting.
+(Actually there is a slight dependence on N for "without replacement" audits when the sample size approaches N, 
+but that case approaches a full hand audit, and isnt very interesting.)
 
-When Card Style Data (CSD) is missing, the sample sizes have to be scaled by N / Nc, where N is the number of physical ballots
+When Card Style Data (CSD) is missing, the sample sizes have to be scaled by Nb / Nc, where Nb is the number of physical ballots
 that a contest might be on, and Nc is the number of ballots it is actually on. 
 See [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample), below.
 
@@ -283,11 +283,16 @@ So, for example we need 1,128 samples to audit a contest with a 0.5% margin.
 (Click on the plot to get an interactive html plot).
 For a 10,000 vote election, thats 11.28% of the total ballots. For a 100,000 vote election, its only 1.13%.
 
-Here are sample sizes for the three audit types: Polling, Comparison (clca) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
+Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
 when there are no errors in the CVRs:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
+
+* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
+* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
+* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
 
 "In a card-level comparison audit, the estimated sample size scales with
 the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
@@ -303,11 +308,8 @@ These are plots vs fuzzPct, with margin fixed at 4%:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
 
-* CLCA is much more sensitive to errors than polling or oneaudit.
-* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
-* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
-* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
-* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
+* Sample sizes increase with fuzzPct similarly for all three audits.
+* CLCA as a percent of Nc is more sensitive to errors than polling or OneAudit.
 
 Varying undervotes percent:
 
@@ -315,10 +317,12 @@ Varying undervotes percent:
 
 Varying phantom percent, up to and over the margin of 4.5%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsNoErrors Linear">![AuditsWithPhantomsLinear](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsWithPhantomsLog">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
-* Invetsingate why OneAudits seem much less affected.
+* CLCA and Polling audits go to hand count when phantomPct exceeds the margin, as they should.
+* Investigate why OneAudits are less affected.
+
 
 # Sampling
 
@@ -345,8 +349,8 @@ Once we have all of the contests' estimated sample sizes, we next choose which b
 This step depends whether you have Card Style Data (CSD, see MoreStyle, p.2), which tells us which ballots
 have which contests. 
 
-For comparison audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
-For polling audits, the BallotManifest may contain BallotStyles which comprise the CSD.
+For CLCA audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
+For Polling audits, the BallotManifest may contain BallotStyles which comprise the CSD.
 
 If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
 
@@ -395,13 +399,13 @@ In the following plot we show polling audits, no style information, no errors, f
 * The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
 * We need to sample more than 50% of Nb when the margin < 5%
 
-### Polling Vs Comparison with/out CSD Estimated Sample sizes (outdated, redo)
+### Polling Vs Clca with/out CSD Estimated Sample sizes
 
-The following plot shows polling vs comparison with and without CSD at different margins, where Nb/Nc = 2.
+The following plot shows Polling vs CLCA with and without CSD at different margins, where Nb/Nc = 2.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLog.html" rel="compareWithStyle">![compareWithStyle](./docs/plots/workflows/compareWithStyle/compareWithStyleLog.png)</a>
 
-* For both polling and clca, the sample sizes are a factor of Nb/Nc = 2 greater. 
+* For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data. 
 
 
 # Appendices
@@ -446,7 +450,7 @@ Im guessing STYLISH is trying to describe the easist possible algorithm.
 
 Not clear what this means, and how its different from 2.c.
 
-### estimate comparison error rates
+### estimate CLCA error rates
 
 SHANGRLA has guesses for p1,p2,p3,p4. We do a blanket fuzz, and simulate the errors by ncandidates in a contest, then use those.
 

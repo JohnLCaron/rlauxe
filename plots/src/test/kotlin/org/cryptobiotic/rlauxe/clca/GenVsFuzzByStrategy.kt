@@ -1,31 +1,29 @@
-package org.cryptobiotic.rlauxe.comparison
+package org.cryptobiotic.rlauxe.clca
 
-import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-class GenVsMarginByStrategy {
-    val nruns = 100  // number of times to run workflow
-    val name = "clcaVsMarginByStrategy"
-    val dirName = "/home/stormy/temp/workflow/$name"
+class GenVsFuzzByStrategy {
 
     // Used in docs
 
     @Test
-    fun genSamplesVsMarginByStrategy() {
+    fun genSamplesVsFuzzByStrategy() {
+        val name = "clcaVsFuzzByStrategy"
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val N = 50000
-        val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val fuzzPct = .05
+        val margin = .04
+        val nruns = 100  // number of times to run workflow
+        val fuzzPcts = listOf(.00, .005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10, .11, .12, .13, .14, .15)
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<RepeatedWorkflowRunner>()
 
-        margins.forEach { margin ->
+        fuzzPcts.forEach { fuzzPct ->
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 ClcaConfig(ClcaStrategyType.oracle, fuzzPct),
                 mapOf("nruns" to nruns.toDouble(), "strat" to 1.0, "fuzzPct" to fuzzPct))
@@ -60,36 +58,40 @@ class GenVsMarginByStrategy {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsMargin(Scale.Linear)
-        showSampleSizesVsMargin(Scale.Log)
-        showSampleSizesVsMargin(Scale.Pct)
-        showFailuresVsMargin()
+        showSampleSizesVsFuzzPct(name, Scale.Linear)
+        showSampleSizesVsFuzzPct(name, Scale.Log)
+        showSampleSizesVsFuzzPct(name, Scale.Pct)
+        showFailuresVsFuzzPct(name, )
+        // showNroundsVsFuzzPct(name, )
     }
 
-    fun showSampleSizesVsMargin(yscale: Scale) {
+    fun showSampleSizesVsFuzzPct(name:String, yscale: Scale) {
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "auditType", yscale) { categoryStrategy(it) }
+        plotter.showSampleSizesVsFuzzPct(results, "strategy", yscale=yscale) { categoryStrategy(it) }
     }
 
-    fun showFailuresVsMargin() {
+    fun showFailuresVsFuzzPct(name:String, ) {
+        val dirName = "/home/stormy/temp/workflow/$name"
+
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "auditType") { categoryStrategy(it) }
+        plotter.showFailuresVsFuzzPct(results, "strategy") { categoryStrategy(it) }
     }
-}
 
-fun categoryStrategy(wr: WorkflowResult): String {
-    return when (wr.parameters["strat"]) {
-        1.0 -> "oracle"
-        2.0 -> "noerror"
-        3.0 -> "fuzzPct"
-        4.0 -> "2*fuzzPct"
-        5.0 -> "fuzzPct/2"
-        else -> "unknown"
+    fun showNroundsVsFuzzPct(name:String, ) {
+        val dirName = "/home/stormy/temp/workflow/$name"
+
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val results = io.readResults()
+
+        val plotter = WorkflowResultsPlotter(dirName, name)
+        plotter.showNroundsVsFuzzPct(results, "strategy") { categoryStrategy(it) }
     }
 }

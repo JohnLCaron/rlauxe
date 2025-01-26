@@ -19,6 +19,8 @@ import kotlin.test.Test
 
 class GenAdaptiveComparison {
 
+    // used in docs
+
     @Test
     fun genAdaptiveComparison() {
         val stopwatch = Stopwatch()
@@ -75,6 +77,8 @@ class GenAdaptiveComparison {
         plotter.plotFailuresVsTheta()
 
     }
+
+    // used in docs
 
     // just do one task
     @Test

@@ -75,6 +75,8 @@ class GenBettingPayoff {
         }
     }
 
+    // used in docs
+
     @Test
     fun genBettingPayoffPlot() {
         val results = mutableListOf<BettingPayoffData>()

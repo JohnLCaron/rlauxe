@@ -88,7 +88,7 @@ Notes
   ````
 * The possible values of the bassort function are then:
   {0, .5, 1, 1.5, 2} * noerror
-* When the cvrs always equal the corresponding mvr, we always get bassort == noerror > .5, so eventually the null is rejected.
+* When the CVRs  always equal the corresponding MVR, we always get bassort == noerror > .5, so eventually the null is rejected.
 
 ## Comparison Betting Payoffs
 

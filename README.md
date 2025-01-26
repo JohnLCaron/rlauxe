@@ -349,8 +349,8 @@ Once we have all of the contests' estimated sample sizes, we next choose which b
 This step depends whether you have Card Style Data (CSD, see MoreStyle, p.2), which tells us which ballots
 have which contests. 
 
-For CLCA audits, the generated Cast Vote Record (CVR) comprises the CSD, as long as the CVR records when a contest recieves no votes.
-For Polling audits, the BallotManifest may contain BallotStyles which comprise the CSD.
+For CLCA audits, the generated Cast Vote Records (CVR) comprise the CSD, as long as the CVR records when a contest recieves no votes.
+For Polling audits, the BallotManifest (may) contain BallotStyles which comprise the CSD.
 
 If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
 
@@ -399,7 +399,7 @@ In the following plot we show polling audits, no style information, no errors, f
 * The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
 * We need to sample more than 50% of Nb when the margin < 5%
 
-### Polling Vs Clca with/out CSD Estimated Sample sizes
+### Polling Vs CLCA with/out CSD Estimated Sample sizes
 
 The following plot shows Polling vs CLCA with and without CSD at different margins, where Nb/Nc = 2.
 

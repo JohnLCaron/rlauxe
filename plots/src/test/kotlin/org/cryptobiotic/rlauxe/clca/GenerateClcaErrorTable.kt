@@ -1,8 +1,11 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.clca
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.sampling.ClcaFuzzSampler
+import org.cryptobiotic.rlauxe.sampling.ContestSimulation
+import org.cryptobiotic.rlauxe.sampling.ContestTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
@@ -14,7 +17,7 @@ import kotlin.test.Test
 // margin doesnt matter (TODO show this)
 // TODO: Currently the percentage of ballots with no votes cast for a contest is not well accounted for?
 
-class GenerateComparisonErrorTable {
+class GenerateClcaErrorTable {
     val showRates = false
 
     @Test

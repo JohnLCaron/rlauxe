@@ -44,8 +44,9 @@ class TestGenWorkflowTasks {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val workflowGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                ClcaConfig(ClcaStrategyType.oracle, 0.0),
-                mapOf("nruns" to nruns.toDouble()))
+                mapOf("nruns" to nruns.toDouble()),
+                clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
+                )
             tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
         }
 

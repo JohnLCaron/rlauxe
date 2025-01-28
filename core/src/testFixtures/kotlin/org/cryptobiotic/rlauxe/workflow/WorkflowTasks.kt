@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-// for running workflows with one contest multiple times for testing
+// for running workflows with one contest, multiple times for testing
 
 private val quiet = true
 
@@ -64,17 +64,6 @@ data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamp
     }
 }
 
-data class WorkflowResult(val Nc: Int,
-                          val margin: Double,
-                          val status: TestH0Status,
-                          val nrounds: Double,
-                          val samplesUsed: Double,
-                          val samplesNeeded: Double,
-                          val nmvrs: Double,
-                          val parameters: Map<String, Double>,
-                          val failPct: Double, // from avgWorkflowResult()
-)
-
 interface WorkflowTaskGenerator {
     fun name(): String
     fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
@@ -86,16 +75,17 @@ class ClcaWorkflowTaskGenerator(
     val underVotePct: Double,
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
-    val clcaConfig: ClcaConfig,
     val parameters : Map<String, Double>,
     val auditConfigIn: AuditConfig? = null,
+    val clcaConfigIn: ClcaConfig? = null,
     val Nb: Int = Nc
     ): WorkflowTaskGenerator {
     override fun name() = "ClcaWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?:
-            AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10, clcaConfig = clcaConfig)
+            AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10,
+                clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
@@ -108,7 +98,7 @@ class ClcaWorkflowTaskGenerator(
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clca = ComparisonWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
+        val clca = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
         return WorkflowTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
@@ -237,14 +227,22 @@ fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResu
     return results
 }
 
+
+data class WorkflowResult(val Nc: Int,
+                          val margin: Double,
+                          val status: TestH0Status,
+                          val nrounds: Double,
+                          val samplesUsed: Double, // redundant
+                          val samplesNeeded: Double,
+                          val nmvrs: Double,
+                          val parameters: Map<String, Double>,
+                          val failPct: Double, // from avgWorkflowResult()
+)
+
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
     val failures = runs.count { it.status.fail }
     val failPct = if (runs.isEmpty()) 100.0 else 100.0 * failures / runs.size
     val successRuns = runs.filter { !it.status.fail }
-    /*if (!successRuns.isEmpty() && successRuns[0].margin <= 0.03) {
-        val wtf = successRuns.map { it.nmvrs }.average()
-        println("${successRuns[0].margin} = $wtf")
-    }*/
 
     return if (runs.isEmpty()) {
         WorkflowResult(

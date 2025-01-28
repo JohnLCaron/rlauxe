@@ -42,7 +42,6 @@ class CompareAuditsWithStyles {
             val clcaConfigNS = AuditConfig(AuditType.CARD_COMPARISON, false, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGeneratorNS = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
-                ClcaConfig(ClcaStrategyType.noerror),
                 mapOf("nruns" to nruns.toDouble(), "cat" to 3.0),
                 auditConfigIn = clcaConfigNS,
                 Nb=Nb
@@ -52,7 +51,6 @@ class CompareAuditsWithStyles {
             val clcaConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
-                ClcaConfig(ClcaStrategyType.noerror),
                 mapOf("nruns" to nruns.toDouble(), "cat" to 4.0),
                 auditConfigIn = clcaConfig,
                 Nb=Nc

@@ -115,7 +115,7 @@ class TestClcaWorkflowNoStyles {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.fuzzPct!!)
 
-        val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
+        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
         runWorkflow("TestComparisonWorkflowNoStyles", workflow, testMvrs)
     }

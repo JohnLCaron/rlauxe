@@ -32,7 +32,7 @@ class TestAuditRoundJson {
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
 
-        val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
+        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
         runPersistentWorkflow(publish, workflow, testCvrs, nassertions)
 
@@ -85,7 +85,7 @@ class TestAuditRoundJson {
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
 
-        val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
+        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
         runPersistentWorkflow(publish, workflow, testCvrs, nassertions)
         val target = AuditRound(1, workflow.contestsUA, true)

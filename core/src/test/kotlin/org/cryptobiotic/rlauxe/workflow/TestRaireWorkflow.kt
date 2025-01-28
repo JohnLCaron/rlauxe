@@ -17,7 +17,7 @@ class TestRaireWorkflow {
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
         val (rcontest, cvrs) = makeRaireContest(N=20000, margin=.01)
-        val workflow = ComparisonWorkflow(auditConfig, emptyList(), listOf(rcontest), cvrs)
+        val workflow = ClcaWorkflow(auditConfig, emptyList(), listOf(rcontest), cvrs)
         val nassertions = rcontest.assertions.size
 
         runWorkflow("testRaireWorkflow", workflow, cvrs)

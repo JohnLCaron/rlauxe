@@ -42,12 +42,15 @@ fun estimateSampleSizes(
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
         } else {
-            var size = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
+            var quantile = result.findQuantile(auditConfig.quantile)
+            var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
+                // println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
+            // println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
             // if (show) println("  ${task.contestUA.name} ${task.assertion}")
         }
     }
@@ -82,7 +85,7 @@ fun makeEstimationTasks(
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 val rr = assert.roundResults.last()
-                if (rr.samplesUsed == contestUA.Nc) {
+                if (rr.samplesUsed == contestUA.Nc) {   // TODO or pct of ?
                     println("***LimitReached $contestUA")
                     contestUA.done = true
                     contestUA.status = TestH0Status.LimitReached
@@ -90,6 +93,7 @@ fun makeEstimationTasks(
                 // start where the audit left off
                 prevSampleSize = rr.samplesUsed
                 startingTestStatistic = 1.0 / rr.pvalue
+                // println("startingTestStatistic = $startingTestStatistic")
             }
 
             if (!contestUA.done) {
@@ -202,6 +206,8 @@ fun simulateSampleSizeClcaAssorter(
         }
         else -> {
             val errorRates = ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
+            if (false) println("simulateSampleSizeClcaAssorter errorRates = ${errorRates}")
+
             Pair(
                 ClcaFuzzSampler(
                     clcaConfig.fuzzPct,

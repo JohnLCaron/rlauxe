@@ -41,7 +41,7 @@ class TestPersistentWorkflow {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.fuzzPct!!)
 
-        val workflow = ComparisonWorkflow(auditConfig, contests, emptyList(), testCvrs)
+        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         writeCvrsJsonFile(workflow.cvrsUA, publish.cvrsFile())
 
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
@@ -50,7 +50,7 @@ class TestPersistentWorkflow {
 
 }
 
-fun runPersistentWorkflow(publish: Publisher, workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
+fun runPersistentWorkflow(publish: Publisher, workflow: ClcaWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var prevMvrs = emptyList<Cvr>()

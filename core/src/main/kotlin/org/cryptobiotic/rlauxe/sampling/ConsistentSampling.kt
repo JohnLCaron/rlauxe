@@ -70,7 +70,7 @@ fun uniformSampling(
         // println("  $contestUA: scale=${df(fac)} estSampleSizeNoStyles=${est} Nb=$Nb")
         contestUA.estSampleSizeNoStyles = est
         val estPct = est / Nb.toDouble()
-        /* if (estPct > samplePctCutoff) {
+        if (estPct > samplePctCutoff) {
             contestUA.done = true
             contestUA.status = TestH0Status.LimitReached
             if (debug) println("uniformSampling samplePctCutoff: $contestUA estPct $estPct > $samplePctCutoff round $roundIdx")
@@ -84,7 +84,7 @@ fun uniformSampling(
                 status = TestH0Status.LimitReached,
             )
             minAssert.roundResults.add(roundResult)
-        } */
+        }
     }
     val estTotalSampleSizes = contests.filter { !it.done }.map { it.estSampleSizeNoStyles }
     if (estTotalSampleSizes.isEmpty()) return emptyList()

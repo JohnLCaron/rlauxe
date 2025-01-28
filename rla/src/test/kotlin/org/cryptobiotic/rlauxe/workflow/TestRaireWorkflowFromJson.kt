@@ -44,13 +44,13 @@ class TestRaireWorkflowFromJson {
         }
 
         val nassertions = raireResults.contests.sumOf { it.assertions.size }
-        val workflow = ComparisonWorkflow(auditConfig, emptyList(), raireResults.contests, cvrs)
+        val workflow = ClcaWorkflow(auditConfig, emptyList(), raireResults.contests, cvrs)
         runComparisonWorkflowR(workflow, cvrs, nassertions)
     }
 
 }
 
-fun runComparisonWorkflowR(workflow: ComparisonWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
+fun runComparisonWorkflowR(workflow: ClcaWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var prevMvrs = emptyList<Cvr>()

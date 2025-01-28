@@ -152,7 +152,7 @@ fun auditPollingAssertion(
     )
 
     // do not terminate on null reject, continue to use all available samples
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
     if (!testH0Result.status.fail) {
         assertion.proved = true
         assertion.round = roundIdx
@@ -162,7 +162,7 @@ fun auditPollingAssertion(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=assertion.estSampleSize,
-        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit },
+        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
         samplesUsed = testH0Result.sampleCount,
         pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,

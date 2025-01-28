@@ -219,7 +219,7 @@ data class ClcaAssorter(
 data class AuditRoundResult( val roundIdx: Int,
                         val estSampleSize: Int,   // estimated sample size
                         val samplesNeeded: Int,   // first sample when pvalue < riskLimit
-                        val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
+                        val samplesUsed: Int,     // sample count when testH0 terminates
                         val pvalue: Double,       // last pvalue when testH0 terminates
                         val status: TestH0Status, // testH0 status
     )

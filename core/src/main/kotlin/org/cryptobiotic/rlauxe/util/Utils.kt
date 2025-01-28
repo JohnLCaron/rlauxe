@@ -47,16 +47,31 @@ fun Double.sigfig(minSigfigs: Int = 4): String {
     return if (df.startsWith("0.")) df.substring(1) else df
 }
 
-fun quantile(data: List<Int>, quantile: Double): Int {
-    if (data.isEmpty())
-        return 0
-    val p0 = ceil(quantile * data.size).toInt()
-    val p = min((quantile * data.size).toInt(), data.size-1)
 
-    val sortedData = mutableListOf<Int>()
-    sortedData.addAll(data)
-    sortedData.sort()
+// find the sample value where percent of samples < that value equals quantile percent
+fun quantile(data: List<Int>, quantile: Double): Int {
+    require(quantile in 0.0..1.0)
+    if (data.isEmpty()) return 0
+    if (quantile == 0.0) return 0
+
+    val sortedData = data.sorted()
+    if (quantile == 100.0) return sortedData.last()
+    // showQuantiles(sortedData)
+
+    // rounding down
+    val p = min((quantile * data.size).toInt(), data.size-1)
     return sortedData[p]
+}
+
+fun showQuantiles(sortedData: List<Int>) {
+    print(" quantiles=[")
+    val n = sortedData.size
+    repeat(10) {
+        val quantile = .10 * (it+1)
+        val p = min((quantile * n).toInt(), n-1)
+        print(" ${sortedData[p]}, ")
+    }
+    println("]")
 }
 
 /**

@@ -81,6 +81,7 @@ class AdaptiveComparison(
     val p1o: Double // apriori rate of 1-vote overstatements; set < 0 to remove consideration
     val p1u: Double // apriori rate of 1-vote understatements; set < 0 to remove consideration
     val p2u: Double // apriori rate of 2-vote understatements; set < 0 to remove consideration
+    val debug = false
 
     init {
         if (errorRates == null) {
@@ -93,6 +94,11 @@ class AdaptiveComparison(
             p1o = errorRates[1]
             p1u = errorRates[2]
             p2u = errorRates[3]
+        }
+
+        if (debug) {
+            val lam0 = OptimalLambda(a, p2o, p1o, p1u, p2u, 0.5).solve()
+            println(" AdaptiveComparison lam0 = $lam0")
         }
     }
 

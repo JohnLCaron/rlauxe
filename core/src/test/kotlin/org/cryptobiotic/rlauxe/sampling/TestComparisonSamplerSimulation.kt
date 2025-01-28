@@ -28,18 +28,19 @@ class TestComparisonSamplerSimulation {
 
             testLimits(sampler, N, compareAssorter.upperBound)
 
-            assertEquals(sampler.p1 * N, sampler.flippedVotes1.toDouble())
-            assertEquals(sampler.p2 * N, sampler.flippedVotes2.toDouble())
-            assertEquals(sampler.p3 * N, sampler.flippedVotes3.toDouble())
-            assertEquals(sampler.p4 * N, sampler.flippedVotes4.toDouble())
+            val errs = sampler.errorRates
+            assertEquals(errs.p1o * N, sampler.flippedVotesP1o.toDouble())
+            assertEquals(errs.p2o * N, sampler.flippedVotesP2o.toDouble())
+            assertEquals(errs.p1u * N, sampler.flippedVotesP1u.toDouble())
+            assertEquals(errs.p2u * N, sampler.flippedVotesP2u.toDouble())
 
             val noerror = compareAssorter.noerror
-            val p = 1.0 - sampler.p1 - sampler.p2 - sampler.p3 - sampler.p4
-            assertEquals(sampler.p1 * N, countAssortValues(sampler, N, noerror / 2).toDouble())
-            assertEquals(sampler.p2 * N, countAssortValues(sampler, N, 0.0).toDouble())
+            val p = 1.0 - errs.p1o - errs.p2o - errs.p1u - errs.p2u
+            assertEquals(errs.p1o * N, countAssortValues(sampler, N, noerror / 2).toDouble())
+            assertEquals(errs.p2o * N, countAssortValues(sampler, N, 0.0).toDouble())
             assertEquals(p * N, countAssortValues(sampler, N, noerror).toDouble())
-            assertEquals(sampler.p3 * N, countAssortValues(sampler, N, 3 * noerror / 2).toDouble())
-            assertEquals(sampler.p4 * N, countAssortValues(sampler, N, 2 * noerror).toDouble())
+            assertEquals(errs.p1u * N, countAssortValues(sampler, N, 3 * noerror / 2).toDouble())
+            assertEquals(errs.p2u * N, countAssortValues(sampler, N, 2 * noerror).toDouble())
         }
     }
 

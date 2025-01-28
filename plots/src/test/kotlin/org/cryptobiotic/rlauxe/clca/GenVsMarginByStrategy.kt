@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.rlaplots.Scale
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
@@ -97,4 +98,8 @@ fun categoryStrategy(wr: WorkflowResult): String {
         5.0 -> "fuzzPct/2"
         else -> "unknown"
     }
+}
+
+fun categoryVersion(wr: WorkflowResult): String {
+    return df(wr.parameters["version"]!!)
 }

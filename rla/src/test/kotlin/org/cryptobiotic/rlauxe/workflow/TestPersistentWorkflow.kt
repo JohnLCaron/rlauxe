@@ -14,6 +14,7 @@ class TestPersistentWorkflow {
 
     @Test
     fun testPersistentWorkflow() {
+        val fuzzMvrs = .01
         val publish = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
             pollingConfig = PollingConfig(fuzzPct = .01))
@@ -37,9 +38,9 @@ class TestPersistentWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (auditConfig.clcaConfig.fuzzPct == null) testCvrs
+        val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.fuzzPct!!)
+            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         writeCvrsJsonFile(workflow.cvrsUA, publish.cvrsFile())

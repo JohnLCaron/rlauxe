@@ -16,7 +16,7 @@ class TestOptimalComparison {
             for (p2 in p2s) {
                 println("margin=$margin p2=$p2")
 
-                val kelly = OptimalLambda(a, p1o = 0.0, p2o = p2)
+                val kelly = OptimalLambda(a, ErrorRates(p2, 0.0, 0.0, 0.0))
                 val lam = kelly.solve()
 
                 val optimal = OptimalComparisonNoP1(N = N, withoutReplacement = true, upperBound = 2 * a, p2 = p2)
@@ -40,7 +40,7 @@ class TestOptimalComparison {
             for (p2 in p2s) {
                 println("margin=$margin p2=$p2")
 
-                val kelly = OptimalLambda(a, p1o = 0.0, p2o = p2)
+                val kelly = OptimalLambda(a, ErrorRates(p2, 0.0, 0.0, 0.0))
                 val lam = kelly.solve()
 
                 // these fail when upperBound * (1.0 - p2) <= 1.0

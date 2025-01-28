@@ -47,6 +47,10 @@ fun Double.sigfig(minSigfigs: Int = 4): String {
     return if (df.startsWith("0.")) df.substring(1) else df
 }
 
+fun showLast(x: List<Double>, n: Int) = buildString {
+    val last = x.takeLast(n)
+    last.forEach { append("${df(it)}, ") }
+}
 
 // find the sample value where percent of samples < that value equals quantile percent
 fun quantile(data: List<Int>, quantile: Double): Int {
@@ -56,22 +60,22 @@ fun quantile(data: List<Int>, quantile: Double): Int {
 
     val sortedData = data.sorted()
     if (quantile == 100.0) return sortedData.last()
-    // showQuantiles(sortedData)
+    // println(showDeciles(sortedData))
 
     // rounding down
     val p = min((quantile * data.size).toInt(), data.size-1)
     return sortedData[p]
 }
 
-fun showQuantiles(sortedData: List<Int>) {
-    print(" quantiles=[")
+fun showDeciles(sortedData: List<Int>) = buildString {
+    append(" deciles=[")
     val n = sortedData.size
     repeat(10) {
-        val quantile = .10 * (it+1)
-        val p = min((quantile * n).toInt(), n-1)
-        print(" ${sortedData[p]}, ")
+        val quantile = .10 * (it + 1)
+        val p = min((quantile * n).toInt(), n - 1)
+        append(" ${sortedData[p]}, ")
     }
-    println("]")
+    appendLine("]")
 }
 
 /**

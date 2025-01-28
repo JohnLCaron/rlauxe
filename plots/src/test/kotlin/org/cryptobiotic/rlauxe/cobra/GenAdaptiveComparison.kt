@@ -1,9 +1,5 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.core.AdaptiveComparison
-import org.cryptobiotic.rlauxe.core.BettingMart
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.sampling.Sampler
@@ -11,6 +7,7 @@ import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.concur.RepeatedTask
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -162,7 +159,7 @@ data class CobraTask(
             a = compareAssorter.noerror,
             d1 = 0,
             d2 = d2,
-            listOf(p2prior, 0.0, 0.0, 0.0)
+            ErrorRates(p2prior, 0.0, 0.0, 0.0)
         )
         return BettingMart(
             bettingFn = adaptive, Nc = N, noerror = compareAssorter.noerror,

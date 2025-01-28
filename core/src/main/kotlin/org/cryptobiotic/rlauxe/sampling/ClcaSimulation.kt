@@ -13,12 +13,8 @@ class ClcaSimulation(
     rcvrs: List<Cvr>,
     val contest: ContestIF,
     val cassorter: ClcaAssorterIF,
-    errorRates: List<Double>,
+    val errorRates: ErrorRates,
     ): Sampler {
-    val p1: Double = errorRates[0] // rate of 1-vote overstatements; voted for other, cvr has winner
-    val p2: Double = errorRates[1] // rate of 2-vote overstatements; voted for loser, cvr has winner
-    val p3: Double = errorRates[2] // rate of 1-vote understatements; voted for winner, cvr has other
-    val p4: Double = errorRates[3] // rate of 2-vote understatements; voted for winner, cvr has loser
 
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
     val N = rcvrs.size
@@ -30,10 +26,10 @@ class ClcaSimulation(
     val permutedIndex = MutableList(N) { it }
     val sampleMean: Double
     val sampleCount: Double
-    val flippedVotes1: Int
-    val flippedVotes2: Int
-    val flippedVotes3: Int
-    val flippedVotes4: Int
+    val flippedVotesP1o: Int
+    val flippedVotesP2o: Int
+    val flippedVotesP1u: Int
+    val flippedVotesP2u: Int
 
     var idx = 0
 
@@ -47,11 +43,11 @@ class ClcaSimulation(
         val ccvrs = mutableListOf<Cvr>()
         ccvrs.addAll(rcvrs)
 
-        flippedVotes1 = flip1votes(mmvrs, needToChange = (N * p1).toInt())
-        flippedVotes2 = flip2votes(mmvrs, needToChange = (N * p2).toInt())
-        flippedVotes4 = flip4votes(mmvrs, needToChange = (N * p4).toInt())
-        flippedVotes3 = if (isIRV) flip3votes(mmvrs, needToChange = (N * p3).toInt())
-                        else flip3votesP(mmvrs, ccvrs, needToChange = (N * p3).toInt())
+        flippedVotesP1o = flipP1o(mmvrs, needToChange = (N * errorRates.p1o).toInt())
+        flippedVotesP2o = flipP2o(mmvrs, needToChange = (N * errorRates.p2o).toInt())
+        flippedVotesP2u = flipP2u(mmvrs, needToChange = (N * errorRates.p2u).toInt())
+        flippedVotesP1u = if (isIRV) flipP1u(mmvrs, needToChange = (N * errorRates.p1u).toInt())
+                        else flipP1uP(mmvrs, ccvrs, needToChange = (N * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
@@ -84,16 +80,16 @@ class ClcaSimulation(
     }
 
     fun showFlips() = buildString {
-        appendLine(" flippedVotes1 = $flippedVotes1 = ${df(100.0*flippedVotes1/N)}")
-        appendLine(" flippedVotes2 = $flippedVotes2 = ${df(100.0*flippedVotes2/N)}")
-        appendLine(" flippedVotes3 = $flippedVotes3 = ${df(100.0*flippedVotes3/N)}")
-        appendLine(" flippedVotes4 = $flippedVotes4 = ${df(100.0*flippedVotes4/N)}")
+        appendLine(" flippedVotes1 = $flippedVotesP1o = ${df(100.0*flippedVotesP1o/N)}")
+        appendLine(" flippedVotes2 = $flippedVotesP2o = ${df(100.0*flippedVotesP2o/N)}")
+        appendLine(" flippedVotes3 = $flippedVotesP1u = ${df(100.0*flippedVotesP1u/N)}")
+        appendLine(" flippedVotes4 = $flippedVotesP2u = ${df(100.0*flippedVotesP2u/N)}")
     }
 
     //  plurality:  two vote overstatement: cvr has winner (1), mvr has loser (0)
     //  NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
     //  NEN two vote overstatement: cvr has winner as first pref among remaining (1), mvr has loser as first pref among remaining (0)
-    fun flip2votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP2o(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val startingAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
@@ -133,7 +129,7 @@ class ClcaSimulation(
     //  plurality: two vote understatement: cvr has loser (0), mvr has winner (1)
     //  NEB two vote understatement: cvr has loser preceeding winner (0), mvr has winner as first pref (1)
     //  NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
-    fun flip4votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP2u(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val startingAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.0 }.count()
@@ -173,7 +169,7 @@ class ClcaSimulation(
     //  plurality: one vote overstatement: cvr has winner (1), mvr has other (1/2)
     //  NEB one vote overstatement: cvr has winner as first pref (1), mvr has winner preceding loser, but not first (1/2)
     //  NEN one vote overstatement: cvr has winner as first pref among remaining (1), mvr has neither winner nor loser as first pref among remaining (1/2)
-    fun flip1votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP1o(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -213,7 +209,7 @@ class ClcaSimulation(
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1)
     //  NEB one vote understatement: cvr has winner preceding loser (1/2), but not first, mvr has winner as first pref (1)
     //  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining (1)
-    fun flip3votes(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP1u(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -245,7 +241,7 @@ class ClcaSimulation(
     }
 
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1). have to change cvr to other
-    fun flip3votesP(mcvrs: MutableList<Cvr>, cvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP1uP(mcvrs: MutableList<Cvr>, cvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         val otherCandidate = max(cassorter.assorter().winner(), cassorter.assorter().loser()) + 1

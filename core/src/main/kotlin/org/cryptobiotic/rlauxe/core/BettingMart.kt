@@ -112,6 +112,6 @@ class BettingMart(
             else -> TestH0Status.LimitReached
         }
 
-        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.errorCounts())
+        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.errorRates())
     }
 }

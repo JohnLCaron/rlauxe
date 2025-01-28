@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
 import org.cryptobiotic.rlauxe.core.BettingMart
+import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
@@ -78,7 +79,7 @@ class TestCorla {
                             a = compareAssorter.noerror,
                             d1 = d1,
                             d2 = d1,
-                            listOf(p2prior, p1prior, 0.0, 0.0),
+                            ErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
                         val betting =

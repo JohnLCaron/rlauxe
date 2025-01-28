@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.ClcaAssorterIF
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 
 // theory is that the errorRates are proportional to fuzzPct
@@ -10,9 +11,9 @@ import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 
 object ClcaErrorRates {
     val rrates = mutableMapOf<Int, List<Double>>() // errorRates / FuzzPct
-    val standard = listOf(.01, 1.0e-4, 0.01, 1.0e-4) // TODO
+    val standard = ErrorRates(.01, 1.0e-4, 0.01, 1.0e-4)
 
-    fun getErrorRates(ncandidates: Int, fuzzPct: Double?): List<Double> {
+    fun getErrorRates(ncandidates: Int, fuzzPct: Double?): ErrorRates {
         if (fuzzPct == null) return standard
 
         val useCand = when  {
@@ -20,12 +21,13 @@ object ClcaErrorRates {
             ncandidates > 10 -> 10
             else -> ncandidates
         }
-        return rrates[useCand]!!.map { it * fuzzPct }
+        val rr = rrates[useCand]!!.map { it * fuzzPct }
+        return ErrorRates(rr[0], rr[1], rr[2], rr[3])
     }
 
     fun calcErrorRates(contestId: Int, cassorter: ClcaAssorterIF,
                        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    ) : List<Double> {
+    ) : ErrorRates {
         require(cvrPairs.size > 0)
         val samples = PrevSamplesWithRates(cassorter.noerror()) // accumulate error counts here
         cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second)) }

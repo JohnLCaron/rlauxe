@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
@@ -28,7 +29,7 @@ fun runTestRepeated(
     val statusMap = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
     val sampleCounts = mutableListOf<Int>()
-    val errorCounts = mutableListOf(0.0,0.0,0.0,0.0,0.0)
+    // val errorCounts = mutableListOf(0.0,0.0,0.0,0.0,0.0)
 
     repeat(ntrials) {
         drawSample.reset()
@@ -53,15 +54,15 @@ fun runTestRepeated(
             percentHist.add(percent)
             sampleCounts.add(testH0Result.sampleCount)
         }
-        if (testH0Result.samplingErrors.isNotEmpty()) {
-            testH0Result.samplingErrors.forEachIndexed { idx, err -> errorCounts[idx] = errorCounts[idx] + err.toDouble()/testH0Result.sampleCount }
-        }
+        //if (testH0Result.samplingErrors.isNotEmpty()) {
+        //    testH0Result.samplingErrors.forEachIndexed { idx, err -> errorCounts[idx] = errorCounts[idx] + err.toDouble()/testH0Result.sampleCount }
+        //}
         if (showH0Result) println(" $it $testH0Result")
     }
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, Nc=Nc, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, statusMap, sampleCounts, errorCounts.map { 100.0 * it / ntrials }, margin = margin)
+        ntrials=ntrials, variance, percentHist, statusMap, sampleCounts, margin = margin)
 }
 
 data class RunTestRepeatedResult(
@@ -74,7 +75,7 @@ data class RunTestRepeatedResult(
     val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
-    val errorRate: List<Double> = emptyList(), // error rates percent
+    // val errorRates: ErrorRates? = null, // average error rates over trials
     val margin: Double?,
 ) {
 
@@ -82,7 +83,7 @@ data class RunTestRepeatedResult(
     fun failPct(): Double  = 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
     fun avgSamplesNeeded(): Int  = totalSamplesNeeded / (if (nsuccess == 0) 1 else nsuccess)
     fun pctSamplesNeeded(): Double  = 100.0 * avgSamplesNeeded().toDouble() / (if (Nc == 0) 1 else Nc)
-    fun errorRates() = buildString { errorRate.forEach{ append("${df(it)},") } }
+    // fun errorRates() = buildString { errorRate.forEach{ append("${df(it)},") } }
 
     override fun toString() = buildString {
         appendLine("RunTestRepeatedResult: testParameters=$testParameters Nc=$Nc successPct=${successPct()} in ntrials=$ntrials")
@@ -93,5 +94,10 @@ data class RunTestRepeatedResult(
 
     fun findQuantile(quantile: Double): Int {
         return quantile(sampleCount, quantile)
+    }
+
+    fun showSampleDist() = buildString {
+        append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
+        append(showDeciles(sampleCount.sorted()))
     }
 }

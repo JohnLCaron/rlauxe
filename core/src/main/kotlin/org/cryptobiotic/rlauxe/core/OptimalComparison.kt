@@ -74,7 +74,7 @@ class AdaptiveComparison(
     val a: Double, // compareAssorter.noerror
     val d1: Int,  // weight p1o, p1u
     val d2: Int, // weight p2o, p2u
-    errorRates: List<Double>? = null,  // a priori estimate of the error rates
+    errorRates: ErrorRates? = null,  // a priori estimate of the error rates
     val eps: Double = .00001
 ): BettingFn {
     val p2o: Double // apriori rate of 2-vote overstatements; set < 0 to remove consideration
@@ -90,14 +90,14 @@ class AdaptiveComparison(
             p1u = -1.0
             p2u = -1.0
         } else {
-            p2o = errorRates[0]
-            p1o = errorRates[1]
-            p1u = errorRates[2]
-            p2u = errorRates[3]
+            p2o = errorRates.p2o
+            p1o = errorRates.p1o
+            p1u = errorRates.p1u
+            p2u = errorRates.p2u
         }
 
         if (debug) {
-            val lam0 = OptimalLambda(a, p2o, p1o, p1u, p2u, 0.5).solve()
+            val lam0 = OptimalLambda(a, errorRates!!).solve()
             println(" AdaptiveComparison lam0 = $lam0")
         }
     }
@@ -110,7 +110,7 @@ class AdaptiveComparison(
         val p2uest = if (p2u < 0.0) 0.0 else estimateRate(d2, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
-        val kelly = OptimalLambda(a, p2oest, p1oest, p1uest, p2uest, mui)
+        val kelly = OptimalLambda(a, ErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
         return kelly.solve()
     }
 
@@ -129,12 +129,11 @@ class AdaptiveComparison(
 // We know the true rate of all errors
 class OracleComparison(
     val a: Double, // noerror
-    val errorRates: List<Double>,
+    val errorRates: ErrorRates,
 ): BettingFn {
     val lam: Double
     init {
-        require(errorRates.size == 4)
-        val kelly = OptimalLambda(a, errorRates[0], errorRates[1], errorRates[2], errorRates[3], )
+        val kelly = OptimalLambda(a, errorRates)
         lam = kelly.solve()
     }
     // note lam is a constant
@@ -159,7 +158,11 @@ class OracleComparison(
  * p1u := #{xi = 3a/2}/N is the rate of 1-vote understatements.
  * p2u := #{xi = 2a}/N is the rate of 2-vote understatements.
  */
-class OptimalLambda(val a: Double, val p2o: Double, val p1o: Double, val p1u: Double = 0.0, val p2u: Double = 0.0, val mui: Double = 0.5) {
+class OptimalLambda(val a: Double, val errorRates: ErrorRates, val mui: Double = 0.5) {
+    val p2o = errorRates.p2o
+    val p1o = errorRates.p1o
+    val p1u = errorRates.p1u
+    val p2u = errorRates.p2u
     val p0 = 1.0 - p2o - p1o - p1u - p2u
     val debug = false
 
@@ -202,8 +205,8 @@ class OptimalLambda(val a: Double, val p2o: Double, val p1o: Double, val p1u: Do
     fun expectedValueLogt(lam: Double): Double {
 
         return ln(1.0 + lam * (a - mui)) * p0 +
-                ln(1.0 + lam * (a*0.5 - mui)) * p1o +
                 ln(1.0 - lam * mui) * p2o +
+                ln(1.0 + lam * (a*0.5 - mui)) * p1o +
                 ln(1.0 + lam * (a*1.5 - mui)) * p1u +
                 ln(1.0 + lam * (a*2.0 - mui)) * p2u
     }
@@ -247,7 +250,7 @@ fun estimateSampleSizeOptimalLambda(
     alpha: Double, // risk
     dilutedMargin: Double, // the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
     upperBound: Double, // assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
-    p2o: Double, p1o: Double, p1u: Double = 0.0, p2u: Double = 0.0
+    errorRates: ErrorRates,
 ): Int {
 
     //  a := 1 / (2 − v/au)
@@ -255,7 +258,7 @@ fun estimateSampleSizeOptimalLambda(
     //  au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
 
     val a = 1 / (2 - dilutedMargin / upperBound)
-    val kelly = OptimalLambda(a, p2o=p2o, p1o=p1o, p1u=p1u, p2u=p2u)
+    val kelly = OptimalLambda(a, errorRates)
     val lam = kelly.solve()
 
     // 1 / alpha = bet ^ size

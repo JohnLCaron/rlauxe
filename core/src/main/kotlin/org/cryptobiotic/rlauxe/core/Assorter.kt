@@ -222,6 +222,7 @@ data class AuditRoundResult( val roundIdx: Int,
                         val samplesUsed: Int,     // sample count when testH0 terminates
                         val pvalue: Double,       // last pvalue when testH0 terminates
                         val status: TestH0Status, // testH0 status
+                        val errorRates: ErrorRates? = null, // measured error rates (clca only)
     )
 
 open class Assertion(

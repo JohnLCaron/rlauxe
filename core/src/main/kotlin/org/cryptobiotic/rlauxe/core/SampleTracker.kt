@@ -89,12 +89,21 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     }
 
     fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
-    fun errorRates(): List<Double> {
-        return errorCounts().subList(1,5).map { it / numberOfSamples().toDouble()  /* skip p0 */ }
+    fun errorRates(): ErrorRates {
+        val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
+        return ErrorRates(p[1], p[2], p[3], p[4])
+    }
+    fun errorRatesList(): List<Double> {
+        val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
+        return listOf(p[1], p[2], p[3], p[4])
     }
 
     fun pollCounts() = listOf(countZero,countHalf,countOne)
     fun pollRates() = pollCounts().map { it / numberOfSamples().toDouble() }
-
 }
 
+data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
+    override fun toString(): String {
+        return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
+    }
+}

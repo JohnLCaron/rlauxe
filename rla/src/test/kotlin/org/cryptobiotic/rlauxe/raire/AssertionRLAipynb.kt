@@ -679,7 +679,7 @@ fun calc_sample_sizes(
         a = minAssorter.noerror(),
         d1 = 100,
         d2 = 100,
-        listOf(.001, .01, 0.0, 0.0),
+        ErrorRates(.001, .01, 0.0, 0.0),
     )
     val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
 

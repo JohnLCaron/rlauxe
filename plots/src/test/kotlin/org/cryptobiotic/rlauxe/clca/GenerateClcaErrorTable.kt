@@ -61,9 +61,9 @@ class GenerateClcaErrorTable {
                         while (sampler.hasNext()) {
                             tracker.addSample(sampler.next())
                         }
-                        tracker.errorRates()
+                        tracker.errorRatesList()
                             .forEachIndexed { idx, rate -> sumRForNcand[idx] = sumRForNcand[idx] + (rate / fuzzPct) }
-                        tracker.errorRates()
+                        tracker.errorRatesList()
                             .forEachIndexed { idx, rate -> sumRForPct[idx] = sumRForPct[idx] + (rate / fuzzPct) }
                     }
                     if (showRates) {

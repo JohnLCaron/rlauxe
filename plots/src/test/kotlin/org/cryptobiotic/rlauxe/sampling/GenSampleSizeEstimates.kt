@@ -42,8 +42,8 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             val cvrs = sim.makeCvrs()
             val contestUAc = ContestUnderAudit(sim.contest, isComparison = true)
             contestUAc.makeClcaAssertions(cvrs)
-            val cassort = contestUAc.minClcaAssertion()!!.cassorter
-            tasks.add(ComparisonTask("Comparison: margin = $margin", auditConfig, contestUAc, cassort, cvrs))
+            val cassertion = contestUAc.minClcaAssertion()!!
+            tasks.add(ComparisonTask("Comparison: margin = $margin", auditConfig, contestUAc, cassertion, cvrs))
         }
         // run tasks concurrently
         val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
@@ -88,8 +88,8 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             print("margin = $margin ${simc.contest.votes}")
             val contestUAs = ContestUnderAudit(simc.contest, isComparison = true, hasStyle = true)
             contestUAs.makeClcaAssertions(cvrs)
-            val cassort = contestUAs.minClcaAssertion()!!.cassorter
-            tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigStyles, contestUAs, cassort, cvrs, moreParameters = mapOf("hasStyles" to 1.0)))
+            val cassertion = contestUAs.minClcaAssertion()!!
+            tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigStyles, contestUAs, cassertion, cvrs, moreParameters = mapOf("hasStyles" to 1.0)))
 
             // no styles
             val auditConfigNo = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = false, seed = 123569667890L, quantile = .80, ntrials = ntrials,
@@ -100,8 +100,8 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             print("margin = $margin ${simNo.contest.votes}")
             val contestUAno = ContestUnderAudit(simNo.contest, isComparison = true, hasStyle = false)
             contestUAno.makeClcaAssertions(cvrsNo)
-            val cassortNo = contestUAno.minClcaAssertion()!!.cassorter
-            tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigNo, contestUAno, cassortNo, cvrsNo))
+            val cassertionNo = contestUAno.minClcaAssertion()!!
+            tasks.add(ComparisonTask("Comparison with styles: margin = $margin", auditConfigNo, contestUAno, cassertionNo, cvrsNo))
         }
         // run tasks concurrently
         val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
@@ -191,9 +191,10 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             val cvrs = sim.makeCvrs()
 
             contestUA.makeClcaAssertions(cvrs)
-            val cassort = contestUA.minClcaAssertion()!!.cassorter
-            tasks.add(ComparisonTask("Comparison (standard): margin = $margin", auditConfig, contestUA, cassort, cvrs))
+            val cassertion = contestUA.minClcaAssertion()!!
+            tasks.add(ComparisonTask("Comparison (standard): margin = $margin", auditConfig, contestUA, cassertion, cvrs))
 
+            // TODO looks fishy, using the same assertion
             // alternative
             val configAlt1 = AuditConfig(
                 AuditType.POLLING,
@@ -203,7 +204,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
                 ntrials = 100,
                 pollingConfig = PollingConfig(fuzzPct = .01)
             )
-            tasks.add(ComparisonTask("Comparison fuzz=.01: margin = $margin", configAlt1, contestUA, cassort, cvrs))
+            tasks.add(ComparisonTask("Comparison fuzz=.01: margin = $margin", configAlt1, contestUA, cassertion, cvrs))
 
             val configAlt2 = AuditConfig(
                 AuditType.POLLING,
@@ -214,7 +215,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
                 pollingConfig = PollingConfig(fuzzPct = .001)
 
             )
-            tasks.add(ComparisonTask("Comparison fuzz=.001: margin = $margin", configAlt2, contestUA, cassort, cvrs))
+            tasks.add(ComparisonTask("Comparison fuzz=.001: margin = $margin", configAlt2, contestUA, cassertion, cvrs))
         }
         // run tasks concurrently
         val results: List<RunTestRepeatedResult> = ConcurrentTaskRunnerG<RunTestRepeatedResult>().run(tasks)
@@ -362,7 +363,7 @@ class BettingTask(val name: String,
                   val upperBound: Double,
                   val maxSamples: Int,
                   val Nc: Int,
-                  val errorRates: List<Double>,
+                  val errorRates: ErrorRates,
                   val otherParameters: Map<String, Double>,
 ):  ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
@@ -415,13 +416,13 @@ class AlphaTask(val name: String,
 class ComparisonTask(val name: String,
                      val auditConfig: AuditConfig,
                      val contestUA: ContestUnderAudit,
-                     val cassort: ClcaAssorterIF,
+                     val cassertion: ClcaAssertion,
                      val cvrs: List<Cvr>,
                      val moreParameters: Map<String, Double> = emptyMap(),
 ): ConcurrentTaskG<RunTestRepeatedResult> {
     override fun name() = name
     override fun run() : RunTestRepeatedResult {
-        return simulateSampleSizeClcaAssorter(auditConfig, contestUA.contest as Contest, cassort, cvrs, moreParameters=moreParameters)
+        return simulateSampleSizeClcaAssorter(auditConfig, contestUA.contest as Contest, cassertion, cvrs, moreParameters=moreParameters)
     }
 }
 

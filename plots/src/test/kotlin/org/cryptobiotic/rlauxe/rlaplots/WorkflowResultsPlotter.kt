@@ -90,6 +90,36 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
+    fun showEstCostVsVersion(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
+        val exemplar = data[0]
+        val nruns = exemplar.parameters["nruns"]!!
+        val fuzzPct = exemplar.parameters["fuzzPct"]
+        val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
+
+        wrsPlot(
+            titleS = "$filename estimated cost",
+            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            data,
+            "$dir/${filename}Cost${yscale.name}",
+            "margin",
+            yscale.desc("estimated cost"),
+            catName,
+            xfld = { it.margin },
+            yfld = { it: WorkflowResult -> when (yscale) {
+                Scale.Linear -> estimatedCost(it)
+                Scale.Log -> log10( estimatedCost(it) )// needed?
+                Scale.Pct -> (100 * estimatedCost(it)/it.nmvrs )
+            }},
+            catfld = catfld,
+        )
+    }
+
+    fun estimatedCost(wr: WorkflowResult): Double {
+        val extraCost= wr.nmvrs - wr.samplesNeeded
+        val roundCost = if (wr.nrounds > 2) 500.0 * (wr.nrounds - 2) else 0.0
+        return extraCost + roundCost
+    }
+
     fun showFailuresVsMargin(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!

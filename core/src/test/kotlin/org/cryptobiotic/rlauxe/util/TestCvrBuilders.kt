@@ -44,7 +44,7 @@ class TestCvrBuilders {
         fuzzPcts.forEach { fuzzPct ->
             val fcvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")
-            val avgRates = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
+            val allErrorRates = mutableListOf<ErrorRates>()
             contests.forEach { contest ->
                 val contestUA = ContestUnderAudit(contest.info, cvrs).makeClcaAssertions(cvrs)
                 val minAssert = contestUA.minClcaAssertion()
@@ -66,12 +66,18 @@ class TestCvrBuilders {
                         println("  errorCounts = ${samples.errorCounts()}")
                         println("  errorRates =  ${samples.errorRates()}")
                     }
-                    samples.errorRates().forEachIndexed { idx, it -> avgRates[idx] = avgRates[idx] + it}
+                    allErrorRates.add(samples.errorRates())
                 }
             }
             val total = ntrials * ncontests
-            println("  avgRates = ${avgRates.map { it / total }}")
-            println("  error% = ${avgRates.map { it / (total * fuzzPct) }}")
+            val avgRates = ErrorRates(
+                allErrorRates.map{ it.p2o }.sum() / total,
+                allErrorRates.map{ it.p1o }.sum() / total,
+                allErrorRates.map{ it.p1u }.sum() / total,
+                allErrorRates.map{ it.p2u }.sum() / total,
+            )
+            println("  avgRates = $avgRates")
+            // println("  error% = ${avgRates.map { it / (total * fuzzPct) }}")
         }
     }
 }

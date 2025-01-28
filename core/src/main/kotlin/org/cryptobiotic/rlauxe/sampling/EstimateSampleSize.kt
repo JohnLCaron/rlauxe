@@ -41,7 +41,7 @@ fun estimateSampleSizes(
             println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.ntrials} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
-        } else {
+        } else if (auditConfig.version == 1.0) {
             var quantile = result.findQuantile(auditConfig.quantile)
             var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
@@ -50,8 +50,12 @@ fun estimateSampleSizes(
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-            // println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
-            // if (show) println("  ${task.contestUA.name} ${task.assertion}")
+        } else {
+            var quantile = result.findQuantile(auditConfig.quantile + .10 * (roundIdx - 1)) // increase quantile by 10% per round
+            var size = task.prevSampleSize + quantile
+            task.assertion.estSampleSize = min(size, task.contestUA.Nc)
+            println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+            println(result.showSampleDist())
         }
     }
 
@@ -131,7 +135,7 @@ class SimulateSampleSizeTask(
                 simulateSampleSizeClcaAssorter(
                     auditConfig,
                     contestUA.contest,
-                    (assertion as ClcaAssertion).cassorter,
+                    (assertion as ClcaAssertion),
                     cvrs,
                     startingTestStatistic
                 )
@@ -163,12 +167,13 @@ class SimulateSampleSizeTask(
 fun simulateSampleSizeClcaAssorter(
     auditConfig: AuditConfig,
     contest: ContestIF,
-    cassorter: ClcaAssorterIF,
+    cassertion: ClcaAssertion,
     cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
+    val cassorter = cassertion.cassorter
 
     val (sampler: Sampler, bettingFn: BettingFn) = when {
         clcaConfig.errorRates != null -> {
@@ -177,7 +182,7 @@ fun simulateSampleSizeClcaAssorter(
                 AdaptiveComparison(
                     Nc = contest.Nc,
                     withoutReplacement = true,
-                    a = cassorter.noerror(),
+                    a = cassertion.cassorter.noerror(),
                     d1 = clcaConfig.d1,
                     d2 = clcaConfig.d2,
                     clcaConfig.errorRates
@@ -200,13 +205,19 @@ fun simulateSampleSizeClcaAssorter(
                     a = cassorter.noerror(),
                     d1 = clcaConfig.d1,
                     d2 = clcaConfig.d2,
-                    listOf(0.0, 0.0, 0.0, 0.0)
+                    ErrorRates(0.0, 0.0, 0.0, 0.0)
                 )
             )
         }
         else -> {
-            val errorRates = ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
-            if (false) println("simulateSampleSizeClcaAssorter errorRates = ${errorRates}")
+            val errorRates = if (auditConfig.version == 1.0) {
+                ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
+            } else if (cassertion.roundResults.isEmpty()) {
+                ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
+            } else {
+                cassertion.roundResults.last().errorRates
+            }
+            println("simulateSampleSizeClcaAssorter errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
 
             Pair(
                 ClcaFuzzSampler(

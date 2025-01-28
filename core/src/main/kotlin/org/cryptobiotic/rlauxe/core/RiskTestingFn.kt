@@ -22,7 +22,7 @@ data class TestH0Result(
     val sampleMean: Double, // average of the assort values in the sample
     val pvalues: List<Double>,  // set of pvalues
     val bets: List<Double>,  // lamda_i
-    val samplingErrors: List<Int> = emptyList(),  // p2o,p1o,p1u,p2u count of errors
+    val errorRates: ErrorRates,  // p2o,p1o,p1u,p2u count of errors
 ) {
     override fun toString() = buildString {
         append("TestH0Result status=$status")

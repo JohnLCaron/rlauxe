@@ -128,7 +128,8 @@ class ClcaWorkflow(
             var allAssertionsDone = true
             contestUA.clcaAssertions.forEach { assertion ->
                 if (!assertion.proved) {
-                    assertion.status = runClcaAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
+                    val testH0Result = runClcaAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
+                    assertion.status = testH0Result.status
                     allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
                 }
             }
@@ -159,14 +160,12 @@ class ClcaWorkflow(
                 }
             }
         }
-            /*
+
         val minAssertion = getContests().first().minClcaAssertion()!!
         if (minAssertion.roundResults.isNotEmpty()) {
             val lastRound = minAssertion.roundResults.last()
             println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
         }
-
-             */
         println()
     }
 
@@ -282,7 +281,7 @@ fun runClcaAssertionAudit(
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = false,
-): TestH0Status {
+): TestH0Result {
     val debug = false
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
@@ -303,7 +302,6 @@ fun runClcaAssertionAudit(
                 a = cassorter.noerror(),
                 d1 = clcaConfig.d1,
                 d2 = clcaConfig.d2,
-                listOf(0.0, 0.0, 0.0, 0.0)
             )
         }
 
@@ -356,9 +354,10 @@ fun runClcaAssertionAudit(
         samplesUsed = testH0Result.sampleCount,
         pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,
+        errorRates = testH0Result.errorRates
         )
     cassertion.roundResults.add(roundResult)
 
     if (!quiet) println(" ${contestUA.name} $roundResult")
-    return testH0Result.status
+    return testH0Result
 }

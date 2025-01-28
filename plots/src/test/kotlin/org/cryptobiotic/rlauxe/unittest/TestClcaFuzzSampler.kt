@@ -7,11 +7,8 @@ import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeBetaMart
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.secureRandom
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.PollingConfig
+import org.cryptobiotic.rlauxe.workflow.*
 import org.junit.jupiter.api.Test
 
 // TODO make into a test with asserts ?
@@ -33,10 +30,11 @@ class TestClcaFuzzSampler {
             hasStyles = true,
             seed = secureRandom.nextLong(),
             quantile = .50,
-            pollingConfig = PollingConfig(fuzzPct = .01)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.fuzzPct, fuzzPct = .01)
         )
 
         contestsUA.forEach { contestUA ->
+
             val sampleSizes = mutableListOf<Pair<Int, Double>>()
             contestUA.clcaAssertions.map { assertion ->
                 val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contestUA, assertion, cvrs)
@@ -64,6 +62,8 @@ private fun runWithComparisonFuzzSampler(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val assorter = assertion.cassorter
+
+    // TODO using fuzzPct as mvrsFuzz
     val sampler = ClcaFuzzSampler(clcaConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,

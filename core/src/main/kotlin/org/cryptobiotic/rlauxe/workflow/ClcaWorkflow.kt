@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.util.*
 //	c) Read ballot manifest.
 //	d) Read CVRs.
 
-class ComparisonWorkflow(
+class ClcaWorkflow(
     val auditConfig: AuditConfig,
     val contestsToAudit: List<Contest>, // the contests you want to audit
     val raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
@@ -60,7 +60,7 @@ class ComparisonWorkflow(
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
     override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
-        if (!quiet) println("estimateSampleSizes round $roundIdx")
+        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
 
         val maxContestSize = estimateSampleSizes(
             auditConfig,
@@ -159,6 +159,14 @@ class ComparisonWorkflow(
                 }
             }
         }
+            /*
+        val minAssertion = getContests().first().minClcaAssertion()!!
+        if (minAssertion.roundResults.isNotEmpty()) {
+            val lastRound = minAssertion.roundResults.last()
+            println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
+        }
+
+             */
         println()
     }
 
@@ -275,6 +283,7 @@ fun runClcaAssertionAudit(
     roundIdx: Int,
     quiet: Boolean = false,
 ): TestH0Status {
+    val debug = false
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
@@ -301,6 +310,7 @@ fun runClcaAssertionAudit(
         ClcaStrategyType.fuzzPct -> {
             // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
             val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct)
+            if (debug) println("audit errorRates = ${errorRates}")
             AdaptiveComparison(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
@@ -332,8 +342,7 @@ fun runClcaAssertionAudit(
         withoutReplacement = true
     )
 
-    // do not terminate on null reject, continue to use all samples
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = false) { sampler.sample() }
+    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
     if (!testH0Result.status.fail) {
         cassertion.proved = true
         cassertion.round = roundIdx
@@ -343,7 +352,7 @@ fun runClcaAssertionAudit(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
-        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit },
+        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
         samplesUsed = testH0Result.sampleCount,
         pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,

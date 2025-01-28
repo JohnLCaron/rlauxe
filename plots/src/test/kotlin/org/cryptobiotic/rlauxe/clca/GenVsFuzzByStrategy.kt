@@ -25,29 +25,33 @@ class GenVsFuzzByStrategy {
 
         fuzzPcts.forEach { fuzzPct ->
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaStrategyType.oracle, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "strat" to 1.0, "fuzzPct" to fuzzPct))
+                mapOf("nruns" to nruns.toDouble(), "strat" to 1.0, "fuzzPct" to fuzzPct),
+                clcaConfigIn = ClcaConfig(ClcaStrategyType.oracle, fuzzPct))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "strat" to 2.0, "fuzzPct" to fuzzPct))
+                mapOf("nruns" to nruns.toDouble(), "strat" to 2.0, "fuzzPct" to fuzzPct),
+                clcaConfigIn = ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct))
+                mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct),
+                clcaConfigIn = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
-                mapOf("nruns" to nruns.toDouble(), "strat" to 4.0, "fuzzPct" to fuzzPct))
+                mapOf("nruns" to nruns.toDouble(), "strat" to 4.0, "fuzzPct" to fuzzPct),
+                clcaConfigIn = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
+                )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
-                mapOf("nruns" to nruns.toDouble(), "strat" to 5.0, "fuzzPct" to fuzzPct))
+                mapOf("nruns" to nruns.toDouble(), "strat" to 5.0, "fuzzPct" to fuzzPct),
+                clcaConfigIn = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
+                )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
 

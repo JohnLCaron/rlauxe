@@ -48,3 +48,16 @@ fun checkWinners(contestUA: ContestUnderAudit, sortedVotes: List<Map.Entry<Int, 
         }
     }
 }
+
+// find first index where pvalue < riskLimit, and stays below the riskLimit for the rest of the sequence
+fun samplesNeeded(pvalues: List<Double>, riskLimit: Double): Int {
+    var firstIndex = -1
+    pvalues.forEachIndexed { idx, pvalue ->
+        if (pvalue <= riskLimit && firstIndex < 0) {
+            firstIndex = idx
+        } else if (pvalue >= riskLimit) {
+            firstIndex = -1
+        }
+    }
+    return firstIndex
+}

@@ -32,8 +32,8 @@ class CompareAuditsNoErrors {
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                ClcaConfig(ClcaStrategyType.oracle, 0.0),
-                mapOf("nruns" to nruns.toDouble())
+                clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
+                parameters=mapOf("nruns" to nruns.toDouble())
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
@@ -72,8 +72,8 @@ class CompareAuditsNoErrors {
         margins.forEach { margin ->
             val clcaGenerator = ClcaWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                ClcaConfig(ClcaStrategyType.oracle, 0.0),
-                mapOf("nruns" to nruns.toDouble())
+                clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
+                parameters=mapOf("nruns" to nruns.toDouble())
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
         }

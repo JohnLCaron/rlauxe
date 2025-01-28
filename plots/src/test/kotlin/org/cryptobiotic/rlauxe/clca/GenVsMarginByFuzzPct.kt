@@ -30,8 +30,8 @@ class GenVsMarginByFuzzPct {
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
                 val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, actualFuzz,
-                    clcaConfig=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
-                    parameters=mapOf("nruns" to nruns.toDouble(), "estFuzzPct" to fuzzPct)
+                    parameters=mapOf("nruns" to nruns.toDouble(), "estFuzzPct" to fuzzPct),
+                    clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
             }

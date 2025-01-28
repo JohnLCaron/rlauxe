@@ -46,7 +46,7 @@ class BettingMart(
 
         while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
-            sampleNumber++ // j <- j + 1
+            sampleNumber++
             require(xj >= 0.0)
             require(xj <= upperBound)
 

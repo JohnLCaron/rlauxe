@@ -33,7 +33,6 @@ object ClcaErrorRates {
         return samples.errorRates()
     }
 
-    // TODO REDO?
     init {
         // GenerateComparisonErrorTable.generateErrorTable()
         // N=100000 ntrials = 200

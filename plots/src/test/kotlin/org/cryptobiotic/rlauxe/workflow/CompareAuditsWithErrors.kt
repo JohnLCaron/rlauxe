@@ -32,8 +32,8 @@ class CompareAuditsWithErrors {
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct,
-                ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
-                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 

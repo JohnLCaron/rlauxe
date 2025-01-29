@@ -54,7 +54,6 @@ class TestPersistentWorkflow {
 fun runPersistentWorkflow(publish: Publisher, workflow: ClcaWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
-    var prevMvrs = emptyList<Cvr>()
     val previousSamples = mutableSetOf<Int>()
     var rounds = mutableListOf<Round>()
     var roundIdx = 1
@@ -63,7 +62,7 @@ fun runPersistentWorkflow(publish: Publisher, workflow: ClcaWorkflow, testMvrs: 
     while (!done) {
         val roundStopwatch = Stopwatch()
         println("---------------------------")
-        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=true)
+        val indices = workflow.chooseSamples(roundIdx, show=true)
         writeSampleIndicesJsonFile(indices, publish.sampleIndicesFile(roundIdx))
 
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
@@ -77,7 +76,6 @@ fun runPersistentWorkflow(publish: Publisher, workflow: ClcaWorkflow, testMvrs: 
         writeAuditRoundJsonFile(auditRound, publish.auditRoundFile(roundIdx))
 
         println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        prevMvrs = sampledMvrs
         roundIdx++
     }
 

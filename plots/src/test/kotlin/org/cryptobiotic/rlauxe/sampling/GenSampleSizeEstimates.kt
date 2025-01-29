@@ -311,7 +311,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             seed = 12356667890L,
             quantile = .80,
             ntrials = 1000,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = .01),
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = .01),
         )
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 
@@ -373,8 +373,7 @@ class BettingTask(val name: String,
             Nc = Nc,
             withoutReplacement = true,
             a = noerror,
-            d1 = clcaConfig.d1,
-            d2 = clcaConfig.d2,
+            d = clcaConfig.d,
             errorRates,
         )
         return simulateSampleSizeBetaMart(auditConfig, sampleFn, optimal, margin, noerror, upperBound, Nc=Nc,

@@ -31,8 +31,7 @@ class GenBettingPayoff {
                 val optimal = AdaptiveComparison(
                     Nc = N,
                     a = noerror,
-                    d1 = 10000,
-                    d2 = 10000,
+                    d = 10000,
                     errorRates = ErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
@@ -55,8 +54,7 @@ class GenBettingPayoff {
                 val bettingFn = AdaptiveComparison(
                     Nc = N,
                     a = noerror,
-                    d1 = 10000,
-                    d2 = 10000,
+                    d = 10000,
                     errorRates = ErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
@@ -95,8 +93,7 @@ class GenBettingPayoff {
                 val bettingFn = AdaptiveComparison(
                     Nc = N,
                     a = noerror,
-                    d1 = 10000,
-                    d2 = 10000,
+                    d = 10000,
                     errorRates = ErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)

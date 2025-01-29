@@ -77,8 +77,7 @@ class TestCorla {
                             Nc = N,
                             withoutReplacement = false,
                             a = compareAssorter.noerror,
-                            d1 = d1,
-                            d2 = d1,
+                            d = d1,
                             ErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )

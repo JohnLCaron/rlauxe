@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 01/26/2025_
+_last update: 01/29/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -31,7 +31,8 @@ Table of Contents
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
-    * [Polling Vs Clca with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
+    * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
+  * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -406,6 +407,28 @@ The following plot shows Polling vs CLCA with and without CSD at different margi
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLog.html" rel="compareWithStyle">![compareWithStyle](./docs/plots/workflows/compareWithStyle/compareWithStyleLog.png)</a>
 
 * For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data. 
+
+## Under/Over estimating CLCA sample sizes
+
+Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
+Over/under estimation is strongly influenced by over/estimating error rates. 
+
+The following plots show approximate distribution of estimated and actual sample sizes, using our standard AdaptiveComparison
+betting function with weight parameter d = 100, for margin=2% and errors in the MVRs generated with 2% fuzz.
+
+When the estimated error rates are equal to the actual error rates:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/estSampleDistribution/estSampleDistributionEqual.html" rel="estSampleDistributionEqual">![estSampleDistributionEqual](./docs/plots/estSampleDistribution/estSampleDistributionEqual.png)</a>
+
+When the estimated error rates are double the actual error rates:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/estSampleDistribution/estSampleDistributionDouble.html" rel="estSampleDistributionDouble">![estSampleDistributionDouble](./docs/plots/estSampleDistribution/estSampleDistributionDouble.png)</a>
+
+When the estimated error rates are half the actual error rates:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/estSampleDistribution/estSampleDistributionHalf.html" rel="estSampleDistributionHalf">![estSampleDistributionHalf](./docs/plots/estSampleDistribution/estSampleDistributionHalf.png)</a>
+
+TODO: adjust better to the actual error rates as they are sampled.
 
 
 # Appendices

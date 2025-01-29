@@ -25,10 +25,9 @@ fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quie
     var rounds = mutableListOf<Round>()
     var roundIdx = 1
 
-    var prevMvrs = emptyList<Cvr>()
     var done = false
     while (!done) {
-        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
+        val indices = workflow.chooseSamples(roundIdx, show=false)
 
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
@@ -43,7 +42,6 @@ fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quie
 
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
         if (!quiet) println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        prevMvrs = sampledMvrs
         roundIdx++
     }
 

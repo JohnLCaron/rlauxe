@@ -55,21 +55,33 @@ class ClcaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
+    // debugging
+    fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<EstimationResult> {
+        return estimateSampleSizes(
+            auditConfig,
+            contestsUA,
+            cvrs,
+            roundIdx,
+            show = show,
+        )
+    }
+
     /**
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
-    override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
+    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("----------estimateSampleSizes round $roundIdx")
 
-        val maxContestSize = estimateSampleSizes(
+        estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
-            prevMvrs,
             roundIdx,
             show=show,
         )
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
+
 
         //	2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
         //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
@@ -280,7 +292,7 @@ fun runClcaAssertionAudit(
     cassertion: ClcaAssertion,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
-    quiet: Boolean = false,
+    quiet: Boolean = true,
 ): TestH0Result {
     val debug = false
     val cassorter = cassertion.cassorter
@@ -300,21 +312,26 @@ fun runClcaAssertionAudit(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
             )
         }
 
         ClcaStrategyType.fuzzPct -> {
-            // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
-            val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct)
-            if (debug) println("audit errorRates = ${errorRates}")
+            /* val errorRates = if (auditConfig.version == 1.0 || cassertion.roundResults.isEmpty()) {
+                // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
+                ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
+            } else {
+                // use last rounds' errorRates as apriori. TODO: incremental audit
+                cassertion.roundResults.last().errorRates
+            } */
+            val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
+            if (debug) println("simulateSampleSizeClcaAssorter errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
+
             AdaptiveComparison(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
                 errorRates
             )
         }
@@ -325,8 +342,7 @@ fun runClcaAssertionAudit(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
                 clcaConfig.errorRates!!
             )
     }

@@ -97,7 +97,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
 
         wrsPlot(
-            titleS = "$filename nmvrs - samplesNeeded",
+            titleS = if (yscale == Scale.Pct) "$filename extraSamples/nmvrs %" else  "$filename nmvrs - samplesNeeded",
             subtitleS = subtitle,
             data,
             "$dir/${filename}${yscale.name}",

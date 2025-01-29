@@ -21,7 +21,7 @@ class TestAuditRoundJson {
     fun testRoundtrip() {
         val publish = Publisher("/home/stormy/temp/persist/TestAuditRoundJson/")
         val auditConfig =
-            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, ntrials = 10,
+            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, nsimEst = 10,
                 pollingConfig = PollingConfig(fuzzPct = .01))
 
         val N = 5000
@@ -74,7 +74,7 @@ class TestAuditRoundJson {
     fun testRoundtripIO() {
         val publish = Publisher("/home/stormy/temp/persist/testRoundtripIO/")
         val auditConfig =
-            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, ntrials = 10,
+            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, nsimEst = 10,
                 pollingConfig = PollingConfig(fuzzPct = .01))
 
         val N = 5000

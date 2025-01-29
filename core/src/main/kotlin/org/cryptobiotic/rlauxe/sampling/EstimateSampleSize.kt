@@ -36,10 +36,10 @@ fun estimateSampleSizes(
         val result = estResult.repeatedResult
         if (estResult.failed) { // TODO 80% ?? settable ??
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.ntrials} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
+            println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.nsimEst} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
-        } else  {
+        } else if (auditConfig.version == 1.0) {
             val quantile = result.findQuantile(auditConfig.quantile)
             var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
@@ -48,13 +48,13 @@ fun estimateSampleSizes(
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-        } //else {
-          //  var quantile = result.findQuantile(auditConfig.quantile + .10 * (roundIdx - 1)) // increase quantile by 10% per round
-          //  var size = task.prevSampleSize + quantile
-          //  task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-            // println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
-            // println(result.showSampleDist())
-        //}
+        } else {
+            val quantile = result.findQuantile( if (roundIdx == 1) .50 else .80)
+            var size = task.prevSampleSize + quantile
+            task.assertion.estSampleSize = min(size, task.contestUA.Nc)
+            println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+        }
+        println(result.showSampleDist())
     }
 
     // pull out the sampleSizes for all successful assertions in the contest
@@ -171,9 +171,10 @@ fun simulateSampleSizeClcaAssorter(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val cassorter = cassertion.cassorter
+    val round = cassertion.roundResults.size + 1
 
     val errorRates = when {
-        (auditConfig.version == 2.0 && cassertion.roundResults.isNotEmpty()) -> {
+        (auditConfig.version == 2.0 && round > 1) -> {
             println("simulateSampleSizeClcaAssorter using errorRates = ${cassertion.roundResults.last().errorRates} instead of ${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)} for round ${cassertion.roundResults.size + 1}")
             cassertion.roundResults.last().errorRates!!
         }
@@ -182,13 +183,15 @@ fun simulateSampleSizeClcaAssorter(
         else -> null
     }
 
+    val d =  if (auditConfig.version == 2.0 && round > 1) 10 else clcaConfig.d
+
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null) {
         Pair(
             ClcaSimulation(cvrs, contest, cassorter, errorRates),
             AdaptiveComparison(
                 Nc = contest.Nc,
                 a = cassertion.cassorter.noerror(),
-                d = clcaConfig.d,
+                d = d,
                 errorRates = errorRates,
             )
         )
@@ -316,7 +319,7 @@ fun simulateSampleSizeBetaMart(
 
     val result: RunTestRepeatedResult = runTestRepeated(
         drawSample = sampleFn,
-        ntrials = auditConfig.ntrials,
+        ntrials = auditConfig.nsimEst,
         testFn = testFn,
         testParameters = moreParameters,
         startingTestStatistic = startingTestStatistic,
@@ -387,9 +390,9 @@ fun simulateSampleSizeAlphaMart(
 
     val result: RunTestRepeatedResult = runTestRepeated(
         drawSample = sampleFn,
-        ntrials = auditConfig.ntrials,
+        ntrials = auditConfig.nsimEst,
         testFn = testFn,
-        testParameters = mapOf("ntrials" to auditConfig.ntrials.toDouble(), "polling" to 1.0) + moreParameters,
+        testParameters = mapOf("ntrials" to auditConfig.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
         margin = margin,
         Nc = Nc,

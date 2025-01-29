@@ -23,7 +23,7 @@ class CompareAuditsWithStyles {
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val pollingConfigNS = AuditConfig(AuditType.POLLING, false, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10)
+            val pollingConfigNS = AuditConfig(AuditType.POLLING, false, samplePctCutoff=0.5, nsimEst = 10)
             val pollingGeneratorNS = PollingWorkflowTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to 1.0),
@@ -31,7 +31,7 @@ class CompareAuditsWithStyles {
                 Nb=Nb)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGeneratorNS))
 
-            val pollingConfig = AuditConfig(AuditType.POLLING, true, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10)
+            val pollingConfig = AuditConfig(AuditType.POLLING, true, samplePctCutoff=0.5, nsimEst = 10)
             val pollingGenerator = PollingWorkflowTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to 2.0),
@@ -39,7 +39,7 @@ class CompareAuditsWithStyles {
                 Nb=Nc)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaConfigNS = AuditConfig(AuditType.CARD_COMPARISON, false, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10,
+            val clcaConfigNS = AuditConfig(AuditType.CARD_COMPARISON, false, samplePctCutoff=0.5, nsimEst = 10,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGeneratorNS = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to 3.0),
@@ -48,7 +48,7 @@ class CompareAuditsWithStyles {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorNS))
 
-            val clcaConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10,
+            val clcaConfig = AuditConfig(AuditType.CARD_COMPARISON, true, samplePctCutoff=0.5, nsimEst = 10,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to 4.0),

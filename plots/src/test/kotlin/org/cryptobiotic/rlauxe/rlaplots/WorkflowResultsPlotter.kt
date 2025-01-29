@@ -66,7 +66,31 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showEstSizesVsMargin(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
+    fun showEstSizesVsMarginVersion(data: List<WorkflowResult>, subtitle: String, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
+        val exemplar = data[0]
+        val nruns = exemplar.parameters["nruns"]!!
+        val fuzzPct = exemplar.parameters["fuzzPct"]
+        val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
+
+        wrsPlot(
+            titleS = "$filename extra samples (version1 - version2)",
+            subtitleS = subtitle,
+            data,
+            "$dir/${filename}${yscale.name}",
+            "margin",
+            yscale.desc("extra samples"),
+            catName,
+            xfld = { it.margin },
+            yfld = { it: WorkflowResult -> when (yscale) {
+                Scale.Linear -> (it.nmvrs - it.samplesNeeded)
+                Scale.Log -> log10( (it.nmvrs - it.samplesNeeded))// needed?
+                Scale.Pct -> (100* (it.nmvrs - it.samplesNeeded)/it.nmvrs )
+            }},
+            catfld = catfld,
+        )
+    }
+
+    fun showEstSizesVsMargin(data: List<WorkflowResult>, subtitle: String, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
@@ -74,7 +98,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename nmvrs - samplesNeeded",
-            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            subtitleS = subtitle,
             data,
             "$dir/${filename}${yscale.name}",
             "margin",

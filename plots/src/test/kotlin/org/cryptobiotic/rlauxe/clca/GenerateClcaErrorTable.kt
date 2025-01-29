@@ -22,7 +22,7 @@ class GenerateClcaErrorTable {
 
     @Test
     fun generateErrorTable() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, ntrials = 100)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, nsimEst = 100)
         val N = 100000
 
         // TODO how much do the rates depend on the margin?
@@ -34,7 +34,7 @@ class GenerateClcaErrorTable {
         underVotePcts.forEach { underVotePct ->
 
             val result = mutableMapOf<Int, List<Double>>()
-            println("underVotePct=$underVotePct N=$N ntrials = ${auditConfig.ntrials}")
+            println("underVotePct=$underVotePct N=$N ntrials = ${auditConfig.nsimEst}")
             println("| ncand | r2o    | r1o    | r1u    | r2u    |")
             println("|-------|--------|--------|--------|--------|")
             ncands.forEach { ncand ->
@@ -48,7 +48,7 @@ class GenerateClcaErrorTable {
                 fuzzPcts.forEach { fuzzPct ->
                     val sumRForPct = mutableListOf(0.0, 0.0, 0.0, 0.0)
 
-                    repeat(auditConfig.ntrials) {
+                    repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
                         val contestUA = ContestUnderAudit(contest, true, true)
                         // val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
@@ -68,11 +68,11 @@ class GenerateClcaErrorTable {
                     }
                     if (showRates) {
                         print("   $fuzzPct = [")
-                        sumRForPct.forEach { R -> print(" ${df(R / auditConfig.ntrials)},") }
+                        sumRForPct.forEach { R -> print(" ${df(R / auditConfig.nsimEst)},") }
                         println("]")
                     }
                 }
-                val avgRforNcand = sumRForNcand.map { it / (auditConfig.ntrials * fuzzPcts.size) }
+                val avgRforNcand = sumRForNcand.map { it / (auditConfig.nsimEst * fuzzPcts.size) }
                 print("| $ncand | ")
                 avgRforNcand.forEach { avgR -> print(" ${df(avgR)} |") }
                 println()

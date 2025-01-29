@@ -48,7 +48,7 @@ class GenPollingDvalues {
                         hasStyles = true,
                         seed = 12356667890L,
                         quantile = .80,
-                        ntrials = 10,
+                        nsimEst = 10,
                         pollingConfig = PollingConfig(d=d)
                     )
 

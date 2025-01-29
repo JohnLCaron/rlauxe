@@ -7,12 +7,12 @@ class TestRaireWorkflow {
 
     @Test
     fun testRaireComparisonWithStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10))
+        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10))
     }
 
     @Test
     fun testRaireComparisonNoStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 123568667890L, ntrials=10))
+        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 123568667890L, nsimEst=10))
     }
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {

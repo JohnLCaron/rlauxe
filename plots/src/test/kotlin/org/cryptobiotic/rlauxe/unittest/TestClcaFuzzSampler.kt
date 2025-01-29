@@ -68,8 +68,7 @@ private fun runWithComparisonFuzzSampler(
         Nc = contestUA.Nc,
         withoutReplacement = true,
         a = assorter.noerror(),
-        d1 = clcaConfig.d1,
-        d2 = clcaConfig.d2,
+        d = clcaConfig.d,
         ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct),
     )
 

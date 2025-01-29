@@ -40,7 +40,7 @@ fun estimateSampleSizes(
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
         } else  {
-            var quantile = result.findQuantile(auditConfig.quantile)
+            val quantile = result.findQuantile(auditConfig.quantile)
             var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
@@ -178,7 +178,7 @@ fun simulateSampleSizeClcaAssorter(
             cassertion.roundResults.last().errorRates!!
         }
         (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
-        (clcaConfig.errorRates != null) -> clcaConfig.errorRates!! // hmmmm
+        (clcaConfig.errorRates != null) -> clcaConfig.errorRates // hmmmm
         else -> null
     }
 
@@ -188,8 +188,7 @@ fun simulateSampleSizeClcaAssorter(
             AdaptiveComparison(
                 Nc = contest.Nc,
                 a = cassertion.cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
                 errorRates = errorRates,
             )
         )
@@ -207,8 +206,7 @@ fun simulateSampleSizeClcaAssorter(
                 Nc = contest.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
                 ErrorRates(0.0, 0.0, 0.0, 0.0)
             )
         )

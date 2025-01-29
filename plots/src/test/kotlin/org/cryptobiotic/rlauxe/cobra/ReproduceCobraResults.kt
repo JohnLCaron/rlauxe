@@ -212,8 +212,7 @@ class ReproduceCobraResults {
         val p2oracle = listOf(.0001, .001, .01)
         val p1priors = listOf(.001, .01)
         val p2priors = listOf(.0001, .001)
-        val d1 = 100
-        val d2 = 1000
+        val d = 100
         val eps = .00001
 
         val N = 20000
@@ -246,8 +245,7 @@ class ReproduceCobraResults {
                             Nc = N,
                             withoutReplacement = false,
                             a = compareAssorter.noerror,
-                            d1 = d1,
-                            d2 = d2,
+                            d = d,
                             ErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )

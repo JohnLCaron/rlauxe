@@ -49,7 +49,7 @@ class GenAdaptiveComparison {
                         N=N,
                         cvrMean = reportedMean,
                         cvrs = cvrs,
-                        d2 = d2,
+                        d = d2,
                         p2oracle = p2,
                         p2prior = p2prior,
                     )
@@ -108,7 +108,7 @@ class GenAdaptiveComparison {
                         N=N,
                         cvrMean = cvrMean,
                         cvrs = cvrs,
-                        d2 = (1.0/p2prior).toInt(),
+                        d = (1.0/p2prior).toInt(),
                         p2oracle = p2,
                         p2prior = p2prior,
                     )
@@ -139,7 +139,7 @@ data class CobraTask(
     val N: Int,
     val cvrMean: Double,
     val cvrs: List<Cvr>,
-    val d2: Int, // weight p2, p4
+    val d: Int, // weight p2, p4
     val p2oracle: Double, // oracle rate of 2-vote overstatements
     val p2prior: Double, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
 ): RepeatedTask {
@@ -157,8 +157,7 @@ data class CobraTask(
             Nc = N,
             withoutReplacement = true,
             a = compareAssorter.noerror,
-            d1 = 0,
-            d2 = d2,
+            d = d,
             ErrorRates(p2prior, 0.0, 0.0, 0.0)
         )
         return BettingMart(
@@ -168,7 +167,7 @@ data class CobraTask(
     }
 
     override fun makeTestParameters(): Map<String, Double> {
-        return mapOf("p2oracle" to p2oracle, "p2prior" to p2prior, "d2" to d2.toDouble())
+        return mapOf("p2oracle" to p2oracle, "p2prior" to p2prior, "d" to d.toDouble())
     }
 
     // override fun maxSamples(): Int  = N

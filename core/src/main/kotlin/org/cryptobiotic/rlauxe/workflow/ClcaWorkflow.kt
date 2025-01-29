@@ -312,8 +312,7 @@ fun runClcaAssertionAudit(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
             )
         }
 
@@ -332,8 +331,7 @@ fun runClcaAssertionAudit(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
                 errorRates
             )
         }
@@ -344,8 +342,7 @@ fun runClcaAssertionAudit(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
                 a = cassorter.noerror(),
-                d1 = clcaConfig.d1,
-                d2 = clcaConfig.d2,
+                d = clcaConfig.d,
                 clcaConfig.errorRates!!
             )
     }

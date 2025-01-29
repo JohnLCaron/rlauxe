@@ -72,8 +72,7 @@ class AdaptiveComparison(
     val Nc: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
-    val d1: Int,  // weight p1o, p1u
-    val d2: Int, // weight p2o, p2u
+    val d: Int,  // weight
     errorRates: ErrorRates? = null,  // a priori estimate of the error rates
     val eps: Double = .00001
 ): BettingFn {
@@ -104,10 +103,10 @@ class AdaptiveComparison(
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastj = prevSamples.numberOfSamples() // TODO lastj = 0
-        val p2oest = if (p2o < 0.0) 0.0 else estimateRate(d2, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
-        val p1oest = if (p1o < 0.0) 0.0 else estimateRate(d1, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
-        val p1uest = if (p1u < 0.0) 0.0 else estimateRate(d1, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
-        val p2uest = if (p2u < 0.0) 0.0 else estimateRate(d2, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
+        val p2oest = if (p2o < 0.0) 0.0 else estimateRate(d, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
+        val p1oest = if (p1o < 0.0) 0.0 else estimateRate(d, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
+        val p1uest = if (p1u < 0.0) 0.0 else estimateRate(d, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
+        val p2uest = if (p2u < 0.0) 0.0 else estimateRate(d, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, ErrorRates(p2oest, p1oest, p1uest, p2uest), mui)

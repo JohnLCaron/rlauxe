@@ -97,6 +97,8 @@ class EstimationDist {
         return workflow
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+
     @Test
     fun testOneEstSample() {
         val Nc = 50000
@@ -116,7 +118,11 @@ class EstimationDist {
 
         println("doOneHundred")
         val actuals = doOneHundred(Nc, margin, mvrsFuzzPct, auditConfig).sorted()
-        val tripleOra = actuals.mapIndexed { idx, y -> Triple((idx+1).toDouble(), 100.0 * y.toDouble()/Nc, "actual") }
+        val tripleActs = actuals.mapIndexed { idx, y -> Triple((idx+1).toDouble(), 100.0 * y.toDouble()/Nc, "actual") }
+
+        println("oracle")
+        val oracles = doOneHundred(Nc, margin, mvrsFuzzPct, auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))).sorted()
+        val tripleOra = oracles.mapIndexed { idx, y -> Triple((idx+1).toDouble(), 100.0 * y.toDouble()/Nc, "oracle") }
 
         println("doOneEstSample")
         val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first().repeatedResult
@@ -128,7 +134,7 @@ class EstimationDist {
 
         val name = "estSampleDistributionVs1"
         val dirName = "/home/stormy/temp/workflow/estSampleDistribution2"
-        plotCumul(name, dirName, "Nc=$Nc margin=$margin version2 mvrsFuzzPct=$mvrsFuzzPct simFuzzPct=$simFuzzPct",tripleEst+tripleOra)
+        plotCumul(name, dirName, "Nc=$Nc margin=$margin version2 mvrsFuzzPct=$mvrsFuzzPct simFuzzPct=$simFuzzPct",tripleEst+tripleOra+tripleActs)
     }
 
     fun plotCumul(name: String, dirName: String, subtitle: String, data: List<Triple<Double, Double, String>>) {

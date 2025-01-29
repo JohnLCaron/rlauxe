@@ -1,16 +1,11 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.rlaplots.dd
-import org.jetbrains.kotlinx.kandy.dsl.plot
-import org.jetbrains.kotlinx.kandy.letsplot.export.save
-import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
-import org.jetbrains.kotlinx.kandy.letsplot.layers.line
-import org.jetbrains.kotlinx.kandy.letsplot.layers.points
-import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
-import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
-import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.math.log10
 import kotlin.math.ln
+
+import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
+import org.cryptobiotic.rlauxe.util.df
+
 
 // used in docs
 
@@ -33,7 +28,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         //val p2prior = srts[0].p2prior
         val useData = data.filter { it.error == wantError }
 
-        bpdPlot(
+        genericPlotter(
             "BettingPayoff",
             "error = $wantError",
             "$dir/BettingPayoff${wantError}",
@@ -41,7 +36,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
             "margin", "payoff", "assort",
             xfld = { it.margin },
             yfld = { it.payoff },
-            catfld = { it.assort },
+            catfld = { df(it.assort) },
         )
     }
 
@@ -53,7 +48,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         //val p2prior = srts[0].p2prior
         val useData = data.filter { it.assort == wantAssort }
 
-        bpdPlot(
+        genericPlotter(
             "BettingPayoff",
             "assortValue = $wantAssort",
             "$dir/BettingPayoffAssort${wantAssort}",
@@ -61,7 +56,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
             "margin", "payoff", "error",
             xfld = { it.margin },
             yfld = { it.payoff },
-            catfld = { it.error },
+            catfld = { df(it.error) },
         )
     }
 
@@ -73,7 +68,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         //val p2prior = srts[0].p2prior
         val useData = data.filter { it.assort == wantAssort }
 
-        bpdPlot(
+        genericPlotter(
             "BettingPayoff",
             "riskLimit=$risk, assortValue=$wantAssort",
             "$dir/BettingPayoffSampleSize",
@@ -81,7 +76,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
             "margin", "log10(sampleSize)", "error",
             xfld = { it.margin },
             yfld = { log10(sampleSize(it.payoff)) },
-            catfld = { it.error },
+            catfld = { df(it.error) },
         )
     }
 }
@@ -89,77 +84,3 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
 val risk = .05
 val logRisk = -ln(.05)
 fun sampleSize(payoff:Double) = logRisk / ln(payoff)
-
-// generic multiple line plotter
-fun <T> bpdPlot(
-    titleS: String, subtitleS: String, saveFile: String,
-    srts: List<T>,
-    xname: String, yname: String, catName: String,
-    xfld: (T) -> Double, yfld: (T) -> Double, catfld: (T) -> Double,
-) {
-
-    val groups = makeGroups(srts, catfld)
-
-    val xvalues = mutableListOf<Double>()
-    val yvalues = mutableListOf<Double>()
-    val category = mutableListOf<String>()
-    groups.forEach { (cat, srts) ->
-        val ssrtList = srts.sortedBy { xfld(it) }
-        val xvalue = ssrtList.map { xfld(it) }
-        xvalues.addAll(xvalue)
-
-        val yvalue = ssrtList.map { yfld(it) }
-        yvalues.addAll(yvalue)
-
-        repeat(ssrtList.size) {
-            category.add(dd(cat))
-        }
-    }
-
-    // names are used as labels
-    val multipleDataset = mapOf(
-        xname to xvalues,
-        yname to yvalues,
-        catName to category,
-    )
-
-    val plot = multipleDataset.plot {
-        groupBy(catName) {
-            line {
-                x(xname)
-                y(yname)
-                color(catName)
-            }
-
-            points {
-                x(xname)
-                y(yname)
-                size = 1.0
-                symbol = Symbol.CIRCLE_OPEN
-                color = Color.BLUE
-
-                // tooltips(variables, formats, title, anchor, minWidth, hide)
-                tooltips(xname, yname, catName)
-            }
-
-            layout {
-                title = titleS
-                subtitle = subtitleS
-            }
-        }
-    }
-
-    plot.save("${saveFile}.png")
-    plot.save("${saveFile}.html")
-    println("saved to $saveFile")
-}
-
-// make a map of all Ts for each catFld
-fun <T> makeGroups(srs: List<T>, catfld: (T) -> Double): Map<Double, List<T>> {
-    val result = mutableMapOf<Double, MutableList<T>>()
-    srs.forEach {
-        val imap: MutableList<T> = result.getOrPut(catfld(it)) { mutableListOf() }
-        imap.add(it)
-    }
-    return result.toSortedMap()
-}

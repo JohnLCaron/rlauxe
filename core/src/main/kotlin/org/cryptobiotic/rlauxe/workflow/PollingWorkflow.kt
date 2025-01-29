@@ -34,13 +34,12 @@ class PollingWorkflow(
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
-    override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
+    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("estimateSampleSizes round $roundIdx")
         val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
             emptyList(),
-            prevMvrs,
             roundIdx,
             show=show,
         )

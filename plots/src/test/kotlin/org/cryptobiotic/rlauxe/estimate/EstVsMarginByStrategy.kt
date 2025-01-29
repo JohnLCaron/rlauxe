@@ -13,7 +13,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 
 class EstVsMarginByStrategy {
-    val nruns = 100  // number of times to run workflow
+    val nruns = 10  // number of times to run workflow
     val name = "estVsMarginByStrategy"
     val dirName = "/home/stormy/temp/workflow/$name"
 

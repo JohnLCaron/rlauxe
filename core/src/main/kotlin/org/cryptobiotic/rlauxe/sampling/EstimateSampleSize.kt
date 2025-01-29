@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
@@ -20,14 +19,13 @@ fun estimateSampleSizes(
     auditConfig: AuditConfig,
     contestsUA: List<ContestUnderAudit>,
     cvrs: List<Cvr>,        // Comparison only
-    prevMvrs: List<Cvr>,
     roundIdx: Int,
     show: Boolean = false,
-    nthreads: Int = 14,
-): Int? {
+    nthreads: Int = 30,
+): List<EstimationResult> {
     val tasks = mutableListOf<SimulateSampleSizeTask>()
     contestsUA.filter { !it.done }.forEach { contestUA ->
-        tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, prevMvrs, roundIdx))
+        tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, roundIdx))
     }
     // run tasks concurrently
     val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(show).run(tasks, nthreads)
@@ -41,22 +39,22 @@ fun estimateSampleSizes(
             println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.ntrials} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
-        } else if (auditConfig.version == 1.0) {
+        } else  {
             var quantile = result.findQuantile(auditConfig.quantile)
             var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
-                // println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+                println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-        } else {
-            var quantile = result.findQuantile(auditConfig.quantile + .10 * (roundIdx - 1)) // increase quantile by 10% per round
-            var size = task.prevSampleSize + quantile
-            task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-            println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
-            println(result.showSampleDist())
-        }
+        } //else {
+          //  var quantile = result.findQuantile(auditConfig.quantile + .10 * (roundIdx - 1)) // increase quantile by 10% per round
+          //  var size = task.prevSampleSize + quantile
+          //  task.assertion.estSampleSize = min(size, task.contestUA.Nc)
+            // println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+            // println(result.showSampleDist())
+        //}
     }
 
     // pull out the sampleSizes for all successful assertions in the contest
@@ -69,7 +67,7 @@ fun estimateSampleSizes(
     }
     if (show) println()
     val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
-    return maxContestSize
+    return estResults
 }
 
 // tries to start from where the last left off. Otherwise, wouldnt you just get the previous estimate?
@@ -77,7 +75,6 @@ fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     cvrs: List<Cvr>,        // only needed when Comparison
-    prevMvrs: List<Cvr>,  // TODO should be used for subsequent round estimation
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<SimulateSampleSizeTask> {
@@ -175,7 +172,51 @@ fun simulateSampleSizeClcaAssorter(
     val clcaConfig = auditConfig.clcaConfig
     val cassorter = cassertion.cassorter
 
-    val (sampler: Sampler, bettingFn: BettingFn) = when {
+    val errorRates = when {
+        (auditConfig.version == 2.0 && cassertion.roundResults.isNotEmpty()) -> {
+            println("simulateSampleSizeClcaAssorter using errorRates = ${cassertion.roundResults.last().errorRates} instead of ${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)} for round ${cassertion.roundResults.size + 1}")
+            cassertion.roundResults.last().errorRates!!
+        }
+        (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
+        (clcaConfig.errorRates != null) -> clcaConfig.errorRates!! // hmmmm
+        else -> null
+    }
+
+    val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null) {
+        Pair(
+            ClcaSimulation(cvrs, contest, cassorter, errorRates),
+            AdaptiveComparison(
+                Nc = contest.Nc,
+                a = cassertion.cassorter.noerror(),
+                d1 = clcaConfig.d1,
+                d2 = clcaConfig.d2,
+                errorRates = errorRates,
+            )
+        )
+    } else {
+        // this is noerrors
+        Pair(
+            ComparisonWithoutReplacement(
+                contest,
+                cvrs.zip(cvrs),
+                cassorter,
+                allowReset = true,
+                trackStratum = false
+            ),
+            AdaptiveComparison(
+                Nc = contest.Nc,
+                withoutReplacement = true,
+                a = cassorter.noerror(),
+                d1 = clcaConfig.d1,
+                d2 = clcaConfig.d2,
+                ErrorRates(0.0, 0.0, 0.0, 0.0)
+            )
+        )
+    }
+
+
+    /*
+    val (sampler1: Sampler, bettingFn1: BettingFn) = when {
         clcaConfig.errorRates != null -> {
             Pair(
                 ClcaSimulation(cvrs, contest, cassorter, clcaConfig.errorRates),
@@ -189,7 +230,7 @@ fun simulateSampleSizeClcaAssorter(
                 )
             )
         }
-        clcaConfig.fuzzPct == null || clcaConfig.fuzzPct == 0.0 -> {
+        clcaConfig.simFuzzPct == null || clcaConfig.simFuzzPct == 0.0 -> {
             // this is noerrors
             Pair(
                 ComparisonWithoutReplacement(
@@ -210,18 +251,19 @@ fun simulateSampleSizeClcaAssorter(
             )
         }
         else -> {
-            val errorRates = if (auditConfig.version == 1.0) {
-                ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
-            } else if (cassertion.roundResults.isEmpty()) {
-                ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct)
+            val v2 = auditConfig.version == 2.0
+            val standard = ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
+            val errorRates = if (auditConfig.version == 1.0 || cassertion.roundResults.isEmpty()) {
+                ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
             } else {
-                cassertion.roundResults.last().errorRates
+                val lastRound = cassertion.roundResults.last().errorRates
+                println("simulateSampleSizeClcaAssorter using errorRates = ${lastRound} instead of $standard for round ${cassertion.roundResults.size + 1}")
+                lastRound
             }
-            println("simulateSampleSizeClcaAssorter errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
 
             Pair(
                 ClcaFuzzSampler(
-                    clcaConfig.fuzzPct,
+                    clcaConfig.simFuzzPct,  // TODO v2 simulation with errorRates
                     cvrs,
                     contest as Contest, // TODO cant use Raire here
                     cassorter
@@ -236,7 +278,7 @@ fun simulateSampleSizeClcaAssorter(
                 )
             )
         }
-    }
+    } */
 
     // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros at the beginning
     sampler.reset()

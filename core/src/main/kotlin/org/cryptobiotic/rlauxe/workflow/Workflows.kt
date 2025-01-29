@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 
 interface RlauxWorkflow {
-    fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean = false): List<Int>
+    fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int>
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean
     fun showResults()
     fun getContests() : List<ContestUnderAudit>

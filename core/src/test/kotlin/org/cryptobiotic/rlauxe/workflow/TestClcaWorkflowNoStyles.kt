@@ -96,7 +96,7 @@ class TestClcaWorkflowNoStyles {
     @Test
     fun testComparisonWithFuzz() {
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed = 12356667890L, ntrials=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = 0.01))
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = 0.01))
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
@@ -113,7 +113,7 @@ class TestClcaWorkflowNoStyles {
         val testCvrs = testData.makeCvrsFromContests()
         val testMvrs = if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.fuzzPct!!)
+            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val nassertions = workflow.contestsUA.sumOf { it.assertions().size }

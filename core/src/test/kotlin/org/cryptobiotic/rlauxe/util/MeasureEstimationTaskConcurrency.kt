@@ -36,7 +36,7 @@ class MeasureEstimationTaskConcurrency {
         val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
 
         contestsUA.filter { !it.done }.forEach { contestUA ->
-            tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, emptyList(), 1))
+            tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, 1))
         }
 
         val one = runWest(1, tasks, 0.0).toDouble()

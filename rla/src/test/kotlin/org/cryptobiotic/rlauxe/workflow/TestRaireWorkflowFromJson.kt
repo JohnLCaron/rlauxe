@@ -53,7 +53,6 @@ class TestRaireWorkflowFromJson {
 fun runComparisonWorkflowR(workflow: ClcaWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
-    var prevMvrs = emptyList<Cvr>()
     val previousSamples = mutableSetOf<Int>()
     var rounds = mutableListOf<Round>()
     var roundIdx = 1
@@ -62,7 +61,7 @@ fun runComparisonWorkflowR(workflow: ClcaWorkflow, testMvrs: List<Cvr>, nasserti
     while (!done) {
         val roundStopwatch = Stopwatch()
         println("---------------------------")
-        val indices = workflow.chooseSamples(prevMvrs, roundIdx, show=false)
+        val indices = workflow.chooseSamples(roundIdx, show=false)
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
         rounds.add(currRound)
         previousSamples.addAll(indices)
@@ -72,7 +71,6 @@ fun runComparisonWorkflowR(workflow: ClcaWorkflow, testMvrs: List<Cvr>, nasserti
         val sampledMvrs = indices.map { testMvrs[it] }
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
         println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        prevMvrs = sampledMvrs
         roundIdx++
     }
 

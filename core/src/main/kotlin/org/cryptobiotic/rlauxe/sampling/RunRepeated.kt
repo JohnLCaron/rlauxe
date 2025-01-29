@@ -98,6 +98,6 @@ data class RunTestRepeatedResult(
 
     fun showSampleDist() = buildString {
         append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
-        append(showDeciles(sampleCount.sorted()))
+        append(showDeciles(sampleCount))
     }
 }

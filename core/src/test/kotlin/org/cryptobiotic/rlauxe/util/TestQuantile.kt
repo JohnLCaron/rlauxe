@@ -27,8 +27,8 @@ class TestQuantile {
             samples.add(Random.nextInt(1000))
         }
         val datas = samples.toList()
-        repeat(11) {
-            val q = .10 * it
+        for (idx in 1..10) {
+            val q = .10 * idx
             val v = quantile(datas, q)
             val count = datas.count { data -> data < v }
             println(" ${(df(100*q))}% quantile = $v count=$count expect=${(n * q).toInt()}")

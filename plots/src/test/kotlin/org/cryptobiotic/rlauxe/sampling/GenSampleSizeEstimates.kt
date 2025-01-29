@@ -311,7 +311,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             seed = 12356667890L,
             quantile = .80,
             ntrials = 1000,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = .01),
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = .01),
         )
         println("ntrials = ${auditConfig.ntrials} quantile = ${auditConfig.quantile} N=${N}")
 

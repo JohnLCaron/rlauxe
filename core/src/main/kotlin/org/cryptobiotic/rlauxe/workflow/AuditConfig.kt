@@ -25,7 +25,7 @@ data class AuditConfig(
 enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
-    val fuzzPct: Double? = null, // use to generate apriori errorRates for round 1
+    val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
     val errorRates: ErrorRates? = null, // use as apriori
     val d1: Int = 100,  // shrinkTrunc weight for p2o, p2u
     val d2: Int = 100,  // shrinkTrunc weight for p1o, p1u

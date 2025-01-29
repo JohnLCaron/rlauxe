@@ -67,14 +67,22 @@ fun quantile(data: List<Int>, quantile: Double): Int {
     return sortedData[p]
 }
 
-fun showDeciles(sortedData: List<Int>) = buildString {
-    append(" deciles=[")
+fun makeDeciles(data: List<Int>): List<Int> {
+    val sortedData = data.sorted()
+    val deciles = mutableListOf<Int>()
     val n = sortedData.size
     repeat(10) {
         val quantile = .10 * (it + 1)
         val p = min((quantile * n).toInt(), n - 1)
-        append(" ${sortedData[p]}, ")
+        deciles.add(sortedData[p])
     }
+    return deciles
+}
+
+fun showDeciles(data: List<Int>) = buildString {
+    val deciles = makeDeciles(data)
+    append(" deciles=[")
+    deciles.forEach { append(" $it, ") };
     appendLine("]")
 }
 

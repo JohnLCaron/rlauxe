@@ -30,14 +30,13 @@ class OneAuditWorkflow(
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
-    override fun chooseSamples(prevMvrs: List<Cvr>, roundIdx: Int, show: Boolean): List<Int> {
+    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("estimateSampleSizes round $roundIdx")
 
         val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
-            prevMvrs,
             roundIdx,
             show=show,
         )

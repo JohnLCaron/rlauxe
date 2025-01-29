@@ -9,7 +9,7 @@ import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
 
-// generic multiple line plotter
+// generic multiple line plotter for SRT
 fun srtPlot(
     titleS: String, subtitleS: String, srts: List<SRT>, saveFile: String,
     xname: String, yname: String, catName: String,
@@ -17,7 +17,7 @@ fun srtPlot(
     bravoGroup: List<SRT>? = null, // optional
 ) {
 
-    val groups = makeGroups(srts, catfld)
+    val groups = makeWrGroups(srts, catfld)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
@@ -114,7 +114,7 @@ fun readFilterTN(filename: String, theta: Double, Nc: Int): List<SRT> {
 /////////////////////////////////////////////////////////////////////////////////
 
 // make a map of all SRTS for each catFld
-fun makeGroups(srs: List<SRT>, catfld: (SRT) -> String): Map<String, List<SRT>> {
+fun makeWrGroups(srs: List<SRT>, catfld: (SRT) -> String): Map<String, List<SRT>> {
     val result = mutableMapOf<String, MutableList<SRT>>()
     srs.forEach {
         val imap: MutableList<SRT> = result.getOrPut(catfld(it)) { mutableListOf() }

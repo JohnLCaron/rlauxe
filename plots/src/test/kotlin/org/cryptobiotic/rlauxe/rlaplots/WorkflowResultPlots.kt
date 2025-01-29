@@ -11,7 +11,8 @@ import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
 
-// generic multiple line plotter
+// TO replace with GenericPlotter
+// generic multiple line plotter for WorkflowResult
 fun wrsPlot(
     titleS: String,
     subtitleS: String,
@@ -23,7 +24,7 @@ fun wrsPlot(
     catfld: (WorkflowResult) -> String,
 ) {
     val useWrs = wrs.filter { it.status != TestH0Status.AllFailPct }
-    val groups = makeGroups(useWrs, catfld)
+    val groups = makeWrGroups(useWrs, catfld)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
@@ -105,7 +106,7 @@ fun readAndFilter(
 /////////////////////////////////////////////////////////////////////////////////
 
 // make a map of all WorkflowResult for each catFld
-fun makeGroups(srs: List<WorkflowResult>, catfld: (WorkflowResult) -> String): Map<String, List<WorkflowResult>> {
+fun makeWrGroups(srs: List<WorkflowResult>, catfld: (WorkflowResult) -> String): Map<String, List<WorkflowResult>> {
     val result = mutableMapOf<String, MutableList<WorkflowResult>>()
     srs.forEach {
         val imap: MutableList<WorkflowResult> = result.getOrPut(catfld(it)) { mutableListOf() }

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.unittest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeBetaMart
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.secureRandom
@@ -30,7 +29,7 @@ class TestClcaFuzzSampler {
             hasStyles = true,
             seed = secureRandom.nextLong(),
             quantile = .50,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.fuzzPct, fuzzPct = .01)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.fuzzPct, simFuzzPct = .01)
         )
 
         contestsUA.forEach { contestUA ->
@@ -64,14 +63,14 @@ private fun runWithComparisonFuzzSampler(
     val assorter = assertion.cassorter
 
     // TODO using fuzzPct as mvrsFuzz
-    val sampler = ClcaFuzzSampler(clcaConfig.fuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
+    val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
     val optimal = AdaptiveComparison(
         Nc = contestUA.Nc,
         withoutReplacement = true,
         a = assorter.noerror(),
         d1 = clcaConfig.d1,
         d2 = clcaConfig.d2,
-        ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct),
+        ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct),
     )
 
     return simulateSampleSizeBetaMart(

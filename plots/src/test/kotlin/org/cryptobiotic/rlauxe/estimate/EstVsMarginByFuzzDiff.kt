@@ -60,7 +60,7 @@ class EstVsMarginByFuzzDiff {
 
     @Test
     fun regenPlots() {
-        val subtitle = "Nc=${Nc} nruns=${nruns} fuzzDiff=.01"
+        val subtitle = "Nc=${Nc} nruns=${nruns} fuzzDiff=.02"
 
         //showEstCostVsVersion(Scale.Linear)
         //showEstCostVsVersion(Scale.Log)

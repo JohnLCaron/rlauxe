@@ -16,7 +16,7 @@ class TestPersistentWorkflow {
     fun testPersistentWorkflow() {
         val fuzzMvrs = .01
         val publish = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10,
             pollingConfig = PollingConfig(fuzzPct = .01))
 
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())

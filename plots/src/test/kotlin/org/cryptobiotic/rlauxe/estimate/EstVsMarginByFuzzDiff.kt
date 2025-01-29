@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.clca.categoryStrategy
+import org.cryptobiotic.rlauxe.clca.categoryFuzzDiff
 import org.cryptobiotic.rlauxe.clca.categoryVersion
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -12,36 +12,32 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
 import kotlin.test.Test
 
-class EstVsMarginByStrategy {
-    val nruns = 10  // number of times to run workflow
-    val name = "estVsMarginByStrategy"
+class EstVsMarginByFuzzDiff {
+    val Nc = 50000
+    val nruns = 100  // number of times to run workflow
+    val name = "estVsMarginByFuzzDiff"
     val dirName = "/home/stormy/temp/workflow/$name"
 
-    // Used in docs
-
     @Test
-    fun estSamplesVsMarginByVersion() {
-        val N = 50000
+    fun estSamplesVsMarginByFuzzDiff() {
         val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val fuzzMvrs = .01
-        val fuzzEst = .02
+        val fuzzMvrs = .02
+        val fuzzDiffs = listOf(-.01, -.005, 0.0, .005, .01)
         val stopwatch = Stopwatch()
 
-        val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzEst)
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), quantile=.80, ntrials = 10, clcaConfig = clcaConfig)
-
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        fuzzDiffs.forEach { fuzzDiff ->
+            val simFuzzPct = fuzzMvrs+fuzzDiff
+            val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct)
+            val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, quantile=.50, nsimEst = 100, clcaConfig = clcaConfig)
 
-        margins.forEach { margin ->
-            val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzMvrs,
-                parameters=mapOf("nruns" to nruns.toDouble(), "version" to 1.0, "fuzzPct" to fuzzEst),
-                auditConfigIn=auditConfig)
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
+            margins.forEach { margin ->
+                val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
+                    parameters=mapOf("nruns" to nruns.toDouble(), "version" to 1.0, "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
+                    auditConfigIn=auditConfig)
+                tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
+            }
 
-            val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzMvrs,
-                parameters=mapOf("nruns" to nruns.toDouble(), "version" to 1.1, "fuzzPct" to fuzzEst),
-                auditConfigIn=auditConfig.copy(version=1.1))
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
         }
 
         // run tasks concurrently and average the results
@@ -51,23 +47,27 @@ class EstVsMarginByStrategy {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showEstCostVsVersion(Scale.Linear)
-        showEstCostVsVersion(Scale.Log)
-        /* showEstSizesVsMargin(Scale.Linear)
-        showEstSizesVsMargin(Scale.Log)
-        showEstSizesVsMargin(Scale.Pct)
+        val subtitle = "Nc=${Nc} nruns=${nruns} fuzzMvrs=.02"
+
+        //showEstCostVsVersion(Scale.Linear)
+        //showEstCostVsVersion(Scale.Log)
+        showEstSizesVsMargin(subtitle, Scale.Linear)
+        showEstSizesVsMargin(subtitle, Scale.Log)
+        showEstSizesVsMargin(subtitle, Scale.Pct)
         showFailuresVsMargin()
-        showNroundsVsMargin() */
+        showNroundsVsMargin()
     }
 
     @Test
     fun regenPlots() {
-        showEstCostVsVersion(Scale.Linear)
-        showEstCostVsVersion(Scale.Log)
-        /*showEstSizesVsMargin(Scale.Linear)
-        showEstSizesVsMargin(Scale.Log)
-        showEstSizesVsMargin(Scale.Pct)
-        showFailuresVsMargin() */
+        val subtitle = "Nc=${Nc} nruns=${nruns} fuzzDiff=.01"
+
+        //showEstCostVsVersion(Scale.Linear)
+        //showEstCostVsVersion(Scale.Log)
+        showEstSizesVsMargin(subtitle, Scale.Linear)
+        showEstSizesVsMargin(subtitle, Scale.Log)
+        showEstSizesVsMargin(subtitle, Scale.Pct)
+        showFailuresVsMargin()
         showNroundsVsMargin()
     }
 
@@ -79,12 +79,12 @@ class EstVsMarginByStrategy {
         plotter.showEstCostVsVersion(results, "version", yscale) { categoryVersion(it) }
     }
 
-    fun showEstSizesVsMargin(yscale: Scale) {
+    fun showEstSizesVsMargin(subtitle: String, yscale: Scale) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showEstSizesVsMargin(results, "strategy", yscale) { categoryStrategy(it) }
+        plotter.showEstSizesVsMargin(results, subtitle, "fuzzDiff %", yscale) { categoryFuzzDiff(it) }
     }
 
     fun showFailuresVsMargin() {
@@ -92,7 +92,7 @@ class EstVsMarginByStrategy {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "strategy") { categoryStrategy(it) }
+        plotter.showFailuresVsMargin(results, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
 
     fun showNroundsVsMargin() {
@@ -100,7 +100,7 @@ class EstVsMarginByStrategy {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsMargin(results, "strategy") { categoryStrategy(it) }
+        plotter.showNroundsVsMargin(results, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
 
     @Test
@@ -114,9 +114,8 @@ class EstVsMarginByStrategy {
             val auditConfig = AuditConfig(
                 AuditType.CARD_COMPARISON,
                 true,
-                seed = Random.nextLong(),
                 quantile = .50,
-                ntrials = 100,
+                nsimEst = 100,
                 clcaConfig = clcaConfig
             )
 

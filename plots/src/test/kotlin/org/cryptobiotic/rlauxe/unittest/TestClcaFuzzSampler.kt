@@ -27,7 +27,6 @@ class TestClcaFuzzSampler {
         val auditConfig = AuditConfig(
             AuditType.CARD_COMPARISON,
             hasStyles = true,
-            seed = secureRandom.nextLong(),
             quantile = .50,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.fuzzPct, simFuzzPct = .01)
         )

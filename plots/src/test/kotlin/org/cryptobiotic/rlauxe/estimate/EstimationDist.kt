@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.betting.BettingPayoffData
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
@@ -28,9 +27,8 @@ class EstimationDist {
         val auditConfig = AuditConfig(
             AuditType.CARD_COMPARISON,
             true,
-            seed = Random.nextLong(),
             quantile = .50,
-            ntrials = 100,
+            nsimEst = 100,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct),
             version = 2.0,
         )
@@ -109,9 +107,8 @@ class EstimationDist {
         val auditConfig = AuditConfig(
             AuditType.CARD_COMPARISON,
             true,
-            seed = Random.nextLong(),
             quantile = .50,
-            ntrials = 100,
+            nsimEst = 100,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct),
             version = 2.0,
         )

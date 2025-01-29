@@ -224,7 +224,7 @@ data class AuditRoundResult( val roundIdx: Int,
                         val status: TestH0Status, // testH0 status
                         val errorRates: ErrorRates? = null, // measured error rates (clca only)
     ) {
-    override fun toString() = "$roundIdx estSampleSize=$estSampleSize samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed pvalue=$pvalue status=$status"
+    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed pvalue=$pvalue status=$status"
     }
 
 open class Assertion(

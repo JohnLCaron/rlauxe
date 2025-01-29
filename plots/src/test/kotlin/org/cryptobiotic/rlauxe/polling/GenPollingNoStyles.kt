@@ -21,7 +21,7 @@ class GenPollingNoStyles {
         val nruns = 100
         val Nbs = listOf(10000, 20000, 50000, 100000)
         val margins = listOf(.01, .02, .03, .04, .05, .06, .08, .10, .15, .20)
-        val auditConfig = AuditConfig(AuditType.POLLING, false, seed = Random.nextLong(), samplePctCutoff=0.5, ntrials = 10)
+        val auditConfig = AuditConfig(AuditType.POLLING, false, samplePctCutoff=0.5, nsimEst = 10)
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

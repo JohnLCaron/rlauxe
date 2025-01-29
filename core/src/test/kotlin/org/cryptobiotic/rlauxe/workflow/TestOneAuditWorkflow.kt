@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
+import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -12,7 +13,7 @@ class TestOneAuditWorkflow {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = Random.nextLong(), quantile=.80, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, quantile=.80, nsimEst=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
         runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
@@ -24,7 +25,7 @@ class TestOneAuditWorkflow {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = Random.nextLong(), quantile=.80, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, quantile=.80, nsimEst=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
         runWorkflow("testOneAuditContest", workflow, testCvrs)

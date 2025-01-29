@@ -430,6 +430,12 @@ When the estimated error rates are half the actual error rates:
 
 TODO: adjust better to the actual error rates as they are sampled.
 
+The amount of extra sampling closely follows the number of samples needed, as these plots vs margin show:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLinear.html" rel="estVsMarginByFuzzDiffLinear">![estVsMarginByFuzzDiffLinear](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLog.html" rel="estVsMarginByFuzzDiffLog">![estVsMarginByFuzzDiffLog](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffNrounds.html" rel="estVsMarginByFuzzDiffNrounds">![estVsMarginByFuzzDiffNrounds](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffNrounds.png)</a>
+
 
 # Appendices
 ## Differences with SHANGRLA

@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 // for running workflows with one contest, multiple times for testing
 
@@ -82,7 +81,7 @@ class ClcaWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?:
-            AuditConfig(AuditType.CARD_COMPARISON, true, seed = Random.nextLong(), ntrials = 10,
+            AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 10,
                 clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -120,8 +119,7 @@ class PollingWorkflowTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.POLLING, true, seed = Random.nextLong(), ntrials = 10,
-            pollingConfig = PollingConfig(fuzzPct = fuzzPct)
+            AuditType.POLLING, true, nsimEst = 10, pollingConfig = PollingConfig(fuzzPct = fuzzPct)
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -165,10 +163,7 @@ class OneAuditWorkflowTaskGenerator(
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, fuzzPct)
 
         val oneaudit = OneAuditWorkflow(
-            AuditConfig(
-                AuditType.ONEAUDIT, true, seed = Random.nextLong(), ntrials = 10,
-                pollingConfig = PollingConfig(fuzzPct = fuzzPct)
-            ),
+            AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 10, pollingConfig = PollingConfig(fuzzPct = fuzzPct)),
             listOf(contestOA2), oaCvrs, quiet = quiet
         )
         return WorkflowTask(

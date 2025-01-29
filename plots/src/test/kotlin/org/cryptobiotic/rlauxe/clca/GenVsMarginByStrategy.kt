@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
@@ -102,4 +103,18 @@ fun categoryStrategy(wr: WorkflowResult): String {
 
 fun categoryVersion(wr: WorkflowResult): String {
     return df(wr.parameters["version"]!!)
+}
+
+fun categoryFuzzMvrs(wr: WorkflowResult): String {
+    return df(100.0*wr.parameters["fuzzMvrs"]!!)
+}
+
+fun categoryFuzzDiff(wr: WorkflowResult): String {
+    return dfn(100.0*wr.parameters["fuzzDiff"]!!, 2)
+}
+
+fun categorySimFuzzVersion(wr: WorkflowResult): String {
+    val diff =  dfn(100.0*wr.parameters["simFuzzPct"]!!, 2)
+    val ver = dfn(wr.parameters["version"]!!, 0)
+    return "ver$ver ${diff}%"
 }

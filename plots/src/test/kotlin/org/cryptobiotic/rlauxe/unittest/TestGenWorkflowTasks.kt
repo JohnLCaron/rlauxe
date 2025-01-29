@@ -71,11 +71,10 @@ class TestGenWorkflowTasks {
         val auditConfig = AuditConfig(
             AuditType.ONEAUDIT,
             hasStyles = true,
-            seed = Random.nextLong(),
             quantile = .80,
-            ntrials = 10
+            nsimEst = 10
         )
-        println("N=${N} ntrials=${auditConfig.ntrials}")
+        println("N=${N} ntrials=${auditConfig.nsimEst}")
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         cvrPercents.forEach { cvrPercent ->

@@ -15,7 +15,7 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingNoStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.80, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, quantile=.80, nsimEst=10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
@@ -46,7 +46,7 @@ class TestPollingWorkflow {
 
     @Test
     fun testPollingWithStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, nsimEst=10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -99,7 +99,7 @@ class TestPollingWorkflow {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, ntrials=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, nsimEst=10)
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val workflow = PollingWorkflow(auditConfig, test.contests, ballotManifest, testCvrs.size)
 

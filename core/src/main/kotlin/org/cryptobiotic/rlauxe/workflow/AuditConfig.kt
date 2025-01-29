@@ -1,15 +1,16 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.ErrorRates
+import org.cryptobiotic.rlauxe.util.secureRandom
 
 enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
 
 data class AuditConfig(
     val auditType: AuditType,
     val hasStyles: Boolean,
-    val seed: Long,
+    val seed: Long = secureRandom.nextLong(),
     val riskLimit: Double = 0.05,
-    val ntrials: Int = 100, // when estimating the sample size
+    val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val samplePctCutoff: Double = 0.33, // dont sample more than this pct of N TODO
     val pollingConfig: PollingConfig = PollingConfig(),

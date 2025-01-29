@@ -119,7 +119,7 @@ fun EstimationResult.makeSRTnostyle(Nc: Int): SRT {
         reportedMeanDiff=parameters["reportedMeanDiff"]?: 0.0,
         testParameters=task.moreParameters,
         this.repeatedResult.nsuccess,
-        task.auditConfig.ntrials,
+        task.auditConfig.nsimEst,
         ceil(this.repeatedResult.totalSamplesNeeded * N / Nc).toInt(),
         stddev=0.0,
         percentHist=null)

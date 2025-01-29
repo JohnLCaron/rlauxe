@@ -3,11 +3,12 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.random.Random
 import kotlin.test.Test
 
 class TestClcaWorkflow {
-    val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = Random.nextLong(), ntrials=10)
+    val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, nsimEst=10)
 
     @Test
     fun testComparisonOneContest() {
@@ -21,7 +22,7 @@ class TestClcaWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
@@ -63,7 +64,7 @@ class TestClcaWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
@@ -71,7 +72,7 @@ class TestClcaWorkflow {
 
     @Test
     fun testComparisonWithFuzz() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, ntrials=10,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=0.01))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)

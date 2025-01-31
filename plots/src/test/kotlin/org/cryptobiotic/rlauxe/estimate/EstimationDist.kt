@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.sampling.EstimationResult
@@ -67,7 +68,7 @@ class EstimationDist {
 
         // remove that round
         assertion.roundResults.removeAll { true }
-        assertion.proved = false
+        assertion.status = TestH0Status.InProgress
 
         // now do the normal workflow
         val previousSamples = mutableSetOf<Int>()

@@ -34,11 +34,12 @@ fun estimateSampleSizes(
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
-        if (estResult.failed) { // TODO 80% ?? settable ??
+        if (result.failPct() > 80.0) { // TODO 80% ?? settable ??
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
             println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.nsimEst} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
+
         } else if (auditConfig.version == 1.0) {
             val quantile = result.findQuantile(auditConfig.quantile)
             var size = task.prevSampleSize + quantile
@@ -48,9 +49,10 @@ fun estimateSampleSizes(
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
+
         } else {
             val quantile = result.findQuantile( if (roundIdx == 1) .50 else .80)
-            var size = task.prevSampleSize + quantile
+            val size = task.prevSampleSize + quantile
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
             println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
         }
@@ -60,7 +62,7 @@ fun estimateSampleSizes(
     // pull out the sampleSizes for all successful assertions in the contest
     // probably dont need to check failed, if it did fail, contest.done is true
     contestsUA.filter { !it.done }.forEach { contestUA ->
-        val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id && !it.failed }
+        val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id }
             .map { it.task.assertion.estSampleSize }
         contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
         if (show) println("  ${contestUA}")
@@ -81,7 +83,7 @@ fun makeEstimationTasks(
     val tasks = mutableListOf<SimulateSampleSizeTask>()
 
     contestUA.assertions().map { assert -> // pollingAssertions vs comparisonAssertions
-        if (!assert.proved) {
+        if (!assert.status.complete) {
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
@@ -154,7 +156,7 @@ class SimulateSampleSizeTask(
                     moreParameters=moreParameters,
                 )
         }
-        return EstimationResult(this, result, result.failPct() > 80.0) // TODO 80% ??
+        return EstimationResult(this, result)
     }
 }
 

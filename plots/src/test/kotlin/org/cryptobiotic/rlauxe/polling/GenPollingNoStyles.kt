@@ -29,7 +29,7 @@ class GenPollingNoStyles {
             margins.forEach { margin ->
                 val pollingGenerator = PollingWorkflowTaskGenerator(
                     Nc, margin, 0.0, 0.0, 0.0,
-                    mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble()),
+                    mapOf("nruns" to nruns, "Nb" to Nb),
                     auditConfigIn = auditConfig,
                     Nb)
 
@@ -56,7 +56,7 @@ class GenPollingNoStyles {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNmvrsVsMargin(results, "Nballots", yscale) { category(it) }
+        plotter.showNmvrsVsMargin(results, "Nballots", yscale) { categoryNb(it) }
     }
 
     fun showFailuresVsMargin(name: String, dirName: String, ) {
@@ -64,11 +64,11 @@ class GenPollingNoStyles {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, catName="Nballots") { category(it) }
+        plotter.showFailuresVsMargin(results, catName="Nballots") { categoryNb(it) }
     }
 
-    fun category(wr: WorkflowResult): String {
-        val Nb = wr.parameters["Nb"] ?: 0.0
-        return nfn(Nb.toInt(), 6)
+    fun categoryNb(wr: WorkflowResult): String {
+        val Nb = wr.parameters["Nb"] as Int
+        return nfn(Nb, 6)
     }
 }

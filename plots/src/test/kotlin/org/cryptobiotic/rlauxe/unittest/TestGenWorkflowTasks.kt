@@ -20,7 +20,7 @@ class TestGenWorkflowTasks {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val workflowGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble()))
+                mapOf("nruns" to nruns))
             tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
         }
 
@@ -44,7 +44,7 @@ class TestGenWorkflowTasks {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val workflowGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble()),
+                mapOf("nruns" to nruns),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
@@ -94,6 +94,6 @@ class TestGenWorkflowTasks {
         writer.writeResults(results)
 
         val plotter = WorkflowResultsPlotter(dirName, filename)
-        plotter.showSampleSizesVsMargin(results, "cvrPercent") { df(it.parameters["cvrPercent"]!!.toDouble()) }
+        plotter.showSampleSizesVsMargin(results, "cvrPercent") { df(it.Dparam("cvrPercent")) }
     }
 }

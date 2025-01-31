@@ -62,9 +62,3 @@ data class PollingTask(
     override fun reportedMean() = cvrMean
     override fun reportedMeanDiff() = cvrMeanDiff
 }
-
-class FixedEstimFn(
-    val eta0: Double,
-) : EstimFn {
-    override fun eta(prevSampleTracker: SampleTracker) = eta0
-}

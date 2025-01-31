@@ -37,6 +37,14 @@ class WorkflowResultsIO(val filename: String) {
         appendLine()
     }
 
+    fun writeParameters(params: Map<String, Any> ) = buildString {
+        append("\"")
+        params.forEach { key, value ->
+            append("$key=$value ")
+        }
+        append("\"")
+    }
+
     fun readResults(): List<WorkflowResult> {
         val reader: BufferedReader = File(filename).bufferedReader()
         val header = reader.readLine() // get rid of header line
@@ -67,5 +75,17 @@ class WorkflowResultsIO(val filename: String) {
 
         val status = safeEnumValueOf(statusS) ?: TestH0Status.InProgress
         return WorkflowResult(N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, readParameters(parameters), failPct)
+    }
+
+    fun readParameters(s: String): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        val tokens = s.split(" ", "\"")
+        val ftokens = tokens.filter { it.isNotEmpty() }
+        val ttokens = ftokens.map { it.trim() }
+        ttokens.forEach {
+            val kv = it.split("=")
+            result[kv[0]] = kv[1]
+        }
+        return result
     }
 }

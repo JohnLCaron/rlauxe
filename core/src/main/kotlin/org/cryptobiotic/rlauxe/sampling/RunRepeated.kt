@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.sampling
 
-import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.sqrt
 
-// single threaded
+// single threaded, used for estimating sample size
 // runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
 fun runTestRepeated(
     drawSample: Sampler,
@@ -29,7 +28,6 @@ fun runTestRepeated(
     val statusMap = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
     val sampleCounts = mutableListOf<Int>()
-    // val errorCounts = mutableListOf(0.0,0.0,0.0,0.0,0.0)
 
     repeat(ntrials) {
         drawSample.reset()
@@ -41,7 +39,7 @@ fun runTestRepeated(
 
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
-        if (testH0Result.status.fail) {
+        if (testH0Result.status != TestH0Status.StatRejectNull) {
             fail++
         } else {
             nsuccess++
@@ -54,9 +52,6 @@ fun runTestRepeated(
             percentHist.add(percent)
             sampleCounts.add(testH0Result.sampleCount)
         }
-        //if (testH0Result.samplingErrors.isNotEmpty()) {
-        //    testH0Result.samplingErrors.forEachIndexed { idx, err -> errorCounts[idx] = errorCounts[idx] + err.toDouble()/testH0Result.sampleCount }
-        //}
         if (showH0Result) println(" $it $testH0Result")
     }
 
@@ -75,12 +70,11 @@ data class RunTestRepeatedResult(
     val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
-    // val errorRates: ErrorRates? = null, // average error rates over trials
     val margin: Double?,
 ) {
 
     fun successPct(): Double = 100.0 * nsuccess / (if (ntrials == 0) 1 else ntrials)
-    fun failPct(): Double  = 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
+    fun failPct(): Double  = if (nsuccess == 0) 100.0 else 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
     fun avgSamplesNeeded(): Int  = totalSamplesNeeded / (if (nsuccess == 0) 1 else nsuccess)
     fun pctSamplesNeeded(): Double  = 100.0 * avgSamplesNeeded().toDouble() / (if (Nc == 0) 1 else Nc)
     // fun errorRates() = buildString { errorRate.forEach{ append("${df(it)},") } }

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.Scale
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.category
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -29,32 +30,32 @@ class GenVsMarginByStrategy {
 
         margins.forEach { margin ->
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "strat" to 1.0, "fuzzPct" to fuzzPct),
+                mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, fuzzPct),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "strat" to 2.0, "fuzzPct" to fuzzPct),
+                mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct),
+                mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "strat" to 4.0, "fuzzPct" to fuzzPct),
+                mapOf("nruns" to nruns, "cat" to "2*fuzzPct", "fuzzPct" to fuzzPct),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, 2*fuzzPct)),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "strat" to 5.0, "fuzzPct" to fuzzPct),
+                mapOf("nruns" to nruns, "cat" to "fuzzPct/2", "fuzzPct" to fuzzPct),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorRates.getErrorRates(2, fuzzPct/2)),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
@@ -78,7 +79,7 @@ class GenVsMarginByStrategy {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "strategy", yscale) { categoryStrategy(it) }
+        plotter.showSampleSizesVsMargin(results, "strategy", yscale) { category(it) }
     }
 
     fun showFailuresVsMargin() {
@@ -86,35 +87,6 @@ class GenVsMarginByStrategy {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, catName="strategy") { categoryStrategy(it) }
+        plotter.showFailuresVsMargin(results, catName="strategy") { category(it) }
     }
-}
-
-fun categoryStrategy(wr: WorkflowResult): String {
-    return when (wr.parameters["strat"]) {
-        1.0 -> "oracle"
-        2.0 -> "noerror"
-        3.0 -> "fuzzPct"
-        4.0 -> "2*fuzzPct"
-        5.0 -> "fuzzPct/2"
-        else -> "unknown"
-    }
-}
-
-fun categoryVersion(wr: WorkflowResult): String {
-    return df(wr.parameters["version"]!!)
-}
-
-fun categoryFuzzMvrs(wr: WorkflowResult): String {
-    return df(100.0*wr.parameters["fuzzMvrs"]!!)
-}
-
-fun categoryFuzzDiff(wr: WorkflowResult): String {
-    return dfn(100.0*wr.parameters["fuzzDiff"]!!, 2)
-}
-
-fun categorySimFuzzVersion(wr: WorkflowResult): String {
-    val diff =  dfn(100.0*wr.parameters["simFuzzPct"]!!, 2)
-    val ver = dfn(wr.parameters["version"]!!, 0)
-    return "ver$ver ${diff}%"
 }

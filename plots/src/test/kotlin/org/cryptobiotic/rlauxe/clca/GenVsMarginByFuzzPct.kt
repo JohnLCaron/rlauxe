@@ -66,7 +66,7 @@ class GenVsMarginByFuzzPct {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "estFuzzPct") { category(it) }
+        plotter.showFailuresVsMargin(results, catName="estFuzzPct") { category(it) }
     }
 
     fun category(wr: WorkflowResult): String {

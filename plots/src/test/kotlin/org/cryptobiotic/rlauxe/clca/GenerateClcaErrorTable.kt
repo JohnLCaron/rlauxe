@@ -22,7 +22,7 @@ class GenerateClcaErrorTable {
 
     @Test
     fun generateErrorTable() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, nsimEst = 100)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, nsimEst = 1000)
         val N = 100000
 
         // TODO how much do the rates depend on the margin?

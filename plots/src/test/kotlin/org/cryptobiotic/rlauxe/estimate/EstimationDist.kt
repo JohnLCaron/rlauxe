@@ -58,7 +58,8 @@ class EstimationDist {
         // "oracle" audit
         val contestUA = workflow.contestsUA.first()
         val assertion = contestUA.minClcaAssertion()!!
-        val result: TestH0Result = runClcaAssertionAudit(auditConfig, contestUA, assertion, sortedPairs, 1, quiet=quiet)
+        val result: TestH0Result =
+            runClcaAssertionAudit(auditConfig, contestUA, assertion, sortedPairs, 1, quiet = quiet)
         println("oracle audit")
         workflow.showResults()
         //println("last 20 pvalues= ${showLast(result.pvalues, 20)}")
@@ -97,6 +98,8 @@ class EstimationDist {
 
     ////////////////////////////////////////////////////////////////////////////////////
 
+    // Used in docs
+
     @Test
     fun testOneEstSample() {
         val Nc = 50000
@@ -115,11 +118,18 @@ class EstimationDist {
 
         println("doOneHundred")
         val actuals = doOneHundred(Nc, margin, mvrsFuzzPct, auditConfig).sorted()
-        val tripleActs = actuals.mapIndexed { idx, y -> Triple((idx+1).toDouble(), 100.0 * y.toDouble()/Nc, "actual") }
+        val tripleActs =
+            actuals.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "actual") }
 
         println("oracle")
-        val oracles = doOneHundred(Nc, margin, mvrsFuzzPct, auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))).sorted()
-        val tripleOra = oracles.mapIndexed { idx, y -> Triple((idx+1).toDouble(), 100.0 * y.toDouble()/Nc, "oracle") }
+        val oracles = doOneHundred(
+            Nc,
+            margin,
+            mvrsFuzzPct,
+            auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
+        ).sorted()
+        val tripleOra =
+            oracles.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "oracle") }
 
         println("doOneEstSample")
         val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first().repeatedResult
@@ -127,11 +137,17 @@ class EstimationDist {
         //println(rr.showSampleDist())
         //println(rr.sampleCount.sorted())
         val sdata = rr.sampleCount.sorted()
-        val tripleEst = sdata.mapIndexed { idx, y -> Triple((idx+1).toDouble(), 100.0 * y.toDouble()/Nc, "estimate") }
+        val tripleEst =
+            sdata.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "estimate") }
 
         val name = "estSampleDistributionVs1"
         val dirName = "/home/stormy/temp/workflow/estSampleDistribution2"
-        plotCumul(name, dirName, "Nc=$Nc margin=$margin version2 mvrsFuzzPct=$mvrsFuzzPct simFuzzPct=$simFuzzPct",tripleEst+tripleOra+tripleActs)
+        plotCumul(
+            name,
+            dirName,
+            "Nc=$Nc margin=$margin version2 mvrsFuzzPct=$mvrsFuzzPct simFuzzPct=$simFuzzPct",
+            tripleEst + tripleOra + tripleActs
+        )
     }
 
     fun plotCumul(name: String, dirName: String, subtitle: String, data: List<Triple<Double, Double, String>>) {
@@ -190,9 +206,14 @@ class EstimationDist {
         val phantomPct = 0.0
 
         val results = mutableListOf<Int>()
-            repeat(100) {
+        repeat(100) {
             val sim =
-                ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
+                ContestSimulation.make2wayTestContest(
+                    Nc = Nc,
+                    margin,
+                    undervotePct = undervotePct,
+                    phantomPct = phantomPct
+                )
             var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
             var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
             // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")

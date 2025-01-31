@@ -28,7 +28,6 @@ class TestCorla {
         val compareAssorter = makeStandardComparisonAssorter(theta, N)
         val sampler = ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = p1, withoutReplacement = false)
 
-        // TODO reportedMargin or clcaMargin?
         val corla = Corla(N = N, riskLimit=riskLimit, reportedMargin=compareAssorter.assorter.reportedMargin(), noerror=compareAssorter.noerror,
             p1 = p1, p2 = p2, p3 = 0.0, p4 = 0.0)
 

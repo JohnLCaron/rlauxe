@@ -86,7 +86,7 @@ class GenVsMarginByStrategy {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "strategy") { categoryStrategy(it) }
+        plotter.showFailuresVsMargin(results, catName="strategy") { categoryStrategy(it) }
     }
 }
 

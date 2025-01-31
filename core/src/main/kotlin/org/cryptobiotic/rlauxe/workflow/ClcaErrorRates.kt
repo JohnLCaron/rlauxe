@@ -25,7 +25,8 @@ object ClcaErrorRates {
         return ErrorRates(rr[0], rr[1], rr[2], rr[3])
     }
 
-    fun calcErrorRates(contestId: Int, cassorter: ClcaAssorterIF,
+    fun calcErrorRates(contestId: Int,
+                       cassorter: ClcaAssorterIF,
                        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     ) : ErrorRates {
         require(cvrPairs.size > 0)
@@ -35,8 +36,25 @@ object ClcaErrorRates {
         return samples.errorRates()
     }
 
+    // given an error rate, what fuzz pct does it corresond to ?
+    fun calcFuzzPct(ncandidates: Int, errorRates: ErrorRates ) : List<Double> {
+        val useCand = when  {
+            ncandidates < 2 -> 2
+            ncandidates > 10 -> 10
+            else -> ncandidates
+        }
+        val rr = rrates[useCand]!!
+        // p1 = fuzzPct * r1
+        // fuzzPct = p1 / r1
+        val p2o = errorRates.p2o / rr[0]
+        val p1o = errorRates.p1o / rr[1]
+        val p1u = errorRates.p1u / rr[2]
+        val p2u = errorRates.p2u / rr[3]
+        return listOf(p2o, p1o, p1u, p2u)
+    }
+
     init {
-        // GenerateComparisonErrorTable.generateErrorTable()
+        // GenerateClcaErrorTable.generateErrorTable()
         // N=100000 ntrials = 200
         // generated 1/26/2026
         rrates[2] = listOf(0.2623686, 0.2625469, 0.2371862, 0.2370315,)
@@ -51,6 +69,14 @@ object ClcaErrorRates {
     }
 
 }
+
+// underVotePct=0.01 N=100000 ntrials = 1000
+//| ncand | r2o    | r1o    | r1u    | r2u    |
+//|-------|--------|--------|--------|--------|
+//| 2 |  0.2602 | 0.2637 | 0.2384 | 0.2350 |
+//| 3 |  0.1361 | 0.3492 | 0.3159 | 0.1198 |
+//| 4 |  0.1103 | 0.3719 | 0.3351 | 0.0974 |
+//| 5 |  0.0738 | 0.3572 | 0.3171 | 0.0636 |
 
 // N=100000 ntrials = 200
 //| ncand | p2o    | p1o    | p1u    | p2u    |

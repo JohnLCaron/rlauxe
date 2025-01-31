@@ -80,6 +80,7 @@ fun makeDeciles(data: List<Int>): List<Int> {
 }
 
 fun showDeciles(data: List<Int>) = buildString {
+    if (data.isEmpty()) return ""
     val deciles = makeDeciles(data)
     append(" deciles=[")
     deciles.forEach { append(" $it, ") };

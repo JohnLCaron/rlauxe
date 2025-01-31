@@ -3,9 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.clca.*
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.*
@@ -33,12 +31,12 @@ class EstVsMarginByVersion {
 
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
-                    parameters=mapOf("nruns" to nruns.toDouble(), "version" to 1.0, "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
+                    parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "1.0", "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
                     auditConfigIn=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
                 val clcaGenerator2 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
-                    parameters=mapOf("nruns" to nruns.toDouble(), "version" to 2.0, "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
+                    parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "2.0", "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
                     auditConfigIn=auditConfig.copy(version=2.0))
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
             }
@@ -81,7 +79,7 @@ class EstVsMarginByVersion {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showEstCostVsVersion(results, "version", yscale) { categoryVersion(it) }
+        plotter.showEstCostVsVersion(results, "version", yscale) { category(it) }
     }
 
     fun showEstSizesVsMarginVersion(subtitle: String, yscale: Scale) {

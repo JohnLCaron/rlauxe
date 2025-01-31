@@ -1,12 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.clca.categoryFuzzDiff
-import org.cryptobiotic.rlauxe.clca.categoryVersion
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
@@ -34,7 +30,7 @@ class EstVsMarginByFuzzDiff {
 
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
-                    parameters=mapOf("nruns" to nruns.toDouble(), "version" to 1.0, "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
+                    parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "1.0", "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
                     auditConfigIn=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
             }
@@ -77,7 +73,7 @@ class EstVsMarginByFuzzDiff {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showEstCostVsVersion(results, "version", yscale) { categoryVersion(it) }
+        plotter.showEstCostVsVersion(results, "version", yscale) { category(it) }
     }
 
     fun showEstSizesVsMargin(subtitle: String, yscale: Scale) {

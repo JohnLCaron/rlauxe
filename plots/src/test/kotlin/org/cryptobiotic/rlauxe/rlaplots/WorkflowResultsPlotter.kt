@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.math.log10
 
@@ -23,7 +24,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename estimated number of MVRS",
-            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns}" + fuzzPctLabel,
             data,
             "$dir/${filename}${yscale.name}",
             "margin",
@@ -34,7 +35,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
                 Scale.Linear -> it.nmvrs
                 Scale.Log -> log10(it.nmvrs)
                 Scale.Pct -> {
-                    val Nb = it.parameters["Nb"] ?: it.Nc.toDouble()
+                    val Nb = it.Dparam("Nb")
                     (100*it.nmvrs/Nb)
                 }
             }},
@@ -50,7 +51,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename estimated sample sizes",
-            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns}" + fuzzPctLabel,
             data,
             "$dir/${filename}${yscale.name}",
             "margin",
@@ -122,7 +123,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename estimated cost",
-            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns}" + fuzzPctLabel,
             data,
             "$dir/${filename}Cost${yscale.name}",
             "margin",
@@ -152,7 +153,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename failurePct",
-            subtitleS = subtitle ?: ("Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel),
+            subtitleS = subtitle ?: ("Nc=${exemplar.Nc} nruns=${nruns}" + fuzzPctLabel),
             data,
             "$dir/${filename}Failures",
             "margin",
@@ -170,7 +171,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename number of audit rounds",
-            subtitleS = subtitle ?: "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = subtitle ?: "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns}",
             data,
             "$dir/${filename}Nrounds",
             "fuzzPct",
@@ -188,13 +189,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename estimated sample sizes",
-            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns}",
             data,
             "$dir/${filename}${yscale.name}",
             xname="fuzzPct",
             yscale.desc("samplesNeeded"),
             catName=catName,
-            xfld = { it.parameters["fuzzPct"]!! },
+            xfld = { it.Dparam("fuzzPct") },
             yfld = { it: WorkflowResult -> when (yscale) {
                 Scale.Linear -> it.samplesNeeded
                 Scale.Log -> log10(it.samplesNeeded)
@@ -210,13 +211,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename failurePct",
-            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns}",
             data,
             "$dir/${filename}Failures",
             "fuzzPct",
             "failurePct",
             catName,
-            xfld = { it.parameters["fuzzPct"]!! },
+            xfld = { it.Dparam("fuzzPct")},
             yfld = { it.failPct},
             catfld = catfld,
         )
@@ -228,13 +229,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename number of audit rounds",
-            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns}",
             data,
             "$dir/${filename}Nrounds",
             "fuzzPct",
             "auditRounds",
             catName,
-            xfld = { it.parameters["fuzzPct"]!! },
+            xfld = { it.Dparam("fuzzPct") },
             yfld = { it.nrounds},
             catfld = catfld,
         )
@@ -246,13 +247,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename estimated sample sizes",
-            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
             "underVotePct",
             if (useLog) "log10(samplesNeeded)" else "samplesNeeded",
             catName,
-            xfld = { it.parameters["undervote"]!! },
+            xfld = { it.Dparam("undervote") },
             yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
             catfld = catfld,
         )
@@ -264,13 +265,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename estimated sample sizes",
-            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
             "phantomPct",
             if (useLog) "log10(samplesNeeded)" else "samplesNeeded",
             catName,
-            xfld = { it.parameters["phantom"]!! },
+            xfld = { it.Dparam("phantom") },
             yfld = { if (useLog) log10(it.samplesNeeded) else it.samplesNeeded},
             catfld = catfld,
         )
@@ -282,16 +283,35 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename failurePct",
-            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
             data,
             "$dir/${filename}Failures",
             "phantomPct",
             "failurePct",
             catName,
-            xfld = { it.parameters["phantom"]!! },
+            xfld = { it.Dparam("phantom") },
             yfld = { it.failPct},
             catfld = catfld,
         )
     }
 
 }
+
+fun category(wr: WorkflowResult): String {
+    return wr.parameters["cat"] as String
+}
+
+fun categoryFuzzPct(wr: WorkflowResult): String {
+    return df(wr.Dparam("fuzzPct"))
+}
+
+fun categoryFuzzDiff(wr: WorkflowResult): String {
+    return dfn(100.0*wr.Dparam("fuzzDiff"), 2)
+}
+
+fun categorySimFuzzVersion(wr: WorkflowResult): String {
+    val diff =  categoryFuzzDiff(wr)
+    val ver = wr.parameters["cat"]
+    return "ver$ver ${diff}%"
+}
+

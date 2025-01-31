@@ -43,9 +43,9 @@ class PollingWorkflow(
             roundIdx,
             show=show,
         )
+        val contestsNotDone = contestsUA.filter{ !it.done }
 
         // choose indices to sample
-        val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
                 if (!quiet) println("\nconsistentSampling round $roundIdx")
@@ -106,14 +106,16 @@ fun runAudit(
     contestsNotDone.forEach { contestUA ->
         var allAssertionsDone = true
         contestUA.pollingAssertions.forEach { assertion ->
-            if (!assertion.proved) {
-                assertion.status = auditPollingAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
-                allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
+            if (!assertion.status.complete) {
+                val testResult = auditPollingAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
+                assertion.status = testResult.status
+                assertion.round = roundIdx
+                allAssertionsDone = allAssertionsDone && assertion.status.complete
             }
         }
         if (allAssertionsDone) {
             contestUA.done = true
-            contestUA.status = TestH0Status.StatRejectNull
+            contestUA.status = TestH0Status.StatRejectNull // TODO
         }
         allDone = allDone && contestUA.done
     }
@@ -127,7 +129,7 @@ fun auditPollingAssertion(
     mvrs: List<Cvr>,
     roundIdx: Int,
     quiet: Boolean = false
-): TestH0Status {
+): TestH0Result {
     val assorter = assertion.assorter
     val sampler = PollWithoutReplacement(contest, mvrs, assorter, allowReset=false)
 
@@ -152,12 +154,6 @@ fun auditPollingAssertion(
 
     // do not terminate on null reject, continue to use all available samples
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
-    if (!testH0Result.status.fail) {
-        assertion.proved = true
-        assertion.round = roundIdx
-    } else {
-        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
-    }
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=assertion.estSampleSize,
@@ -169,5 +165,5 @@ fun auditPollingAssertion(
     assertion.roundResults.add(roundResult)
 
     if (!quiet) println(" ${contest.name} $roundResult")
-    return testH0Result.status
+    return testH0Result
 }

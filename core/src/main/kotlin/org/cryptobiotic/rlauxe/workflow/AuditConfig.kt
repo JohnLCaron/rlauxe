@@ -15,6 +15,7 @@ data class AuditConfig(
     val samplePctCutoff: Double = 0.33, // dont sample more than this pct of N TODO
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.oracle),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.standard),
     val version: Double = 1.0,
 )
 
@@ -35,4 +36,12 @@ data class PollingConfig(
     val fuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight
 )
+
+enum class OneAuditStrategyType { standard, max99 }
+data class OneAuditConfig(
+    val strategy: OneAuditStrategyType,
+    val fuzzPct: Double? = null, // for the estimation
+    val d: Int = 100,  // shrinkTrunc weight
+)
+
 

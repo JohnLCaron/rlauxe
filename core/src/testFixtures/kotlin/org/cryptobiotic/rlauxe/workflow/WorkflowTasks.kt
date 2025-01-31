@@ -21,33 +21,33 @@ fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quie
     val stopwatch = Stopwatch()
 
     val previousSamples = mutableSetOf<Int>()
-    var rounds = mutableListOf<Round>()
+    val rounds = mutableListOf<Round>()
     var roundIdx = 1
 
     var done = false
     while (!done) {
         val indices = workflow.chooseSamples(roundIdx, show=false)
+        if (indices.isEmpty()) {
+            done = true
 
-        val currRound = Round(roundIdx, indices, previousSamples.toSet())
-        rounds.add(currRound)
-        previousSamples.addAll(indices)
+        } else {
+            val currRound = Round(roundIdx, indices, previousSamples.toSet())
+            rounds.add(currRound)
+            previousSamples.addAll(indices)
 
-        if (!quiet) println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        stopwatch.start()
+            if (!quiet) println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            stopwatch.start()
 
-        val sampledMvrs = indices.map {
-            testMvrs[it]
+            val sampledMvrs = indices.map {
+                testMvrs[it]
+            }
+
+            done = workflow.runAudit(indices, sampledMvrs, roundIdx)
+            if (!quiet) println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            roundIdx++
         }
-
-        done = workflow.runAudit(indices, sampledMvrs, roundIdx)
-        if (!quiet) println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        roundIdx++
     }
 
-    if (!quiet) {
-        rounds.forEach { println(it) }
-        workflow.showResults()
-    }
     return rounds.last().sampledIndices.size
 }
 
@@ -72,7 +72,7 @@ class ClcaWorkflowTaskGenerator(
     val underVotePct: Double,
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
-    val parameters : Map<String, Double>,
+    val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val Nb: Int = Nc
@@ -111,7 +111,7 @@ class PollingWorkflowTaskGenerator(
     val underVotePct: Double,
     val phantomPct: Double,
     val fuzzPct: Double,
-    val parameters : Map<String, Double>,
+    val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
     val Nb: Int = Nc,
     ) : WorkflowTaskGenerator {
@@ -153,19 +153,21 @@ class OneAuditWorkflowTaskGenerator(
     val phantomPct: Double,
     val cvrPercent: Double,
     val fuzzPct: Double,
-    val parameters : Map<String, Double>,
-) : WorkflowTaskGenerator {
+    val parameters : Map<String, Any>,
+    val auditConfigIn: AuditConfig? = null,
+    ) : WorkflowTaskGenerator {
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
+        val auditConfig = auditConfigIn ?: AuditConfig(
+            AuditType.ONEAUDIT, true, nsimEst = 10, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.standard, fuzzPct = fuzzPct)
+        )
+
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, fuzzPct)
 
-        val oneaudit = OneAuditWorkflow(
-            AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 10, pollingConfig = PollingConfig(fuzzPct = fuzzPct)),
-            listOf(contestOA2), oaCvrs, quiet = quiet
-        )
+        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), oaCvrs, quiet = quiet)
         return WorkflowTask(
             "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
             oneaudit,
@@ -179,7 +181,7 @@ class WorkflowTask(
     val name: String,
     val workflow: RlauxWorkflow,
     val testCvrs: List<Cvr>,
-    val otherParameters: Map<String, Double>,
+    val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
     override fun name() = name
     override fun run(): WorkflowResult {
@@ -208,18 +210,17 @@ class WorkflowTask(
                 lastRound.samplesNeeded.toDouble(),
                 nmvrs.toDouble(),
                 otherParameters,
-                if (lastRound.status.fail) 100.0 else 0.0
+                if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0
             )
         }
     }
 }
 
 fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>): List<WorkflowResult> {
-    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks)
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=1)
     val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
     return results
 }
-
 
 data class WorkflowResult(val Nc: Int,
                           val margin: Double,
@@ -228,16 +229,18 @@ data class WorkflowResult(val Nc: Int,
                           val samplesUsed: Double, // redundant
                           val samplesNeeded: Double,
                           val nmvrs: Double,
-                          val parameters: Map<String, Double>,
+                          val parameters: Map<String, Any>,
                           val failPct: Double, // from avgWorkflowResult()
-)
+) {
+    fun Dparam(key: String) = (parameters[key]!! as String).toDouble()
+}
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
-    val failures = runs.count { it.status.fail }
+    val successRuns = runs.filter { it.status == TestH0Status.StatRejectNull }
+    val failures = runs.size - successRuns.count()
     val failPct = if (runs.isEmpty()) 100.0 else 100.0 * failures / runs.size
-    val successRuns = runs.filter { !it.status.fail }
 
-    return if (runs.isEmpty()) {
+    val result =  if (runs.isEmpty()) {
         WorkflowResult(
             0,
             0.0,
@@ -270,5 +273,11 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             failPct,
         )
     }
+
+    if (result.samplesNeeded < 100) {
+        println("why")
+    }
+
+    return result
 }
 

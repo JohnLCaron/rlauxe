@@ -1,12 +1,12 @@
 package org.cryptobiotic.rlauxe.core
 
-enum class TestH0Status(val fail: Boolean) {
+enum class TestH0Status(val complete: Boolean) {
     InProgress(false),
-    StatRejectNull(false), // statistical rejection of H0
-    LimitReached(true), // cant tell from the number of samples available
 
+    StatRejectNull(true), // statistical rejection of H0
+    LimitReached(false), // cant tell from the number of samples available
     //// only when sampling without replacement all the way to N, in practice, this rarely happens I think
-    SampleSumRejectNull(false), // SampleSum > N * t, so we know H0 is false
+    SampleSumRejectNull(true), // SampleSum > N * t, so we know H0 is false; call it a failure anyway
     AcceptNull(true), // SampleSum + (all remaining ballots == 1) < N * t, so we know that H0 is true.
 
     // contest status

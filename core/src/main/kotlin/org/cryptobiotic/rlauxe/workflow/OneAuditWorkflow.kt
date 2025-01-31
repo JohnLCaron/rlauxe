@@ -40,12 +40,10 @@ class OneAuditWorkflow(
             roundIdx,
             show=show,
         )
-
-        // TODO how to control the round's sampleSize?
+        val contestsNotDone = contestsUA.filter{ !it.done }
 
         //	4.c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         // draws random ballots and returns their locations to the auditors.
-        val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
                 if (!quiet) println(" consistentSampling round $roundIdx")
@@ -77,15 +75,16 @@ class OneAuditWorkflow(
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
             contestUA.clcaAssertions.forEach { assertion ->
-                if (!assertion.proved) {
-                    // assertion.status = runOneAuditAssertionBet(auditConfig, contestUA, assertion, cvrPairs, roundIdx)
-                    assertion.status = runOneAuditAssertionAlpha(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
-                    allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
+                  if (!assertion.status.complete) {
+                    val testH0Result = runOneAuditAssertionAlpha(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
+                    assertion.status = testH0Result.status
+                    assertion.round = roundIdx
+                    allAssertionsDone = allAssertionsDone && assertion.status.complete
                 }
             }
             if (allAssertionsDone) {
                 contestUA.done = true
-                contestUA.status = TestH0Status.StatRejectNull
+                contestUA.status = TestH0Status.StatRejectNull // TODO
             }
             allDone = allDone && contestUA.done
 
@@ -125,22 +124,33 @@ fun runOneAuditAssertionAlpha(
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = false,
-): TestH0Status {
+): TestH0Result{
     val assorter = cassertion.cassorter as OneAuditComparisonAssorter
-    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassertion.cassorter, allowReset = false, trackStratum = false)
+    val sampler = ComparisonWithoutReplacement(
+        contestUA.contest,
+        cvrPairs,
+        cassertion.cassorter,
+        allowReset = false,
+        trackStratum = false
+    )
 
     val eta0 = margin2mean(assorter.clcaMargin)
     val c = (eta0 - 0.5) / 2
 
     // TODO is this right, no special processing for the "hasCvr" strata?
-    val estimFn = TruncShrinkage(
-        N = contestUA.Nc,
-        withoutReplacement = true,
-        upperBound = assorter.upperBound(),
-        d = auditConfig.pollingConfig.d,
-        eta0 = eta0,
-        c = c,
-    )
+    val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.max99) {
+        FixedEstimFn(.99 * assorter.upperBound())
+    } else {
+        TruncShrinkage(
+            N = contestUA.Nc,
+            withoutReplacement = true,
+            upperBound = assorter.upperBound(),
+            d = auditConfig.pollingConfig.d,
+            eta0 = eta0,
+            c = c,
+        )
+    }
+
     val testFn = AlphaMart(
         estimFn = estimFn,
         N = contestUA.Nc,
@@ -149,14 +159,7 @@ fun runOneAuditAssertionAlpha(
         upperBound = assorter.upperBound(),
     )
 
-    // do not terminate on null reject, continue to use all available samples
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
-    if (!testH0Result.status.fail) {
-        cassertion.proved = true
-        cassertion.round = roundIdx
-    } else {
-        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
-    }
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
@@ -168,5 +171,5 @@ fun runOneAuditAssertionAlpha(
     cassertion.roundResults.add(roundResult)
 
     if (!quiet) println(" ${contestUA.name} $roundResult")
-    return testH0Result.status
+    return testH0Result
 }

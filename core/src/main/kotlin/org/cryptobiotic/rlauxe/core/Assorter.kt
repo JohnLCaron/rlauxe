@@ -240,7 +240,7 @@ open class Assertion(
     // these values are set during runAudit()
     val roundResults = mutableListOf<AuditRoundResult>()
     var status = TestH0Status.InProgress
-    var proved = false
+    // var proved = false
     var round = 0           // round when set to proved or disproved
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"

@@ -84,7 +84,7 @@ class TestAlphaMart {
                 assertEquals(it, alpha2.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(alpha2.status.fail)
+        assertTrue(!alpha2.status.complete)
         assertEquals(alpha2.sampleCount, x2.size)
         assertEquals(alpha2.sampleMean, 0.5714285714285714)
     }
@@ -134,7 +134,7 @@ class TestAlphaMart {
                 assertEquals(it, result.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(result.status.fail)
+        assertTrue(result.status.complete)
         assertEquals(result.sampleCount, x.size)
         assertEquals(result.sampleMean, 0.5714285714285714)
     }
@@ -172,7 +172,7 @@ class TestAlphaMart {
                 assertEquals(it, result.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(result.status.fail)
+        assertTrue(result.status.complete)
         assertEquals(result.sampleCount, x.size)
         assertEquals(result.sampleMean, 0.5714285714285714)
     }

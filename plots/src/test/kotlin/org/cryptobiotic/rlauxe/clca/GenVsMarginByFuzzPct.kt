@@ -30,7 +30,7 @@ class GenVsMarginByFuzzPct {
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
                 val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, actualFuzz,
-                    parameters=mapOf("nruns" to nruns.toDouble(), "estFuzzPct" to fuzzPct),
+                    parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct),
                     clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -56,7 +56,7 @@ class GenVsMarginByFuzzPct {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "estFuzzPct", yscale=yscale) { category(it) }
+        plotter.showSampleSizesVsMargin(results, "estFuzzPct", yscale=yscale) { categoryFuzzPct(it) }
     }
 
     fun showFailuresVsMargin(name:String, ) {
@@ -66,10 +66,7 @@ class GenVsMarginByFuzzPct {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, catName="estFuzzPct") { category(it) }
+        plotter.showFailuresVsMargin(results, catName="estFuzzPct") { categoryFuzzPct(it) }
     }
 
-    fun category(wr: WorkflowResult): String {
-        return df(wr.parameters["estFuzzPct"]!!)
-    }
 }

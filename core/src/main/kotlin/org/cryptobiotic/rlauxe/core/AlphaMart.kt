@@ -12,6 +12,12 @@ interface EstimFn {
     fun eta(prevSampleTracker: SampleTracker): Double
 }
 
+class FixedEstimFn(
+    val eta0: Double,
+) : EstimFn {
+    override fun eta(prevSampleTracker: SampleTracker) = eta0
+}
+
 class TruncShrinkage(
     val N: Int,
     val withoutReplacement: Boolean = true,

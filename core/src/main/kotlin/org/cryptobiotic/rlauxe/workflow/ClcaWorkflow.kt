@@ -73,14 +73,14 @@ class ClcaWorkflow(
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("----------estimateSampleSizes round $roundIdx")
 
-        estimateSampleSizes(
+        val maxContestSize = estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
             roundIdx,
             show=show,
         )
-        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
+        val contestsNotDone = contestsUA.filter{ !it.done }
 
 
         //	2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
@@ -92,11 +92,8 @@ class ClcaWorkflow(
         // val ncvrs =  makeNcvrsPerContest(contests, cvrs)
         // val phantomCVRs = makePhantomCvrs(contests, ncvrs)
 
-        // TODO how to control the round's sampleSize?
-
         //	4.c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
         // draws random ballots and returns their locations to the auditors.
-        val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
                 if (!quiet) println("\nconsistentSampling round $roundIdx")
@@ -133,21 +130,22 @@ class ClcaWorkflow(
         val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
-        // TODO could parellelize across assertions
+        // TODO could parallelize across assertions
         if (!quiet) println("runAudit round $roundIdx")
         var allDone = true
         contestsNotDone.forEach { contestUA ->
             var allAssertionsDone = true
-            contestUA.clcaAssertions.forEach { assertion ->
-                if (!assertion.proved) {
-                    val testH0Result = runClcaAssertionAudit(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
-                    assertion.status = testH0Result.status
-                    allAssertionsDone = allAssertionsDone && (!assertion.status.fail)
+            contestUA.clcaAssertions.forEach { cassertion ->
+                if (!cassertion.status.complete) {
+                    val testH0Result = runClcaAssertionAudit(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
+                    cassertion.status = testH0Result.status
+                    cassertion.round = roundIdx
+                    allAssertionsDone = allAssertionsDone && cassertion.status.complete
                 }
             }
             if (allAssertionsDone) {
                 contestUA.done = true
-                contestUA.status = TestH0Status.StatRejectNull
+                contestUA.status = TestH0Status.StatRejectNull // TODO ???
             }
             allDone = allDone && contestUA.done
 
@@ -357,12 +355,6 @@ fun runClcaAssertionAudit(
     )
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
-    if (!testH0Result.status.fail) {
-        cassertion.proved = true
-        cassertion.round = roundIdx
-    } else {
-        if (!quiet) println("testH0Result.status = ${testH0Result.status}")
-    }
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,

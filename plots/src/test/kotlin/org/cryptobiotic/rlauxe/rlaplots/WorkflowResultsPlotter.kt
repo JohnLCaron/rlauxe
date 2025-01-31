@@ -144,7 +144,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         return extraCost + roundCost
     }
 
-    fun showFailuresVsMargin(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
+    fun showFailuresVsMargin(data: List<WorkflowResult>, subtitle: String? = null, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
@@ -152,7 +152,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
         wrsPlot(
             titleS = "$filename failurePct",
-            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel,
+            subtitleS = subtitle ?: ("Nc=${exemplar.Nc} nruns=${nruns.toInt()}" + fuzzPctLabel),
             data,
             "$dir/${filename}Failures",
             "margin",
@@ -164,13 +164,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showNroundsVsMargin(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
+    fun showNroundsVsMargin(data: List<WorkflowResult>, subtitle: String? = null, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
 
         wrsPlot(
             titleS = "$filename number of audit rounds",
-            subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
+            subtitleS = subtitle ?: "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns.toInt()}",
             data,
             "$dir/${filename}Nrounds",
             "fuzzPct",

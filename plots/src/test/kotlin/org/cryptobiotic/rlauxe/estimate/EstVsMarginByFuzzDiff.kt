@@ -9,14 +9,15 @@ import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.random.Random
 import kotlin.test.Test
 
 class EstVsMarginByFuzzDiff {
     val Nc = 50000
     val nruns = 100  // number of times to run workflow
-    val name = "estVsMarginByFuzzDiff"
+    val name = "estVsMarginOracle"
     val dirName = "/home/stormy/temp/workflow/$name"
+
+    // Used in docs
 
     @Test
     fun estSamplesVsMarginByFuzzDiff() {
@@ -28,7 +29,7 @@ class EstVsMarginByFuzzDiff {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct)
+            val clcaConfig = ClcaConfig(ClcaStrategyType.oracle, simFuzzPct)
             val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, quantile=.50, nsimEst = 100, clcaConfig = clcaConfig)
 
             margins.forEach { margin ->
@@ -54,8 +55,8 @@ class EstVsMarginByFuzzDiff {
         showEstSizesVsMargin(subtitle, Scale.Linear)
         showEstSizesVsMargin(subtitle, Scale.Log)
         showEstSizesVsMargin(subtitle, Scale.Pct)
-        showFailuresVsMargin()
-        showNroundsVsMargin()
+        showFailuresVsMargin(subtitle)
+        showNroundsVsMargin(subtitle)
     }
 
     @Test
@@ -67,8 +68,8 @@ class EstVsMarginByFuzzDiff {
         showEstSizesVsMargin(subtitle, Scale.Linear)
         showEstSizesVsMargin(subtitle, Scale.Log)
         showEstSizesVsMargin(subtitle, Scale.Pct)
-        showFailuresVsMargin()
-        showNroundsVsMargin()
+        showFailuresVsMargin(subtitle)
+        showNroundsVsMargin(subtitle)
     }
 
     fun showEstCostVsVersion(yscale: Scale) {
@@ -87,20 +88,20 @@ class EstVsMarginByFuzzDiff {
         plotter.showEstSizesVsMargin(results, subtitle, "fuzzDiff %", yscale) { categoryFuzzDiff(it) }
     }
 
-    fun showFailuresVsMargin() {
+    fun showFailuresVsMargin(subtitle: String, ) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "fuzzDiff %") { categoryFuzzDiff(it) }
+        plotter.showFailuresVsMargin(results, subtitle, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
 
-    fun showNroundsVsMargin() {
+    fun showNroundsVsMargin(subtitle: String, ) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsMargin(results, "fuzzDiff %") { categoryFuzzDiff(it) }
+        plotter.showNroundsVsMargin(results, subtitle, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
 
     @Test

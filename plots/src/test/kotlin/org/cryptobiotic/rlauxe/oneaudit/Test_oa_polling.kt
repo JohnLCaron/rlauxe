@@ -1,5 +1,6 @@
 import kotlin.math.*
 
+// Generalized Wald SPRT
 fun sprtMart(
     x: DoubleArray,
     N: Int,
@@ -29,8 +30,8 @@ fun sprtMart(
     N : int
         population size for sampling without replacement, or np.infinity for
         sampling with replacement
-    theta : float in (0,u)
-        hypothesized population mean
+    mu : float in (0,u)
+        hypothesized population mean = 1/2
     eta : float in (0,u)
         alternative hypothesized population mean
     randomOrder : Boolean

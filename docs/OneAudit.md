@@ -131,7 +131,7 @@ of the best-performing method.
 ````
 
 "ALPHA on the raw assorter values" I think is regular BPA.
-"Transforming the assorter into an overstatement assorter" is ONEAIDIT I think, but using Alpha instead of Betting?
+"Transforming the assorter into an overstatement assorter" is ONEAUDIT I think, but using Alpha instead of Betting?
 This paper came out at the same time as COBRA.
 
 If ONEAUDIT is better than current BPA, perhaps can unify all 3 (comparison, polling, oneaudit) into a single workflow??

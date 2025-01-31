@@ -97,7 +97,7 @@ class EstVsMarginByVersion {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "simFuzzPct") { categorySimFuzzVersion(it) }
+        plotter.showFailuresVsMargin(results, catName="simFuzzPct") { categorySimFuzzVersion(it) }
     }
 
     fun showNroundsVsMarginVersion() {
@@ -105,7 +105,7 @@ class EstVsMarginByVersion {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsMargin(results, "simFuzzPct") { categorySimFuzzVersion(it) }
+        plotter.showNroundsVsMargin(results, catName="simFuzzPct") { categorySimFuzzVersion(it) }
     }
 
     @Test

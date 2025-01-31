@@ -64,7 +64,7 @@ class GenPollingNoStyles {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, "Nballots") { category(it) }
+        plotter.showFailuresVsMargin(results, catName="Nballots") { category(it) }
     }
 
     fun category(wr: WorkflowResult): String {

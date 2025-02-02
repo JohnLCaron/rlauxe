@@ -2,13 +2,17 @@
 02/02/2025
 
 The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for calculating pvalues, 
-from "Gentle Introduction" and "Super Simple" papers. It makes use of measured error rates as they are sampled. 
-It may become more inefficient when auditing more than one contest at a time.
+from "Gentle Introduction" and "Super Simple" papers. It makes use of measured error rates as they are sampled.
 
-The following plots compare Corla performance in sample sizes needed with the current
-implementation of CLCA audits. The CLCA "noerror" strategy is similar to CORLA in that it uses 0% error rates for the
+We have a Kotlin port of the CORLA Java code in order to compare performance with our CLCA algorithm. Its possible
+that our port does not accurately reflect what CORLA does.
+
+The following plots compare our Corla implementation with our CLCA algorithm, using several "strategies". 
+The CLCA "noerror" strategy is similar to CORLA in that it uses 0% error rates for the
 apriori rates, then adjusts to the actual error rates as they are measured in the sampled ballots. This has the advantage
-of not trying to guess the actual error rates.
+of not trying to guess the actual error rates. They differ in that CORLA uses the Kaplan-Markov bound (eq 10 of SuperSimple)
+for the risk estimation function, while CLCA uses the BettingMart supermartingale and Adaptive / Optimal betting as described in
+the COBRA paper.
 
 We compare also with the CLCA "fuzzPct" strategy, where the apriori error rates are estimated from a presumed "fuzz percentage",
 which randomly changed the voted-for candidate in a percentage of the ballots. We generate "fuzzed MRVS" using this technique
@@ -19,7 +23,6 @@ a "clcaFuzzPct/2" scenario where we underestimate the error rates by a factor of
 
 ## Comparison with no errors
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsLinear.html" rel="corlaNoErrorsLinear">![corlaNoErrorsLinear](plots/corla/corlaNoErrors/corlaNoErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsPct.html" rel="corlaNoErrorsPct">![corlaNoErrorsPct](plots/corla/corlaNoErrors/corlaNoErrorsPct.png)</a>
 
 * The algorithms give essentially the same results. One needs 1133 ballots to successfully audit a margin of .005.
@@ -28,7 +31,6 @@ a "clcaFuzzPct/2" scenario where we underestimate the error rates by a factor of
 
 Here we add errors between the MVRS and CVRS at a rate of 1 per 1000 ballots. Then we add the three fuzzPct strategies described above.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsLinear.html" rel="corlaWithSmallErrorsLinear">![corlaWithSmallErrorsLinear](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.html" rel="corlaWithSmallErrorsPct">![corlaWithSmallErrorsPct](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.html" rel="corlaWithSmallErrorsFailures">![corlaWithSmallErrorsFailures](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.png)</a>
 
@@ -39,7 +41,6 @@ Here we add errors between the MVRS and CVRS at a rate of 1 per 1000 ballots. Th
 
 Here we add errors between the MVRS and CVRS at a rate of 1 per 100 ballots. 
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLinear.html" rel="corlaWithErrorsLinear">![corlaWithErrorsLinear](plots/corla/corlaWithErrors/corlaWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsPct.html" rel="corlaWithErrorsPct">![corlaWithErrorsPct](plots/corla/corlaWithErrors/corlaWithErrorsPct.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsFailures.html" rel="corlaWithErrorsFailures">![corlaWithErrorsFailures](plots/corla/corlaWithErrors/corlaWithErrorsFailures.png)</a>
 
@@ -51,7 +52,6 @@ Here we add errors between the MVRS and CVRS at a rate of 1 per 100 ballots.
 
 Here we add errors between the MVRS and CVRS at a rate of 1 per 50 ballots.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsLinear.html" rel="corlaWithTwoPercentErrorsLinear">![corlaWithTwoPercentErrorsLinear](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsPct.html" rel="corlaWithTwoPercentErrorsPct">![corlaWithTwoPercentErrorsPct](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsPct.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsFailures.html" rel="corlaWithTwoPercentErrorsFailures">![corlaWithTwoPercentErrorsFailures](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsFailures.png)</a>
 
@@ -59,10 +59,11 @@ Here we add errors between the MVRS and CVRS at a rate of 1 per 50 ballots.
 * CLCA noerror strategy doing worse when margin < .03.
 * The other clca strategies are all approximately similar, still useable down to maybe .01 margins.
 
-## Questions
+## Conclusions
 
-* Why isnt noerrors equivilent to CORLA even at higher errrors?
-
+* COBRA is impressively good in the absence of errors.
+* As expected, it does progressively worse as the error rate increases.
+* Not clear if COBRA can efficiently do multiple contests at once.
 
 # Notes on CORLA implementation
 

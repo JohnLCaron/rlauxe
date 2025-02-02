@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 class TestAssorterSuperMajority {
 
     @Test
-    fun testThreeCandidateSuperMajorityAssorter() {
+    fun testBasics() {
         val info = ContestInfo(
             name = "ABC",
             id = 0,
@@ -28,16 +28,21 @@ class TestAssorterSuperMajority {
         val contest = makeContestFromCvrs(info, listOf(cvr0, cvr1, cvr2))
 
         val minFraction = contest.info.minFraction!!
-        val winner12 = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction)
-        assertEquals(1.0 / (2 * winner12.minFraction), winner12.upperBound)
-        assertEquals(0.0, winner12.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
-        assertEquals(0.5 / minFraction, winner12.assort(cvr1)) // // bi has a mark for Alice and no one else
-        assertEquals(0.0, winner12.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
+        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction)
+        assertEquals(1.0 / (2 * superAssorter.minFraction), superAssorter.upperBound)
+        println("minFraction = $minFraction upperBound=${superAssorter.upperBound}")
+
+        assertEquals(0.0, superAssorter.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
+        assertEquals(superAssorter.upperBound, superAssorter.assort(cvr1)) // // bi has a mark for Alice and no one else
+        assertEquals(0.0, superAssorter.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
 
         val votes = mutableMapOf<Int, IntArray>()
         votes[0] = intArrayOf(0, 2)
         val cvr02 = Cvr("card", votes)
-        assertEquals(0.5, winner12.assort(cvr02)) // otherwise
+        assertEquals(0.5, superAssorter.assort(cvr02)) // otherwise
+
+        // A in {0, 1/2, u}
+
     }
 
     @Test

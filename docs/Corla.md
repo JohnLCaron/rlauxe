@@ -1,38 +1,70 @@
 # CORLA
-10/20/2024
+02/02/2025
 
-## Comparison to betting martingale
+The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for calculating pvalues, 
+from "Gentle Introduction" and "Super Simple" papers. It makes use of measured error rates as they are sampled. 
+It may become more inefficient when auditing more than one contest at a time.
 
-Uses Kaplan-Markov MACRO P-value approximation, eq 10 in SuperSimple paper.
+The following plots compare Corla performance in sample sizes needed with the current
+implementation of CLCA audits. The CLCA "noerror" strategy is similar to CORLA in that it uses 0% error rates for the
+apriori rates, then adjusts to the actual error rates as they are measured in the sampled ballots. This has the advantage
+of not trying to guess the actual error rates.
 
-In this simulation, I used the "ballot at a time" approach to discover when the risk < riskLimit,
-rather than calculating the expected sample size, "batch mode" and seeing what the risk was.
+We compare also with the CLCA "fuzzPct" strategy, where the apriori error rates are estimated from a presumed "fuzz percentage",
+which randomly changed the voted-for candidate in a percentage of the ballots. We generate "fuzzed MRVS" using this technique
+when simulating the effect of errors on the audit. The "clcaFuzzPct" is when we use exactly the same fuzzPct for the
+apriri error rates as the MVRs were generated with. In theory, this should give us the best results. To see how things change
+when our estimates are wrong, we have a "2*clcaFuzzPct" scenario where we overestimate the error rates by a factor of 2, and
+a "clcaFuzzPct/2" scenario where we underestimate the error rates by a factor of 2.
 
-Performance is similar when there are few overstatements, and progressively worse as the rate
-of two-vote overstatement goes up. Havent yet tested the effects of one-vote overstatements. 
+## Comparison with no errors
 
-Compare to same plots in [Betting](Betting.md).
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsLinear.html" rel="corlaNoErrorsLinear">![corlaNoErrorsLinear](plots/corla/corlaNoErrors/corlaNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsPct.html" rel="corlaNoErrorsPct">![corlaNoErrorsPct](plots/corla/corlaNoErrors/corlaNoErrorsPct.png)</a>
 
-Plot 1 shows the average number of samples needed to reject the null, aka "success":
+* The algorithms give essentially the same results. One needs 1133 ballots to successfully audit a margin of .005.
 
-[Number of samples needed](plots/corla/CorlaPlot.plotSuccessVsTheta.10000.html)
+## Comparison with fuzzPct .001
 
-Plot 2 shows the percentage of successes when the cutoff is 20% of N. Note these are false positives when
-theta <= 0.5:
+Here we add errors between the MVRS and CVRS at a rate of 1 per 1000 ballots. Then we add the three fuzzPct strategies described above.
 
-[Percentage of successes when the cutoff is 20%](plots/corla/CorlaPlot.plotSuccess20VsTheta.10000.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsLinear.html" rel="corlaWithSmallErrorsLinear">![corlaWithSmallErrorsLinear](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.html" rel="corlaWithSmallErrorsPct">![corlaWithSmallErrorsPct](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.html" rel="corlaWithSmallErrorsFailures">![corlaWithSmallErrorsFailures](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.png)</a>
 
-Plot 3 zooms in on the false positives when the cutoff is 20% of N:
+* When margins < .005, we start to see "failures" which sends the audit to hand count.
+* All of the strategies give essentially the same results.
 
-[False positives when the cutoff is 20%](plots/corla/CorlaPlot.plotFailuresVsTheta.10000.html)
+## Comparison with fuzzPct .01
 
-Plot 4 zooms in on the successes (same as Plot 2) close to theta = 1/2:
+Here we add errors between the MVRS and CVRS at a rate of 1 per 100 ballots. 
 
-[Percentage of successes, theta close to 1/2](plots/corla/CorlaPlot.plotSuccess20VsThetaNarrow.10000.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLinear.html" rel="corlaWithErrorsLinear">![corlaWithErrorsLinear](plots/corla/corlaWithErrors/corlaWithErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsPct.html" rel="corlaWithErrorsPct">![corlaWithErrorsPct](plots/corla/corlaWithErrors/corlaWithErrorsPct.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsFailures.html" rel="corlaWithErrorsFailures">![corlaWithErrorsFailures](plots/corla/corlaWithErrors/corlaWithErrorsFailures.png)</a>
 
-## Notes
+* The various strategies are giving different results.
+* CORLA is doing worse when margin <= .02.
+* The clca strategies are all approximately similar, useable down to maybe .01 margins.
 
-Notes on the non-IRV part of CORLA server.
+## Comparison with fuzzPct .02
+
+Here we add errors between the MVRS and CVRS at a rate of 1 per 50 ballots.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsLinear.html" rel="corlaWithTwoPercentErrorsLinear">![corlaWithTwoPercentErrorsLinear](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsPct.html" rel="corlaWithTwoPercentErrorsPct">![corlaWithTwoPercentErrorsPct](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsPct.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsFailures.html" rel="corlaWithTwoPercentErrorsFailures">![corlaWithTwoPercentErrorsFailures](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsFailures.png)</a>
+
+* CORLA only useable when margin >= .03.
+* CLCA noerror strategy doing worse when margin < .03.
+* The other clca strategies are all approximately similar, still useable down to maybe .01 margins.
+
+## Questions
+
+* Why isnt noerrors equivilent to CORLA even at higher errrors?
+
+
+# Notes on CORLA implementation
 
 * uses sparkjava web framework (now abandoned), with Jetty providing the Servlet container.
 * hibernate/jpa ORM with postgres database

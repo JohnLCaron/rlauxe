@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.rlaplots.extractDecile
 import org.cryptobiotic.rlauxe.rlaplots.readAndFilter
 import org.cryptobiotic.rlauxe.rlaplots.srtPlot
 
+// TODO remove
+
 fun main() {
     val ac = CorlaPlot()
     ac.plotSuccessVsTheta()
@@ -16,7 +18,7 @@ fun main() {
 
 class CorlaPlot {
     val dir = "/home/stormy/temp/corla"
-    val filename = "$dir/plotCorla10000.csv"
+    val filename = "$dir/plotCorla1000.csv"
 
     fun plotSuccessVsTheta() {
         val thetaFilter: ClosedFloatingPointRange<Double> = 0.500001.. 1.0
@@ -31,7 +33,7 @@ class CorlaPlot {
             "CorlaPlot: success avg nsamples",
             "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "$dir/CorlaPlot.plotSuccessVsTheta.${ntrials}.html",
+            "$dir/CorlaPlot.plotSuccessVsTheta.${ntrials}",
             "theta", "nsamples", "p2oracle",
             xfld = { it.theta },
             yfld = { it.nsamples },
@@ -50,7 +52,7 @@ class CorlaPlot {
             "CorlaPlot: % success at 20% cutoff",
             "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "$dir/CorlaPlot.plotSuccess20VsTheta.${ntrials}.html",
+            "$dir/CorlaPlot.plotSuccess20VsTheta.${ntrials}",
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
@@ -71,7 +73,7 @@ class CorlaPlot {
             "CorlaPlot: % success at 20% cutoff",
             "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "$dir/CorlaPlot.plotSuccess20VsThetaNarrow.${ntrials}.html",
+            "$dir/CorlaPlot.plotSuccess20VsThetaNarrow.${ntrials}",
             "theta", "pctSuccess", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },
@@ -91,7 +93,7 @@ class CorlaPlot {
             "CorlaPlot: % false positives at 20% cutoff",
             "for Nc=$Nc ntrials=$ntrials",
             srts,
-            "$dir/CorlaPlot.plotFailuresVsTheta.${ntrials}.html",
+            "$dir/CorlaPlot.plotFailuresVsTheta.${ntrials}",
             "theta", "falsePositives%", "p2oracle",
             xfld = { it.theta },
             yfld = { extractDecile(it, 20) },

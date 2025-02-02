@@ -48,7 +48,7 @@ fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quie
         }
     }
 
-    return rounds.last().sampledIndices.size
+    return if (rounds.isEmpty()) 0 else rounds.last().sampledIndices.size
 }
 
 data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamples: Set<Int>) {
@@ -217,7 +217,7 @@ class WorkflowTask(
 }
 
 fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>): List<WorkflowResult> {
-    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=1)
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=40)
     val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
     return results
 }
@@ -226,7 +226,7 @@ data class WorkflowResult(val Nc: Int,
                           val margin: Double,
                           val status: TestH0Status,
                           val nrounds: Double,
-                          val samplesUsed: Double, // redundant
+                          val samplesUsed: Double,
                           val samplesNeeded: Double,
                           val nmvrs: Double,
                           val parameters: Map<String, Any>,
@@ -237,8 +237,6 @@ data class WorkflowResult(val Nc: Int,
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
     val successRuns = runs.filter { it.status == TestH0Status.StatRejectNull }
-    val failures = runs.size - successRuns.count()
-    val failPct = if (runs.isEmpty()) 100.0 else 100.0 * failures / runs.size
 
     val result =  if (runs.isEmpty()) {
         WorkflowResult(
@@ -261,21 +259,22 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             )
     } else {
         val first = successRuns.first()
-        WorkflowResult(
-            first.Nc,
-            first.margin,
-            first.status,
-            successRuns.map { it.nrounds }.average(),
-            successRuns.map { it.samplesUsed }.average(),
-            successRuns.map { it.samplesNeeded }.average(),
-            successRuns.map { it.nmvrs }.average(),
-            first.parameters,
-            failPct,
-        )
-    }
+        val failures = runs.size - successRuns.count()
+        val successPct = successRuns.count() / runs.size.toDouble()
+        val failPct = failures / runs.size.toDouble()
+        val Nc = first.Nc
 
-    if (result.samplesNeeded < 100) {
-        println("why")
+        WorkflowResult(
+            Nc,
+            first.margin,
+            first.status, // hmm kinda bogus
+            runs.filter{ it.nrounds > 0 } .map { it.nrounds }.average(),
+            successPct * successRuns.map { it.samplesUsed }.average() + failPct * Nc,
+            successPct * successRuns.map { it.samplesNeeded }.average() + failPct * Nc,
+            successPct * successRuns.map { it.nmvrs }.average() + failPct * Nc,
+            first.parameters,
+            100.0 * failPct,
+        )
     }
 
     return result

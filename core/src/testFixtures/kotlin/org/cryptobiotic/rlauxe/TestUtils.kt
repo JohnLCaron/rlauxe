@@ -32,10 +32,11 @@ class SampleFromList(val list: List<Double>) {
     fun sample() = list[index++]
 }
 
+// deprecate
 fun makeStandardContest(Nc: Int) =
     Contest(
         ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
-            mapOf(0 to 3, 1 to 33),
+            mapOf(0 to 3, 1 to 33),  // TODO BOGUS
             Nc = Nc,
             Np=0, // TODO
         )
@@ -45,6 +46,7 @@ fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
     return PluralityAssorter.makeWithVotes(contest, 0, 1, contest.votes)
 }
 
+// deprecate
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int) =
     ClcaAssorter(makeStandardContest(Nc), makeStandardPluralityAssorter(Nc), avgCvrAssortValue, check=false)
 

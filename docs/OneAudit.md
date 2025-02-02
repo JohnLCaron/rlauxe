@@ -1,5 +1,103 @@
 # OneAudit Notes
 
+### Why you cant use BettingMart
+
+BettingMart bets as aggressively as possible, and is very sensitive to errors between the MVR and CVR. 
+It assumes that mostly the two agree, and manages the bet to deal with the expected rates of disagreement. 
+With OA, when you have a ballot from the non-CVR stratum, its like you always have a disagreement, so your test pretty much always fails.
+
+In a regular CLCA, the possible CLCA assort values (Bi) are 
+
+````
+Assort values:
+  assort in {0, .5, 1} (plurality)
+
+Regular CLCA:
+  overstatementError ≡ A(CVR) − A(MVR) ≡ ωi
+  ωi is in [-1, -.5, 0, .5, 1] (plurality)
+  
+  find B transform to interval [0, 1],  so that H0 is B < 1/2
+  Bi ≡ (1 - ωi) / (2 - v)
+  let tau ≡ (1 - ωi), noerror ≡ 1 / (2 - v)
+  so Bi ≡ tau * noerror; 
+
+  Bi in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
+
+where 
+  v = assorter margin
+  noerror ≡ 1/(2-v)
+````
+
+In OneAudit, when the ballot is in the non-CVR strata:
+
+````
+  mvr assort in {0, .5, 1}, as before
+  cvr assort is always Ā(g) ≡ assorter_mean_poll ≡ (winner total - loser total) / Ng
+  overstatementError ≡ ωi ≡ A(CVR) − A(MVR) = Ā(g) - {0, .5, 1} = { Ā(g), Ā(g)-.5, Ā(g)-1 } = [loser, nuetral, winner]
+
+  τi ≡ (1 − ωi) = {1 - Ā(g), 1 - (Ā(g)-.5), 1 - (Ā(g)-1)}
+  B(bi, ci) ≡ {1 - Ā(g), 1 - (Ā(g)-.5), 1 - (Ā(g)-1)} / (2 − v)
+          
+  mvr has loser vote = (1 - A) / (2-v)
+  mvr has winner vote = (2 - A) / (2-v)
+  mvr has other vote = (1 - (A -.5)) / (2-v) = (1.5 - A) / (2-v) 
+  
+  v = 2A-1, 2A = v + 1
+  2-v = 2-(2A-1) = 3-2A = 2*(1.5-A)
+  other = (1.5-A) / (2-v) = (1.5-A)/2*(1.5-A) = 1/2
+  
+  Bi in [ (1-A) / (2-v), .5, (2-A) / (2-v)) ] = [Bl, Bo, Bw]
+  
+  where 
+      v = assorter margin in non-CVR strata
+      noerror ≡ 1/(2-v)
+````
+
+The Alpha supermartingale is Tj+1 = Tj * tj, where
+
+    val tj = 1.0 + betj * (Bj - mj)
+
+can be thought of as the "betting payoff" of betj.
+
+    mj = 1/2
+    (Bl - 1/2) = (1-A)/(2-v) - 1/2 = 2(1-A)/2(2-v) - (2-v)/2(2-v) = (2-2A-(2-v))/2(2-v) = 2-(v+1)-2+v)/2(2-v) = -1/2(2-v)
+    (Bo - 1/2) = 0
+    (Bw - 1/2) = (2-A)/(2-v) - 1/2 = 2(2-A)/2(2-v) - (4-v)/2(2-v) = (4-2A-(2-v))/2(2-v) = 4-(v+1)-2+v)/2(2-v) = 1/2(2-v)
+
+    (Bi - 1/2) = [-f, 0, f], where f ≡ 1/2(2-v)
+
+For example if A = .52, v = .04, noerror = 0.510204082, Bi in [.245, .5, 0.755102041], and
+(Bi - 1/2) in [-.255102, 0, .255102]
+
+In order to reject the null, we need Tk > 1 / risk, for some k < N. A value of tj > 1 increase Tj, a value <  1 decreases it.
+
+Consider a contest with w winner votes and l loser votes out of a total of N votes. (We can ignore other votes)
+
+The factors tj consist of l pairs of votes where one has a vote for the winner, and one has a vote for the loser,
+and (w - l) votes for the winner.
+
+For the pairs, the product of their tjs has the form (1 + betj*f) * (1 - betj*f) = 1 - (betj*f)**2, which are always less than 1, which decrease Tj.
+(Note that the betting values betj will change for each j, so this is approximate, unless the bets are constant)
+So there an asymettry to the betting payoff.
+
+And we have (w - l) = v * N, tjs with the value (1 + betj*f), which will increase Tj.
+
+Assuming betj are constant = b, then 
+
+    (1 - (b*f)**2)^l * (1 + b*f)^(w-l) > 1/risk
+    l * log(1-(b*f)**2) + (w-l) * log (1+b*f)  > -log(risk)
+
+
+//////////////
+One possibility is that we can mofify the betting function to take into account these known "errors".
+
+
+
+
+
+////////////////////////////////////////////////////////////////
+
+
 OneAudit, 2.3 pp 5-7:
 ````
       "assorter" here is the plurality assorter
@@ -29,6 +127,7 @@ OneAudit, 2.3 pp 5-7:
          otherwise = 1/2
 ````
 
+TODO redo proof with supermajority
 ````
 Plurality assort values:
   assort in {0, .5, 1}

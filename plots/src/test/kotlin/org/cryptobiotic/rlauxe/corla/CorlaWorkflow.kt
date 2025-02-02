@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -6,21 +6,53 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.*
 
-// "Stylish Risk-Limiting Audits in Practice" STYLISH 2.1
-// 1. Set up the audit
-//	a) Read contest descriptors, candidate names, social choice functions, and reported winners.
-//     Read upper bounds on the number of cards that contain each contest:
-//	     Let 𝑁_𝑐 denote the upper bound on the number of cards that contain contest 𝑐, 𝑐 = 1, . . . , 𝐶.
-//	b) Read audit parameters (risk limit for each contest, risk-measuring function to use for each contest,
-//	   assumptions about errors for computing initial sample sizes), and seed for pseudo-random sampling.
-//	c) Read ballot manifest.
-//	d) Read CVRs.
+class CorlaWorkflowTaskGenerator(
+    val Nc: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val mvrsFuzzPct: Double,
+    val parameters : Map<String, Any>,
+    val auditConfigIn: AuditConfig? = null,
+    val clcaConfigIn: ClcaConfig? = null,
+    val Nb: Int = Nc
+): WorkflowTaskGenerator {
+    override fun name() = "CorlaWorkflowTaskGenerator"
 
-class ClcaWorkflow(
+    override fun generateNewTask(): WorkflowTask {
+        val auditConfig = auditConfigIn ?:
+        AuditConfig(
+            AuditType.CARD_COMPARISON, true, nsimEst = 10,
+            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct)
+        )
+
+        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
+        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+
+        if (!auditConfig.hasStyles && Nb > Nc) {
+            val otherContestId = 42
+            val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
+            testCvrs = testCvrs + otherCvrs
+            testMvrs = testMvrs + otherCvrs
+        }
+
+        val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), testCvrs, quiet = true)
+        return WorkflowTask(
+            "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
+            clca,
+            testMvrs,
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
+        )
+    }
+}
+
+// cloned ClcaWorkflow
+class CorlaWorkflow(
     val auditConfig: AuditConfig,
     val contestsToAudit: List<Contest>, // the contests you want to audit
-    val raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
 ): RlauxWorkflow {
@@ -34,12 +66,6 @@ class ClcaWorkflow(
         // 	a) Check that the winners according to the CVRs are the reported winners.
         //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-        //contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
-        contestsUA.forEach {
-            if (it.choiceFunction != SocialChoiceFunction.IRV) {
-                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
-            }
-        }
 
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
@@ -182,106 +208,6 @@ class ClcaWorkflow(
     override fun getContests(): List<ContestUnderAudit> = contestsUA
 }
 
-///////////////////////////////////////////////////////////////////////
-
-// tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
-fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Int> {
-    val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
-    contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete
-    for (cvr in cvrs) {
-        for (conId in cvr.votes.keys) {
-            val accum = ncvrs.getOrPut(conId) { 0 }
-            ncvrs[conId] = accum + 1
-        }
-    }
-    contests.forEach {
-        val ncvr = ncvrs[it.id]!!
-        //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
-        if (it.Nc < ncvr) throw RuntimeException(
-            "upperBound ${it.Nc} < ncvrs ${ncvr} for contest ${it.id}"
-        )
-    }
-
-    return ncvrs
-}
-
-fun makeVotesPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes
-    contests.forEach { allVotes[it.id] = mutableMapOf() } // make sure map is complete
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return allVotes
-}
-
-fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: Boolean=true): List<ContestUnderAudit> {
-    if (contests.isEmpty()) return emptyList()
-
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes (cand -> vote)
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-
-    return allVotes.keys.map { conId ->
-        val contest = contests.find { it.id == conId }
-        if (contest == null)
-            throw RuntimeException("no contest for contest id= $conId")
-        val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, true, hasStyles)
-        require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
-        contestUA
-    }
-}
-
-// ok if one has zero votes and the other doesnt
-fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {
-    if (votes1 == votes2) return true
-    val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
-    val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
-    return votes1z == votes2z
-}
-
-// TODO seems wrong
-fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>): List<ContestUnderAudit> {
-    if (rcontests.isEmpty()) return emptyList()
-
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    val ncvrs = mutableMapOf<Int, Int>()
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-        for (conId in cvr.votes.keys) {
-            val accum = ncvrs.getOrPut(conId) { 0 }
-            ncvrs[conId] = accum + 1
-        }
-    }
-    return allVotes.keys.map { conId ->
-        val rcontestUA = rcontests.find { it.id == conId }
-        if (rcontestUA == null) throw RuntimeException("no contest for contest id= $conId")
-        val nc = ncvrs[conId]!!
-        val accumVotes = allVotes[conId]!!
-        // require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
-        rcontestUA
-    }
-}
-
 /////////////////////////////////////////////////////////////////////////////////
 
 fun runClcaAssertionAudit(
@@ -311,7 +237,6 @@ fun runClcaAssertionAudit(
                 withoutReplacement = true,
                 a = cassorter.noerror(),
                 d = clcaConfig.d,
-                ErrorRates(0.0, 0.0, 0.0, 0.0)
             )
         }
 
@@ -346,13 +271,14 @@ fun runClcaAssertionAudit(
             )
     }
 
-    val testFn = BettingMart(
-        bettingFn = bettingFn,
-        Nc = contestUA.Nc,
-        noerror = cassorter.noerror(),
-        upperBound = cassorter.upperBound(),
+    // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
+    //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn
+    val testFn = Corla(
+        N = contestUA.Nc,
         riskLimit = auditConfig.riskLimit,
-        withoutReplacement = true
+        reportedMargin = cassertion.assorter.reportedMargin(),
+        noerror = cassorter.noerror(),
+        p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // todo
     )
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }

@@ -33,7 +33,7 @@ class CompareAuditsNoErrors {
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
+                clcaConfigIn=ClcaConfig(ClcaStrategyType.noerror, 0.0),
                 parameters=mapOf("nruns" to nruns)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -66,7 +66,7 @@ class CompareAuditsNoErrors {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "auditType", yscale) {
+        plotter.showSampleSizesVsMargin(results, null, "auditType", yscale) {
             when (it.parameters["auditType"]) {
                 1.0 -> "oneaudit ${dfn(it.Dparam("cvrPercent"), 3)}"
                 2.0 -> "polling"
@@ -109,7 +109,7 @@ class CompareAuditsNoErrors {
 
     @Test
     fun oaNoErrorsPlots() {
-        val name = "oaNoErrors"
+        val name = "oaNoErrors2"
         val dirName = "/home/stormy/temp/workflow/$name"
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
@@ -121,14 +121,16 @@ class CompareAuditsNoErrors {
         margins.forEach { margin ->
             val oneauditGenerator1 = OneAuditWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, 0.50, fuzzPct=fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "cat" to "standard")
+                mapOf("nruns" to nruns.toDouble(), "cat" to "standard"),
+                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
+                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.standard))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator1))
             val oneauditGenerator2 = OneAuditWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, 0.50, fuzzPct=fuzzPct,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "max99"),
-                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 10,
-                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99, fuzzPct = fuzzPct))
+                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
+                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator2))
         }
@@ -141,18 +143,18 @@ class CompareAuditsNoErrors {
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMarginByStrategy(name, dirName, Scale.Linear)
-        showSampleSizesVsMarginByStrategy(name, dirName, Scale.Log)
-        showSampleSizesVsMarginByStrategy(name, dirName, Scale.Pct)
+        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, Scale.Linear)
+        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, Scale.Log)
+        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, Scale.Pct)
         showFailuresVsMarginByStrategy(name, dirName, subtitle=subtitle)
     }
 
-    fun showSampleSizesVsMarginByStrategy(name: String, dirName: String, yscale: Scale) {
+    fun showSampleSizesVsMarginByStrategy(name: String, dirName: String, subtitle: String, yscale: Scale) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "strategy", yscale) { category(it) }
+        plotter.showSampleSizesVsMargin(results, subtitle, "strategy", yscale) { category(it) }
     }
 
     fun showFailuresVsMarginByStrategy(name: String, dirName: String, subtitle: String) {

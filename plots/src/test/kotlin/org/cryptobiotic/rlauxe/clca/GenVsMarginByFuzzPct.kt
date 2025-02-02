@@ -56,7 +56,7 @@ class GenVsMarginByFuzzPct {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, "estFuzzPct", yscale=yscale) { categoryFuzzPct(it) }
+        plotter.showSampleSizesVsMargin(results, null, "estFuzzPct", yscale=yscale) { categoryFuzzPct(it) }
     }
 
     fun showFailuresVsMargin(name:String, ) {

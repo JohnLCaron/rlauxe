@@ -29,9 +29,11 @@ class TestAssorterPlurality {
         val avalue0 = assorter.assort(cvr0)
         val avalue1 = assorter.assort(cvr1)
         val avalue2 = assorter.assort(cvr2)
-        assertEquals(1.0, avalue0)
+
+        // A in {0, 1/2, 1}
         assertEquals(0.0, avalue1)
         assertEquals(0.5, avalue2)
+        assertEquals(1.0, avalue0)
     }
 
     @Test

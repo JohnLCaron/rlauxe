@@ -43,15 +43,15 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showSampleSizesVsMargin(data: List<WorkflowResult>, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
+    fun showSampleSizesVsMargin(data: List<WorkflowResult>, subtitle: String? = null, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
         val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
 
         wrsPlot(
-            titleS = "$filename estimated sample sizes",
-            subtitleS = "Nc=${exemplar.Nc} nruns=${nruns}" + fuzzPctLabel,
+            titleS = "$filename samples needed",
+            subtitleS = subtitle?: "Nc=${exemplar.Nc} nruns=${nruns}" + fuzzPctLabel,
             data,
             "$dir/${filename}${yscale.name}",
             "margin",
@@ -167,14 +167,13 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
     fun showNroundsVsMargin(data: List<WorkflowResult>, subtitle: String? = null, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
-        val nruns = exemplar.parameters["nruns"]!!
 
         wrsPlot(
             titleS = "$filename number of audit rounds",
-            subtitleS = subtitle ?: "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns}",
+            subtitleS = subtitle ?: "N=${exemplar.Nc} nruns=${exemplar.parameters["nruns"]!!}",
             data,
             "$dir/${filename}Nrounds",
-            "fuzzPct",
+            "margin",
             "auditRounds",
             catName,
             xfld = { it.margin },
@@ -188,7 +187,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         val nruns = exemplar.parameters["nruns"]!!
 
         wrsPlot(
-            titleS = "$filename estimated sample sizes",
+            titleS = "$filename samples needed",
             subtitleS = "margin=${exemplar.margin} N=${exemplar.Nc} nruns=${nruns}",
             data,
             "$dir/${filename}${yscale.name}",
@@ -246,7 +245,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         val nruns = exemplar.parameters["nruns"]!!
 
         wrsPlot(
-            titleS = "$filename estimated sample sizes",
+            titleS = "$filename samples needed",
             subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
@@ -264,7 +263,7 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         val nruns = exemplar.parameters["nruns"]!!
 
         wrsPlot(
-            titleS = "$filename estimated sample sizes",
+            titleS = "$filename samples needed",
             subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
             data,
             if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",

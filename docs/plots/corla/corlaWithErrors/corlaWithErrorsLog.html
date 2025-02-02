@@ -1,0 +1,82 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;NbrESC&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;corlaWithErrors samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=10000 nruns=100 mvrsFuzzPct=0.01&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;],
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05],
+&quot;log10(samplesNeeded)&quot;:[4.0,4.0,3.996183638453542,3.9807925698078286,3.931780674574803,3.819516297740899,3.3871352266806705,3.304372028490833,3.1390474664585644,2.8655481142556707,2.833459487497644,2.5293790162876184,2.4034980044519982,2.2676409823459154,4.0,4.0,3.9854444383229124,3.8947152749643794,3.6791925142782724,3.5484225878733016,3.490779910101798,3.2780810669228404,3.175068014884829,2.9739632974060903,2.8002151507339144,2.5371766195445073,2.3540892221522474,2.2974759933242117,3.996306296875639,3.9958825403984575,3.9207424851447557,3.7241824452681196,3.6509337379755022,3.572550988491547,3.4926416749543625,3.296213113315693,3.1964829302031736,2.98507602280041,2.8270460170047342,2.5833801645870698,2.4322956924440127,2.2326149831347815,3.9575560497383595,3.89984675621179,3.871095766794744,3.8128578970372855,3.78401356756463,3.729944361212703,3.579931003145711,3.450241407994324,3.3124122183005626,3.1315256371045286,2.9918770293220898,2.7490712278196594,2.4447940102762318,2.334011188761349,3.9802270552106025,3.967715016429286,3.961747522838163,3.9436191474626114,3.8824989235013856,3.906691060421048,3.752036917724386,3.7631456103652154,3.71275742023182,3.2746426946993252,3.2154551373036346,2.7090493647937484,2.4255668239652586,2.2584936113939125],
+&quot;auditType&quot;:[&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;],
+&quot;log10(samplesNeeded)&quot;:[4.0,4.0,3.996183638453542,3.9807925698078286,3.931780674574803,3.819516297740899,3.3871352266806705,3.304372028490833,3.1390474664585644,2.8655481142556707,2.833459487497644,2.5293790162876184,2.4034980044519982,2.2676409823459154,4.0,4.0,3.9854444383229124,3.8947152749643794,3.6791925142782724,3.5484225878733016,3.490779910101798,3.2780810669228404,3.175068014884829,2.9739632974060903,2.8002151507339144,2.5371766195445073,2.3540892221522474,2.2974759933242117,3.996306296875639,3.9958825403984575,3.9207424851447557,3.7241824452681196,3.6509337379755022,3.572550988491547,3.4926416749543625,3.296213113315693,3.1964829302031736,2.98507602280041,2.8270460170047342,2.5833801645870698,2.4322956924440127,2.2326149831347815,3.9575560497383595,3.89984675621179,3.871095766794744,3.8128578970372855,3.78401356756463,3.729944361212703,3.579931003145711,3.450241407994324,3.3124122183005626,3.1315256371045286,2.9918770293220898,2.7490712278196594,2.4447940102762318,2.334011188761349,3.9802270552106025,3.967715016429286,3.961747522838163,3.9436191474626114,3.8824989235013856,3.906691060421048,3.752036917724386,3.7631456103652154,3.71275742023182,3.2746426946993252,3.2154551373036346,2.7090493647937484,2.4255668239652586,2.2584936113939125],
+&quot;auditType&quot;:[&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;2*clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaFuzzPct/2&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;clcaNoerror&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;,&quot;corla&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;log10(samplesNeeded)&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}]
+};
+       var plotContainer = document.getElementById(&quot;NbrESC&quot;);
+       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

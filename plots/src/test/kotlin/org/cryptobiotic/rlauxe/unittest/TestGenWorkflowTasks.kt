@@ -33,7 +33,7 @@ class TestGenWorkflowTasks {
         writer.writeResults(results)
 
         val plotter = WorkflowResultsPlotter(dirName, filename)
-        plotter.showSampleSizesVsMargin(results, "category") { "all" }
+        plotter.showSampleSizesVsMargin(results, null, "category") { "all" }
     }
 
     @Test
@@ -59,7 +59,7 @@ class TestGenWorkflowTasks {
         writer.writeResults(results)
 
         val plotter = WorkflowResultsPlotter(dirName, filename)
-        plotter.showSampleSizesVsMargin(results, "category") { "all" }
+        plotter.showSampleSizesVsMargin(results, null, "category") { "all" }
     }
 
     @Test
@@ -94,6 +94,6 @@ class TestGenWorkflowTasks {
         writer.writeResults(results)
 
         val plotter = WorkflowResultsPlotter(dirName, filename)
-        plotter.showSampleSizesVsMargin(results, "cvrPercent") { df(it.Dparam("cvrPercent")) }
+        plotter.showSampleSizesVsMargin(results, null, "cvrPercent") { df(it.Dparam("cvrPercent")) }
     }
 }

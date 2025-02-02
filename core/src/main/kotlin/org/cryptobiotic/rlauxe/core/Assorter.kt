@@ -76,7 +76,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
 
 /** See SHANGRLA, section 2.3, p.5. */
 data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterFunction {
-    val upperBound = 0.5 / minFraction
+    val upperBound = 0.5 / minFraction // 1/2f
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(contest.info.id)) return 0.5

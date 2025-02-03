@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.concur.RepeatedTask
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.sampling.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.random.Random
@@ -149,7 +149,7 @@ data class CobraTask(
     }
 
     override fun makeSampler(): Sampler {
-        return ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2oracle, withoutReplacement = true)
+        return ClcaAttackSampler(cvrs, compareAssorter, p2 = p2oracle, withoutReplacement = true)
     }
 
     override fun makeTestFn(): RiskTestingFn {

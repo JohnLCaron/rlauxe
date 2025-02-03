@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
+import org.cryptobiotic.rlauxe.sampling.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -75,7 +76,8 @@ class ClcaWorkflowTaskGenerator(
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
-    val Nb: Int = Nc
+    val Nb: Int = Nc,
+    val p2flips: Double? = null,
     ): WorkflowTaskGenerator {
     override fun name() = "ClcaWorkflowTaskGenerator"
 
@@ -86,7 +88,8 @@ class ClcaWorkflowTaskGenerator(
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
+            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         if (!auditConfig.hasStyles && Nb > Nc) {
             val otherContestId = 42

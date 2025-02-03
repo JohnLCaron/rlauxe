@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.util.makeContestUAfromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,7 +47,7 @@ class TestCvrBuilders {
             println("fuzzPct = $fuzzPct")
             val allErrorRates = mutableListOf<ErrorRates>()
             contests.forEach { contest ->
-                val contestUA = ContestUnderAudit(contest.info, cvrs).makeClcaAssertions(cvrs)
+                val contestUA = makeContestUAfromCvrs(contest.info, cvrs).makeClcaAssertions(cvrs)
                 val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter

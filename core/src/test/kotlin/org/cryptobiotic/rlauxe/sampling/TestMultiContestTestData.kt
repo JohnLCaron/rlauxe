@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToInt
-import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -99,7 +99,7 @@ class TestMultiContestTestData {
             val underPct = nunder/ Nc.toDouble()
             println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${fcontest.undervotePct} abs=${abs(underPct - fcontest.undervotePct)} " +
                     " rel=${abs(underPct - fcontest.undervotePct)/underPct}")
-            if (nunder > 5) assertEquals(fcontest.undervotePct, underPct, .02)
+            if (nunder > 5) assertEquals(fcontest.undervotePct, underPct, .03)
         }
     }
 

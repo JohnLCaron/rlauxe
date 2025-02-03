@@ -23,7 +23,7 @@ interface ConcurrentTaskG<T> {
     fun run() : T
 }
 
-// runs set of ConcurrentTaskG<T> concurrently, whose run() returns T
+// runs set of ConcurrentTaskG<T> concurrently, whose run() returns T. Used in estimateSampleSizes.
 class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
     private val mutex = Mutex()
     private val results = mutableListOf<T>()
@@ -31,7 +31,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
     // run all the tasks concurrently
     fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int = 30): List<T> {
         val stopwatch = Stopwatch()
-        if (show) println("\nConcurrentTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads")
+        if (show) println("\nConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads")
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()

@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

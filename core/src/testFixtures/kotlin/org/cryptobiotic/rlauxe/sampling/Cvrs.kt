@@ -29,6 +29,7 @@ fun makeCvr(winner: Int, name:String?=null): Cvr {
     votes[0] = intArrayOf(winner)
     return Cvr(name?:"card", votes)
 }
+
 fun makeOtherCvrForContest(contestId: Int, name:String?=null): Cvr {
     val votes = mutableMapOf<Int, IntArray>()
     votes[contestId] = IntArray(0)
@@ -129,52 +130,6 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     return changed
 }
 
-fun makeContestsFromCvrs(
-    cvrs: List<Cvr>,
-    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-): List<Contest> {
-    val votes = tabulateVotes(cvrs)
-    val ncards = cardsPerContest(cvrs)
-    return makeContestsFromCvrs(votes, ncards, choiceFunction)
-}
 
-fun makeContestsFromCvrs(
-    votes: Map<Int, Map<Int, Int>>,  // contestId -> candidate -> votes
-    cards: Map<Int, Int>, // contestId -> ncards
-    choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
-): List<Contest> {
-    val svotes = votes.toSortedMap()
-    val contests = mutableListOf<Contest>()
 
-    for ((contestId, candidateMap) in svotes.toSortedMap()) {
-        val scandidateMap = candidateMap.toSortedMap()
 
-        contests.add(
-            Contest(
-                ContestInfo(
-                    name = "contest$contestId",
-                    id = contestId,
-                    choiceFunction = choiceFunction,
-                    candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
-                    nwinners=1,
-                ),
-                voteInput = votes[contestId]!!,
-                Nc = cards[contestId]!!,
-                Np=0, // TODO
-            )
-        )
-    }
-
-    return contests
-}
-
-fun makeFakeContest(info: ContestInfo, ncvrs: Int): Contest {
-    val cvrs = mutableListOf<Cvr>()
-    repeat(ncvrs) {
-        val votes = mutableMapOf<Int, IntArray>()
-        val choice = Random.nextInt(info.nwinners)
-        votes[0] = intArrayOf(choice)
-        cvrs.add(Cvr("card-$it", votes))
-    }
-    return makeContestFromCvrs(info, cvrs)
-}

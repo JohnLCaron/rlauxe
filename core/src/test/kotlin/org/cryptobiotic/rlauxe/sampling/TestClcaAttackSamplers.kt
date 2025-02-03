@@ -2,9 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.tabulateVotes
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,7 +23,7 @@ class TestClcaAttackSamplers {
         println("testComparisonWithErrors N=$N cvrMean=$cvrMean meanDiff=$meanDiff")
         repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
-            val contest = ContestUnderAudit(info, cvrs).makeClcaAssertions(cvrs)
+            val contest = makeContestUAfromCvrs(info, cvrs).makeClcaAssertions(cvrs)
             val bassorter = contest.clcaAssertions.first().cassorter as ClcaAssorter
             assertEquals(.02, bassorter.assorter().reportedMargin(), doublePrecision)
             assertEquals(0.5050505050505051, bassorter.noerror(), doublePrecision)

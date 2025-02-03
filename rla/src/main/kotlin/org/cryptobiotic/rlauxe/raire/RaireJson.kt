@@ -14,6 +14,18 @@ import java.nio.file.StandardOpenOption
 // TestRaireAssertions,AssertionRLAipynb  reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json"
 // TestRaireWorkflow reads   "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json"
 
+// The output of RAIRE assertion generator, read from JSON files
+data class RaireResults(
+    val overallExpectedPollsNumber : Int,  // what is this?
+    val ballotsInvolvedInAuditNumber : Int, // what is this?
+    val contests: List<RaireContestUnderAudit>,
+) {
+    fun show() = buildString {
+        appendLine("RaireResults: overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
+        contests.forEach { append(it.show()) }
+    }
+}
+
 @Serializable
 data class RaireResultsJson(
     @SerialName("Overall Expected Polls (#)")
@@ -45,7 +57,7 @@ data class RaireAssertionJson(
 )
 
 @OptIn(ExperimentalSerializationApi::class)
-fun readRaireResults(filename: String): RaireResultsJson {
+fun readRaireResultsJson(filename: String): RaireResultsJson {
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     Files.newInputStream(Path.of(filename), StandardOpenOption.READ).use { inp ->
         val result =  jsonReader.decodeFromStream<RaireResultsJson>(inp)
@@ -82,15 +94,3 @@ fun RaireAssertionJson.import() =
         this.already_eliminated.map { it.toInt() },
         this.explanation,
     )
-
-// The output of RAIRE assertion generator, read from JSON files
-data class RaireResults(
-    val overallExpectedPollsNumber : Int,
-    val ballotsInvolvedInAuditNumber : Int,
-    val contests: List<RaireContestUnderAudit>,
-) {
-    fun show() = buildString {
-        appendLine("RaireResults: overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
-        contests.forEach { append(it.show()) }
-    }
-}

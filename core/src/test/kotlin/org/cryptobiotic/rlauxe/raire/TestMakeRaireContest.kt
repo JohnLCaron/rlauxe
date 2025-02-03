@@ -6,6 +6,6 @@ class TestMakeRaireContest {
 
     @Test
     fun testMakeRaireContest() {
-        val (rcontest, cvrs) = makeRaireContest(N=20000, margin=.05)
+        val (rcontest, cvrs) = makeRaireContest(N=20000, minMargin=.05)
     }
 }

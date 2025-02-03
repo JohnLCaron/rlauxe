@@ -21,8 +21,8 @@ data class RaireCvrContest(
 
 // TODO relation to the original CVRs ??
 // "RaireCvr is always for one contest" probably an artifact of raire processing
-// probably doesnt have to be seperate class, exept for method override hasMarkFor / hasOveVote ?
-/** Duplicating the math from SHANGRLA CVR */
+// probably doesnt have to be seperate class, exept for method override hasMarkFor / hasOneVote ?
+/** Duplicating the math from SHANGRLA CVR in Audit.py */
 class RaireCvr(val cvr: Cvr) {
 
     //     def get_vote_for(self, contest_id: str, candidate: str):

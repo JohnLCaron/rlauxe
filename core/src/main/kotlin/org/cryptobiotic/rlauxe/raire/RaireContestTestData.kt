@@ -1,14 +1,17 @@
 package org.cryptobiotic.rlauxe.raire
 
 import au.org.democracydevelopers.raire.RaireProblem
+import au.org.democracydevelopers.raire.RaireSolution
 import au.org.democracydevelopers.raire.algorithm.RaireResult
 import au.org.democracydevelopers.raire.assertions.Assertion
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin
+import au.org.democracydevelopers.raire.irv.IRVResult
 import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
+
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -23,7 +26,7 @@ data class RaireContestTestData(
     val contestId: Int,
     val ncands: Int,
     val ncards: Int,
-    val margin: Double, // TODO not using
+    val minMargin: Double,
     val undervotePct: Double, // TODO not using
     val phantomPct: Double,
 ) {
@@ -48,7 +51,7 @@ data class RaireContestTestData(
         return rcvrs
     }
 
-    fun makeRandomCvrs(): List<RaireCvr> {
+    private fun makeRandomCvrs(): List<RaireCvr> {
         var count = 0
         val cvrs = mutableListOf<RaireCvr>()
         repeat(this.ncards) {
@@ -77,7 +80,7 @@ data class RaireContestTestData(
     // adjust in place
     fun adjust(testCvrs: List<RaireCvr>, minAssertion: AssertionAndDifficulty) {
         var have = minAssertion.margin
-        val want = this.margin * this.ncards
+        val want = this.minMargin * this.ncards
         val nen = minAssertion.assertion as NotEliminatedNext
         val winner = nen.winner
         val loser = nen.loser
@@ -104,26 +107,39 @@ data class RaireContestTestData(
     }
 }
 
-fun makeRaireContest(N: Int, margin: Double): Pair<RaireContestUnderAudit, List<Cvr>> {
+fun makeRaireContest(N: Int, minMargin: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>> {
+    repeat(11) {
+        val result = trytoMakeRaireContest(N, minMargin, quiet)
+        if (result != null) return result
+    }
+    throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
+}
+
+fun trytoMakeRaireContest(N: Int, minMargin: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val ncands = 4
 
-    val testContest = RaireContestTestData(0, ncands=ncands, ncards=N, margin=margin, undervotePct = .10, phantomPct = .005)
+    val testContest = RaireContestTestData(0, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = .10, phantomPct = .005)
     val testCvrs = testContest.makeCvrs()
 
     var round = 1
-    println("===================================\nRound $round")
-    var solution = findMinAssertion(testContest, testCvrs)
+    if (!quiet) println("===================================\nRound $round")
+    var solution = findMinAssertion(testContest, testCvrs, quiet)
+    if (solution == null) return null
 
-    var marginPct = 0.0
-    while (marginPct < margin) {
-        testContest.adjust(testCvrs, solution.third)
-        println("===================================\nRound $round")
-        solution = findMinAssertion(testContest, testCvrs)
+    var marginPct = solution.second.margin / testContest.ncards.toDouble()
+
+    // iteratively modify the testCvrs until the minAssertion margin is > margin TODO cleanup
+    while (marginPct < minMargin) {
+        testContest.adjust(testCvrs, solution!!.third)
+
+        if (!quiet) println("===================================\nRound $round")
+        solution = findMinAssertion(testContest, testCvrs, quiet)
+        if (solution == null) return null
         marginPct = solution.second.margin / testContest.ncards.toDouble()
         round++
     }
 
-    val raireAssertions = solution.second.assertions.map { RaireAssertion.convertAssertion(testContest.info.candidateIds, it) }
+    val raireAssertions = solution!!.second.assertions.map { RaireAssertion.convertAssertion(testContest.info.candidateIds, it) }
 
     val rcontentUA = RaireContestUnderAudit.makeFromInfo(
         testContest.info,
@@ -136,7 +152,9 @@ fun makeRaireContest(N: Int, margin: Double): Pair<RaireContestUnderAudit, List<
     return Pair(rcontentUA, testCvrs.map { it.cvr })
 }
 
-fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>): Triple<Int, RaireResult, AssertionAndDifficulty> {
+// TODO using testCvrs.size as Nc I think
+// return Triple(winner, solution.solution.Ok, minAssertion)
+fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>, quiet: Boolean): Triple<Int, RaireResult, AssertionAndDifficulty>? {
     val vc = VoteConsolidator()
     testCvrs.forEach {
         val votes = it.cvr.votes[testContest.info.id]
@@ -148,10 +166,16 @@ fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>
 
     // public Votes(Vote[] votes, int numCandidates) throws RaireException {
     val votes = Votes(cvotes, testContest.ncands)
-    val result = votes.runElection(TimeOut.never())
-    println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
-    require(1 == result.possibleWinners.size) { "nwinners ${result.possibleWinners.size} must be 1" } // TODO WTF
-    val winner:Int = result.possibleWinners[0]
+    // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
+    val result: IRVResult = votes.runElection(TimeOut.never())
+    if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
+
+    // were just going to pretend theres only one
+    if (1 != result.possibleWinners.size) {
+        println("nwinners ${result.possibleWinners.size} must be 1")
+        return null
+    }
+    val winner:Int = result.possibleWinners[0] // we need a winner in order to generate the assertions
 
     // Map<String, Object> metadata,
     // Vote[] votes,
@@ -171,17 +195,24 @@ fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>
         null,
         null,
     )
-    val solution = problem.solve()
+    val solution: RaireSolution = problem.solve()
+    if (solution.solution.Err != null) {
+        println("solution.solution.Err=${solution.solution.Err}")
+        return null
+    }
     requireNotNull(solution.solution.Ok) // TODO
     val solutionResult: RaireResult = solution.solution.Ok
+    val minAssertion: AssertionAndDifficulty = solutionResult.assertions.find { it.margin == solutionResult.margin }!!
 
-    val marginPct = solutionResult.margin / testContest.ncards.toDouble()
-    println(" solutionResult: margin=${solutionResult.margin} marginPct=${df(marginPct)} difficulty=${df(solutionResult.difficulty)} nassertions=${solutionResult.assertions.size}")
-    solutionResult.assertions.forEach { it ->
-        println("   ${showAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} ")
+    if (!quiet) {
+        val marginPct = solutionResult.margin / testContest.ncards.toDouble()
+        println(" solutionResult: margin=${solutionResult.margin} marginPct=${df(marginPct)} difficulty=${df(solutionResult.difficulty)} nassertions=${solutionResult.assertions.size}")
+        solutionResult.assertions.forEach {
+            val isMinAssertion = if (it == minAssertion) "*" else ""
+            println("   ${showAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
+        }
     }
 
-    val minAssertion: AssertionAndDifficulty = solutionResult.assertions.find { it.margin == solutionResult.margin }!!
     return Triple(winner, solutionResult, minAssertion)
 }
 

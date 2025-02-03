@@ -17,7 +17,7 @@ class CorlaWorkflowTaskGenerator(
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
-    val Nb: Int = Nc
+    val p2flips: Double? = null,
 ): WorkflowTaskGenerator {
     override fun name() = "CorlaWorkflowTaskGenerator"
 
@@ -29,15 +29,10 @@ class CorlaWorkflowTaskGenerator(
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
 
-        if (!auditConfig.hasStyles && Nb > Nc) {
-            val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
-            testCvrs = testCvrs + otherCvrs
-            testMvrs = testMvrs + otherCvrs
-        }
+        val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
+            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), testCvrs, quiet = true)
         return WorkflowTask(

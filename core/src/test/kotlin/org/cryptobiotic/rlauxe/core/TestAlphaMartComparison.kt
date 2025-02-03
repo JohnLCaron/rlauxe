@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.sampling.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.sampling.Sampler
 import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
@@ -20,7 +20,7 @@ class TestAlphaMartComparison {
         val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
-        val sampler = ComparisonNoErrors(contest.id, cvrs, compareAssorter)
+        val sampler = ClcaNoErrorSampler(contest.id, cvrs, compareAssorter)
         val theta = sampler.sampleMean()
         val expected = 1.0 / (3 - 2 * cvrMean)
         assertEquals(expected, theta, doublePrecision)

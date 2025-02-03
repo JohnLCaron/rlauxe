@@ -67,6 +67,27 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
+    fun showSampleSizesVsTheta(data: List<WorkflowResult>, subtitle: String, yscale: Scale, catName: String, catfld: (WorkflowResult) -> String) {
+
+        wrsPlot(
+            titleS = "$filename samples needed",
+            subtitleS = subtitle,
+            data,
+            "$dir/${filename}${yscale.name}",
+            "theta",
+            yscale.desc("samplesNeeded"),
+            catName,
+            xfld = { it.Dparam("theta") },
+            yfld = { it: WorkflowResult -> when (yscale) {
+                Scale.Linear -> it.samplesNeeded
+                Scale.Log -> log10(it.samplesNeeded)
+                Scale.Pct -> (100*it.samplesNeeded/it.Nc.toDouble())
+            }},
+            catfld = catfld,
+        )
+
+    }
+
     fun showEstSizesVsMarginVersion(data: List<WorkflowResult>, subtitle: String, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
@@ -145,6 +166,23 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         return extraCost + roundCost
     }
 
+    fun showFailuresVsTheta(data: List<WorkflowResult>, subtitle: String, catName: String, catfld: (WorkflowResult) -> String) {
+
+        wrsPlot(
+            titleS = "$filename failurePct",
+            subtitleS = subtitle,
+            data,
+            "$dir/${filename}Failures",
+            "theta",
+            "failurePct",
+            catName,
+            xfld = { it.Dparam("theta") },
+            yfld = { it.failPct },
+            catfld = catfld,
+        )
+
+    }
+
     fun showFailuresVsMargin(data: List<WorkflowResult>, subtitle: String? = null, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
@@ -161,6 +199,23 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
             catName,
             xfld = { it.margin },
             yfld = { it.failPct },
+            catfld = catfld,
+        )
+    }
+
+    fun showNroundsVsTheta(data: List<WorkflowResult>, subtitle: String? = null, catName: String, catfld: (WorkflowResult) -> String) {
+        val exemplar = data[0]
+
+        wrsPlot(
+            titleS = "$filename number of audit rounds",
+            subtitleS = subtitle ?: "N=${exemplar.Nc} nruns=${exemplar.parameters["nruns"]!!}",
+            data,
+            "$dir/${filename}Nrounds",
+            "theta",
+            "auditRounds",
+            catName,
+            xfld = { it.Dparam("theta") },
+            yfld = { it.nrounds},
             catfld = catfld,
         )
     }

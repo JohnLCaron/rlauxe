@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.cardsPerContest
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.util.tabulateVotes
 import kotlin.collections.iterator
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 // making CVRs for simulations and testing
@@ -47,15 +48,47 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     return randomCvrs
 }
 
-
 // change cvrs to have the exact number of votes for wantAvg
 fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
     val ncards = cvrs.size
-    val expectedAVotes = (ncards * wantAvg).toInt()
+    val expectedAVotes = (ncards * wantAvg).roundToInt()
     val actualAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     val needToChangeVotesFromA = actualAvotes - expectedAVotes
     return add2voteOverstatements(cvrs, needToChangeVotesFromA)
 }
+
+fun makeFlippedMvrs(cvrs: List<Cvr>, N: Int, p2o: Double, p1o: Double): List<Cvr> {
+    val mmvrs = mutableListOf<Cvr>()
+    mmvrs.addAll(cvrs)
+    val flippedVotes2 = add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2o).toInt())
+    val flippedVotes1 = if (p1o == 0.0) 0 else {
+        add1voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p1o).toInt())
+    }
+    return mmvrs.toList()
+}
+
+// change cvrs to add the given number of one-vote overstatements.
+fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
+    if (needToChangeVotesFromA == 0) return 0
+    val ncards = cvrs.size
+    val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    var changed = 0
+    while (changed < needToChangeVotesFromA) {
+        val cvrIdx = Random.nextInt(ncards)
+        val cvr = cvrs[cvrIdx]
+        if (cvr.hasMarkFor(0, 0) == 1) {
+            val votes = mutableMapOf<Int, IntArray>()
+            votes[0] = intArrayOf(2)
+            cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+            changed++
+        }
+    }
+    val checkAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
+    // if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
+    require(checkAvotes == startingAvotes - needToChangeVotesFromA)
+    return changed
+}
+
 
 // change cvrs to add the given number of two-vote over/understatements.
 // Note that we replace the Cvr in the list when we change it
@@ -73,7 +106,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             if (cvr.hasMarkFor(0, 1) == 1) {
                 val votes = mutableMapOf<Int, IntArray>()
                 votes[0] = intArrayOf(0)
-                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                cvrs[cvrIdx] = Cvr(cvr.id, votes)
                 changed--
             }
         }
@@ -85,7 +118,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             if (cvr.hasMarkFor(0, 0) == 1) {
                 val votes = mutableMapOf<Int, IntArray>()
                 votes[0] = intArrayOf(1)
-                cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+                cvrs[cvrIdx] = Cvr(cvr.id, votes)
                 changed++
             }
         }

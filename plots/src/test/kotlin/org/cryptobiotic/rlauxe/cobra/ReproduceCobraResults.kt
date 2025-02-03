@@ -1,14 +1,14 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.sampling.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.unittest.ComparisonWithErrorRates
+import org.cryptobiotic.rlauxe.sampling.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
@@ -33,7 +33,7 @@ class ReproduceCobraResults {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta, N)
-                val sampler = ComparisonNoErrors(compareAssorter.contest.id, cvrs, compareAssorter)
+                val sampler = ClcaNoErrorSampler(compareAssorter.contest.id, cvrs, compareAssorter)
                 val upperBound = compareAssorter.upperBound
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${compareAssorter.noerror}")
 
@@ -86,7 +86,7 @@ class ReproduceCobraResults {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta, N)
                 val sampleWithErrors =
-                    ComparisonWithErrorRates(cvrs, compareAssorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
+                    ClcaAttackSampler(cvrs, compareAssorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
                 val upperBound = compareAssorter.upperBound
                 println("testTable1: margin=${margin} a=${compareAssorter.noerror} p2=${p2}")
 
@@ -151,7 +151,7 @@ class ReproduceCobraResults {
                         val cvrs = makeCvrsByExactMean(N, theta)
                         val compareAssorter = makeStandardComparisonAssorter(theta, N)
                         val sampleWithErrors =
-                            ComparisonWithErrorRates(
+                            ClcaAttackSampler(
                                 cvrs,
                                 compareAssorter,
                                 p2 = p2,
@@ -230,7 +230,7 @@ class ReproduceCobraResults {
                         val stopwatch = Stopwatch()
 
                         // generate with the oracle, or true rates
-                        val sampler = ComparisonWithErrorRates(
+                        val sampler = ClcaAttackSampler(
                             cvrs,
                             compareAssorter,
                             p2 = p2o,

@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.sampling.ComparisonNoErrors
+import org.cryptobiotic.rlauxe.sampling.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
@@ -46,7 +46,7 @@ class CompareAlphaPaper {
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ComparisonNoErrors(contest.id, cvrs, compareAssertion.cassorter),
+                    drawSample = ClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
                     // maxSamples = N,
                     eta0 = eta,
                     d = d,

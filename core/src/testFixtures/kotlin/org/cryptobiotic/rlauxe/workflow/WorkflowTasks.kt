@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.concur.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
+import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.sampling.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
@@ -49,6 +50,10 @@ fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quie
         }
     }
 
+    if (!quiet) {
+        rounds.forEach { println(it) }
+        workflow.showResults()
+    }
     return if (rounds.isEmpty()) 0 else rounds.last().sampledIndices.size
 }
 
@@ -100,7 +105,7 @@ class ClcaWorkflowTaskGenerator(
 
         val clca = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
         return WorkflowTask(
-            "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
+            name(),
             clca,
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
@@ -141,7 +146,7 @@ class PollingWorkflowTaskGenerator(
 
         val polling = PollingWorkflow(auditConfig, listOf(sim.contest), ballotManifest, Nb, quiet = quiet)
         return WorkflowTask(
-            "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
+            name(),
             polling,
             testMvrs,
             parameters + mapOf("fuzzPct" to fuzzPct, "auditType" to 2.0)
@@ -172,10 +177,40 @@ class OneAuditWorkflowTaskGenerator(
 
         val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), oaCvrs, quiet = quiet)
         return WorkflowTask(
-            "genAuditWithErrorsPlots fuzzPct = $fuzzPct",
+            name(),
             oneaudit,
             oaMvrs,
             parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to fuzzPct, "auditType" to 1.0)
+        )
+    }
+}
+
+class RaireWorkflowTaskGenerator(
+    val Nc: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val mvrsFuzzPct: Double,
+    val parameters : Map<String, Any>,
+    val auditConfigIn: AuditConfig? = null,
+    val clcaConfigIn: ClcaConfig? = null,
+): WorkflowTaskGenerator {
+    override fun name() = "RaireWorkflowTaskGenerator"
+
+    override fun generateNewTask(): WorkflowTask {
+        val auditConfig = auditConfigIn ?:
+        AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 10,
+            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
+
+        val (rcontest, testCvrs) = makeRaireContest(N=20000, minMargin=margin, quiet = true)
+        // var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
+
+        val clca = ClcaWorkflow(auditConfig, emptyList(), listOf(rcontest), testCvrs, quiet = quiet)
+        return WorkflowTask(
+            name(),
+            clca,
+            testCvrs, // no errors
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0)
         )
     }
 }

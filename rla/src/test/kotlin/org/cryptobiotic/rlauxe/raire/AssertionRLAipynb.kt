@@ -295,7 +295,7 @@ class AssertionRLA {
         val nps = mapOf("334" to 0, "339" to 0) // TODO
 
         val rr =
-            readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
+            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
         val raireResults = rr.import(ncs, nps)
         val show = raireResults.show()
         println(show)
@@ -317,7 +317,7 @@ class AssertionRLA {
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
         // //         'cvr_file':       './data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire',
-        val raireCvrs = readRaireBallots(audit.cvrFile)
+        val raireCvrs = readRaireBallotsCsv(audit.cvrFile)
         val rcContest = raireCvrs.contests.first()
         val N = raireCvrs.cvrs.size // ??
         println(" raireCvrs contests=${raireCvrs.contests.size} ncards =${N}")

@@ -10,7 +10,7 @@ data class RaireContestInfo(val candidates: List<String>, val winner: String, va
 // TestRaireReader reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/raire/Aspen_2009_CityCouncil.raire"
 // TestRaireAssertions, TestRaireWorkflow reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
 
-fun readRaireBallots(fileName: String): RaireCvrs {
+fun readRaireBallotsCsv(fileName: String): RaireCvrs {
 
 //  A map between ballot id and the relevant CVR.
     val lines = File(fileName).bufferedReader().readLines()

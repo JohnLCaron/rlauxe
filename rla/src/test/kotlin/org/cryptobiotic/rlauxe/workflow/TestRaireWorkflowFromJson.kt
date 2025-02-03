@@ -23,14 +23,14 @@ class TestRaireWorkflowFromJson {
 
          // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
-        val raireCvrs = readRaireBallots(cvrFile)
+        val raireCvrs = readRaireBallotsCsv(cvrFile)
         val rcontests = raireCvrs.contests
         val cvrs = raireCvrs.cvrs
 
         // The corresponding assertions file that has already been generated.
         val ncs = raireCvrs.contests.associate { Pair(it.contestNumber.toString(), it.ncvrs + 2) }
         val nps = raireCvrs.contests.associate { Pair(it.contestNumber.toString(), 2) }
-        val raireResults = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
+        val raireResults = readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
             .import(ncs, nps)
         print(raireResults.show())
 

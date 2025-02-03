@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 
+// a Contest that does not have votes: Map<Int, Int>,   // candidateId -> nvotes
 data class RaireContest(
     override val info: ContestInfo,
     override val winners: List<Int>,
@@ -53,7 +54,7 @@ class RaireContestUnderAudit(
             val calcMargin = assorter.calcAssorterMargin(id, cvrs)
             if (assertion.margin != 0) {
                 val reportedMargin = assertion.margin / this.Nc.toDouble()
-                println(" calcMargin=$calcMargin reportedMargin=$reportedMargin")
+                // println(" calcMargin=$calcMargin reportedMargin=$reportedMargin")
                 require(doubleIsClose(calcMargin, reportedMargin))
             }
             assorter.reportedMargin = calcMargin

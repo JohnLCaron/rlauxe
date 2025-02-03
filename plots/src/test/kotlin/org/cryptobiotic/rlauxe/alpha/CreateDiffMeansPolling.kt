@@ -16,8 +16,6 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.plots.createPctRatio
 import org.cryptobiotic.rlauxe.plots.plotPctRatio
 import org.cryptobiotic.rlauxe.plots.plotSRTpct
@@ -25,10 +23,9 @@ import org.cryptobiotic.rlauxe.plots.plotSRTsamples
 import org.cryptobiotic.rlauxe.plots.plotSRTstdev
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.sampling.*
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 
 // CANDIDATE FOR REFACTOR
@@ -225,7 +222,7 @@ class CreatePollingDiffMeans {
         val reportedMean = theta + reportedMeanDiff
 
         val info = ContestInfo("contest0", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
-        val contestUA = ContestUnderAudit(info, cvrs, isComparison = false).makePollingAssertions()
+        val contestUA = makeContestUAfromCvrs(info, cvrs, isComparison = false).makePollingAssertions()
 
         val results = mutableListOf<RunTestRepeatedResult>()
         contestUA.pollingAssertions.map { assert ->

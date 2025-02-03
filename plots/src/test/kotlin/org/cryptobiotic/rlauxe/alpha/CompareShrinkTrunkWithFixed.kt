@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
-import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 import kotlin.math.max

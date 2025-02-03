@@ -4,9 +4,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.workflow.makeContestUAFromCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -37,7 +35,7 @@ class TestCvrs {
             .addCvr().addContest("AvB", "4").ddone()
             .addCvr().addContest("AvB", "4").ddone()
             .build()
-        val contestUA = ContestUnderAudit(info, cvrs, true, true)
+        val contestUA = makeContestUAfromCvrs(info, cvrs, true, true)
         assertEquals(2, contestUA.contest.winners.size)
         assertEquals(11, contestUA.Nc)
     }

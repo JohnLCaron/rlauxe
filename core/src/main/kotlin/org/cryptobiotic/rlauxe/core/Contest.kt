@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.math.min
 
@@ -202,10 +201,6 @@ open class ContestUnderAudit(
     var done = false
     var status = TestH0Status.InProgress // or its own enum ??
     var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
-
-    // should only be used for testing i think
-    constructor(info: ContestInfo, cvrs: List<Cvr>, isComparison: Boolean=true, hasStyle: Boolean=true):
-            this( makeContestFromCvrs(info, cvrs), isComparison, hasStyle)
 
     override fun toString() = buildString {
         append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")

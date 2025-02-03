@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlauxe.workflow.tabulateRaireVotes
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
@@ -43,5 +44,36 @@ class TestReadRaireAssertions {
                 else assertEquals(cassertion.cassorter.noerror()/2, cassertion.cassorter.bassort(it, it))
             }
         }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////
+
+// TODO seems wrong
+fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>): List<ContestUnderAudit> {
+    if (rcontests.isEmpty()) return emptyList()
+
+    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
+    val ncvrs = mutableMapOf<Int, Int>()
+    for (cvr in cvrs) {
+        for ((conId, conVotes) in cvr.votes) {
+            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
+        }
+        for (conId in cvr.votes.keys) {
+            val accum = ncvrs.getOrPut(conId) { 0 }
+            ncvrs[conId] = accum + 1
+        }
+    }
+    return allVotes.keys.map { conId ->
+        val rcontestUA = rcontests.find { it.id == conId }
+        if (rcontestUA == null) throw RuntimeException("no contest for contest id= $conId")
+        val nc = ncvrs[conId]!!
+        val accumVotes = allVotes[conId]!!
+        // require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
+        rcontestUA
     }
 }

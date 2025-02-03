@@ -294,13 +294,13 @@ class TestAssorterComparison {
 
         val info = ContestInfo("standard", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val cvrs = makeCvrsByExactMean(N, cvrMean)
-        val contest = ContestUnderAudit(info, cvrs)
+        val contest = makeContestUAfromCvrs(info, cvrs)
         val contestAU = contest.makeClcaAssertions(cvrs)
         val compareAssertion = contestAU.clcaAssertions.first()
         val compareAssorter1 = compareAssertion.cassorter
 
         // check the same
-        val compareAssorter2 = ContestUnderAudit(info, cvrs).makeClcaAssertions(cvrs).clcaAssertions.first().cassorter
+        val compareAssorter2 = makeContestUAfromCvrs(info, cvrs).makeClcaAssertions(cvrs).clcaAssertions.first().cassorter
         assertEquals(compareAssorter1, compareAssorter2)
 
         // check assort values for ComparisonSamplerSimulation

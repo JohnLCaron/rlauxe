@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
 import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.sampling.makeContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test

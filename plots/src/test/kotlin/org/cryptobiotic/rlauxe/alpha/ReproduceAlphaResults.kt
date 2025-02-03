@@ -570,7 +570,7 @@ class ReproduceAlphaResults {
         for (factor in factors) {
             val srs = mutableListOf<SRT>()
             val cvrs = makeCvrsByExactMean(N, theta)
-            val contestUA = ContestUnderAudit(info, cvrs).makeClcaAssertions(cvrs)
+            val contestUA = makeContestUAfromCvrs(info, cvrs).makeClcaAssertions(cvrs)
             val compareAssorter = contestUA.minClcaAssertion()!!.cassorter
             val margin = compareAssorter.assorter().reportedMargin()
             val drawSample = ClcaNoErrorSampler(info.id, cvrs, compareAssorter)

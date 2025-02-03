@@ -4,8 +4,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.mergeReduceS
+import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -57,7 +56,7 @@ class TestMakeFuzzedCvrsFrom {
             println("fuzzPct = $fuzzPct")
             val totalErrorCounts = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             test.contests.forEach { contest ->
-                val contestUA = ContestUnderAudit(contest.info, cvrs).makeClcaAssertions(cvrs)
+                val contestUA = makeContestUAfromCvrs(contest.info, cvrs).makeClcaAssertions(cvrs)
                 val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) { trial ->
                     val minAssort = minAssert.cassorter

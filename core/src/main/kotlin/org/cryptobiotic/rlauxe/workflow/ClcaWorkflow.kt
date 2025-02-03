@@ -34,7 +34,6 @@ class ClcaWorkflow(
         // 	a) Check that the winners according to the CVRs are the reported winners.
         //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-        //contestsUA = (makeContestUAFromCvrs(contestsToAudit, cvrs, auditConfig.hasStyles) + tabulateRaireVotes(raireContests, cvrs)).sortedBy{ it.id }
         contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
                 checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
@@ -45,7 +44,6 @@ class ClcaWorkflow(
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
 
-        // val votes =  makeVotesPerContest(contests, cvrs)
         contestsUA.filter{ !it.done }.forEach { contest ->
             contest.makeClcaAssertions(cvrs)
         }
@@ -180,106 +178,6 @@ class ClcaWorkflow(
     }
 
     override fun getContests(): List<ContestUnderAudit> = contestsUA
-}
-
-///////////////////////////////////////////////////////////////////////
-
-// tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
-fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Int> {
-    val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
-    contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete
-    for (cvr in cvrs) {
-        for (conId in cvr.votes.keys) {
-            val accum = ncvrs.getOrPut(conId) { 0 }
-            ncvrs[conId] = accum + 1
-        }
-    }
-    contests.forEach {
-        val ncvr = ncvrs[it.id]!!
-        //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
-        if (it.Nc < ncvr) throw RuntimeException(
-            "upperBound ${it.Nc} < ncvrs ${ncvr} for contest ${it.id}"
-        )
-    }
-
-    return ncvrs
-}
-
-fun makeVotesPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes
-    contests.forEach { allVotes[it.id] = mutableMapOf() } // make sure map is complete
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return allVotes
-}
-
-fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: Boolean=true): List<ContestUnderAudit> {
-    if (contests.isEmpty()) return emptyList()
-
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes (cand -> vote)
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-
-    return allVotes.keys.map { conId ->
-        val contest = contests.find { it.id == conId }
-        if (contest == null)
-            throw RuntimeException("no contest for contest id= $conId")
-        val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, true, hasStyles)
-        require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
-        contestUA
-    }
-}
-
-// ok if one has zero votes and the other doesnt
-fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {
-    if (votes1 == votes2) return true
-    val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
-    val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
-    return votes1z == votes2z
-}
-
-// TODO seems wrong
-fun tabulateRaireVotes(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>): List<ContestUnderAudit> {
-    if (rcontests.isEmpty()) return emptyList()
-
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    val ncvrs = mutableMapOf<Int, Int>()
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-        for (conId in cvr.votes.keys) {
-            val accum = ncvrs.getOrPut(conId) { 0 }
-            ncvrs[conId] = accum + 1
-        }
-    }
-    return allVotes.keys.map { conId ->
-        val rcontestUA = rcontests.find { it.id == conId }
-        if (rcontestUA == null) throw RuntimeException("no contest for contest id= $conId")
-        val nc = ncvrs[conId]!!
-        val accumVotes = allVotes[conId]!!
-        // require(checkEquivilentVotes(contestUA.contest.votes, accumVotes))
-        rcontestUA
-    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

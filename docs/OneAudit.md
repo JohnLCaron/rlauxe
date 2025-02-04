@@ -1,10 +1,13 @@
 # OneAudit Notes
 
+last changed 02/04/2025
+
 ### Why you cant use BettingMart
 
 BettingMart bets as aggressively as possible, and is very sensitive to errors between the MVR and CVR. 
 It assumes that mostly the two agree, and manages the bet to deal with the expected rates of disagreement. 
-With OA, when you have a ballot from the non-CVR stratum, its like you always have a disagreement, so your test pretty much always fails.
+With OA, when you have a ballot from the non-CVR stratum, its like you always have a disagreement, so your test 
+is likely to fail. Below tries to explain that in detail:
 
 In a regular CLCA, the possible CLCA assort values (Bi) are 
 
@@ -88,14 +91,11 @@ Assuming betj are constant = b, then
     l * log(1-(b*f)**2) + (w-l) * log (1+b*f)  > -log(risk)
 
 
-//////////////
-One possibility is that we can mofify the betting function to take into account these known "errors".
+TODO: show plot
 
+One possibility is that we can mofify the betting function to take into account these known "errors"?
 
-
-
-
-////////////////////////////////////////////////////////////////
+## Notes from the paper
 
 
 OneAudit, 2.3 pp 5-7:
@@ -241,13 +241,13 @@ Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appea
 Unclear about using nostyle with ONEAUDIT.
 
 
-## Measures Sample Sizes
+## Measured Sample Sizes
 
 Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
 when there are no errors in the CVRs:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
 
 * OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
 * OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.

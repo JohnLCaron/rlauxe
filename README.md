@@ -280,6 +280,7 @@ The audit needing the least samples is CLCA when there are no errors in the CVRs
 only on the margin, and so is a smooth curve:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
+
 (click on the plot to get an interactive html plot)
 
 For example we need exactly 1,128 samples to audit a contest with a 0.5% margin, if no errors are found.

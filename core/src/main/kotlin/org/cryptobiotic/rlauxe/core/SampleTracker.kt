@@ -106,4 +106,8 @@ data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u
     override fun toString(): String {
         return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
     }
+    fun toList() = listOf(p2o, p1o, p1u, p2u)
+    companion object {
+        fun fromList(list: List<Double>) = ErrorRates(list[0], list[1], list[2], list[3])
+    }
 }

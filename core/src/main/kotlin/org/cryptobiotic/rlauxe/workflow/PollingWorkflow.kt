@@ -11,7 +11,7 @@ class PollingWorkflow(
     val ballotManifest: BallotManifest,
     val Nb: Int, // total number of ballots/cards
     val quiet: Boolean = false,
-): RlauxWorkflow {
+): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     val ballotsUA: List<BallotUnderAudit>
 

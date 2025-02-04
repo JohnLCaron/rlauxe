@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
@@ -50,7 +49,7 @@ class CorlaWorkflow(
     val contestsToAudit: List<Contest>, // the contests you want to audit
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
-): RlauxWorkflow {
+): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
 

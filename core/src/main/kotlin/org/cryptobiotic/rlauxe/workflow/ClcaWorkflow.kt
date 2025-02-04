@@ -23,7 +23,7 @@ class ClcaWorkflow(
     val raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
-): RlauxWorkflow {
+): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
 

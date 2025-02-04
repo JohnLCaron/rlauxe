@@ -1,23 +1,29 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-class TestPersistentWorkflow {
+class TestPersistentWorkflowInStages {
     val topdir = "/home/stormy/temp/persist/testPersistentWorkflow"
 
     @Test
     fun testPersistentWorkflow() {
-        val fuzzMvrs = .01
+        val fuzzMvrs = .05
         val publish = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10,
-            pollingConfig = PollingConfig(fuzzPct = .01))
+            pollingConfig = PollingConfig(simFuzzPct = .01))
 
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
 
@@ -45,41 +51,69 @@ class TestPersistentWorkflow {
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         writeCvrsJsonFile(workflow.cvrsUA, publish.cvrsFile())
 
-        val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
-        runPersistentWorkflow(publish, workflow, testMvrs, nassertions)
+        var round = 1
+        var done = false
+        while (!done) {
+            done = runPersistentWorkflowStage(round, workflow, testMvrs, publish)
+        }
     }
 
 }
 
-fun runPersistentWorkflow(publish: Publisher, workflow: ClcaWorkflow, testMvrs: List<Cvr>, nassertions: Int) {
-    val stopwatch = Stopwatch()
-
+fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, publish: Publisher): Boolean {
+    val roundStopwatch = Stopwatch()
     val previousSamples = mutableSetOf<Int>()
-    var rounds = mutableListOf<Round>()
-    var roundIdx = 1
 
     var done = false
-    while (!done) {
-        val roundStopwatch = Stopwatch()
-        println("---------------------------")
-        val indices = workflow.chooseSamples(roundIdx, show=true)
+
+    val indices = workflow.chooseSamples(roundIdx, show=false)
+    if (indices.isEmpty()) {
+        done = true
+
+    } else {
         writeSampleIndicesJsonFile(indices, publish.sampleIndicesFile(roundIdx))
 
         val currRound = Round(roundIdx, indices, previousSamples.toSet())
-        rounds.add(currRound)
         previousSamples.addAll(indices)
-        println("$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+        println(
+            "$roundIdx choose ${indices.size} samples, new=${currRound.newSamples} took ${
+                roundStopwatch.elapsed(
+                    TimeUnit.MILLISECONDS
+                )
+            } ms\n"
+        )
 
-        val sampledMvrs = indices.map { testMvrs[it] }
+        val sampledMvrs = indices.map {
+            testMvrs[it]
+        }
+
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
-        val auditRound = AuditRound(roundIdx, workflow.contestsUA, done)
+        println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+        val auditRound = AuditRound(roundIdx, workflow.getContests(), done)
         writeAuditRoundJsonFile(auditRound, publish.auditRoundFile(roundIdx))
 
-        println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-        roundIdx++
+        println(currRound)
+        workflow.showResults()
     }
 
-    rounds.forEach { println(it) }
-    workflow.showResults()
-    println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
+    return done
+}
+
+fun recreateAudit(publish: Publisher, round: Int) {
+    val resultAuditConfig = readAuditConfigJsonFile(publish.auditConfigFile())
+    assertTrue(resultAuditConfig is Ok)
+    val auditConfig = resultAuditConfig.unwrap()
+
+    val resultAuditResult: Result<AuditResult, ErrorMessages> = readAuditRoundJsonFile(publish.auditRoundFile(round))
+    assertTrue(resultAuditResult is Ok)
+    val auditResult = resultAuditResult.unwrap()
+    assertNotNull(auditResult)
+
+    val resultCvrs = readCvrsJsonFile(publish.cvrsFile())
+    assertTrue(resultCvrs is Ok)
+    val cvrs = resultCvrs.unwrap()
+
+
+    // val workflow = ClcaWorkflow(auditConfig, auditResult.contests, emptyList(), cvrs)
+
 }

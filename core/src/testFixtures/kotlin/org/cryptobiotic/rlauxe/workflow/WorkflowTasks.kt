@@ -21,7 +21,7 @@ private val quiet = true
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
 // return number of mvrs hand counted
-fun runWorkflow(name: String, workflow: RlauxWorkflow, testMvrs: List<Cvr>, quiet: Boolean=false): Int {
+fun runWorkflow(name: String, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, quiet: Boolean=false): Int {
     val stopwatch = Stopwatch()
 
     val previousSamples = mutableSetOf<Int>()
@@ -129,7 +129,7 @@ class PollingWorkflowTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = 10, pollingConfig = PollingConfig(fuzzPct = fuzzPct)
+            AuditType.POLLING, true, nsimEst = 10, pollingConfig = PollingConfig(simFuzzPct = fuzzPct)
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -170,7 +170,7 @@ class OneAuditWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = 10, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.standard, fuzzPct = fuzzPct)
+            AuditType.ONEAUDIT, true, nsimEst = 10, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.standard, simFuzzPct = fuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
@@ -219,7 +219,7 @@ class RaireWorkflowTaskGenerator(
 
 class WorkflowTask(
     val name: String,
-    val workflow: RlauxWorkflow,
+    val workflow: RlauxWorkflowIF,
     val testCvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {

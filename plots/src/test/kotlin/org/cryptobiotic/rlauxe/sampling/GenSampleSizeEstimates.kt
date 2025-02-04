@@ -20,7 +20,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             seed = 12356667890L,
             quantile = .80,
             nsimEst = 100,
-            pollingConfig = PollingConfig(fuzzPct = .00), // TODO 0.0 fuzz ??
+            pollingConfig = PollingConfig(simFuzzPct = .00), // TODO 0.0 fuzz ??
             )
         val N = 10000
         println("ntrials = ${auditConfig.nsimEst} quantile = ${auditConfig.quantile} N=${N}")
@@ -70,7 +70,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
         margins.forEach { margin ->
             // polling
             val auditConfigPolling = AuditConfig(AuditType.POLLING, hasStyles = true, seed = 12356667890L, quantile = .80, nsimEst = ntrials,
-                                        pollingConfig = PollingConfig(fuzzPct = .055))
+                                        pollingConfig = PollingConfig(simFuzzPct = .055))
 
             val simp = ContestSimulation.make2wayTestContest(Nc=N, margin, 0.0, 0.0)
             print("margin = $margin ${simp.contest.votes}")
@@ -82,7 +82,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             // with styles
             val simc = ContestSimulation.make2wayTestContest(Nc=N, margin, 0.0, 0.0)
             val auditConfigStyles = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1235666890L, quantile = .80, nsimEst = ntrials,
-                                        pollingConfig = PollingConfig(fuzzPct = .05))
+                                        pollingConfig = PollingConfig(simFuzzPct = .05))
 
             val cvrs = simc.makeCvrs()
             print("margin = $margin ${simc.contest.votes}")
@@ -93,7 +93,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
 
             // no styles
             val auditConfigNo = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = false, seed = 123569667890L, quantile = .80, nsimEst = ntrials,
-                pollingConfig = PollingConfig(fuzzPct = .05))
+                pollingConfig = PollingConfig(simFuzzPct = .05))
 
             val simNo = ContestSimulation.make2wayTestContest(Nc=N, margin, 0.0, 0.0)
             val cvrsNo = simNo.makeCvrs()
@@ -129,7 +129,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             seed = 12356667890L,
             quantile = .80,
             nsimEst = 100,
-            pollingConfig = PollingConfig(fuzzPct = .01),
+            pollingConfig = PollingConfig(simFuzzPct = .01),
         )
         val N = 10000
         println("ntrials = ${auditConfig.nsimEst} quantile = ${auditConfig.quantile} N=${N}")
@@ -202,7 +202,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
                 seed = 12356667890L,
                 quantile = .80,
                 nsimEst = 100,
-                pollingConfig = PollingConfig(fuzzPct = .01)
+                pollingConfig = PollingConfig(simFuzzPct = .01)
             )
             tasks.add(ComparisonTask("Comparison fuzz=.01: margin = $margin", configAlt1, contestUA, cassertion, cvrs))
 
@@ -212,7 +212,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
                 seed = 12356667890L,
                 quantile = .80,
                 nsimEst = 100,
-                pollingConfig = PollingConfig(fuzzPct = .001)
+                pollingConfig = PollingConfig(simFuzzPct = .001)
 
             )
             tasks.add(ComparisonTask("Comparison fuzz=.001: margin = $margin", configAlt2, contestUA, cassertion, cvrs))
@@ -257,7 +257,7 @@ class GenSampleSizeEstimates : AbstractProjectConfig() {
             seed = 12356667890L,
             quantile = .80,
             nsimEst = 1000,
-            pollingConfig = PollingConfig(fuzzPct = .01)
+            pollingConfig = PollingConfig(simFuzzPct = .01)
         )
         println("ntrials = ${auditConfig.nsimEst} quantile = ${auditConfig.quantile} N=${N}")
 

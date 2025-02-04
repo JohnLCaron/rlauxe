@@ -101,7 +101,7 @@ fun Assertion.publishJson(round: Int) : AssertionResultJson {
 }
 
 //////////////////////////////////////////////////////////////
-// reasing
+// reading
 
 fun readAuditRoundJsonFile(filename: String): Result<AuditResult, ErrorMessages> {
     val errs = ErrorMessages("readAuditRoundJsonFile '${filename}'")
@@ -125,14 +125,28 @@ data class AuditResult(
     val round: Int,
     val contests: List<ContestResult>,
     val done: Boolean,
-)
+) {
+    override fun toString() = buildString {
+        appendLine("AuditResult(round=$round, done=$done")
+        contests.forEach {
+            appendLine("  $it")
+        }
+    }
+}
 
 data class ContestResult(
     val name: String,
     val id: Int,
     val assertions: List<AssertionResult>,
     val done: Boolean,
-)
+)  {
+    override fun toString() = buildString {
+        appendLine("ContestResult(name=$name, id=$id, done=$done")
+        assertions.forEach {
+            appendLine("    $it")
+        }
+    }
+}
 
 data class AssertionResult(
     val desc: String,

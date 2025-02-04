@@ -280,9 +280,9 @@ The audit needing the least samples is CLCA when there are no errors in the CVRs
 only on the margin, and so is a smooth curve:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
-
-So, for example we need exactly 1,128 samples to audit a contest with a 0.5% margin, if no errors are found.
 (click on the plot to get an interactive html plot)
+
+For example we need exactly 1,128 samples to audit a contest with a 0.5% margin, if no errors are found.
 For a 10,000 vote election, thats 11.28% of the total ballots. For a 100,000 vote election, its only 1.13%.
 
 For polling, the assort values vary, and the number of samples needed depends on the order the samples are drawn.
@@ -292,6 +292,8 @@ Here we show the average and standard deviation over 250 independent trials at e
 
 * In a card-level comparison audit, the estimated sample size scales with 1/margin, while polling scales as the square of 1/margin.
 * The variation in polling sample sizes is about half the sample sizes, and so potentially adds a large burden to the audit.
+* When there are errors, CLCA audits also have potentially wide variance in sample sizes due to sample ordering. 
+  See [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes) below.
 
 ## Sample sizes with errors
 

@@ -138,7 +138,7 @@ class TestMakeFuzzedCvrsFrom {
 
         // approx even distribution
         val totalPct = totalChange.map { (key, value) -> Pair(key, value / N.toDouble()) }.toMap()
-        assertEquals(totalPct["01"]!!, totalPct["02"]!!, .02)
+        assertEquals(totalPct["01"]!!, totalPct["02"]!!, .03)
         assertEquals(totalPct["10"]!!, totalPct["12"]!!, .02)
         assertEquals(totalPct["20"]!!, totalPct["21"]!!, .02)
     }

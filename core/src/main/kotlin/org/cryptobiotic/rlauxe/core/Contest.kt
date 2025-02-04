@@ -54,6 +54,7 @@ interface ContestIF {
     val winnerNames: List<String>
     val winners: List<Int>
     val losers: List<Int>
+    fun show() : String = ""
 }
 
 //    When we have styles, we can calculate Nb_c = physical ballots for contest C.
@@ -173,6 +174,10 @@ class Contest(
         return result
     }
 
+    override fun show(): String {
+        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers, undervotes=$undervotes, minMargin=$minMargin)"
+    }
+
     companion object {
         fun makeWithCandidateNames(info: ContestInfo, votesByName: Map<String, Int>, Nc: Int, Np: Int): Contest {
             val votesById = votesByName.map { (key, value) -> Pair(info.candidateNames[key]!!, value) }.toMap()
@@ -201,10 +206,6 @@ open class ContestUnderAudit(
     var done = false
     var status = TestH0Status.InProgress // or its own enum ??
     var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
-
-    override fun toString() = buildString {
-        append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
-    }
 
     // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
     open fun makePollingAssertions(): ContestUnderAudit {
@@ -289,5 +290,43 @@ open class ContestUnderAudit(
         return if (isComparison) (minClcaAssertion()?.assorter?.reportedMargin() ?: 0.0)
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
+
+
+    override fun toString() = buildString {
+        append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ContestUnderAudit
+
+        if (isComparison != other.isComparison) return false
+        if (hasStyle != other.hasStyle) return false
+        if (estSampleSize != other.estSampleSize) return false
+        if (done != other.done) return false
+        if (estSampleSizeNoStyles != other.estSampleSizeNoStyles) return false
+        if (contest != other.contest) return false
+        if (pollingAssertions != other.pollingAssertions) return false
+        if (clcaAssertions != other.clcaAssertions) return false
+        if (status != other.status) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = isComparison.hashCode()
+        result = 31 * result + hasStyle.hashCode()
+        result = 31 * result + estSampleSize
+        result = 31 * result + done.hashCode()
+        result = 31 * result + estSampleSizeNoStyles
+        result = 31 * result + contest.hashCode()
+        result = 31 * result + pollingAssertions.hashCode()
+        result = 31 * result + clcaAssertions.hashCode()
+        result = 31 * result + status.hashCode()
+        return result
+    }
+
 }
 

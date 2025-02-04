@@ -14,11 +14,15 @@ data class AuditConfig(
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val samplePctCutoff: Double = 0.33, // dont sample more than this pct of N TODO
     val pollingConfig: PollingConfig = PollingConfig(),
-    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.oracle),
+    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.standard),
     val version: Double = 1.0,
 )
 
+data class PollingConfig(
+    val simFuzzPct: Double? = null, // for the estimation
+    val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
+)
 
 // oracle: use actual measured error rates, testing only
 // noerror: assume no errors, with adaptation
@@ -32,15 +36,10 @@ data class ClcaConfig(
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
-data class PollingConfig(
-    val fuzzPct: Double? = null, // for the estimation
-    val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
-)
-
 enum class OneAuditStrategyType { standard, max99 }
 data class OneAuditConfig(
     val strategy: OneAuditStrategyType,
-    val fuzzPct: Double? = null, // for the estimation
+    val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight
 )
 

@@ -13,7 +13,7 @@ class OneAuditWorkflow(
     val contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = false,
-): RlauxWorkflow {
+): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
     init {

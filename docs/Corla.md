@@ -29,7 +29,7 @@ a "clcaFuzzPct/2" scenario where we underestimate the error rates by a factor of
 
 ## Comparison with fuzzPct .001
 
-Here we add errors between the MVRS and CVRS at a rate of 1 per 1000 ballots. Then we add the three fuzzPct strategies described above.
+Here we add errors between the MVRS and CVRS at a rate of 1 per 1000 ballots. We also show the three fuzzPct strategies described above.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.html" rel="corlaWithSmallErrorsPct">![corlaWithSmallErrorsPct](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.html" rel="corlaWithSmallErrorsFailures">![corlaWithSmallErrorsFailures](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.png)</a>

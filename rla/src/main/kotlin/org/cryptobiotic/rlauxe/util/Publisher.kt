@@ -8,8 +8,7 @@ class Publisher(val topdir: String) {
         validateOutputDir(Path.of(topdir), ErrorMessages("Publisher"))
     }
 
-    fun auditConfigFile() = "$topdir/audirConfig.json"
-    fun electionInitFile() = "$topdir/electionInit.json"
+    fun auditConfigFile() = "$topdir/auditConfig.json"
     fun cvrsFile() = "$topdir/cvrs.json"
 
     fun sampleIndicesFile(round: Int): String {
@@ -21,7 +20,7 @@ class Publisher(val topdir: String) {
     fun auditRoundFile(round: Int): String {
         val dir = "$topdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("Publisher"))
-        return "$dir/auditRound.json"
+        return "$dir/electionState.json"
     }
 }
 

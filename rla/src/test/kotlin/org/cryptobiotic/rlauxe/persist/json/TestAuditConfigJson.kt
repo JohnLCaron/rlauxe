@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -17,7 +17,30 @@ class TestAuditConfigJson {
 
     @Test
     fun testRoundtrip() {
-        val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L)
+        testRoundtrips(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = 12356667890L))
+
+        testRoundtrips(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+            samplePctCutoff=.10,  version=2.0,
+            clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, ErrorRates(.01, .02, .03, .04), d = 99)
+        ))
+        testRoundtrips(AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+            samplePctCutoff=.10,  version=2.0,
+            pollingConfig= PollingConfig(simFuzzPct=.111, d = 99)
+        ))
+        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+            samplePctCutoff=.10,  version=2.0,
+            oaConfig= OneAuditConfig(OneAuditStrategyType.max99, simFuzzPct=.111, d = 99)
+        ))
+    }
+
+    fun testRoundtrips(target: AuditConfig) {
+        testRoundtrip(target)
+        testRoundtripIO(target)
+    }
+
+    fun testRoundtrip(target: AuditConfig) {
         val json = target.publishJson()
         val roundtrip = json.import()
         assertNotNull(roundtrip)
@@ -25,10 +48,8 @@ class TestAuditConfigJson {
         assertTrue(roundtrip.equals(target))
     }
 
-    @Test
-    fun testRoundtripIO() {
+    fun testRoundtripIO(target: AuditConfig) {
         val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L)
-
         writeAuditConfigJsonFile(target, filename)
         val result = readAuditConfigJsonFile(filename)
         assertTrue(result is Ok)

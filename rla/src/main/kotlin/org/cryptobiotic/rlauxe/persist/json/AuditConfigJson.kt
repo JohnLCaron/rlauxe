@@ -9,17 +9,29 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.safeEnumValueOf
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.workflow.*
 
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+
+// data class AuditConfig(
+//    val auditType: AuditType,
+//    val hasStyles: Boolean,
+//    val seed: Long = secureRandom.nextLong(),
+//    val riskLimit: Double = 0.05,
+//    val nsimEst: Int = 100, // number of simulation estimations
+//    val quantile: Double = 0.80, // use this percentile success for estimated sample size
+//    val samplePctCutoff: Double = 0.33, // dont sample more than this pct of N TODO
+//    val pollingConfig: PollingConfig = PollingConfig(),
+//    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.oracle),
+//    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.standard),
+//    val version: Double = 1.0,
+//)
 
 @Serializable
 data class AuditConfigJson(
@@ -27,6 +39,13 @@ data class AuditConfigJson(
     val hasStyles: Boolean,
     val seed: Long,
     val riskLimit: Double,
+    val nsimEst: Int,
+    val quantile: Double,
+    val samplePctCutoff: Double,
+    val pollingConfig: PollingConfigJson,
+    val clcaConfig: ClcaConfigJson,
+    val oaConfig: OneAuditConfigJson,
+    val version: Double,
 )
 
 fun AuditConfig.publishJson() : AuditConfigJson {
@@ -35,6 +54,13 @@ fun AuditConfig.publishJson() : AuditConfigJson {
         this.hasStyles,
         this.seed,
         this.riskLimit,
+        this.nsimEst,
+        this.quantile,
+        this.samplePctCutoff,
+        this.pollingConfig.publishJson(),
+        this.clcaConfig.publishJson(),
+        this.oaConfig.publishJson(),
+        this.version
     )
 }
 
@@ -44,9 +70,106 @@ fun AuditConfigJson.import(): AuditConfig {
         auditType,
         this.hasStyles,
         this.seed,
-        riskLimit=this.riskLimit,
+        this.riskLimit,
+        this.nsimEst,
+        this.quantile,
+        this.samplePctCutoff,
+        this.pollingConfig.import(),
+        this.clcaConfig.import(),
+        this.oaConfig.import(),
+        this.version,
     )
 }
+
+// data class PollingConfig(
+//    val fuzzPct: Double? = null,
+//    val d: Int = 100,
+//)
+@Serializable
+data class PollingConfigJson(
+    val simFuzzPct: Double?,
+    val d: Int,
+)
+
+fun PollingConfig.publishJson() : PollingConfigJson {
+    return PollingConfigJson(
+        this.simFuzzPct,
+        this.d,
+    )
+}
+
+fun PollingConfigJson.import(): PollingConfig {
+    return PollingConfig(
+        this.simFuzzPct,
+        this.d,
+    )
+}
+
+// enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori }
+//data class ClcaConfig(
+//    val strategy: ClcaStrategyType,
+//    val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
+//    val errorRates: ErrorRates? = null, // use as apriori
+//    val d: Int = 100,  // shrinkTrunc weight for error rates
+//)
+@Serializable
+data class ClcaConfigJson(
+    val strategy: String,
+    val simFuzzPct: Double?,
+    val errorRates: List<Double>?,
+    val d: Int,
+)
+
+fun ClcaConfig.publishJson() : ClcaConfigJson {
+    return ClcaConfigJson(
+        this.strategy.name,
+        this.simFuzzPct,
+        this.errorRates?.toList(),
+        this.d,
+    )
+}
+
+fun ClcaConfigJson.import(): ClcaConfig {
+    val strategy = safeEnumValueOf(this.strategy) ?: ClcaStrategyType.noerror
+    return ClcaConfig(
+        strategy,
+        this.simFuzzPct,
+        if (this.errorRates != null) ErrorRates.fromList(this.errorRates) else null,
+        this.d,
+    )
+}
+
+// enum class OneAuditStrategyType { standard, max99 }
+//data class OneAuditConfig(
+//    val strategy: OneAuditStrategyType,
+//    val fuzzPct: Double? = null, // for the estimation
+//    val d: Int = 100,  // shrinkTrunc weight
+//)
+@Serializable
+data class OneAuditConfigJson(
+    val strategy: String,
+    val simFuzzPct: Double?,
+    val d: Int,
+)
+
+fun OneAuditConfig.publishJson() : OneAuditConfigJson {
+    return OneAuditConfigJson(
+        this.strategy.name,
+        this.simFuzzPct,
+        this.d,
+    )
+}
+
+fun OneAuditConfigJson.import(): OneAuditConfig {
+    val strategy = safeEnumValueOf(this.strategy) ?: OneAuditStrategyType.standard
+    return OneAuditConfig(
+        strategy,
+        this.simFuzzPct,
+        this.d,
+    )
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 
 fun writeAuditConfigJsonFile(auditConfig: AuditConfig, filename: String) {
     val json = auditConfig.publishJson()

@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class CompareCorlaWithErrors {
-    val nruns = 100  // number of times to run workflow
+    val nruns = 250  // number of times to run workflow
     val N = 10000
     val name = "corlaWithTwoPercentErrors"
     val dirName = "/home/stormy/temp/corla/$name"

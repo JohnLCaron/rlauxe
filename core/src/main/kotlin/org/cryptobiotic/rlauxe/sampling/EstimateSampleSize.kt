@@ -347,10 +347,10 @@ fun simulateSampleSizePollingAssorter(
     val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin.
 
     val pollingConfig = auditConfig.pollingConfig
-    val sampler = if (pollingConfig.fuzzPct == null || pollingConfig.fuzzPct == 0.0) {
+    val sampler = if (pollingConfig.simFuzzPct == null || pollingConfig.simFuzzPct == 0.0) {
         PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
     } else {
-        PollingFuzzSampler(pollingConfig.fuzzPct, cvrs, contest, assorter) // TODO cant use Raire
+        PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest, assorter) // TODO cant use Raire
     }
 
     return simulateSampleSizeAlphaMart(
@@ -416,10 +416,10 @@ fun simulateSampleSizeOneAuditAssorter(
     val pollingConfig = auditConfig.pollingConfig
 
     // TODO is this right, no special processing for the "hasCvr" strata?
-    val sampler = if (pollingConfig.fuzzPct == null) {
+    val sampler = if (pollingConfig.simFuzzPct == null) {
         ComparisonWithoutReplacement(contestUA.contest, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
     } else {
-        OneAuditFuzzSampler(pollingConfig.fuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
+        OneAuditFuzzSampler(pollingConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
     }
 
     sampler.reset()

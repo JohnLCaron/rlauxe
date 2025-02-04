@@ -244,6 +244,41 @@ open class Assertion(
     var round = 0           // round when set to proved or disproved
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Assertion
+
+        if (winner != other.winner) return false
+        if (loser != other.loser) return false
+        if (estSampleSize != other.estSampleSize) return false
+        if (round != other.round) return false
+        if (contest != other.contest) return false
+        if (assorter != other.assorter) return false
+        if (roundResults != other.roundResults) return false
+        if (status != other.status) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = winner
+        result = 31 * result + loser
+        result = 31 * result + estSampleSize
+        result = 31 * result + round
+        result = 31 * result + contest.hashCode()
+        result = 31 * result + assorter.hashCode()
+        result = 31 * result + roundResults.hashCode()
+        result = 31 * result + status.hashCode()
+        return result
+    }
+
+    open fun show(): String {
+        return "Assertion(contest=$contest, assorter=$assorter, winner=$winner, loser=$loser, estSampleSize=$estSampleSize, roundResults=$roundResults, status=$status, round=$round)"
+    }
+
 }
 
 open class ClcaAssertion(
@@ -251,4 +286,26 @@ open class ClcaAssertion(
     val cassorter: ClcaAssorterIF,
 ): Assertion(contest, cassorter.assorter()) {
     override fun toString() = "${cassorter.assorter().desc()} estSampleSize=$estSampleSize"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as ClcaAssertion
+
+        return cassorter == other.cassorter
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + cassorter.hashCode()
+        return result
+    }
+
+    override fun show(): String {
+        return "ClcaAssertion(cassorter=$cassorter)" + super.show()
+    }
+
+
 }

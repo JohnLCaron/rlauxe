@@ -34,7 +34,7 @@ data class ClcaConfig(
 
 data class PollingConfig(
     val fuzzPct: Double? = null, // for the estimation
-    val d: Int = 100,  // shrinkTrunc weight
+    val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
 )
 
 enum class OneAuditStrategyType { standard, max99 }

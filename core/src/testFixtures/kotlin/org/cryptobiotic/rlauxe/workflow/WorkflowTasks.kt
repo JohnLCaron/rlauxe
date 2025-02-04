@@ -11,7 +11,9 @@ import org.cryptobiotic.rlauxe.sampling.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.Welford
 import java.util.concurrent.TimeUnit
+import kotlin.math.sqrt
 
 // for running workflows with one contest, multiple times for testing
 
@@ -260,16 +262,20 @@ fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResu
     return results
 }
 
-data class WorkflowResult(val Nc: Int,
-                          val margin: Double,
-                          val status: TestH0Status,
-                          val nrounds: Double,
-                          val samplesUsed: Double,
-                          val samplesNeeded: Double,
-                          val nmvrs: Double,
-                          val parameters: Map<String, Any>,
-                          val failPct: Double, // from avgWorkflowResult()
-) {
+data class WorkflowResult(
+        val Nc: Int,
+        val margin: Double,
+        val status: TestH0Status,
+        val nrounds: Double,
+        val samplesUsed: Double,  // weighted
+        val samplesNeeded: Double, // weighted
+        val nmvrs: Double, // weighted
+        val parameters: Map<String, Any>,
+
+        // from avgWorkflowResult()
+        val failPct: Double = 100.0,
+        val neededStddev: Double = 0.0, // success only
+    ) {
     fun Dparam(key: String) = (parameters[key]!! as String).toDouble()
 }
 
@@ -283,7 +289,6 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             TestH0Status.AllFailPct,
             0.0, 0.0, 0.0,0.0,
             emptyMap(),
-            100.0,
             )
     } else if (successRuns.isEmpty()) {
         val first = runs.first()
@@ -293,7 +298,6 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             TestH0Status.FailPct,
             0.0, first.Nc.toDouble(), first.Nc.toDouble(), first.Nc.toDouble(),
             first.parameters,
-            100.0,
             )
     } else {
         val first = successRuns.first()
@@ -301,6 +305,8 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         val successPct = successRuns.count() / runs.size.toDouble()
         val failPct = failures / runs.size.toDouble()
         val Nc = first.Nc
+        val welford = Welford()
+        successRuns.forEach { welford.update(it.samplesNeeded) }
 
         WorkflowResult(
             Nc,
@@ -308,10 +314,12 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             first.status, // hmm kinda bogus
             runs.filter{ it.nrounds > 0 } .map { it.nrounds }.average(),
             successPct * successRuns.map { it.samplesUsed }.average() + failPct * Nc,
-            successPct * successRuns.map { it.samplesNeeded }.average() + failPct * Nc,
+            successPct * welford.mean + failPct * Nc,
             successPct * successRuns.map { it.nmvrs }.average() + failPct * Nc,
             first.parameters,
+
             100.0 * failPct,
+            sqrt(welford.variance()), // success only
         )
     }
 

@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 01/29/2025_
+_last update: 02/04/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -276,27 +276,22 @@ See [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sam
 
 ## Sample sizes with no errors
 
-The audit needing the least samples is CLCA when there are no errors in the CVRs. In that case, the sample sizes depend only on the margin:
+The audit needing the least samples is CLCA when there are no errors in the CVRs. In that case, the sample sizes depend 
+only on the margin, and so is a smooth curve:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
 
-So, for example we need 1,128 samples to audit a contest with a 0.5% margin.
-(Click on the plot to get an interactive html plot).
+So, for example we need exactly 1,128 samples to audit a contest with a 0.5% margin, if no errors are found.
+(click on the plot to get an interactive html plot)
 For a 10,000 vote election, thats 11.28% of the total ballots. For a 100,000 vote election, its only 1.13%.
 
-Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
-when there are no errors in the CVRs:
+For polling, the assort values vary, and the number of samples needed depends on the order the samples are drawn.
+Here we show the average and standard deviation over 250 independent trials at each reported margin, when no errors are found:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoErrors/pollingNoErrorsLinear.html" rel="pollingNoErrors">![pollingNoErrors](./docs/plots/workflows/pollingNoErrors/pollingNoErrorsLinear.png)</a>
 
-* When there are no errors, the CLCA assort values depend only on the margin, so we get a smooth curve.
-* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
-* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
-* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
-
-"In a card-level comparison audit, the estimated sample size scales with
-the reciprocal of the diluted margin." (STYLISH p.4) Polling scales as square of 1/margin.
+* In a card-level comparison audit, the estimated sample size scales with 1/margin, while polling scales as the square of 1/margin.
+* The variation in polling sample sizes is about half the sample sizes, and so potentially adds a large burden to the audit.
 
 ## Sample sizes with errors
 

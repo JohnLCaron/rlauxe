@@ -239,3 +239,16 @@ The main difference is preparing the contest with strata.
 Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appears if the MVR is missing?
 
 Unclear about using nostyle with ONEAUDIT.
+
+
+## Measures Sample Sizes
+
+Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
+when there are no errors in the CVRs:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](./docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
+
+* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
+* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.

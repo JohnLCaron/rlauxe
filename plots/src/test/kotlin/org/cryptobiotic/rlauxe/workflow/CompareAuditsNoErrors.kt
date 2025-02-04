@@ -2,16 +2,14 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.category
-import org.cryptobiotic.rlauxe.rlaplots.Scale
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.dfn
+import kotlin.math.log10
 import kotlin.test.Test
 
 class CompareAuditsNoErrors {
-    val nruns = 100  // number of times to run workflow
+    val nruns = 250  // number of times to run workflow
     val N = 10000
 
     @Test
@@ -105,6 +103,64 @@ class CompareAuditsNoErrors {
         showSampleSizesVsMargin(name, dirName, Scale.Linear)
         showSampleSizesVsMargin(name, dirName, Scale.Log)
         showSampleSizesVsMargin(name, dirName, Scale.Pct)
+    }
+
+    @Test
+    fun pollingNoErrorsPlots() {
+        val name = "pollingNoErrors"
+        val dir = "/home/stormy/temp/workflow/$name"
+        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
+        val stopwatch = Stopwatch()
+
+        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        margins.forEach { margin ->
+            val nsamplesGenerator = PollingWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, 0.0,
+                parameters=mapOf("nruns" to nruns)
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, nsamplesGenerator))
+        }
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        println(stopwatch.took())
+
+        val writer = WorkflowResultsIO("$dir/${name}.cvs")
+        writer.writeResults(results)
+
+        wrsPlot2(
+            titleS = "$name samples needed",
+            subtitleS = "Nc=${N} nruns=${nruns}",
+            results,
+            "$dir/${name}Linear",
+            "margin",
+            "samplesNeeded",
+            "legend",
+            xfld = { it.margin },
+            yfld = { cat: String, wr: WorkflowResult -> when (cat) {
+                "needed" -> wr.samplesNeeded
+                "plusStdev" -> wr.samplesNeeded + wr.neededStddev
+                "minusStdev" -> wr.samplesNeeded - wr.neededStddev
+                else -> 0.0
+            }},
+            catflds = listOf("needed", "plusStdev", "minusStdev"),
+        )
+
+        wrsPlot2(
+            titleS = "$name samples needed",
+            subtitleS = "Nc=${N} nruns=${nruns}",
+            results,
+            "$dir/${name}Log",
+            "margin",
+            "samplesNeeded",
+            "legend",
+            xfld = { it.margin },
+            yfld = { cat: String, wr: WorkflowResult -> when (cat) {
+                "needed" -> log10(wr.samplesNeeded)
+                "plusStdev" -> log10(wr.samplesNeeded + wr.neededStddev)
+                "minusStdev" -> log10(wr.samplesNeeded - wr.neededStddev)
+                else -> 0.0
+            }},
+            catflds = listOf("needed", "plusStdev", "minusStdev"),
+        )
     }
 
     @Test

@@ -19,10 +19,10 @@ import org.cryptobiotic.rlauxe.util.*
 
 class ClcaWorkflow(
     val auditConfig: AuditConfig,
-    val contestsToAudit: List<Contest>, // the contests you want to audit
-    val raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
+    contestsToAudit: List<Contest>, // the contests you want to audit
+    raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-    val quiet: Boolean = false,
+    val quiet: Boolean = true,
 ): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
@@ -108,49 +108,6 @@ class ClcaWorkflow(
         return emptyList()
     }
 
-    //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
-        // 	e) Import the MVRs.
-        //	f) For each MVR 𝑖:
-        //		For each 𝑐 ∈ C:
-        //			If 𝑢_𝑖 ≤ 𝑡_𝑐 , then for each 𝑎 ∈ A 𝑐 ∩ A:
-        //				• If the 𝑖th CVR is a phantom, define 𝑎(CVR𝑖 ) := 1/2.
-        //				• If card 𝑖 cannot be found or if it is a phantom, define 𝑎(MVR𝑖 ) := 0.
-        //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
-        //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
-
-        val contestsNotDone = contestsUA.filter{ !it.done }
-        val sampledCvrs = sampleIndices.map { cvrs[it] }
-
-        // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrs.size)
-        val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
-
-        // TODO could parallelize across assertions
-        if (!quiet) println("runAudit round $roundIdx")
-        var allDone = true
-        contestsNotDone.forEach { contestUA ->
-            var allAssertionsDone = true
-            contestUA.clcaAssertions.forEach { cassertion ->
-                if (!cassertion.status.complete) {
-                    val testH0Result = runClcaAssertionAudit(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
-                    cassertion.status = testH0Result.status
-                    cassertion.round = roundIdx
-                    allAssertionsDone = allAssertionsDone && cassertion.status.complete
-                }
-            }
-            if (allAssertionsDone) {
-                contestUA.done = true
-                contestUA.status = TestH0Status.StatRejectNull // TODO ???
-            }
-            allDone = allDone && contestUA.done
-
-        }
-        return allDone
-    }
-
     override fun showResults() {
         println("Audit results")
         contestsUA.forEach{ contest ->
@@ -178,11 +135,64 @@ class ClcaWorkflow(
     }
 
     override fun getContests(): List<ContestUnderAudit> = contestsUA
+
+    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
+        return runClcaAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 
-fun runClcaAssertionAudit(
+//   The auditors retrieved the indicated cards, manually read the votes from those cards, and input the MVRs
+fun runClcaAudit(auditConfig: AuditConfig,
+                 contestsUA: List<ContestUnderAudit>,
+                 sampleIndices: List<Int>,
+                 mvrs: List<Cvr>,
+                 cvrs: List<Cvr>,
+                 roundIdx: Int,
+                 quiet: Boolean): Boolean {
+    //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
+    // 	e) Import the MVRs.
+    //	f) For each MVR 𝑖:
+    //		For each 𝑐 ∈ C:
+    //			If 𝑢_𝑖 ≤ 𝑡_𝑐 , then for each 𝑎 ∈ A 𝑐 ∩ A:
+    //				• If the 𝑖th CVR is a phantom, define 𝑎(CVR𝑖 ) := 1/2.
+    //				• If card 𝑖 cannot be found or if it is a phantom, define 𝑎(MVR𝑖 ) := 0.
+    //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
+    //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
+
+    val contestsNotDone = contestsUA.filter{ !it.done }
+    val sampledCvrs = sampleIndices.map { cvrs[it] }
+
+    // prove that sampledCvrs correspond to mvrs
+    require(sampledCvrs.size == mvrs.size)
+    val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
+    cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
+
+    // TODO could parallelize across assertions
+    if (!quiet) println("runAudit round $roundIdx")
+    var allDone = true
+    contestsNotDone.forEach { contestUA ->
+        var allAssertionsDone = true
+        contestUA.clcaAssertions.forEach { cassertion ->
+            if (!cassertion.status.complete) {
+                val testH0Result = auditClcaAssertion(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
+                cassertion.status = testH0Result.status
+                cassertion.round = roundIdx
+                allAssertionsDone = allAssertionsDone && cassertion.status.complete
+            }
+        }
+        if (allAssertionsDone) {
+            contestUA.done = true
+            contestUA.status = TestH0Status.StatRejectNull // TODO ???
+        }
+        allDone = allDone && contestUA.done
+
+    }
+    return allDone
+}
+
+fun auditClcaAssertion(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     cassertion: ClcaAssertion,

@@ -29,6 +29,14 @@ class Publisher(val topdir: String) {
         validateOutputDir(Path.of(dir), ErrorMessages("Publisher"))
         return "$dir/electionState.json"
     }
+
+    fun rounds(): Int {
+        var roundIdx = 1
+        while (Files.exists(Path.of("$topdir/round$roundIdx"))) {
+            roundIdx++
+        }
+        return roundIdx - 1
+    }
 }
 
 /** Make sure output directories exists and are writeable.  */

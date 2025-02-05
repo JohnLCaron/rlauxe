@@ -60,8 +60,8 @@ data class Cvr(
     }
 }
 
-/** Mutable version of Cvr. sampleNum >= 0  */
-data class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCvr {
+/** Mutable version of Cvr. */
+data class CvrUnderAudit (val cvr: Cvr, val sampleNum: Long): BallotOrCvr {
     var sampled = false // is this CVR in the sample?
 
     val id = cvr.id
@@ -70,8 +70,9 @@ data class CvrUnderAudit (val cvr: Cvr, var sampleNum: Long = 0L): BallotOrCvr {
 
     override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun sampleNumber() = sampleNum
-    override fun setIsSampled(isSampled: Boolean) {
+    override fun setIsSampled(isSampled: Boolean): CvrUnderAudit {
         this.sampled = isSampled
+        return this
     }
 
     override fun toString() = buildString {

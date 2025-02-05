@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
@@ -15,11 +16,11 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class TestPersistentWorkflowInStages {
-    val topdir = "/home/stormy/temp/persist/testPersistentWorkflow"
+class TestPersistentWorkflowClca {
+    val topdir = "/home/stormy/temp/persist/testPersistentWorkflowClca"
 
     @Test
-    fun testPersistentWorkflow() {
+    fun testPersistentWorkflowClca() {
         val fuzzMvrs = .01
         val publish = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10)
@@ -29,7 +30,7 @@ class TestPersistentWorkflowInStages {
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
-        println("Start testComparisonWorkflow $testData")
+        println("Start testPersistentWorkflowClca $testData")
         contests.forEach{ println("  $it")}
         println()
 
@@ -46,18 +47,16 @@ class TestPersistentWorkflowInStages {
         var done = false
         var workflow : RlauxWorkflowIF = clcaWorkflow
         while (!done) {
-            done = runPersistentWorkflowStage(round, workflow, testMvrs, publish)
+            done = runPersistentWorkflowStage(round, workflow, clcaWorkflow.cvrsUA, testMvrs, publish)
             workflow = readPersistentWorkflow(round, publish)
             round++
         }
     }
-
 }
 
-fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, publish: Publisher): Boolean {
+fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: List<BallotOrCvr>, testMvrs: List<Cvr>, publish: Publisher): Boolean {
     val roundStopwatch = Stopwatch()
     val previousSamples = mutableSetOf<Int>()
-
     var done = false
 
     val indices = workflow.chooseSamples(roundIdx, show=false)
@@ -80,6 +79,12 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, testMvr
         val state = ElectionState("Round$roundIdx", workflow.getContests(), done)
         writeElectionStateJsonFile(state, publish.auditRoundFile(roundIdx))
 
+        val sampledMvrus = indices.map {
+            val cvr = bcUA[it]
+            CvrUnderAudit(testMvrs[it], cvr.sampleNumber())
+        }
+        writeCvrsJsonFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
+
         println(currRound)
         workflow.showResults()
     }
@@ -89,17 +94,29 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, testMvr
 
 fun readPersistentWorkflow(round: Int, publish: Publisher): RlauxWorkflow {
     val resultAuditConfig = readAuditConfigJsonFile(publish.auditConfigFile())
+    if (resultAuditConfig is Err) println(resultAuditConfig)
     assertTrue(resultAuditConfig is Ok)
     val auditConfig = resultAuditConfig.unwrap()
 
-    val resultCvrs = readCvrsJsonFile(publish.cvrsFile())
-    assertTrue(resultCvrs is Ok)
-    val cvrs = resultCvrs.unwrap()
-
     val resultAuditResult: Result<ElectionState, ErrorMessages> = readElectionStateJsonFile(publish.auditRoundFile(round))
+    if (resultAuditResult is Err) println(resultAuditResult)
     assertTrue(resultAuditResult is Ok)
     val electionState = resultAuditResult.unwrap()
     assertNotNull(electionState)
 
-    return RlauxWorkflow(auditConfig, electionState.contests, cvrs)
+    if (auditConfig.auditType == AuditType.CARD_COMPARISON) {
+        val resultCvrs = readCvrsJsonFile(publish.cvrsFile())
+        if (resultCvrs is Err) println(resultCvrs)
+        assertTrue(resultCvrs is Ok)
+        val cvrs = resultCvrs.unwrap()
+        return RlauxWorkflow(auditConfig, electionState.contests, emptyList(), cvrs)
+
+    } else {
+        val resultBallotManifest = readBallotManifestJsonFile(publish.ballotManifestFile())
+        if (resultBallotManifest is Err) println(resultBallotManifest)
+        assertTrue(resultBallotManifest is Ok)
+        val ballotManifest = resultBallotManifest.unwrap()
+        return RlauxWorkflow(auditConfig, electionState.contests, ballotManifest.ballots, emptyList())
+    }
+
 }

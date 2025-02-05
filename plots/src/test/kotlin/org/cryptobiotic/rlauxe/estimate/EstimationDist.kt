@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.sampling.EstimationResult
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.random.Random
 import kotlin.test.Test
 
 class EstimationDist {
@@ -60,7 +59,7 @@ class EstimationDist {
         val contestUA = workflow.contestsUA.first()
         val assertion = contestUA.minClcaAssertion()!!
         val result: TestH0Result =
-            runClcaAssertionAudit(auditConfig, contestUA, assertion, sortedPairs, 1, quiet = quiet)
+            auditClcaAssertion(auditConfig, contestUA, assertion, sortedPairs, 1, quiet = quiet)
         println("oracle audit")
         workflow.showResults()
         //println("last 20 pvalues= ${showLast(result.pvalues, 20)}")
@@ -231,7 +230,7 @@ class EstimationDist {
             // "oracle" audit
             val contestUA = workflow.contestsUA.first()
             val assertion = contestUA.minClcaAssertion()!!
-            runClcaAssertionAudit(auditConfig, contestUA, assertion, sortedPairs, 1, quiet = quiet)
+            auditClcaAssertion(auditConfig, contestUA, assertion, sortedPairs, 1, quiet = quiet)
             results.add(assertion.roundResults.last().samplesNeeded)
         }
 

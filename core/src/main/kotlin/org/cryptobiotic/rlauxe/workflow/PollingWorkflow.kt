@@ -7,10 +7,10 @@ import org.cryptobiotic.rlauxe.util.*
 
 class PollingWorkflow(
     val auditConfig: AuditConfig,
-    val contestsToAudit: List<ContestIF>, // the contests you want to audit
-    val ballotManifest: BallotManifest,
+    contestsToAudit: List<ContestIF>, // the contests you want to audit
+    ballotManifest: BallotManifest,
     val Nb: Int, // total number of ballots/cards
-    val quiet: Boolean = false,
+    val quiet: Boolean = true,
 ): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     val ballotsUA: List<BallotUnderAudit>
@@ -85,12 +85,12 @@ class PollingWorkflow(
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        return runAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
+        return runPollingAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
     }
     override fun getContests() : List<ContestUnderAudit> = contestsUA
 }
 
-fun runAudit(
+fun runPollingAudit(
     auditConfig: AuditConfig,
     contestsUA: List<ContestUnderAudit>,
     mvrs: List<Cvr>,

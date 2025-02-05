@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import kotlin.math.min
 import kotlin.math.max
 
+private val debug = false
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
@@ -18,7 +19,7 @@ import kotlin.math.max
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
     contestsUA: List<ContestUnderAudit>,
-    cvrs: List<Cvr>,        // Comparison only
+    cvrs: List<Cvr>,        // Clca only
     roundIdx: Int,
     show: Boolean = false,
     nthreads: Int = 30,
@@ -36,7 +37,7 @@ fun estimateSampleSizes(
         val result = estResult.repeatedResult
         if (result.failPct() > 80.0) { // TODO 80% ?? settable ??
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.nsimEst} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
+            if (debug) println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.nsimEst} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailPct
 
@@ -45,7 +46,7 @@ fun estimateSampleSizes(
             var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
-                println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+                if (debug) println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
                 size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
@@ -54,9 +55,9 @@ fun estimateSampleSizes(
             val quantile = result.findQuantile( if (roundIdx == 1) .50 else .80)
             val size = task.prevSampleSize + quantile
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-            println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+            if (debug) println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
         }
-        println(result.showSampleDist())
+        if (debug) println(result.showSampleDist())
     }
 
     // pull out the sampleSizes for all successful assertions in the contest
@@ -177,7 +178,7 @@ fun simulateSampleSizeClcaAssorter(
 
     val errorRates = when {
         (auditConfig.version == 2.0 && round > 1) -> {
-            println("simulateSampleSizeClcaAssorter using errorRates = ${cassertion.roundResults.last().errorRates} instead of ${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)} for round ${cassertion.roundResults.size + 1}")
+            if (debug) println("simulateSampleSizeClcaAssorter using errorRates = ${cassertion.roundResults.last().errorRates} instead of ${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)} for round ${cassertion.roundResults.size + 1}")
             cassertion.roundResults.last().errorRates!!
         }
         (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)

@@ -27,17 +27,22 @@ data class BallotManifest(
     val ballotStyles: List<BallotStyle> // empty if style info not available
 )
 
+data class BallotManifestUnderAudit(
+    val ballots: List<BallotUnderAudit>,
+    val ballotStyles: List<BallotStyle> // empty if style info not available
+)
+
 interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
-    fun setIsSampled(isSampled: Boolean)
+    fun setIsSampled(isSampled: Boolean): BallotOrCvr
 }
 
 data class Ballot(
     val id: String,
     val phantom: Boolean = false,
     val ballotStyle: BallotStyle?, // if hasStyles
-    val contestIds: List<Int>? = null, // if hasStyles
+    val contestIds: List<Int>? = null, // if hasStyles, instead of BallotStyles
 ) {
     fun hasContest(contestId: Int): Boolean {
         if (ballotStyle != null) return ballotStyle.hasContest(contestId)
@@ -46,15 +51,16 @@ data class Ballot(
     }
 }
 
-class BallotUnderAudit (val ballot: Ballot, var sampleNum: Long = 0L) : BallotOrCvr {
+data class BallotUnderAudit (val ballot: Ballot, val sampleNum: Long) : BallotOrCvr {
     var sampled = false //  # is this in the sample?
     val id = ballot.id
     val phantom = ballot.phantom
 
     override fun hasContest(contestId: Int) = ballot.hasContest(contestId)
     override fun sampleNumber() = sampleNum
-    override fun setIsSampled(isSampled: Boolean) {
+    override fun setIsSampled(isSampled: Boolean): BallotUnderAudit {
         this.sampled = isSampled
+        return this
     }
 }
 

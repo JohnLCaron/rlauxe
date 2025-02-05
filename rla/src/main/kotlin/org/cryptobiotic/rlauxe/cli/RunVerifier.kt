@@ -1,15 +1,11 @@
 package org.cryptobiotic.rlauxe.cli
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import io.github.oshai.kotlinlogging.KotlinLogging
+
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.util.Publisher
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verifier.Verifier
 import kotlin.system.exitProcess
 
@@ -44,12 +40,13 @@ class RunVerifier {
             ).default(false)
 
             parser.parse(args)
-            try {
+            println("RunVerifier on $inputDir")
+            //try {
                 val retval = runVerifier(inputDir, nthreads, showTime)
                 if (!noexit && retval != 0) exitProcess(retval)
-            } catch (t: Throwable) {
-                if (!noexit) exitProcess(-1)
-            }
+            //} catch (t: Throwable) {
+            //    if (!noexit) exitProcess(-1)
+            //}
         }
 
         fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false): Int {

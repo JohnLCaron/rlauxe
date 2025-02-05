@@ -2,19 +2,36 @@ package org.cryptobiotic.rlauxe.verifier
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readCvrsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Publisher
+import org.cryptobiotic.rlauxe.workflow.AuditConfig
+import org.cryptobiotic.rlauxe.workflow.AuditType
 
 class Verifier(val publish: Publisher) {
+    var auditConfig : AuditConfig = readAuditConfigJsonFile(publish.auditConfigFile()).unwrap()
+
+    init {
+        println("auditConfig = $auditConfig")
+    }
 
     fun verify(): Boolean {
-        return verifyCvrSampleNumbers()
+        var allOk = true
+
+        if (auditConfig.auditType == AuditType.CARD_COMPARISON) {
+            allOk = allOk && verifyCvrSampleNumbers()
+        } else {
+            allOk = allOk && verifyBallotManifest()
+        }
+
+        for (roundIdx in 1..publish.rounds()) {
+            allOk = allOk && verifyRound(roundIdx)
+        }
+        println("verify = $allOk")
+        return allOk
     }
 
     fun verifyCvrSampleNumbers(): Boolean {
-        val auditConfig = readAuditConfigJsonFile(publish.auditConfigFile()).unwrap()
         val cvrs: List<CvrUnderAudit> = readCvrsJsonFile(publish.cvrsFile()).unwrap()
         val prng = Prng(auditConfig.seed)
         var countBad = 0
@@ -24,22 +41,31 @@ class Verifier(val publish: Publisher) {
                 if (countBad > 10) throw RuntimeException()
             }
         }
-        println("verifyCvrSampleNumbers ${cvrs.size} bad=${countBad} ")
+        println("  verifyCvrSampleNumbers ${cvrs.size} bad=${countBad} ")
         return countBad == 0
     }
 
-    fun verifySampleIndices(): Boolean {
-        val auditConfig = readAuditConfigJsonFile(publish.auditConfigFile()).unwrap()
-        val cvrs: List<CvrUnderAudit> = readCvrsJsonFile(publish.cvrsFile()).unwrap()
+    fun verifyBallotManifest(): Boolean {
+        val ballotManifest = readBallotManifestJsonFile(publish.ballotManifestFile()).unwrap()
         val prng = Prng(auditConfig.seed)
         var countBad = 0
-        cvrs.forEach{
+        ballotManifest.ballots.forEach{
             if (it.sampleNum != prng.next()) {
                 countBad++
                 if (countBad > 10) throw RuntimeException()
             }
         }
-        println("verifyCvrSampleNumbers ${cvrs.size} bad=${countBad} ")
+        println("  verifyBallotManifest ${ballotManifest.ballots.size} bad=${countBad} ")
         return countBad == 0
+    }
+
+    fun verifyRound(roundIdx: Int): Boolean {
+        val state = readElectionStateJsonFile(publish.auditRoundFile(roundIdx)).unwrap()
+
+        val indices = readSampleIndicesJsonFile(publish.sampleIndicesFile(roundIdx)).unwrap()
+        val mvrs = readCvrsJsonFile(publish.sampleMvrsFile(roundIdx)).unwrap()
+        println("    verifyRound $roundIdx ${state.name} done=${state.done} indices = ${indices.size} mvrs = ${mvrs.size}")
+
+        return (indices.size == mvrs.size)
     }
 }

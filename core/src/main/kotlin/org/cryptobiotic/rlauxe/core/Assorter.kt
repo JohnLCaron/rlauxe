@@ -58,7 +58,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
         return (w - l + 1) * 0.5
     }
     override fun upperBound() = 1.0
-    override fun desc() = " winner=$winner loser=$loser reportedMargin=$reportedMargin"
+    override fun desc() = " winner=$winner loser=$loser reportedMargin=${df(reportedMargin)}"
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin // TODO why is this here? if not here, only need one PluralityAssorter
@@ -216,16 +216,19 @@ data class ClcaAssorter(
 
 ///////////////////////////////////////////////////////////////////
 
-data class AuditRoundResult( val roundIdx: Int,
-                        val estSampleSize: Int,   // estimated sample size
-                        val samplesNeeded: Int,   // first sample when pvalue < riskLimit
-                        val samplesUsed: Int,     // sample count when testH0 terminates
-                        val pvalue: Double,       // last pvalue when testH0 terminates
-                        val status: TestH0Status, // testH0 status
-                        val errorRates: ErrorRates? = null, // measured error rates (clca only)
-    ) {
-    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed pvalue=$pvalue status=$status"
-    }
+data class AuditRoundResult(
+    val roundIdx: Int,
+    val estSampleSize: Int,   // estimated sample size
+    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits)
+    val pvalue: Double,       // last pvalue when testH0 terminates
+    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
+    val samplesUsed: Int,     // sample count when testH0 terminates
+    val status: TestH0Status, // testH0 status
+    val errorRates: ErrorRates? = null, // measured error rates (clca only)
+) {
+    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotsUsed=$maxBallotsUsed " +
+            " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
+}
 
 open class Assertion(
     val contest: ContestIF,
@@ -275,8 +278,11 @@ open class Assertion(
         return result
     }
 
-    open fun show(): String {
-        return "Assertion(contest=$contest, assorter=$assorter, winner=$winner, loser=$loser, estSampleSize=$estSampleSize, roundResults=$roundResults, status=$status, round=$round)"
+    open fun show() = buildString {
+        appendLine(" assertion: ${assorter.desc()}, estSampleSize=$estSampleSize, status=$status, round=$round)")
+        roundResults.forEach {
+            appendLine("    $it")
+        }
     }
 
 }
@@ -302,10 +308,5 @@ open class ClcaAssertion(
         result = 31 * result + cassorter.hashCode()
         return result
     }
-
-    override fun show(): String {
-        return "ClcaAssertion(cassorter=$cassorter)" + super.show()
-    }
-
 
 }

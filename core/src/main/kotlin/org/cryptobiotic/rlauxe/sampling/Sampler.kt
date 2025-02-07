@@ -60,6 +60,7 @@ class PollWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
+    fun maxSamplesUsed() = idx
 }
 
 //// For comparison audits
@@ -101,6 +102,8 @@ class ComparisonWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
+
+    fun maxSamplesUsed() = idx
 }
 
 

@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 02/04/2025_
+_last update: 02/07/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -23,11 +23,11 @@ Table of Contents
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
   * [Stratified Audits using OneAudit](#stratified-audits-using-oneaudit)
-* [Measured Sample sizes](#measured-sample-sizes)
-  * [Sample sizes with no errors](#sample-sizes-with-no-errors)
-  * [Sample sizes with errors](#sample-sizes-with-errors)
-* [Sampling](#sampling)
-  * [Estimating Sample sizes](#estimating-sample-sizes)
+* [Measuring Samples Needed](#measuring-samples-needed)
+  * [Samples needed with no errors](#samples-needed-with-no-errors)
+  * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
+* [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
+  * [Estimation](#estimation)
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
@@ -261,23 +261,28 @@ This is "overstatement-net-equivalent" (aka ONE).
 See [OneAudit Notes](docs/OneAudit.md) for more details and plots.
 
 
-# Measured Sample sizes
+# Measuring Samples Needed
 
-The following plots are simulated complete workflows, averaging the results from the given number of runs.
+Here we are looking at the actual number of sample sizes needed to reject or confirm the null hypotheses, called the 
+"samples needed". We ignore the need to estimate a batch size, as if we do "one sample at a time". This gives us a
+theoretical minimum. In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) we deal with the 
+need to estimate a batch size, and the extra overhead that brings.
 
-In general samples sizes are independent of N, which is helpful to keep in mind
+In general samplesNeeded are independent of N, which is helpful to keep in mind
 
 (Actually there is a slight dependence on N for "without replacement" audits when the sample size approaches N, 
 but that case approaches a full hand audit, and isnt very interesting.)
 
-When Card Style Data (CSD) is missing, the sample sizes have to be scaled by Nb / Nc, where Nb is the number of physical ballots
+When Card Style Data (CSD) is missing, the samplesNeeded have to be scaled by Nb / Nc, where Nb is the number of physical ballots
 that a contest might be on, and Nc is the number of ballots it is actually on. 
 See [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample), below.
 
-## Sample sizes with no errors
+The following plots are simulated complete workflows, averaging the results from the given number of runs.
 
-The audit needing the least samples is CLCA when there are no errors in the CVRs. In that case, the sample sizes depend 
-only on the margin, and so is a smooth curve:
+## Samples needed with no errors
+
+The audit needing the least samples is CLCA when there are no errors in the CVRs, and no phantom ballots. In that case, 
+the samplesNeeded depend only on the margin, and so is a smooth curve:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.html" rel="clcaNoErrorsLinear">![clcaNoErrorsLinear](./docs/plots/workflows/clcaNoErrors/clcaNoErrorsLinear.png)</a>
 
@@ -296,7 +301,7 @@ Here we show the average and standard deviation over 250 independent trials at e
 * When there are errors, CLCA audits also have potentially wide variance in sample sizes due to sample ordering. 
   See [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes) below.
 
-## Sample sizes with errors
+## Samples needed when there are errors
 
 In these simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the ballots
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
@@ -322,22 +327,26 @@ Varying phantom percent, up to and over the margin of 4.5%:
 * CLCA and Polling audits go to hand count when phantomPct exceeds the margin, as they should.
 * Investigate why OneAudits are less affected.
 
+TODO show the effect of phantoms in more detail.
 
-# Sampling
+# Estimating Sample Batch sizes
 
 Sampling refers to choosing which ballots to hand review to create Manual Voting Records (MVRs) for. Once the MVRs
 are created, the actual audit takes place.
 
-There are two phases to sampling: estimating sample sizes for each contest, and then randomly choosing ballots that 
+There are two phases to sampling: estimating the sample batch sizes for each contest, and then randomly choosing ballots that 
 contain at least that many contests.
 
-## Estimating Sample sizes
+## Estimation
 
 For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
 running simulations, we can use estimated error rates to add errors to the manufactured data.
 
-For each contest assertion we estimate the required sample size that will satisfy the risk limit some fraction 
+For each contest assertion we estimate the samplesNeeded that will satisfy the risk limit some fraction 
 (_auditConfig.quantile_) of the time. The contest estimated sample size is then the maximum of the contests' assertion estimates.
+
+If the estimated samplesNeeded exceeds some maximum fraction of the total ballots for that contest (_auditConfig.samplePctCutoff_), 
+that contest is marked for a hand count, and is removed from the audit.
 
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
@@ -437,6 +446,9 @@ The amount of extra sampling closely follows the number of samples needed, addin
 
 TODO: reduce extra sampling; tradeoff with number of rounds.
 
+### Effect of Multiple Contest Auditing
+
+TODO
 
 # Appendices
 ## Differences with SHANGRLA

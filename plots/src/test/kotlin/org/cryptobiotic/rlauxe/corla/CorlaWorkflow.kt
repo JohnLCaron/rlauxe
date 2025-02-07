@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.math.max
 
 class CorlaWorkflowTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
@@ -75,17 +76,6 @@ class CorlaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    // debugging
-    fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<EstimationResult> {
-        return estimateSampleSizes(
-            auditConfig,
-            contestsUA,
-            cvrs,
-            roundIdx,
-            show = show,
-        )
-    }
-
     /**
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
@@ -93,15 +83,15 @@ class CorlaWorkflow(
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("----------estimateSampleSizes round $roundIdx")
 
-        val maxContestSize = estimateSampleSizes(
+        estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
             roundIdx,
             show=show,
         )
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
         val contestsNotDone = contestsUA.filter{ !it.done }
-
 
         //	2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
         //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
@@ -173,7 +163,7 @@ class CorlaWorkflow(
         return allDone
     }
 
-    override fun showResults() {
+    override fun showResults(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minClcaAssertion()
@@ -191,15 +181,18 @@ class CorlaWorkflow(
             }
         }
 
-        val minAssertion = getContests().first().minClcaAssertion()!!
-        if (minAssertion.roundResults.isNotEmpty()) {
-            val lastRound = minAssertion.roundResults.last()
-            println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
+        var maxBallotsUsed = 0
+        contestsUA.forEach { contest ->
+            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
+                val lastRound = assertion.roundResults.last()
+                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+            }
         }
-        println()
+        println("extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
     override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -279,12 +272,13 @@ fun runClcaAssertionAudit(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
+        maxBallotsUsed = sampler.maxSamplesUsed(),
+        pvalue = testH0Result.pvalues.last(),
         samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
         samplesUsed = testH0Result.sampleCount,
-        pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,
         errorRates = testH0Result.errorRates
-        )
+    )
     cassertion.roundResults.add(roundResult)
 
     if (!quiet) println(" ${contestUA.name} $roundResult")

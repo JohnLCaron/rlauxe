@@ -38,48 +38,9 @@ class TestPersistentWorkflowPolling {
         var done = false
         var workflow : RlauxWorkflowIF = pollingWorkflow
         while (!done) {
-            done = runPersistentWorkflowPollingStage(round, workflow, pollingWorkflow.ballotsUA, testMvrs, publish)
+            done = runPersistentWorkflowStage(round, workflow, pollingWorkflow.ballotsUA, testMvrs, publish)
             workflow = readPersistentWorkflow(round, publish)
             round++
         }
     }
-}
-
-// delete
-fun runPersistentWorkflowPollingStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: List<BallotOrCvr>, testMvrs: List<Cvr>, publish: Publisher): Boolean {
-    val roundStopwatch = Stopwatch()
-    val previousSamples = mutableSetOf<Int>()
-    var done = false
-
-    val indices = workflow.chooseSamples(roundIdx, show=false)
-    if (indices.isEmpty()) {
-        done = true
-
-    } else {
-        writeSampleIndicesJsonFile(indices, publish.sampleIndicesFile(roundIdx))
-
-        val currRound = Round(roundIdx, indices, previousSamples.toSet())
-        previousSamples.addAll(indices)
-
-        val sampledMvrs = indices.map {
-            testMvrs[it]
-        }
-
-        done = workflow.runAudit(indices, sampledMvrs, roundIdx)
-        println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-
-        val state = ElectionState("Round$roundIdx", workflow.getContests(), done)
-        writeElectionStateJsonFile(state, publish.auditRoundFile(roundIdx))
-
-        val sampledMvrus = indices.map {
-            val cvr = bcUA[it]
-            CvrUnderAudit(testMvrs[it], cvr.sampleNumber())
-        }
-        writeCvrsJsonFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
-
-        println(currRound)
-        workflow.showResults()
-    }
-
-    return done
 }

@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.math.max
 
 // "Stylish Risk-Limiting Audits in Practice" STYLISH 2.1
 // 1. Set up the audit
@@ -65,21 +66,22 @@ class ClcaWorkflow(
     }
 
     /**
+     * TODO same for all workflows i think
      * Choose lists of ballots to sample.
      * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
      */
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("----------estimateSampleSizes round $roundIdx")
 
-        val maxContestSize = estimateSampleSizes(
+        estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
             roundIdx,
             show=show,
         )
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
         val contestsNotDone = contestsUA.filter{ !it.done }
-
 
         //	2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
         //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
@@ -108,7 +110,7 @@ class ClcaWorkflow(
         return emptyList()
     }
 
-    override fun showResults() {
+    override fun showResults(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minClcaAssertion()
@@ -126,19 +128,22 @@ class ClcaWorkflow(
             }
         }
 
-        val minAssertion = getContests().first().minClcaAssertion()!!
-        if (minAssertion.roundResults.isNotEmpty()) {
-            val lastRound = minAssertion.roundResults.last()
-            println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
+        var maxBallotsUsed = 0
+        contestsUA.forEach { contest ->
+            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
+                val lastRound = assertion.roundResults.last()
+                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+            }
         }
-        println()
+        println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
-
-    override fun getContests(): List<ContestUnderAudit> = contestsUA
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         return runClcaAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
     }
+
+    override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +217,7 @@ fun auditClcaAssertion(
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
 
+        ClcaStrategyType.default,
         ClcaStrategyType.noerror -> {
             // optimistic, no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(
@@ -267,12 +273,13 @@ fun auditClcaAssertion(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
+        maxBallotsUsed = sampler.maxSamplesUsed(),
+        pvalue = testH0Result.pvalues.last(),
         samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
         samplesUsed = testH0Result.sampleCount,
-        pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,
         errorRates = testH0Result.errorRates
-        )
+    )
     cassertion.roundResults.add(roundResult)
 
     if (!quiet) println(" ${contestUA.name} $roundResult")

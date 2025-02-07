@@ -18,7 +18,7 @@ class EstimationDist {
     val dirName = "/home/stormy/temp/workflow/$name"
 
     @Test
-    fun testOneWorkflow() {
+    fun testVersion2Workflow() {
         val Nc = 50000
         val margin = .02
         val mvrsFuzzPct = .02
@@ -33,10 +33,10 @@ class EstimationDist {
             version = 2.0,
         )
 
-        doOneWorkflow(Nc, margin, mvrsFuzzPct, auditConfig)
+        doOneContestWorkflow(Nc, margin, mvrsFuzzPct, auditConfig)
     }
 
-    fun doOneWorkflow(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): ClcaWorkflow {
+    fun doOneContestWorkflow(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): ClcaWorkflow {
         val undervotePct = 0.0
         val phantomPct = 0.0
 
@@ -61,7 +61,7 @@ class EstimationDist {
         val result: TestH0Result =
             auditClcaAssertion(auditConfig, contestUA, assertion, sortedPairs, 1, quiet = quiet)
         println("oracle audit")
-        workflow.showResults()
+        workflow.showResults(0)
         //println("last 20 pvalues= ${showLast(result.pvalues, 20)}")
         //println("last 20 bets= ${showLast(result.bets, 20)}")
 
@@ -91,14 +91,15 @@ class EstimationDist {
         }
 
         rounds.forEach { println(it) }
-        workflow.showResults()
+        workflow.showResults(0)
 
         return workflow
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
 
-    // Used in docs
+    // Used in docs: Under/Over estimating CLCA sample sizes
+    // trying to improve on "version 1"
 
     @Test
     fun testOneEstSample() {
@@ -133,9 +134,6 @@ class EstimationDist {
 
         println("doOneEstSample")
         val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first().repeatedResult
-        //println(rr)
-        //println(rr.showSampleDist())
-        //println(rr.sampleCount.sorted())
         val sdata = rr.sampleCount.sorted()
         val tripleEst =
             sdata.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "estimate") }
@@ -150,6 +148,7 @@ class EstimationDist {
         )
     }
 
+    // data:  xvalue, yvalue, category name,
     fun plotCumul(name: String, dirName: String, subtitle: String, data: List<Triple<Double, Double, String>>) {
 
         genericPlotter(
@@ -178,29 +177,11 @@ class EstimationDist {
         println("oracle errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
-
-        /* heres the ConsistentSample permutation
-        val cvrsUA = workflow.cvrsUA
-        val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
-        val sortedCvrs = sortedIndices.map { testCvrs[it] }
-        val sortedMvrs = sortedIndices.map { testMvrs[it] }
-        val sortedPairs: List<Pair<Cvr, Cvr>> = sortedMvrs.zip(sortedCvrs)
-
-        // "oracle" audit
-        val contestUA = workflow.contestsUA.first()
-        val assertion = contestUA.minClcaAssertion()!!
-        val result: TestH0Result = runClcaAssertionAudit(auditConfig, contestUA, assertion, sortedPairs, 1, quiet=quiet)
-        println("oracle audit")
-        workflow.showResults()
-
-        // remove that round
-        assertion.roundResults.removeAll { true }
-        assertion.proved = false */
-
         // just want the sample estimation stuff
         return workflow.estimateSampleSizes(1, show = false)
     }
 
+    // calculate 100 trials of "samplesNeeded"
     fun doOneHundred(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<Int> {
         val undervotePct = 0.0
         val phantomPct = 0.0

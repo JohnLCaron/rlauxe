@@ -74,7 +74,9 @@ fun runComparisonWorkflowR(workflow: ClcaWorkflow, testMvrs: List<Cvr>, nasserti
         roundIdx++
     }
 
-    rounds.forEach { println(it) }
-    workflow.showResults()
+    if (rounds.isNotEmpty()) {
+        rounds.forEach { println(it) }
+        workflow.showResults(rounds.last().sampledIndices.size)
+    }
     println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
 }

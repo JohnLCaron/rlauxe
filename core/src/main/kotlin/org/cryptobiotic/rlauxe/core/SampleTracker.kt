@@ -37,7 +37,9 @@ class PrevSamples : SampleTracker {
     }
 }
 
-/** This also counts the under/overstatements for comparison audits. */
+/** This also counts the under/overstatements for comparison audits.
+ * @param noerror for comparison assorters who need rate counting. set to 0 for polling
+ */
 class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     private val isClca = (noerror > 0.0)
     private var last = 0.0
@@ -60,14 +62,6 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     fun countP1u() = countP1u
     fun countP2u() = countP2u
 
-    private var countZero = 0
-    private var countHalf = 0
-    private var countOne = 0
-
-    fun countZero() = countZero
-    fun countHalf() = countHalf
-    fun countOne() = countOne
-
     fun addSample(sample : Double) {
         last = sample
         sum += sample
@@ -80,11 +74,6 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
             else if (doubleIsClose(sample, noerror * 1.5)) countP1u++
             else if (doubleIsClose(sample, noerror * 2.0)) countP2u++
             else println(" isClca not assigned ${df(sample / noerror)}")
-        } else {
-            if (doubleIsClose(sample, 0.0)) countZero++
-            else if (doubleIsClose(sample, 0.5)) countHalf++
-            else if (doubleIsClose(sample, 1.0)) countOne++
-            // else println(" not assigned ${df(sample)}") // get these messages in oneaudit
         }
     }
 
@@ -97,9 +86,6 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
         val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
         return listOf(p[1], p[2], p[3], p[4])
     }
-
-    fun pollCounts() = listOf(countZero,countHalf,countOne)
-    fun pollRates() = pollCounts().map { it / numberOfSamples().toDouble() }
 }
 
 data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {

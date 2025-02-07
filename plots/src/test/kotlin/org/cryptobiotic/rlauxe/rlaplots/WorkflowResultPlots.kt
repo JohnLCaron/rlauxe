@@ -23,7 +23,7 @@ fun wrsPlot(
     yfld: (WorkflowResult) -> Double,
     catfld: (WorkflowResult) -> String,
 ) {
-    val useWrs = wrs.filter { it.status != TestH0Status.AllFailPct }
+    val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
     val groups = makeWrGroups(useWrs, catfld)
 
     val xvalues = mutableListOf<Double>()
@@ -93,8 +93,9 @@ fun makeWrGroups(wrs: List<WorkflowResult>, catfld: (WorkflowResult) -> String):
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+// this allows us to put multiple fields from the same WorkflowResult on the plot
 
-fun wrsPlot2(
+fun wrsPlotMultipleFields(
     titleS: String,
     subtitleS: String,
     wrs: List<WorkflowResult>,
@@ -104,7 +105,7 @@ fun wrsPlot2(
     yfld: (String, WorkflowResult) -> Double,
     catflds: List<String>,
 ) {
-    val useWrs = wrs.filter { it.status != TestH0Status.AllFailPct }
+    val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
     val groups = makeWrGroups(useWrs, catflds)
 
     val xvalues = mutableListOf<Double>()

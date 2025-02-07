@@ -7,7 +7,6 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.util.Publisher
 import org.cryptobiotic.rlauxe.verifier.Verifier
-import kotlin.system.exitProcess
 
 /** Run election record verification CLI. */
 class RunVerifier {
@@ -33,20 +32,11 @@ class RunVerifier {
                 shortName = "time",
                 description = "Show timing"
             ).default(false)
-            val noexit by parser.option(
-                ArgType.Boolean,
-                shortName = "noexit",
-                description = "Dont call System.exit"
-            ).default(false)
 
             parser.parse(args)
             println("RunVerifier on $inputDir")
-            //try {
-                val retval = runVerifier(inputDir, nthreads, showTime)
-                if (!noexit && retval != 0) exitProcess(retval)
-            //} catch (t: Throwable) {
-            //    if (!noexit) exitProcess(-1)
-            //}
+            val retval = runVerifier(inputDir, nthreads, showTime)
+            println("  retval $retval")
         }
 
         fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false): Int {

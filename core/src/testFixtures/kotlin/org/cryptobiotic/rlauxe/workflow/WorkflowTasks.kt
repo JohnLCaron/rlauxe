@@ -52,9 +52,9 @@ fun runWorkflow(name: String, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, qu
         }
     }
 
-    if (!quiet) {
+    if (!quiet && rounds.isNotEmpty()) {
         rounds.forEach { println(it) }
-        workflow.showResults()
+        workflow.showResults(rounds.last().sampledIndices.size)
     }
     return if (rounds.isEmpty()) 0 else rounds.last().sampledIndices.size
 }
@@ -170,7 +170,7 @@ class OneAuditWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = 10, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.standard, simFuzzPct = fuzzPct)
+            AuditType.ONEAUDIT, true, nsimEst = 10, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = fuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
@@ -234,7 +234,7 @@ class WorkflowTask(
             WorkflowResult(
                 contestUA.Nc,
                 minAssertion.assorter.reportedMargin(),
-                TestH0Status.FailPct,
+                TestH0Status.FailSimulationPct,
                 0.0, 0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
@@ -286,7 +286,7 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         WorkflowResult(
             0,
             0.0,
-            TestH0Status.AllFailPct,
+            TestH0Status.FailSimulationPct,
             0.0, 0.0, 0.0,0.0,
             emptyMap(),
             )
@@ -295,7 +295,7 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         WorkflowResult(
             first.Nc,
             first.margin,
-            TestH0Status.FailPct,
+            TestH0Status.FailSimulationPct,
             0.0, first.Nc.toDouble(), first.Nc.toDouble(), first.Nc.toDouble(),
             first.parameters,
             )

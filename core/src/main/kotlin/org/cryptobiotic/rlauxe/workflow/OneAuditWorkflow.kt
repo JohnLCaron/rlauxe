@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.math.max
 
 class OneAuditWorkflow(
     val auditConfig: AuditConfig,
@@ -33,13 +34,14 @@ class OneAuditWorkflow(
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("estimateSampleSizes round $roundIdx")
 
-        val maxContestSize = estimateSampleSizes(
+        estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
             roundIdx,
             show=show,
         )
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
         val contestsNotDone = contestsUA.filter{ !it.done }
 
         //	4.c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
@@ -92,7 +94,7 @@ class OneAuditWorkflow(
         return allDone
     }
 
-    override fun showResults() {
+    override fun showResults(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minClcaAssertion()
@@ -109,12 +111,18 @@ class OneAuditWorkflow(
                 }
             }
         }
-        println()
+        var maxBallotsUsed = 0
+        contestsUA.forEach { contest ->
+            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
+                val lastRound = assertion.roundResults.last()
+                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+            }
+        }
+        println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
-    override fun getContests(): List<ContestUnderAudit> {
-        return contestsUA
-    }
+    override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 
 fun runOneAuditAssertionAlpha(
@@ -163,10 +171,12 @@ fun runOneAuditAssertionAlpha(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
+        maxBallotsUsed = sampler.maxSamplesUsed(),
+        pvalue = testH0Result.pvalues.last(),
         samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
         samplesUsed = testH0Result.sampleCount,
-        pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,
+        errorRates = testH0Result.errorRates
     )
     cassertion.roundResults.add(roundResult)
 

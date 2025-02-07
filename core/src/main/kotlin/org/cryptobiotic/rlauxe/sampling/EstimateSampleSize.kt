@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
@@ -12,6 +13,9 @@ import kotlin.math.min
 import kotlin.math.max
 
 private val debug = false
+private val debugErrorRates = true
+private val debugSampleDist = false
+private val showFail = true
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
@@ -35,11 +39,24 @@ fun estimateSampleSizes(
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
-        if (result.failPct() > 80.0) { // TODO 80% ?? settable ??
+        if (result.failPct() > 80.0) { // TODO make settable ??
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            if (debug) println("***estimateSampleSizes for '${task.name()}' ntrials=${auditConfig.nsimEst} failed ${result.failPct()} > 80% estSampleSize=${task.assertion.estSampleSize}")
+            if (showFail) println(
+                "***FailSimulationPct for '${task.name()}' ntrials=${auditConfig.nsimEst} failed " +
+                        "${df(result.failPct())} > 80% estSampleSize=${task.assertion.estSampleSize}"
+            )
             task.contestUA.done = true
-            task.contestUA.status = TestH0Status.FailPct
+            task.contestUA.status = TestH0Status.FailSimulationPct
+
+        } else if (result.pctSamplesNeeded() > 100 * auditConfig.samplePctCutoff) {
+            task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
+            if (showFail) println(
+                "***FailMaxSamplesAllowed for '${task.name()}' ntrials=${auditConfig.nsimEst} pctSamplesNeeded " +
+                        "${df(result.pctSamplesNeeded())} > ${df(100 * auditConfig.samplePctCutoff)}% estSampleSize=${task.assertion.estSampleSize} Nc=${result.Nc}" +
+                        "\n  sampleDist = ${result.showSampleDist()}"
+            )
+            task.contestUA.done = true
+            task.contestUA.status = TestH0Status.FailMaxSamplesAllowed
 
         } else if (auditConfig.version == 1.0) {
             val quantile = result.findQuantile(auditConfig.quantile)
@@ -52,12 +69,22 @@ fun estimateSampleSizes(
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
 
         } else {
-            val quantile = result.findQuantile( if (roundIdx == 1) .50 else .80)
+            val quantile = result.findQuantile(if (roundIdx == 1) .50 else .80)
             val size = task.prevSampleSize + quantile
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
             if (debug) println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
         }
         if (debug) println(result.showSampleDist())
+
+        if (debugSampleDist) {
+            println(
+                "---debugSampleDist for '${task.name()}' ntrials=${auditConfig.nsimEst} pctSamplesNeeded=" +
+                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertion.estSampleSize} Nc=${result.Nc}" +
+                        " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
+                        "\n  sampleDist = ${result.showSampleDist()}"
+            )
+
+        }
     }
 
     // pull out the sampleSizes for all successful assertions in the contest
@@ -69,7 +96,6 @@ fun estimateSampleSizes(
         if (show) println("  ${contestUA}")
     }
     if (show) println()
-    val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
     return estResults
 }
 
@@ -174,16 +200,25 @@ fun simulateSampleSizeClcaAssorter(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val cassorter = cassertion.cassorter
-    val round = cassertion.roundResults.size + 1
+    val round = cassertion.roundResults.size + 1  // TODO is this accurate ?
 
     val errorRates = when {
         (auditConfig.version == 2.0 && round > 1) -> {
-            if (debug) println("simulateSampleSizeClcaAssorter using errorRates = ${cassertion.roundResults.last().errorRates} instead of ${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)} for round ${cassertion.roundResults.size + 1}")
+            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
             cassertion.roundResults.last().errorRates!!
         }
-        (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
-        (clcaConfig.errorRates != null) -> clcaConfig.errorRates // hmmmm
-        else -> null
+        (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> {
+            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using simFuzzPct=${clcaConfig.simFuzzPct} errorRate=${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)}")
+            ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
+        }
+        (clcaConfig.errorRates != null) -> {
+            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using clcaConfig.errorRates =${clcaConfig.errorRates}")
+            clcaConfig.errorRates
+        } // hmmmm
+        else -> {
+            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using no errorRates")
+            null
+        }
     }
 
     val d =  if (auditConfig.version == 2.0 && round > 1) 10 else clcaConfig.d
@@ -217,7 +252,6 @@ fun simulateSampleSizeClcaAssorter(
             )
         )
     }
-
 
     /*
     val (sampler1: Sampler, bettingFn1: BettingFn) = when {

@@ -12,10 +12,10 @@ data class AuditConfig(
     val riskLimit: Double = 0.05,
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val samplePctCutoff: Double = 0.33, // dont sample more than this pct of N TODO
+    val samplePctCutoff: Double = .42, // dont sample more than this pct of N
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.standard),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
     val version: Double = 1.0,
 )
 
@@ -28,7 +28,7 @@ data class PollingConfig(
 // noerror: assume no errors, with adaptation
 // fuzzPct: model errors with fuzz simulation, with adaptation
 // apriori: pass in apriori errorRates, with adaptation
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori }
+enum class ClcaStrategyType { default, oracle, noerror, fuzzPct, apriori }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
@@ -36,7 +36,7 @@ data class ClcaConfig(
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
-enum class OneAuditStrategyType { standard, max99 }
+enum class OneAuditStrategyType { default, max99 }
 data class OneAuditConfig(
     val strategy: OneAuditStrategyType,
     val simFuzzPct: Double? = null, // for the estimation

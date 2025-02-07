@@ -291,7 +291,6 @@ open class ContestUnderAudit(
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
-
     override fun toString() = buildString {
         append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
     }
@@ -326,6 +325,13 @@ open class ContestUnderAudit(
         result = 31 * result + clcaAssertions.hashCode()
         result = 31 * result + status.hashCode()
         return result
+    }
+
+    open fun show() = buildString {
+        appendLine("${name} ($id) ncandidates=${ncandidates} Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
+        assertions().forEach {
+            append(" ${it.show()}")
+        }
     }
 
 }

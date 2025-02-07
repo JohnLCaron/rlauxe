@@ -78,6 +78,7 @@ fun uniformSampling(
 
             val roundResult = AuditRoundResult(roundIdx,
                 estSampleSize=est,
+                maxBallotsUsed=-1,
                 samplesNeeded = -1,
                 samplesUsed = -1,
                 pvalue = 0.0,

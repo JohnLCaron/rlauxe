@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.math.max
 
 class PollingWorkflow(
     val auditConfig: AuditConfig,
@@ -36,13 +37,14 @@ class PollingWorkflow(
 
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("estimateSampleSizes round $roundIdx")
-        val maxContestSize = estimateSampleSizes(
+        estimateSampleSizes(
             auditConfig,
             contestsUA,
             emptyList(),
             roundIdx,
             show=show,
         )
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
         val contestsNotDone = contestsUA.filter{ !it.done }
 
         // choose indices to sample
@@ -63,7 +65,7 @@ class PollingWorkflow(
         return emptyList()
     }
 
-    override fun showResults() {
+    override fun showResults(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
@@ -81,13 +83,21 @@ class PollingWorkflow(
                 }
             }
         }
-        println()
+        var maxBallotsUsed = 0
+        contestsUA.forEach { contest ->
+            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
+                val lastRound = assertion.roundResults.last()
+                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+            }
+        }
+        println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         return runPollingAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
     }
     override fun getContests() : List<ContestUnderAudit> = contestsUA
+    override fun getBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
 }
 
 fun runPollingAudit(
@@ -157,10 +167,12 @@ fun auditPollingAssertion(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=assertion.estSampleSize,
+        maxBallotsUsed = sampler.maxSamplesUsed(),
+        pvalue = testH0Result.pvalues.last(),
         samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
         samplesUsed = testH0Result.sampleCount,
-        pvalue = testH0Result.pvalues.last(),
         status = testH0Result.status,
+        errorRates = testH0Result.errorRates
     )
     assertion.roundResults.add(roundResult)
 

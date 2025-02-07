@@ -64,8 +64,16 @@ class Verifier(val publish: Publisher) {
 
         val indices = readSampleIndicesJsonFile(publish.sampleIndicesFile(roundIdx)).unwrap()
         val mvrs = readCvrsJsonFile(publish.sampleMvrsFile(roundIdx)).unwrap()
-        println("    verifyRound $roundIdx ${state.name} done=${state.done} indices = ${indices.size} mvrs = ${mvrs.size}")
+        println("    verifyRound $roundIdx '${state.name}' done=${state.done} indices = ${indices.size} mvrs = ${mvrs.size}")
 
-        return (indices.size == mvrs.size)
+        if (indices.size != mvrs.size) {
+            println("*** indices = ${indices.size} NOT EQUAL mvrs = ${mvrs.size}")
+            return false
+        }
+
+        state.contests.forEach { contest ->
+            print(contest.show())
+        }
+        return true
     }
 }

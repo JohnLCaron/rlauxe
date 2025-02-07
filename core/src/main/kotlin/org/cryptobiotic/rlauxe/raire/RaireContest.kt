@@ -64,7 +64,7 @@ class RaireContestUnderAudit(
         return this
     }
 
-    fun show() = buildString {
+    override fun show() = buildString {
         appendLine("  RaireContestUnderAudit ${contest.info.name} winner $winner losers ${contest.losers}")
         assertions.forEach { append(it.show()) }
     }

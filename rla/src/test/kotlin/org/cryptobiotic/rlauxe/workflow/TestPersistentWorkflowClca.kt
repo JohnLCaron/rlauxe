@@ -86,7 +86,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: L
         writeCvrsJsonFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
 
         println(currRound)
-        workflow.showResults()
+        workflow.showResults(indices.size)
     }
 
     return done

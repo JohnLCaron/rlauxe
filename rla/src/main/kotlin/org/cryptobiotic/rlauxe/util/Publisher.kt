@@ -27,9 +27,10 @@ class Publisher(val topdir: String) {
     fun auditRoundFile(round: Int): String {
         val dir = "$topdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("Publisher"))
-        return "$dir/electionState.json"
+        return "$dir/auditState.json"
     }
 
+    // what round are we on?
     fun rounds(): Int {
         var roundIdx = 1
         while (Files.exists(Path.of("$topdir/round$roundIdx"))) {

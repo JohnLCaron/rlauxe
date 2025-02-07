@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
-import org.cryptobiotic.rlauxe.util.*
+import kotlin.math.max
 
 class RlauxWorkflow(
     val auditConfig: AuditConfig,
@@ -30,13 +30,15 @@ class RlauxWorkflow(
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("----------estimateSampleSizes round $roundIdx")
 
-        val maxContestSize = estimateSampleSizes(
+        estimateSampleSizes(
             auditConfig,
             contestsUA,
             cvrs,
             roundIdx,
             show=show,
         )
+        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
+
         val contestsNotDone = contestsUA.filter{ !it.done }
         if (contestsNotDone.size > 0) {
             return if (auditConfig.hasStyles) {
@@ -62,7 +64,7 @@ class RlauxWorkflow(
         }
     }
 
-    override fun showResults() {
+    override fun showResults(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
@@ -70,23 +72,27 @@ class RlauxWorkflow(
                 println(" $contest has no assertions; status=${contest.status}")
             } else {
                 if (minAssertion.roundResults.size == 1) {
-                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(contest.minMargin())} ${minAssertion.roundResults[0]}")
+                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estSampleSize} ${minAssertion.roundResults[0]}")
                     if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
                 } else {
-                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(contest.minMargin())} est=${contest.estSampleSize} round=${minAssertion.round} status=${contest.status}")
+                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estSampleSize}")
                     if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
                     minAssertion.roundResults.forEach { rr -> println("   $rr") }
                 }
             }
         }
 
-        val minAssertion = getContests().first().minAssertion()!!
-        if (minAssertion.roundResults.isNotEmpty()) {
-            val lastRound = minAssertion.roundResults.last()
-            println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
+        var maxBallotsUsed = 0
+        contestsUA.forEach { contest ->
+            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
+                val lastRound = assertion.roundResults.last()
+                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+            }
         }
-        println()
+        println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
     override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun getBallotsOrCvrs() : List<BallotOrCvr> = bcUA
+
 }

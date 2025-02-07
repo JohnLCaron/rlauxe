@@ -126,7 +126,7 @@ class CompareAuditsNoErrors {
         val writer = WorkflowResultsIO("$dir/${name}.cvs")
         writer.writeResults(results)
 
-        wrsPlot2(
+        wrsPlotMultipleFields(
             titleS = "$name samples needed",
             subtitleS = "Nc=${N} nruns=${nruns}",
             results,
@@ -144,7 +144,7 @@ class CompareAuditsNoErrors {
             catflds = listOf("needed", "plusStdev", "minusStdev"),
         )
 
-        wrsPlot2(
+        wrsPlotMultipleFields(
             titleS = "$name samples needed",
             subtitleS = "Nc=${N} nruns=${nruns}",
             results,
@@ -179,7 +179,7 @@ class CompareAuditsNoErrors {
                 N, margin, 0.0, 0.0, 0.50, fuzzPct=fuzzPct,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "standard"),
                 auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.standard))
+                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator1))
             val oneauditGenerator2 = OneAuditWorkflowTaskGenerator(

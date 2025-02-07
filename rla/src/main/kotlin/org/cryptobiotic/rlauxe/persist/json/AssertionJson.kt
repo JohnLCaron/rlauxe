@@ -118,23 +118,26 @@ fun AssertionJson.import() : Assertion {
     return result
 }
 
-// data class AuditRoundResult( val roundIdx: Int,
-//                        val estSampleSize: Int,   // estimated sample size
-//                        val samplesNeeded: Int,   // first sample when pvalue < riskLimit
-//                        val samplesUsed: Int,     // sample count when testH0 terminates
-//                        val pvalue: Double,       // last pvalue when testH0 terminates
-//                        val status: TestH0Status, // testH0 status
-//                        val errorRates: ErrorRates? = null, // measured error rates (clca only)
-//    )
+// data class AuditRoundResult(
+//    val roundIdx: Int,
+//    val estSampleSize: Int,   // estimated sample size
+//    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits)
+//    val pvalue: Double,       // last pvalue when testH0 terminates
+//    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
+//    val samplesUsed: Int,     // sample count when testH0 terminates
+//    val status: TestH0Status, // testH0 status
+//    val errorRates: ErrorRates? = null, // measured error rates (clca only)
+//)
 
 @Serializable
 data class AuditRoundResultJson(
     val desc: String,
     val roundIdx: Int,
     val estSampleSize: Int,   // estimated sample size
+    val maxBallotsUsed: Int,   // estimated sample size
+    val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
-    val pvalue: Double,       // last pvalue when testH0 terminates
     val status: String, // testH0 status
     val errorRates: List<Double>?,
 )
@@ -143,9 +146,10 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
         this.toString(),
         this.roundIdx,
         this.estSampleSize,
+        this.maxBallotsUsed,
+        this.pvalue,
         this.samplesNeeded,
         this.samplesUsed,
-        this.pvalue,
         this.status.name,
         this.errorRates?.toList(),
     )
@@ -155,9 +159,10 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
     return AuditRoundResult(
         this.roundIdx,
         this.estSampleSize,
+        this.maxBallotsUsed,
+        this.pvalue,
         this.samplesNeeded,
         this.samplesUsed,
-        this.pvalue,
         status,
         if (this.errorRates != null) ErrorRates.fromList(this.errorRates) else null,
     )

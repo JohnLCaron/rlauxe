@@ -2,14 +2,14 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.core.TestH0Status
 
 interface RlauxWorkflowIF {
-    fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int>
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean
-    fun showResults()
+    fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int> // return ballot indices to sample
+    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean  // return allDone
+    fun showResults(estSampleSize: Int)
     fun getContests() : List<ContestUnderAudit>
+    fun getBallotsOrCvrs() : List<BallotOrCvr>
 }
 
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.

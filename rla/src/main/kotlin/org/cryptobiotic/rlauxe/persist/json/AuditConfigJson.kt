@@ -130,7 +130,7 @@ fun ClcaConfig.publishJson() : ClcaConfigJson {
 }
 
 fun ClcaConfigJson.import(): ClcaConfig {
-    val strategy = safeEnumValueOf(this.strategy) ?: ClcaStrategyType.noerror
+    val strategy = safeEnumValueOf(this.strategy) ?: ClcaStrategyType.default
     return ClcaConfig(
         strategy,
         this.simFuzzPct,
@@ -161,7 +161,7 @@ fun OneAuditConfig.publishJson() : OneAuditConfigJson {
 }
 
 fun OneAuditConfigJson.import(): OneAuditConfig {
-    val strategy = safeEnumValueOf(this.strategy) ?: OneAuditStrategyType.standard
+    val strategy = safeEnumValueOf(this.strategy) ?: OneAuditStrategyType.default
     return OneAuditConfig(
         strategy,
         this.simFuzzPct,

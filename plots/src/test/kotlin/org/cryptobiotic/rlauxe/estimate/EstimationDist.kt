@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
+// show distribution of samplesNeeded estimations
 class EstimationDist {
     val quiet = true
     val nruns = 10  // number of times to run workflow
@@ -98,15 +99,15 @@ class EstimationDist {
 
     ////////////////////////////////////////////////////////////////////////////////////
 
-    // Used in docs: Under/Over estimating CLCA sample sizes
+    // Used in docs: Under/Over estimating CLCA sample sizes, show distributions
     // trying to improve on "version 1"
 
     @Test
-    fun testOneEstSample() {
+    fun genDistributionPlots() {
         val Nc = 50000
         val margin = .02
         val mvrsFuzzPct = .02
-        val simFuzzPct = .02
+        val simFuzzPct = .04
 
         val auditConfig = AuditConfig(
             AuditType.CARD_COMPARISON,
@@ -114,14 +115,14 @@ class EstimationDist {
             quantile = .50,
             nsimEst = 100,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct),
-            version = 2.0,
         )
 
         println("doOneHundred")
         val actuals = doOneHundred(Nc, margin, mvrsFuzzPct, auditConfig).sorted()
-        val tripleActs =
+        val tripleActuals =
             actuals.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "actual") }
 
+        /*
         println("oracle")
         val oracles = doOneHundred(
             Nc,
@@ -132,19 +133,21 @@ class EstimationDist {
         val tripleOra =
             oracles.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "oracle") }
 
+         */
+
         println("doOneEstSample")
         val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first().repeatedResult
         val sdata = rr.sampleCount.sorted()
         val tripleEst =
             sdata.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "estimate") }
 
-        val name = "estSampleDistributionVs1"
-        val dirName = "/home/stormy/temp/workflow/estSampleDistribution2"
+        val name = "estErrorRatesDouble"
+        val dirName = "/home/stormy/temp/dist/estSamplesNeeded"
         plotCumul(
             name,
             dirName,
-            "Nc=$Nc margin=$margin version2 mvrsFuzzPct=$mvrsFuzzPct simFuzzPct=$simFuzzPct",
-            tripleEst + tripleOra + tripleActs
+            "Nc=$Nc margin=$margin version1 mvrsFuzzPct=$mvrsFuzzPct simFuzzPct=$simFuzzPct",
+            tripleEst + tripleActuals // + tripleOra
         )
     }
 
@@ -166,6 +169,7 @@ class EstimationDist {
         )
     }
 
+    // calculate 100 estimateSampleSizes, return List<EstimationResult>, single contest, no phantoms
     fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<EstimationResult> {
         val undervotePct = 0.0
         val phantomPct = 0.0
@@ -173,7 +177,6 @@ class EstimationDist {
         val sim =
             ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
         println("oracle errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
@@ -181,7 +184,7 @@ class EstimationDist {
         return workflow.estimateSampleSizes(1, show = false)
     }
 
-    // calculate 100 trials of "samplesNeeded"
+    // calculate 100 simulated audits, return "samplesNeeded", single contest, fuzzed, no phantoms
     fun doOneHundred(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<Int> {
         val undervotePct = 0.0
         val phantomPct = 0.0

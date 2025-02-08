@@ -9,11 +9,12 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
+import org.cryptobiotic.rlauxe.workflow.ClcaStrategyType
 import kotlin.math.min
 import kotlin.math.max
 
 private val debug = false
-private val debugErrorRates = true
+private val debugErrorRates = false
 private val debugSampleDist = false
 private val showFail = true
 
@@ -203,7 +204,13 @@ fun simulateSampleSizeClcaAssorter(
     val round = cassertion.roundResults.size + 1  // TODO is this accurate ?
 
     val errorRates = when {
-        (auditConfig.version == 2.0 && round > 1) -> {
+        (clcaConfig.strategy == ClcaStrategyType.default && round == 1) -> {
+            val phantomRate = contest.phantomRate()
+            val errorRates = if (phantomRate == 0.0) null else ErrorRates(0.0, phantomRate, 0.0, 0.0)
+            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using errorRates=$errorRates")
+            errorRates
+        }
+        (clcaConfig.strategy == ClcaStrategyType.default && round > 1) -> {
             if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
             cassertion.roundResults.last().errorRates!!
         }
@@ -221,15 +228,13 @@ fun simulateSampleSizeClcaAssorter(
         }
     }
 
-    val d =  if (auditConfig.version == 2.0 && round > 1) 10 else clcaConfig.d
-
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null) {
         Pair(
             ClcaSimulation(cvrs, contest, cassorter, errorRates),
             AdaptiveComparison(
                 Nc = contest.Nc,
                 a = cassertion.cassorter.noerror(),
-                d = d,
+                d = clcaConfig.d,
                 errorRates = errorRates,
             )
         )
@@ -252,71 +257,6 @@ fun simulateSampleSizeClcaAssorter(
             )
         )
     }
-
-    /*
-    val (sampler1: Sampler, bettingFn1: BettingFn) = when {
-        clcaConfig.errorRates != null -> {
-            Pair(
-                ClcaSimulation(cvrs, contest, cassorter, clcaConfig.errorRates),
-                AdaptiveComparison(
-                    Nc = contest.Nc,
-                    withoutReplacement = true,
-                    a = cassertion.cassorter.noerror(),
-                    d1 = clcaConfig.d1,
-                    d2 = clcaConfig.d2,
-                    clcaConfig.errorRates
-                )
-            )
-        }
-        clcaConfig.simFuzzPct == null || clcaConfig.simFuzzPct == 0.0 -> {
-            // this is noerrors
-            Pair(
-                ComparisonWithoutReplacement(
-                    contest,
-                    cvrs.zip(cvrs),
-                    cassorter,
-                    allowReset = true,
-                    trackStratum = false
-                ),
-                AdaptiveComparison(
-                    Nc = contest.Nc,
-                    withoutReplacement = true,
-                    a = cassorter.noerror(),
-                    d1 = clcaConfig.d1,
-                    d2 = clcaConfig.d2,
-                    ErrorRates(0.0, 0.0, 0.0, 0.0)
-                )
-            )
-        }
-        else -> {
-            val v2 = auditConfig.version == 2.0
-            val standard = ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
-            val errorRates = if (auditConfig.version == 1.0 || cassertion.roundResults.isEmpty()) {
-                ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
-            } else {
-                val lastRound = cassertion.roundResults.last().errorRates
-                println("simulateSampleSizeClcaAssorter using errorRates = ${lastRound} instead of $standard for round ${cassertion.roundResults.size + 1}")
-                lastRound
-            }
-
-            Pair(
-                ClcaFuzzSampler(
-                    clcaConfig.simFuzzPct,  // TODO v2 simulation with errorRates
-                    cvrs,
-                    contest as Contest, // TODO cant use Raire here
-                    cassorter
-                ),
-                AdaptiveComparison(
-                    Nc = contest.Nc,
-                    withoutReplacement = true,
-                    a = cassorter.noerror(),
-                    d1 = clcaConfig.d1,
-                    d2 = clcaConfig.d2,
-                    errorRates
-                )
-            )
-        }
-    } */
 
     // we need a permutation to get uniform distribution of errors, since the ComparisonSamplerSimulation puts all the errros at the beginning
     sampler.reset()

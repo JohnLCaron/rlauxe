@@ -217,6 +217,7 @@ fun runClcaAssertionAudit(
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
 
+        ClcaStrategyType.default,
         ClcaStrategyType.noerror -> {
             // optimistic, no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(

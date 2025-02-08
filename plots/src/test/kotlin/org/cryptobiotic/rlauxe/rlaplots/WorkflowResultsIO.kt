@@ -33,7 +33,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun toCSV(wr: WorkflowResult) = buildString {
         append("${writeParameters(wr.parameters)}, ${wr.Nc}, ${wr.margin}, ${wr.status.name}, ${wr.nrounds}, ")
-        append("${wr.samplesUsed}, ${wr.samplesNeeded}, ${wr.nmvrs}, ${wr.failPct} ${wr.neededStddev}")
+        append("${wr.samplesUsed}, ${wr.samplesNeeded}, ${wr.nmvrs}, ${wr.failPct}, ${wr.neededStddev}")
         appendLine()
     }
 

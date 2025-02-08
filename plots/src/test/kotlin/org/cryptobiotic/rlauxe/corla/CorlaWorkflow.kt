@@ -90,34 +90,7 @@ class CorlaWorkflow(
             roundIdx,
             show=show,
         )
-        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
-        val contestsNotDone = contestsUA.filter{ !it.done }
-
-        //	2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
-        //	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
-        //	2.d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known,
-        //     create enough “phantom” cards to make up the difference. TODO c) vs d)  diffrence?
-        //  3.c) Assign independent uniform pseudo-random numbers to CVRs that contain one or more contests under audit
-        //      (including “phantom” CVRs), using a high-quality PRNG [OS19].
-        // val ncvrs =  makeNcvrsPerContest(contests, cvrs)
-        // val phantomCVRs = makePhantomCvrs(contests, ncvrs)
-
-        //	4.c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
-        // draws random ballots and returns their locations to the auditors.
-        if (contestsNotDone.size > 0) {
-            return if (auditConfig.hasStyles) {
-                if (!quiet) println("\nconsistentSampling round $roundIdx")
-                val sampleIndices = consistentSampling(contestsNotDone, cvrsUA)
-                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            } else {
-                if (!quiet) println("\nuniformSampling round $roundIdx")
-                val sampleIndices = uniformSampling(contestsNotDone, cvrsUA, auditConfig.samplePctCutoff, cvrs.size, roundIdx)
-                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            }
-        }
-        return emptyList()
+        return createSampleIndices(this, roundIdx, quiet)
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
@@ -163,7 +136,7 @@ class CorlaWorkflow(
         return allDone
     }
 
-    override fun showResults(estSampleSize: Int) {
+    override fun showResultsOld(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minClcaAssertion()
@@ -191,6 +164,7 @@ class CorlaWorkflow(
         println("extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
+    override fun auditConfig() =  this.auditConfig
     override fun getContests(): List<ContestUnderAudit> = contestsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }

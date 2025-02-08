@@ -1,12 +1,28 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
+import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowIF
 
-//// Adapted from SHANGRLA Audit.py
+fun createSampleIndices(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> {
+    val auditConfig = workflow.auditConfig()
+    val contestsNotDone = workflow.getContests().filter{ !it.done }
+    val maxContestSize = contestsNotDone.filter { !it.done }.maxOfOrNull { it.estSampleSize }
 
-// TODO not clear yet how to limit the sample size. maxFirstRoundSampleSize? maxPercent? show pvalue, let user intervene?
+    if (contestsNotDone.isEmpty()) return emptyList()
+
+    return if (auditConfig.hasStyles) {
+        if (!quiet) println("\nconsistentSampling round $roundIdx")
+        val sampleIndices = consistentSampling(contestsNotDone, workflow.getBallotsOrCvrs())
+        if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+        sampleIndices
+    } else {
+        if (!quiet) println("\nuniformSampling round $roundIdx")
+        val sampleIndices = uniformSampling(contestsNotDone, workflow.getBallotsOrCvrs(), auditConfig.samplePctCutoff, roundIdx)
+        if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+        sampleIndices
+    }
+}
 
 fun consistentSampling(
     contests: List<ContestUnderAudit>, // must have sampleSizes set
@@ -55,10 +71,10 @@ fun uniformSampling(
     contests: List<ContestUnderAudit>,
     ballotOrCvrs: List<BallotOrCvr>,
     samplePctCutoff: Double,
-    Nb: Int,
     roundIdx: Int,
 ): List<Int> {
     if (ballotOrCvrs.isEmpty()) return emptyList()
+    val Nb = ballotOrCvrs.size // TODO is it always all ballots ?? could it be contest specific ??
 
     // set all sampled to false, so each round is independent TODO not needed
     ballotOrCvrs.forEach{ it.setIsSampled(false)}

@@ -7,7 +7,9 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 interface RlauxWorkflowIF {
     fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int> // return ballot indices to sample
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean  // return allDone
-    fun showResults(estSampleSize: Int)
+    fun showResultsOld(estSampleSize: Int)
+
+    fun auditConfig() : AuditConfig
     fun getContests() : List<ContestUnderAudit>
     fun getBallotsOrCvrs() : List<BallotOrCvr>
 }

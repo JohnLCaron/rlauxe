@@ -213,12 +213,8 @@ data class OneAuditComparisonAssorter(
     val clcaMargin: Double // estimated assorter mean, if all cards agree; used for alphaMart
     var cvrStrata: StratumInfo? = null
 
-    // TODO what is this used for??
-    private val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
-    val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
-    val upperBound = 2.0 * noerror  // maximum assort value
-    override fun noerror() = noerror
-    override fun upperBound() = upperBound
+    override fun noerror() = cvrStrata!!.cassorter!!.noerror
+    override fun upperBound() = cvrStrata!!.cassorter!!.upperBound
     override fun assorter() = assorter
 
     init {

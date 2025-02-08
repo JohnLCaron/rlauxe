@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 02/07/2025_
+_last update: 02/08/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -26,6 +26,7 @@ Table of Contents
 * [Measuring Samples Needed](#measuring-samples-needed)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
+  * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Estimation](#estimation)
   * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
@@ -316,19 +317,30 @@ These are plots vs fuzzPct, with margin fixed at 4%:
 * Sample sizes increase with fuzzPct similarly for all three audits.
 * CLCA as a percent of Nc is more sensitive to errors than polling or OneAudit.
 
-Varying undervotes percent:
+Varying the percent of undervotes at margin of 4% and 2%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotes Linear">![AuditsWithUndervotesLinear](./docs/plots/workflows/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithUndervotes/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](./docs/plots/workflows/auditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithUndervotes/AuditsWithUndervotes2Linear.html" rel="AuditsWithUndervotes2Linear">![AuditsWithUndervotes2Linear](./docs/plots/workflows/auditsWithUndervotes/AuditsWithUndervotes2Linear.png)</a>
 
-Varying phantom percent, up to and over the margin of 4.5%:
+* Note that undervote percentages are shown up to 50%, with relatively modest effects.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.html" rel="AuditsWithPhantomsLog">![AuditsWithPhantomsLog](./docs/plots/workflows/AuditsWithPhantoms/AuditsWithPhantomsLog.png)</a>
+## Effect of Phantoms on Samples needed
+
+Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithPhantoms/sampleSizesLinear.html" rel="AuditsWithPhantomsLinear">![AuditsWithPhantomsLinear](./docs/plots/workflows/auditsWithPhantoms/sampleSizesLinear)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithPhantoms/sampleSizesLog.html" rel="AuditsWithPhantomsLog">![AuditsWithPhantomsLog](./docs/plots/workflows/auditsWithPhantoms/sampleSizesLog)</a>
 
 * Increased phantoms have a strong effect on sample size.
-* CLCA and Polling audits go to hand count when phantomPct exceeds the margin, as they should.
-* Investigate why OneAudits are less affected.
+* All audits go to hand count when phantomPct gets close to the margin, as they should.
 
-TODO show the effect of phantoms in more detail.
+Having _phantomPct_ phantoms is equivilent to subtracting phantomPct from the margin. In this CLCA plot we show samples needed
+as a function of phantomPct, and samples needed with no phantoms but the margin shifted by phantomPct:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/phantomMarginShift/sampleSizesLog.html" rel="phantomMarginShiftLog">![phantomMarginShiftLog](./docs/plots/workflows/phantomMarginShift/sampleSizesLog.png)</a>
+
+* Generally, in further simulations we will ignore the effect of phantoms for simplicity, with the rule of thumb that
+  their effect is as if the margins are reduced by phantomPct across the board.
 
 # Estimating Sample Batch sizes
 

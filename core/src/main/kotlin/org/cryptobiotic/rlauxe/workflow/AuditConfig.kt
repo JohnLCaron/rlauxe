@@ -28,7 +28,9 @@ data class PollingConfig(
 // noerror: assume no errors, with adaptation
 // fuzzPct: model errors with fuzz simulation, with adaptation
 // apriori: pass in apriori errorRates, with adaptation
-enum class ClcaStrategyType { default, oracle, noerror, fuzzPct, apriori }
+// previous: use error rates from previous batch
+// phantoms: use phantom rates
+enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, previous, phantoms }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation

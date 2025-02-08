@@ -4,13 +4,16 @@ import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.category
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class CompareAuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
-    val name = "AuditsWithUndervotes"
+    val nsimEst = 100  // number of times to run simulation
+    val name = "auditsWithUndervotes"
     val dirName = "/home/stormy/temp/workflow/$name"
+    val mvrFuzzPct = .01
 
     @Test
     fun genAuditWithUnderVotesPlots() {
@@ -23,18 +26,19 @@ class CompareAuditsWithUndervotes {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
 
         undervotes.forEach { undervote ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, undervote, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble(), "undervote" to undervote))
+            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, undervote, phantomPct=0.0, mvrsFuzzPct=mvrFuzzPct,
+                auditConfigIn=AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
+                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, undervote, 0.0, 0.0,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
-                parameters=mapOf("nruns" to nruns.toDouble(), "undervote" to undervote))
+            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, undervote, 0.0, mvrFuzzPct,
+                auditConfigIn=AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst),
+                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            // oneaudit
-            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, undervote, 0.0, cvrPercent, 0.0,
-                mapOf("nruns" to nruns.toDouble(), "undervote" to undervote))
+            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, undervote, 0.0, cvrPercent=cvrPercent, fuzzPct=mvrFuzzPct,
+                auditConfigIn=AuditConfig(AuditType.ONEAUDIT, true, nsimEst = nsimEst),
+                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit"))
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
 
@@ -42,8 +46,7 @@ class CompareAuditsWithUndervotes {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/auditsWithUndervotes.cvs")
         writer.writeResults(results)
 
         showSampleSizesVsUndervotePct(true)
@@ -51,11 +54,11 @@ class CompareAuditsWithUndervotes {
     }
 
     fun showSampleSizesVsUndervotePct(useLog: Boolean) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/auditsWithUndervotes.cvs")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsUndervotePct(results, "auditType", useLog=useLog)   { compareCategories(it) }
+        plotter.showSampleSizesVsUndervotePct(results, "auditsWithUndervotes","auditType", useLog=useLog)   { category(it) }
     }
 
 }

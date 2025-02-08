@@ -91,7 +91,7 @@ class ClcaWorkflowTaskGenerator(
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?:
             AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 10,
-                clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct))
+                clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
@@ -120,7 +120,7 @@ class PollingWorkflowTaskGenerator(
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
-    val fuzzPct: Double,
+    val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
     val Nb: Int = Nc,
@@ -129,12 +129,12 @@ class PollingWorkflowTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = 10, pollingConfig = PollingConfig(simFuzzPct = fuzzPct)
+            AuditType.POLLING, true, nsimEst = 10, pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, fuzzPct)
+        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
         var ballotManifest = sim.makeBallotManifest(auditConfig.hasStyles)
 
         if (!auditConfig.hasStyles && Nb > Nc) {
@@ -151,7 +151,7 @@ class PollingWorkflowTaskGenerator(
             name(),
             polling,
             testMvrs,
-            parameters + mapOf("fuzzPct" to fuzzPct, "auditType" to 2.0)
+            parameters + mapOf("fuzzPct" to mvrsFuzzPct, "auditType" to 2.0)
         )
     }
 }

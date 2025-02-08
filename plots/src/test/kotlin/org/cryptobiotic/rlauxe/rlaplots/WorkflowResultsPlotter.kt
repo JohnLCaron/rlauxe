@@ -295,15 +295,15 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showSampleSizesVsUndervotePct(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
+    fun showSampleSizesVsUndervotePct(data: List<WorkflowResult>, writeName: String, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
 
         wrsPlot(
-            titleS = "$filename samples needed",
+            titleS = "$writeName samples needed",
             subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
             data,
-            if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
+            if (useLog) "$dir/${writeName}Log" else "$dir/${writeName}Linear",
             "underVotePct",
             if (useLog) "log10(samplesNeeded)" else "samplesNeeded",
             catName,
@@ -313,15 +313,16 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
         )
     }
 
-    fun showSampleSizesVsPhantomPct(data: List<WorkflowResult>, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
+    fun showSampleSizesVsPhantomPct(data: List<WorkflowResult>, writeName: String, catName: String, useLog: Boolean = true, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
+        val mvrFuzz = exemplar.parameters["mvrFuzz"]!!
 
         wrsPlot(
             titleS = "$filename samples needed",
-            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
+            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns} mvrFuzz=${mvrFuzz}",
             data,
-            if (useLog) "$dir/${filename}Log" else "$dir/${filename}Linear",
+            if (useLog) "$dir/${writeName}Log" else "$dir/${writeName}Linear",
             "phantomPct",
             if (useLog) "log10(samplesNeeded)" else "samplesNeeded",
             catName,
@@ -334,10 +335,11 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
     fun showFailuresVsPhantomPct(data: List<WorkflowResult>, catName: String, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
+        val mvrFuzz = exemplar.parameters["mvrFuzz"]!!
 
         wrsPlot(
             titleS = "$filename failurePct",
-            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns}",
+            subtitleS = "margin=${df(exemplar.margin)} N=${exemplar.Nc} nruns=${nruns} mvrFuzz=${mvrFuzz}",
             data,
             "$dir/${filename}Failures",
             "phantomPct",

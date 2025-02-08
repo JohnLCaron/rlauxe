@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.max
 
-private val debugErrorRates = true
+private val debugErrorRates = false
 
 // "Stylish Risk-Limiting Audits in Practice" STYLISH 2.1
 // 1. Set up the audit
@@ -184,11 +184,27 @@ fun auditClcaAssertion(
 
     val clcaConfig = auditConfig.clcaConfig
     val bettingFn: BettingFn = when (clcaConfig.strategy) {
-        ClcaStrategyType.default -> {
+
+        ClcaStrategyType.previous -> {
+            // use previous round errors as apriori, then adapt to actual mvrs
             val phantomRate = contestUA.contest.phantomRate()
             val errorRates = if (roundIdx > 1) (cassertion.roundResults.last().errorRates!!) // TODO minimum phantomRate for p1o?
-                    else if (phantomRate == 0.0) null else ErrorRates(0.0, phantomRate, 0.0, 0.0)
-            if (debugErrorRates) println("auditClcaAssertion round $roundIdx errorRates=$errorRates")
+                    else if (phantomRate == 0.0) ErrorRates(0.0, 0.0, 0.0, 0.0) else ErrorRates(0.0, phantomRate, 0.0, 0.0)
+            if (debugErrorRates) println(" previous audit round $roundIdx errorRates=$errorRates")
+            AdaptiveComparison(
+                Nc = contestUA.Nc,
+                withoutReplacement = true,
+                a = cassorter.noerror(),
+                d = clcaConfig.d,
+                errorRates
+            )
+        }
+
+        ClcaStrategyType.phantoms -> {
+            // use previous round errors as apriori, then adapt to actual mvrs
+            val phantomRate = contestUA.contest.phantomRate()
+            val errorRates = if (phantomRate == 0.0) ErrorRates(0.0, 0.0, 0.0, 0.0) else ErrorRates(0.0, phantomRate, 0.0, 0.0)
+            if (debugErrorRates) println(" phantoms audit round $roundIdx errorRates=$errorRates")
             AdaptiveComparison(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,
@@ -216,15 +232,9 @@ fun auditClcaAssertion(
         }
 
         ClcaStrategyType.fuzzPct -> {
-            /* val errorRates = if (auditConfig.version == 1.0 || cassertion.roundResults.isEmpty()) {
-                // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
-                ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
-            } else {
-                // use last rounds' errorRates as apriori. TODO: incremental audit
-                cassertion.roundResults.last().errorRates
-            } */
+            // use computed errors as apriori, then adapt to actual mvrs.
             val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
-            if (debug) println("simulateSampleSizeClcaAssorter errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
+            if (debugErrorRates) println(" fuzzPct errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
 
             AdaptiveComparison(
                 Nc = contestUA.Nc,

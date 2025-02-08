@@ -204,30 +204,31 @@ fun simulateSampleSizeClcaAssorter(
     val round = cassertion.roundResults.size + 1  // TODO is this accurate ?
 
     val errorRates = when {
-        (clcaConfig.strategy == ClcaStrategyType.default && round == 1) -> {
-            val phantomRate = contest.phantomRate()
-            val errorRates = if (phantomRate == 0.0) null else ErrorRates(0.0, phantomRate, 0.0, 0.0)
-            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using errorRates=$errorRates")
-            errorRates
-        }
-        (clcaConfig.strategy == ClcaStrategyType.default && round > 1) -> {
-            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
+        (clcaConfig.strategy == ClcaStrategyType.previous && round > 1) -> {
+            if (debugErrorRates) println("previous simulate round $round using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
             cassertion.roundResults.last().errorRates!!
         }
+        (clcaConfig.strategy == ClcaStrategyType.phantoms || clcaConfig.strategy == ClcaStrategyType.previous) -> {
+            val phantomRate = contest.phantomRate()
+            val errorRates = ErrorRates(0.0, phantomRate, 0.0, 0.0)
+            if (debugErrorRates) println("phantoms simulate round $round using errorRates=$errorRates")
+            errorRates
+        }
         (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> {
-            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using simFuzzPct=${clcaConfig.simFuzzPct} errorRate=${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)}")
+            if (debugErrorRates) println("simFuzzPct simulate round $round using simFuzzPct=${clcaConfig.simFuzzPct} errorRate=${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)}")
             ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
         }
         (clcaConfig.errorRates != null) -> {
-            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using clcaConfig.errorRates =${clcaConfig.errorRates}")
+            if (debugErrorRates) println("simulate apriori round $round using clcaConfig.errorRates =${clcaConfig.errorRates}")
             clcaConfig.errorRates
         } // hmmmm
         else -> {
-            if (debugErrorRates) println("simulateSampleSizeClcaAssorter round $round using no errorRates")
+            if (debugErrorRates) println("simulate round $round using no errorRates")
             null
         }
     }
 
+    // TODO detect all zeroes
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null) {
         Pair(
             ClcaSimulation(cvrs, contest, cassorter, errorRates),
@@ -250,10 +251,9 @@ fun simulateSampleSizeClcaAssorter(
             ),
             AdaptiveComparison(
                 Nc = contest.Nc,
-                withoutReplacement = true,
                 a = cassorter.noerror(),
                 d = clcaConfig.d,
-                ErrorRates(0.0, 0.0, 0.0, 0.0)
+                errorRates = ErrorRates(0.0, 0.0, 0.0, 0.0)
             )
         )
     }

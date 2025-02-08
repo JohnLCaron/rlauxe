@@ -91,7 +91,7 @@ class CompareAuditsWithErrors {
 }
 
 fun compareCategories(wr: WorkflowResult): String {
-    return when (wr.parameters["auditType"]) {
+    return when (wr.Dparam("auditType")) {
         1.0 -> "oneaudit"
         2.0 -> "polling"
         3.0 -> "clca"

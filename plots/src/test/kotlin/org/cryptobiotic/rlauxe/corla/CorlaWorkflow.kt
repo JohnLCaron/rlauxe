@@ -120,7 +120,7 @@ class CorlaWorkflow(
             var allAssertionsDone = true
             contestUA.clcaAssertions.forEach { cassertion ->
                 if (!cassertion.status.complete) {
-                    val testH0Result = runClcaAssertionAudit(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
+                    val testH0Result = runCorlaAudit(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
                     cassertion.status = testH0Result.status
                     cassertion.round = roundIdx
                     allAssertionsDone = allAssertionsDone && cassertion.status.complete
@@ -171,7 +171,7 @@ class CorlaWorkflow(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-fun runClcaAssertionAudit(
+fun runCorlaAudit(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     cassertion: ClcaAssertion,
@@ -179,59 +179,8 @@ fun runClcaAssertionAudit(
     roundIdx: Int,
     quiet: Boolean = true,
 ): TestH0Result {
-    val debug = false
     val cassorter = cassertion.cassorter
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
-
-    val clcaConfig = auditConfig.clcaConfig
-    val bettingFn = when (clcaConfig.strategy) {
-        ClcaStrategyType.oracle -> {
-            // use the actual errors comparing mvrs to cvrs. Testing only
-            val errorRates = ClcaErrorRates.calcErrorRates(contestUA.id, cassorter, cvrPairs)
-            OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
-        }
-
-        ClcaStrategyType.default,
-        ClcaStrategyType.noerror -> {
-            // optimistic, no errors as apriori, then adapt to actual mvrs
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-            )
-        }
-
-        ClcaStrategyType.fuzzPct -> {
-            /* val errorRates = if (auditConfig.version == 1.0 || cassertion.roundResults.isEmpty()) {
-                // use given fuzzPct to generate apriori errors, then adapt to actual mvrs
-                ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
-            } else {
-                // use last rounds' errorRates as apriori. TODO: incremental audit
-                cassertion.roundResults.last().errorRates
-            } */
-            val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
-            if (debug) println("simulateSampleSizeClcaAssorter errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
-
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                errorRates
-            )
-        }
-
-        ClcaStrategyType.apriori ->
-            // use given errors as apriori, then adapt to actual mvrs.
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                clcaConfig.errorRates!!
-            )
-    }
 
     // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
     //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn

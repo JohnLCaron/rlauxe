@@ -73,7 +73,7 @@ class AdaptiveComparison(
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
-    errorRates: ErrorRates? = null,  // a priori estimate of the error rates
+    errorRates: ErrorRates, // ? = null,  // a priori estimate of the error rates
     val eps: Double = .00001
 ): BettingFn {
     val p2o: Double // apriori rate of 2-vote overstatements; set < 0 to remove consideration

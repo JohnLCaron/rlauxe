@@ -41,25 +41,8 @@ class OneAuditWorkflow(
             roundIdx,
             show=show,
         )
-        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
-        val contestsNotDone = contestsUA.filter{ !it.done }
 
-        //	4.c) Choose thresholds {𝑡_𝑐} 𝑐 ∈ C so that 𝑆_𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
-        // draws random ballots and returns their locations to the auditors.
-        if (contestsNotDone.size > 0) {
-            return if (auditConfig.hasStyles) {
-                if (!quiet) println(" consistentSampling round $roundIdx")
-                val sampleIndices = consistentSampling(contestsNotDone, cvrsUA)
-                if (!quiet) println("  maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            } else {
-                if (!quiet) println(" uniformSampling round $roundIdx")
-                val sampleIndices = uniformSampling(contestsNotDone, cvrsUA, auditConfig.samplePctCutoff, cvrs.size, roundIdx)
-                if (!quiet) println("  maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            }
-        }
-        return emptyList()
+        return createSampleIndices(this, roundIdx, quiet)
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
@@ -94,7 +77,7 @@ class OneAuditWorkflow(
         return allDone
     }
 
-    override fun showResults(estSampleSize: Int) {
+    override fun showResultsOld(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minClcaAssertion()
@@ -121,6 +104,7 @@ class OneAuditWorkflow(
         println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
+    override fun auditConfig() =  this.auditConfig
     override fun getContests(): List<ContestUnderAudit> = contestsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }

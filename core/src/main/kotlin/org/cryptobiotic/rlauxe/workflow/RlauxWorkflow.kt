@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import kotlin.math.max
 
+// created from persistent state
 class RlauxWorkflow(
     val auditConfig: AuditConfig,
     val contestsUA: List<ContestUnderAudit>,
@@ -16,7 +17,7 @@ class RlauxWorkflow(
     val cvrs = cvrsUA.map { it.cvr }    // may be empty
     val bcUA = if (auditConfig.auditType == AuditType.POLLING) ballotsUA else cvrsUA
 
-    // debugging
+    // debugging and plots
     fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<EstimationResult> {
         return estimateSampleSizes(
             auditConfig,
@@ -37,23 +38,8 @@ class RlauxWorkflow(
             roundIdx,
             show=show,
         )
-        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
 
-        val contestsNotDone = contestsUA.filter{ !it.done }
-        if (contestsNotDone.size > 0) {
-            return if (auditConfig.hasStyles) {
-                if (!quiet) println("\nconsistentSampling round $roundIdx")
-                val sampleIndices = consistentSampling(contestsNotDone, bcUA)
-                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            } else {
-                if (!quiet) println("\nuniformSampling round $roundIdx")
-                val sampleIndices = uniformSampling(contestsNotDone, bcUA, auditConfig.samplePctCutoff, cvrs.size, roundIdx)
-                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            }
-        }
-        return emptyList()
+        return createSampleIndices(this, roundIdx, quiet)
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
@@ -64,7 +50,7 @@ class RlauxWorkflow(
         }
     }
 
-    override fun showResults(estSampleSize: Int) {
+    override fun showResultsOld(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
@@ -92,7 +78,35 @@ class RlauxWorkflow(
         println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
+    override fun auditConfig() =  this.auditConfig
     override fun getContests(): List<ContestUnderAudit> = contestsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = bcUA
+}
 
+fun RlauxWorkflowIF.showResults(estSampleSize: Int) {
+    println("Audit results")
+    this.getContests().forEach{ contest ->
+        val minAssertion = contest.minAssertion()
+        if (minAssertion == null) {
+            println(" $contest has no assertions; status=${contest.status}")
+        } else {
+            if (minAssertion.roundResults.size == 1) {
+                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estSampleSize} ${minAssertion.roundResults[0]}")
+                if (!this.auditConfig().hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
+            } else {
+                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estSampleSize}")
+                if (!this.auditConfig().hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
+                minAssertion.roundResults.forEach { rr -> println("   $rr") }
+            }
+        }
+    }
+
+    var maxBallotsUsed = 0
+    this.getContests().forEach { contest ->
+        contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
+            val lastRound = assertion.roundResults.last()
+            maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+        }
+    }
+    println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
 }

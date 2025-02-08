@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflow
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowIF
+import org.cryptobiotic.rlauxe.workflow.showResults
 import java.util.concurrent.TimeUnit
 
 /** Run one round of the RLA. */

@@ -10,7 +10,7 @@ class PollingWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     ballotManifest: BallotManifest,
-    val Nb: Int, // total number of ballots/cards
+    val Nb: Int, // total number of ballots/cards TODO same as ballots.size ??
     val quiet: Boolean = true,
 ): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
@@ -44,28 +44,11 @@ class PollingWorkflow(
             roundIdx,
             show=show,
         )
-        val maxContestSize = contestsUA.filter { !it.done }.maxOfOrNull { it.estSampleSize }
-        val contestsNotDone = contestsUA.filter{ !it.done }
 
-        // choose indices to sample
-        if (contestsNotDone.size > 0) {
-            return if (auditConfig.hasStyles) {
-                if (!quiet) println("\nconsistentSampling round $roundIdx")
-                val sampleIndices = consistentSampling(contestsNotDone, ballotsUA)
-                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            } else {
-                if (!quiet) println("\nuniformSampling round $roundIdx")
-                val sampleIndices = uniformSampling(contestsNotDone, ballotsUA, auditConfig.samplePctCutoff, Nb, roundIdx)
-                if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
-                sampleIndices
-            }
-        }
-
-        return emptyList()
+        return createSampleIndices(this, roundIdx, quiet)
     }
 
-    override fun showResults(estSampleSize: Int) {
+    override fun showResultsOld(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minAssertion()
@@ -96,6 +79,8 @@ class PollingWorkflow(
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         return runPollingAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
     }
+
+    override fun auditConfig() =  this.auditConfig
     override fun getContests() : List<ContestUnderAudit> = contestsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
 }

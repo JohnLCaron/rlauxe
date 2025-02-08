@@ -55,6 +55,8 @@ interface ContestIF {
     val winners: List<Int>
     val losers: List<Int>
     fun show() : String = ""
+
+    fun phantomRate() = Np / Nc.toDouble()
 }
 
 //    When we have styles, we can calculate Nb_c = physical ballots for contest C.
@@ -76,9 +78,7 @@ class Contest(
         override val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
         override val Nc: Int,
-        override val Np: Int,       // may not know this, if !hasStyles
-        // val hasStyles: Boolean,
-        // val Nb: Int?,  // needed to form the factor N / Nc when !hasStyles
+        override val Np: Int,       // TODO may not know this, if !hasStyles
     ): ContestIF {
     override val id = info.id
     val name = info.name

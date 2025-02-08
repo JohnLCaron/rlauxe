@@ -134,6 +134,7 @@ class OneAuditStratum (
             cvrs.add(makeCvr(info.id))
         }
         // phantoms
+        // TODO if dont know Np, assume Np = Nc = nvotes ??
         repeat(this.Np) {
             cvrs.add(Cvr(strataName, mapOf(info.id to IntArray(0)), phantom = true))
         }

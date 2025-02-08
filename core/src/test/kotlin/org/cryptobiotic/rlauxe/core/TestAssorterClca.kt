@@ -25,7 +25,7 @@ Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
  */
 
 // See SHANGRLA 3.2
-class TestAssorterComparison {
+class TestAssorterClca {
 
     @Test
     fun testBasics() {
@@ -393,9 +393,11 @@ class TestAssorterComparison {
         assertEquals(1.5*noerror, bassorter.bassort(otherCvr, loserCvr))       // cvr flipped vote from other to loser
         assertEquals(noerror, bassorter.bassort(otherCvr, otherCvr))           // no error
 
-        assertEquals(0.0, bassorter.bassort(phantomCvr, winnerCvr))          // cvr reported winner, cant find ballot: twoOver
-        assertEquals(noerror, bassorter.bassort(phantomCvr, loserCvr))       // cvr reported loser, cant find ballot: nuetral
-        assertEquals(0.5*noerror, bassorter.bassort(phantomCvr, phantomCvr)) // cant find ballot: oneOver
+        assertEquals(0.0, bassorter.bassort(phantomCvr, winnerCvr))           // no mvr, cvr reported winner, : twoOver
+        assertEquals(noerror, bassorter.bassort(phantomCvr, loserCvr))                 // no mvr, cvr reported loser: nuetral
+        assertEquals(0.5*noerror, bassorter.bassort(phantomCvr, phantomCvr))  // no mvr, no cvr: oneOver (common case i assume)
+        assertEquals(1.5*noerror, bassorter.bassort(winnerCvr, phantomCvr))   // mvr reported winner, no cvr: oneUnder
+        assertEquals(.5*noerror, bassorter.bassort(loserCvr, phantomCvr))     // mvr reported lose, no cvr: oneOver
     }
 
     @Test

@@ -33,6 +33,7 @@ Table of Contents
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
     * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
+    * [Effect of Multiple Contest Auditing](#effect-of-multiple-contest-auditing)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -265,7 +266,7 @@ See [OneAudit Notes](docs/OneAudit.md) for more details and plots.
 
 Here we are looking at the actual number of sample sizes needed to reject or confirm the null hypotheses, called the 
 "samples needed". We ignore the need to estimate a batch size, as if we do "one sample at a time". This gives us a
-theoretical minimum. In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) we deal with the 
+theoretical minimum. In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) below, we deal with the 
 need to estimate a batch size, and the extra overhead that brings.
 
 In general samplesNeeded are independent of N, which is helpful to keep in mind
@@ -425,17 +426,15 @@ betting function with weight parameter d = 100, for margin=2% and errors in the 
 
 When the estimated error rates are equal to the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/estSampleDistribution/estSampleDistributionEqual.html" rel="estSampleDistributionEqual">![estSampleDistributionEqual](./docs/plots/estSampleDistribution/estSampleDistributionEqual.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesEqual.html" rel="estErrorRatesEqual">![estErrorRatesEqual](./docs/plots/dist/estSamplesNeeded/estErrorRatesEqual.png)</a>
 
 When the estimated error rates are double the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/estSampleDistribution/estSampleDistributionDouble.html" rel="estSampleDistributionDouble">![estSampleDistributionDouble](./docs/plots/estSampleDistribution/estSampleDistributionDouble.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesDouble.html" rel="estErrorRatesDouble">![estErrorRatesDouble](./docs/plots/dist/estSamplesNeeded/estErrorRatesDouble.png)</a>
 
 When the estimated error rates are half the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/estSampleDistribution/estSampleDistributionHalf.html" rel="estSampleDistributionHalf">![estSampleDistributionHalf](./docs/plots/estSampleDistribution/estSampleDistributionHalf.png)</a>
-
-TODO: adjust better to the actual error rates as they are sampled.
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.png)</a>
 
 The amount of extra sampling closely follows the number of samples needed, adding 10-50% extra work, as the following plots vs margin show:
 

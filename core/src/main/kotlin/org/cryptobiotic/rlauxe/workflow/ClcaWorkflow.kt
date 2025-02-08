@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.max
 
+private val debugErrorRates = true
+
 // "Stylish Risk-Limiting Audits in Practice" STYLISH 2.1
 // 1. Set up the audit
 //	a) Read contest descriptors, candidate names, social choice functions, and reported winners.
@@ -210,14 +212,27 @@ fun auditClcaAssertion(
     val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
     val clcaConfig = auditConfig.clcaConfig
-    val bettingFn = when (clcaConfig.strategy) {
+    val bettingFn: BettingFn = when (clcaConfig.strategy) {
+        ClcaStrategyType.default -> {
+            val phantomRate = contestUA.contest.phantomRate()
+            val errorRates = if (roundIdx > 1) (cassertion.roundResults.last().errorRates!!) // TODO minimum phantomRate for p1o?
+                    else if (phantomRate == 0.0) null else ErrorRates(0.0, phantomRate, 0.0, 0.0)
+            if (debugErrorRates) println("auditClcaAssertion round $roundIdx errorRates=$errorRates")
+            AdaptiveComparison(
+                Nc = contestUA.Nc,
+                withoutReplacement = true,
+                a = cassorter.noerror(),
+                d = clcaConfig.d,
+                errorRates
+            )
+        }
+
         ClcaStrategyType.oracle -> {
             // use the actual errors comparing mvrs to cvrs. Testing only
             val errorRates = ClcaErrorRates.calcErrorRates(contestUA.id, cassorter, cvrPairs)
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
 
-        ClcaStrategyType.default,
         ClcaStrategyType.noerror -> {
             // optimistic, no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(

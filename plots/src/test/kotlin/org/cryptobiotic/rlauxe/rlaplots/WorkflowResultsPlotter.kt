@@ -88,14 +88,14 @@ class WorkflowResultsPlotter(val dir: String, val filename: String) {
 
     }
 
-    fun showEstSizesVsMarginVersion(data: List<WorkflowResult>, subtitle: String, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
+    fun showEstSizesVsMarginStrategy(data: List<WorkflowResult>, subtitle: String, catName: String, yscale: Scale = Scale.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
         val nruns = exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
         val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
 
         wrsPlot(
-            titleS = "$filename extra samples (version1 - version2)",
+            titleS = "$filename extra samples",
             subtitleS = subtitle,
             data,
             "$dir/${filename}${yscale.name}",
@@ -367,5 +367,11 @@ fun categorySimFuzzVersion(wr: WorkflowResult): String {
     val diff =  categoryFuzzDiff(wr)
     val ver = wr.parameters["cat"]
     return "ver$ver ${diff}%"
+}
+
+fun categorySimFuzzCat(wr: WorkflowResult): String {
+    val diff =  categoryFuzzDiff(wr)
+    val cat = wr.parameters["cat"]
+    return "$cat ${diff}%"
 }
 

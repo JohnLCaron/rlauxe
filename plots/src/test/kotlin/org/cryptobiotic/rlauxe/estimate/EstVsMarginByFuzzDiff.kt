@@ -10,7 +10,7 @@ import kotlin.test.Test
 class EstVsMarginByFuzzDiff {
     val Nc = 50000
     val nruns = 100  // number of times to run workflow
-    val name = "estVsMarginOracle"
+    val name = "estVsMarginByFuzzDiff" // ""estVsMarginOracle"
     val dirName = "/home/stormy/temp/workflow/$name"
 
     // Used in docs
@@ -25,7 +25,7 @@ class EstVsMarginByFuzzDiff {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val clcaConfig = ClcaConfig(ClcaStrategyType.oracle, simFuzzPct)
+            val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct)
             val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, quantile=.50, nsimEst = 100, clcaConfig = clcaConfig)
 
             margins.forEach { margin ->

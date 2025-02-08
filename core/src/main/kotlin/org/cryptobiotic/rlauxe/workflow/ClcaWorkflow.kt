@@ -200,6 +200,7 @@ fun auditClcaAssertion(
             )
         }
 
+        ClcaStrategyType.mixed,
         ClcaStrategyType.phantoms -> {
             // use previous round errors as apriori, then adapt to actual mvrs
             val phantomRate = contestUA.contest.phantomRate()

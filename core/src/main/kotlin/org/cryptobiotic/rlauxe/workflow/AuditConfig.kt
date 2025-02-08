@@ -30,7 +30,8 @@ data class PollingConfig(
 // apriori: pass in apriori errorRates, with adaptation
 // previous: use error rates from previous batch
 // phantoms: use phantom rates
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, previous, phantoms }
+// mixed: use phantom rates for audit, noerror for sample
+enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, previous, phantoms, mixed }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation

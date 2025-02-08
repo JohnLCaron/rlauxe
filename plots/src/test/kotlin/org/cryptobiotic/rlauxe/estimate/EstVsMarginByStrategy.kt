@@ -10,8 +10,8 @@ import kotlin.test.Test
 
 class EstVsMarginByStrategy {
     val Nc = 50000
-    val nruns = 10  // number of times to run workflow
-    val nsimEst = 10 // number of simulations
+    val nruns = 1000  // number of times to run workflow
+    val nsimEst = 100 // number of simulations
     val phantomPct = .01
     val fuzzMvrs = .01
     val simFuzzPct = .01
@@ -42,7 +42,7 @@ class EstVsMarginByStrategy {
 
     @Test
     fun estSamplesVsMarginByStrategy() {
-        val name = "estVsMarginByStrategy"
+        val name = "estVsMarginByStrategy4"
         val dirName = "/home/stormy/temp/workflow/$name"
 
         val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
@@ -58,9 +58,9 @@ class EstVsMarginByStrategy {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val auditConfig2 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
-                clcaConfig = ClcaConfig(ClcaStrategyType.previous, simFuzzPct=simFuzzPct))
+                clcaConfig = ClcaConfig(ClcaStrategyType.mixed, simFuzzPct=simFuzzPct))
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
-                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "previous", "simFuzzPct" to simFuzzPct),
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "mixed", "simFuzzPct" to simFuzzPct),
                 auditConfigIn=auditConfig2)
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
@@ -91,7 +91,7 @@ class EstVsMarginByStrategy {
 
     @Test
     fun regenPlots() {
-        val name = "estVsMarginByStrategy"
+        val name = "estVsMarginByStrategy4"
         val dirName = "/home/stormy/temp/workflow/$name"
 
         val subtitle = "Nc=${Nc} nruns=${nruns} mvrFuzz=$fuzzMvrs"
@@ -113,7 +113,7 @@ class EstVsMarginByStrategy {
 
     @Test
     fun estSamplesVsMarginByStrategyWithPhantoms() {
-        val name = "estVsMarginByStrategyWithPhantoms"
+        val name = "estVsMarginByStrategyWithPhantoms5"
         val dirName = "/home/stormy/temp/workflow/$name"
 
         val margins = listOf(.025, .03, .04, .05, .06, .07, .08, .09, .10)
@@ -129,9 +129,9 @@ class EstVsMarginByStrategy {
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
                 val auditConfig2 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
-                    clcaConfig = ClcaConfig(ClcaStrategyType.previous))
+                    clcaConfig = ClcaConfig(ClcaStrategyType.mixed))
                 val clcaGenerator2 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
-                    parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "previous", "simFuzzPct" to simFuzzPct),
+                    parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "mixed", "simFuzzPct" to simFuzzPct),
                     auditConfigIn=auditConfig2)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
@@ -149,12 +149,13 @@ class EstVsMarginByStrategy {
                     auditConfigIn=auditConfig4)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
+                /*
                 val auditConfig5 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                     clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
                 val clcaGenerator5 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "phantoms", "simFuzzPct" to simFuzzPct),
                     auditConfigIn=auditConfig5)
-                tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
+                tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5)) */
             }
 
         // run tasks concurrently and average the results
@@ -169,7 +170,7 @@ class EstVsMarginByStrategy {
 
     @Test
     fun regenPlotsWithPhantoms() {
-        val name = "estVsMarginByStrategyWithPhantoms"
+        val name = "estVsMarginByStrategyWithPhantoms5"
         val dirName = "/home/stormy/temp/workflow/$name"
 
         val subtitle = "Nc=${Nc} nruns=${nruns} fuzzMvrs=$fuzzMvrs phantomPct=$phantomPct"
@@ -191,7 +192,7 @@ class EstVsMarginByStrategy {
 
     fun showExtra(dir: String, name: String, subtitle: String, yscale: Scale) {
         val io = WorkflowResultsIO("$dir/${name}.cvs")
-        val data = io.readResults()
+        val data = io.readResults().filter { it.parameters["cat"] != "previous"}
 
         val catName = "strategy"
         val catfld = { it: WorkflowResult -> category(it) }
@@ -216,23 +217,23 @@ class EstVsMarginByStrategy {
 
     fun showFailuresVsMargin(dirName: String, name: String, ) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
+        val results = io.readResults().filter { it.parameters["cat"] != "previous"}
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsMargin(results, catName="fuzzDiff") { category(it) }
+        plotter.showFailuresVsMargin(results, catName="strategy") { category(it) }
     }
 
     fun showNroundsVsMargin(dirName: String, name: String, ) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
+        val results = io.readResults().filter { it.parameters["cat"] != "previous"}
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsMargin(results, catName="fuzzDiff") { category(it) }
+        plotter.showNroundsVsMargin(results, catName="strategy") { category(it) }
     }
 
     fun showSamplesNeeded(dir: String, name: String, subtitle: String, yscale: Scale) {
         val io = WorkflowResultsIO("$dir/${name}.cvs")
-        val data = io.readResults()
+        val data = io.readResults().filter { it.parameters["cat"] != "previous"}
         val catName = "strategy"
         val catfld = { it: WorkflowResult -> category(it) }
 
@@ -256,7 +257,7 @@ class EstVsMarginByStrategy {
 
     fun showNmvrsNeeded(dir: String, name: String, subtitle: String, yscale: Scale) {
         val io = WorkflowResultsIO("$dir/${name}.cvs")
-        val data = io.readResults()
+        val data = io.readResults().filter { it.parameters["cat"] != "previous"}
         val catName = "strategy"
         val catfld = { it: WorkflowResult -> category(it) }
 

@@ -1,0 +1,82 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;sz2wRc&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;estVsMarginByStrategyWithPhantoms5 nmvrs&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=1000 fuzzMvrs=0.01 phantomPct=0.01&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(nmvrs)&quot;,
+&quot;color&quot;:&quot;strategy&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;],
+&quot;margin&quot;:[0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;log10(nmvrs)&quot;:[3.430285214839527,3.2988500210608955,2.8966210023876298,2.6690247727858547,2.4776305281963817,2.3708904121081167,2.273933713964522,2.1776432568794153,2.1094165420598694,3.3242441698312306,3.1713560487281565,3.0354353419481614,2.580531538735,2.4530261634553594,2.3519257259137754,2.2631435100703707,2.1403288831837988,2.1142973250535646,3.400758793149527,3.2890243149463907,2.9503395360226,2.64158713134663,2.4475874602900034,2.441307002987724,2.3083338668552478,2.1259917089344085,2.0603691627953267,2.96953332374483,2.8479790031678176,2.6314782676718527,2.462625568476183,2.2846359881796707,2.169377554919586,2.0665234564638704,2.0186131317936105,1.9661792917187242],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(nmvrs)&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;],
+&quot;log10(nmvrs)&quot;:[3.430285214839527,3.2988500210608955,2.8966210023876298,2.6690247727858547,2.4776305281963817,2.3708904121081167,2.273933713964522,2.1776432568794153,2.1094165420598694,3.3242441698312306,3.1713560487281565,3.0354353419481614,2.580531538735,2.4530261634553594,2.3519257259137754,2.2631435100703707,2.1403288831837988,2.1142973250535646,3.400758793149527,3.2890243149463907,2.9503395360226,2.64158713134663,2.4475874602900034,2.441307002987724,2.3083338668552478,2.1259917089344085,2.0603691627953267,2.96953332374483,2.8479790031678176,2.6314782676718527,2.462625568476183,2.2846359881796707,2.169377554919586,2.0665234564638704,2.0186131317936105,1.9661792917187242],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;log10(nmvrs)&quot;,&quot;strategy&quot;],
+&quot;disable_splitting&quot;:true
+}
+}]
+};
+       var plotContainer = document.getElementById(&quot;sz2wRc&quot;);
+       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

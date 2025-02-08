@@ -1,0 +1,82 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;qRQiiI&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;estVsMarginByStrategyWithPhantoms2 samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100 fuzzMvrs=0.01 phantomPct=0.01&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
+&quot;color&quot;:&quot;strategy&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;],
+&quot;log10(samplesNeeded)&quot;:[3.171650408904813,2.6898147971406887,2.5914541837007063,2.283120234959774,2.288003160031862,2.2368897937018617,2.0442260771126826,1.9231921904206675,1.904282657645628,3.4418977067920444,3.092675037860882,2.8643627311058295,2.5301868869674613,2.397922636545317,2.36259555754882,2.1369740957578296,2.1815005884677596,2.1866456105960035,2.8466401464052598,2.652778002001326,2.407356907485947,2.29453235734187,2.219663100737022,2.2647942194071553,2.0524245881420615,1.9255699095433763,1.939119717648487,3.185975383290552,3.0076795141713157,2.666630283571988,2.583482163526413,2.373794416714732,2.254403046390677,2.210479042645248,2.0356698346516806,2.0506117305295404],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;],
+&quot;margin&quot;:[0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.025,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;log10(samplesNeeded)&quot;:[3.171650408904813,2.6898147971406887,2.5914541837007063,2.283120234959774,2.288003160031862,2.2368897937018617,2.0442260771126826,1.9231921904206675,1.904282657645628,3.4418977067920444,3.092675037860882,2.8643627311058295,2.5301868869674613,2.397922636545317,2.36259555754882,2.1369740957578296,2.1815005884677596,2.1866456105960035,2.8466401464052598,2.652778002001326,2.407356907485947,2.29453235734187,2.219663100737022,2.2647942194071553,2.0524245881420615,1.9255699095433763,1.939119717648487,3.185975383290552,3.0076795141713157,2.666630283571988,2.583482163526413,2.373794416714732,2.254403046390677,2.210479042645248,2.0356698346516806,2.0506117305295404],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;log10(samplesNeeded)&quot;,&quot;strategy&quot;],
+&quot;disable_splitting&quot;:true
+}
+}]
+};
+       var plotContainer = document.getElementById(&quot;qRQiiI&quot;);
+       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

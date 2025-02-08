@@ -322,7 +322,7 @@ Varying the percent of undervotes at margin of 4% and 2%, with errors generated 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](./docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotesLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotes2Linear.html" rel="AuditsWithUndervotes2Linear">![AuditsWithUndervotes2Linear](./docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotes2Linear.png)</a>
 
-* Note that undervote percentages are shown up to 50%, with relatively modest effects.
+* Note that undervote percentages are shown up to 50%, with modest effect.
 
 ## Effect of Phantoms on Samples needed
 

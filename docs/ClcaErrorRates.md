@@ -1,5 +1,5 @@
 # CLCA error rates
-last updated Jan 26, 2025
+last updated Feb 8, 2025
 
 ## Estimating Error
 
@@ -140,5 +140,73 @@ Here are plots of sample size as a function of margin, with a fixed fuzzPct of .
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyLog.html" rel="clcaVsMarginByStrategyLog">![clcaVsMarginByStrategyLog](plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyFailures.html" rel="clcaVsMarginByStrategyFailures">![clcaMarginFailures](plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyFailures.png)</a>
 
-* The oracle is the best, noerrors are the worse, across all margins.
+* Arguably a fuzz rate of 5% is extreme.
 * We start to see failures (more than 80% of trials fail) when the margin is less than 2 percent.
+
+## More experiments with different error rate strategies
+
+One might hope that with better apriori error rates, sample sizes would improve. To that end we tried two more strategies.
+
+###  The _phantoms_ strategy
+
+When it is know that a ballot is missing from the CVRs, a phantom CVR is created for it. Similarly, if a physical ballot has been chosen
+to sample, and cannot be found, a phantom MVR is created. The values of the CLCA assorter in these cases are:
+
+````
+        assertEquals(0.0, bassorter.bassort(phantomMvr, winnerCvr))           // no mvr, cvr reported winner, : twoOver
+        assertEquals(noerror, bassorter.bassort(phantomMvr, loserCvr))        // no mvr, cvr reported loser: nuetral
+        assertEquals(0.5*noerror, bassorter.bassort(phantomMvr, phantomCvr))  // no mvr, no cvr: oneOver (common case)
+        assertEquals(1.5*noerror, bassorter.bassort(winnerMvr, phantomCvr))   // mvr reported winner, no cvr: oneUnder
+        assertEquals(.5*noerror, bassorter.bassort(loserMvr, phantomCvr))     // mvr reported loser, no cvr: oneOver
+````
+
+The common case is that both the CVR and the MVR is missing, which is equivilent to a "one ballot overstantement". So it
+makes sense that using the _phantomPct_ phantoms for a contest might improve the sampling sizes.
+
+The _phantoms_ strategy uses phantomPct from each contest as the apriori "one ballot overstantement" error rate of the AdaptiveComparison 
+betting function. 
+
+### The _previous_ strategy
+
+The _previous_ strategy uses the measured error rates for the previous batch of sample ballots the apriori error rates of the AdaptiveComparison
+betting function. For the first batch, before any measured values are available, it uses the phantomPct as in the phantoms strategy.
+
+## Simulations with different strategies
+
+For the new strategies and the noerror and oracle strategies, we show the number of samples needed, the number of Mvrs needed,
+and the "extra" = nmvrs - needed, along with the average number of rounds and the failure rate:
+
+This is for the case of no phantoms:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/SamplesLinear.html" rel="samplesByStrategyLinear">![samplesByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/SamplesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/NmvrsLinear.html" rel="nmvrsByStrategyLinear">![nmvrsByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/NmvrsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/ExtraLinear.html" rel="extraByStrategyLinear">![extraByStrategyLinear](plots/workflows/extraByStrategy/estVsMarginByStrategy/ExtraLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/estVsMarginByStrategyNrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/extraByStrategy/estVsMarginByStrategy/estVsMarginByStrategyNrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/estVsMarginByStrategyFailures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/extraByStrategy/estVsMarginByStrategy/estVsMarginByStrategyFailures.png)</a>
+
+and the same when there are 1% phantoms:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/SamplesLinear.html" rel="samplesByStrategyPhantomsLinear">![samplesByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/SamplesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/NmvrsLinear.html" rel="nmvrsByStrategyPhantomsLinear">![nmvrsByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/NmvrsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/ExtraLinear.html" rel="extraByStrategyPhantomsLinear">![extraByStrategyPhantomsLinear](plots/workflows/extraByStrategy/estVsMarginByStrategyWithPhantoms2/ExtraLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Nrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/extraByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Nrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Failures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/extraByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Failures.png)</a>
+
+Its clear that for some reason the _previous_ strategy makes things worse. 
+
+Heres another take:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/SamplesLinear.html" rel="samplesByStrategyLinear">![samplesByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/SamplesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/NmvrsLinear.html" rel="nmvrsByStrategyLinear">![nmvrsByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/NmvrsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/ExtraLinear.html" rel="extraByStrategyLinear">![extraByStrategyLinear](plots/workflows/extraByStrategy/estVsMarginByStrategy4/ExtraLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Nrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/extraByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Nrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Failures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/extraByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Failures.png)</a>
+
+Then when there are 1% phantoms:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/SamplesLinear.html" rel="samplesByStrategyPhantomsLinear">![samplesByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/SamplesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/NmvrsLinear.html" rel="nmvrsByStrategyPhantomsLinear">![nmvrsByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/NmvrsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/ExtraLinear.html" rel="extraByStrategyPhantomsLinear">![extraByStrategyPhantomsLinear](plots/workflows/extraByStrategy/estVsMarginByStrategyWithPhantoms5/ExtraLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategy5Nrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/extraByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategyWithPhantoms5Nrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategy5Failures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/extraByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategyWithPhantoms5Failures.png)</a>
+

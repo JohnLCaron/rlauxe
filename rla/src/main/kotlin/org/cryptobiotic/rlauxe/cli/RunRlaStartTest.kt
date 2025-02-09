@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.util.Publisher
+import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
@@ -114,10 +114,10 @@ class RunRlaStartTest {
                 0
             }
 
-            // write the election state to round1
-            val state = ElectionState("Starting", clcaWorkflow.getContests(), false)
-            writeElectionStateJsonFile(state, publish.auditRoundFile(1))
-            println("   writeElectionStateJsonFile ${publish.auditRoundFile(1)}")
+            // write the partial audit state to round1
+            val state = AuditState("Starting", 1, samples.size, samples.size, false, false, clcaWorkflow.getContests())
+            writeAuditStateJsonFile(state, publish.auditRoundFile(1))
+            println("   writeAuditStateJsonFile ${publish.auditRoundFile(1)}")
 
             return result
         }
@@ -164,10 +164,10 @@ class RunRlaStartTest {
                 0
             }
 
-            // write the election state to round1
-            val state = ElectionState("Starting", pollingWorkflow.getContests(), false)
-            writeElectionStateJsonFile(state, publish.auditRoundFile(1))
-            println("   writeElectionStateJsonFile ${publish.auditRoundFile(1)}")
+            // write the partial audit state to round1
+            val state = AuditState("Starting", 1, samples.size, samples.size, false, false, pollingWorkflow.getContests())
+            writeAuditStateJsonFile(state, publish.auditRoundFile(1))
+            println("   writeAuditStateJsonFile ${publish.auditRoundFile(1)}")
 
             return result
         }

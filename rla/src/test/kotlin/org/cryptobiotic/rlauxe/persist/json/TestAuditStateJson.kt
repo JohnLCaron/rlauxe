@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.util.Publisher
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,17 +13,21 @@ import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
 
-class TestContestJson {
-    val filename = "/home/stormy/temp/persist/test/TestContestJson.json"
+class TestAuditStateJson {
+    val filename = "/home/stormy/temp/persist/test/TestAuditStateJson.json"
 
     @Test
     fun testRoundtripNaked() {
         val testData = MultiContestTestData(11, 4, 50000)
         val contests: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
-        val target = ElectionState(
+        val target = AuditState(
             "TestContestJson",
-            contests,
+            2,
+            42,
+            99,
             true,
+            false,
+            contests,
         )
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -37,13 +40,17 @@ class TestContestJson {
     fun testRoundtripIOnaked() {
         val testData = MultiContestTestData(11, 4, 50000)
         val contests: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
-        val target = ElectionState(
+        val target = AuditState(
             "TestContestJson",
-            contests,
+            1,
+            129182,
+            423487234,
             false,
+            false,
+            contests,
         )
-        writeElectionStateJsonFile(target, filename)
-        val result = readElectionStateJsonFile(filename)
+        writeAuditStateJsonFile(target, filename)
+        val result = readAuditStateJsonFile(filename)
         assertTrue(result is Ok)
         val roundtrip = result.unwrap()
         assertTrue(roundtrip.equals(target))
@@ -72,12 +79,16 @@ class TestContestJson {
         else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        runWorkflow("testComparisonWorkflow", clcaWorkflow, testMvrs, quiet = true)
+        val nmvrs = runWorkflow("testComparisonWorkflow", clcaWorkflow, testMvrs, quiet = true)
 
-        val target = ElectionState(
+        val target = AuditState(
             "TestContestJson",
-            clcaWorkflow.contestsUA ,
+            1,
+            nmvrs,
+            nmvrs,
             false,
+            false,
+            clcaWorkflow.contestsUA,
         )
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -86,8 +97,8 @@ class TestContestJson {
         assertEquals(roundtrip, target)
 
         val useFilename = filename + "2"
-        writeElectionStateJsonFile(target, useFilename)
-        val result = readElectionStateJsonFile(useFilename)
+        writeAuditStateJsonFile(target, useFilename)
+        val result = readAuditStateJsonFile(useFilename)
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
@@ -95,9 +106,22 @@ class TestContestJson {
     }
 }
 
-fun check(s1: ElectionState, s2: ElectionState) {
+// data class AuditState(
+//    val name: String,
+//    val roundIdx: Int,
+//    val nmvrs: Int,
+//    val newMvrs: Int,
+//    val auditWasDone: Boolean,
+//    val auditIsComplete: Boolean,
+//    val contests: List<ContestUnderAudit>,
+//)
+fun check(s1: AuditState, s2: AuditState) {
     assertEquals(s1.name, s2.name)
-    assertEquals(s1.done, s2.done)
+    assertEquals(s1.roundIdx, s2.roundIdx)
+    assertEquals(s1.nmvrs, s2.nmvrs)
+    assertEquals(s1.newMvrs, s2.newMvrs)
+    assertEquals(s1.auditWasDone, s2.auditWasDone)
+    assertEquals(s1.auditIsComplete, s2.auditIsComplete)
     assertEquals(s1.contests.size, s2.contests.size)
     s1.contests.forEachIndexed { idx, c1 ->
         val c2 = s2.contests[idx]

@@ -14,6 +14,17 @@ interface RlauxWorkflowIF {
     fun getBallotsOrCvrs() : List<BallotOrCvr>
 }
 
+// per round
+data class AuditState(
+    val name: String,
+    val roundIdx: Int,
+    val nmvrs: Int,
+    val newMvrs: Int,
+    val auditWasDone: Boolean,
+    val auditIsComplete: Boolean,
+    val contests: List<ContestUnderAudit>,
+)
+
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
 fun checkWinners(contestUA: ContestUnderAudit, sortedVotes: List<Map.Entry<Int, Int>>) {
     val contest = contestUA.contest

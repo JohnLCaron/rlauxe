@@ -49,7 +49,7 @@ fun estimateSampleSizes(
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailSimulationPct
 
-        } else if (result.pctSamplesNeeded() > 100 * auditConfig.samplePctCutoff) {
+        } else if (result.pctSamplesNeeded() > 100 * auditConfig.samplePctCutoff) { // TODO may be wrong here
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
             if (showFail) println(
                 "***FailMaxSamplesAllowed for '${task.name()}' ntrials=${auditConfig.nsimEst} pctSamplesNeeded " +

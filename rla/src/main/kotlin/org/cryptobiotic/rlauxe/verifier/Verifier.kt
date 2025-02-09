@@ -4,7 +4,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.util.Publisher
+import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 
@@ -60,20 +60,26 @@ class Verifier(val publish: Publisher) {
     }
 
     fun verifyRound(roundIdx: Int): Boolean {
-        val state = readElectionStateJsonFile(publish.auditRoundFile(roundIdx)).unwrap()
-
+        var result = true
+        val state = readAuditStateJsonFile(publish.auditRoundFile(roundIdx)).unwrap()
+        if (roundIdx != state.roundIdx) {
+            println("*** roundIdx = ${state.roundIdx} should be = $roundIdx")
+            result = false
+        }
         val indices = readSampleIndicesJsonFile(publish.sampleIndicesFile(roundIdx)).unwrap()
-        val mvrs = readCvrsJsonFile(publish.sampleMvrsFile(roundIdx)).unwrap()
-        println("    verifyRound $roundIdx '${state.name}' done=${state.done} indices = ${indices.size} mvrs = ${mvrs.size}")
+        println("    verifyRound $roundIdx '${state.name}' auditWasDone=${state.auditWasDone} auditIsComplete=${state.auditIsComplete} indices = ${indices.size}")
 
-        if (indices.size != mvrs.size) {
-            println("*** indices = ${indices.size} NOT EQUAL mvrs = ${mvrs.size}")
-            return false
+        if (state.auditWasDone) {
+            val mvrs = readCvrsJsonFile(publish.sampleMvrsFile(roundIdx)).unwrap()
+            if (indices.size != mvrs.size) {
+                println("*** indices = ${indices.size} NOT EQUAL mvrs = ${mvrs.size}")
+                result = false
+            }
         }
 
         state.contests.forEach { contest ->
             print(contest.show())
         }
-        return true
+        return result
     }
 }

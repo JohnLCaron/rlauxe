@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.rlauxe.persist.json
 
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.nio.file.Files
 import java.nio.file.Path
 

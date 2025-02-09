@@ -179,39 +179,25 @@ The _mixed_ strategy uses _noerror_ strategy for estimation and the _phantoms_ s
 ## Simulations with new strategies
 
 For the new strategies and the noerror and oracle strategies, we show the number of samples needed, the number of Mvrs needed,
-and the "extra" = nmvrs - needed, along with the average number of rounds and the failure rate:
+and the "extra" = nmvrs - needed, along with the average number of rounds and failure rate:
 
 This is for the case of no phantoms:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/SamplesLinear.html" rel="samplesByStrategyLinear">![samplesByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/SamplesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/NmvrsLinear.html" rel="nmvrsByStrategyLinear">![nmvrsByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/NmvrsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/ExtraLinear.html" rel="extraByStrategyLinear">![extraByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/ExtraLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/estVsMarginByStrategyNrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/estVsMarginByStrategyNrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/estVsMarginByStrategyFailures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy/estVsMarginByStrategyFailures.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/SamplesLog.html" rel="samplesByStrategyLog">![samplesByStrategyLog](plots/workflows/estByStrategy/SamplesLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/NmvrsLog.html" rel="nmvrsByStrategyLog">![nmvrsByStrategyLog](plots/workflows/estByStrategy/NmvrsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/ExtraLog.html" rel="extraByStrategyLog">![extraByStrategyLog](plots/workflows/estByStrategy/ExtraLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/estVsMarginByStrategyNrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/estByStrategy/estVsMarginByStrategyNrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/estVsMarginByStrategyFailures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/estByStrategy/estVsMarginByStrategyFailures.png)</a>
 
 and the same when there are 1% phantoms:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/SamplesLinear.html" rel="samplesByStrategyPhantomsLinear">![samplesByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/SamplesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/NmvrsLinear.html" rel="nmvrsByStrategyPhantomsLinear">![nmvrsByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/NmvrsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/ExtraLinear.html" rel="extraByStrategyPhantomsLinear">![extraByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/ExtraLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Nrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Nrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Failures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms2/estVsMarginByStrategyWithPhantoms2Failures.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/SamplesLog.html" rel="samplesByStrategyPhantomsLog">![samplesByStrategyPhantomsLog](plots/workflows/estByStrategyWithPhantoms/SamplesLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/NmvrsLog.html" rel="nmvrsByStrategyPhantomsLog">![nmvrsByStrategyPhantomsLog](plots/workflows/estByStrategyWithPhantoms/NmvrsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/ExtraLog.html" rel="extraByStrategyPhantomsLog">![extraByStrategyPhantomsLog](plots/workflows/estByStrategyWithPhantoms/ExtraLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsNrounds.html" rel="estByStrategyPhantomsNrounds">![estByStrategyPhantomsNrounds](plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsNrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsFailures.html" rel="estByStrategPhantomsPFailures">![estByStrategPhantomsPFailures](plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsFailures.png)</a>
 
-Its clear that for some reason the _previous_ strategy makes things worse. 
-
-Heres another take:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/SamplesLinear.html" rel="samplesByStrategyLinear">![samplesByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/SamplesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/NmvrsLinear.html" rel="nmvrsByStrategyLinear">![nmvrsByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/NmvrsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/ExtraLinear.html" rel="extraByStrategyLinear">![extraByStrategyLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/ExtraLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Nrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Nrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Failures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategy4/estVsMarginByStrategy4Failures.png)</a>
-
-Then when there are 1% phantoms:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/SamplesLinear.html" rel="samplesByStrategyPhantomsLinear">![samplesByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/SamplesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/NmvrsLinear.html" rel="nmvrsByStrategyPhantomsLinear">![nmvrsByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/NmvrsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/ExtraLinear.html" rel="extraByStrategyPhantomsLinear">![extraByStrategyPhantomsLinear](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/ExtraLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategy5Nrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategyWithPhantoms5Nrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategy5Failures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/estVsMarginByStrategy/estVsMarginByStrategyWithPhantoms5/estVsMarginByStrategyWithPhantoms5Failures.png)</a>
-
+* Note that the plots with phantoms start with margin = .025, while tthe plots without start at margin = .005.
+* Its clear that for some reason the _previous_ strategy makes things worse (investigate why that is).
+* The _phantom_ strategy doesnt stand out.
+* The _nmvrs_ and _extra_ plots may indicate tradeoffs with extra samples vs extra rounds.

@@ -1,0 +1,82 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;fOK0ry&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;estByStrategy samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=250 mvrFuzz=0.01&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
+&quot;color&quot;:&quot;strategy&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;],
+&quot;log10(samplesNeeded)&quot;:[3.898210303344007,3.5660795379219934,3.371873608452377,3.0387409370325362,2.865113454362646,2.57476258261283,2.3758610587728164,2.2830749747354715,2.1616075469083964,2.057331317159242,1.9815105519059435,1.9398386161641459,1.8588258292696092,4.127519189781711,3.779044109989674,3.5511966669819865,3.2747580543520085,3.0526308511644724,2.7025683858299243,2.542979704756025,2.424548440899418,2.3267944958621234,2.1585554689844066,2.0712927338345746,2.02094105986232,1.9605088301481763,4.069099664932302,3.8025597398053335,3.532144155180982,3.239257424368612,3.046342178329386,2.687703713974041,2.5503849155178777,2.399798282113423,2.3055835044459916,2.194314492695122,2.0808572797965894,2.0170667452817903,1.9358094538099326,3.6964842988934663,3.445855678796946,3.1940078785474335,2.9173941646514256,2.7249243686346785,2.4980678325506367,2.313360951244128,2.2096543953411003,2.116899831633445,2.020527012274563,1.9433164087592198,1.8918272622807435,1.8307682511299355,4.405550087521983,4.2748679405293135,4.005738042651425,3.8781268445836568,3.476590512219664,3.4332416411126823,2.617704711380334,2.561034563973272,2.7181162164343164,2.488059742717207,2.4647338997332935,1.8837749613552581,1.8493456941913402],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;log10(samplesNeeded)&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;],
+&quot;margin&quot;:[0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;log10(samplesNeeded)&quot;:[3.898210303344007,3.5660795379219934,3.371873608452377,3.0387409370325362,2.865113454362646,2.57476258261283,2.3758610587728164,2.2830749747354715,2.1616075469083964,2.057331317159242,1.9815105519059435,1.9398386161641459,1.8588258292696092,4.127519189781711,3.779044109989674,3.5511966669819865,3.2747580543520085,3.0526308511644724,2.7025683858299243,2.542979704756025,2.424548440899418,2.3267944958621234,2.1585554689844066,2.0712927338345746,2.02094105986232,1.9605088301481763,4.069099664932302,3.8025597398053335,3.532144155180982,3.239257424368612,3.046342178329386,2.687703713974041,2.5503849155178777,2.399798282113423,2.3055835044459916,2.194314492695122,2.0808572797965894,2.0170667452817903,1.9358094538099326,3.6964842988934663,3.445855678796946,3.1940078785474335,2.9173941646514256,2.7249243686346785,2.4980678325506367,2.313360951244128,2.2096543953411003,2.116899831633445,2.020527012274563,1.9433164087592198,1.8918272622807435,1.8307682511299355,4.405550087521983,4.2748679405293135,4.005738042651425,3.8781268445836568,3.476590512219664,3.4332416411126823,2.617704711380334,2.561034563973272,2.7181162164343164,2.488059742717207,2.4647338997332935,1.8837749613552581,1.8493456941913402],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;mixed&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;,&quot;previous&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;log10(samplesNeeded)&quot;,&quot;strategy&quot;],
+&quot;disable_splitting&quot;:true
+}
+}]
+};
+       var plotContainer = document.getElementById(&quot;fOK0ry&quot;);
+       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

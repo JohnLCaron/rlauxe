@@ -19,17 +19,20 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-// data class AuditConfig(
+// enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
+//data class AuditConfig(
 //    val auditType: AuditType,
 //    val hasStyles: Boolean,
-//    val seed: Long = secureRandom.nextLong(),
 //    val riskLimit: Double = 0.05,
+//    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
+//
+//    // simulation control
 //    val nsimEst: Int = 100, // number of simulation estimations
 //    val quantile: Double = 0.80, // use this percentile success for estimated sample size
-//    val samplePctCutoff: Double = 0.33, // dont sample more than this pct of N TODO
+//    val samplePctCutoff: Double = .42, // dont sample more than this pct of N TODO whats N?
 //    val pollingConfig: PollingConfig = PollingConfig(),
-//    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.oracle),
-//    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.standard),
+//    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
+//    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
 //    val version: Double = 1.0,
 //)
 
@@ -37,8 +40,8 @@ import java.nio.file.StandardOpenOption
 data class AuditConfigJson(
     val auditType: String,
     val hasStyles: Boolean,
-    val seed: Long,
     val riskLimit: Double,
+    val seed: Long,
     val nsimEst: Int,
     val quantile: Double,
     val samplePctCutoff: Double,
@@ -52,8 +55,8 @@ fun AuditConfig.publishJson() : AuditConfigJson {
     return AuditConfigJson(
         this.auditType.name,
         this.hasStyles,
-        this.seed,
         this.riskLimit,
+        this.seed,
         this.nsimEst,
         this.quantile,
         this.samplePctCutoff,
@@ -69,8 +72,8 @@ fun AuditConfigJson.import(): AuditConfig {
     return AuditConfig(
         auditType,
         this.hasStyles,
-        this.seed,
         this.riskLimit,
+        this.seed,
         this.nsimEst,
         this.quantile,
         this.samplePctCutoff,

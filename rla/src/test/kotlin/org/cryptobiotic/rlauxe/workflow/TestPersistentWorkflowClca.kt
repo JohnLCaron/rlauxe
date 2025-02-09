@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.Publisher
+import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
@@ -76,8 +76,8 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: L
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
-        val state = ElectionState("Round$roundIdx", workflow.getContests(), done)
-        writeElectionStateJsonFile(state, publish.auditRoundFile(roundIdx))
+        val state = AuditState("Round$roundIdx", roundIdx, sampledMvrs.size, sampledMvrs.size, true, done, workflow.getContests())
+        writeAuditStateJsonFile(state, publish.auditRoundFile(roundIdx))
 
         val sampledMvrus = indices.map {
             val cvr = bcUA[it]
@@ -98,7 +98,7 @@ fun readPersistentWorkflow(round: Int, publish: Publisher): RlauxWorkflow {
     assertTrue(resultAuditConfig is Ok)
     val auditConfig = resultAuditConfig.unwrap()
 
-    val resultAuditResult: Result<ElectionState, ErrorMessages> = readElectionStateJsonFile(publish.auditRoundFile(round))
+    val resultAuditResult: Result<AuditState, ErrorMessages> = readAuditStateJsonFile(publish.auditRoundFile(round))
     if (resultAuditResult is Err) println(resultAuditResult)
     assertTrue(resultAuditResult is Ok)
     val electionState = resultAuditResult.unwrap()

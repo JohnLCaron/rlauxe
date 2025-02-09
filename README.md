@@ -477,30 +477,41 @@ guarentee that the estimated sample size is large enough, theres no reason not t
 
 From STYLISH paper:
 
-        4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
-        The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
-        The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
-            for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
-        The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
-            𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
-        4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
+````
+4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of 
+sampling. The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
+The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
+for each card that contains contest 𝑘, treating cards already in the sample as having sampling 
+probability 1. The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is 
+the largest of those probabilities:
+  𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
+  
+4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except 
+phantom cards.
+````
 
 AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
-total_size estimate, but not do the consistent sampling, which gives you the total sample size.
+total_size estimate, but not do the consistent sampling, which already gives you the total sample size.
 
 ### generation of phantoms
 
 From STYLISH paper:
 
-        2.c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that 
-            contain the contest, create a corresponding set of “phantom” CVRs as described in section 3.4 of [St20]. 
-            The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
+````
+2.c) If the upper bound on the number of cards that contain any contest is greater than the 
+number of CVRs that contain the contest, create a corresponding set of “phantom” CVRs as 
+described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: 
+each phantom card contains only one contest.
+````
 
 SHANGRLA.make_phantoms() instead generates max(Np_c) phantoms, then for each contest adds it to the first Np_c phantoms.
 Im guessing STYLISH is trying to describe the easist possible algorithm.
 
-        2.d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical 
-           cards whose locations are known, create enough “phantom” cards to make up the difference. 
+````
+2.d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the 
+number of physical cards whose locations are known, create enough “phantom” cards to make up 
+the difference. 
+````
 
 Not clear what this means, and how its different from 2.c.
 
@@ -512,7 +523,7 @@ SHANGRLA has guesses for p1,p2,p3,p4. We do a blanket fuzz, and simulate the err
 
 At first glance, it appears that SHANGRLA Audit.py CVR.consistent_sampling() might make use of the previous round's
 selected ballots (sampled_cvr_indices). However, it looks like CVR.consistent_sampling() never uses sampled_cvr_indices, 
-and so uses the same strategy as we do of sampling without regards to the previous rounds.
+and so uses the same strategy as we do, of sampling without regards to the previous rounds.
 
 Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt just use the 
 first n sorted samples, which the code seems to assume. But I think the question is moot.

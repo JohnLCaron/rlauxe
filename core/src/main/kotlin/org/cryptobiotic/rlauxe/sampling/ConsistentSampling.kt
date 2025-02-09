@@ -70,7 +70,7 @@ private val debug = false
 fun uniformSampling(
     contests: List<ContestUnderAudit>,
     ballotOrCvrs: List<BallotOrCvr>,
-    samplePctCutoff: Double,
+    samplePctCutoff: Double,  // TODO
     roundIdx: Int,
 ): List<Int> {
     if (ballotOrCvrs.isEmpty()) return emptyList()

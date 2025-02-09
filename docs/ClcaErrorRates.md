@@ -176,7 +176,7 @@ it uses the phantomPct as in the phantoms strategy.
 
 The _mixed_ strategy uses _noerror_ strategy for estimation and the _phantoms_ strategy for auditing. 
 
-## Simulations with new strategies
+### Simulations with new strategies
 
 For the new strategies and the noerror and oracle strategies, we show the number of samples needed, the number of Mvrs needed,
 and the "extra" = nmvrs - needed, along with the average number of rounds and failure rate:

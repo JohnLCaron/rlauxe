@@ -5,11 +5,12 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class TestComparisonSamplerSimulation {
+class TestClcaSimulation {
 
     @Test
-    fun testComparisonSamplerPlurality() {
+    fun testClcaSimulationErrorRates() {
         val N = 20000
         val margins = listOf(.017, .03, .05)
         for (margin in margins) {
@@ -45,7 +46,7 @@ class TestComparisonSamplerSimulation {
     }
 
     @Test
-    fun testComparisonSamplerStandard() {
+    fun testClcaSamplerErrorRates() {
         val N = 20000
         val margins = listOf(.017, .03, .05)
         for (margin in margins) {
@@ -55,14 +56,17 @@ class TestComparisonSamplerSimulation {
             val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
-            run(cvrs, contestUA, compareAssorter as ClcaAssorter)
+            runClcaSimulation(cvrs, contestUA, compareAssorter as ClcaAssorter)
         }
     }
 
-    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ClcaAssorter) {
+    fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ClcaAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val sampler = ClcaSimulation(cvrs, contestUA.contest, assorter, ClcaErrorRates.standard)
+        val phantomRate = contestUA.contest.phantomRate()
+        val errorRates = ErrorRates(0.0, phantomRate, 0.0, 0.0)
+        val sampler = ClcaSimulation(cvrs, contestUA.contest, assorter, errorRates)
+        sampler.reset()
 
         val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { assorter.assorter.assort(it) }.average()
@@ -70,13 +74,11 @@ class TestComparisonSamplerSimulation {
         println(" orgCvrs=${df(orgCvrs)} sampleCvrs=${df(sampleCvrs)} sampleMvrs=${df(sampleMvrs)}")
 
         val before = cvrs.map { assorter.bassort(it, it) }.average()
-        sampler.reset()
-        val welford = Welford()
-        repeat(cvrs.size) {
-            welford.update(sampler.sample())
-        }
 
-        println(" bassort expectedNoerror=${df(assorter.noerror)} noerror=${df(before)} sampleMean = ${df(welford.mean)}")
+        val tracker = PrevSamplesWithRates(assorter.noerror)
+        while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
+        println(" bassort expectedNoerror=${df(assorter.noerror)} noerror=${df(before)} sampleMean = ${df(tracker.mean())}")
+        assertTrue( tracker.mean() > .5)
     }
 
 }

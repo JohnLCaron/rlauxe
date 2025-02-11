@@ -93,6 +93,8 @@ data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u
         return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
     }
     fun toList() = listOf(p2o, p1o, p1u, p2u)
+    fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
+
     companion object {
         fun fromList(list: List<Double>) = ErrorRates(list[0], list[1], list[2], list[3])
     }

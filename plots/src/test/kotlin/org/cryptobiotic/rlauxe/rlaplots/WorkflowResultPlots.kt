@@ -23,8 +23,8 @@ fun wrsPlot(
     yfld: (WorkflowResult) -> Double,
     catfld: (WorkflowResult) -> String,
 ) {
-    val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
-    val groups = makeWrGroups(useWrs, catfld)
+    // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
+    val groups = makeWrGroups(wrs, catfld)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
@@ -105,8 +105,8 @@ fun wrsPlotMultipleFields(
     yfld: (String, WorkflowResult) -> Double,
     catflds: List<String>,
 ) {
-    val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
-    val groups = makeWrGroups(useWrs, catflds)
+    // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
+    val groups = makeWrGroups(wrs, catflds)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()

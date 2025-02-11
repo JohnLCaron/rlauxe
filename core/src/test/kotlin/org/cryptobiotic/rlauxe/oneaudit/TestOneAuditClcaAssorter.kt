@@ -61,7 +61,7 @@ class TestOneAuditClcaAssorter {
         val awinnerAvg = cvrs.map { assorter.assort(it) }.average()
         val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
 
-        val stratum = OneAuditStratum("card", false, contest.info, contest.votes, cvrs.size, 0)
+        val stratum = OneAuditStratum("card", true, contest.info, contest.votes, cvrs.size, 0)
 
         val contestOA = OneAuditContest(contest.info, listOf(stratum))
         val bassorter = OneAuditComparisonAssorter(contestOA, assorter, awinnerAvg)

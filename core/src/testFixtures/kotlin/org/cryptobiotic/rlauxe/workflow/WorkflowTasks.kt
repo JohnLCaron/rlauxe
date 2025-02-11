@@ -234,7 +234,7 @@ class WorkflowTask(
             WorkflowResult(
                 contestUA.Nc,
                 minAssertion.assorter.reportedMargin(),
-                TestH0Status.FailSimulationPct,
+                TestH0Status.ContestMisformed, // TODO why empty?
                 0.0, 0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
@@ -280,22 +280,22 @@ data class WorkflowResult(
 }
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
-    val successRuns = runs.filter { it.status == TestH0Status.StatRejectNull }
+    val successRuns = runs.filter { it.status == TestH0Status.StatRejectNull || it.status == TestH0Status.SampleSumRejectNull }
 
-    val result =  if (runs.isEmpty()) {
+    val result =  if (runs.isEmpty()) { // TODO why all empty?
         WorkflowResult(
             0,
             0.0,
-            TestH0Status.FailSimulationPct,
+            TestH0Status.ContestMisformed,
             0.0, 0.0, 0.0,0.0,
             emptyMap(),
             )
-    } else if (successRuns.isEmpty()) {
+    } else if (successRuns.isEmpty()) { // TODO why all empty?
         val first = runs.first()
         WorkflowResult(
             first.Nc,
             first.margin,
-            TestH0Status.FailSimulationPct,
+            TestH0Status.ContestMisformed,
             0.0, first.Nc.toDouble(), first.Nc.toDouble(), first.Nc.toDouble(),
             first.parameters,
             )

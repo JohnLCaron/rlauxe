@@ -103,27 +103,37 @@ class FixedMean(val eta0: Double): EstimFn {
 // generate random values with given mean
 class GenSampleMeanWithReplacement(val N: Int, ratio: Double): Sampler {
     val samples = generateSampleWithMean(N, ratio)
+    var count = 0
+
     override fun sample(): Double {
         val idx = Random.nextInt(N) // with Replacement
+        count++
         return samples[idx]
     }
     override fun reset() {
-        // noop
+        count = 0
     }
     override fun maxSamples() = N
+    override fun hasNext() = (count < N)
+    override fun next() = sample()
 }
 
 class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): Sampler {
-    var samples = generateSampleWithMean(N, ratio)
-    var index = 0
+    private var samples = generateSampleWithMean(N, ratio)
+    private var index = 0
+    private var count = 0
+
     override fun sample(): Double {
         return samples[index++]
     }
     override fun reset() {
         samples = generateSampleWithMean(N, ratio)
         index = 0
+        count = 0
     }
     override fun maxSamples() = N
+    override fun hasNext() = (count < N)
+    override fun next() = sample()
 }
 
 

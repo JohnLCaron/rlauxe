@@ -33,7 +33,7 @@ class BettingMart(
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
-        val prevSamples = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
+        val tracker = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
 
         val bets = mutableListOf<Double>()  // for some tests, could remove in production
         val pvalues = mutableListOf<Double>()
@@ -50,13 +50,12 @@ class BettingMart(
             require(xj >= 0.0)
             require(xj <= upperBound)
 
-            val lamj = bettingFn.bet(prevSamples)
+            val lamj = bettingFn.bet(tracker)
             bets.add(lamj)
 
             // population mean under the null hypothesis
-            mj = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
+            mj = populationMeanIfH0(Nc, withoutReplacement, tracker)
             val eta = lamToEta(lamj, mu=mj, upper=upperBound)
-            //println(" testH0: lamj=$lamj eta=$eta mean=$mj upperBound=$upperBound round=${lamToEta(lamj, mj, upperBound)}")
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
@@ -83,11 +82,10 @@ class BettingMart(
                 tjs.add(tj)
                 testStatistics.add(testStatistic)
             }
-
             if (showEachSample) println("    bet=${df(lamj)} (eta=${df(eta)}) $sampleNumber: $xj tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
 
             // – S ← S + Xj
-            prevSamples.addSample(xj)
+            tracker.addSample(xj)
 
             val pvalue = 1.0 / testStatistic
             pvalues.add(pvalue)
@@ -104,14 +102,19 @@ class BettingMart(
             println("Tjs = ${testStatistics}")
         }
 
-        val pvalue = pvalues.last()
-        val status = when {
-            (pvalue < riskLimit) -> TestH0Status.StatRejectNull
-            (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
-            (mj > upperBound) -> TestH0Status.AcceptNull
-            else -> TestH0Status.LimitReached
+        // if you have sampled the entire polulation, then you know
+        val status = if (sampleNumber == Nc) {
+            if (tracker.mean() > 0.5) TestH0Status.SampleSumRejectNull else TestH0Status.AcceptNull
+        } else {
+            val pvalue = pvalues.last()
+            when {
+                (pvalue < riskLimit) -> TestH0Status.StatRejectNull
+                (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
+                (mj > upperBound) -> TestH0Status.AcceptNull // 1
+                else -> TestH0Status.LimitReached
+            }
         }
 
-        return TestH0Result(status, sampleNumber, prevSamples.mean(), pvalues, bets, prevSamples.errorRates())
+        return TestH0Result(status, sampleNumber, tracker.mean(), pvalues, bets, tracker.errorRates())
     }
 }

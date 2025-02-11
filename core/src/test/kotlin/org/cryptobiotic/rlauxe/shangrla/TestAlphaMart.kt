@@ -84,7 +84,7 @@ class TestAlphaMart {
                 assertEquals(it, alpha2.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(!alpha2.status.complete)
+        assertTrue(alpha2.status == TestH0Status.SampleSumRejectNull)
         assertEquals(alpha2.sampleCount, x2.size)
         assertEquals(alpha2.sampleMean, 0.5714285714285714)
     }
@@ -103,7 +103,7 @@ class TestAlphaMart {
                 assertEquals(it, alpha2.pvalues[idx], doublePrecision)
             }
         }
-        assertTrue(alpha2.status == TestH0Status.LimitReached)
+        assertTrue(alpha2.status == TestH0Status.AcceptNull)
         assertEquals(alpha2.sampleCount, x2.size)
         assertEquals(alpha2.sampleMean, 0.42857142857142855, doublePrecision)
     }

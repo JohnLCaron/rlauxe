@@ -27,9 +27,9 @@ class ClcaWorkflow(
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
     val quiet: Boolean = true,
 ): RlauxWorkflowIF {
+
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
-
     init {
         require (auditConfig.auditType == AuditType.CARD_COMPARISON)
 
@@ -37,21 +37,38 @@ class ClcaWorkflow(
         // 	a) Check that the winners according to the CVRs are the reported winners.
         //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) } + raireContests
-        contestsUA.forEach {
-            if (it.choiceFunction != SocialChoiceFunction.IRV) {
-                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
-            }
-        }
 
         // 3. Prepare for sampling
         //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
-
         contestsUA.filter{ !it.done }.forEach { contest ->
             contest.makeClcaAssertions(cvrs)
         }
 
-        // must be done once and for all rounds
+        // TODO factor out
+        contestsUA.forEach { contestUA ->
+            if (contestUA.choiceFunction != SocialChoiceFunction.IRV) {
+                checkWinners(contestUA, (contestUA.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
+            }
+
+            // see if margin is too small
+            val minMargin = contestUA.minClcaAssertion()!!.assorter.reportedMargin()
+            if (minMargin <= auditConfig.minMargin) {
+                println("contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
+                contestUA.done = true
+                contestUA.status = TestH0Status.MinMargin
+            }
+            // see if too many phantoms
+            val adjustedMargin = minMargin - contestUA.contest.phantomRate()
+            if (adjustedMargin <= 0.0) {
+                println("contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
+                contestUA.done = true
+                contestUA.status = TestH0Status.TooManyPhantoms
+            }
+            // println("contest ${contestUA} minMargin ${minMargin} + phantomRate ${contestUA.contest.phantomRate()} = adjustedMargin ${adjustedMargin}")
+        }
+
+        // must be done once and for all
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
@@ -79,7 +96,7 @@ class ClcaWorkflow(
             show=show,
         )
 
-        return createSampleIndices(this, roundIdx, quiet)
+        return sample(this, roundIdx, quiet)
     }
 
     override fun showResultsOld(estSampleSize: Int) {
@@ -180,7 +197,7 @@ fun auditClcaAssertion(
 ): TestH0Result {
     val debug = false
     val cassorter = cassertion.cassorter
-    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
+    val sampler = ClcaWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
     val clcaConfig = auditConfig.clcaConfig
     val bettingFn: BettingFn = when (clcaConfig.strategy) {
@@ -202,9 +219,8 @@ fun auditClcaAssertion(
 
         ClcaStrategyType.mixed,
         ClcaStrategyType.phantoms -> {
-            // use previous round errors as apriori, then adapt to actual mvrs
-            val phantomRate = contestUA.contest.phantomRate()
-            val errorRates = if (phantomRate == 0.0) ErrorRates(0.0, 0.0, 0.0, 0.0) else ErrorRates(0.0, phantomRate, 0.0, 0.0)
+            // use phantomRate as apriori, then adapt to actual mvrs
+            val errorRates = ErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)
             if (debugErrorRates) println(" phantoms audit round $roundIdx errorRates=$errorRates")
             AdaptiveComparison(
                 Nc = contestUA.Nc,
@@ -222,7 +238,7 @@ fun auditClcaAssertion(
         }
 
         ClcaStrategyType.noerror -> {
-            // optimistic, no errors as apriori, then adapt to actual mvrs
+            // no errors as apriori, then adapt to actual mvrs
             AdaptiveComparison(
                 Nc = contestUA.Nc,
                 withoutReplacement = true,

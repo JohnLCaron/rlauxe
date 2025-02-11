@@ -10,7 +10,9 @@ class ClcaNoErrorSampler(val contestId: Int, val cvrs : List<Cvr>, val cassorter
     val permutedIndex = MutableList(cvrs.size) { it }
     val sampleMean: Double
     val sampleCount: Double
-    var idx = 0
+
+    private var idx = 0
+    private var count = 0
 
     init {
         reset()
@@ -21,15 +23,20 @@ class ClcaNoErrorSampler(val contestId: Int, val cvrs : List<Cvr>, val cassorter
     override fun sample(): Double {
         require (idx < cvrs.size)
         val curr = cvrs[permutedIndex[idx++]]
+        count++
         return cassorter.bassort(curr, curr) // mvr == cvr, no errors. could just return cassorter.noerror
     }
 
     override fun reset() {
         permutedIndex.shuffle(Random)
         idx = 0
+        count = 0
     }
 
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
+
+    override fun hasNext() = (count < maxSamples)
+    override fun next() = sample()
 }

@@ -1,5 +1,5 @@
 # CLCA error rates
-last updated Feb 8, 2025
+last updated Feb 10, 2025
 
 ## Estimating Error
 
@@ -145,7 +145,7 @@ Here are plots of sample size as a function of margin, with a fixed fuzzPct of .
 
 ## More experiments with different error rate strategies
 
-One might hope that with better apriori error rates, sample sizes would improve. To that end we tried two more strategies.
+One might hope that with better apriori error rates, sample sizes would improve. To that end we tried three new strategies.
 
 ###  The _phantoms_ strategy
 
@@ -160,17 +160,17 @@ to sample, and cannot be found, a phantom MVR is created. The values of the CLCA
         assertEquals(.5*noerror, bassorter.bassort(loserMvr, phantomCvr))     // mvr reported loser, no cvr: oneOver
 ````
 
-The common case is that both the CVR and the MVR is missing, which is equivilent to a "one ballot overstantement". So it
-makes sense that using the _phantomPct_ phantoms for a contest might improve the sampling sizes.
+The common case is that both the CVR and the MVR is missing, which is equivilent to a "one ballot overstatement". So it
+makes sense that using the _phantomPct_ phantoms for a contest in the error rates might improve the sampling sizes.
 
-The _phantoms_ strategy uses phantomPct from each contest as the apriori "one ballot overstantement" error rate of the AdaptiveComparison 
-betting function. 
+The _phantoms_ strategy uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of the AdaptiveComparison 
+betting function, for both estimation and auditing.
 
 ### The _previous_ strategy
 
 The _previous_ strategy uses the measured error rates for the previous batch of sample ballots as the apriori error 
 rates of the AdaptiveComparison betting function. For the first batch, before any measured values are available, 
-it uses the phantomPct as in the phantoms strategy.
+it uses the phantomPct, as in the phantoms strategy. For both estimation and auditing.
 
 ### The _mixed_ strategy
 

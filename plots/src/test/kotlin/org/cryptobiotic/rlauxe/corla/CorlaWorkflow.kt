@@ -78,7 +78,7 @@ class CorlaWorkflow(
 
     /**
      * Choose lists of ballots to sample.
-     * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
+     * TODO is this how CORLA does it?
      */
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("----------estimateSampleSizes round $roundIdx")
@@ -90,7 +90,7 @@ class CorlaWorkflow(
             roundIdx,
             show=show,
         )
-        return createSampleIndices(this, roundIdx, quiet)
+        return sample(this, roundIdx, quiet)
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
@@ -180,7 +180,7 @@ fun runCorlaAudit(
     quiet: Boolean = true,
 ): TestH0Result {
     val cassorter = cassertion.cassorter
-    val sampler = ComparisonWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
+    val sampler = ClcaWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
     // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
     //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn

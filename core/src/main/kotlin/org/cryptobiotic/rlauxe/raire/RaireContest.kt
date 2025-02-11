@@ -5,6 +5,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 
@@ -64,9 +65,11 @@ class RaireContestUnderAudit(
         return this
     }
 
-    override fun show() = buildString {
-        appendLine("  RaireContestUnderAudit ${contest.info.name} winner $winner losers ${contest.losers}")
-        assertions.forEach { append(it.show()) }
+    override fun show(roundIdx: Int?) = buildString {
+        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())} est=$estSampleSize status=$status")
+        assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
+            append(" ${it.show()}")
+        }
     }
 
     companion object {

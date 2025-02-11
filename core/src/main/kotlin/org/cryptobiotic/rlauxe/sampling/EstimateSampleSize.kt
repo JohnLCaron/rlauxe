@@ -96,7 +96,9 @@ fun estimateSampleSizes(
         val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id }
             .map { it.task.assertion.estSampleSize }
         contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        if (show) println("  ${contestUA}")
+        val results = contestUA.minAssertion()?.roundResults
+        val pvalue = if (results.isNullOrEmpty()) 1.0 else results.last().pvalue
+        if (show) println("  ${contestUA} pvalue=$pvalue")
     }
     if (show) println()
     return estResults

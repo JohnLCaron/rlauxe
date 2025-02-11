@@ -20,7 +20,7 @@ fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> 
     while (contestsNotDone.isNotEmpty()) {
         sampleIndices = createSampleIndices(workflow, roundIdx, quiet)
         val pct = sampleIndices.size / N.toDouble()
-        println("createSampleIndices size = ${sampleIndices.size}, pct= $pct max=${auditConfig.samplePctCutoff}")
+        println(" createSampleIndices size = ${sampleIndices.size}, pct= $pct max=${auditConfig.samplePctCutoff}")
         if (pct <= auditConfig.samplePctCutoff) {
             break
         }
@@ -29,9 +29,15 @@ fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> 
         val maxContest = contestsNotDone.first { it.estSampleSize == maxEstimation }
         println(" ***too many samples, remove contest ${maxContest}")
 
+        // information we want in the persisted record
+        val minAssertion = maxContest.minAssertion()!!
+        minAssertion.status = TestH0Status.FailMaxSamplesAllowed
+        minAssertion.round = roundIdx
         maxContest.done = true
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
+
         contestsNotDone.remove(maxContest)
+        sampleIndices = emptyList() // if theres no more contests, this says were done
     }
     return sampleIndices
 }

@@ -22,7 +22,7 @@ data class RaireResults(
 ) {
     fun show() = buildString {
         appendLine("RaireResults: overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
-        contests.forEach { append(it.show()) }
+        contests.forEach { append(it.show(null)) }
     }
 }
 

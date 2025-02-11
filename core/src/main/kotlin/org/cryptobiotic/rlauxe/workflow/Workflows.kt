@@ -25,8 +25,8 @@ data class AuditState(
     val contests: List<ContestUnderAudit>,
 ) {
     fun show() =
-        "AuditState($name, $roundIdx, nmvrs=$nmvrs, newMvrs=$newMvrs, wasDone=$auditWasDone, isComplete=$auditIsComplete)" +
-                " ncontests done=${contests.filter{ it.done }.count()}"
+        "AuditState($name, $roundIdx, nmvrs=$nmvrs, newMvrs=$newMvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
+                " ncontests=${contests.size} ncontestsDone=${contests.filter { it.done }.count()}"
 }
 
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.

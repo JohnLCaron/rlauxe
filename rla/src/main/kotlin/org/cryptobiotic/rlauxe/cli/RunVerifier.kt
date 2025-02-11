@@ -35,8 +35,7 @@ class RunVerifier {
 
             parser.parse(args)
             println("RunVerifier on $inputDir")
-            val retval = runVerifier(inputDir, nthreads, showTime)
-            println("  retval $retval")
+            runVerifier(inputDir, nthreads, showTime)
         }
 
         fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false): Int {

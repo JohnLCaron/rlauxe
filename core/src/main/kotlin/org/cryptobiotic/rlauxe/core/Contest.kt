@@ -203,9 +203,9 @@ open class ContestUnderAudit(
     var clcaAssertions: List<ClcaAssertion> = emptyList()
 
     var estSampleSize = 0 // Estimate of the sample size required to confirm the contest
+    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
     var done = false
     var status = TestH0Status.InProgress // or its own enum ??
-    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
 
     // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
     open fun makePollingAssertions(): ContestUnderAudit {
@@ -327,10 +327,10 @@ open class ContestUnderAudit(
         return result
     }
 
-    open fun show() = buildString {
+    open fun show(roundIdx: Int?) = buildString {
         val votes = if (contest is Contest) contest.votes else "N/A"
         appendLine("${name} ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize status=$status")
-        assertions().forEach {
+        assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
             append(" ${it.show()}")
         }
     }

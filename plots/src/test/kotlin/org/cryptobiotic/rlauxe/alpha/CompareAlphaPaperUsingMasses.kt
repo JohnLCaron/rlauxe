@@ -112,52 +112,32 @@ class CompareAlphaPaperUsingMasses {
 }
 
 
-class ArrayAsGenSampleFn(val assortValues : DoubleArray): Sampler {
-    var index = 0
-
-    override fun sample(): Double {
-        return assortValues[index++]
-    }
-
-    override fun reset() {
-        index = 0
-    }
-
-    fun sampleMean(): Double {
-        return assortValues.toList().average()
-    }
-
-    fun sampleCount(): Double {
-        return assortValues.toList().sum()
-    }
-
-    override fun maxSamples(): Int {
-        return assortValues.size
-    }
-}
-
-
 class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampler {
-    val N = assortValues.size
-    val permutedIndex = MutableList(N) { it }
-    var idx = 0
+    val maxSamples = assortValues.size
+    val permutedIndex = MutableList(maxSamples) { it }
+    private var idx = 0
+    private var count = 0
 
     init {
         reset()
     }
 
     override fun sample(): Double {
-        require (idx < N)
-        require (permutedIndex[idx] < N)
+        require (idx < maxSamples)
+        require (permutedIndex[idx] < maxSamples)
+        count++
         return assortValues[permutedIndex[idx++]]
     }
 
     override fun reset() {
         permutedIndex.shuffle(Random)
         idx = 0
+        count = 0
     }
 
     fun sampleCount() = assortValues.sum()
     fun sampleMean() = assortValues.average()
-    override fun maxSamples() = N
+    override fun maxSamples() = maxSamples
+    override fun hasNext() = (count < maxSamples)
+    override fun next() = sample()
 }

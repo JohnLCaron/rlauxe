@@ -42,7 +42,7 @@ class OneAuditWorkflow(
             show=show,
         )
 
-        return createSampleIndices(this, roundIdx, quiet)
+        return sample(this, roundIdx, quiet)
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
@@ -118,7 +118,7 @@ fun runOneAuditAssertionAlpha(
     quiet: Boolean = false,
 ): TestH0Result{
     val assorter = cassertion.cassorter as OneAuditComparisonAssorter
-    val sampler = ComparisonWithoutReplacement(
+    val sampler = ClcaWithoutReplacement(
         contestUA.contest,
         cvrPairs,
         cassertion.cassorter,

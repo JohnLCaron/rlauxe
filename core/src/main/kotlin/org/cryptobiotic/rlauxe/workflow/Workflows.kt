@@ -23,7 +23,11 @@ data class AuditState(
     val auditWasDone: Boolean,
     val auditIsComplete: Boolean,
     val contests: List<ContestUnderAudit>,
-)
+) {
+    fun show() =
+        "AuditState($name, $roundIdx, nmvrs=$nmvrs, newMvrs=$newMvrs, wasDone=$auditWasDone, isComplete=$auditIsComplete)" +
+                " ncontests done=${contests.filter{ it.done }.count()}"
+}
 
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.
 fun checkWinners(contestUA: ContestUnderAudit, sortedVotes: List<Map.Entry<Int, Int>>) {
@@ -40,7 +44,7 @@ fun checkWinners(contestUA: ContestUnderAudit, sortedVotes: List<Map.Entry<Int, 
         return
     }
 
-    // see if theres a tie
+    // see if theres a tie TODO check this
     val winnerMin: Int = sortedVotes.take(nwinners).map{ it.value }.min()
     if (sortedVotes.size > nwinners) {
         val firstLoser = sortedVotes[nwinners]

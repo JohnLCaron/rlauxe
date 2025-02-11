@@ -211,10 +211,11 @@ data class OneAuditComparisonAssorter(
 ) : ClcaAssorterIF {
     val stratumInfos: Map<String, StratumInfo>   // strataName -> average batch assorter value
     val clcaMargin: Double // estimated assorter mean, if all cards agree; used for alphaMart
-    var cvrStrata: StratumInfo? = null
+    var cvrStrata: StratumInfo
 
-    override fun noerror() = cvrStrata!!.cassorter!!.noerror
-    override fun upperBound() = cvrStrata!!.cassorter!!.upperBound
+    // TODO fix failing tests
+    override fun noerror() = cvrStrata.cassorter!!.noerror
+    override fun upperBound() = cvrStrata.cassorter!!.upperBound
     override fun assorter() = assorter
 
     init {
@@ -235,7 +236,7 @@ data class OneAuditComparisonAssorter(
         }.toMap()
         val clcaMean = weightedMeanAssortValue / contestOA.Nc
         clcaMargin = mean2margin(clcaMean)
-        cvrStrata = stratumInfos.values.find { it.cassorter != null }
+        cvrStrata = stratumInfos.values.find { it.cassorter != null }!!
     }
 
     fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {

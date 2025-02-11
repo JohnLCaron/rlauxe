@@ -40,7 +40,7 @@ fun estimateSampleSizes(
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
-        if (result.failPct() > 80.0) { // TODO make settable ??
+        /* if (result.failPct() > 80.0) { // TODO make settable ??
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
             if (showFail) println(
                 "***FailSimulationPct for '${task.name()}' ntrials=${auditConfig.nsimEst} failed " +
@@ -51,6 +51,7 @@ fun estimateSampleSizes(
 
         } else if (result.pctSamplesNeeded() > 100 * auditConfig.samplePctCutoff) { // TODO may be wrong here
             task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
+            task.assertion.status = TestH0Status.FailMaxSamplesAllowed
             if (showFail) println(
                 "***FailMaxSamplesAllowed for '${task.name()}' ntrials=${auditConfig.nsimEst} pctSamplesNeeded " +
                         "${df(result.pctSamplesNeeded())} > ${df(100 * auditConfig.samplePctCutoff)}% estSampleSize=${task.assertion.estSampleSize} Nc=${result.Nc}" +
@@ -58,18 +59,20 @@ fun estimateSampleSizes(
             )
             task.contestUA.done = true
             task.contestUA.status = TestH0Status.FailMaxSamplesAllowed
+            } else
+ */
 
-        } else if (auditConfig.version == 1.0) {
+        if (auditConfig.version == 1.0) {
             val quantile = result.findQuantile(auditConfig.quantile)
             var size = task.prevSampleSize + quantile
             if (roundIdx > 1) {
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
                 if (debug) println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
-                size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt()
+                size = max(1.25 * task.contestUA.estSampleSize, size.toDouble()).toInt() // TODO do we really need this? seems too crude
             }
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
 
-        } else {
+        } else { // TODO WTF?
             val quantile = result.findQuantile(if (roundIdx == 1) .50 else .80)
             val size = task.prevSampleSize + quantile
             task.assertion.estSampleSize = min(size, task.contestUA.Nc)
@@ -89,7 +92,6 @@ fun estimateSampleSizes(
     }
 
     // pull out the sampleSizes for all successful assertions in the contest
-    // probably dont need to check failed, if it did fail, contest.done is true
     contestsUA.filter { !it.done }.forEach { contestUA ->
         val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id }
             .map { it.task.assertion.estSampleSize }
@@ -201,35 +203,34 @@ fun simulateSampleSizeClcaAssorter(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val cassorter = cassertion.cassorter
-    val round = cassertion.roundResults.size + 1  // TODO is this accurate ?
+    val roundIdx = cassertion.roundResults.size + 1  // TODO is this accurate ?
 
     val errorRates = when {
-        (clcaConfig.strategy == ClcaStrategyType.previous && round > 1) -> {
-            if (debugErrorRates) println("previous simulate round $round using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
+        (clcaConfig.strategy == ClcaStrategyType.previous && roundIdx > 1) -> {
+            if (debugErrorRates) println("previous simulate round $roundIdx using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
             cassertion.roundResults.last().errorRates!!
         }
         (clcaConfig.strategy == ClcaStrategyType.phantoms || clcaConfig.strategy == ClcaStrategyType.previous) -> {
             val phantomRate = contest.phantomRate()
             val errorRates = ErrorRates(0.0, phantomRate, 0.0, 0.0)
-            if (debugErrorRates) println("phantoms simulate round $round using errorRates=$errorRates")
+            if (debugErrorRates) println("phantoms simulate round $roundIdx using errorRates=$errorRates")
             errorRates
         }
         (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> {
-            if (debugErrorRates) println("simFuzzPct simulate round $round using simFuzzPct=${clcaConfig.simFuzzPct} errorRate=${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)}")
+            if (debugErrorRates) println("simFuzzPct simulate round $roundIdx using simFuzzPct=${clcaConfig.simFuzzPct} errorRate=${ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)}")
             ClcaErrorRates.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
         }
         (clcaConfig.errorRates != null) -> {
-            if (debugErrorRates) println("simulate apriori round $round using clcaConfig.errorRates =${clcaConfig.errorRates}")
+            if (debugErrorRates) println("simulate apriori round $roundIdx using clcaConfig.errorRates =${clcaConfig.errorRates}")
             clcaConfig.errorRates
         } // hmmmm
         else -> {
-            if (debugErrorRates) println("simulate round $round using no errorRates")
+            if (debugErrorRates) println("simulate round $roundIdx using no errorRates")
             null
         }
     }
 
-    // TODO detect all zeroes
-    val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null) {
+    val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
         Pair(
             ClcaSimulation(cvrs, contest, cassorter, errorRates),
             AdaptiveComparison(
@@ -242,7 +243,7 @@ fun simulateSampleSizeClcaAssorter(
     } else {
         // this is noerrors
         Pair(
-            ComparisonWithoutReplacement(
+            ClcaWithoutReplacement(
                 contest,
                 cvrs.zip(cvrs),
                 cassorter,
@@ -291,7 +292,6 @@ fun simulateSampleSizeBetaMart(
         Nc = Nc,
         noerror = noerror,
         upperBound = upperBound,
-        withoutReplacement = false
     )
 
     val result: RunTestRepeatedResult = runTestRepeated(
@@ -392,7 +392,7 @@ fun simulateSampleSizeOneAuditAssorter(
 
     // TODO is this right, no special processing for the "hasCvr" strata?
     val sampler = if (pollingConfig.simFuzzPct == null) {
-        ComparisonWithoutReplacement(contestUA.contest, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
+        ClcaWithoutReplacement(contestUA.contest, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
     } else {
         OneAuditFuzzSampler(pollingConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
     }

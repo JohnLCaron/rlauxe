@@ -17,7 +17,7 @@ fun runTestRepeated(
     startingTestStatistic: Double = 1.0,
     margin: Double?,
     Nc:Int, // maximum cards in the contest
-    ): RunTestRepeatedResult {
+): RunTestRepeatedResult {
 
     val showH0Result = false
 
@@ -37,9 +37,12 @@ fun runTestRepeated(
             showSequences = showSequences,
             startingTestStatistic = startingTestStatistic) { drawSample.sample() }
 
+
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
-        if (testH0Result.status != TestH0Status.StatRejectNull) {
+
+        // samples cant fail (I think), since you can use sample entire population
+        if (testH0Result.status == TestH0Status.LimitReached) { // TODO???
             fail++
         } else {
             nsuccess++

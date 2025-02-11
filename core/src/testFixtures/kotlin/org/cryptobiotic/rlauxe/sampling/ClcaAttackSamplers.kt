@@ -18,7 +18,8 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
     val flippedVotes2: Int
     val flippedVotes1: Int
 
-    var idx = 0
+    private var idx = 0
+    private var count = 0
 
     init {
         reset()
@@ -36,6 +37,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
         sampleMean = sampleCount / N
     }
 
+    // TODO why not filtering by contest?
     override fun sample(): Double {
         val assortVal = if (withoutReplacement) {
             val cvr = cvrs[permutedIndex[idx]]
@@ -48,17 +50,19 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
         }
+        count++
         return assortVal
     }
 
     override fun reset() {
         permutedIndex.shuffle(Random)
         idx = 0
+        count = 0
     }
 
-    fun sampleMean() = sampleMean
-    fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
+    override fun hasNext() = (count < maxSamples)
+    override fun next() = sample()
 }
 
 
@@ -72,7 +76,9 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
     val sampleMean: Double
     val sampleCount: Double
     val flippedVotes: Int
-    var idx = 0
+
+    private var idx = 0
+    private var count = 0
 
     init {
         reset()
@@ -87,6 +93,7 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
         sampleMean = sampleCount / cvrs.size
     }
 
+    // TODO why not filtering by contest?
     override fun sample(): Double {
         val assortVal = if (withoutReplacement) {
             val cvr = cvrs[permutedIndex[idx]]
@@ -99,15 +106,19 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
             val mvr = mvrs[chooseIdx]
             cassorter.bassort(mvr, cvr)
         }
+        count++
         return assortVal
     }
 
     override fun reset() {
         permutedIndex.shuffle(Random)
         idx = 0
+        count = 0
     }
 
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
+    override fun hasNext() = (count < maxSamples)
+    override fun next() = sample()
 }

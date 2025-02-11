@@ -126,7 +126,7 @@ data class ClcaAssorter(
     val hasStyle: Boolean = true, // TODO could be on the Contest ??
     val check: Boolean = true, // TODO get rid of
 ) : ClcaAssorterIF {
-    private val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
+    val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
 
@@ -243,7 +243,6 @@ open class Assertion(
     // these values are set during runAudit()
     val roundResults = mutableListOf<AuditRoundResult>()
     var status = TestH0Status.InProgress
-    // var proved = false
     var round = 0           // round when set to proved or disproved
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"

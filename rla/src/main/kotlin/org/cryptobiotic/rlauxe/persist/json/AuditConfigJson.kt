@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption
 //    val hasStyles: Boolean,
 //    val riskLimit: Double = 0.05,
 //    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
+//    val minMargin: Double = 0.005,
 //
 //    // simulation control
 //    val nsimEst: Int = 100, // number of simulation estimations
@@ -42,6 +43,7 @@ data class AuditConfigJson(
     val hasStyles: Boolean,
     val riskLimit: Double,
     val seed: Long,
+    val minMargin: Double,
     val nsimEst: Int,
     val quantile: Double,
     val samplePctCutoff: Double,
@@ -57,6 +59,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
         this.hasStyles,
         this.riskLimit,
         this.seed,
+        this.minMargin,
         this.nsimEst,
         this.quantile,
         this.samplePctCutoff,
@@ -74,6 +77,7 @@ fun AuditConfigJson.import(): AuditConfig {
         this.hasStyles,
         this.riskLimit,
         this.seed,
+        this.minMargin,
         this.nsimEst,
         this.quantile,
         this.samplePctCutoff,

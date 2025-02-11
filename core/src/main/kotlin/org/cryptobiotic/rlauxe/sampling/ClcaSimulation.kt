@@ -7,23 +7,24 @@ import kotlin.random.Random
 
 private val show = true
 
-// create internal cvr and mvr with the correct under/over statements that match the passed in error rates.
-// specific to a contest. only used for estimating the sample size
+/** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
+ * Specific to a contest. Only used for estimating the sample size.
+ */
 class ClcaSimulation(
-    rcvrs: List<Cvr>,
+    rcvrs: List<Cvr>, // may have phantoms
     val contest: ContestIF,
     val cassorter: ClcaAssorterIF,
     val errorRates: ErrorRates,
-    ): Sampler {
-
+): Sampler {
+    val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
-    val N = rcvrs.size
+    val Nc = contest.Nc
     val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()
 
-    val permutedIndex = MutableList(N) { it }
+    val permutedIndex = MutableList(Ncvrs) { it }
     val sampleMean: Double
     val sampleCount: Double
     val flippedVotesP1o: Int
@@ -31,7 +32,8 @@ class ClcaSimulation(
     val flippedVotesP1u: Int
     val flippedVotesP2u: Int
 
-    var idx = 0
+    private var idx = 0
+    private var count = 0
 
     init {
         // reset() we use the original order unless reset() is called, then we use a permutation
@@ -39,21 +41,21 @@ class ClcaSimulation(
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
         val mmvrs = mutableListOf<Cvr>()
-        rcvrs.forEach{ mmvrs.add(it) }
+        mmvrs.addAll(rcvrs)
         val ccvrs = mutableListOf<Cvr>()
         ccvrs.addAll(rcvrs)
 
-        flippedVotesP1o = flipP1o(mmvrs, needToChange = (N * errorRates.p1o).toInt())
-        flippedVotesP2o = flipP2o(mmvrs, needToChange = (N * errorRates.p2o).toInt())
-        flippedVotesP2u = flipP2u(mmvrs, needToChange = (N * errorRates.p2u).toInt())
-        flippedVotesP1u = if (isIRV) flipP1u(mmvrs, needToChange = (N * errorRates.p1u).toInt())
-                        else flipP1uP(mmvrs, ccvrs, needToChange = (N * errorRates.p1u).toInt())
+        flippedVotesP1o = flipP1o(mmvrs, needToChange = (Nc * errorRates.p1o).toInt())
+        flippedVotesP2o = flipP2o(mmvrs, needToChange = (Nc * errorRates.p2o).toInt())
+        flippedVotesP2u = flipP2u(mmvrs, needToChange = (Nc * errorRates.p2u).toInt())
+        flippedVotesP1u = if (isIRV) flipP1u(mmvrs, needToChange = (Nc * errorRates.p1u).toInt())
+                        else flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
 
         sampleCount = rcvrs.filter { it.hasContest(contest.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
-        sampleMean = sampleCount / N
+        sampleMean = sampleCount / Nc
     }
 
     fun sampleMean() = sampleMean
@@ -63,27 +65,31 @@ class ClcaSimulation(
     override fun reset() {
         permutedIndex.shuffle(Random)
         idx = 0
+        count = 0
     }
 
     override fun sample(): Double {
-        while (idx < N) {
+        while (idx < Ncvrs) {
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
+            idx++
             if (cvr.hasContest(contest.id)) {
                 val result = cassorter.bassort(mvr, cvr)
-                idx++
+                count++
                 return result
             }
-            idx++
         }
-        throw RuntimeException("no samples left for contest=${contest.id} and ComparisonAssorter ${cassorter}")
+        throw RuntimeException("ClcaSimulation: no samples left for contest=${contest.id} and ComparisonAssorter ${cassorter}")
     }
 
+    override fun hasNext() = (count < maxSamples)
+    override fun next() = sample()
+
     fun showFlips() = buildString {
-        appendLine(" flippedVotes1 = $flippedVotesP1o = ${df(100.0*flippedVotesP1o/N)}")
-        appendLine(" flippedVotes2 = $flippedVotesP2o = ${df(100.0*flippedVotesP2o/N)}")
-        appendLine(" flippedVotes3 = $flippedVotesP1u = ${df(100.0*flippedVotesP1u/N)}")
-        appendLine(" flippedVotes4 = $flippedVotesP2u = ${df(100.0*flippedVotesP2u/N)}")
+        appendLine(" flippedVotesP1o = $flippedVotesP1o = ${df(1.0*flippedVotesP1o/Nc)}")
+        appendLine(" flippedVotesP2o = $flippedVotesP2o = ${df(1.0*flippedVotesP2o/Nc)}")
+        appendLine(" flippedVotesP1u = $flippedVotesP1u = ${df(1.0*flippedVotesP1u/Nc)}")
+        appendLine(" flippedVotesP2u = $flippedVotesP2u = ${df(1.0*flippedVotesP2u/Nc)}")
     }
 
     //  plurality:  two vote overstatement: cvr has winner (1), mvr has loser (0)

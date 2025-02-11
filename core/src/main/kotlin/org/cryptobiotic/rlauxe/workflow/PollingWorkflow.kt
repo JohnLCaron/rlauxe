@@ -45,7 +45,7 @@ class PollingWorkflow(
             show=show,
         )
 
-        return createSampleIndices(this, roundIdx, quiet)
+        return sample(this, roundIdx, quiet)
     }
 
     override fun showResultsOld(estSampleSize: Int) {

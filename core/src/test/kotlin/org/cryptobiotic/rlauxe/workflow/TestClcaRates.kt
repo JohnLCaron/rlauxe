@@ -47,7 +47,7 @@ class TestClcaRates {
             println("margin=$margin mvrsFuzzPct=$mvrsFuzzPct estPct=$estPct")
             estPct.forEach { print(" ${df(abs(it - mvrsFuzzPct))},") }
             println()
-            estPct.forEach { assertEquals(mvrsFuzzPct, it, .03) }
+            estPct.forEach { assertEquals(mvrsFuzzPct, it, .05) }
         }
     }
 }

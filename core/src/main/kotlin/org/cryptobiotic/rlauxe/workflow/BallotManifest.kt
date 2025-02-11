@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+
 // The id must uniquely identify the paper ballot. Here it may be some simple thing (seq number) that points to
 // the paper ballot location. Its necessary that the system publically commit to that mapping before the Audit,
 // as well as to sampleNum.
@@ -36,6 +38,13 @@ interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
     fun setIsSampled(isSampled: Boolean): BallotOrCvr
+
+    fun hasOneOrMoreContest(contests: List<ContestUnderAudit>): Boolean {
+        for (contest in contests) {
+            if (hasContest(contest.id)) return true
+        }
+        return false
+    }
 }
 
 data class Ballot(

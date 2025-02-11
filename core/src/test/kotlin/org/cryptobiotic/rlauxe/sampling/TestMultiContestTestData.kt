@@ -1,10 +1,12 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,7 +23,7 @@ class TestMultiContestTestData {
 
     init {
         test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
-        println(test)
+        // println(test)
     }
 
     @Test
@@ -137,6 +139,35 @@ class TestMultiContestTestData {
             val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
             contestUA.assertions().forEach {
                 println("  $it")
+            }
+        }
+    }
+
+    @Test
+    fun testPhantomCvrs() {
+        val (cvrs, ballotManifest) = test.makeCvrsAndBallotManifest(true)
+
+        test.contests.forEachIndexed { idx, contest ->
+            val fcontest = test.fcontests[idx]
+            val Nc = fcontest.ncards + fcontest.phantomCount
+            assertEquals(contest.Nc, Nc)
+
+            val nphantom = cvrs.count { it.hasContest(contest.id) && it.phantom }
+            assertEquals(fcontest.phantomCount, nphantom)
+            val phantomPct = nphantom/ Nc.toDouble()
+            println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")
+            if (nphantom > 1) assertEquals(fcontest.phantomPct, phantomPct, 3.0/Nc) // TODO seems like should be 2 at the most, maybe 1
+
+            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+            val cassorter = contestUA.minClcaAssertion()!!.cassorter
+
+            val sampler = ClcaWithoutReplacement(contest, cvrs.zip(cvrs), cassorter, true)
+            val tracker = PrevSamplesWithRates(cassorter.noerror())
+            while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
+            // println("   tracker.errorRates = ${tracker.errorRates()}")
+            val p1o = tracker.errorRates().p1o
+            if (!doubleIsClose(phantomPct, p1o, 2.0/Nc)) {
+                println("   *** expected ${phantomPct} got=${p1o}")
             }
         }
     }

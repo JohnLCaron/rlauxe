@@ -328,7 +328,8 @@ open class ContestUnderAudit(
     }
 
     open fun show() = buildString {
-        appendLine("${name} ($id) ncandidates=${ncandidates} Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
+        val votes = if (contest is Contest) contest.votes else "N/A"
+        appendLine("${name} ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize status=$status")
         assertions().forEach {
             append(" ${it.show()}")
         }

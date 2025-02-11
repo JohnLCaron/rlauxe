@@ -10,11 +10,12 @@ data class AuditConfig(
     val hasStyles: Boolean,
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
+    val minMargin: Double = 0.005,
 
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val samplePctCutoff: Double = .42, // dont sample more than this pct of N TODO whats N?
+    val samplePctCutoff: Double = .42, // dont sample more than this pct of N
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),

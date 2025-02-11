@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
+import org.cryptobiotic.rlauxe.workflow.AuditState
 import org.cryptobiotic.rlauxe.workflow.AuditType
 
 class Verifier(val publish: Publisher) {
@@ -24,9 +25,14 @@ class Verifier(val publish: Publisher) {
             allOk = allOk && verifyBallotManifest()
         }
 
+        var state: AuditState? = null
         for (roundIdx in 1..publish.rounds()) {
-            allOk = allOk && verifyRound(roundIdx)
+            state = verifyRound(roundIdx)
+            verifyContests(state)
+            println("------------------------------------")
         }
+        // allOk = allOk && verifyContests(state)
+
         println("verify = $allOk")
         return allOk
     }
@@ -41,8 +47,9 @@ class Verifier(val publish: Publisher) {
                 if (countBad > 10) throw RuntimeException()
             }
         }
-        println("  verifyCvrSampleNumbers ${cvrs.size} bad=${countBad} ")
-        return countBad == 0
+        val ok = (countBad == 0)
+        println("  verifyCvrs $ok size=${cvrs.size} bad=${countBad} ")
+        return ok
     }
 
     fun verifyBallotManifest(): Boolean {
@@ -55,19 +62,26 @@ class Verifier(val publish: Publisher) {
                 if (countBad > 10) throw RuntimeException()
             }
         }
-        println("  verifyBallotManifest ${ballotManifest.ballots.size} bad=${countBad} ")
-        return countBad == 0
+        val ok = (countBad == 0)
+        println("  verifyBallots $ok size=${ballotManifest.ballots.size} bad=${countBad} ")
+        return ok
     }
 
-    fun verifyRound(roundIdx: Int): Boolean {
+    fun verifyRound(roundIdx: Int): AuditState {
         var result = true
         val state = readAuditStateJsonFile(publish.auditRoundFile(roundIdx)).unwrap()
+        println(" ${state.show()}")
+
         if (roundIdx != state.roundIdx) {
-            println("*** roundIdx = ${state.roundIdx} should be = $roundIdx")
+            println("  *** roundIdx = ${state.roundIdx} should be = $roundIdx")
             result = false
         }
+
         val indices = readSampleIndicesJsonFile(publish.sampleIndicesFile(roundIdx)).unwrap()
-        println("    verifyRound $roundIdx '${state.name}' auditWasDone=${state.auditWasDone} auditIsComplete=${state.auditIsComplete} indices = ${indices.size}")
+        if (indices.size != state.nmvrs) {
+            println("  *** nmvrs = ${state.nmvrs} should be = ${indices.size} ")
+            result = false
+        }
 
         if (state.auditWasDone) {
             val mvrs = readCvrsJsonFile(publish.sampleMvrsFile(roundIdx)).unwrap()
@@ -76,10 +90,16 @@ class Verifier(val publish: Publisher) {
                 result = false
             }
         }
+        return state
+    }
 
+    fun verifyContests(state: AuditState?): Boolean {
+        if (state == null) return false
+        println()
         state.contests.forEach { contest ->
-            print(contest.show())
+            println(contest.show())
         }
-        return result
+
+        return true
     }
 }

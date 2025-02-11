@@ -1,20 +1,20 @@
 package org.cryptobiotic.rlauxe.core
 
-enum class TestH0Status(val complete: Boolean) {
-    InProgress(false),
+enum class TestH0Status(val complete: Boolean, val success: Boolean) {
+    InProgress(false, false),
 
     // possible returns from RiskTestingFn
-    StatRejectNull(true), // statistical rejection of H0
-    LimitReached(false),  // cant tell from the number of samples available
+    StatRejectNull(true, true), // statistical rejection of H0
+    LimitReached(false, false),  // cant tell from the number of samples available
     //// only when sampling without replacement all the way to Nc, in practice, this rarely happens I think
-    SampleSumRejectNull(true), // SampleSum > Nc * t, so we know H0 is false; call it a failure anyway (for sampling)
-    AcceptNull(true), // SampleSum + (all remaining ballots == 1) < Nc * t, so we know that H0 is true.
+    SampleSumRejectNull(true, true), // SampleSum > Nc / 2, so we know H0 is false
+    AcceptNull(true, false), // SampleSum + (all remaining ballots == 1) < Nc / 2, so we know that H0 is true.
 
     // contest status
-    MinMargin(true), // margin too small for RLA to efficiently work
-    ContestMisformed(true), // Contest incorrectly formed
-    FailSimulationPct(true), // too many Simulations fail
-    FailMaxSamplesAllowed(true),  // estimated simulations greater than maximum samples allowed
+    ContestMisformed(true, false), // Contest incorrectly formed
+    MinMargin(true, false), // margin too small for RLA to efficiently work
+    TooManyPhantoms(true, false), // too many phantoms
+    FailMaxSamplesAllowed(true, false),  // estimated simulations greater than maximum samples allowed
 }
 
 data class TestH0Result(

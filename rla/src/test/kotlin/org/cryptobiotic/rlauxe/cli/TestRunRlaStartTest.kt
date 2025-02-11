@@ -13,7 +13,7 @@ class TestRunRlaStartTest {
                 "-in", topdir,
                 "-minMargin", "0.005",
                 "-fuzzMvrs", ".0123",
-                "-pctPhantoms", "0.0",
+                "-pctPhantoms", "0.001",
                 "-mvrs", mvrs,
             )
         )

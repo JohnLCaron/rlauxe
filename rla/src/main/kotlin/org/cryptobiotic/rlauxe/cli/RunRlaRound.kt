@@ -9,6 +9,7 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.persist.json.Publisher
@@ -66,10 +67,13 @@ class RunRound {
                         return -1
                     } else {
                         val roundSet = RoundIndexSet(round+1, samples, prevSamples.toSet())
-                        println("newSamplesNeeded=${roundSet.newSamples}, total samples=${samples.size}, ready to audit") // TODO save this number
+                        println("  newSamplesNeeded=${roundSet.newSamples}, total samples=${samples.size}, ready to audit") // TODO save this number
 
                         // write the partial election state to round+1
-                        val state = AuditState("Starting", round+1, samples.size, roundSet.newSamples, false, false, workflow.getContests())
+                        // we want FailMaxSamplesAllowed to get recorded in the persistent state, even though its done
+                        val notdone = workflow.getContests().filter { !it.done || it.status == TestH0Status.FailMaxSamplesAllowed }
+
+                        val state = AuditState("Starting", round+1, samples.size, roundSet.newSamples, false, false, notdone)
                         writeAuditStateJsonFile(state, publisher.auditRoundFile(round+1))
                         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(round+1)}")
                     }

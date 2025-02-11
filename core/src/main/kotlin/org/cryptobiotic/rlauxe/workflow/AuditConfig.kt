@@ -20,7 +20,17 @@ data class AuditConfig(
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
     val version: Double = 1.0,
-)
+) {
+    override fun toString() = buildString {
+        appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")
+        appendLine("  minMargin=$minMargin nsimEst=$nsimEst, quantile=$quantile, samplePctCutoff=$samplePctCutoff, version=$version")
+        when (auditType) {
+            AuditType.POLLING -> appendLine("  $pollingConfig")
+            AuditType.CARD_COMPARISON -> appendLine("  $clcaConfig")
+            AuditType.ONEAUDIT -> appendLine("  $oaConfig, ")
+        }
+    }
+}
 
 data class PollingConfig(
     val simFuzzPct: Double? = null, // for the estimation

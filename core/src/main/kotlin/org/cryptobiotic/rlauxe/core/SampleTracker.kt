@@ -16,7 +16,7 @@ interface SampleTracker {
 /**
  * This ensures that the called function doesnt have access to the current sample,
  * as required by "predictable function of the data X1 , . . . , Xi−1" requirement.
- * Its up to the method using this to make it "previous samples", by not adding the
+ * Its up to the method using this to make only "previous samples", by not adding the
  * current sample to it until the end of the iteration.
  */
 class PrevSamples : SampleTracker {
@@ -37,7 +37,8 @@ class PrevSamples : SampleTracker {
     }
 }
 
-/** This also counts the under/overstatements for comparison audits.
+/**
+ * This also counts the under/overstatements for comparison audits.
  * @param noerror for comparison assorters who need rate counting. set to 0 for polling
  */
 class PrevSamplesWithRates(val noerror: Double) : SampleTracker {

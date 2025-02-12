@@ -1,13 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 
 interface RlauxWorkflowIF {
+    fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult>
+    fun sample(roundIdx: Int): List<Int>
     fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int> // return ballot indices to sample
+
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean  // return allDone
-    fun showResultsOld(estSampleSize: Int)
 
     fun auditConfig() : AuditConfig
     fun getContests() : List<ContestUnderAudit>
@@ -27,6 +28,33 @@ data class AuditState(
     fun show() =
         "AuditState($name, $roundIdx, nmvrs=$nmvrs, newMvrs=$newMvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contests.size} ncontestsDone=${contests.filter { it.done }.count()}"
+}
+
+fun check(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
+
+    contestsUA.forEach { contestUA ->
+        if (contestUA.choiceFunction != SocialChoiceFunction.IRV) {
+            checkWinners(
+                contestUA,
+                (contestUA.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
+        }
+
+        // see if margin is too small
+        val minMargin = contestUA.minAssertion()!!.assorter.reportedMargin()
+        if (minMargin <= auditConfig.minMargin) {
+            println("***MinMargin contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
+            contestUA.done = true
+            contestUA.status = TestH0Status.MinMargin
+        }
+        // see if too many phantoms
+        val adjustedMargin = minMargin - contestUA.contest.phantomRate()
+        if (adjustedMargin <= 0.0) {
+            println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
+            contestUA.done = true
+            contestUA.status = TestH0Status.TooManyPhantoms
+        }
+        // println("contest ${contestUA} minMargin ${minMargin} + phantomRate ${contestUA.contest.phantomRate()} = adjustedMargin ${adjustedMargin}")
+    }
 }
 
 // 2.a) Check that the winners according to the CVRs are the reported winners on the Contest.

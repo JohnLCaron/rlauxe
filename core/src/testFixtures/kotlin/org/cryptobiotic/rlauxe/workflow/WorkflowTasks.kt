@@ -81,16 +81,17 @@ class ClcaWorkflowTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfig: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val Nb: Int = Nc,
+    val nsimEst: Int = 100,
     val p2flips: Double? = null,
     ): WorkflowTaskGenerator {
     override fun name() = "ClcaWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
-        val auditConfig = auditConfigIn ?:
-            AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 10,
+        val useConfig = auditConfig ?:
+            AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                 clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -98,17 +99,17 @@ class ClcaWorkflowTaskGenerator(
         var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        if (!auditConfig.hasStyles && Nb > Nc) {
+        if (!useConfig.hasStyles && Nb > Nc) { // TODO wtf?
             val otherContestId = 42
             val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
             testCvrs = testCvrs + otherCvrs
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clca = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
         return WorkflowTask(
             name(),
-            clca,
+            clcaWorkflow,
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
         )
@@ -122,22 +123,24 @@ class PollingWorkflowTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfig: AuditConfig? = null,
     val Nb: Int = Nc,
+    val nsimEst: Int = 100,
+
     ) : WorkflowTaskGenerator {
     override fun name() = "PollingWorkflowTaskGenerator"
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
-        val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = 10, pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
+        val useConfig = auditConfig ?: AuditConfig(
+            AuditType.POLLING, true, nsimEst = nsimEst, pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-        var ballotManifest = sim.makeBallotManifest(auditConfig.hasStyles)
+        var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
 
-        if (!auditConfig.hasStyles && Nb > Nc) {
+        if (!useConfig.hasStyles && Nb > Nc) {
             val otherContestId = 42
             val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
             testMvrs = testMvrs + otherCvrs
@@ -146,10 +149,10 @@ class PollingWorkflowTaskGenerator(
             ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
         }
 
-        val polling = PollingWorkflow(auditConfig, listOf(sim.contest), ballotManifest, Nb, quiet = quiet)
+        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotManifest, Nb, quiet = quiet)
         return WorkflowTask(
             name(),
-            polling,
+            pollingWorkflow,
             testMvrs,
             parameters + mapOf("fuzzPct" to mvrsFuzzPct, "auditType" to 2.0)
         )
@@ -280,7 +283,7 @@ data class WorkflowResult(
 }
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
-    val successRuns = runs.filter { it.status == TestH0Status.StatRejectNull || it.status == TestH0Status.SampleSumRejectNull }
+    val successRuns = runs.filter { it.status.success }
 
     val result =  if (runs.isEmpty()) { // TODO why all empty?
         WorkflowResult(

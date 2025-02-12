@@ -2,11 +2,10 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
+import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import kotlin.random.Random
 import kotlin.test.Test
 
 class CompareAuditsWithStyles {
@@ -27,7 +26,7 @@ class CompareAuditsWithStyles {
             val pollingGeneratorNS = PollingWorkflowTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to 1.0),
-                auditConfigIn = pollingConfigNS,
+                auditConfig = pollingConfigNS,
                 Nb=Nb)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGeneratorNS))
 
@@ -35,7 +34,7 @@ class CompareAuditsWithStyles {
             val pollingGenerator = PollingWorkflowTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to 2.0),
-                auditConfigIn = pollingConfig,
+                auditConfig = pollingConfig,
                 Nb=Nc)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
@@ -43,7 +42,7 @@ class CompareAuditsWithStyles {
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGeneratorNS = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to 3.0),
-                auditConfigIn = clcaConfigNS,
+                auditConfig = clcaConfigNS,
                 Nb=Nb
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorNS))
@@ -52,7 +51,7 @@ class CompareAuditsWithStyles {
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to 4.0),
-                auditConfigIn = clcaConfig,
+                auditConfig = clcaConfig,
                 Nb=Nc
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -67,13 +66,13 @@ class CompareAuditsWithStyles {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showNmvrsVsMargin(name, dirName, Scale.Linear)
-        showNmvrsVsMargin(name, dirName, Scale.Log)
-        showNmvrsVsMargin(name, dirName, Scale.Pct)
+        showNmvrsVsMargin(name, dirName, ScaleTypeOld.Linear)
+        showNmvrsVsMargin(name, dirName, ScaleTypeOld.Log)
+        showNmvrsVsMargin(name, dirName, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName)
     }
 
-    fun showNmvrsVsMargin(name: String, dirName: String, yscale: Scale) {
+    fun showNmvrsVsMargin(name: String, dirName: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 

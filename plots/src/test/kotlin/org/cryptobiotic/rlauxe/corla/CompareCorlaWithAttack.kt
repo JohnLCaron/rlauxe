@@ -2,12 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.*
-import org.cryptobiotic.rlauxe.sampling.ContestSimulation
-import org.cryptobiotic.rlauxe.sampling.makeFlippedMvrs
-import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -53,9 +48,9 @@ class CompareCorlaWithAttack {
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsTheta(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsTheta(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsTheta(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleTypeOld.Pct)
         showNroundsVsTheta(name, dirName, subtitle)
     }
 
@@ -66,7 +61,7 @@ class CompareCorlaWithAttack {
         showFailuresVsTheta(name, dirName, "${name}FailuresOver", "Nc=${N} nruns=${nruns}") { it.Dparam("theta") in 0.5..0.52 }
     }
 
-    fun showSampleSizesVsTheta(name: String, dirName: String, subtitle: String, yscale: Scale) {
+    fun showSampleSizesVsTheta(name: String, dirName: String, subtitle: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 

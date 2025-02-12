@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowIF
 
+private val debug = false
+
 /** must have sampleSizes set. must have sampleNums assigned */
 fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> {
     val auditConfig = workflow.auditConfig()
@@ -20,7 +22,7 @@ fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> 
     while (contestsNotDone.isNotEmpty()) {
         sampleIndices = createSampleIndices(workflow, roundIdx, quiet)
         val pct = sampleIndices.size / N.toDouble()
-        println(" createSampleIndices size = ${sampleIndices.size}, pct= $pct max=${auditConfig.samplePctCutoff}")
+        if (debug) println(" createSampleIndices size = ${sampleIndices.size}, pct= $pct max=${auditConfig.samplePctCutoff}")
         if (pct <= auditConfig.samplePctCutoff) {
             break
         }
@@ -106,7 +108,6 @@ fun consistentSampling(
 }
 
 // for audits with !hasStyles
-private val debug = false
 fun uniformSampling(
     contests: List<ContestUnderAudit>,
     ballotOrCvrs: List<BallotOrCvr>,

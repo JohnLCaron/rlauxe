@@ -1,17 +1,20 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
+import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
+import org.jetbrains.kotlinx.kandy.ir.scale.Scale
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
+import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
 
-// TODO replace with GenericPlotter
+enum class ScaleType { Linear, LogLinear, LogLog }
+
 // generic multiple line plotter for WorkflowResult
 fun wrsPlot(
     titleS: String,
@@ -22,6 +25,7 @@ fun wrsPlot(
     xfld: (WorkflowResult) -> Double,
     yfld: (WorkflowResult) -> Double,
     catfld: (WorkflowResult) -> String,
+    scaleType: ScaleType = ScaleType.Linear
 ) {
     // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
     val groups = makeWrGroups(wrs, catfld)
@@ -49,17 +53,20 @@ fun wrsPlot(
         catName to category,
     )
 
+    val xScale = if (scaleType == ScaleType.LogLog) Scale.continuousPos<Int>(transform = Transformation.LOG10) else Scale.continuousPos<Int>()
+    val yScale = if (scaleType == ScaleType.Linear) Scale.continuousPos<Int>() else Scale.continuousPos<Int>(transform = Transformation.LOG10)
+
     val plot = multipleDataset.plot {
         groupBy(catName) {
             line {
-                x(xname)
-                y(yname)
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
                 color(catName)
             }
 
             points {
-                x(xname)
-                y(yname)
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
                 size = 1.0
                 symbol = Symbol.CIRCLE_OPEN
                 color = Color.BLUE
@@ -79,8 +86,6 @@ fun wrsPlot(
     plot.save("${writeFile}.html")
     println("saved to $writeFile")
 }
-
-
 
 // make a map of all WorkflowResult for each catFld
 fun makeWrGroups(wrs: List<WorkflowResult>, catfld: (WorkflowResult) -> String): Map<String, List<WorkflowResult>> {

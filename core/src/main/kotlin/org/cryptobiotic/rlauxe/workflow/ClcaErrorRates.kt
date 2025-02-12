@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.ErrorRates
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 
-// theory is that the errorRates are proportional to fuzzPct
+// the idea is that the errorRates are proportional to fuzzPct
 // Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
 // margin doesnt matter (TODO show this)
 

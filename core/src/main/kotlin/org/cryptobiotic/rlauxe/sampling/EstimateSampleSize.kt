@@ -28,7 +28,7 @@ fun estimateSampleSizes(
     roundIdx: Int,
     show: Boolean = false,
     nthreads: Int = 30,
-): List<EstimationResult> {
+): List<RunTestRepeatedResult> {
     val tasks = mutableListOf<SimulateSampleSizeTask>()
     contestsUA.filter { !it.done }.forEach { contestUA ->
         tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, roundIdx))
@@ -101,7 +101,7 @@ fun estimateSampleSizes(
         if (show) println("  ${contestUA} pvalue=$pvalue")
     }
     if (show) println()
-    return estResults
+    return estResults.map { it.repeatedResult }
 }
 
 // tries to start from where the last left off. Otherwise, wouldnt you just get the previous estimate?
@@ -320,8 +320,9 @@ fun simulateSampleSizePollingAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val margin = assorter.reportedMargin()
+    // TODO 2 candidate plurality Contest with given margin
     val simContest = ContestSimulation(contest)
-    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin.
+    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin, what about suprmajority?
 
     val pollingConfig = auditConfig.pollingConfig
     val sampler = if (pollingConfig.simFuzzPct == null || pollingConfig.simFuzzPct == 0.0) {

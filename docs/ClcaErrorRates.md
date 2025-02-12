@@ -1,5 +1,5 @@
 # CLCA error rates
-last updated Feb 10, 2025
+last updated Feb 12, 2025
 
 ## Estimating Error
 
@@ -17,14 +17,14 @@ If the errors are from random processes, its possible that margins remain approx
 are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
 fetching and interpreting ballots.
 
-We currently have two ways of setting error rates. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4.
+We currently have two ways of setting error rates in the mvrs. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4.
 Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. 
 
 In both cases, we use CORBRA's adaptive estimate of the error rates that does a weighted average of the apriori and the 
 actual error rate from previous samples. These estimates are used in COBRA's OptimalLambda algorithm, which finds the 
 optimal bet given the error rates. 
 
-This algorithm is used when estimating the sample size, and also when doing the actual audit.
+This algorithm is used both when estimating the sample size, and also when doing the actual audit.
 
 ## CLCA error rates
 
@@ -51,7 +51,7 @@ See [Ballot Comparison using Betting Martingales](Betting.md) for more details a
 with varying p2error rates.
 
 
-## Estimating CLCA error rates with fuzz
+## CLCA sample sizes with MVR fuzzing
 
 We can estimate CLCA error rates as follows:
 
@@ -59,20 +59,19 @@ The MVRs are "fuzzed" by taking _fuzzPct_ of the ballots
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the cvrs and mvrs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
-In the plots that follow, the actual fuzz of the MVRs is 1%. We use different fuzz rates for estimating and auditing, 
-and see how the resulting sample sizes vary. 
+In the folowing log-log plot, we plot CLCA sample size against the actual fuzz of the MVRs, down to a margin of .001, 
+using the standard strategy of noerror (see below).
 
-The first plot below shows that CLCA sample sizes are somewhat affected by fuzz. The second plot shows that Plotting sample sizes
-have greater spread, but on average are not much affected.
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/fuzz/clcaByMvrFuzzPctLogLog.html" rel="clcaByMvrFuzzPctLogLog">![clcaByMvrFuzzPctLogLog](plots/fuzz/clcaByMvrFuzzPctLogLog.png)</a>
 
-TODO: replace with clcaVsMarginByFuzzPct, pollVsMarginByFuzzPct
+In contrast, the following log-linear plot for polling audits shows less sensitivity (and higher sample sizes):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/ComparisonFuzzed.html" rel="ComparisonFuzzed">![ComparisonFuzzed](plots/samples/ComparisonFuzzed.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/PollingFuzzed.html" rel="PollingFuzzed">![PollingFuzzed](plots/samples/PollingFuzzed.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/fuzz/pollByMvrFuzzPctLogLinear.html" rel="pollByMvrFuzzPctLogLinear">![pollByMvrFuzzPctLogLinear](plots/fuzz/pollByMvrFuzzPctLogLinear.png)</a>
 
-We use this strategy and run simulations that generate CLCA error rates, as a function of number of candidates in the contest.
+## CLCA error rate simulation with MVR fuzzing
+
+We use fuzzed MBRs to generate CLCA error rates, as a function of number of candidates in the contest.
 Note that margin doesnt effect these values.
-
 
 ````
     GenerateComparisonErrorTable.generateErrorTable()
@@ -107,11 +106,11 @@ of the four categories. Use those rates in the OptimalLambda algorithm
 The benefit is that you immediately start your bets knowing what errors you're going to see in that sample.
 That gives us a fixed lamda for that sample. 
 
-It does seem that the algorithm violates the "predictable sequence in the sense that ηj may depend on X j−1 , but not on Xk for k ≥ j ."
-We use this _oracle strategy_ only for testing.
+This algorithm violates the "predictable sequence in the sense that ηj may depend on X j−1 , but not on Xk for k ≥ j ."
+So we use this _oracle strategy_ only for testing, to show the best possible sampling using the OptimalLambda algorithm.
 
 
-## CLCA sample sizes with different error rate strategies
+## CLCA sample sizes with Mvr fuzzing
 
 These are plots of sample sizes for various error estimation strategies. In all cases, synthetic CVRs are generated with the given margin, 
 and MVRs are fuzzed at the given fuzzPct. Except for the oracle strategy, the AdaptiveComparison betting function is used.
@@ -197,7 +196,7 @@ and the same when there are 1% phantoms:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsNrounds.html" rel="estByStrategyPhantomsNrounds">![estByStrategyPhantomsNrounds](plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsNrounds.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsFailures.html" rel="estByStrategPhantomsPFailures">![estByStrategPhantomsPFailures](plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsFailures.png)</a>
 
-* Note that the plots with phantoms start with margin = .025, while tthe plots without start at margin = .005.
+* Note that the plots with phantoms start with margin = .025, while the plots without phantoms start at margin = .005.
 * Its clear that for some reason the _previous_ strategy makes things worse (investigate why that is).
 * The _phantom_ strategy doesnt stand out.
 * The _nmvrs_ and _extra_ plots may indicate tradeoffs with extra samples vs extra rounds.

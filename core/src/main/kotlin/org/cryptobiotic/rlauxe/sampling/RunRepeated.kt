@@ -41,8 +41,9 @@ fun runTestRepeated(
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
 
-        // samples cant fail (I think), since you can use sample entire population
-        if (testH0Result.status == TestH0Status.LimitReached) { // TODO???
+        // samples cant fail (I think), since you can use the entire population
+        if (testH0Result.status == TestH0Status.LimitReached) {
+            println("unexpected failure in sampling, status= ${testH0Result.status}")
             fail++
         } else {
             nsuccess++
@@ -98,3 +99,8 @@ data class RunTestRepeatedResult(
         append(showDeciles(sampleCount))
     }
 }
+
+data class EstimationResult(
+    val task: SimulateSampleSizeTask,
+    val repeatedResult: RunTestRepeatedResult,
+)

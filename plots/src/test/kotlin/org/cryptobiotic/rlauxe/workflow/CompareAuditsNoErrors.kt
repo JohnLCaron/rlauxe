@@ -53,13 +53,13 @@ class CompareAuditsNoErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsMargin(name, dirName, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Pct)
     }
 
 
-    fun showSampleSizesVsMargin(name: String, dirName: String, yscale: Scale) {
+    fun showSampleSizesVsMargin(name: String, dirName: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
@@ -100,9 +100,9 @@ class CompareAuditsNoErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsMargin(name, dirName, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Pct)
     }
 
     @Test
@@ -199,13 +199,13 @@ class CompareAuditsNoErrors {
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMarginByStrategy(name, dirName, subtitle=subtitle)
     }
 
-    fun showSampleSizesVsMarginByStrategy(name: String, dirName: String, subtitle: String, yscale: Scale) {
+    fun showSampleSizesVsMarginByStrategy(name: String, dirName: String, subtitle: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 

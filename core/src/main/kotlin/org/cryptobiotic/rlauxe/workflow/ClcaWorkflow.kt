@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
-import kotlin.math.max
 
 private val debugErrorRates = false
 
@@ -45,36 +44,16 @@ class ClcaWorkflow(
             contest.makeClcaAssertions(cvrs)
         }
 
-        // TODO factor out
-        contestsUA.forEach { contestUA ->
-            if (contestUA.choiceFunction != SocialChoiceFunction.IRV) {
-                checkWinners(contestUA, (contestUA.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
-            }
-
-            // see if margin is too small
-            val minMargin = contestUA.minClcaAssertion()!!.assorter.reportedMargin()
-            if (minMargin <= auditConfig.minMargin) {
-                println("contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
-                contestUA.done = true
-                contestUA.status = TestH0Status.MinMargin
-            }
-            // see if too many phantoms
-            val adjustedMargin = minMargin - contestUA.contest.phantomRate()
-            if (adjustedMargin <= 0.0) {
-                println("contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
-                contestUA.done = true
-                contestUA.status = TestH0Status.TooManyPhantoms
-            }
-            // println("contest ${contestUA} minMargin ${minMargin} + phantomRate ${contestUA.contest.phantomRate()} = adjustedMargin ${adjustedMargin}")
-        }
+        // check contests well formed etc
+        check(auditConfig, contestsUA)
 
         // must be done once and for all
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    // debugging
-    fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<EstimationResult> {
+    override fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult> {
+        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
         return estimateSampleSizes(
             auditConfig,
             contestsUA,
@@ -82,6 +61,10 @@ class ClcaWorkflow(
             roundIdx,
             show = show,
         )
+    }
+
+    override fun sample(roundIdx: Int): List<Int> {
+        return sample(this, roundIdx, quiet)
     }
 
     /** Choose lists of ballots to sample. */
@@ -97,34 +80,6 @@ class ClcaWorkflow(
         )
 
         return sample(this, roundIdx, quiet)
-    }
-
-    override fun showResultsOld(estSampleSize: Int) {
-        println("Audit results")
-        contestsUA.forEach{ contest ->
-            val minAssertion = contest.minClcaAssertion()
-            if (minAssertion == null) {
-                println(" $contest has no assertions; status=${contest.status}")
-            } else {
-                if (minAssertion.roundResults.size == 1) {
-                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(contest.minMargin())} ${minAssertion.roundResults[0]}")
-                    if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
-                } else {
-                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(contest.minMargin())} est=${contest.estSampleSize} round=${minAssertion.round} status=${contest.status}")
-                    if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
-                    minAssertion.roundResults.forEach { rr -> println("   $rr") }
-                }
-            }
-        }
-
-        var maxBallotsUsed = 0
-        contestsUA.forEach { contest ->
-            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
-                val lastRound = assertion.roundResults.last()
-                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
-            }
-        }
-        println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
@@ -195,7 +150,6 @@ fun auditClcaAssertion(
     roundIdx: Int,
     quiet: Boolean = true,
 ): TestH0Result {
-    val debug = false
     val cassorter = cassertion.cassorter
     val sampler = ClcaWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 

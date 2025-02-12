@@ -62,14 +62,14 @@ class GenVsFuzzByStrategy {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsFuzzPct(name, Scale.Linear)
-        showSampleSizesVsFuzzPct(name, Scale.Log)
-        showSampleSizesVsFuzzPct(name, Scale.Pct)
+        showSampleSizesVsFuzzPct(name, ScaleTypeOld.Linear)
+        showSampleSizesVsFuzzPct(name, ScaleTypeOld.Log)
+        showSampleSizesVsFuzzPct(name, ScaleTypeOld.Pct)
         showFailuresVsFuzzPct(name, )
         showNroundsVsFuzzPct(name, )
     }
 
-    fun showSampleSizesVsFuzzPct(name:String, yscale: Scale) {
+    fun showSampleSizesVsFuzzPct(name:String, yscale: ScaleTypeOld) {
         val dirName = "/home/stormy/temp/workflow/$name"
 
         val io = WorkflowResultsIO("$dirName/${name}.cvs")

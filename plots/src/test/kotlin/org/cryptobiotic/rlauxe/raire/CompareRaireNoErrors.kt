@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.corla.showFailuresVsMargin
 import org.cryptobiotic.rlauxe.corla.showNroundsVsMargin
 import org.cryptobiotic.rlauxe.corla.showSampleSizesVsMargin
-import org.cryptobiotic.rlauxe.rlaplots.Scale
+import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
@@ -49,9 +49,9 @@ class CompareRaireNoErrors {
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }
@@ -60,9 +60,9 @@ class CompareRaireNoErrors {
     fun regenNoerrorsPlots() {
         val subtitle = "Nc=${N} nruns=${nruns}"
 
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }

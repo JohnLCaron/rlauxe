@@ -84,7 +84,7 @@ class RunRound {
     }
 }
 
-fun readPersistentWorkflow(round: Int, publish: Publisher): Pair<AuditState, RlauxWorkflow?> {
+fun readPersistentWorkflow(round: Int, publish: Publisher): Pair<AuditState, PersistentWorkflow?> {
     println("readPersistentWorkflow from round $round")
     val resultAuditConfig = readAuditConfigJsonFile(publish.auditConfigFile())
     if (resultAuditConfig is Err) println(resultAuditConfig)
@@ -104,14 +104,14 @@ fun readPersistentWorkflow(round: Int, publish: Publisher): Pair<AuditState, Rla
         if (resultCvrs is Err) println(resultCvrs)
         require(resultCvrs is Ok)
         val cvrs = resultCvrs.unwrap()
-        return Pair(auditState, RlauxWorkflow(auditConfig, auditState.contests, emptyList(), cvrs))
+        return Pair(auditState, PersistentWorkflow(auditConfig, auditState.contests, emptyList(), cvrs))
 
     } else {
         val resultBallotManifest = readBallotManifestJsonFile(publish.ballotManifestFile())
         if (resultBallotManifest is Err) println(resultBallotManifest)
         require(resultBallotManifest is Ok)
         val ballotManifest = resultBallotManifest.unwrap()
-        return Pair(auditState, RlauxWorkflow(auditConfig, auditState.contests, ballotManifest.ballots, emptyList()))
+        return Pair(auditState, PersistentWorkflow(auditConfig, auditState.contests, ballotManifest.ballots, emptyList()))
     }
 }
 

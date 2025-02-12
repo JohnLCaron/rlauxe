@@ -92,7 +92,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: L
     return done
 }
 
-fun readPersistentWorkflow(round: Int, publish: Publisher): RlauxWorkflow {
+fun readPersistentWorkflow(round: Int, publish: Publisher): PersistentWorkflow {
     val resultAuditConfig = readAuditConfigJsonFile(publish.auditConfigFile())
     if (resultAuditConfig is Err) println(resultAuditConfig)
     assertTrue(resultAuditConfig is Ok)
@@ -109,14 +109,14 @@ fun readPersistentWorkflow(round: Int, publish: Publisher): RlauxWorkflow {
         if (resultCvrs is Err) println(resultCvrs)
         assertTrue(resultCvrs is Ok)
         val cvrs = resultCvrs.unwrap()
-        return RlauxWorkflow(auditConfig, electionState.contests, emptyList(), cvrs)
+        return PersistentWorkflow(auditConfig, electionState.contests, emptyList(), cvrs)
 
     } else {
         val resultBallotManifest = readBallotManifestJsonFile(publish.ballotManifestFile())
         if (resultBallotManifest is Err) println(resultBallotManifest)
         assertTrue(resultBallotManifest is Ok)
         val ballotManifest = resultBallotManifest.unwrap()
-        return RlauxWorkflow(auditConfig, electionState.contests, ballotManifest.ballots, emptyList())
+        return PersistentWorkflow(auditConfig, electionState.contests, ballotManifest.ballots, emptyList())
     }
 
 }

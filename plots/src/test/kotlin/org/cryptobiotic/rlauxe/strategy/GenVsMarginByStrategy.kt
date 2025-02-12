@@ -7,12 +7,12 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenVsMarginByStrategy {
-    val name = "clcaVsMarginByStrategy1"
+    var name = "clcaVsMarginByStrategy1"
     val dirName = "/home/stormy/temp/strategy"
 
     val N = 50000
     val nruns = 100  // number of times to run workflow
-    val fuzzPct = .01
+    var fuzzPct = .01
 
     @Test
     fun genSamplesVsFuzzByStrategy() {

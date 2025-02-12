@@ -109,15 +109,14 @@ That gives us a fixed lamda for that sample.
 This algorithm violates the "predictable sequence in the sense that ηj may depend on X j−1 , but not on Xk for k ≥ j ."
 So we use this _oracle strategy_ only for testing, to show the best possible sampling using the OptimalLambda algorithm.
 
-
-## CLCA sample sizes with Mvr fuzzing
+## CLCA sample sizes by strategy
 
 These are plots of sample sizes for various error estimation strategies. In all cases, synthetic CVRs are generated with the given margin, 
 and MVRs are fuzzed at the given fuzzPct. Except for the oracle strategy, the AdaptiveComparison betting function is used.
 
 The error estimation strategies are:
 
-* oracle : The true error rate for the sample is computed. This voilates the "predictable sequence requirement", so cant be used in a real audit.
+* oracle : The true error rate for the sample is computed. This violates the "predictable sequence requirement", so cant be used in a real audit.
 * noerror : The apriori error rates are 0.
 * fuzzPct: The apriori error rates are calculated from the true fuzzPct. 
 * 2*fuzzPct: The fuzzPct is overestimated by a factor of 2.
@@ -129,18 +128,15 @@ Here are plots of sample size as a function of fuzzPct, with a fixed margins of 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy4LogLog.html" rel="clcaVsFuzzByStrategy4LogLog">![clcaVsFuzzByStrategy4LogLog](plots/strategy/clcaVsFuzzByStrategy4LogLog.png)</a>
 
 Notes:
-* The oracle results show the lowest sample sizes possible.
+* The oracle results generally show the lowest sample sizes, as expected.
 * The noerror strategy is significantly worse in the presence of errors.
 * If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes, especially for low values of fuzzPct.
 
-Here are plots of sample size as a function of margin, with a fixed fuzzPct of .005, .01 and .04:
+Here are plots of sample size as a function of margin, for fuzzPct of .005, .01 and .04:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy05LogLog.html" rel="clcaVsMarginByStrategy05LogLog">![clcaVsMarginByStrategy05LogLog](plots/strategy/clcaVsMarginByStrategy05LogLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy1LogLog.html" rel="clcaVsMarginByStrategy1LogLog">![clcaVsMarginByStrategy1LogLog](plots/strategy/clcaVsMarginByStrategy1LogLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy4LogLog.html" rel="clcaVsMarginByStrategy4LogLog">![clcaVsMarginByStrategy4LogLog](plots/strategy/clcaVsMarginByStrategy4LogLog.png)</a>
-
-* Arguably a fuzz rate of 5% is extreme.
-* We start to see failures (more than 80% of trials fail) when the margin is less than 2 percent.
 
 ## More experiments with different error rate strategies
 
@@ -177,26 +173,14 @@ The _mixed_ strategy uses _noerror_ strategy for estimation and the _phantoms_ s
 
 ### Simulations with new strategies
 
-For the new strategies and the noerror and oracle strategies, we show the number of samples needed, the number of Mvrs needed,
-and the "extra" = nmvrs - needed, along with the average number of rounds and failure rate:
+For the new strategies and the noerror and oracle strategies, with fuzzPct of .01, we show the number of samples needed for phantomPct = 0, 1, and 2 percent:
 
-This is for the case of no phantoms:
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy0LogLog.html" rel="clcaVsMarginByStrategy0LogLog">![clcaVsMarginByStrategy0LogLog](plots/strategy2/clcaVsMarginByStrategy0LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy1LogLog.html" rel="clcaVsMarginByStrategy1LogLog">![clcaVsMarginByStrategy1LogLog](plots/strategy2/clcaVsMarginByStrategy1LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy2LogLog.html" rel="clcaVsMarginByStrategy2LogLog">![clcaVsMarginByStrategy2LogLog](plots/strategy2/clcaVsMarginByStrategy2LogLog.png)</a>
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/SamplesLog.html" rel="samplesByStrategyLog">![samplesByStrategyLog](plots/workflows/estByStrategy/SamplesLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/NmvrsLog.html" rel="nmvrsByStrategyLog">![nmvrsByStrategyLog](plots/workflows/estByStrategy/NmvrsLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/ExtraLog.html" rel="extraByStrategyLog">![extraByStrategyLog](plots/workflows/estByStrategy/ExtraLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/estVsMarginByStrategyNrounds.html" rel="estByStrategyNrounds">![estByStrategyNrounds](plots/workflows/estByStrategy/estVsMarginByStrategyNrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategy/estVsMarginByStrategyFailures.html" rel="estByStrategyFailures">![estByStrategyFailures](plots/workflows/estByStrategy/estVsMarginByStrategyFailures.png)</a>
-
-and the same when there are 1% phantoms:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/SamplesLog.html" rel="samplesByStrategyPhantomsLog">![samplesByStrategyPhantomsLog](plots/workflows/estByStrategyWithPhantoms/SamplesLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/NmvrsLog.html" rel="nmvrsByStrategyPhantomsLog">![nmvrsByStrategyPhantomsLog](plots/workflows/estByStrategyWithPhantoms/NmvrsLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/ExtraLog.html" rel="extraByStrategyPhantomsLog">![extraByStrategyPhantomsLog](plots/workflows/estByStrategyWithPhantoms/ExtraLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsNrounds.html" rel="estByStrategyPhantomsNrounds">![estByStrategyPhantomsNrounds](plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsNrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsFailures.html" rel="estByStrategPhantomsPFailures">![estByStrategPhantomsPFailures](plots/workflows/estByStrategyWithPhantoms/estByStrategyWithPhantomsFailures.png)</a>
-
-* Note that the plots with phantoms start with margin = .025, while the plots without phantoms start at margin = .005.
-* Its clear that for some reason the _previous_ strategy makes things worse (investigate why that is).
-* The _phantom_ strategy doesnt stand out.
-* The _nmvrs_ and _extra_ plots may indicate tradeoffs with extra samples vs extra rounds.
+* A _phantomPct_ of phantoms lowers the margin by that amount, so note that the margins <= phantomPct are ommitted in the plots.
+* When phantomPct = 0.0, the phantom and mixed strategies become the same as noerrer, abd any differences are due to variance in the sample ordering.
+* The oracle strategy can't be used in production. 
+* The fuzzPct strategy requires one to guess the fuzzPct, and here we use the actual fuzz, so this is as good as it gets using that strategy.
+* That leaves the noerror, previous, phantom and mixed as possible strategies that dont require apriori knowledge.

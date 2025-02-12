@@ -7,13 +7,13 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenVsMarginByStrategy2 {
-    val name = "clcaVsMarginByStrategy0"
+    var name = "clcaVsMarginByStrategy0"
     val dirName = "/home/stormy/temp/strategy2"
 
     val N = 50000
-    val nruns = 10  // number of times to run workflow
+    val nruns = 100  // number of times to run workflow
     val fuzzPct = .01
-    val phantomPct = .00
+    var phantomPct = .00
 
     @Test
     fun genSamplesVsFuzzByStrategy() {
@@ -21,7 +21,7 @@ class GenVsMarginByStrategy2 {
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 10, minMargin = 0.0, samplePctCutoff = 1.0)
+        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 100, minMargin = 0.0, samplePctCutoff = 1.0)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->

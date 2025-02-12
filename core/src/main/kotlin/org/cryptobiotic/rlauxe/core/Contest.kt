@@ -70,7 +70,7 @@ interface ContestIF {
 
 /**
  * Contest with the reported results.
- * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be ommitted.
+ * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be omitted.
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  * @parameter Np: number of phantoms for this contest.
  */
@@ -85,13 +85,12 @@ class Contest(
     override val choiceFunction = info.choiceFunction
     override val ncandidates = info.candidateIds.size
 
-    val votes: Map<Int, Int>  // same as voteInput except zero vote candidates have been added
+    val votes: Map<Int, Int>  // candidateId -> nvotes; zero vote candidates have been added
     override val winnerNames: List<String>
     override val winners: List<Int>
     override val losers: List<Int>
 
-    val undervotes: Int
-    val minMargin: Double  // minimum margin between top winner and top loser
+    val undervotes: Int // TODO may not know this, if !hasStyles
 
     init {
         // construct votes, adding 0 votes if needed
@@ -127,14 +126,10 @@ class Contest(
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
-
-        // TODO this assumes plurality with nwinners = 1. Maybe get rid of this ??
-        val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
-        minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
+        append("$name ($id) Nc=$Nc Np=$Np votes=${votes}")
     }
 
     fun calcMargin(winner: Int, loser: Int): Double {
@@ -152,7 +147,6 @@ class Contest(
 
         if (Nc != other.Nc) return false
         if (Np != other.Np) return false
-        if (minMargin != other.minMargin) return false
         if (info != other.info) return false
         if (votes != other.votes) return false
         if (winnerNames != other.winnerNames) return false
@@ -165,7 +159,6 @@ class Contest(
     override fun hashCode(): Int {
         var result = Nc
         result = 31 * result + Np
-        result = 31 * result + minMargin.hashCode()
         result = 31 * result + info.hashCode()
         result = 31 * result + votes.hashCode()
         result = 31 * result + winnerNames.hashCode()
@@ -175,7 +168,7 @@ class Contest(
     }
 
     override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers, undervotes=$undervotes, minMargin=$minMargin)"
+        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers, undervotes=$undervotes)"
     }
 
     companion object {
@@ -328,8 +321,8 @@ open class ContestUnderAudit(
     }
 
     open fun show(roundIdx: Int?) = buildString {
-        val votes = if (contest is Contest) contest.votes else "N/A"
-        appendLine("${name} ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize status=$status")
+        val votes = if (contest is Contest) contest.votes.toString() else "N/A"
+        appendLine("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize status=$status")
         assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
             append(" ${it.show()}")
         }

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.category
-import org.cryptobiotic.rlauxe.rlaplots.Scale
+import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -48,9 +48,9 @@ class CompareCorlaNoErrors {
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }
@@ -59,15 +59,15 @@ class CompareCorlaNoErrors {
     fun regenNoerrorsPlots() {
         val subtitle = "Nc=${N} nruns=${nruns}"
 
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }
 }
 
-fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: Scale) {
+fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleTypeOld) {
     val io = WorkflowResultsIO("$dirName/${name}.cvs")
     val results = io.readResults()
 

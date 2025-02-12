@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
+import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -51,21 +51,21 @@ class CompareAuditsWithErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsFuzzPct(Scale.Linear)
-        showSampleSizesVsFuzzPct(Scale.Log)
-        showSampleSizesVsFuzzPct(Scale.Pct)
+        showSampleSizesVsFuzzPct(ScaleTypeOld.Linear)
+        showSampleSizesVsFuzzPct(ScaleTypeOld.Log)
+        showSampleSizesVsFuzzPct(ScaleTypeOld.Pct)
         showFailuresVsFuzzPct()
         showNroundsVsFuzzPct()
     }
 
     @Test
     fun regenPlots() {
-        showSampleSizesVsFuzzPct(Scale.Linear)
-        showSampleSizesVsFuzzPct(Scale.Log)
-        showSampleSizesVsFuzzPct(Scale.Pct)
+        showSampleSizesVsFuzzPct(ScaleTypeOld.Linear)
+        showSampleSizesVsFuzzPct(ScaleTypeOld.Log)
+        showSampleSizesVsFuzzPct(ScaleTypeOld.Pct)
     }
 
-    fun showSampleSizesVsFuzzPct(yscale: Scale) {
+    fun showSampleSizesVsFuzzPct(yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 

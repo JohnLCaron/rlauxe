@@ -2,14 +2,8 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.rlaplots.category
-import org.cryptobiotic.rlauxe.rlaplots.Scale
+import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
-import org.cryptobiotic.rlauxe.sampling.ContestSimulation
-import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
@@ -74,9 +68,9 @@ class CompareCorlaWithErrors {
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns} mvrsFuzzPct=$mvrsFuzzPct"
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }
@@ -85,9 +79,9 @@ class CompareCorlaWithErrors {
     fun regenNoerrorsPlots() {
         val subtitle = "Nc=${N} nruns=${nruns} mvrsFuzzPct=$mvrsFuzzPct"
 
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, Scale.Pct)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }

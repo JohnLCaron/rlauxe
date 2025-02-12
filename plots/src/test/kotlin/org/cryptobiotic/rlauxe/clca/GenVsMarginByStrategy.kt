@@ -2,13 +2,11 @@ package org.cryptobiotic.rlauxe.clca
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
+import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.rlaplots.category
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
@@ -68,13 +66,13 @@ class GenVsMarginByStrategy {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsMargin(Scale.Linear)
-        showSampleSizesVsMargin(Scale.Log)
-        showSampleSizesVsMargin(Scale.Pct)
+        showSampleSizesVsMargin(ScaleTypeOld.Linear)
+        showSampleSizesVsMargin(ScaleTypeOld.Log)
+        showSampleSizesVsMargin(ScaleTypeOld.Pct)
         showFailuresVsMargin()
     }
 
-    fun showSampleSizesVsMargin(yscale: Scale) {
+    fun showSampleSizesVsMargin(yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 

@@ -13,14 +13,12 @@ dependencies {
     api(project(":core"))
 
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.3.1")
-    implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.7.0")
     implementation(libs.kotlinx.coroutines.core)
-
     implementation(libs.lets.plot)
+    implementation(libs.lets.plot.statistics)
+
     testImplementation(libs.kotlin.test)
     testImplementation(libs.bundles.egtest)
-
     testImplementation(testFixtures(project(":core")))
 }
 

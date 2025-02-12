@@ -1,0 +1,142 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;NAB6dw&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;pollByMvrFuzzPct samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=10000 nruns=100&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;mvrFuzzPct&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;],
+&quot;samplesNeeded&quot;:[4265.239999999999,9427.26,9138.169999999996,9180.050000000001,9096.080000000002,8792.200000000003,8606.970000000003,8262.919999999998,7262.100000000001,6925.429999999999,5854.730000000001,4206.719999999998,3114.3900000000012,2074.540000000001,1584.9400000000003,1267.5300000000002,1009.12,646.1400000000001,5264.340000000001,7504.889999999999,9469.6,9377.679999999998,9042.060000000003,9057.459999999997,8504.199999999997,8430.380000000005,7919.710000000001,6144.09,5986.339999999999,4336.29,2849.090000000001,2201.6299999999997,1864.3199999999997,1202.0199999999998,977.7699999999995,627.51,6985.470000000003,8594.82,8935.290000000006,9184.86,9474.499999999995,9393.12,8559.539999999999,8260.800000000005,7531.069999999999,6866.449999999997,5864.410000000001,4039.2599999999993,2855.5299999999997,2160.6799999999994,1899.7399999999998,1273.3199999999997,1079.1200000000001,647.7500000000001,7741.020000000001,8224.150000000001,8569.05,9513.21,9026.22,8687.119999999999,8923.719999999998,7608.24,8024.669999999997,6980.690000000001,6057.800000000002,4107.500000000002,3138.3299999999995,2301.3699999999994,1794.8799999999997,1235.0800000000002,962.8200000000002,656.1500000000001,8489.759999999998,8319.31,8193.22,8626.809999999998,8993.109999999999,8922.759999999998,8537.520000000002,8068.18,7957.979999999999,6237.0300000000025,6160.03,4376.360000000001,3183.390000000001,2340.580000000001,1573.1399999999999,1338.6099999999994,1127.2200000000003,681.44,8090.020000000001,8728.91,8695.760000000002,8147.649999999996,8740.060000000001,8915.590000000004,8707.769999999999,8254.710000000003,7752.639999999999,7103.329999999999,6195.219999999998,4132.92,3133.11,2377.1099999999997,1564.6100000000004,1356.7099999999996,1162.18,781.0800000000003],
+&quot;mvrFuzzPct&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;mvrFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;],
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;samplesNeeded&quot;:[4265.239999999999,9427.26,9138.169999999996,9180.050000000001,9096.080000000002,8792.200000000003,8606.970000000003,8262.919999999998,7262.100000000001,6925.429999999999,5854.730000000001,4206.719999999998,3114.3900000000012,2074.540000000001,1584.9400000000003,1267.5300000000002,1009.12,646.1400000000001,5264.340000000001,7504.889999999999,9469.6,9377.679999999998,9042.060000000003,9057.459999999997,8504.199999999997,8430.380000000005,7919.710000000001,6144.09,5986.339999999999,4336.29,2849.090000000001,2201.6299999999997,1864.3199999999997,1202.0199999999998,977.7699999999995,627.51,6985.470000000003,8594.82,8935.290000000006,9184.86,9474.499999999995,9393.12,8559.539999999999,8260.800000000005,7531.069999999999,6866.449999999997,5864.410000000001,4039.2599999999993,2855.5299999999997,2160.6799999999994,1899.7399999999998,1273.3199999999997,1079.1200000000001,647.7500000000001,7741.020000000001,8224.150000000001,8569.05,9513.21,9026.22,8687.119999999999,8923.719999999998,7608.24,8024.669999999997,6980.690000000001,6057.800000000002,4107.500000000002,3138.3299999999995,2301.3699999999994,1794.8799999999997,1235.0800000000002,962.8200000000002,656.1500000000001,8489.759999999998,8319.31,8193.22,8626.809999999998,8993.109999999999,8922.759999999998,8537.520000000002,8068.18,7957.979999999999,6237.0300000000025,6160.03,4376.360000000001,3183.390000000001,2340.580000000001,1573.1399999999999,1338.6099999999994,1127.2200000000003,681.44,8090.020000000001,8728.91,8695.760000000002,8147.649999999996,8740.060000000001,8915.590000000004,8707.769999999999,8254.710000000003,7752.639999999999,7103.329999999999,6195.219999999998,4132.92,3133.11,2377.1099999999997,1564.6100000000004,1356.7099999999996,1162.18,781.0800000000003],
+&quot;mvrFuzzPct&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0200&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;,&quot;0.0500&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;mvrFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;samplesNeeded&quot;,&quot;mvrFuzzPct&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;6&quot;
+};
+       var containerDiv = document.getElementById(&quot;NAB6dw&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

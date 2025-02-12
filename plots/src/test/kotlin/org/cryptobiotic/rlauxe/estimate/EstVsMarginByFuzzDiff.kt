@@ -31,7 +31,7 @@ class EstVsMarginByFuzzDiff {
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "1.0", "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
-                    auditConfigIn=auditConfig)
+                    auditConfig=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
             }
 
@@ -48,9 +48,9 @@ class EstVsMarginByFuzzDiff {
 
         //showEstCostVsVersion(Scale.Linear)
         //showEstCostVsVersion(Scale.Log)
-        showEstSizesVsMargin(subtitle, Scale.Linear)
-        showEstSizesVsMargin(subtitle, Scale.Log)
-        showEstSizesVsMargin(subtitle, Scale.Pct)
+        showEstSizesVsMargin(subtitle, ScaleTypeOld.Linear)
+        showEstSizesVsMargin(subtitle, ScaleTypeOld.Log)
+        showEstSizesVsMargin(subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(subtitle)
         showNroundsVsMargin(subtitle)
     }
@@ -61,14 +61,14 @@ class EstVsMarginByFuzzDiff {
 
         //showEstCostVsVersion(Scale.Linear)
         //showEstCostVsVersion(Scale.Log)
-        showEstSizesVsMargin(subtitle, Scale.Linear)
-        showEstSizesVsMargin(subtitle, Scale.Log)
-        showEstSizesVsMargin(subtitle, Scale.Pct)
+        showEstSizesVsMargin(subtitle, ScaleTypeOld.Linear)
+        showEstSizesVsMargin(subtitle, ScaleTypeOld.Log)
+        showEstSizesVsMargin(subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(subtitle)
         showNroundsVsMargin(subtitle)
     }
 
-    fun showEstCostVsVersion(yscale: Scale) {
+    fun showEstCostVsVersion(yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
@@ -76,7 +76,7 @@ class EstVsMarginByFuzzDiff {
         plotter.showEstCostVsVersion(results, "version", yscale) { category(it) }
     }
 
-    fun showEstSizesVsMargin(subtitle: String, yscale: Scale) {
+    fun showEstSizesVsMargin(subtitle: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
@@ -119,7 +119,7 @@ class EstVsMarginByFuzzDiff {
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct,
                 parameters = mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct),
-                auditConfigIn = auditConfig
+                auditConfig = auditConfig
             )
             val task = clcaGenerator2.generateNewTask()
 

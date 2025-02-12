@@ -142,6 +142,9 @@ data class MultiContestTestData(
 
         // is this the same?
         val ncardsByContest = fcontests.associate { Pair(it.contestId, it.ncards) }
+        if (ncardsByContest != ncardsPerContest) {
+            println("ncardsByContest")
+        }
         require( ncardsByContest == ncardsPerContest)
 
         val phantoms = makePhantomCvrs(contests, ncardsPerContest)

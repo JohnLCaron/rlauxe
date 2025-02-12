@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.Scale
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.rlaplots.category
@@ -26,12 +25,12 @@ class CompareAuditsWithPhantoms {
 
         phantoms.forEach { phantom ->
             val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfigIn=AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
+                auditConfig=AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfigIn=AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst),
+                auditConfig=AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
@@ -95,12 +94,12 @@ class CompareAuditsWithPhantoms {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         phantoms.forEach { phantom ->
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfigIn=auditConfig,
+                auditConfig=auditConfig,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "phantoms"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin-phantom, 0.0, phantomPct=0.0, mvrFuzzPct,
-                auditConfigIn=auditConfig,
+                auditConfig=auditConfig,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "marginShift"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
         }

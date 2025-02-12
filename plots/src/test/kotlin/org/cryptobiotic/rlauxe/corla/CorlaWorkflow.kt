@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.math.max
 
 class CorlaWorkflowTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
@@ -76,6 +75,21 @@ class CorlaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
+    override fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult> {
+        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
+        return estimateSampleSizes(
+            auditConfig,
+            contestsUA,
+            cvrs,
+            roundIdx,
+            show = show,
+        )
+    }
+
+    override fun sample(roundIdx: Int): List<Int> {
+        return sample(this, roundIdx, quiet)
+    }
+
     /**
      * Choose lists of ballots to sample.
      * TODO is this how CORLA does it?
@@ -134,34 +148,6 @@ class CorlaWorkflow(
 
         }
         return allDone
-    }
-
-    override fun showResultsOld(estSampleSize: Int) {
-        println("Audit results")
-        contestsUA.forEach{ contest ->
-            val minAssertion = contest.minClcaAssertion()
-            if (minAssertion == null) {
-                println(" $contest has no assertions; status=${contest.status}")
-            } else {
-                if (minAssertion.roundResults.size == 1) {
-                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} Np=${contest.Np} minMargin=${df(contest.minMargin())} ${minAssertion.roundResults[0]}")
-                    if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
-                } else {
-                    print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} minMargin=${df(contest.minMargin())} est=${contest.estSampleSize} round=${minAssertion.round} status=${contest.status}")
-                    if (!auditConfig.hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
-                    minAssertion.roundResults.forEach { rr -> println("   $rr") }
-                }
-            }
-        }
-
-        var maxBallotsUsed = 0
-        contestsUA.forEach { contest ->
-            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
-                val lastRound = assertion.roundResults.last()
-                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
-            }
-        }
-        println("extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
     override fun auditConfig() =  this.auditConfig

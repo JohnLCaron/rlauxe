@@ -11,10 +11,11 @@ import kotlin.math.ceil
 import kotlin.test.Test
 
 class TestCorlaEstimateSampleSize {
+
     @Test
     fun testFindSampleSizePolling() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false) }
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false, hasStyle = true) } // CORLA does polling?
 
         contestsUA.forEach { contest ->
             println("contest = $contest")
@@ -28,7 +29,7 @@ class TestCorlaEstimateSampleSize {
     @Test
     fun testFindSampleSize() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it ) }
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it, isComparison = true, hasStyle = true ) }
         val cvrs = test.makeCvrsFromContests()
         // val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
 

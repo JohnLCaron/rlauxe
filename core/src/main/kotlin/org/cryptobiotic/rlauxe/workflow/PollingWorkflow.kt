@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.*
-import kotlin.math.max
 
 class PollingWorkflow(
     val auditConfig: AuditConfig,
@@ -30,9 +29,27 @@ class PollingWorkflow(
             contest.makePollingAssertions()
         }
 
+        // check contests well formed etc
+        check(auditConfig, contestsUA)
+
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
+    }
+
+    override fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult> {
+        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
+        return estimateSampleSizes(
+            auditConfig,
+            contestsUA,
+            emptyList(),
+            roundIdx,
+            show = show,
+        )
+    }
+
+    override fun sample(roundIdx: Int): List<Int> {
+        return sample(this, roundIdx, quiet)
     }
 
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
@@ -46,34 +63,6 @@ class PollingWorkflow(
         )
 
         return sample(this, roundIdx, quiet)
-    }
-
-    override fun showResultsOld(estSampleSize: Int) {
-        println("Audit results")
-        contestsUA.forEach{ contest ->
-            val minAssertion = contest.minAssertion()
-            if (minAssertion == null) {
-                println(" $contest has no assertions; status=${contest.status}")
-            } else if (auditConfig.hasStyles) {
-                println(" $contest round=${minAssertion.round} status=${contest.status}")
-                minAssertion.roundResults.forEach { rr ->
-                    println("   $rr")
-                }
-            } else {
-                println(" $contest round=${minAssertion.round} status=${contest.status} estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}")
-                minAssertion.roundResults.forEach { rr ->
-                    println("   $rr")
-                }
-            }
-        }
-        var maxBallotsUsed = 0
-        contestsUA.forEach { contest ->
-            contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
-                val lastRound = assertion.roundResults.last()
-                maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
-            }
-        }
-        println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {

@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.random.Random
 import kotlin.test.Test
 
 class GenPollingNoStyles {
@@ -30,7 +29,7 @@ class GenPollingNoStyles {
                 val pollingGenerator = PollingWorkflowTaskGenerator(
                     Nc, margin, 0.0, 0.0, 0.0,
                     mapOf("nruns" to nruns, "Nb" to Nb),
-                    auditConfigIn = auditConfig,
+                    auditConfig = auditConfig,
                     Nb)
 
                 tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
@@ -45,13 +44,13 @@ class GenPollingNoStyles {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showNmvrsVsMargin(name, dirName, Scale.Linear)
-        showNmvrsVsMargin(name, dirName, Scale.Log)
-        showNmvrsVsMargin(name, dirName, Scale.Pct)
+        showNmvrsVsMargin(name, dirName, ScaleTypeOld.Linear)
+        showNmvrsVsMargin(name, dirName, ScaleTypeOld.Log)
+        showNmvrsVsMargin(name, dirName, ScaleTypeOld.Pct)
         showFailuresVsMargin(name, dirName)
     }
 
-    fun showNmvrsVsMargin(name: String, dirName: String, yscale: Scale) {
+    fun showNmvrsVsMargin(name: String, dirName: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 

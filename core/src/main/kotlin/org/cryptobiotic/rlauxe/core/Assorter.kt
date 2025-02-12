@@ -65,7 +65,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
 
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>? = null): PluralityAssorter {
-            val useVotes = if (votes != null) votes else (contest as Contest).votes
+            val useVotes = votes ?: (contest as Contest).votes
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
             val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
@@ -93,7 +93,7 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
 
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, votes: Map<Int, Int>?=null): SuperMajorityAssorter {
-            val useVotes = if (votes != null) votes else (contest as Contest).votes
+            val useVotes = votes ?: (contest as Contest).votes
 
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes.filter { it.key != winner }.values.sum()
@@ -137,7 +137,6 @@ data class ClcaAssorter(
         }
     }
 
-    // override fun margin() = margin
     override fun noerror() = noerror
     override fun upperBound() = upperBound
     override fun assorter() = assorter

@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class EstVsMarginByStrategy {
     val Nc = 50000
-    val nruns = 250  // number of times to run workflow
+    val nruns = 50  // number of times to run workflow
     val nsimEst = 100 // number of simulations
     val phantomPct = .01
     val fuzzMvrs = .01
@@ -26,7 +26,7 @@ class EstVsMarginByStrategy {
             clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
         val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.01, fuzzMvrs,
             parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "phantoms"),
-            auditConfigIn=auditConfig)
+            auditConfig=auditConfig)
         val task = clcaGenerator.generateNewTask()
 
         val nmvrs = runWorkflow("phantoms", task.workflow, task.testCvrs, quiet = false)
@@ -54,35 +54,35 @@ class EstVsMarginByStrategy {
                 clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=simFuzzPct))
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "fuzzPct", "simFuzzPct" to simFuzzPct),
-                auditConfigIn=auditConfig1)
+                auditConfig=auditConfig1)
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val auditConfig2 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.mixed, simFuzzPct=simFuzzPct))
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "mixed", "simFuzzPct" to simFuzzPct),
-                auditConfigIn=auditConfig2)
+                auditConfig=auditConfig2)
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val auditConfig3 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
             val clcaGenerator3 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=0.0, fuzzMvrs,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "oracle", "simFuzzPct" to simFuzzPct),
-                auditConfigIn=auditConfig3)
+                auditConfig=auditConfig3)
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             val auditConfig4 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGenerator4 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=0.0, fuzzMvrs,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "noerror", "simFuzzPct" to simFuzzPct),
-                auditConfigIn=auditConfig4)
+                auditConfig=auditConfig4)
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val auditConfig5 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.previous, simFuzzPct=simFuzzPct))
             val clcaGenerator5 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "previous", "simFuzzPct" to simFuzzPct),
-                auditConfigIn=auditConfig5)
+                auditConfig=auditConfig5)
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
 
@@ -103,19 +103,19 @@ class EstVsMarginByStrategy {
 
         val subtitle = "Nc=${Nc} nruns=${nruns} mvrFuzz=$fuzzMvrs"
 
-        showExtra(dirName, name, subtitle, Scale.Linear)
-        showExtra(dirName, name, subtitle, Scale.Log)
-        showExtra(dirName, name, subtitle, Scale.Pct)
+        showExtra(dirName, name, subtitle, ScaleTypeOld.Linear)
+        showExtra(dirName, name, subtitle, ScaleTypeOld.Log)
+        showExtra(dirName, name, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(dirName, name, )
         showNroundsVsMargin(dirName, name, )
 
-        showSamplesNeeded(dirName, name, subtitle, Scale.Linear)
-        showSamplesNeeded(dirName, name, subtitle, Scale.Log)
-        showSamplesNeeded(dirName, name, subtitle, Scale.Pct)
+        showSamplesNeeded(dirName, name, subtitle, ScaleTypeOld.Linear)
+        showSamplesNeeded(dirName, name, subtitle, ScaleTypeOld.Log)
+        showSamplesNeeded(dirName, name, subtitle, ScaleTypeOld.Pct)
 
-        showNmvrsNeeded(dirName, name, subtitle, Scale.Linear)
-        showNmvrsNeeded(dirName, name, subtitle, Scale.Log)
-        showNmvrsNeeded(dirName, name, subtitle, Scale.Pct)
+        showNmvrsNeeded(dirName, name, subtitle, ScaleTypeOld.Linear)
+        showNmvrsNeeded(dirName, name, subtitle, ScaleTypeOld.Log)
+        showNmvrsNeeded(dirName, name, subtitle, ScaleTypeOld.Pct)
     }
 
     @Test
@@ -129,42 +129,42 @@ class EstVsMarginByStrategy {
                     clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=simFuzzPct))
                 val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "fuzzPct", "simFuzzPct" to simFuzzPct),
-                    auditConfigIn=auditConfig1)
+                    auditConfig=auditConfig1)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
                 val auditConfig2 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                     clcaConfig = ClcaConfig(ClcaStrategyType.mixed))
                 val clcaGenerator2 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "mixed", "simFuzzPct" to simFuzzPct),
-                    auditConfigIn=auditConfig2)
+                    auditConfig=auditConfig2)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
                 val auditConfig3 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                     clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
                 val clcaGenerator3 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "oracle", "simFuzzPct" to simFuzzPct),
-                    auditConfigIn=auditConfig3)
+                    auditConfig=auditConfig3)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
                 val auditConfig4 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                     clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
                 val clcaGenerator4 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "noerror", "simFuzzPct" to simFuzzPct),
-                    auditConfigIn=auditConfig4)
+                    auditConfig=auditConfig4)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
                 val auditConfig5 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                     clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
                 val clcaGenerator5 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "phantoms", "simFuzzPct" to simFuzzPct),
-                    auditConfigIn=auditConfig5)
+                    auditConfig=auditConfig5)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
 
                 val auditConfig6 = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
                     clcaConfig = ClcaConfig(ClcaStrategyType.previous))
                 val clcaGenerator6 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, phantomPct=phantomPct, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "previous", "simFuzzPct" to simFuzzPct),
-                    auditConfigIn=auditConfig6)
+                    auditConfig=auditConfig6)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator6))
             }
 
@@ -187,24 +187,24 @@ class EstVsMarginByStrategy {
 
         val subtitle = "Nc=${Nc} nruns=${nruns} fuzzMvrs=$fuzzMvrs phantomPct=$phantomPct"
 
-        showExtra(dirName, name, subtitle, Scale.Linear)
-        showExtra(dirName, name, subtitle, Scale.Log)
-        showExtra(dirName, name, subtitle, Scale.Pct)
+        showExtra(dirName, name, subtitle, ScaleTypeOld.Linear)
+        showExtra(dirName, name, subtitle, ScaleTypeOld.Log)
+        showExtra(dirName, name, subtitle, ScaleTypeOld.Pct)
         showFailuresVsMargin(dirName, name, )
         showNroundsVsMargin(dirName, name, )
 
-        showSamplesNeeded(dirName, name, subtitle, Scale.Linear)
-        showSamplesNeeded(dirName, name, subtitle, Scale.Log)
-        showSamplesNeeded(dirName, name, subtitle, Scale.Pct)
+        showSamplesNeeded(dirName, name, subtitle, ScaleTypeOld.Linear)
+        showSamplesNeeded(dirName, name, subtitle, ScaleTypeOld.Log)
+        showSamplesNeeded(dirName, name, subtitle, ScaleTypeOld.Pct)
 
-        showNmvrsNeeded(dirName, name, subtitle, Scale.Linear)
-        showNmvrsNeeded(dirName, name, subtitle, Scale.Log)
-        showNmvrsNeeded(dirName, name, subtitle, Scale.Pct)
+        showNmvrsNeeded(dirName, name, subtitle, ScaleTypeOld.Linear)
+        showNmvrsNeeded(dirName, name, subtitle, ScaleTypeOld.Log)
+        showNmvrsNeeded(dirName, name, subtitle, ScaleTypeOld.Pct)
     }
 
     val keepPrevious = true
 
-    fun showExtra(dir: String, name: String, subtitle: String, yscale: Scale) {
+    fun showExtra(dir: String, name: String, subtitle: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dir/${name}.cvs")
         val data = io.readResults().filter { keepPrevious || it.parameters["cat"] != "previous"}
 
@@ -221,9 +221,9 @@ class EstVsMarginByStrategy {
             catName,
             xfld = { it.margin },
             yfld = { it: WorkflowResult -> when (yscale) {
-                Scale.Linear -> (it.nmvrs - it.samplesNeeded)
-                Scale.Log -> log10( (it.nmvrs - it.samplesNeeded))// needed?
-                Scale.Pct -> (100* (it.nmvrs - it.samplesNeeded)/it.nmvrs )
+                ScaleTypeOld.Linear -> (it.nmvrs - it.samplesNeeded)
+                ScaleTypeOld.Log -> log10( (it.nmvrs - it.samplesNeeded))// needed?
+                ScaleTypeOld.Pct -> (100* (it.nmvrs - it.samplesNeeded)/it.nmvrs )
             }},
             catfld = catfld,
         )
@@ -245,7 +245,7 @@ class EstVsMarginByStrategy {
         plotter.showNroundsVsMargin(results, catName="strategy") { category(it) }
     }
 
-    fun showSamplesNeeded(dir: String, name: String, subtitle: String, yscale: Scale) {
+    fun showSamplesNeeded(dir: String, name: String, subtitle: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dir/${name}.cvs")
         val data = io.readResults().filter { keepPrevious || it.parameters["cat"] != "previous"}
         val catName = "strategy"
@@ -261,15 +261,15 @@ class EstVsMarginByStrategy {
             catName,
             xfld = { it.margin },
             yfld = { it: WorkflowResult -> when (yscale) {
-                Scale.Linear -> it.samplesNeeded
-                Scale.Log -> log10(it.samplesNeeded)
-                Scale.Pct -> (100*it.samplesNeeded/it.Nc.toDouble())
+                ScaleTypeOld.Linear -> it.samplesNeeded
+                ScaleTypeOld.Log -> log10(it.samplesNeeded)
+                ScaleTypeOld.Pct -> (100*it.samplesNeeded/it.Nc.toDouble())
             }},
             catfld = catfld,
         )
     }
 
-    fun showNmvrsNeeded(dir: String, name: String, subtitle: String, yscale: Scale) {
+    fun showNmvrsNeeded(dir: String, name: String, subtitle: String, yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dir/${name}.cvs")
         val data = io.readResults().filter { keepPrevious || it.parameters["cat"] != "previous"}
         val catName = "strategy"
@@ -285,9 +285,9 @@ class EstVsMarginByStrategy {
             catName,
             xfld = { it.margin },
             yfld = { it: WorkflowResult -> when (yscale) {
-                Scale.Linear -> it.nmvrs
-                Scale.Log -> log10(it.nmvrs)
-                Scale.Pct -> (100*it.nmvrs/it.Nc.toDouble())
+                ScaleTypeOld.Linear -> it.nmvrs
+                ScaleTypeOld.Log -> log10(it.nmvrs)
+                ScaleTypeOld.Pct -> (100*it.nmvrs/it.Nc.toDouble())
             }},
             catfld = catfld,
         )

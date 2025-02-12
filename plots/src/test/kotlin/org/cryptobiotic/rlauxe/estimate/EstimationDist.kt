@@ -136,7 +136,7 @@ class EstimationDist {
          */
 
         println("doOneEstSample")
-        val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first().repeatedResult
+        val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first()
         val sdata = rr.sampleCount.sorted()
         val tripleEst =
             sdata.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "estimate") }
@@ -170,13 +170,13 @@ class EstimationDist {
     }
 
     // calculate 100 estimateSampleSizes, return List<EstimationResult>, single contest, no phantoms
-    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<EstimationResult> {
+    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<RunTestRepeatedResult> {
         val undervotePct = 0.0
         val phantomPct = 0.0
 
         val sim =
             ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
-        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         println("oracle errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)

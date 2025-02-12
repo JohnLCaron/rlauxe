@@ -12,8 +12,9 @@ dataframe = "0.14.1"
 serialization = "1.6.3"
 datetime = "0.6.0"
 html = "0.11.0"
-statistics = "0.3.1-dev-31"
-letsPlot = "4.7.3"
+statistics = "0.4.0"
+letsPlot = "0.8.0"
+letsPlotStatistics = "0.4.0"
 letsPlotImage = "4.3.3"
 mockk = "1.13.10"
 
@@ -34,7 +35,8 @@ kotlinx-html = { group = "org.jetbrains.kotlinx", name = "kotlinx-html-jvm", ver
 kotlinx-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statistics-jvm", version.ref = "statistics" }
 
 # Lets-Plot
-lets-plot = { group = "org.jetbrains.lets-plot", name = "lets-plot-kotlin-jvm", version.ref = "letsPlot" }
+lets-plot = { group = "org.jetbrains.kotlinx", name = "kandy-lets-plot", version.ref = "letsPlot" }
+lets-plot-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statistics-jvm", version.ref = "letsPlotStatistics" }
 lets-plot-image = { group = "org.jetbrains.lets-plot", name = "lets-plot-image-export", version.ref = "letsPlotImage" }
 lets-plot-awt = { group = "org.jetbrains.lets-plot", name = "platf-awt-jvm", version.ref = "letsPlotImage" }
 

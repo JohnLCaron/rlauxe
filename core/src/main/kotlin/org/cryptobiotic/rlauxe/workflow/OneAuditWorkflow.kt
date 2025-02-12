@@ -19,12 +19,29 @@ class OneAuditWorkflow(
     val cvrsUA: List<CvrUnderAudit>
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-
         contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
+
+        // check contests well formed etc
+        check(auditConfig, contestsUA)
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
+    }
+
+    override fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult> {
+        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
+        return estimateSampleSizes(
+            auditConfig,
+            contestsUA,
+            cvrs,
+            roundIdx,
+            show = show,
+        )
+    }
+
+    override fun sample(roundIdx: Int): List<Int> {
+        return sample(this, roundIdx, quiet)
     }
 
     /**
@@ -77,7 +94,7 @@ class OneAuditWorkflow(
         return allDone
     }
 
-    override fun showResultsOld(estSampleSize: Int) {
+    fun showResultsOld(estSampleSize: Int) {
         println("Audit results")
         contestsUA.forEach{ contest ->
             val minAssertion = contest.minClcaAssertion()

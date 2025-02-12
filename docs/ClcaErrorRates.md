@@ -123,21 +123,21 @@ The error estimation strategies are:
 * 2*fuzzPct: The fuzzPct is overestimated by a factor of 2.
 * fuzzPct/2: The fuzzPct is underestimated by a factor of 1/2.
 
-Here are plots of sample size as a function of fuzzPct, with a fixed margin of .04:
+Here are plots of sample size as a function of fuzzPct, with a fixed margins of .02 and .04:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsFuzzByStrategy/clcaVsFuzzByStrategyLinear.html" rel="clcaVsFuzzByStrategyLinear">![clcaVsFuzzByStrategyLinear](plots/workflows/clcaVsFuzzByStrategy/clcaVsFuzzByStrategyLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsFuzzByStrategy/clcaVsFuzzByStrategyLog.html" rel="clcaVsFuzzByStrategyLog">![clcaVsFuzzByStrategyLog](plots/workflows/clcaVsFuzzByStrategy/clcaVsFuzzByStrategyLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy2LogLog.html" rel="clcaVsFuzzByStrategy2LogLog">![clcaVsFuzzByStrategy2LogLog](plots/strategy/clcaVsFuzzByStrategy2LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy4LogLog.html" rel="clcaVsFuzzByStrategy4LogLog">![clcaVsFuzzByStrategy4LogLog](plots/strategy/clcaVsFuzzByStrategy4LogLog.png)</a>
 
 Notes:
 * The oracle results show the lowest sample sizes possible.
 * The noerror strategy is significantly worse in the presence of errors.
 * If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes, especially for low values of fuzzPct.
 
-Here are plots of sample size as a function of margin, with a fixed fuzzPct of .05:
+Here are plots of sample size as a function of margin, with a fixed fuzzPct of .005, .01 and .04:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyLinear.html" rel="clcaVsMarginByStrategyLinear">![clcaMarginLinear](plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyLog.html" rel="clcaVsMarginByStrategyLog">![clcaVsMarginByStrategyLog](plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyFailures.html" rel="clcaVsMarginByStrategyFailures">![clcaMarginFailures](plots/workflows/clcaVsMarginByStrategy/clcaVsMarginByStrategyFailures.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy05LogLog.html" rel="clcaVsMarginByStrategy05LogLog">![clcaVsMarginByStrategy05LogLog](plots/strategy/clcaVsMarginByStrategy05LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy1LogLog.html" rel="clcaVsMarginByStrategy1LogLog">![clcaVsMarginByStrategy1LogLog](plots/strategy/clcaVsMarginByStrategy1LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy4LogLog.html" rel="clcaVsMarginByStrategy4LogLog">![clcaVsMarginByStrategy4LogLog](plots/strategy/clcaVsMarginByStrategy4LogLog.png)</a>
 
 * Arguably a fuzz rate of 5% is extreme.
 * We start to see failures (more than 80% of trials fail) when the margin is less than 2 percent.
@@ -159,8 +159,8 @@ to sample, and cannot be found, a phantom MVR is created. The values of the CLCA
         assertEquals(.5*noerror, bassorter.bassort(loserMvr, phantomCvr))     // mvr reported loser, no cvr: oneOver
 ````
 
-The common case is that both the CVR and the MVR is missing, which is equivilent to a "one ballot overstatement". So it
-makes sense that using the _phantomPct_ phantoms for a contest in the error rates might improve the sampling sizes.
+The common case is that both the CVR and the MVR are missing, which is equivilent to a "one ballot overstatement". So it
+makes sense that using the _phantomPct_ phantoms for a contest might improve the sampling sizes.
 
 The _phantoms_ strategy uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of the AdaptiveComparison 
 betting function, for both estimation and auditing.

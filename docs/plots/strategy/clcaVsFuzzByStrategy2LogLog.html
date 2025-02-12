@@ -1,0 +1,142 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;Facib5&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;clcaVsFuzzByStrategy2 samples needed&quot;,
+&quot;subtitle&quot;:&quot;margin=0.02 Nc=50000 nruns=100&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;strategy&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15],
+&quot;&amp;merged_groups&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;],
+&quot;samplesNeeded&quot;:[298.0,479.5099999999999,689.9300000000002,1208.69,1843.5500000000002,2430.7300000000023,2419.590000000001,3024.5599999999986,4017.69,4579.559999999996,5578.509999999998,5481.83,7348.150000000001,6835.200000000005,7640.440000000001,9380.229999999994,9177.370000000003,298.0,591.32,691.5900000000004,1189.2600000000002,1708.229999999999,2205.919999999999,3134.7,3355.1999999999994,4002.1800000000007,4905.679999999999,5580.269999999998,5812.690000000002,7196.090000000001,7956.01,7510.479999999998,8937.270000000002,9166.93,298.0,602.74,703.9200000000001,1111.56,1668.16,2444.3000000000006,2665.0200000000004,3413.3299999999995,3856.129999999999,5439.100000000001,5862.9800000000005,6482.269999999999,7109.1100000000015,8938.989999999998,8706.669999999998,10097.650000000001,9821.649999999998,298.0,790.6500000000001,991.3399999999997,2154.7499999999986,3296.0200000000004,4476.12,5984.64,7422.800000000001,8140.180000000001,10112.85,11230.910000000003,13549.599999999993,13175.360000000004,14500.660000000005,15113.87,18579.390000000014,19105.119999999995,298.0,382.86000000000007,599.0900000000001,929.7900000000001,1354.83,1693.1800000000005,2179.89,2585.2799999999997,3116.5400000000004,3511.380000000001,4521.590000000002,5180.050000000002,5589.58,6128.640000000002,7759.889999999999,6714.479999999997,7561.52],
+&quot;strategy&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;strategy&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15,0.0,0.005,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.13,0.14,0.15],
+&quot;&amp;merged_groups&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;],
+&quot;samplesNeeded&quot;:[298.0,479.5099999999999,689.9300000000002,1208.69,1843.5500000000002,2430.7300000000023,2419.590000000001,3024.5599999999986,4017.69,4579.559999999996,5578.509999999998,5481.83,7348.150000000001,6835.200000000005,7640.440000000001,9380.229999999994,9177.370000000003,298.0,591.32,691.5900000000004,1189.2600000000002,1708.229999999999,2205.919999999999,3134.7,3355.1999999999994,4002.1800000000007,4905.679999999999,5580.269999999998,5812.690000000002,7196.090000000001,7956.01,7510.479999999998,8937.270000000002,9166.93,298.0,602.74,703.9200000000001,1111.56,1668.16,2444.3000000000006,2665.0200000000004,3413.3299999999995,3856.129999999999,5439.100000000001,5862.9800000000005,6482.269999999999,7109.1100000000015,8938.989999999998,8706.669999999998,10097.650000000001,9821.649999999998,298.0,790.6500000000001,991.3399999999997,2154.7499999999986,3296.0200000000004,4476.12,5984.64,7422.800000000001,8140.180000000001,10112.85,11230.910000000003,13549.599999999993,13175.360000000004,14500.660000000005,15113.87,18579.390000000014,19105.119999999995,298.0,382.86000000000007,599.0900000000001,929.7900000000001,1354.83,1693.1800000000005,2179.89,2585.2799999999997,3116.5400000000004,3511.380000000001,4521.590000000002,5180.050000000002,5589.58,6128.640000000002,7759.889999999999,6714.479999999997,7561.52],
+&quot;strategy&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;strategy&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;fuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;strategy&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+       var containerDiv = document.getElementById(&quot;Facib5&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

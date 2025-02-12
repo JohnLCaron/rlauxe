@@ -19,8 +19,7 @@ class PlotClcaFuzz {
         val nruns = 100  // number of times to run workflow
 
         val fuzzPcts = listOf(0.0, 0.001, 0.0025, .005, .01, .02, .05)
-        val margins =
-            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         // do all margins and sample sizes
         val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 100, minMargin = 0.0, samplePctCutoff = 1.0)

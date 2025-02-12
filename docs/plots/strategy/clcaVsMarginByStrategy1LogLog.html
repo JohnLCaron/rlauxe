@@ -1,0 +1,142 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;7Qadt1&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;clcaVsMarginByStrategy1 samples needed&quot;,
+&quot;subtitle&quot;:&quot;fuzzPct=0.01 Nc=50000 nruns=10&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;strategy&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08],
+&quot;&amp;merged_groups&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;],
+&quot;samplesNeeded&quot;:[38423.8,20375.399999999998,17622.7,9992.0,8859.099999999999,5842.400000000001,2613.3999999999996,2185.4,1481.2,1456.3999999999999,647.2,476.70000000000005,249.50000000000003,158.3,153.79999999999998,139.8,104.9,29318.800000000003,28637.100000000002,15308.400000000001,10480.0,9788.8,6225.5,3233.8999999999996,2705.2,1185.8999999999999,1379.6000000000001,611.2,308.7,359.3,173.40000000000003,132.59999999999997,125.7,118.89999999999999,39596.5,29374.800000000003,20565.0,13737.800000000001,7221.2,5615.0,3667.7999999999997,2994.1000000000004,2374.2000000000003,1147.1,782.1999999999999,433.5,207.1,207.20000000000002,100.4,191.1,138.0,44652.3,25666.1,23752.1,16629.9,12940.699999999999,10733.1,4184.9,4367.0,2409.6000000000004,1223.8,1184.8,322.2,395.4,200.30000000000004,151.1,168.7,94.69999999999999,37181.3,20694.9,16183.399999999998,9997.7,6197.0,3053.7,2384.0,1579.4,1294.8000000000002,746.6,722.7,212.89999999999998,265.50000000000006,196.5,148.5,131.0,75.59999999999998],
+&quot;strategy&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;strategy&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;],
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08],
+&quot;samplesNeeded&quot;:[38423.8,20375.399999999998,17622.7,9992.0,8859.099999999999,5842.400000000001,2613.3999999999996,2185.4,1481.2,1456.3999999999999,647.2,476.70000000000005,249.50000000000003,158.3,153.79999999999998,139.8,104.9,29318.800000000003,28637.100000000002,15308.400000000001,10480.0,9788.8,6225.5,3233.8999999999996,2705.2,1185.8999999999999,1379.6000000000001,611.2,308.7,359.3,173.40000000000003,132.59999999999997,125.7,118.89999999999999,39596.5,29374.800000000003,20565.0,13737.800000000001,7221.2,5615.0,3667.7999999999997,2994.1000000000004,2374.2000000000003,1147.1,782.1999999999999,433.5,207.1,207.20000000000002,100.4,191.1,138.0,44652.3,25666.1,23752.1,16629.9,12940.699999999999,10733.1,4184.9,4367.0,2409.6000000000004,1223.8,1184.8,322.2,395.4,200.30000000000004,151.1,168.7,94.69999999999999,37181.3,20694.9,16183.399999999998,9997.7,6197.0,3053.7,2384.0,1579.4,1294.8000000000002,746.6,722.7,212.89999999999998,265.50000000000006,196.5,148.5,131.0,75.59999999999998],
+&quot;strategy&quot;:[&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;2*fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;fuzzPct/2&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;,&quot;oracle&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;strategy&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;samplesNeeded&quot;,&quot;strategy&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+       var containerDiv = document.getElementById(&quot;7Qadt1&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

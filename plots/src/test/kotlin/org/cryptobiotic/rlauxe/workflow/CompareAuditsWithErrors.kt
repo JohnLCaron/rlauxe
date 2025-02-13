@@ -2,23 +2,21 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class CompareAuditsWithErrors {
     val nruns = 200  // number of times to run workflow
     val name = "AuditsWithErrors"
-    val dirName = "/home/stormy/temp/workflow/$name"
+    val dirName = "/home/stormy/temp/samples/$name"
+    val N = 50000
+    val margin = .04
 
     @Test
     fun genAuditWithFuzzPlots() {
-        val N = 50000
-        val margin = .04
         val cvrPercent = .50
-        val fuzzPcts = listOf(.00, .005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10, .11, .12)
+        val fuzzPcts = listOf(.00, .005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -51,21 +49,19 @@ class CompareAuditsWithErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsFuzzPct(ScaleTypeOld.Linear)
-        showSampleSizesVsFuzzPct(ScaleTypeOld.Log)
-        showSampleSizesVsFuzzPct(ScaleTypeOld.Pct)
-        showFailuresVsFuzzPct()
-        showNroundsVsFuzzPct()
+        regenPlots()
     }
 
     @Test
     fun regenPlots() {
-        showSampleSizesVsFuzzPct(ScaleTypeOld.Linear)
-        showSampleSizesVsFuzzPct(ScaleTypeOld.Log)
-        showSampleSizesVsFuzzPct(ScaleTypeOld.Pct)
+        val subtitle = "margin=${margin} Nc=${N} nruns=${nruns}"
+        val dirName = "/home/stormy/temp/archive/workflow/$name"
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType", catfld= { compareCategories(it) })
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType", catfld= { compareCategories(it) })
     }
 
-    fun showSampleSizesVsFuzzPct(yscale: ScaleTypeOld) {
+    /*
+    fun showSampleSizesVsFuzzPctOld(yscale: ScaleTypeOld) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val results = io.readResults()
 
@@ -88,6 +84,8 @@ class CompareAuditsWithErrors {
         val plotter = WorkflowResultsPlotter(dirName, name)
         plotter.showNroundsVsFuzzPct(results, "auditType") { compareCategories(it) }
     }
+
+     */
 }
 
 fun compareCategories(wr: WorkflowResult): String {

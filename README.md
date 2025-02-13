@@ -312,16 +312,16 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 These are plots vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrors Linear">![AuditsWithErrorsLinear](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.html" rel="AuditsWithErrors Log">![AuditsWithErrorsLog](./docs/plots/workflows/AuditsWithErrors/AuditsWithErrorsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrorsLinear">![AuditsWithErrorsLinear](docs/plots/samples/auditsWithErrors/AuditsWithErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/AuditsWithErrorsLogLinear.html" rel="AuditsWithErrorsLogLinear">![AuditsWithErrorsLogLinear](docs/plots/samples/auditsWithErrors/AuditsWithErrorsLogLinear.png)</a>
 
 * Sample sizes increase with fuzzPct similarly for all three audits.
 * CLCA as a percent of Nc is more sensitive to errors than polling or OneAudit.
 
 Varying the percent of undervotes at margin of 4% and 2%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](./docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotes2Linear.html" rel="AuditsWithUndervotes2Linear">![AuditsWithUndervotes2Linear](./docs/plots/workflows/auditsWithUndervotes/auditsWithUndervotes2Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithUndervotes/auditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](docs/plots/samples/auditsWithUndervotes/auditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithUndervotes/auditsWithUndervotes2Linear.html" rel="AuditsWithUndervotes2Linear">![AuditsWithUndervotes2Linear](docs/plots/samples/auditsWithUndervotes/auditsWithUndervotes2Linear.png)</a>
 
 * Note that undervote percentages are shown up to 50%, with modest effect.
 
@@ -329,8 +329,7 @@ Varying the percent of undervotes at margin of 4% and 2%, with errors generated 
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithPhantoms/sampleSizesLinear.html" rel="AuditsWithPhantomsLinear">![AuditsWithPhantomsLinear](./docs/plots/workflows/auditsWithPhantoms/sampleSizesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/auditsWithPhantoms/sampleSizesLog.html" rel="AuditsWithPhantomsLog">![AuditsWithPhantomsLog](./docs/plots/workflows/auditsWithPhantoms/sampleSizesLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/sampleSizesLogLinear.html" rel="sampleSizesLogLinear">![sampleSizesLogLinear](docs/plots/samples/auditsWithPhantoms/sampleSizesLogLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.

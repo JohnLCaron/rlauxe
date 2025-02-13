@@ -175,3 +175,21 @@ fun makeWrGroups(wrs: List<WorkflowResult>, catfld: List<String>): Map<String, L
     }
     return result.toSortedMap()
 }
+
+/////////////////////////////////////////////////////////////////////
+
+fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
+                             catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "fuzzPct", xfld = { it.Dparam("fuzzPct") },
+        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        catName = catName, catfld = catfld,
+        scaleType = scaleType
+    )
+}

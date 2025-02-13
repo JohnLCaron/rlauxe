@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 02/08/2025_
+_last update: 02/12/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -9,7 +9,7 @@ Click on plot images to get an interactive html plot.
 
 You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
-Table of Contents
+**Table of Contents**
 <!-- TOC -->
 * [Reference Papers](#reference-papers)
 * [SHANGRLA framework](#shangrla-framework)
@@ -34,6 +34,7 @@ Table of Contents
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
     * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
+  * [Minimizing costs in MultiContest Audits](#minimizing-costs-in-multicontest-audits)
     * [Effect of Multiple Contest Auditing](#effect-of-multiple-contest-auditing)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
@@ -344,7 +345,7 @@ as a function of phantomPct, and also with no phantoms but the margin shifted by
 
 # Estimating Sample Batch sizes
 
-Sampling refers to choosing which ballots to hand review to create Manual Voting Records (MVRs) for. Once the MVRs
+Sampling refers to choosing which ballots to hand review to create Manual Voting Records (MVRs). Once the MVRs
 are created, the actual audit takes place.
 
 There are two phases to sampling: estimating the sample batch sizes for each contest, and then randomly choosing ballots that 
@@ -355,11 +356,14 @@ contain at least that many contests.
 For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
 running simulations, we can use estimated error rates to add errors to the manufactured data.
 
-For each contest assertion we estimate the samplesNeeded that will satisfy the risk limit some fraction 
-(_auditConfig.quantile_) of the time. The contest estimated sample size is then the maximum of the contests' assertion estimates.
+For each contest assertion we simulate the samplesNeeded that will satisfy the risk limit some fraction 
+(_auditConfig.quantile_) of the time. Each contest's estimated sample size is then the maximum of the contest's assertion estimates.
+If the simulation is accurate, the audit should succeed that fraction of the time. If not, then the contest goes to the
+next audit round.
 
-If the estimated samplesNeeded exceeds some maximum fraction of the total ballots for that contest (_auditConfig.samplePctCutoff_), 
-that contest is marked for a hand count, and is removed from the audit.
+The auditors must decide how many ballots they are willing to audit, since at some point its more efficient to do a full handcount
+than the more elaborate process of finding a subset of ballots that have been selected for the sample. We want to minimize both the 
+overall number of ballots sampled, and the number of rounds.
 
 Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
 the previous audit's pvalue.
@@ -426,7 +430,7 @@ The following plot shows Polling vs CLCA with and without CSD at different margi
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLog.html" rel="compareWithStyle">![compareWithStyle](./docs/plots/workflows/compareWithStyle/compareWithStyleLog.png)</a>
 
-* For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data. 
+* For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data.
 
 ## Under/Over estimating CLCA sample sizes
 
@@ -456,6 +460,24 @@ The amount of extra sampling closely follows the number of samples needed, addin
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffNrounds.html" rel="estVsMarginByFuzzDiffNrounds">![estVsMarginByFuzzDiffNrounds](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffNrounds.png)</a>
 
 TODO: reduce extra sampling; tradeoff with number of rounds.
+
+## Minimizing costs in MultiContest Audits
+
+An election often consists of several or many contests, and it can be more efficient to audit all of the contests at once.
+
+Before the audit begins:
+1. Any contest whose reported margin is less than _auditConfig.minMargin_ is removed from the audit with failure code MinMargin.
+2. Any contest whose reported margin is less than its phantomPct (Np/Nc) is removed from the audit with failure code TooManyPhantoms.
+
+For each Estimation round:
+1. Any contest whose estimated samplesNeeded exceeds _auditConfig.sampleCutoff_ is removed from the audit with failure code FailMaxSamplesAllowed.
+2. If the total number of ballots for a multicontest audit exceeds _auditConfig.sampleCutoff_, the contest with the largest estimated samplesNeeded
+   is removed from the audit with failure code FailMaxSamplesAllowed. The Consistent/Uniform sampling is then redone without that
+   contest, and the check on the total number of ballots is repeated.
+
+These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
+auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the Estimation stage,
+and try out different scenarios before committing to which contests continue on to the next round.
 
 ### Effect of Multiple Contest Auditing
 

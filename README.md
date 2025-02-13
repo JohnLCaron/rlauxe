@@ -329,18 +329,18 @@ Varying the percent of undervotes at margin of 4% and 2%, with errors generated 
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/sampleSizesLogLinear.html" rel="sampleSizesLogLinear">![sampleSizesLogLinear](docs/plots/samples/auditsWithPhantoms/sampleSizesLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html.html" rel="sampleSizesLogLinear">![sampleSizesLogLinear](docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
 
-Having _phantomPct_ phantoms is equivilent to subtracting phantomPct from the margin. In this CLCA plot we show samples needed
+Having _phantomPct_ phantoms is similar to subtracting phantomPct from the margin. In this CLCA plot we show samples needed
 as a function of phantomPct, and also with no phantoms but the margin shifted by phantomPct:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/phantomMarginShift/sampleSizesLog.html" rel="phantomMarginShiftLog">![phantomMarginShiftLog](./docs/plots/workflows/phantomMarginShift/sampleSizesLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLogLinear.html" rel="phantomMarginShiftLog">![phantomMarginShiftLog](docs/plots/samples/phantomMarginShift/phantomMarginShiftLogLinear.png)</a>
 
 * Generally, in further simulations we will ignore the effect of phantoms for simplicity, with the rule of thumb that
-  their effect is as if the margins are reduced by phantomPct across the board.
+  their effect is approximately as if the margins are reduced by phantomPct across the board.
 
 # Estimating Sample Batch sizes
 

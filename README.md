@@ -329,7 +329,7 @@ Varying the percent of undervotes at margin of 4% and 2%, with errors generated 
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html.html" rel="sampleSizesLogLinear">![sampleSizesLogLinear](docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="sampleSizesLogLinear">![sampleSizesLogLinear](docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.

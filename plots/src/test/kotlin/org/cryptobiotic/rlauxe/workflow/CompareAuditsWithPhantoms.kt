@@ -2,21 +2,20 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
-import org.cryptobiotic.rlauxe.rlaplots.category
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 
 class CompareAuditsWithPhantoms {
     val mvrFuzzPct = .01
+    val nruns = 100  // number of times to run workflow
+    val nsimEst = 100  // number of times to run workflow
+    val N = 50000
+    val margin = .045
 
     @Test
     fun genAuditWithPhantomsPlots() {
-        val nruns = 100  // number of times to run workflow
-        val nsimEst = 100  // number of times to run workflow
-        val N = 50000
-        val margin = .045
         val cvrPercent = .50
         val phantoms = listOf(.00, .005, .01, .02, .03, .04, .05)
         val stopwatch = Stopwatch()
@@ -58,37 +57,36 @@ class CompareAuditsWithPhantoms {
         val name = "auditsWithPhantoms"
         val dirName = "/home/stormy/temp/workflow/$name"
 
-        showSampleSizesVsPhantomPct(dirName, name, true)
-        showSampleSizesVsPhantomPct(dirName, name, false)
-        showFailuresVsPhantomPct(dirName, name, )
+        val subtitle = "margin=${df(margin)} Nc=${N} nruns=${nruns} mvrFuzz=${mvrFuzzPct}"
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
     }
 
-    fun showSampleSizesVsPhantomPct(dirName:String, name:String, useLog: Boolean) {
+    fun showSampleSizesVsPhantomPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
+                                      catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsPhantomPct(results, "sampleSizes", "auditType", useLog=useLog)  { category(it) }
-    }
-
-    fun showFailuresVsPhantomPct(dirName: String, name:String, ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsPhantomPct(results, "auditType")   { category(it) }
+        val data = io.readResults()
+        wrsPlot(
+            titleS = "$name samples needed",
+            subtitleS = subtitle,
+            writeFile = "$dirName/${name}${scaleType.name}",
+            wrs = data,
+            xname = "phantomPct", xfld = { it.Dparam("phantom") },
+            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            catName = catName, catfld = catfld,
+            scaleType = scaleType
+        )
     }
 
     @Test
     fun genAuditsWithPhantomsPlotsMarginShift() {
-        val nruns = 100  // number of times to run workflow
+        val nruns = 300  // number of times to run workflow
         val nsimEst = 100
-        val N = 50000
         val margin = .045
-        val phantoms = listOf(.00, .005, .01, .02, .03, .04, .05)
+        val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
         val stopwatch = Stopwatch()
 
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
             clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -122,9 +120,9 @@ class CompareAuditsWithPhantoms {
         val name = "phantomMarginShift"
         val dirName = "/home/stormy/temp/workflow/$name"
 
-        showSampleSizesVsPhantomPct(dirName, name, true)
-        showSampleSizesVsPhantomPct(dirName, name, false)
-        showFailuresVsPhantomPct(dirName, name, )
+        val subtitle = "margin=${df(.045)} Nc=${N} nruns=${300} mvrFuzz=${mvrFuzzPct}"
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
     }
 
 }

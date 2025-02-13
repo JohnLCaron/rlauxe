@@ -2,23 +2,23 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
-import org.cryptobiotic.rlauxe.rlaplots.category
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.df
+import kotlin.math.log10
 import kotlin.test.Test
 
 class CompareAuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
     val nsimEst = 100  // number of times to run simulation
     val name = "auditsWithUndervotes"
-    val dirName = "/home/stormy/temp/workflow/$name"
+    val dirName = "/home/stormy/temp/samples/$name"
     val mvrFuzzPct = .01
+    val margin = .04
+    val N = 50000
 
     @Test
     fun genAuditWithUnderVotesPlots() {
-        val N = 50000
-        val margin = .04
         val cvrPercent = .50
         val undervotes = listOf(.00, .05, .10, .15, .20, .25, .30, .35, .40, .45, .50)
         val stopwatch = Stopwatch()
@@ -49,16 +49,33 @@ class CompareAuditsWithUndervotes {
         val writer = WorkflowResultsIO("$dirName/auditsWithUndervotes.cvs")
         writer.writeResults(results)
 
-        showSampleSizesVsUndervotePct(true)
-        showSampleSizesVsUndervotePct(false)
+        regenPlots()
     }
 
-    fun showSampleSizesVsUndervotePct(useLog: Boolean) {
-        val io = WorkflowResultsIO("$dirName/auditsWithUndervotes.cvs")
-        val results = io.readResults()
+    @Test
+    fun regenPlots() {
+        val name = "auditsWithUndervotes"
+        val dirName = "/home/stormy/temp/workflow/$name"
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsUndervotePct(results, "auditsWithUndervotes","auditType", useLog=useLog)   { category(it) }
+        val subtitle = "margin=${margin} Nc=${N} nruns=${nruns}"
+        showSampleSizesVsUndervotePct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
+        showSampleSizesVsUndervotePct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
+    }
+
+    fun showSampleSizesVsUndervotePct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
+                                 catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val data = io.readResults()
+        wrsPlot(
+            titleS = "$name samples needed",
+            subtitleS = subtitle,
+            writeFile = "$dirName/${name}${scaleType.name}",
+            wrs = data,
+            xname = "underVotePct", xfld = { it.Dparam("undervote") },
+            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            catName = catName, catfld = catfld,
+            scaleType = scaleType
+        )
     }
 
 }

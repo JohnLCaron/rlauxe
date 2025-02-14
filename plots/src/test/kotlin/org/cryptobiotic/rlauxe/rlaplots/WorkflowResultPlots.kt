@@ -193,3 +193,18 @@ fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, sca
         scaleType = scaleType
     )
 }
+
+fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "margin", xfld = { it.margin },
+        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        catName = "strategy", catfld = { category(it) },
+        scaleType = scaleType
+    )
+}

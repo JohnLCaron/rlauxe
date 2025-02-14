@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 02/12/2025_
+_last update: 02/14/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -350,22 +350,24 @@ are created, the actual audit takes place.
 There are two phases to sampling: estimating the sample batch sizes for each contest, and then randomly choosing ballots that 
 contain at least that many contests.
 
+Audits are done in rounds. The auditors must decide how many cards/ballots they are willing to audit, since at some point its
+more efficient to do a full handcount than the more elaborate process of tracking down a subset that have been selected for the sample.
+We want to minimize both the overall number of ballots sampled, and the number of rounds.
+
+Note that in this section we are plotting _nmvrs_ = overall number of ballots sampled, which includes the inaccuracies of the
+estimation. Above we have been plotting _samples needed_, as if we were doing "one ballot at a time" auditing.
+
 ## Estimation
 
-For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome. By
-running simulations, we can use estimated error rates to add errors to the manufactured data.
+For each contest we simulate the audit with manufactured data that has the same margin as the reported outcome, and a
+guess at the error rates. 
 
-For each contest assertion we simulate the samplesNeeded that will satisfy the risk limit some fraction 
-(_auditConfig.quantile_) of the time. Each contest's estimated sample size is then the maximum of the contest's assertion estimates.
-If the simulation is accurate, the audit should succeed that fraction of the time. If not, then the contest goes to the
-next audit round.
+For each contest assertion we run _auditConfig.nsimEst_ (default 100) simulations and collect the distribution of samples
+needed to satisfy the risk limit. We then choose the (_auditConfig.quantile_) sample size as our estimate for that assertion,
+and the contest's estimated sample size is the maximum of the contest's assertion estimates.
 
-The auditors must decide how many ballots they are willing to audit, since at some point its more efficient to do a full handcount
-than the more elaborate process of finding a subset of ballots that have been selected for the sample. We want to minimize both the 
-overall number of ballots sampled, and the number of rounds.
-
-Audits are done in rounds. If a contest is not proved or disproved, the next round's estimated sample size starts from 
-the previous audit's pvalue.
+If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time. Since we dont know the 
+actual error rates, or the order that the errors will be sampled, the simulation results are just estimates.
 
 ## Choosing which ballots/cards to sample
 
@@ -373,30 +375,38 @@ Once we have all of the contests' estimated sample sizes, we next choose which b
 This step depends whether you have Card Style Data (CSD, see MoreStyle, p.2), which tells us which ballots
 have which contests. 
 
-For CLCA audits, the generated Cast Vote Records (CVR) comprise the CSD, as long as the CVR records when a contest recieves no votes.
+For CLCA audits, the generated Cast Vote Records (CVR) comprise the CSD, as long as the CVR has the information which contests are
+on it, even when a contest recieves no votes.
 For Polling audits, the BallotManifest (may) contain BallotStyles which comprise the CSD.
 
 If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
 
 Note that each round does its own sampling without regard to the previous round's results.
 However, since the seed remains the same, the ballot ordering is the same. We choose the lowest ordered ballots first,
-so previously audited MVRS are always used again in subsequent rounds.
+so previously audited MVRS are always used again in subsequent rounds for contests that continue to the next round. At
+each round we record both the total number of MVRs, and the number of "new samples" needed for that round.
 
 ### Consistent Sampling with Card Style Data
 
-* For each contest, estimate the number of samples needed (contest.estSamples).
+At the start of the audit:
 * For each ballot/cvr, assign a large psuedo-random number, using a high-quality PRNG.
 * Sort the ballots/cvrs by that number
+
+For each round:
+* For each contest, estimate the number of samples needed (contest.estSamples).
 * Select the first ballots/cvrs that use any contest that needs more samples, until all contests have
 at least contest.estSampleSize in the sample of selected ballots.
 
 ### Uniform Sampling without Card Style Data
 
-* For each contest, estimate the number of samples needed (contest.estSamples).
+At the start of the audit:
 * For each ballot/cvr, assign a large psuedo-random number, using a high-quality PRNG.
 * Sort the ballots/cvrs by that number
-* Let Nb be the total number of ballots that may contain a contest, and Nc the maximum number of cards for a contest C. 
+* Let Nb be the total number of ballots that may contain a contest, and Nc the maximum number of cards for a contest C.
   Then we assume that the probability of a ballot containing contest C is Nc / Nb.
+
+For each round:
+* For each contest, estimate the number of samples needed (contest.estSamples).
 * Over all contests, compute contest.estSamples * ( Nb / Nc) and set audit.estSamples to the maximum.
 * Take the first audit.estSamples of the sorted ballots.
 
@@ -406,15 +416,19 @@ since it works out that Nc cancels out:
         sampleEstimate = rho / dilutedMargin                  // (SuperSimple p. 4)
         where 
           dilutedMargin = (vw - vl)/ Nc
+          rho = constant
+
         sampleEstimate = rho * Nc / (vw - vl)
         totalEstimate = sampleEstimate * Nb / Nc               // must scale by proportion of ballots with that contest
                       = rho * Nb / (vw - vl) 
                       = rho / fullyDilutedMargin
+
         where
           fullyDilutedMargin = (vw - vl)/ Nb
 
 The scale factor Nb/Nc depends on how many contests there are and how they are distributed across the ballots.
-In the following plot we show polling audits, no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
+In the following plot we show averages of the overall number of ballots sampled (nmvrs), for polling audits, 
+no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.png)</a>
@@ -425,9 +439,9 @@ In the following plot we show polling audits, no style information, no errors, f
 
 ### Polling Vs CLCA with/out CSD Estimated Sample sizes
 
-The following plot shows Polling vs CLCA with and without CSD at different margins, where Nb/Nc = 2.
+The following plot shows nmvrs for Polling vs CLCA, with and without CSD at different margins, no errors, where Nb/Nc = 2.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLog.html" rel="compareWithStyle">![compareWithStyle](./docs/plots/workflows/compareWithStyle/compareWithStyleLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLogLinear.html" rel="compareWithStyleLogLinear">![compareWithStyleLogLinear](./docs/plots/workflows/compareWithStyle/compareWithStyleLogLinear.png)</a>
 
 * For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data.
 
@@ -492,7 +506,10 @@ SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample
 contest audits, additional ballots may be in the sample because they are needed by another contest. Since theres no 
 guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
 
-*** If the Audit gets below the risk limit, should you terminate? Or finish all the samples that have been audited? ***
+Note that as soon as an audit gets below the risk limit, the audit is considered a success (status StatRejectNull).
+This reflects the "anytime P-value" property of the Betting martingale (ALPHA eq 9).
+That is, one does not continue with the audit, which could go back above the risk limit with more samples.
+This does agree with how SHANGRLA works.
 
 ### compute sample size
 
@@ -538,17 +555,20 @@ Not clear what this means, and how its different from 2.c.
 
 ### estimate CLCA error rates
 
-SHANGRLA has guesses for p1,p2,p3,p4. We do a blanket fuzz, and simulate the errors by ncandidates in a contest, then use those.
+SHANGRLA has guesses for p1,p2,p3,p4. 
+We can use that method (strategy.apriori), and we can also use strategy.fuzzPct, which guesses a percent of contests to randomly 
+change ("fuzzPct"), and use it to simulate errors (by number of candidates) in a contest. That and other strategies are described in
+[CLCA error rates](https://github.com/JohnLCaron/rlauxe/blob/main/docs/ClcaErrorRates.md) and we are still exploring 
+which strategy works best.
 
 ### use of previous round's sampled_cvr_indices
 
 At first glance, it appears that SHANGRLA Audit.py CVR.consistent_sampling() might make use of the previous round's
 selected ballots (sampled_cvr_indices). However, it looks like CVR.consistent_sampling() never uses sampled_cvr_indices, 
-and so uses the same strategy as we do, of sampling without regards to the previous rounds.
+and so uses the same strategy as we do, namely  sampling without regards to the previous rounds.
 
 Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt just use the 
 first n sorted samples, which the code seems to assume. But I think the question is moot.
-
 
 ## Other Notes
 

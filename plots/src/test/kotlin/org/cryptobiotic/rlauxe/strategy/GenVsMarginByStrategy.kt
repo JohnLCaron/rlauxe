@@ -74,19 +74,4 @@ class GenVsMarginByStrategy {
         //showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear)
         // showFailuresVsFuzzPct(dirName, name, subtitle)
     }
-
-    fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val data = io.readResults()
-        wrsPlot(
-            titleS = "$name samples needed",
-            subtitleS = subtitle,
-            writeFile = "$dirName/${name}${scaleType.name}",
-            wrs = data,
-            xname = "margin", xfld = { it.margin },
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
-            catName = "strategy", catfld = { category(it) },
-            scaleType = scaleType
-        )
-    }
 }

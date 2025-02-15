@@ -159,33 +159,35 @@ class PollingWorkflowTaskGenerator(
     }
 }
 
+// mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
 class OneAuditWorkflowTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
     val cvrPercent: Double,
-    val fuzzPct: Double,
+    val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
+    val nsimEst: Int = 100,
     ) : WorkflowTaskGenerator {
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = 10, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = fuzzPct)
+            AuditType.ONEAUDIT, true, nsimEst = nsimEst, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs()
-        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, fuzzPct)
+        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), oaCvrs, quiet = quiet)
         return WorkflowTask(
             name(),
             oneaudit,
             oaMvrs,
-            parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to fuzzPct, "auditType" to 1.0)
+            parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to mvrsFuzzPct, "auditType" to 1.0)
         )
     }
 }

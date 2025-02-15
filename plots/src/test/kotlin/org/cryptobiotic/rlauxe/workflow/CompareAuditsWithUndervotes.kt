@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.df
-import kotlin.math.log10
 import kotlin.test.Test
 
 class CompareAuditsWithUndervotes {
@@ -36,7 +34,7 @@ class CompareAuditsWithUndervotes {
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, undervote, 0.0, cvrPercent=cvrPercent, fuzzPct=mvrFuzzPct,
+            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, undervote, 0.0, cvrPercent=cvrPercent, mvrsFuzzPct=mvrFuzzPct,
                 auditConfigIn=AuditConfig(AuditType.ONEAUDIT, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit"))
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))

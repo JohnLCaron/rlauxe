@@ -176,14 +176,14 @@ class CompareAuditsNoErrors {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val oneauditGenerator1 = OneAuditWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, 0.50, fuzzPct=fuzzPct,
+                N, margin, 0.0, 0.0, 0.50, mvrsFuzzPct=fuzzPct,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "standard"),
                 auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
                     oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator1))
             val oneauditGenerator2 = OneAuditWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, 0.50, fuzzPct=fuzzPct,
+                N, margin, 0.0, 0.0, 0.50, mvrsFuzzPct=fuzzPct,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "max99"),
                 auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
                     oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))

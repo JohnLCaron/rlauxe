@@ -180,7 +180,7 @@ For the new strategies and the noerror and oracle strategies, with fuzzPct of .0
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy2LogLog.html" rel="clcaVsMarginByStrategy2LogLog">![clcaVsMarginByStrategy2LogLog](plots/strategy2/clcaVsMarginByStrategy2LogLog.png)</a>
 
 * A _phantomPct_ of phantoms lowers the margin by that amount, so note that the margins <= phantomPct are ommitted in the plots.
-* When phantomPct = 0.0, the phantom and mixed strategies become the same as noerrer, abd any differences are due to variance in the sample ordering.
+* When phantomPct = 0.0, the phantom and mixed strategies become the same as noerrer, and any differences are due to variance in the sample ordering.
 * The oracle strategy can't be used in production. 
 * The fuzzPct strategy requires one to guess the fuzzPct, and here we use the actual fuzz, so this is as good as it gets using that strategy.
 * That leaves the noerror, previous, phantom and mixed as possible strategies that dont require apriori knowledge.

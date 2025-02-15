@@ -70,7 +70,7 @@ class GenVsMarginByStrategy {
     fun regenPlots() {
         val subtitle = "fuzzPct=${fuzzPct} Nc=${N} nruns=${nruns}"
         //showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear)
-        showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLog)
+        showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLog, catName="strategy")
         //showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear)
         // showFailuresVsFuzzPct(dirName, name, subtitle)
     }

@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 02/14/2025_
+_last update: 02/15/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -26,6 +26,7 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
 * [Measuring Samples Needed](#measuring-samples-needed)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
+  * [Variance of Samples needed when there are errors](#variance-of-samples-needed-when-there-are-errors)
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Estimation](#estimation)
@@ -34,8 +35,7 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
     * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
-  * [Minimizing costs in MultiContest Audits](#minimizing-costs-in-multicontest-audits)
-    * [Effect of Multiple Contest Auditing](#effect-of-multiple-contest-auditing)
+  * [Multiple Contest Auditing](#multiple-contest-auditing)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -325,6 +325,14 @@ Varying the percent of undervotes at margin of 4% and 2%, with errors generated 
 
 * Note that undervote percentages are shown up to 50%, with modest effect.
 
+## Variance of Samples needed when there are errors
+
+Using the same method of fuzzing the CVRs and the MVRs, and feeping fuzzPct = .02, we want to get a sense of how much 
+variance there is at different margins.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditVariance/auditVarianceLogLinear.html" rel="auditVarianceLogLinear">![auditVarianceLogLinear](docs/plots/samples/auditVariance/auditVarianceLogLinear.png)</a>
+
+
 ## Effect of Phantoms on Samples needed
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
@@ -347,15 +355,15 @@ as a function of phantomPct, and also with no phantoms but the margin shifted by
 Sampling refers to choosing which ballots to hand review to create Manual Voting Records (MVRs). Once the MVRs
 are created, the actual audit takes place.
 
-There are two phases to sampling: estimating the sample batch sizes for each contest, and then randomly choosing ballots that 
-contain at least that many contests.
-
 Audits are done in rounds. The auditors must decide how many cards/ballots they are willing to audit, since at some point its
-more efficient to do a full handcount than the more elaborate process of tracking down a subset that have been selected for the sample.
+more efficient to do a full handcount than the more elaborate process of tracking down a subset that has been selected for the sample.
 We want to minimize both the overall number of ballots sampled, and the number of rounds.
 
 Note that in this section we are plotting _nmvrs_ = overall number of ballots sampled, which includes the inaccuracies of the
 estimation. Above we have been plotting _samples needed_, as if we were doing "one ballot at a time" auditing.
+
+There are two phases to sampling: estimating the sample batch sizes for each contest, and then randomly choosing ballots that
+contain at least that many contests.
 
 ## Estimation
 
@@ -448,7 +456,7 @@ The following plot shows nmvrs for Polling vs CLCA, with and without CSD at diff
 ## Under/Over estimating CLCA sample sizes
 
 Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
-Over/under estimation is strongly influenced by over/estimating error rates. 
+Over/under estimation is strongly influenced by over/under estimating error rates. 
 
 The following plots show approximate distribution of estimated and actual sample sizes, using our standard AdaptiveComparison
 betting function with weight parameter d = 100, for margin=2% and errors in the MVRs generated with 2% fuzz.
@@ -465,16 +473,26 @@ When the estimated error rates are half the actual error rates:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.png)</a>
 
-The amount of extra sampling closely follows the number of samples needed, adding 10-50% extra work, as the following plots vs margin show:
+The amount of extra sampling closely follows the number of samples needed, adding around 30-75% extra work, as the following plots vs margin show:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLinear.html" rel="estVsMarginByFuzzDiffLinear">![estVsMarginByFuzzDiffLinear](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLog.html" rel="estVsMarginByFuzzDiffLog">![estVsMarginByFuzzDiffLog](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffPct.html" rel="estVsMarginByFuzzDiffPct">![estVsMarginByFuzzDiffPct](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffPct.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffNrounds.html" rel="estVsMarginByFuzzDiffNrounds">![estVsMarginByFuzzDiffNrounds](./docs/plots/workflows/estVsMarginByFuzzDiff/estVsMarginByFuzzDiffNrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.html" rel="extraVsMarginByFuzzDiffLogLinear">![extraVsMarginByFuzzDiffLogLinear](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.html" rel="extraVsMarginByFuzzDiffPct">![extraVsMarginByFuzzDiffPct](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.png)</a>
 
-TODO: reduce extra sampling; tradeoff with number of rounds.
+In the best case, the simulation accurately estimates the distribution of audit sample sizes. But because there is so much variance in that
+distribution, the audit sample sizes are significantly overestimated. To emphasize this point, here are plots of samples needed and nmrvs, for both clca and polling, 
+when there is a constant mvr fuzz of .01 and the estimation also use .01 fuzz:
 
-## Minimizing costs in MultiContest Audits
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceLogLinear.html" rel="clcaVarianceLogLinear">![clcaVarianceLogLinear](./docs/plots/extra/clcaVariance/clcaVarianceLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceLogLinear.html" rel="pollingVarianceLogLinear">![pollingVarianceLogLinear](./docs/plots/extra/pollingVariance/pollingVarianceLogLinear.png)</a>
+
+The number of rounds needed reflects the default value of auditConfig.quantile = 80%, so we expect to need a second round 20% of the time:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceNrounds.html" rel="clcaVarianceNrounds">![clcaVarianceNrounds](./docs/plots/extra/clcaVariance/clcaVarianceNrounds.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceNrounds.html" rel="pollingVarianceNrounds">![pollingVarianceNrounds](./docs/plots/extra/pollingVariance/pollingVarianceNrounds.png)</a>
+
+One could use other algorithms to trade off extra samples vs extra rounds.
+
+## Multiple Contest Auditing
 
 An election often consists of several or many contests, and it can be more efficient to audit all of the contests at once.
 
@@ -492,9 +510,7 @@ These rules are somewhat arbitrary but allow us to test audits without human int
 auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the Estimation stage,
 and try out different scenarios before committing to which contests continue on to the next round.
 
-### Effect of Multiple Contest Auditing
-
-TODO
+TODO MORE
 
 
 # Appendices

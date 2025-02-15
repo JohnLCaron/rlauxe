@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsPlotter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.random.Random
 import kotlin.test.Test
 
 class TestGenWorkflowTasks {
@@ -79,7 +78,7 @@ class TestGenWorkflowTasks {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         cvrPercents.forEach { cvrPercent ->
             margins.forEach { margin ->
-                val workflowGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, fuzzPct = 0.0,
+                val workflowGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct = 0.0,
                     mapOf("nruns" to nruns.toDouble()))
                 tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
             }

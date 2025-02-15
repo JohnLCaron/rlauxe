@@ -1,0 +1,138 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;OT43HA&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;extraVsMarginByFuzzDiff number of audit rounds&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100 fuzzMvrs=0.02&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;auditRounds&quot;,
+&quot;color&quot;:&quot;fuzzDiff %&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;],
+&quot;auditRounds&quot;:[1.22,1.25,1.26,1.36,1.37,1.44,1.24,1.3,1.34,1.28,1.31,1.46,1.31,1.44,1.53,1.51,1.86,1.5,1.48,1.55,1.37,1.57,1.55,1.39,1.53,1.53,1.07,1.06,1.11,1.14,1.16,1.18,1.23,1.25,1.26,1.2,1.23,1.26,1.26,1.04,1.02,1.0,1.02,1.07,1.07,1.21,1.18,1.15,1.14,1.19,1.29,1.17,1.0,1.0,1.0,1.02,1.02,1.07,1.06,1.11,1.11,1.1,1.1,1.12,1.14],
+&quot;margin&quot;:[0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;fuzzDiff %&quot;:[&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzDiff %&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;auditRounds&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;auditRounds&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.005,0.00752,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;],
+&quot;auditRounds&quot;:[1.22,1.25,1.26,1.36,1.37,1.44,1.24,1.3,1.34,1.28,1.31,1.46,1.31,1.44,1.53,1.51,1.86,1.5,1.48,1.55,1.37,1.57,1.55,1.39,1.53,1.53,1.07,1.06,1.11,1.14,1.16,1.18,1.23,1.25,1.26,1.2,1.23,1.26,1.26,1.04,1.02,1.0,1.02,1.07,1.07,1.21,1.18,1.15,1.14,1.19,1.29,1.17,1.0,1.0,1.0,1.02,1.02,1.07,1.06,1.11,1.11,1.1,1.1,1.12,1.14],
+&quot;fuzzDiff %&quot;:[&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-0.50&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;-1.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.00&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;0.50&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;,&quot;1.00&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzDiff %&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;auditRounds&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;auditRounds&quot;,&quot;fuzzDiff %&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;12&quot;
+};
+       var containerDiv = document.getElementById(&quot;OT43HA&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

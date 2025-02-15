@@ -109,6 +109,7 @@ fun wrsPlotMultipleFields(
     xfld: (WorkflowResult) -> Double,
     yfld: (String, WorkflowResult) -> Double,
     catflds: List<String>,
+    scaleType: ScaleType = ScaleType.Linear
 ) {
     // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
     val groups = makeWrGroups(wrs, catflds)
@@ -136,17 +137,20 @@ fun wrsPlotMultipleFields(
         catName to category,
     )
 
+    val xScale = if (scaleType == ScaleType.LogLog) Scale.continuousPos<Int>(transform = Transformation.LOG10) else Scale.continuousPos<Int>()
+    val yScale = if (scaleType == ScaleType.Linear) Scale.continuousPos<Int>() else Scale.continuousPos<Int>(transform = Transformation.LOG10)
+
     val plot = multipleDataset.plot {
         groupBy(catName) {
             line {
-                x(xname)
-                y(yname)
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
                 color(catName)
             }
 
             points {
-                x(xname)
-                y(yname)
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
                 size = 1.0
                 symbol = Symbol.CIRCLE_OPEN
                 color = Color.BLUE
@@ -194,7 +198,7 @@ fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, sca
     )
 }
 
-fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
+fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
     val io = WorkflowResultsIO("$dirName/${name}.cvs")
     val data = io.readResults()
     wrsPlot(
@@ -204,7 +208,7 @@ fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scal
         wrs = data,
         xname = "margin", xfld = { it.margin },
         yname = "samplesNeeded", yfld = { it.samplesNeeded },
-        catName = "strategy", catfld = { category(it) },
+        catName = catName, catfld = { category(it) },
         scaleType = scaleType
     )
 }

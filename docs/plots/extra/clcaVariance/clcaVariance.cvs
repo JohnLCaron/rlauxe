@@ -1,0 +1,14 @@
+parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, failPct, neededStddev
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.1, StatRejectNull, 1.229, 74.421, 74.42099999999992, 92.992, 0.0, 37.72887168999358
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.07, StatRejectNull, 1.202, 113.113, 113.11299999999997, 172.774, 0.0, 62.16793571448226
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.08, StatRejectNull, 1.248, 98.82, 98.82000000000006, 137.444, 0.0, 53.229668419031135
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.06, StatRejectNull, 1.222, 137.865, 137.8650000000003, 224.085, 0.0, 75.94784246441769
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.05, StatRejectNull, 1.217, 177.37, 177.37000000000018, 295.126, 0.0, 102.59932309718234
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.04, StatRejectNull, 1.198, 239.019, 239.01900000000018, 406.909, 0.0, 155.1066621360926
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.03, StatRejectNull, 1.217, 372.019, 372.0190000000001, 653.62, 0.0, 260.57730645434185
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.02, StatRejectNull, 1.207, 707.167, 707.1669999999984, 1323.129, 0.0, 527.3247093689047
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.016, StatRejectNull, 1.192, 1020.785, 1020.7850000000003, 1941.985, 0.0, 748.180815561987
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.012, StatRejectNull, 1.155, 1606.621, 1606.6209999999985, 3262.157, 0.0, 1254.5235029121618
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.01, StatRejectNull, 1.137, 2306.646, 2306.6460000000015, 4587.581, 0.0, 1695.6332229241084
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.008, StatRejectNull, 1.138, 3541.441, 3541.441000000002, 7038.446, 0.0, 2522.5151072925214
+"nruns=1000.0 fuzzPct=0.01 auditType=3.0 mvrsFuzzPct=0.01 ", 50000, 0.006, StatRejectNull, 1.112, 5681.459, 5681.4590000000035, 11917.594, 0.0, 4004.443717711485

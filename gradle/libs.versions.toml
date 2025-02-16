@@ -1,32 +1,31 @@
 [versions]
-# plugins version
+`rlauxe = "0.5.1"
+
 # kotlin-version = "1.9.23"
-kotlin-version = "2.0.20"
-dokka = "1.9.10"
-korro = "0.1.6"
-nexus = "1.3.0"
-jupyterApi = "0.12.0-250"
+kotlin-version = "2.1.10"
 
 # libraries version
 dataframe = "0.14.1"
-serialization = "1.6.3"
+serialization = "1.7.1"
 datetime = "0.6.0"
 html = "0.11.0"
-statistics = "0.4.0"
 letsPlot = "0.8.0"
 letsPlotStatistics = "0.4.0"
 letsPlotImage = "4.3.3"
+logback = "1.5.15"
 mockk = "1.13.10"
+statistics = "0.4.0"
 
 # coroutines-version = "1.8.0-RC2"
-coroutines-version = "1.9.0"
+kotlinx-coroutines = "1.8.1"
+# coroutines-version = "1.9.0" // kobweb not using
 kotest-version = "5.9.1"
-ktor-version = "2.3.4"
+ktor-version = "3.0.3"
 xmlutil-version = "0.90.0-RC3"
 
 [libraries]
 # Kotlinx libraries
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines-version" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version = "0.3.6" }
 kotlinx-dataframe = { group = "org.jetbrains.kotlinx", name = "dataframe", version.ref = "dataframe" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
@@ -45,7 +44,7 @@ bull-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version
 pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvm", version.ref = "xmlutil-version" }
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
 oshai-logging = { module = "io.github.oshai:kotlin-logging", version = "7.0.0" }
-logback-classic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 #Ktor
 ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor-version" }
@@ -65,7 +64,7 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-version" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin-version" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin-version" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-version" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
 test-common = { module = "org.jetbrains.kotlin:kotlin-test-common", version.ref = "kotlin-version" }
 test-annotations-common = { module = "org.jetbrains.kotlin:kotlin-test-annotations-common", version.ref = "kotlin-version" }
@@ -119,4 +118,5 @@ xmlutil = [
 
 [plugins]
 ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }

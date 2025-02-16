@@ -13,8 +13,10 @@ import kotlin.random.Random
 
 private const val debugAdjust = false
 
-// creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
-// It can create cvrs that reflect the contests' exact votes.
+/**
+ * Creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
+ * It can create cvrs that reflect the contests' exact votes.
+ */
 data class MultiContestTestData(
     val ncontest: Int,
     val nballotStyles: Int,

@@ -19,15 +19,13 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
-private const val debug = false
-
 /** Simulation of Raire Contest */
 data class RaireContestTestData(
     val contestId: Int,
     val ncands: Int,
     val ncards: Int,
     val minMargin: Double,
-    val undervotePct: Double, // TODO not using
+    val undervotePct: Double,
     val phantomPct: Double,
 ) {
     val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
@@ -107,24 +105,27 @@ data class RaireContestTestData(
     }
 }
 
-fun makeRaireContest(N: Int, minMargin: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>> {
+fun makeRaireContest(N: Int, minMargin: Double, undervotePct: Double = .10, phantomPct: Double = .005, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>> {
     repeat(11) {
-        val result = trytoMakeRaireContest(N, minMargin, quiet)
+        val result = trytoMakeRaireContest(N, minMargin, undervotePct, phantomPct, quiet)
         if (result != null) return result
     }
     throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
 }
 
-fun trytoMakeRaireContest(N: Int, minMargin: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
+fun trytoMakeRaireContest(N: Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val ncands = 4
 
-    val testContest = RaireContestTestData(0, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = .10, phantomPct = .005)
+    val testContest = RaireContestTestData(0, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
     var round = 1
     if (!quiet) println("===================================\nRound $round")
     var solution = findMinAssertion(testContest, testCvrs, quiet)
-    if (solution == null) return null
+    if (solution == null) {
+        println("round 1 solution is null")
+        return null
+    }
 
     var marginPct = solution.second.margin / testContest.ncards.toDouble()
 
@@ -134,7 +135,10 @@ fun trytoMakeRaireContest(N: Int, minMargin: Double, quiet: Boolean = false): Pa
 
         if (!quiet) println("===================================\nRound $round")
         solution = findMinAssertion(testContest, testCvrs, quiet)
-        if (solution == null) return null
+        if (solution == null) {
+            println("round $round solution is null")
+            return null
+        }
         marginPct = solution.second.margin / testContest.ncards.toDouble()
         round++
     }

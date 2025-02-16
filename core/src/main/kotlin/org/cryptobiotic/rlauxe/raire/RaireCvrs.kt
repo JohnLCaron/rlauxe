@@ -95,7 +95,7 @@ class RaireCvr(val cvr: Cvr) {
             return 0
         }
 
-        val rank_cand = get_vote_for(contest, cand) ?: return 0
+        val rank_cand = get_vote_for(contest, cand)
         if (rank_cand == 0) return 0
 
         for (altc in remaining) {
@@ -109,77 +109,3 @@ class RaireCvr(val cvr: Cvr) {
         return 1
     }
 }
-
-/////////////////////////////////////////////////////////////////////
-// DO NOT USE, use readRaireBallots()
-// this is (apparently) RAIRE CSV format for ranked choice CVRs from SFDA2019
-// input to RAIRE, not sure where these are produced, somewhere in SFDA2019
-// eg SFDA2019_PrelimReport12VBMJustDASheets.raire
-// TODO Colorado may be very different, see corla
-//
-// This reads:
-// 1
-// Contest,339,4,15,16,17,18
-// 339,99813_1_1,17
-// 339,99813_1_3,16
-// 339,99813_1_6,18,17,15,16
-// ...
-
-/*
-fun readRaireSfdaCvrs(filename: String): RaireCvrs {
-    val path: Path = Paths.get(filename)
-    val reader: Reader = Files.newBufferedReader(path)
-    val parser = CSVParser(reader, CSVFormat.DEFAULT)
-    val records = parser.iterator()
-
-    // we expect the first line to be the number of contests
-    val ncontests = records.next().get(0).toInt()
-    if (ncontests != 1) throw RuntimeException("readRaireSfdaCvrs only allows one contest")
-
-    val contests = mutableListOf<RaireCvrContest>()
-    var cvrs = mutableListOf<RaireCvr>()
-    var contestId = 0
-    var nchoices = 0
-    var choices = emptyList<Int>()
-
-    while (records.hasNext()) {
-        val line = records.next()
-        val first = line.get(0)
-        if (first.equals("Contest")) {
-            if (cvrs.isNotEmpty()) {
-                contests.add(RaireCvrContest(contestId, choices, cvrs.size))
-            }
-            // start a new contest
-            contestId = line.get(1).toInt()
-            nchoices = line.get(2).toInt()
-            choices = readVariableListOfInt(line,3)
-            require(nchoices == choices.size)
-            cvrs = mutableListOf()
-        } else {
-            val cid = line.get(0).toInt()
-            val location = line.get(1)
-            val rankedChoices = readVariableListOfInt(line, 2)
-            require(cid == contestId)
-            require(choices.containsAll(rankedChoices))
-            cvrs.add(RaireCvr(cid, location, rankedChoices))
-        }
-    }
-    if (cvrs.isNotEmpty()) {
-        contests.add(RaireCvrContest(contestId, choices, cvrs.size)) // dont know the winner
-    }
-
-    return RaireCvrs(contests, cvrs, filename)
-}
-
-private fun readVariableListOfInt(line: CSVRecord, startPos: Int): List<Int> {
-    val result = mutableListOf<Int>()
-    while (startPos + result.size < line.size()) {
-        val s = line.get(startPos + result.size)
-        if (s.isEmpty()) break
-        val sn = line.get(startPos + result.size)
-        result.add(sn.toInt())
-    }
-    return result
-}
-
- */

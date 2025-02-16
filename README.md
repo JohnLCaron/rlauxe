@@ -495,6 +495,7 @@ One could use other algorithms to trade off extra samples vs extra rounds.
 ## Multiple Contest Auditing
 
 An election often consists of several or many contests, and it can be more efficient to audit all of the contests at once.
+We have several mechanisms for choosing contests to remove from the audit to keep the sample sizes resonable.
 
 Before the audit begins:
 1. Any contest whose reported margin is less than _auditConfig.minMargin_ is removed from the audit with failure code MinMargin.
@@ -507,10 +508,15 @@ For each Estimation round:
    contest, and the check on the total number of ballots is repeated.
 
 These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
-auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the Estimation stage,
+auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the estimation stage,
 and try out different scenarios before committing to which contests continue on to the next round.
 
-TODO MORE
+### Efficiency
+
+We assume that the cost of auditing a ballot is the same no matter how many contests are on it. So, if two contests always 
+appear together on a ballot, then auditing the second contest is "free". If the two contests appear on the same ballot some 
+pct of the time, then the cose is reduced by that pct. More generally the reduction in cost of a multicontest audit depends
+on the various percentages the contests appear on the same ballot.
 
 
 # Appendices

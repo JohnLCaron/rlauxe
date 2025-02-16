@@ -199,25 +199,26 @@ class RaireWorkflowTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfig: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
-): WorkflowTaskGenerator {
+    val nsimEst: Int = 100,
+    ): WorkflowTaskGenerator {
     override fun name() = "RaireWorkflowTaskGenerator"
 
     override fun generateNewTask(): WorkflowTask {
-        val auditConfig = auditConfigIn ?:
-        AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 10,
+        val useConfig = auditConfig ?:
+        AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
-        val (rcontest, testCvrs) = makeRaireContest(N=20000, minMargin=margin, quiet = true)
+        val (rcontest, testCvrs) = makeRaireContest(N=Nc, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
         // var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val clca = ClcaWorkflow(auditConfig, emptyList(), listOf(rcontest), testCvrs, quiet = quiet)
+        val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest), testCvrs, quiet = quiet)
         return WorkflowTask(
             name(),
             clca,
             testCvrs, // no errors
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0)
+            parameters + mapOf("mvrsFuzzPct" to 0.0, "auditType" to 4.0)
         )
     }
 }

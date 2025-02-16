@@ -36,7 +36,6 @@ class CompareAuditsNoErrors {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            // oneaudit
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditWorkflowTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,

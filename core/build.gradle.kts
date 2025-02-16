@@ -1,11 +1,10 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
     id ("java-test-fixtures")
 }
 
-repositories {
-    mavenCentral()
-}
+group = "org.cryptobiotic.rlauxe"
+version = libs.versions.rlauxe.get()
 
 dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))

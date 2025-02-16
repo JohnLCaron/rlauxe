@@ -3,13 +3,6 @@ package org.cryptobiotic.rlauxe.raire
 import au.org.democracydevelopers.raire.irv.Vote
 import kotlin.collections.getOrPut
 
-/*
-class Vote(
-    val n: Int, // The number of votes that expressed the ranking 'prefs' on their ballot.
-    val prefs: IntArray, // A preference ranking. Note that prefs[0] denotes the first (highest) ranked candidate.
-)
- */
-
 /**
  * For a single Contest.
  *

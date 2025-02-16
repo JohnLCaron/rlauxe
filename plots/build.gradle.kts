@@ -1,12 +1,14 @@
 plugins {
-    kotlin("jvm")
-    alias(libs.plugins.serialization)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinx.serialization)
     id ("java-test-fixtures")
 }
 
+group = "org.cryptobiotic.rlauxe"
+version = libs.versions.rlauxe.get()
+
 repositories {
-    mavenCentral()
-    maven("https://packages.jetbrains.team/maven/p/kds/kotlin-ds-maven")
+    maven("https://packages.jetbrains.team/maven/p/kds/kotlin-ds-maven")  // why?? for raire-java ??
 }
 
 dependencies {

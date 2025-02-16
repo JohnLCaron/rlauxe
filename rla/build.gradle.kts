@@ -1,12 +1,11 @@
 plugins {
-    kotlin("jvm")
-    alias(libs.plugins.serialization)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinx.serialization)
     id ("java-test-fixtures")
 }
 
-repositories {
-    mavenCentral()
-}
+group = "org.cryptobiotic.rlauxe"
+version = libs.versions.rlauxe.get()
 
 dependencies {
     api(project(":core"))

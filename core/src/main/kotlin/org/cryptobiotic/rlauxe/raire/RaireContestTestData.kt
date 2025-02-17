@@ -63,12 +63,11 @@ data class RaireContestTestData(
         return cvrs
     }
 
-    // TODO must be able to set the margin, to get testable assertions. Random gives margins like .0011
     private fun makeCvr(cvrIdx: Int): RaireCvr {
         // vote for a random number of candidates, including 0
         val nprefs = Random.nextInt(ncands)
         val prefs = mutableListOf<Int>()
-        while(prefs.size < nprefs) {
+        while (prefs.size < nprefs) {
             val voteFor = Random.nextInt(ncands)
             if (!prefs.contains(voteFor)) prefs.add(voteFor)
         }

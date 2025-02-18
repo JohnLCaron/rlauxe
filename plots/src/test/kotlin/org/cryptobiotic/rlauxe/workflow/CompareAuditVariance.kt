@@ -46,7 +46,7 @@ class CompareAuditVariance {
         val subtitle = "Nc=${N} nruns=${nruns} fuzzPct=$fuzzPct"
         showSampleVarianceVsMargin(dirName, name, subtitle, ScaleType.Linear)
         showSampleVarianceVsMargin(dirName, name, subtitle, ScaleType.LogLinear)
-        showNroundsVsMargin(dirName, name, subtitle, catName = "auditType", catfld = {"clca"} )
+        showNroundsVsMargin(dirName, name, subtitle, catName = "auditType", catfld = {"polling"} )
         showNmvrsVsMargin(dirName, name, subtitle, ScaleType.Linear )
         showNmvrsVsMargin(dirName, name, subtitle, ScaleType.LogLinear )
     }

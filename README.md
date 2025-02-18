@@ -26,7 +26,6 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
 * [Measuring Samples Needed](#measuring-samples-needed)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
-  * [Variance of Samples needed when there are errors](#variance-of-samples-needed-when-there-are-errors)
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Estimation](#estimation)
@@ -328,19 +327,11 @@ Varying the percent of undervotes at margin of 4% and 2%, with errors generated 
 
 * Note that undervote percentages are shown up to 50%, with modest effect.
 
-## Variance of Samples needed when there are errors
-
-Using the same method of fuzzing the CVRs and the MVRs, and feeping fuzzPct = .02, we want to get a sense of how much 
-variance there is at different margins.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditVariance/auditVarianceLogLinear.html" rel="auditVarianceLogLinear">![auditVarianceLogLinear](docs/plots/samples/auditVariance/auditVarianceLogLinear.png)</a>
-
-
 ## Effect of Phantoms on Samples needed
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="sampleSizesLogLinear">![sampleSizesLogLinear](docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="auditsWithPhantomsLogLinear">![auditsWithPhantomsLogLinear](docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
@@ -350,8 +341,8 @@ as a function of phantomPct, and also with no phantoms but the margin shifted by
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLogLinear.html" rel="phantomMarginShiftLog">![phantomMarginShiftLog](docs/plots/samples/phantomMarginShift/phantomMarginShiftLogLinear.png)</a>
 
-* Generally, in further simulations we will ignore the effect of phantoms for simplicity, with the rule of thumb that
-  their effect is approximately as if the margins are reduced by phantomPct across the board.
+* A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board.
+  TODO: investigate a more precise characterizarion of their effect.
 
 # Estimating Sample Batch sizes
 
@@ -359,8 +350,9 @@ Sampling refers to choosing which ballots to hand review to create Manual Voting
 are created, the actual audit takes place.
 
 Audits are done in rounds. The auditors must decide how many cards/ballots they are willing to audit, since at some point its
-more efficient to do a full handcount than the more elaborate process of tracking down a subset that has been selected for the sample.
-We want to minimize both the overall number of ballots sampled, and the number of rounds.
+more efficient for them to do a full handcount than the more elaborate process of tracking down a subset that has been 
+selected for the sample.
+Theres a tradeoff between the overall number of ballots sampled and the number of rounds, but, we would like to minimize both.
 
 Note that in this section we are plotting _nmvrs_ = overall number of ballots sampled, which includes the inaccuracies of the
 estimation. Above we have been plotting _samples needed_, as if we were doing "one ballot at a time" auditing.
@@ -377,8 +369,8 @@ For each contest assertion we run _auditConfig.nsimEst_ (default 100) simulation
 needed to satisfy the risk limit. We then choose the (_auditConfig.quantile_) sample size as our estimate for that assertion,
 and the contest's estimated sample size is the maximum of the contest's assertion estimates.
 
-If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time. Since we dont know the 
-actual error rates, or the order that the errors will be sampled, the simulation results are just estimates.
+If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time (default 80%). 
+Since we dont know the actual error rates, or the order that the errors will be sampled, these simulation results are just estimates.
 
 ## Choosing which ballots/cards to sample
 
@@ -476,14 +468,18 @@ When the estimated error rates are half the actual error rates:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.png)</a>
 
-The amount of extra sampling closely follows the number of samples needed, adding around 30-75% extra work, as the following plots vs margin show:
+The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
+following plots vs margin show:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.html" rel="extraVsMarginByFuzzDiffLogLinear">![extraVsMarginByFuzzDiffLogLinear](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.html" rel="extraVsMarginByFuzzDiffPct">![extraVsMarginByFuzzDiffPct](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.png)</a>
 
+The extra samples goes up as our guesses for the error rates go up. In these plots we use the fuzzPct as a proxy for what
+the error rates might be.
+
 In the best case, the simulation accurately estimates the distribution of audit sample sizes. But because there is so much variance in that
-distribution, the audit sample sizes are significantly overestimated. To emphasize this point, here are plots of samples needed and nmrvs, for both clca and polling, 
-when there is a constant mvr fuzz of .01 and the estimation also use .01 fuzz:
+distribution, the audit sample sizes are significantly overestimated. To emphasize this point, here are plots of samples needed and nmrvs, 
+one for CLCA and one for polling (actual and estimated fuzz of 1%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceLogLinear.html" rel="clcaVarianceLogLinear">![clcaVarianceLogLinear](./docs/plots/extra/clcaVariance/clcaVarianceLogLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceLogLinear.html" rel="pollingVarianceLogLinear">![pollingVarianceLogLinear](./docs/plots/extra/pollingVariance/pollingVarianceLogLinear.png)</a>

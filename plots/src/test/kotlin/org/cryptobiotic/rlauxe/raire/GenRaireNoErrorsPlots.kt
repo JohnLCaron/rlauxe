@@ -12,7 +12,7 @@ import kotlin.test.Test
 class GenRaireNoErrorsPlots {
     val nruns = 100
     val nsimEst = 100
-    val N = 10000
+    val N = 20000
     val name = "raireNoErrors"
     val dirName = "/home/stormy/temp/workflow/$name"
 

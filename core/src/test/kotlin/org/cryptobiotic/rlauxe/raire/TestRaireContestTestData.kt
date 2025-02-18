@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
+import io.kotest.core.test.TestCaseOrder
+import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
@@ -9,6 +11,7 @@ import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.math.abs
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,13 +25,31 @@ class TestRaireContestTestData {
     val phantomRange = 0.001..0.01
 
     val rcontest: RaireContestUnderAudit
-    val rcvrs: List<Cvr>
+    val cvrs: List<Cvr>
 
     init {
-        val makeRaireContestResult = makeRaireContest(N=N, minMargin=.05)
+        val minMargin = marginRange.start + Random.nextDouble(marginRange.endInclusive - marginRange.start)
+        val phantomPct = phantomRange.start + Random.nextDouble(phantomRange.endInclusive - phantomRange.start)
+        println("minMargin = $minMargin, phantomPct=${phantomPct}")
+
+        val makeRaireContestResult = makeRaireContest(N=N, minMargin=minMargin, phantomPct=phantomPct, quiet=false)
         rcontest = makeRaireContestResult.first
-        rcvrs = makeRaireContestResult.second
+        cvrs = makeRaireContestResult.second
+        rcontest.makeClcaAssertions(cvrs)
     }
+
+    @Test
+    fun testCvrs() {
+        assertEquals(N, rcontest.Nc)
+        assertEquals(N, cvrs.size)
+
+        val np = cvrs.count { it.phantom }
+        assertEquals(rcontest.Np, np)
+
+        assertEquals(rcontest.winner, 0)
+        rcontest.rassertions.forEach { println("  $it marginPct=${it.margin/N.toDouble()}") }
+    }
+
     /*
 
     @Test

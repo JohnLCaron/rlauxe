@@ -7,8 +7,9 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class CompareAuditsWithErrors {
-    val nruns = 200  // number of times to run workflow
-    val name = "AuditsWithErrors"
+    val nruns = 100
+    val nsimEst = 100
+    val name = "auditsWithErrors"
     val dirName = "/home/stormy/temp/samples/$name"
     val N = 50000
     val margin = .04
@@ -23,23 +24,30 @@ class CompareAuditsWithErrors {
 
         fuzzPcts.forEach { fuzzPct ->
             val pollingGenerator = PollingWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+                N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct,
+                N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, cvrPercent, fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+                N, margin, 0.0, 0.0, cvrPercent, fuzzPct, nsimEst=nsimEst,
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
+
+            val raireGenerator = RaireWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
+                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))
         }
 
         // run tasks concurrently and average the results
@@ -55,37 +63,9 @@ class CompareAuditsWithErrors {
     @Test
     fun regenPlots() {
         val subtitle = "margin=${margin} Nc=${N} nruns=${nruns}"
-        val dirName = "/home/stormy/temp/archive/workflow/$name"
         showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType", catfld= { compareCategories(it) })
         showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType", catfld= { compareCategories(it) })
     }
-
-    /*
-    fun showSampleSizesVsFuzzPctOld(yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsFuzzPct(results, "auditType", yscale = yscale) { compareCategories(it) }
-    }
-
-    fun showFailuresVsFuzzPct() {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showFailuresVsFuzzPct(results, "auditType") { compareCategories(it) }
-    }
-
-    fun showNroundsVsFuzzPct() {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsFuzzPct(results, "auditType") { compareCategories(it) }
-    }
-
-     */
 }
 
 fun compareCategories(wr: WorkflowResult): String {
@@ -93,6 +73,7 @@ fun compareCategories(wr: WorkflowResult): String {
         1.0 -> "oneaudit"
         2.0 -> "polling"
         3.0 -> "clca"
+        4.0 -> "raire"
         else -> "unknown"
     }
 }

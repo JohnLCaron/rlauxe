@@ -36,13 +36,13 @@ data class RaireContest(
 class RaireContestUnderAudit(
     contest: RaireContest,
     val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
-    val assertions: List<RaireAssertion>,
+    val rassertions: List<RaireAssertion>,
 ): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     val candidates =  contest.info.candidateIds
 
     // TODO eliminate
     fun makeAssorters(): List<RaireAssorter> {
-        return this.assertions.map {
+        return this.rassertions.map {
             RaireAssorter(contest.info, it)
         }
     }
@@ -50,7 +50,7 @@ class RaireContestUnderAudit(
     // override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
     override fun makeClcaAssertions(cvrs: Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        this.clcaAssertions = assertions.map { assertion ->
+        this.clcaAssertions = rassertions.map { assertion ->
             val assorter = RaireAssorter(contest.info, assertion)
             val calcMargin = assorter.calcAssorterMargin(id, cvrs)
             if (assertion.margin != 0) {

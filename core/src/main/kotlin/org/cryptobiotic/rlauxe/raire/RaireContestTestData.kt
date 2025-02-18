@@ -23,9 +23,9 @@ import kotlin.random.Random
 data class RaireContestTestData(
     val contestId: Int,
     val ncands: Int,
-    val ncards: Int,
+    val ncards: Int,        // Nc
     val minMargin: Double,
-    val undervotePct: Double,
+    val undervotePct: Double,   // TODO
     val phantomPct: Double,
 ) {
     val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
@@ -33,26 +33,17 @@ data class RaireContestTestData(
 
     val underCount = (this.ncards * undervotePct).toInt()
     val phantomCount = (this.ncards * phantomPct).toInt()
-    val Nc = this.ncards + this.phantomCount
+    val Nc = this.ncards
 
     fun makeCvrs(): List<RaireCvr> {
-        val rcvrs = makeRandomCvrs()
-        val vc = VoteConsolidator()
-        rcvrs.forEach {
-            val votes = it.cvr.votes[contestId]
-            if (votes != null) {
-                vc.addVote(votes)
-            }
-        }
-        val cvotes = vc.makeVotes()
-
-        return rcvrs
-    }
-
-    private fun makeRandomCvrs(): List<RaireCvr> {
         var count = 0
         val cvrs = mutableListOf<RaireCvr>()
-        repeat(this.ncards) {
+
+        val excess = (this.ncards * minMargin).toInt()
+        repeat(excess) {
+            cvrs.add(makeCvrWithLeading0(count++))
+        }
+        repeat(this.ncards-excess-this.phantomCount) {
             cvrs.add(makeCvr(count++))
         }
         repeat(this.phantomCount) {
@@ -60,15 +51,28 @@ data class RaireContestTestData(
             count++
             cvrs.add(RaireCvr(pcvr))
         }
+        // println("makeCvrs: excess=$excess phantoms=${this.phantomCount}")
+        cvrs.shuffle()
         return cvrs
     }
 
-    // TODO must be able to set the margin, to get testable assertions. Random gives margins like .0011
+    private fun makeCvrWithLeading0(cvrIdx: Int): RaireCvr {
+        // vote for a random number of candidates, including 0
+        val nprefs = 1 + Random.nextInt(ncands-1)
+        val prefs = mutableListOf<Int>()
+        prefs.add(0) // vote for zero first
+        while (prefs.size < nprefs) {
+            val voteFor = Random.nextInt(ncands)
+            if (!prefs.contains(voteFor)) prefs.add(voteFor)
+        }
+        return RaireCvr(Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray())))
+    }
+
     private fun makeCvr(cvrIdx: Int): RaireCvr {
         // vote for a random number of candidates, including 0
         val nprefs = Random.nextInt(ncands)
         val prefs = mutableListOf<Int>()
-        while(prefs.size < nprefs) {
+        while (prefs.size < nprefs) {
             val voteFor = Random.nextInt(ncands)
             if (!prefs.contains(voteFor)) prefs.add(voteFor)
         }
@@ -83,6 +87,7 @@ data class RaireContestTestData(
         val winner = nen.winner
         val loser = nen.loser
         var cvrIdx = 0
+        // println("have=$have, want = $want")
         while (have < want) {
             val rcvr = testCvrs[cvrIdx]
             val votes: IntArray = rcvr.cvr.votes[contestId]!!
@@ -90,7 +95,7 @@ data class RaireContestTestData(
                 val rank_winner = rcvr.get_vote_for(contestId, winner)
                 val rank_loser = rcvr.get_vote_for(contestId, loser)
                 if (rank_winner > rank_loser) {
-                    // switch winner and loser
+                    // switch winner and loser TODO Mutable votes!!
                     votes[rank_winner-1] = loser
                     votes[rank_loser-1] = winner
                     have++
@@ -105,7 +110,7 @@ data class RaireContestTestData(
     }
 }
 
-fun makeRaireContest(N: Int, minMargin: Double, undervotePct: Double = .10, phantomPct: Double = .005, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>> {
+fun makeRaireContest(N: Int, minMargin: Double, undervotePct: Double = .10, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
     repeat(11) {
         val result = trytoMakeRaireContest(N, minMargin, undervotePct, phantomPct, quiet)
         if (result != null) return result
@@ -174,9 +179,8 @@ fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>
     val result: IRVResult = votes.runElection(TimeOut.never())
     if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
 
-    // were just going to pretend theres only one
     if (1 != result.possibleWinners.size) {
-        println("nwinners ${result.possibleWinners.size} must be 1")
+        // println("nwinners ${result.possibleWinners.size} must be 1")
         return null
     }
     val winner:Int = result.possibleWinners[0] // we need a winner in order to generate the assertions

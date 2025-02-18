@@ -1,6 +1,6 @@
 **RLAUXE (WORK IN PROGRESS)**
 
-_last update: 02/15/2025_
+_last update: 02/18/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -36,6 +36,7 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
     * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
   * [Multiple Contest Auditing](#multiple-contest-auditing)
+    * [Efficiency](#efficiency)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -312,11 +313,13 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 These are plots vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/AuditsWithErrorsLinear.html" rel="AuditsWithErrorsLinear">![AuditsWithErrorsLinear](docs/plots/samples/auditsWithErrors/AuditsWithErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/AuditsWithErrorsLogLinear.html" rel="AuditsWithErrorsLogLinear">![AuditsWithErrorsLogLinear](docs/plots/samples/auditsWithErrors/AuditsWithErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLinear.html" rel="auditsWithErrorsLinear">![auditsWithErrorsLinear](docs/plots/samples/auditsWithErrors/auditsWithErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.html" rel="auditsWithErrorsLogLinear">![auditsWithErrorsLogLinear](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.png)</a>
 
-* Sample sizes increase with fuzzPct similarly for all three audits.
+* Sample sizes increase with fuzzPct similarly for all the audits.
 * CLCA as a percent of Nc is more sensitive to errors than polling or OneAudit.
+* Raire audits are CLCA audits using Raire assertions. These are less sensitive to random changes to the MVRs than CLCA 
+  plurality audits because the changes are less likely to change the assorter values. 
 
 Varying the percent of undervotes at margin of 4% and 2%, with errors generated with 1% fuzz:
 

@@ -91,7 +91,7 @@ class ClcaWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-            AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
+            AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff=1.0,
                 clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -132,7 +132,8 @@ class PollingWorkflowTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = nsimEst, pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
+            AuditType.POLLING, true, nsimEst = nsimEst,  samplePctCutoff=1.0,
+            pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -175,7 +176,8 @@ class OneAuditWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = nsimEst, oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
+            AuditType.ONEAUDIT, true, nsimEst = nsimEst,  samplePctCutoff=1.0,
+            oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
@@ -207,18 +209,18 @@ class RaireWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-        AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst,
+        AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff=1.0,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val (rcontest, testCvrs) = makeRaireContest(N=Nc, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
-        // var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
+        var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
         val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest), testCvrs, quiet = quiet)
         return WorkflowTask(
             name(),
             clca,
-            testCvrs, // no errors
-            parameters + mapOf("mvrsFuzzPct" to 0.0, "auditType" to 4.0)
+            testMvrs,
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0)
         )
     }
 }

@@ -6,20 +6,20 @@ import au.org.democracydevelopers.raire.time.TimeOut
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestMakeRaireContest {
+class TestIrvCount {
 
-    @Test
+    // @Test
     fun testRepeat() {
         var idx = 0
         while(true) {
             println("\n$idx ===================================")
-            testMakeRaireContest()
+            testIrvCount()
             idx++
         }
     }
 
-     @Test
-    fun testMakeRaireContest() {
+    @Test
+    fun testIrvCount() {
         val N = 20000
         val ncands = 7
         val minMargin = .05
@@ -70,13 +70,11 @@ class TestMakeRaireContest {
                     assertEquals(raireCount[idx], rootPath.candVotes[cand])
                 }
             }
-            if (round > ncands)
-                println("huh")
         }
          val mult = if (roundWinner.winners.size > 1) "multipleWinenrs" else ""
         println("winner=$roundWinner} $mult")
 
-         // so does this agree with votes.runElection?
+         // so does this agree with votes.runElection() from raire=java library?
 
          // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
          val result: IRVResult = votes.runElection(TimeOut.never())

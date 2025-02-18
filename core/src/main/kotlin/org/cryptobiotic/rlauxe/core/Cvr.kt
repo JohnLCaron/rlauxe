@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 
-// immutable
+// immutable, TODO except for the IntArray!
 data class Cvr(
     val id: String,
     val votes: Map<Int, IntArray>, // contest : list of candidates voted for; for IRV, ranked hi to lo

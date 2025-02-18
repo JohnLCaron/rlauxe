@@ -152,10 +152,11 @@ class OneAuditFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO cant be used on raire, approval
+// TODO cant be used on approval
 
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
+    val isIRV = contests.associate { it.info.name to (it.choiceFunction == SocialChoiceFunction.IRV) }.toMap()
 
     var count = 0
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
@@ -164,13 +165,16 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Doub
         cvrb.contests.forEach { (_, cvb) ->
             if (r < fuzzPct) {
                 val ccontest: CvrContest = cvb.contest
-                val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
-                cvb.votes.clear()
-
-                // choose a different candidate, or none.
-                val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
-                if (ncandId != null) {
-                    cvb.votes.add(ncandId)
+                if (isIRV[ccontest.name]!!) {
+                    switchCandidateRankings(cvb, ccontest.candidateIds)
+                } else {
+                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
+                    cvb.votes.clear()
+                    // choose a different candidate, or none.
+                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
+                    if (ncandId != null) {
+                        cvb.votes.add(ncandId)
+                    }
                 }
             }
         }
@@ -189,5 +193,23 @@ fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
         if (candId != currId) {
             return candId
         }
+    }
+}
+
+// for IRV
+fun switchCandidateRankings(cvb: ContestVoteBuilder, candidateIds: List<Int>) {
+    val ncands = candidateIds.size
+    val size = cvb.votes.size
+    if (size == 0) { // no votes -> random one vote
+        val candIdx = Random.nextInt(ncands)
+        cvb.votes.add(candidateIds[candIdx])
+    } else if (size == 1) { // one votes -> no votes
+        cvb.votes.clear()
+    } else { // switch two randomly selected votes
+        val ncandIdx1 = Random.nextInt(size)
+        val ncandIdx2 = Random.nextInt(size)
+        val save = cvb.votes[ncandIdx1]
+        cvb.votes[ncandIdx1] = cvb.votes[ncandIdx2]
+        cvb.votes[ncandIdx2] = save
     }
 }

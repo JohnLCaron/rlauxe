@@ -9,6 +9,7 @@ private val show = true
 
 /** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
  * Specific to a contest. Only used for estimating the sample size.
+ * TODO cant use Raire??
  */
 class ClcaSimulation(
     rcvrs: List<Cvr>, // may have phantoms

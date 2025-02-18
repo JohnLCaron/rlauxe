@@ -43,7 +43,7 @@ class TestRaireWorkflowFromJson {
             // TODO rrc.Nc = rc.ncvrs
         }
 
-        val nassertions = raireResults.contests.sumOf { it.assertions.size }
+        val nassertions = raireResults.contests.sumOf { it.rassertions.size }
         val workflow = ClcaWorkflow(auditConfig, emptyList(), raireResults.contests, cvrs)
         runComparisonWorkflowR(workflow, cvrs, nassertions)
     }

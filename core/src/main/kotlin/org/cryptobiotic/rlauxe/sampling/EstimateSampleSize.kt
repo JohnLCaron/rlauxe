@@ -234,7 +234,7 @@ fun simulateSampleSizeClcaAssorter(
 
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
         Pair(
-            ClcaSimulation(cvrs, contest, cassorter, errorRates),
+            ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO cant use Raire??
             AdaptiveComparison(
                 Nc = contest.Nc,
                 a = cassertion.cassorter.noerror(),

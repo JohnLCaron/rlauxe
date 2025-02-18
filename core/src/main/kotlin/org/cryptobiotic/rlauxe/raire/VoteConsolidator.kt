@@ -44,7 +44,10 @@ private class HashableIntArray(val array: IntArray) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-// Array vs List, should be immutable
+/**
+ * Check the IRV elimination algorithm.
+ */
+
 class IrvCount(val votes: Array<Vote>, val candidates: List<Int>) {
     var round = 1
     val rootPath = EliminationPath(round, emptyList(), candidates.toSet(), votes)

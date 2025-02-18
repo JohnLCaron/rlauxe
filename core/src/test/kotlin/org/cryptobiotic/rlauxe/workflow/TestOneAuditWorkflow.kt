@@ -30,4 +30,17 @@ class TestOneAuditWorkflow {
 
         runWorkflow("testOneAuditContest", workflow, testCvrs)
     }
+
+    @Test
+    fun testOneAuditContestMax99() {
+        val contestOA = makeContestOA(100, 50, cvrPercent = .80, 0.0, undervotePercent=.0, phantomPercent = .0)
+        println(contestOA)
+
+        val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, quantile=.80, nsimEst=10,
+            oaConfig = OneAuditConfig(OneAuditStrategyType.max99))
+
+        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
+        runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
+    }
 }

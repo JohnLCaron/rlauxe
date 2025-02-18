@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.sampling.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertFailsWith
 
 class TestContest {
@@ -89,7 +91,7 @@ class TestContest {
     }
 
     @Test
-    fun testContest() {
+    fun testContestBasics() {
         val info = ContestInfo(
             "testContestInfo",
             0,
@@ -121,7 +123,31 @@ class TestContest {
         assertEquals("Nc 111 must be <= totalVotes 208", mess2)
 
         val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
+
+        assertEquals("testContestInfo (0) Nc=211 Np=0 votes={0=100, 1=108, 2=0}", contest.toString())
+        assertEquals("Contest(info=testContestInfo (0) candidates={cand0=0, cand1=1, cand2=2}, Nc=211, Np=0, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votes={0=100, 1=108, 2=0}, winnerNames=[cand1], winners=[1], losers=[0, 2], undervotes=3)",
+            contest.show())
+    }
+
+    @Test
+    fun testContestUnderAudit() {
+        val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+
+        val contestUAp = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+
+        assertNotEquals(contestUAp, contestUAc)
+        assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
+
+        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+        assertEquals(contestUAc2, contestUAc)
+        assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
+        assertEquals(contestUAc2.toString(), contestUAc.toString())
+        assertEquals(contestUAc2.show(1), contestUAc.show(1))
     }
 
     @Test
@@ -150,5 +176,45 @@ class TestContest {
             contestUAc.makeClcaAssertions(emptyList())
         }.message
         assertEquals("choice function IRV is not supported", mess4)
+
+        assertNotEquals(contestUAp, contestUAc)
+        assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
+    }
+
+    @Test
+    fun testMakeWithCandidateNames() {
+        // the candidates
+        val info = ContestInfo(
+            "Kalamazoo", 0,
+            mapOf(
+                "Butkovich" to 0,
+                "Gelineau" to 1,
+                "Kurland" to 2,
+                "Schuette" to 4,
+                "Whitmer" to 5,
+                "Schleiger" to 3,
+            ),
+            SocialChoiceFunction.PLURALITY,
+            nwinners = 1,
+        )
+
+        val contest = Contest.makeWithCandidateNames(
+            info,
+            mapOf(
+                "Whitmer" to 3765,
+                "Butkovich" to 6,
+                "Gelineau" to 56,
+                "Kurland" to 23,
+                "Schleiger" to 19,
+                "Schuette" to 1349,
+            ),
+            Nc = 42000,
+            Np = 0, // assume all undervotes I guess
+        )
+
+        println("contest = $contest")
+        val expected = mapOf(0 to 6, 1 to 56, 2 to 23, 3 to 19, 4 to 1349, 5 to 3765)
+        assertEquals(expected, contest.votes)
+
     }
 }

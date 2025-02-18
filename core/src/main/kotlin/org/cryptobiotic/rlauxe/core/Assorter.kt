@@ -61,7 +61,7 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
     override fun desc() = " winner=$winner loser=$loser reportedMargin=${df(reportedMargin)}"
     override fun winner() = winner
     override fun loser() = loser
-    override fun reportedMargin() = reportedMargin // TODO why is this here? if not here, only need one PluralityAssorter
+    override fun reportedMargin() = reportedMargin
 
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>? = null): PluralityAssorter {
@@ -141,11 +141,14 @@ data class ClcaAssorter(
     override fun upperBound() = upperBound
     override fun assorter() = assorter
 
+    /*
     fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
         val mean = cvrPairs.filter{ it.first.hasContest(contest.id) }
             .map { bassort(it.first, it.second) }.average()
         return mean2margin(mean)
     }
+
+     */
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr:Cvr): Double {
@@ -203,7 +206,7 @@ data class ClcaAssorter(
         //
         //        # assort the CVR
         //        cvr_assort = (
-        //            self.tally_pool_means[cvr.tally_pool] // TODO cvr.tally_pool used for ONEAUDIT
+        //            self.tally_pool_means[cvr.tally_pool]
         //            if cvr.pool and self.tally_pool_means is not None
         //            else int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )

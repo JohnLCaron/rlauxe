@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.*
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -87,10 +88,18 @@ class TestAssertions {
             val mean = margin2mean(it.assorter.reportedMargin())
             assertEquals(assortAvg, mean)
         }
+        val firstAssertion = assertions.first()
+        assertEquals(firstAssertion, firstAssertion)
+        assertEquals(firstAssertion.hashCode(), firstAssertion.hashCode())
+
+        val lastAssertion = assertions.last()
+        assertNotEquals(firstAssertion, lastAssertion)
+        assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
+        assertEquals("'AvB' (0) SuperMajorityAssorter winner=4 minFraction=0.4 margin=0.0385", firstAssertion.toString())
     }
 
     @Test
-    fun testComparisonBasics() {
+    fun testClcaBasics() {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
@@ -112,10 +121,15 @@ class TestAssertions {
             assertIs< PluralityAssorter>(it.cassorter.assorter())
             assertEquals(1.0, it.cassorter.assorter().upperBound())
         }
+        val firstAssertion = assertions.first()
+        val lastAssertion = assertions.last()
+        assertNotEquals(firstAssertion, lastAssertion)
+        assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
+        assertEquals(" winner=4 loser=0 reportedMargin=0.2492 estSampleSize=0", firstAssertion.toString())
     }
 
     @Test
-    fun testComparisonSuperMajority() {
+    fun testClcaSuperMajority() {
         val info = ContestInfo(
             name = "AvB",
             id = 0,

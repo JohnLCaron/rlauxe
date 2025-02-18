@@ -54,7 +54,7 @@ interface ContestIF {
     val winnerNames: List<String>
     val winners: List<Int>
     val losers: List<Int>
-    fun show() : String = ""
+    fun show() : String = toString()
 
     fun phantomRate() = Np / Nc.toDouble()
 }

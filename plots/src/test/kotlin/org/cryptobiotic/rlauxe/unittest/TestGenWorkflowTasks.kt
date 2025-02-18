@@ -10,16 +10,18 @@ import kotlin.test.Test
 
 class TestGenWorkflowTasks {
     val nruns = 10
+    val nsimEst = 10
+    val N = 10000
 
     @Test
     fun genPollingWorkflowMarginPlots() {
-        val N = 50000
         val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val workflowGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns))
+                nsimEst = nsimEst,
+                parameters = mapOf("nruns" to nruns))
             tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
         }
 
@@ -37,13 +39,13 @@ class TestGenWorkflowTasks {
 
     @Test
     fun genClcaWorkflowMarginPlots() {
-        val N = 50000
         val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val workflowGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns),
+                nsimEst = nsimEst,
+                parameters = mapOf("nruns" to nruns),
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, workflowGenerator))
@@ -63,16 +65,10 @@ class TestGenWorkflowTasks {
 
     @Test
     fun genOneAuditWorkflowMarginPlots() {
-        val N = 50000
         val cvrPercents = listOf(.2, .4, .6, .8, .9, .95, .99)
         val margins = listOf(.02, .03, .04, .05, .06, .07, .08, .09, .10)
 
-        val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT,
-            hasStyles = true,
-            quantile = .80,
-            nsimEst = 10
-        )
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles = true, nsimEst = nsimEst)
         println("N=${N} ntrials=${auditConfig.nsimEst}")
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

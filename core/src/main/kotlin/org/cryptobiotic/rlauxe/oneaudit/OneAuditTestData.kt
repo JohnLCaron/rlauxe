@@ -21,6 +21,7 @@ fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent:
 // divide into two stratum based on cvrPercent
 // skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
 fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
+    require(cvrPercent > 0.0)
 
     // the candidates
     val info = ContestInfo(

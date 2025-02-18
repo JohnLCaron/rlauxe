@@ -28,7 +28,7 @@ class TestClcaFuzzSampler {
             AuditType.CARD_COMPARISON,
             hasStyles = true,
             quantile = .50,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous, simFuzzPct = .011)
         )
 
         contestsUA.forEach { contestUA ->

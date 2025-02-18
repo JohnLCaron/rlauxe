@@ -76,37 +76,17 @@ class AdaptiveComparison(
     errorRates: ErrorRates, // ? = null,  // a priori estimate of the error rates
     val eps: Double = .00001
 ): BettingFn {
-    val p2o: Double // apriori rate of 2-vote overstatements; set < 0 to remove consideration
-    val p1o: Double // apriori rate of 1-vote overstatements; set < 0 to remove consideration
-    val p1u: Double // apriori rate of 1-vote understatements; set < 0 to remove consideration
-    val p2u: Double // apriori rate of 2-vote understatements; set < 0 to remove consideration
-    val debug = false
-
-    init {
-        if (errorRates == null) {
-            p2o = -1.0
-            p1o = -1.0
-            p1u = -1.0
-            p2u = -1.0
-        } else {
-            p2o = errorRates.p2o
-            p1o = errorRates.p1o
-            p1u = errorRates.p1u
-            p2u = errorRates.p2u
-        }
-
-        if (debug) {
-            val lam0 = OptimalLambda(a, errorRates!!).solve()
-            println(" AdaptiveComparison lam0 = $lam0")
-        }
-    }
+    val p2o: Double = if (errorRates == null) -1.0 else errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
+    val p1o: Double = if (errorRates == null) -1.0 else errorRates.p1o // apriori rate of 1-vote overstatements; set < 0 to remove consideration
+    val p1u: Double = if (errorRates == null) -1.0 else errorRates.p1u // apriori rate of 1-vote understatements; set < 0 to remove consideration
+    val p2u: Double = if (errorRates == null) -1.0 else errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
-        val lastj = prevSamples.numberOfSamples() // TODO lastj = 0
-        val p2oest = if (p2o < 0.0) 0.0 else estimateRate(d, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
-        val p1oest = if (p1o < 0.0) 0.0 else estimateRate(d, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
-        val p1uest = if (p1u < 0.0) 0.0 else estimateRate(d, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
-        val p2uest = if (p2u < 0.0) 0.0 else estimateRate(d, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
+        val lastj = prevSamples.numberOfSamples()
+        val p2oest = if (p2o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
+        val p1oest = if (p1o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
+        val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
+        val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, ErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
@@ -240,36 +220,6 @@ class OptimalLambda(val a: Double, val errorRates: ErrorRates, val mui: Double =
     }
 
      */
-}
-
-// COBRA equation 1 is a deterministic lower bound on sample size, dependent on margin and risk limit.
-// COBRA equation 2 has the maximum expected value for given over/understatement rates. See OptimalLambda class for implementation.
-
-fun estimateSampleSizeOptimalLambda(
-    alpha: Double, // risk
-    dilutedMargin: Double, // the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
-    upperBound: Double, // assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
-    errorRates: ErrorRates,
-): Int {
-
-    //  a := 1 / (2 − v/au)
-    //  v := 2Āc − 1 is the diluted margin
-    //  au := assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
-
-    val a = 1 / (2 - dilutedMargin / upperBound)
-    val kelly = OptimalLambda(a, errorRates)
-    val lam = kelly.solve()
-
-    // 1 / alpha = bet ^ size
-    val term1 = -ln(alpha)
-    val term2 = ln(lam)
-    val r = term1 / term2 // round up
-
-    val T = pow(lam, r)
-    val size = ceil(r)
-    // println("   lam=$lam r=$r T=$T size=$size")
-
-    return size.toInt()
 }
 
 // MoreStyle footnote 5

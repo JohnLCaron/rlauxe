@@ -90,6 +90,12 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
 }
 
 data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
+    init {
+        require(p2o in 0.0..1.0) {"p2o out of range $p2o"}
+        require(p1o in 0.0..1.0) {"p1o out of range $p1o"}
+        require(p1u in 0.0..1.0) {"p1u out of range $p1u"}
+        require(p2u in 0.0..1.0) {"p2u out of range $p2u"}
+    }
     override fun toString(): String {
         return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
     }
@@ -97,6 +103,9 @@ data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u
     fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
 
     companion object {
-        fun fromList(list: List<Double>) = ErrorRates(list[0], list[1], list[2], list[3])
+        fun fromList(list: List<Double>): ErrorRates {
+            require(list.size == 4) { "ErrorRates list must have 4 elements"}
+            return ErrorRates(list[0], list[1], list[2], list[3])
+        }
     }
 }

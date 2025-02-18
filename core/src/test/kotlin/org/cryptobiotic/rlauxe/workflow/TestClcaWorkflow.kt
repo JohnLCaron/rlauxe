@@ -22,8 +22,7 @@ class TestClcaWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, seed=12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
     }
@@ -64,16 +63,46 @@ class TestClcaWorkflow {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
     }
 
     @Test
     fun testComparisonWithFuzz() {
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=0.01))
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=0.01))
+        val N = 50000
+        val testData = MultiContestTestData(11, 4, N)
+        testComparisonWorkflow(auditConfig, testData)
+    }
+
+    @Test
+    fun testComparisonOracle() {
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
+        val N = 50000
+        val testData = MultiContestTestData(11, 4, N)
+        testComparisonWorkflow(auditConfig, testData)
+    }
+
+    @Test
+    fun testComparisonPhantoms() {
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+        val N = 50000
+        val testData = MultiContestTestData(11, 4, N)
+        testComparisonWorkflow(auditConfig, testData)
+    }
+
+    @Test
+    fun testComparisonPrevious() {
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous))
+        val N = 50000
+        val testData = MultiContestTestData(11, 4, N)
+        testComparisonWorkflow(auditConfig, testData)
+    }
+
+    @Test
+    fun testComparisonMixed() {
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.mixed))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, testData)

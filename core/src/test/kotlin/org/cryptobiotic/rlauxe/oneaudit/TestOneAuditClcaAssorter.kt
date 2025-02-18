@@ -87,6 +87,7 @@ class TestOneAuditClcaAssorter {
         println(" mvr winner bassort=${bassorter.bassort(winnerCvr, winnerCvr)} ")
         println(" mvr loser bassort=${bassorter.bassort(loserCvr, winnerCvr)} ")
 
+        // TODO failing
         assertEquals(0.5, bassorter.bassort(otherCvr, winnerCvr), doublePrecision)
         assertEquals(loserVote, bassorter.bassort(loserCvr, winnerCvr), doublePrecision)
         assertEquals(winnerVote, bassorter.bassort(winnerCvr, winnerCvr), doublePrecision)

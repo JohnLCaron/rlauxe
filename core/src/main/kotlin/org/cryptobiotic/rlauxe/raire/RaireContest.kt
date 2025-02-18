@@ -206,7 +206,7 @@ class RaireAssorter(info: ContestInfo, val assertion: RaireAssertion): AssorterF
     val remaining = info.candidateIds.filter { !assertion.alreadyEliminated.contains(it) }
     var reportedMargin: Double = 0.0
 
-    override fun upperBound() = 1.0 // TODO
+    override fun upperBound() = 1.0
     override fun winner() = assertion.winner
     override fun loser() = assertion.loser
     override fun reportedMargin() = reportedMargin

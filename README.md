@@ -36,6 +36,7 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
   * [Multiple Contest Auditing](#multiple-contest-auditing)
     * [Efficiency](#efficiency)
+    * [Deterministic sampling order for each Contest](#deterministic-sampling-order-for-each-contest)
 * [Appendices](#appendices)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
@@ -474,12 +475,13 @@ following plots vs margin show:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.html" rel="extraVsMarginByFuzzDiffLogLinear">![extraVsMarginByFuzzDiffLogLinear](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.html" rel="extraVsMarginByFuzzDiffPct">![extraVsMarginByFuzzDiffPct](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.png)</a>
 
-The extra samples goes up as our guesses for the error rates go up. In these plots we use the fuzzPct as a proxy for what
-the error rates might be.
+The "extra samples" goes up as our guess for the error rates differ more from the actual rates. 
+In these plots we use fuzzPct as a proxy for what the error rates might be.
 
-In the best case, the simulation accurately estimates the distribution of audit sample sizes. But because there is so much variance in that
-distribution, the audit sample sizes are significantly overestimated. To emphasize this point, here are plots of samples needed and nmrvs, 
-one for CLCA and one for polling (actual and estimated fuzz of 1%:
+In the best case, the simulation accurately estimates the distribution of audit sample sizes (fuzzDiff == 0%). 
+But because there is so much variance in that distribution, the audit sample sizes are significantly overestimated. 
+To emphasize this point, here are plots of average samples needed, and samples needed +/- one stddev, 
+one for CLCA and one for polling:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceLogLinear.html" rel="clcaVarianceLogLinear">![clcaVarianceLogLinear](./docs/plots/extra/clcaVariance/clcaVarianceLogLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceLogLinear.html" rel="pollingVarianceLogLinear">![pollingVarianceLogLinear](./docs/plots/extra/pollingVariance/pollingVarianceLogLinear.png)</a>
@@ -489,7 +491,9 @@ The number of rounds needed reflects the default value of auditConfig.quantile =
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceNrounds.html" rel="clcaVarianceNrounds">![clcaVarianceNrounds](./docs/plots/extra/clcaVariance/clcaVarianceNrounds.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceNrounds.html" rel="pollingVarianceNrounds">![pollingVarianceNrounds](./docs/plots/extra/pollingVariance/pollingVarianceNrounds.png)</a>
 
-One could use other algorithms to trade off extra samples vs extra rounds.
+* We see large variance in samples needed, even when we guess the error rates correctly.
+* The variance gets larger as average samples needed gets larger.
+* One could use other algorithms to trade off extra samples vs extra rounds.
 
 ## Multiple Contest Auditing
 
@@ -514,8 +518,20 @@ and try out different scenarios before committing to which contests continue on 
 
 We assume that the cost of auditing a ballot is the same no matter how many contests are on it. So, if two contests always 
 appear together on a ballot, then auditing the second contest is "free". If the two contests appear on the same ballot some 
-pct of the time, then the cose is reduced by that pct. More generally the reduction in cost of a multicontest audit depends
+pct of the time, then the cost is reduced by that pct. More generally the reduction in cost of a multicontest audit depends
 on the various percentages the contests appear on the same ballot.
+
+### Deterministic sampling order for each Contest
+
+For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen.
+
+In a multi-contest audit, at each round, the estimate of the number of ballots needed for each contest is calculated = n, 
+and the first n ballots in the contest's sequence are sampled.
+The total set of ballots sampled in a round is just the union of the individual contests' set. 
+When there are duplicates, one gets some efficiency gain.
+
+The set of contests to continue to the next round is not known, so the total set of ballots sampled at each round is unknown. 
+Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed. 
 
 
 # Appendices

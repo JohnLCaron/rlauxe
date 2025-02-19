@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.sampling.estimateSampleSizes
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
@@ -76,8 +77,15 @@ class PlotDistributions {
         println("oracle errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
+
         // just want the sample estimation stuff
-        return workflow.estimateSampleSizes(1, show = false)
+        return estimateSampleSizes(
+            auditConfig,
+            workflow.contestsUA,
+            workflow.cvrs,
+            1,
+            show = false,
+        )
     }
 
     // calculate 100 simulated audits, return "samplesNeeded", single contest, fuzzed, no phantoms

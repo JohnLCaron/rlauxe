@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /**
- * Finds the betting martingale for the hypothesis that the population mean is less than or equal to t,
- * for a population of size Nc, based on a series of draws x.
+ * The betting martingale for the hypothesis that the population mean is less than or equal to 1/2,
+ * for a population of size Nc, based on a series of samples x.
  */
 class BettingMart(
     val bettingFn : BettingFn,
@@ -28,7 +28,7 @@ class BettingMart(
                         showSequences: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
-        require(maxSamples <= Nc)
+        require(maxSamples <= Nc) // TODO assumes sample without replacement?
 
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic

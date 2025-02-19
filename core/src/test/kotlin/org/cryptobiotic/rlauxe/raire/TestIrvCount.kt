@@ -8,10 +8,11 @@ import kotlin.test.assertEquals
 
 class TestIrvCount {
 
-    // @Test
+    // Need a lot of tries to be sure to get some ties
+    @Test
     fun testRepeat() {
         var idx = 0
-        while(true) {
+        repeat(111) {
             println("\n$idx ===================================")
             testIrvCount()
             idx++
@@ -31,7 +32,8 @@ class TestIrvCount {
             ncards = N,
             minMargin = minMargin,
             undervotePct = undervotePct,
-            phantomPct = phantomPct
+            phantomPct = phantomPct,
+            excessVotes = 0,
         )
         val candidateIds = testContest.info.candidateIds
         val testCvrs = testContest.makeCvrs()

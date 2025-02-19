@@ -41,6 +41,7 @@ fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> 
         contestsNotDone.remove(maxContest)
         sampleIndices = emptyList() // if theres no more contests, this says were done
     }
+
     return sampleIndices
 }
 

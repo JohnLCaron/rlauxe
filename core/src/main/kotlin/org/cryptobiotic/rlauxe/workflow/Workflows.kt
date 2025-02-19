@@ -1,13 +1,9 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 
 interface RlauxWorkflowIF {
-    fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult>
-    fun sample(roundIdx: Int): List<Int>
     fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int> // return ballot indices to sample
-
     fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean  // return allDone
 
     fun auditConfig() : AuditConfig

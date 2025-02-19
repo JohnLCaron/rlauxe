@@ -75,21 +75,6 @@ class CorlaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    override fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult> {
-        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
-        return estimateSampleSizes(
-            auditConfig,
-            contestsUA,
-            cvrs,
-            roundIdx,
-            show = show,
-        )
-    }
-
-    override fun sample(roundIdx: Int): List<Int> {
-        return sample(this, roundIdx, quiet)
-    }
-
     /**
      * Choose lists of ballots to sample.
      * TODO is this how CORLA does it?

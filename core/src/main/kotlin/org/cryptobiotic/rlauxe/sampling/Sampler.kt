@@ -12,28 +12,6 @@ interface Sampler: Iterator<Double> {
 }
 
 //// For polling audits.
-class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterFunction): Sampler {
-    val maxSamples = mvrs.count { it.hasContest(contest.id) }
-    private var count = 0
-
-    override fun sample(): Double {
-        while (true) {
-            val idx = Random.nextInt(mvrs.size) // with Replacement
-            val cvr = mvrs[idx]
-            if (cvr.hasContest(contest.id)) {
-                count++
-                return assorter.assort(cvr, usePhantoms = true)
-            }
-        }
-    }
-
-    override fun reset() { count = 0 }
-    override fun maxSamples() = maxSamples
-
-    override fun hasNext() = (count < maxSamples)
-    override fun next() = sample()
-}
-
 class PollWithoutReplacement(
     val contest: ContestIF,
     val mvrs : List<Cvr>,

@@ -27,6 +27,7 @@ data class RaireContestTestData(
     val minMargin: Double,
     val undervotePct: Double,   // TODO
     val phantomPct: Double,
+    val excessVotes: Int? = null,   // control this for testing
 ) {
     val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
     val info = ContestInfo("rcontest$contestId", contestId, candidateNames = listToMap(candidateNames), SocialChoiceFunction.IRV)
@@ -39,7 +40,7 @@ data class RaireContestTestData(
         var count = 0
         val cvrs = mutableListOf<RaireCvr>()
 
-        val excess = (this.ncards * minMargin).toInt()
+        val excess = excessVotes ?: (this.ncards * minMargin).toInt()
         repeat(excess) {
             cvrs.add(makeCvrWithLeading0(count++))
         }

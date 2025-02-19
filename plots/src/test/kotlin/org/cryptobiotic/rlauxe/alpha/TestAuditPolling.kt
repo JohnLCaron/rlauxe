@@ -3,20 +3,15 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.plots.plotDDsample
 import org.cryptobiotic.rlauxe.rlaplots.SRT
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.sampling.PollWithReplacement
-import org.cryptobiotic.rlauxe.sampling.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.sampling.*
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.random.Random
 import kotlin.test.Test
 
 // CANDIDATE FOR REMOVAL
-
 class TestAuditPolling {
-
     val showContests = false
 
     @Test
@@ -156,4 +151,26 @@ class TestAuditPolling {
 //  1000,  14077,   7972,   3180,   1840,    657,    380,    124,     35,
 //  2000,  11381,   8237,   2959,   1677,    953,    436,    170,     26,
 
+}
+
+class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterFunction): Sampler {
+    val maxSamples = mvrs.count { it.hasContest(contest.id) }
+    private var count = 0
+
+    override fun sample(): Double {
+        while (true) {
+            val idx = Random.nextInt(mvrs.size) // with Replacement
+            val cvr = mvrs[idx]
+            if (cvr.hasContest(contest.id)) {
+                count++
+                return assorter.assort(cvr, usePhantoms = true)
+            }
+        }
+    }
+
+    override fun reset() { count = 0 }
+    override fun maxSamples() = maxSamples
+
+    override fun hasNext() = (count < maxSamples)
+    override fun next() = sample()
 }

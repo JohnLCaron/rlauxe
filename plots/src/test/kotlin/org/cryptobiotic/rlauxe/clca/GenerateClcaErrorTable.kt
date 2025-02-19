@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.clca
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.sampling.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
 import org.cryptobiotic.rlauxe.sampling.ContestTestData
 import org.cryptobiotic.rlauxe.util.df

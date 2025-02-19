@@ -37,21 +37,6 @@ class PollingWorkflow(
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
-    override fun estimateSampleSizes(roundIdx: Int, show: Boolean): List<RunTestRepeatedResult> {
-        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
-        return estimateSampleSizes(
-            auditConfig,
-            contestsUA,
-            emptyList(),
-            roundIdx,
-            show = show,
-        )
-    }
-
-    override fun sample(roundIdx: Int): List<Int> {
-        return sample(this, roundIdx, quiet)
-    }
-
     override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
         if (!quiet) println("estimateSampleSizes round $roundIdx")
         estimateSampleSizes(

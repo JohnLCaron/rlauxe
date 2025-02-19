@@ -10,7 +10,7 @@ import kotlin.random.Random
 class ClcaFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
-    val contest: Contest,
+    val contest: ContestIF,
     val cassorter: ClcaAssorterIF
 ): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
@@ -55,6 +55,7 @@ class ClcaFuzzSampler(
     override fun next(): Double = sample()
 }
 
+// used in simulateSampleSizePollingAssorter
 class PollingFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
@@ -101,6 +102,7 @@ class PollingFuzzSampler(
     override fun next(): Double = sample()
 }
 
+// used in simulateSampleSizeOneAuditAssorter
 class OneAuditFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,

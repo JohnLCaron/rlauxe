@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.sampling.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeBetaMart
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.*
 import org.junit.jupiter.api.Test

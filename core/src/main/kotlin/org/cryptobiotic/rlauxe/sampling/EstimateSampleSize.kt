@@ -40,27 +40,6 @@ fun estimateSampleSizes(
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
-        /* if (result.failPct() > 80.0) { // TODO make settable ??
-            task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            if (showFail) println(
-                "***FailSimulationPct for '${task.name()}' ntrials=${auditConfig.nsimEst} failed " +
-                        "${df(result.failPct())} > 80% estSampleSize=${task.assertion.estSampleSize}"
-            )
-            task.contestUA.done = true
-            task.contestUA.status = TestH0Status.FailSimulationPct
-
-        } else if (result.pctSamplesNeeded() > 100 * auditConfig.samplePctCutoff) { // TODO may be wrong here
-            task.assertion.estSampleSize = task.prevSampleSize + result.findQuantile(auditConfig.quantile)
-            task.assertion.status = TestH0Status.FailMaxSamplesAllowed
-            if (showFail) println(
-                "***FailMaxSamplesAllowed for '${task.name()}' ntrials=${auditConfig.nsimEst} pctSamplesNeeded " +
-                        "${df(result.pctSamplesNeeded())} > ${df(100 * auditConfig.samplePctCutoff)}% estSampleSize=${task.assertion.estSampleSize} Nc=${result.Nc}" +
-                        "\n  sampleDist = ${result.showSampleDist()}"
-            )
-            task.contestUA.done = true
-            task.contestUA.status = TestH0Status.FailMaxSamplesAllowed
-            } else
- */
 
         if (auditConfig.version == 1.0) {
             val quantile = result.findQuantile(auditConfig.quantile)
@@ -87,7 +66,6 @@ fun estimateSampleSizes(
                         " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
                         "\n  sampleDist = ${result.showSampleDist()}"
             )
-
         }
     }
 
@@ -128,7 +106,6 @@ fun makeEstimationTasks(
                 // start where the audit left off
                 prevSampleSize = rr.samplesUsed
                 startingTestStatistic = 1.0 / rr.pvalue
-                // println("startingTestStatistic = $startingTestStatistic")
             }
 
             if (!contestUA.done) {
@@ -193,7 +170,7 @@ class SimulateSampleSizeTask(
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-//// Comparison
+//// Clca, including Raire
 
 fun simulateSampleSizeClcaAssorter(
     auditConfig: AuditConfig,
@@ -234,7 +211,12 @@ fun simulateSampleSizeClcaAssorter(
 
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
         Pair(
-            ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO cant use Raire??
+            //     val fuzzPct: Double,
+            //    val cvrs: List<Cvr>,
+            //    val contest: Contest,
+            //    val cassorter: ClcaAssorterIF
+            if (contest.choiceFunction == SocialChoiceFunction.IRV) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter) // TODO
+            else ClcaSimulation(cvrs, contest, cassorter, errorRates),
             AdaptiveComparison(
                 Nc = contest.Nc,
                 a = cassertion.cassorter.noerror(),
@@ -342,6 +324,7 @@ fun simulateSampleSizePollingAssorter(
     )
 }
 
+// polling and oneAudit
 fun simulateSampleSizeAlphaMart(
     auditConfig: AuditConfig,
     sampleFn: Sampler,
@@ -391,13 +374,13 @@ fun simulateSampleSizeOneAuditAssorter(
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val pollingConfig = auditConfig.pollingConfig
+    val oaConfig = auditConfig.oaConfig
 
     // TODO is this right, no special processing for the "hasCvr" strata?
-    val sampler = if (pollingConfig.simFuzzPct == null) {
+    val sampler = if (oaConfig.simFuzzPct == null) {
         ClcaWithoutReplacement(contestUA.contest, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
     } else {
-        OneAuditFuzzSampler(pollingConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
+        OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
     }
 
     sampler.reset()

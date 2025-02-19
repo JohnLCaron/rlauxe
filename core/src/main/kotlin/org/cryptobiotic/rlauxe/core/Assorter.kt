@@ -141,14 +141,11 @@ data class ClcaAssorter(
     override fun upperBound() = upperBound
     override fun assorter() = assorter
 
-    /*
     fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
         val mean = cvrPairs.filter{ it.first.hasContest(contest.id) }
             .map { bassort(it.first, it.second) }.average()
         return mean2margin(mean)
     }
-
-     */
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr:Cvr): Double {

@@ -1,7 +1,13 @@
 package org.cryptobiotic.rlauxe.sampling
 
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.double
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+import kotlinx.coroutines.test.runTest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
@@ -35,19 +41,26 @@ class TestContestSimulation {
     @Test
     fun testContestSimulationWithPhantoms() {
         val Nc = 10000
-        val reportedMargin = .005
-        val pctPhantoms = .01
-        val sim = ContestSimulation.make2wayTestContest(Nc, reportedMargin, undervotePct=0.10, phantomPct=pctPhantoms)
-        val contest = sim.contest
-        val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
-        val cvrs = sim.makeCvrs() // phantoms have been added
-        assertEquals(contest.Nc, cvrs.size)
-        val calcMargin = assorter.calcAssorterMargin(contest.id, cvrs)
-        val Ncd = contest.Nc.toDouble()
-        val expectWithPhantoms = (margin2mean(calcMargin) * Ncd - 0.5 * sim.phantomCount) / Ncd
-        val assortWithPhantoms = cvrs.map { cvr -> assorter.assort(cvr, usePhantoms = true)}.average()
-        assertEquals(expectWithPhantoms, assortWithPhantoms, doublePrecision)
-        println("assorter= $assorter ncvrs = ${cvrs.size} assortWithPhantoms= $assortWithPhantoms")
+        runTest {
+            checkAll(
+                propTestFastConfig, // propTestSlowConfig,
+                Arb.int(min = 10, max = 30),
+                Arb.double(min = 0.005, max = 0.05),
+                Arb.double(min = 0.01, max = 0.05),
+            ) { ncontests, reportedMargin, pctPhantoms ->
+                val sim = ContestSimulation.make2wayTestContest(Nc, reportedMargin, undervotePct = 0.10, phantomPct = pctPhantoms)
+                val contest = sim.contest
+                val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
+                val cvrs = sim.makeCvrs() // phantoms have been added
+                assertEquals(contest.Nc, cvrs.size)
+                val calcMargin = assorter.calcAssorterMargin(contest.id, cvrs)
+                val Ncd = contest.Nc.toDouble()
+                val expectWithPhantoms = (margin2mean(calcMargin) * Ncd - 0.5 * sim.phantomCount) / Ncd
+                val assortWithPhantoms = cvrs.map { cvr -> assorter.assort(cvr, usePhantoms = true) }.average()
+                assertEquals(expectWithPhantoms, assortWithPhantoms, doublePrecision)
+                println("assorter= $assorter ncvrs = ${cvrs.size} assortWithPhantoms= $assortWithPhantoms")
+            }
+        }
     }
 
     @Test

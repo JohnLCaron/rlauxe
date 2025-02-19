@@ -25,12 +25,32 @@ import java.nio.file.StandardOpenOption
 //    val hasStyles: Boolean,
 //    val riskLimit: Double = 0.05,
 //    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
-//    val minMargin: Double = 0.005,
 //
 //    // simulation control
 //    val nsimEst: Int = 100, // number of simulation estimations
 //    val quantile: Double = 0.80, // use this percentile success for estimated sample size
 //    val samplePctCutoff: Double = .42, // dont sample more than this pct of N TODO whats N?
+//    val minMargin: Double = 0.005,
+//
+//    val pollingConfig: PollingConfig = PollingConfig(),
+//    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
+//    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
+//    val version: Double = 1.0,
+//)
+
+// data class AuditConfig(
+//    val auditType: AuditType,
+//    val hasStyles: Boolean,
+//    val riskLimit: Double = 0.05,
+//    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
+//
+//    // simulation control
+//    val nsimEst: Int = 100, // number of simulation estimations
+//    val quantile: Double = 0.80, // use this percentile success for estimated sample size
+//    val samplePctCutoff: Double = 1.0, // dont sample more than this pct of N
+//    val minMargin: Double = 0.0, // do not audit contests less than this reported margin
+//    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+//
 //    val pollingConfig: PollingConfig = PollingConfig(),
 //    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
 //    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
@@ -43,10 +63,11 @@ data class AuditConfigJson(
     val hasStyles: Boolean,
     val riskLimit: Double,
     val seed: Long,
-    val minMargin: Double,
     val nsimEst: Int,
     val quantile: Double,
     val samplePctCutoff: Double,
+    val minMargin: Double,
+    val removeTooManyPhantoms: Boolean,
     val pollingConfig: PollingConfigJson,
     val clcaConfig: ClcaConfigJson,
     val oaConfig: OneAuditConfigJson,
@@ -59,10 +80,11 @@ fun AuditConfig.publishJson() : AuditConfigJson {
         this.hasStyles,
         this.riskLimit,
         this.seed,
-        this.minMargin,
         this.nsimEst,
         this.quantile,
         this.samplePctCutoff,
+        this.minMargin,
+        this.removeTooManyPhantoms,
         this.pollingConfig.publishJson(),
         this.clcaConfig.publishJson(),
         this.oaConfig.publishJson(),
@@ -77,10 +99,11 @@ fun AuditConfigJson.import(): AuditConfig {
         this.hasStyles,
         this.riskLimit,
         this.seed,
-        this.minMargin,
         this.nsimEst,
         this.quantile,
         this.samplePctCutoff,
+        this.minMargin,
+        this.removeTooManyPhantoms,
         this.pollingConfig.import(),
         this.clcaConfig.import(),
         this.oaConfig.import(),

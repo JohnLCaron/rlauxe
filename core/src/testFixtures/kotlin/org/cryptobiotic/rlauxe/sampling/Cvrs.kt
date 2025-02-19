@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.cardsPerContest
-import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.cryptobiotic.rlauxe.util.tabulateVotes
-import kotlin.collections.iterator
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -58,11 +54,13 @@ fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
     return add2voteOverstatements(cvrs, needToChangeVotesFromA)
 }
 
-fun makeFlippedMvrs(cvrs: List<Cvr>, N: Int, p2o: Double, p1o: Double): List<Cvr> {
+fun makeFlippedMvrs(cvrs: List<Cvr>, N: Int, p2o: Double?, p1o: Double?): List<Cvr> {
     val mmvrs = mutableListOf<Cvr>()
     mmvrs.addAll(cvrs)
-    val flippedVotes2 = add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2o).toInt())
-    val flippedVotes1 = if (p1o == 0.0) 0 else {
+    val flippedVotes2 = if (p2o == null) 0 else {
+        add2voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p2o).toInt())
+    }
+    val flippedVotes1 = if (p1o == null) 0 else {
         add1voteOverstatements(mmvrs, needToChangeVotesFromA = (N * p1o).toInt())
     }
     return mmvrs.toList()
@@ -80,7 +78,7 @@ fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
         if (cvr.hasMarkFor(0, 0) == 1) {
             val votes = mutableMapOf<Int, IntArray>()
             votes[0] = intArrayOf(2)
-            cvrs[cvrIdx] = Cvr("card-$cvrIdx", votes)
+            cvrs[cvrIdx] = Cvr(cvr.id, votes)
             changed++
         }
     }

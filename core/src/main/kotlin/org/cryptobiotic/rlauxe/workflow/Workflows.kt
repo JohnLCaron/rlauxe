@@ -42,9 +42,10 @@ fun check(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
             contestUA.done = true
             contestUA.status = TestH0Status.MinMargin
         }
+
         // see if too many phantoms
         val adjustedMargin = minMargin - contestUA.contest.phantomRate()
-        if (adjustedMargin <= 0.0) {
+        if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
             println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
             contestUA.done = true
             contestUA.status = TestH0Status.TooManyPhantoms

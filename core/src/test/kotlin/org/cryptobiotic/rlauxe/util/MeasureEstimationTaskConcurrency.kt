@@ -31,8 +31,7 @@ class MeasureEstimationTaskConcurrency {
         val nassertions = contestsUA.sumOf { it.assertions().size }
         println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
 
-        val auditConfig =
-            AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, seed = 1234567890L, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, nsimEst = 10)
         val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
 
         contestsUA.filter { !it.done }.forEach { contestUA ->

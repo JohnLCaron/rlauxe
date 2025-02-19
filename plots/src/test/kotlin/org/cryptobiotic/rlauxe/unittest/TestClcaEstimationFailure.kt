@@ -26,7 +26,7 @@ class TestClcaEstimationFailure {
         val auditConfig = AuditConfig(
             AuditType.CARD_COMPARISON,
             hasStyles = true,
-            quantile = .50,
+            quantile = .50,     // TODO review
             samplePctCutoff = .10,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )

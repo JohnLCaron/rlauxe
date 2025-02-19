@@ -283,6 +283,7 @@ data class WorkflowResult(
         // from avgWorkflowResult()
         val failPct: Double = 100.0,
         val neededStddev: Double = 0.0, // success only
+        val mvrMargin: Double = 0.0,
     ) {
     fun Dparam(key: String) = (parameters[key]!! as String).toDouble()
 }
@@ -306,7 +307,8 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             TestH0Status.ContestMisformed,
             0.0, first.Nc.toDouble(), first.Nc.toDouble(), first.Nc.toDouble(),
             first.parameters,
-            )
+            mvrMargin=runs.filter{ it.nrounds > 0 }.map { it.mvrMargin }.average(),
+        )
     } else {
         val first = successRuns.first()
         val failures = runs.size - successRuns.count()
@@ -327,7 +329,8 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
             first.parameters,
 
             100.0 * failPct,
-            sqrt(welford.variance()), // success only
+            neededStddev=sqrt(welford.variance()), // success only
+            mvrMargin=runs.filter{ it.nrounds > 0 }.map { it.mvrMargin }.average(),
         )
     }
 

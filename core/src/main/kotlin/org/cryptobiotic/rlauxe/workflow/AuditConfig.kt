@@ -10,12 +10,14 @@ data class AuditConfig(
     val hasStyles: Boolean,
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
-    val minMargin: Double = 0.005,
 
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val samplePctCutoff: Double = .42, // dont sample more than this pct of N
+    val samplePctCutoff: Double = 1.0, // dont sample more than this pct of N
+    val minMargin: Double = 0.0, // do not audit contests less than this reported margin
+    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
@@ -23,7 +25,7 @@ data class AuditConfig(
 ) {
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")
-        appendLine("  minMargin=$minMargin nsimEst=$nsimEst, quantile=$quantile, samplePctCutoff=$samplePctCutoff, version=$version")
+        appendLine("  nsimEst=$nsimEst, quantile=$quantile, samplePctCutoff=$samplePctCutoff, minMargin=$minMargin version=$version")
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
             AuditType.CARD_COMPARISON -> appendLine("  $clcaConfig")

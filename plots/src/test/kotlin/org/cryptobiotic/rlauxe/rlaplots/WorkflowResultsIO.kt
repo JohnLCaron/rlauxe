@@ -23,7 +23,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun writeResults(wrs: List<WorkflowResult>) {
         val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-        writer.write("parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, failPct, neededStddev\n")
+        writer.write("parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, failPct, neededStddev, mvrMargin\n")
         // "auditType=3.0 nruns=10.0 fuzzPct=0.02 ", 50000, 0.04002, StatRejectNull, 2.0, 293.5, 261.9, 0.0
         wrs.forEach {
             writer.write(toCSV(it))
@@ -33,7 +33,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun toCSV(wr: WorkflowResult) = buildString {
         append("${writeParameters(wr.parameters)}, ${wr.Nc}, ${wr.margin}, ${wr.status.name}, ${wr.nrounds}, ")
-        append("${wr.samplesUsed}, ${wr.samplesNeeded}, ${wr.nmvrs}, ${wr.failPct}, ${wr.neededStddev}")
+        append("${wr.samplesUsed}, ${wr.samplesNeeded}, ${wr.nmvrs}, ${wr.failPct}, ${wr.neededStddev}, ${wr.mvrMargin}")
         appendLine()
     }
 
@@ -60,7 +60,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun fromCSV(line: String): WorkflowResult {
         val tokens = line.split(",")
-        require(tokens.size >= 9) { "Expected 9 or 10 tokens but got ${tokens.size}" }
+        require(tokens.size >= 9) { "Expected 9 - 11 tokens but got ${tokens.size}" }
         val ttokens = tokens.map { it.trim() }
         var idx = 0
         val parameters = ttokens[idx++]
@@ -73,9 +73,10 @@ class WorkflowResultsIO(val filename: String) {
         val nmvrs = ttokens[idx++].toDouble()
         val failPct = ttokens[idx++].toDouble()
         val stddev = if (tokens.size > 9) ttokens[idx++].toDouble() else 0.0
+        val mvrMargin = if (tokens.size > 10) ttokens[idx++].toDouble() else 0.0
 
         val status = safeEnumValueOf(statusS) ?: TestH0Status.InProgress
-        return WorkflowResult(N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, readParameters(parameters), failPct, stddev)
+        return WorkflowResult(N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, readParameters(parameters), failPct, stddev, mvrMargin)
     }
 
     fun readParameters(s: String): Map<String, String> {

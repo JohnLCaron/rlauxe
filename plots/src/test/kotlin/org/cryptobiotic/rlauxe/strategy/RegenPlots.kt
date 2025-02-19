@@ -9,15 +9,15 @@ class RegenPlots {
         val plotGen = GenVsMarginByStrategy2()
         plotGen.phantomPct = 0.0
         plotGen.name = "clcaVsMarginByStrategy0"
-        plotGen.genSamplesVsFuzzByStrategy()
+        plotGen.genSamplesVsMarginByStrategy()
 
         plotGen.phantomPct = 0.01
         plotGen.name = "clcaVsMarginByStrategy1"
-        plotGen.genSamplesVsFuzzByStrategy()
+        plotGen.genSamplesVsMarginByStrategy()
 
         plotGen.phantomPct = 0.02
         plotGen.name = "clcaVsMarginByStrategy2"
-        plotGen.genSamplesVsFuzzByStrategy()
+        plotGen.genSamplesVsMarginByStrategy()
 
         val plotGen2 = GenVsMarginByStrategy()
         plotGen2.fuzzPct = 0.005

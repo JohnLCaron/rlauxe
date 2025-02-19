@@ -36,7 +36,7 @@ class TestAlphaMart {
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.50, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val cvrSampler = PollWithoutReplacement(contestUA.contest as Contest, cvrs, assorter)
 
         val margin = assorter.reportedMargin()

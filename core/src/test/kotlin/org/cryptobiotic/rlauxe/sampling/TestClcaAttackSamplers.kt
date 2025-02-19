@@ -169,7 +169,7 @@ class TestClcaAttackSamplers {
                 val orgMargin = showMargin("cvrs", cvrs)
                 assertEquals(margin, orgMargin, doublePrecision )
 
-                val mvrs = makeFlippedMvrs(cvrs, N, p2, 0.0)
+                val mvrs = makeFlippedMvrs(cvrs, N, p2, null)
                 val newMargin = showMargin("mvrs", mvrs)
                 assertEquals(orgMargin-2*p2, newMargin, doublePrecision )
                 assertEquals(margin2mean(orgMargin)-p2, margin2mean(newMargin), doublePrecision )

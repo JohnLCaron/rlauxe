@@ -12,7 +12,7 @@ class TestOneAuditWorkflow {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, quantile=.80, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
         runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
@@ -24,7 +24,7 @@ class TestOneAuditWorkflow {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, quantile=.80, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
 
         runWorkflow("testOneAuditContest", workflow, testCvrs)
@@ -52,7 +52,7 @@ class TestOneAuditWorkflow {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, quantile=.80, nsimEst=10,
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.max99))
 
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)

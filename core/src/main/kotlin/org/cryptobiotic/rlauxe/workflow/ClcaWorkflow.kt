@@ -234,6 +234,6 @@ fun auditClcaAssertion(
     )
     cassertion.roundResults.add(roundResult)
 
-    if (!quiet) println(" ${contestUA.name} $roundResult")
+    if (!quiet) println(" ${contestUA.name} ${cassertion} $roundResult")
     return testH0Result
 }

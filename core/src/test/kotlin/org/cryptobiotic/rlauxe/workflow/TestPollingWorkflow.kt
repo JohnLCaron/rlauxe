@@ -126,7 +126,7 @@ class TestPollingWorkflow {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, quantile=.80, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val workflow = PollingWorkflow(auditConfig, test.contests, ballotManifest, testCvrs.size)
 

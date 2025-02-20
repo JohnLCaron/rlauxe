@@ -1,5 +1,5 @@
 # CLCA error rates
-last updated Feb 12, 2025
+last updated Feb 20, 2025
 
 ## Estimating Error
 
@@ -132,55 +132,23 @@ Notes:
 * The noerror strategy is significantly worse in the presence of errors.
 * If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes, especially for low values of fuzzPct.
 
-Here are plots of sample size as a function of margin, for fuzzPct of .005, .01 and .04:
+### CLCA sample sizes by strategy vs true margin with phantoms 
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy05LogLog.html" rel="clcaVsMarginByStrategy05LogLog">![clcaVsMarginByStrategy05LogLog](plots/strategy/clcaVsMarginByStrategy05LogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy1LogLog.html" rel="clcaVsMarginByStrategy1LogLog">![clcaVsMarginByStrategy1LogLog](plots/strategy/clcaVsMarginByStrategy1LogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsMarginByStrategy4LogLog.html" rel="clcaVsMarginByStrategy4LogLog">![clcaVsMarginByStrategy4LogLog](plots/strategy/clcaVsMarginByStrategy4LogLog.png)</a>
+We will assume that the fuzz rate is not worse than 1%, and investigate different strategies in the presence of phantoms.
+In these workflows, we do everything in one round, and skip sample estimation. We creates simulations at different margins
+and percentage of phantom, and fuzz the MVRs at 1%. We can measure the "true margin" of the MVRs, including phantoms, and use that at the x axis.
 
-## More experiments with different error rate strategies
+We also add the _phantoms_ strategy which uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of 
+the AdaptiveComparison betting function.
 
-One might hope that with better apriori error rates, sample sizes would improve. To that end we tried three new strategies.
+Here are plots of sample size as a function of true margin, for phantomPct of 0, 1, and 2 percent, for various strategies:
 
-###  The _phantoms_ strategy
-
-When it is know that a ballot is missing from the CVRs, a phantom CVR is created for it. Similarly, if a physical ballot has been chosen
-to sample, and cannot be found, a phantom MVR is created. The values of the CLCA assorter in these cases are:
-
-````
-        assertEquals(0.0, bassorter.bassort(phantomMvr, winnerCvr))           // no mvr, cvr reported winner, : twoOver
-        assertEquals(noerror, bassorter.bassort(phantomMvr, loserCvr))        // no mvr, cvr reported loser: nuetral
-        assertEquals(0.5*noerror, bassorter.bassort(phantomMvr, phantomCvr))  // no mvr, no cvr: oneOver (common case)
-        assertEquals(1.5*noerror, bassorter.bassort(winnerMvr, phantomCvr))   // mvr reported winner, no cvr: oneUnder
-        assertEquals(.5*noerror, bassorter.bassort(loserMvr, phantomCvr))     // mvr reported loser, no cvr: oneOver
-````
-
-The common case is that both the CVR and the MVR are missing, which is equivilent to a "one ballot overstatement". So it
-makes sense that using the _phantomPct_ phantoms for a contest might improve the sampling sizes.
-
-The _phantoms_ strategy uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of the AdaptiveComparison 
-betting function, for both estimation and auditing.
-
-### The _previous_ strategy
-
-The _previous_ strategy uses the measured error rates for the previous batch of sample ballots as the apriori error 
-rates of the AdaptiveComparison betting function. For the first batch, before any measured values are available, 
-it uses the phantomPct, as in the phantoms strategy. For both estimation and auditing.
-
-### The _mixed_ strategy
-
-The _mixed_ strategy uses _noerror_ strategy for estimation and the _phantoms_ strategy for auditing. 
-
-### Simulations with new strategies
-
-For the new strategies and the noerror and oracle strategies, with fuzzPct of .01, we show the number of samples needed for phantomPct = 0, 1, and 2 percent:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy0LogLog.html" rel="clcaVsMarginByStrategy0LogLog">![clcaVsMarginByStrategy0LogLog](plots/strategy2/clcaVsMarginByStrategy0LogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy1LogLog.html" rel="clcaVsMarginByStrategy1LogLog">![clcaVsMarginByStrategy1LogLog](plots/strategy2/clcaVsMarginByStrategy1LogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy2/clcaVsMarginByStrategy2LogLog.html" rel="clcaVsMarginByStrategy2LogLog">![clcaVsMarginByStrategy2LogLog](plots/strategy2/clcaVsMarginByStrategy2LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLog.html" rel="clcaOneRoundByStrategy0LogLog">![clcaOneRoundByStrategy0LogLog](plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLog.html" rel="clcaOneRoundByStrategy1LogLog">![clcaOneRoundByStrategy1LogLog](plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLog.html" rel="clcaOneRoundByStrategy2LogLog">![clcaOneRoundByStrategy2LogLog](plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLog.png)</a>
 
 * A _phantomPct_ of phantoms lowers the margin by that amount, so note that the margins <= phantomPct are ommitted in the plots.
 * When phantomPct = 0.0, the phantom and mixed strategies become the same as noerrer, and any differences are due to variance in the sample ordering.
 * The oracle strategy can't be used in production. 
 * The fuzzPct strategy requires one to guess the fuzzPct, and here we use the actual fuzz, so this is as good as it gets using that strategy.
-* That leaves the noerror, previous, phantom and mixed as possible strategies that dont require apriori knowledge.
+* That phantom strategy seems to be better than noerror.

@@ -127,11 +127,11 @@ fun auditPollingAssertion(
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=assertion.estSampleSize,
         maxBallotsUsed = sampler.maxSamplesUsed(),
-        pvalue = testH0Result.pvalues.last(),
-        samplesNeeded = testH0Result.pvalues.indexOfFirst{ it < auditConfig.riskLimit } + 1,
+        pvalue = testH0Result.pvalueLast,
+        samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
-        errorRates = testH0Result.errorRates
+        errorRates = testH0Result.tracker.errorRates()
     )
     assertion.roundResults.add(roundResult)
 

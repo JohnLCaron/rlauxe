@@ -1,13 +1,8 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromArray
-import org.cryptobiotic.rlauxe.core.AlphaMart
-import org.cryptobiotic.rlauxe.core.PrevSamples
-import org.cryptobiotic.rlauxe.core.SampleTracker
-import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TruncShrinkage
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -231,6 +226,7 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * .5
         override fun mean() = 0.5
         override fun variance() = 0.0
+        override fun errorRates() = ErrorRates(0.0, 0.0, 0.0, 0.0, )
     }
 
     @Test
@@ -255,6 +251,7 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * noerror
         override fun mean() = noerror
         override fun variance() = 0.0
+        override fun errorRates() = ErrorRates(0.0, 0.0, 0.0, 0.0, )
     }
 }
 

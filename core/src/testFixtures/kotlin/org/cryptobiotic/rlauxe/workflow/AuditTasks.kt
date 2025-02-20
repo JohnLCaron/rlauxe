@@ -60,10 +60,8 @@ class OneRoundAuditTask(
         val contestUA = workflow.getContests().first() // theres only one
         val minAssertion = contestUA.minAssertion()!!
         val assorter = minAssertion.assorter
-        val mvrMargin = assorter.calcAssorterMargin(contestUA.id, testMvrs)
-        if (mvrMargin < 0.0) {
-            println("negetory")
-        }
+
+        val mvrMargin = assorter.calcAssorterMargin(contestUA.id, testMvrs, usePhantoms = true)
 
         return if (minAssertion.roundResults.isEmpty()) { // TODO why is this empty?
             WorkflowResult(

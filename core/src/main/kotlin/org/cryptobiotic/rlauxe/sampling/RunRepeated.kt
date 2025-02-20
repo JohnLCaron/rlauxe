@@ -13,7 +13,6 @@ fun runTestRepeated(
     testFn: RiskTestingFn,
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
-    showSequences: Boolean = false,
     startingTestStatistic: Double = 1.0,
     margin: Double?,
     Nc:Int, // maximum cards in the contest
@@ -34,7 +33,6 @@ fun runTestRepeated(
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
-            showSequences = showSequences,
             startingTestStatistic = startingTestStatistic) { drawSample.sample() }
 
 

@@ -18,9 +18,9 @@ interface AssorterFunction {
     //    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
     //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
     // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
-    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>): Double {
+    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }
-                        .map { assort(it, usePhantoms = false) }.average()
+                        .map { assort(it, usePhantoms = usePhantoms) }.average()
         return mean2margin(mean)
     }
 

@@ -16,6 +16,7 @@ class BettingMart(
     val upperBound: Double,  // aka u
 ): RiskTestingFn {
     private val showEachSample = false
+    private val sequences = DebuggingSequences()
 
     init {
         require(riskLimit > 0.0 && riskLimit < 1.0 )
@@ -25,7 +26,6 @@ class BettingMart(
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
     override fun testH0(maxSamples: Int,
                         terminateOnNullReject: Boolean,
-                        showSequences: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
         require(maxSamples <= Nc) // TODO assumes sample without replacement?
@@ -35,14 +35,9 @@ class BettingMart(
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
         val tracker = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
 
-        val bets = mutableListOf<Double>()  // for some tests, could remove in production
-        val pvalues = mutableListOf<Double>()
-
-        // keep sequences for debugging, when showSequences is true
-        val xs = mutableListOf<Double>()
-        val etas = mutableListOf<Double>()
-        val tjs = mutableListOf<Double>()
-        val testStatistics = mutableListOf<Double>()
+        var pvalueLast = 1.0
+        var pvalueMin = 1.0
+        var sampleFirstUnderLimit = 0
 
         while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
@@ -51,7 +46,6 @@ class BettingMart(
             require(xj <= upperBound)
 
             val lamj = bettingFn.bet(tracker)
-            bets.add(lamj)
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(Nc, withoutReplacement, tracker)
@@ -76,45 +70,60 @@ class BettingMart(
             }
             testStatistic *= tj // Tj ← Tj-1 & tj
 
-            if (showSequences) {
-                xs.add(xj)
-                etas.add(eta)
-                tjs.add(tj)
-                testStatistics.add(testStatistic)
+            if (sequences.isOn) {
+                sequences.add(xj, lamj, eta, tj, testStatistic)
             }
             if (showEachSample) println("    bet=${df(lamj)} (eta=${df(eta)}) $sampleNumber: $xj tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
 
             // – S ← S + Xj
             tracker.addSample(xj)
+            pvalueLast = 1.0 / testStatistic
+            if (sampleFirstUnderLimit == 0 && pvalueLast < riskLimit) sampleFirstUnderLimit = sampleNumber + 1
+            if (pvalueLast < pvalueMin) pvalueMin = pvalueLast
 
-            val pvalue = 1.0 / testStatistic
-            pvalues.add(pvalue)
-
-            if (terminateOnNullReject && (pvalue < riskLimit)) {
+            if (terminateOnNullReject && (pvalueLast < riskLimit)) {
                 break
             }
         }
 
-        if (showSequences) {
-            println("xs = ${xs}")
-            println("bets = ${bets}")
-            println("tjs = ${tjs}")
-            println("Tjs = ${testStatistics}")
-        }
-
-        // if you have sampled the entire polulation, then you know
+        // if you have sampled the entire population, then you know if it passed
         val status = if (sampleNumber == Nc) {
             if (tracker.mean() > 0.5) TestH0Status.SampleSumRejectNull else TestH0Status.AcceptNull
         } else {
-            val pvalue = pvalues.last()
             when {
-                (pvalue < riskLimit) -> TestH0Status.StatRejectNull
+                (pvalueLast < riskLimit) -> TestH0Status.StatRejectNull
                 (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
                 (mj > upperBound) -> TestH0Status.AcceptNull // 1
                 else -> TestH0Status.LimitReached
             }
         }
 
-        return TestH0Result(status, sampleNumber, tracker.mean(), pvalues, bets, tracker.errorRates())
+        return TestH0Result(status, sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalueLast, tracker)
+    }
+
+    fun setDebuggingSequences(): DebuggingSequences {
+        this.sequences.isOn = true
+        return this.sequences
+    }
+}
+
+class DebuggingSequences() {
+    var isOn = false
+    val xs = mutableListOf<Double>()
+    val bets = mutableListOf<Double>()
+    val etas = mutableListOf<Double>()
+    val tjs = mutableListOf<Double>()
+    val testStatistics = mutableListOf<Double>()
+
+    fun add(x: Double, bet: Double, eta: Double, tj: Double, testStatistic: Double) {
+        this.xs.add(x)
+        this.bets.add(bet)
+        this.etas.add(eta)
+        this.tjs.add(tj)
+        this.testStatistics.add(testStatistic)
+    }
+
+    fun pvalues(): List<Double> {
+        return testStatistics.map { 1.0 / it }
     }
 }

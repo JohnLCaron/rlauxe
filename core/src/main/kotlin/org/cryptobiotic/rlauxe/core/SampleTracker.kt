@@ -11,6 +11,7 @@ interface SampleTracker {
     fun sum(): Double   // sum of samples so far
     fun mean(): Double   // average of samples so far
     fun variance(): Double   // variance of samples so far
+    fun errorRates(): ErrorRates   // only for clca
 }
 
 /**
@@ -29,6 +30,7 @@ class PrevSamples : SampleTracker {
     override fun sum() = sum
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
+    override fun errorRates() = ErrorRates(0.0, 0.0, 0.0, 0.0, )
 
     fun addSample(sample : Double) {
         last = sample
@@ -79,7 +81,7 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     }
 
     fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
-    fun errorRates(): ErrorRates {
+    override fun errorRates(): ErrorRates {
         val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
         return ErrorRates(p[1], p[2], p[3], p[4])
     }

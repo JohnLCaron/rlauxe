@@ -95,11 +95,12 @@ class TestAssorterMargins {
             assertEquals(calcReportedMargin, calcAssorterMargin, doublePrecision, "calcReportedMargin")
             assertEquals(ast.assorter.reportedMargin(), calcAssorterMargin, doublePrecision, "calcAssorterMargin")
 
-            //val assortWithoutPhantoms = margin2mean(calcAssorterMargin)
-            //val assortWithPhantoms = cvrs.filter { it.hasContest(ast.contest.info.id) }
-            //    .map { cvr -> ast.assorter.assort(cvr, usePhantoms = true) }.average()
-            //println(" assortDiffPhantoms= ${df(assortWithoutPhantoms)} - ${df(assortWithPhantoms)} = " +
-            //        "${df(assortWithoutPhantoms - assortWithPhantoms)}")
+            val assortWithoutPhantoms = margin2mean(calcAssorterMargin)
+            val assortWithPhantoms = cvrs.filter { it.hasContest(ast.contest.info.id) }
+                .map { cvr -> ast.assorter.assort(cvr, usePhantoms = true) }.average()
+            println(" assortDiffPhantoms= ${df(assortWithoutPhantoms)} - ${df(assortWithPhantoms)} = " +
+                    df(assortWithoutPhantoms - assortWithPhantoms)
+            )
             //assertTrue(assortWithPhantoms <= assortWithoutPhantoms, "assortWithPhantoms")
         }
     }

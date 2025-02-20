@@ -42,18 +42,19 @@ class TestBettingMart {
             for (lam in lams) {
                 println("assort value = $value lam=$lam")
                 val betta = BettingMart(bettingFn = FixedBet(lam), noerror=0.0, Nc = N, upperBound = u)
+                val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
 
                 // return min(1, 1 / np.max(terms)), np.minimum(1, 1 / terms)
-                println("pvalues=  ${result.pvalues}")
+                println("pvalues=  ${debugSeq.pvalues()}")
 
                 val expected = 1 / (1 + lam * (value - t)).pow(n)
                 println("expected=  ${expected}")
 
-                assertEquals(expected, result.pvalues.last(), .01)
+                assertEquals(expected, result.pvalueLast, .01)
             }
         }
     }
@@ -81,13 +82,14 @@ class TestBettingMart {
                     c_grapa_grow = c_g_g,
                 )
                 val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u)
+                val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
-                println("   bets=  ${result.bets}")
+                println("   bets=  ${debugSeq.bets}")
 
-                result.bets.forEachIndexed { index, bet ->
+                debugSeq.bets.forEachIndexed { index, bet ->
                     val expected = if (index == 0) lam else max(0.0, min(c_g_0 / t, 1.0 / (value - t)))
                     assertEquals(expected, bet, .005)
                 }
@@ -118,13 +120,14 @@ class TestBettingMart {
                     c_grapa_grow = c_g_g,
                 )
                 val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u)
+                val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
                 val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
-                println("   bets=  ${result.bets}")
+                println("   bets=  ${debugSeq.bets}")
 
-                result.bets.forEachIndexed { index, bet ->
+                debugSeq.bets.forEachIndexed { index, bet ->
                     // (N * t - prevSamples.sum()) / ( N - lastSampleNumber)
                     val t_adj = (N * t - index * value) / (N - index)
 
@@ -188,10 +191,12 @@ class TestBettingMart {
             c_grapa_grow = c_g_g,
         )
         val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u)
+        val debugSeq = betta.setDebuggingSequences()
+
         val sampler = SampleFromList(x)
         val result = betta.testH0(x.size, false) { sampler.sample() }
         println("  ${result}")
-        println("   bets=  ${result.bets}") // these are the bets, despite the name
+        println("   bets=  ${debugSeq.bets}") // these are the bets, despite the name
 
         // from SHANGRLAorg.test_agrapa_with_variance()
         val expected = listOf(
@@ -207,7 +212,7 @@ class TestBettingMart {
             1.84834123
         )
         expected.forEachIndexed { idx, it ->
-            assertEquals(it, result.bets[idx], doublePrecision)
+            assertEquals(it, debugSeq.bets[idx], doublePrecision)
         }
     }
 

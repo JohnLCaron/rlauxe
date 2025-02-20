@@ -74,7 +74,6 @@ fun runAlphaMartRepeated(
     withoutReplacement: Boolean = true,
     ntrials: Int = 1,
     upperBound: Double = 1.0,
-    showSequences: Boolean = false,
     estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
 ): RunTestRepeatedResult {
 
@@ -96,7 +95,6 @@ fun runAlphaMartRepeated(
         ntrials = ntrials,
         testFn = alpha,
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
-        showSequences = showSequences,
         margin = mean2margin(eta0),
         Nc=drawSample.maxSamples(), // TODO ??
     )

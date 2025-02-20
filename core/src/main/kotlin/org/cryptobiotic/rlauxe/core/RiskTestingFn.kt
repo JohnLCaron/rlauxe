@@ -19,16 +19,18 @@ enum class TestH0Status(val complete: Boolean, val success: Boolean) {
 
 data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
-    val sampleCount: Int,   // number of samples used in testH0
-    val sampleMean: Double, // average of the assort values in the sample
-    val pvalues: List<Double>,  // pvalues_i
-    val bets: List<Double>,  // lamda_i
-    val errorRates: ErrorRates,  // p2o,p1o,p1u,p2u count of errors (clca only)
+    val sampleCount: Int,      // number of samples used in testH0
+    val sampleFirstUnderLimit: Int, // first sample index with pvalue with risk < limit, one based
+    val pvalueMin: Double,    // smallest pvalue in the sequence
+    val pvalueLast: Double,    // last pvalue
+    val tracker: SampleTracker,
 ) {
     override fun toString() = buildString {
         append("TestH0Result status=$status")
         append(" sampleCount=$sampleCount")
-        append(" pvalue=${pvalues.last()}")
+        append(" sampleFirstUnderLimit=${sampleFirstUnderLimit}")
+        append(" pvalueMin=${pvalueMin}")
+        append(" pvalueLast=${pvalueLast}")
     }
 }
 
@@ -36,7 +38,6 @@ interface RiskTestingFn {
     fun testH0(
         maxSamples: Int,
         terminateOnNullReject: Boolean,
-        showSequences: Boolean = false,
         startingTestStatistic: Double = 1.0,
         drawSample: () -> Double,
     ): TestH0Result

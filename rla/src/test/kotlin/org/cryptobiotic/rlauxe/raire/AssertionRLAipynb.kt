@@ -638,10 +638,10 @@ fun replicate_p_values(
     )
 
     val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
+    val debugSeq = betta.setDebuggingSequences()
     val result = betta.testH0(sample_size, true) { sampler.sample() }
     println(result)
-    println("pvalues = ${result.pvalues}")
-}
+    println("pvalues=  ${debugSeq.pvalues()}")}
 
 fun calc_sample_sizes(
     ntrials: Int,

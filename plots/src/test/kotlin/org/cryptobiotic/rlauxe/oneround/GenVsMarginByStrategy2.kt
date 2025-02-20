@@ -7,31 +7,30 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenVsMarginByStrategy2 {
-    var name = "clcaVsMarginByStrategy"
-    val dirName = "/home/stormy/temp/oneround/marginByStrategy"
+    val name = "clcaOneRoundByStrategy"
+    var dirName = "/home/stormy/temp/oneround/marginByStrategy2"
 
     val N = 100000
-    val nruns = 100
+    val nruns = 1000
     val nsimEst = 10
     val fuzzPct = .01
-    var phantomPct = .01
+    var phantomPct = .02
 
     @Test
     fun genSamplesVsMarginByStrategy() {
-        val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .025, .03, .04, .05, .06, .07, .08)
+        val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .025, .03, .04, .05, .06, .07, .08, .10)
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
 
         val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
-        allMargins.forEach { margin ->
-            /*
+        margins.forEach { margin ->
             val clcaGenerator1 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle, fuzzPct))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1)) */
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val clcaGenerator2 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
@@ -39,26 +38,26 @@ class GenVsMarginByStrategy2 {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
-            /* val clcaGenerator3 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            val clcaGenerator3 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3)) */
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
-            val clcaGenerator4 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            /* val clcaGenerator4 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4)) */
 
             val clcaGenerator5 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
 
-            val clcaGenerator6 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            /* val clcaGenerator6 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "mixed", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.mixed)))
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator6))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator6)) */
         }
 
         // run tasks concurrently and average the results

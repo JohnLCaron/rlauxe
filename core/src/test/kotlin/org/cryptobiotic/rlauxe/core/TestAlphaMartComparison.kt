@@ -44,7 +44,6 @@ fun doOneAlphaMartRun(
     d: Int,
     u: Double,
     withoutReplacement: Boolean = true,
-    showDetails: Boolean = true,
 ): TestH0Result {
     val t = 0.5
     val upperBound = u
@@ -62,5 +61,5 @@ fun doOneAlphaMartRun(
         withoutReplacement = withoutReplacement,
     )
 
-    return alpha.testH0(maxSamples, terminateOnNullReject = true, showDetails = showDetails) { drawSample.sample() }
+    return alpha.testH0(maxSamples, terminateOnNullReject = true) { drawSample.sample() }
 }

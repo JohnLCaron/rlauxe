@@ -135,20 +135,20 @@ Notes:
 ### CLCA sample sizes by strategy vs true margin with phantoms 
 
 We will assume that the fuzz rate is not worse than 1%, and investigate different strategies in the presence of phantoms.
-In these workflows, we do everything in one round, and skip sample estimation. We creates simulations at different margins
-and percentage of phantom, and fuzz the MVRs at 1%. We can measure the "true margin" of the MVRs, including phantoms, and use that at the x axis.
+In these workflows, we do everything in one round, and skip sample estimation. We create simulations at different margins
+and percentage of phantoms, and fuzz the MVRs at 1%. We measure the "true margin" of the MVRs, including phantoms, by applying
+the CVRC assorter, and use that at the x axis here.
 
 We also add the _phantoms_ strategy which uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of 
 the AdaptiveComparison betting function.
 
 Here are plots of sample size as a function of true margin, for phantomPct of 0, 1, and 2 percent, for various strategies:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLog.html" rel="clcaOneRoundByStrategy0LogLog">![clcaOneRoundByStrategy0LogLog](plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLog.html" rel="clcaOneRoundByStrategy1LogLog">![clcaOneRoundByStrategy1LogLog](plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLog.html" rel="clcaOneRoundByStrategy2LogLog">![clcaOneRoundByStrategy2LogLog](plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy0LogLinear">![clcaOneRoundByStrategy0LogLinear](plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy1LogLinear">![clcaOneRoundByStrategy1LogLinear](plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy2LogLinear">![clcaOneRoundByStrategy2LogLinear](plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLinear.png)</a>
 
-* A _phantomPct_ of phantoms lowers the margin by that amount, so note that the margins <= phantomPct are ommitted in the plots.
-* When phantomPct = 0.0, the phantom and mixed strategies become the same as noerrer, and any differences are due to variance in the sample ordering.
+* When phantomPct = 0.0, the phantom and noerrer are the same, and any differences are due to variance in the sample ordering.
 * The oracle strategy can't be used in production. 
-* The fuzzPct strategy requires one to guess the fuzzPct, and here we use the actual fuzz, so this is as good as it gets using that strategy.
-* That phantom strategy seems to be better than noerror.
+* The fuzzPct strategy does quites well (suspiciously well in tha last plot), and is the best if one knows the error rates.
+* That phantom strategy does better than noerror at low margins.

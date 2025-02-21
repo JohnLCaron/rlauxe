@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.BallotManifestUnderAudit
 import org.cryptobiotic.rlauxe.workflow.BallotUnderAudit
 import kotlin.random.Random

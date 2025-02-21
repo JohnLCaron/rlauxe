@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.consistentSampling
-import org.cryptobiotic.rlauxe.sampling.makePhantomCvrs
+import org.cryptobiotic.rlauxe.estimate.consistentSampling
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

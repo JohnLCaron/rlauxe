@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals

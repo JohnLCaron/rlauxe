@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.alpha
 
 
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
-import org.cryptobiotic.rlauxe.sampling.ClcaFlipErrorsSampler
+import org.cryptobiotic.rlauxe.estimate.ClcaFlipErrorsSampler
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs

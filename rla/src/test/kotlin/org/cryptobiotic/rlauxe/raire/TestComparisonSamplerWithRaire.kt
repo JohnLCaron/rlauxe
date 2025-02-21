@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ClcaSimulation
+import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import kotlin.test.Test

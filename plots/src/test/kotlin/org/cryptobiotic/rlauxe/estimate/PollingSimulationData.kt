@@ -1,11 +1,10 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.df
 
 import org.junit.jupiter.api.Test
-import kotlin.math.ln
 
 // TODO candidate for removal
 
@@ -31,7 +30,7 @@ class TestPollingSimulationData {
             listOf(.04, .05, .06, .07, .08, .10)
         margins.forEach { margin ->
             phantomPcts.forEach { phantomPct ->
-                val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, underVotePct, phantomPct)
+                val sim = ContestSimulation.make2wayTestContest(Nc = Nc, margin, underVotePct, phantomPct)
                 val contest = sim.contest
                 val assorter = PluralityAssorter.makeWithVotes(contest, winner=0, loser=1)
                 val cvrs = sim.makeCvrs()

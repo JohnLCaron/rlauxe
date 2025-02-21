@@ -7,8 +7,8 @@ import io.kotest.property.checkAll
 import kotlinx.coroutines.test.runTest
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.sampling.ContestSimulation
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import kotlin.test.Test

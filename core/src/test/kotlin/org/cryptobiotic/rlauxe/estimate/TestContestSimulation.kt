@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.estimate
 
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.double

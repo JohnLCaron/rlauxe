@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.readDominionBallotManifest
-import org.cryptobiotic.rlauxe.sampling.*
+import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
 import kotlin.test.assertEquals

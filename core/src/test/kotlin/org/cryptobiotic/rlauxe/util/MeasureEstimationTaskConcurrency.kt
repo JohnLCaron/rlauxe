@@ -14,9 +14,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.sampling.EstimationResult
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.sampling.makeEstimationTasks
+import org.cryptobiotic.rlauxe.estimate.EstimationResult
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import kotlin.test.Test

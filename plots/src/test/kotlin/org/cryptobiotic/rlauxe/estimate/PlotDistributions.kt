@@ -3,10 +3,6 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
-import org.cryptobiotic.rlauxe.sampling.ContestSimulation
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sampling.estimateSampleSizes
-import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates

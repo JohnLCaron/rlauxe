@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ClcaFuzzSampler
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
-import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeBetaMart
+import org.cryptobiotic.rlauxe.estimate.ClcaFuzzSampler
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.simulateSampleSizeBetaMart
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.*
 import org.junit.jupiter.api.Test
 

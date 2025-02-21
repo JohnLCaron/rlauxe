@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.makeCvr
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.estimate.makeCvr
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

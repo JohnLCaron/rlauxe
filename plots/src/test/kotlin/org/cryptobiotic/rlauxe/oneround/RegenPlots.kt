@@ -7,7 +7,7 @@ class RegenPlots {
 
     @Test
     fun regenPlots() {
-        val plotGen = GenVsMarginByStrategy2()
+        val plotGen = GenVsMarginByStrategy()
         plotGen.phantomPct = 0.0
         plotGen.dirName = "/home/stormy/temp/oneround/marginByStrategy0"
         plotGen.genSamplesVsMarginByStrategy()

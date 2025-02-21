@@ -148,7 +148,21 @@ Here are plots of sample size as a function of true margin, for phantomPct of 0,
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy1LogLinear">![clcaOneRoundByStrategy1LogLinear](plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy2LogLinear">![clcaOneRoundByStrategy2LogLinear](plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLinear.png)</a>
 
-* When phantomPct = 0.0, the phantom and noerrer are the same, and any differences are due to variance in the sample ordering.
 * The oracle strategy can't be used in production. 
-* The fuzzPct strategy does quites well (suspiciously well in tha last plot), and is the best if one knows the error rates.
-* That phantom strategy does better than noerror at low margins.
+* The fuzzPct strategy does quite well, and is the best if one knows the error rates.
+* The phantom strategy does better than noerror at low margins as phantomPct increases.
+
+### CLCA false positives by strategy
+
+These plots are a sanity check on false positive rates for the various strategies. We create simulations at the given margins,
+no fuzzing, no phantoms. Then in the MVRs we flip just enough votes to make the true margin < 50%. We want to be sure that
+the percent of false positives stays below the risk limit of 5%:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/oneround/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
+
+* The excess over 5% of noerrors is probably a statistical fluke.
+* The oracle strategy never gets a false positive. I would have guessed that it might get more than it should, since  
+  it violates the conditions of the betting martingale. I guess it essentially "looks ahead" to see the margin > 50%
+  and bets in a way that always fails.
+* Generally things act as expected.
+

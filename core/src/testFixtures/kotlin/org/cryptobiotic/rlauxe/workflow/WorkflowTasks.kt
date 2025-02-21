@@ -304,7 +304,7 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         WorkflowResult(
             first.Nc,
             first.margin,
-            TestH0Status.ContestMisformed,
+            TestH0Status.MinMargin, // TODO maybe TestH0Status.AllFail ?
             0.0, first.Nc.toDouble(), first.Nc.toDouble(), first.Nc.toDouble(),
             first.parameters,
             mvrMargin=runs.filter{ it.nrounds > 0 }.map { it.mvrMargin }.average(),

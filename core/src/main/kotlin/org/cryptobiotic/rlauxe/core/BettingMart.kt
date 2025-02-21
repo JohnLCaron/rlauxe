@@ -97,7 +97,7 @@ class BettingMart(
                 else -> TestH0Status.LimitReached
             }
         }
-
+        // println(" status=$status mean = ${tracker.mean()} samplesUsed = ${sampleNumber/Nc.toDouble()}")
         return TestH0Result(status, sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalueLast, tracker)
     }
 

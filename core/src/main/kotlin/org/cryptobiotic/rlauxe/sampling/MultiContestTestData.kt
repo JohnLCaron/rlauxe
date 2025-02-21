@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.workflow.Ballot
 import org.cryptobiotic.rlauxe.workflow.BallotManifest
 import org.cryptobiotic.rlauxe.workflow.BallotStyle
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -219,27 +218,11 @@ data class ContestTestData(
     fun adjust(svotes: MutableList<Pair<Int, Int>>, Nc: Int): Int {
         val winner = svotes[0]
         val loser = svotes[1]
-        val wantMarginDiff = ceil(margin * Nc).toInt()
+        val wantMarginDiff = roundUp(margin * Nc)
         val haveMarginDiff = (winner.second - loser.second)
-        val adjust: Int = ceil((wantMarginDiff - haveMarginDiff) * 0.5).toInt() // can be positive or negetive
+        val adjust: Int = roundUp((wantMarginDiff - haveMarginDiff) * 0.5) // can be positive or negetive
         svotes[0] = Pair(winner.first, winner.second + adjust)
         svotes[1] = Pair(loser.first, loser.second - adjust)
-        return adjust // will be 0 when done
-    }
-
-    fun adjust2(svotes: MutableList<Pair<Int, Int>>, Nc: Int): Int {
-        // dont touch undervotes
-        val winnerIdx = if (svotes[0].first == ncands) 1 else 0
-        val loserIdx = if (svotes[winnerIdx+1].first == ncands) winnerIdx+2 else winnerIdx+1
-
-        val winner = svotes[winnerIdx]
-        var loser = svotes[loserIdx]
-
-        val wantMarginDiff = ceil(margin * Nc).toInt()
-        val haveMarginDiff = (winner.second - loser.second)
-        val adjust: Int = ceil((wantMarginDiff - haveMarginDiff) * 0.5).toInt() // can be positive or negetive
-        svotes[0] = Pair(winner.first, winner.second + adjust)
-        svotes[loserIdx] = Pair(loser.first, loser.second - adjust)
         return adjust // will be 0 when done
     }
 

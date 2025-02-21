@@ -9,8 +9,6 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import java.lang.Math.pow
-import kotlin.math.ceil
 import kotlin.math.ln
 import kotlin.math.max
 

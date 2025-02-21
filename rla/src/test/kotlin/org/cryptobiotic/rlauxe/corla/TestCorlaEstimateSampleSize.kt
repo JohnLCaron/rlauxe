@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.simulateSampleSizeClcaAssorter
 import org.cryptobiotic.rlauxe.util.df
-import kotlin.math.ceil
+import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.test.Test
 
 class TestCorlaEstimateSampleSize {
@@ -61,10 +61,10 @@ class TestCorlaEstimateSampleSize {
                 val result = simulateSampleSizeClcaAssorter(auditConfig, contestUA.contest as Contest, assert, cvrs)
                 val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assert.assorter.reportedMargin(), gamma,
-                    oneOver = ceil(cn*p1).toInt(), // p1
-                    twoOver = ceil(cn*p2).toInt(), // p2
-                    oneUnder = ceil(cn*p3).toInt(), // p3
-                    twoUnder = ceil(cn*p4).toInt(), // p4
+                    oneOver = roundUp(cn*p1), // p1
+                    twoOver = roundUp(cn*p2), // p2
+                    oneUnder = roundUp(cn*p3), // p3
+                    twoUnder = roundUp(cn*p4), // p4
                     )
                 estSizes.add(estSize)
                 println("  ${contestUA.name} margin=${df(assert.assorter.reportedMargin())} est=$estSize sim=$simSize")

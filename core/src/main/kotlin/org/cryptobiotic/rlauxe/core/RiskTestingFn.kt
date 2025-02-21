@@ -7,7 +7,7 @@ enum class TestH0Status(val complete: Boolean, val success: Boolean) {
     StatRejectNull(true, true), // statistical rejection of H0
     LimitReached(false, false),  // cant tell from the number of samples available
     //// only when sampling without replacement all the way close to Nc
-    SampleSumRejectNull(true, true), // SampleSum > Nc / 2, so we know H0 is false
+    SampleSumRejectNull(true, false), // SampleSum > Nc / 2, so we know H0 is false
     AcceptNull(true, false), // SampleSum + (all remaining ballots == 1) < Nc / 2, so we know that H0 is true.
 
     // contest status

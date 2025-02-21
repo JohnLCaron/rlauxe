@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import java.security.SecureRandom
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.round
 
@@ -16,6 +17,7 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
 }
 
 fun roundToInt(x: Double) = round(x).toInt()
+fun roundUp(x: Double) = ceil(x).toInt()
 
 fun ceilDiv(numerator: Int, denominator: Int): Int {
     val frac = numerator.toDouble() / denominator

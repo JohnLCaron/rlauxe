@@ -3,15 +3,11 @@ package org.cryptobiotic.rlauxe.rlaplots
 import org.cryptobiotic.rlauxe.sampling.EstimationResult
 import org.cryptobiotic.rlauxe.sampling.SimulateSampleSizeTask
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.util.Deciles
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
-import kotlin.math.ceil
 import kotlin.math.sqrt
 
 // data class for capturing results from repeated audit trials.
@@ -120,7 +116,7 @@ fun EstimationResult.makeSRTnostyle(Nc: Int): SRT {
         testParameters=task.moreParameters,
         this.repeatedResult.nsuccess,
         task.auditConfig.nsimEst,
-        ceil(this.repeatedResult.totalSamplesNeeded * N / Nc).toInt(),
+        roundUp(this.repeatedResult.totalSamplesNeeded * N / Nc),
         stddev=0.0,
         percentHist=null)
 }

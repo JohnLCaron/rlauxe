@@ -19,7 +19,7 @@ class TestOneRoundClcaWorkflow {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testOneRoundClcaWorkflow(auditConfig, testData)

@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals

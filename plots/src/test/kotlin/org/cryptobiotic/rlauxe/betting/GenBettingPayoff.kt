@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.core.AdaptiveComparison
-import org.cryptobiotic.rlauxe.core.ErrorRates
+import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
@@ -32,7 +32,7 @@ class GenBettingPayoff {
                     Nc = N,
                     a = noerror,
                     d = 10000,
-                    errorRates = ErrorRates(error, error, error, error),
+                    errorRates = ClcaErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
                 repeat(100) { samples.addSample(noerror) }
@@ -55,7 +55,7 @@ class GenBettingPayoff {
                     Nc = N,
                     a = noerror,
                     d = 10000,
-                    errorRates = ErrorRates(error, error, error, error),
+                    errorRates = ClcaErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
                 repeat(100) { samples.addSample(noerror) }
@@ -94,7 +94,7 @@ class GenBettingPayoff {
                     Nc = N,
                     a = noerror,
                     d = 10000,
-                    errorRates = ErrorRates(error, error, error, error),
+                    errorRates = ClcaErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
                 repeat(10) { samples.addSample(noerror) }

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.sampling.ContestSimulation
@@ -74,7 +75,7 @@ class PlotDistributions {
         val sim =
             ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        println("oracle errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
+        println("oracle errorRates = ${ClcaErrorTable.getErrorRates(2, mvrsFuzzPct)}")
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
 

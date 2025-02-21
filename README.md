@@ -22,7 +22,7 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
-  * [Stratified Audits using OneAudit](#stratified-audits-using-oneaudit)
+  * [Stratified Audits using OneAudit (In Progress)](#stratified-audits-using-oneaudit-in-progress)
 * [Measuring Samples Needed](#measuring-samples-needed)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
@@ -49,34 +49,34 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
 <!-- TOC -->
 
 # Reference Papers
+````
+P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
 
-    P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
+RAIRE       Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
+    https://arxiv.org/abs/1903.08804
 
-    RAIRE       Risk-Limiting Audits for IRV Elections.			Blom, Stucky, Teague    29 Oct 2019
-        https://arxiv.org/abs/1903.08804
+SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
+    https://github.com/pbstark/SHANGRLA
 
-    SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
-        https://github.com/pbstark/SHANGRLA
+MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. Glazer, Spertus, Stark; 6 Dec 2020
 
-    MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes	Glazer, Spertus, Stark; 6 Dec 2020
+ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
+    https://github.com/pbstark/alpha.
 
-    ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
-        https://github.com/pbstark/alpha.
+BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
+    https://github.com/WannabeSmith/betting-paper-simulations
 
-    BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
-        https://github.com/WannabeSmith/betting-paper-simulations
+COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
+    https://github.com/spertus/comparison-RLA-betting/tree/main
 
-    COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
-        https://github.com/spertus/comparison-RLA-betting/tree/main
+ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
+    https://github.com/pbstark/ONEAudit
 
-    ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark   6 Mar 2023.
-        https://github.com/pbstark/ONEAudit
+STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
+  https://github.com/pbstark/SHANGRLA
 
-    STYLISH	    Stylish Risk-Limiting Audits in Practice.		Glazer, Spertus, Stark  16 Sep 2023
-      https://github.com/pbstark/SHANGRLA
-
-    VERIFIABLE  Publicly Verifiable RLAs.     Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
-
+VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
+````
 
 # SHANGRLA framework
 
@@ -99,7 +99,8 @@ in a risk-limiting audit with risk limit α:
 | risk	         | we want to confirm or reject the null hypothesis with risk level α.                            |
 | assorter      | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
 | assertion     | the mean of assorter values is > 1/2: "half-average assertion"                                 |
-| estimator     | estimates the true population mean from the sampled assorter values.                           |
+| estimator     | estimates the true population mean from the sampled assorter values. (AlphaMart)               |
+| bettingFn     | decides how much to bet for each sample. (BettingMart)                                         |
 | riskTestingFn | is the statistical method to test if the assertion is true.                                    |
 | audit         | iterative process of picking ballots and checking if all the assertions are true.              |
 
@@ -255,7 +256,7 @@ A few representative plots showing the effect of d are at [meanDiff plots](https
 See [ALPHA testing statistic](docs/AlphaMart.md) for more details and plots.
 
 
-## Stratified Audits using OneAudit
+## Stratified Audits using OneAudit (In Progress)
 
 OneAudit is a CLCA audit that uses AlphaMart instead of BettingMart. 
 

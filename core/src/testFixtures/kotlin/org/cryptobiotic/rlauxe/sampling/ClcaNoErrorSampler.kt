@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.ClcaAssorterIF
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.random.Random
 
 // the mvr and cvr always agree.

@@ -18,7 +18,7 @@ class TestClcaWorkflowNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
@@ -36,7 +36,7 @@ class TestClcaWorkflowNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
@@ -87,7 +87,7 @@ class TestClcaWorkflowNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
         testComparisonWorkflow(auditConfig, testData)

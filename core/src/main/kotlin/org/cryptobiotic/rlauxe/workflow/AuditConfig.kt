@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.ErrorRates
+import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 
 enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
@@ -50,7 +50,7 @@ enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, previous, phant
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
-    val errorRates: ErrorRates? = null, // use as apriori
+    val errorRates: ClcaErrorRates? = null, // use as apriori
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 

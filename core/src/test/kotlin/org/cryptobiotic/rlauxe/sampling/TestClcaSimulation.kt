@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -24,7 +24,7 @@ class TestClcaSimulation {
             val sampler = ClcaSimulation(cvrs,
                 contestUA.contest as Contest,
                 compareAssorter,
-                ClcaErrorRates.standard,
+                ClcaErrorTable.standard,
             )
 
             testLimits(sampler, N, compareAssorter.upperBound)
@@ -64,7 +64,7 @@ class TestClcaSimulation {
         println("\n${assorter.assorter.desc()}")
 
         val phantomRate = contestUA.contest.phantomRate()
-        val errorRates = ErrorRates(0.0, phantomRate, 0.0, 0.0)
+        val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulation(cvrs, contestUA.contest, assorter, errorRates)
         sampler.reset()
 

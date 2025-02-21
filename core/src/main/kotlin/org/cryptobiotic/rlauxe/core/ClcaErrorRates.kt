@@ -1,19 +1,38 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.core.ClcaAssorterIF
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.ErrorRates
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.util.df
 
+data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
+    init {
+        require(p2o in 0.0..1.0) {"p2o out of range $p2o"}
+        require(p1o in 0.0..1.0) {"p1o out of range $p1o"}
+        require(p1u in 0.0..1.0) {"p1u out of range $p1u"}
+        require(p2u in 0.0..1.0) {"p2u out of range $p2u"}
+    }
+    override fun toString(): String {
+        return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
+    }
+    fun toList() = listOf(p2o, p1o, p1u, p2u)
+    fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
+
+    companion object {
+        fun fromList(list: List<Double>): ClcaErrorRates {
+            require(list.size == 4) { "ErrorRates list must have 4 elements"}
+            return ClcaErrorRates(list[0], list[1], list[2], list[3])
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 // the idea is that the errorRates are proportional to fuzzPct
 // Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
 // margin doesnt matter (TODO show this)
 
-object ClcaErrorRates {
+object ClcaErrorTable {
     val rrates = mutableMapOf<Int, List<Double>>() // errorRates / FuzzPct
-    val standard = ErrorRates(.01, 1.0e-4, 0.01, 1.0e-4)
+    val standard = ClcaErrorRates(.01, 1.0e-4, 0.01, 1.0e-4)
 
-    fun getErrorRates(ncandidates: Int, fuzzPct: Double?): ErrorRates {
+    fun getErrorRates(ncandidates: Int, fuzzPct: Double?): ClcaErrorRates {
         if (fuzzPct == null) return standard
 
         val useCand = when  {
@@ -22,13 +41,13 @@ object ClcaErrorRates {
             else -> ncandidates
         }
         val rr = rrates[useCand]!!.map { it * fuzzPct }
-        return ErrorRates(rr[0], rr[1], rr[2], rr[3])
+        return ClcaErrorRates(rr[0], rr[1], rr[2], rr[3])
     }
 
     fun calcErrorRates(contestId: Int,
                        cassorter: ClcaAssorterIF,
                        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    ) : ErrorRates {
+    ) : ClcaErrorRates {
         require(cvrPairs.size > 0)
         val samples = PrevSamplesWithRates(cassorter.noerror()) // accumulate error counts here
         cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second)) }
@@ -37,7 +56,7 @@ object ClcaErrorRates {
     }
 
     // given an error rate, what fuzz pct does it corresond to ?
-    fun calcFuzzPct(ncandidates: Int, errorRates: ErrorRates ) : List<Double> {
+    fun calcFuzzPct(ncandidates: Int, errorRates: ClcaErrorRates ) : List<Double> {
         val useCand = when  {
             ncandidates < 2 -> 2
             ncandidates > 10 -> 10

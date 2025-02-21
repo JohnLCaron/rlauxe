@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
-import org.cryptobiotic.rlauxe.sampling.Sampler
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
@@ -158,7 +158,7 @@ data class CobraTask(
             withoutReplacement = true,
             a = compareAssorter.noerror,
             d = d,
-            ErrorRates(p2prior, 0.0, 0.0, 0.0)
+            ClcaErrorRates(p2prior, 0.0, 0.0, 0.0)
         )
         return BettingMart(
             bettingFn = adaptive, Nc = N, noerror = compareAssorter.noerror,

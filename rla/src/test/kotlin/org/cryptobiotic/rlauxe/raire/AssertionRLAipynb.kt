@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -678,7 +679,7 @@ fun calc_sample_sizes(
         withoutReplacement = true,
         a = minAssorter.noerror(),
         d = 100,
-        ErrorRates(.001, .01, 0.0, 0.0),
+        ClcaErrorRates(.001, .01, 0.0, 0.0),
     )
     val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
 

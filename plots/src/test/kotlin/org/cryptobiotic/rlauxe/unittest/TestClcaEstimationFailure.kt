@@ -48,7 +48,7 @@ class TestClcaEstimationFailure {
         if (debug) println("\n$contest phantomRate=${contest.phantomRate()}")
 
         val phantomRate = contest.phantomRate()
-        val errorRates = ErrorRates(0.0, phantomRate, 0.0, 0.0)
+        val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulation(cvrs, contestUA.contest, cassorter, errorRates)
         if (debug) print(sampler.showFlips())
 

@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
 import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.util.secureRandom
-import kotlin.random.Random
 import kotlin.test.Test
 
 class TestClcaWorkflow {
@@ -21,7 +19,7 @@ class TestClcaWorkflow {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)
@@ -62,7 +60,7 @@ class TestClcaWorkflow {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
+        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         testComparisonWorkflow(auditConfig, testData)

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sampling
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.math.max
 import kotlin.random.Random
 
@@ -15,7 +16,7 @@ class ClcaSimulation(
     rcvrs: List<Cvr>, // may have phantoms
     val contest: ContestIF,
     val cassorter: ClcaAssorterIF,
-    val errorRates: ErrorRates,
+    val errorRates: ClcaErrorRates,
 ): Sampler {
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }

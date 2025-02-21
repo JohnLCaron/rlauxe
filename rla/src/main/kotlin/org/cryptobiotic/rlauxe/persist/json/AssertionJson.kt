@@ -164,7 +164,7 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.samplesNeeded,
         this.samplesUsed,
         status,
-        if (this.errorRates != null) ErrorRates.fromList(this.errorRates) else null,
+        if (this.errorRates != null) ClcaErrorRates.fromList(this.errorRates) else null,
     )
 }
 

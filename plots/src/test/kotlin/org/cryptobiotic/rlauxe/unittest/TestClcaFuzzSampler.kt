@@ -66,7 +66,7 @@ fun runWithComparisonFuzzSampler(
         withoutReplacement = true,
         a = assorter.noerror(),
         d = clcaConfig.d,
-        ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct),
+        ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct),
     )
 
     return simulateSampleSizeBetaMart(

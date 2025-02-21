@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.ErrorRates
+import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import kotlin.test.Test
 
 class TestOptimalEstimate {
@@ -72,7 +72,7 @@ fun compareCorlaAndOptimal(dilutedMargin: Double, twoOver: Int, oneOver: Int, on
         riskLimit,
         dilutedMargin,
         1.0,
-        ErrorRates(twoOver/N, oneOver/N, oneUnder/N, twoUnder/N)
+        ClcaErrorRates(twoOver/N, oneOver/N, oneUnder/N, twoUnder/N)
     )
 
     println("   [$twoOver, $oneOver, $oneUnder, $twoUnder] -> $optimal $corla")

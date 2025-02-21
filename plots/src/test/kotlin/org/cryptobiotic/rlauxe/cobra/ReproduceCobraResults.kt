@@ -163,7 +163,7 @@ class ReproduceCobraResults {
 
                         val oracle = OracleComparison(
                             a = compareAssorter.noerror,
-                            ErrorRates(p2, p1, 0.0, 0.0)
+                            ClcaErrorRates(p2, p1, 0.0, 0.0)
                         )
                         val betting =
                             BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
@@ -246,7 +246,7 @@ class ReproduceCobraResults {
                             withoutReplacement = false,
                             a = compareAssorter.noerror,
                             d = d,
-                            ErrorRates(p2prior, p1prior, 0.0, 0.0),
+                            ClcaErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
                         val betting =

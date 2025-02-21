@@ -19,7 +19,7 @@ data class AuditConfig(
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 
     val pollingConfig: PollingConfig = PollingConfig(),
-    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
+    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.phantoms),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
     val version: Double = 1.0,
 ) {
@@ -43,10 +43,8 @@ data class PollingConfig(
 // noerror: assume no errors, with adaptation
 // fuzzPct: model errors with fuzz simulation, with adaptation
 // apriori: pass in apriori errorRates, with adaptation
-// previous: use error rates from previous batch
-// phantoms: use phantom rates
-// mixed: use phantom rates for audit, noerror for sample
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, previous, phantoms, mixed }
+// phantoms: use phantom rates for apriori
+enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation

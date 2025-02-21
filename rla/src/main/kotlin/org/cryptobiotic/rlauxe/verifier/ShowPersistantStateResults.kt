@@ -6,11 +6,12 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditState
 import org.cryptobiotic.rlauxe.workflow.AuditType
 
-class Verifier(val publish: Publisher, val show: Boolean = false) {
+class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = false) {
     var auditConfig : AuditConfig = readAuditConfigJsonFile(publish.auditConfigFile()).unwrap()
 
     init {
@@ -18,30 +19,30 @@ class Verifier(val publish: Publisher, val show: Boolean = false) {
         println(auditConfig)
     }
 
-    fun verify(): Boolean {
-        var allOk = true
-
-        if (auditConfig.auditType == AuditType.CLCA) {
-            allOk = allOk && verifyCvrSampleNumbers()
+    fun verify() {
+        val ncards = if (auditConfig.auditType == AuditType.CLCA) {
+            verifyCvrSampleNumbers()
         } else {
-            allOk = allOk && verifyBallotManifest()
+            verifyBallotManifest()
         }
 
+        var totalMvrs = 0
         val contests = mutableMapOf<Int, ContestUnderAudit>()
         var state: AuditState? = null
         for (roundIdx in 1..publish.rounds()) {
             //println("Round $roundIdx ------------------------------------")
             state = verifyRound(roundIdx)
             state.contests.forEach { contests[it.id] = it }
+            totalMvrs += state.newMvrs
         }
+        println("  totalMvrs = $totalMvrs = ${df(100.0 * totalMvrs / ncards)} %")
+        println()
+        showContests(contests.toSortedMap().values.toList())
         println()
         verifyContests(contests.toSortedMap().values.toList(), null)
-
-        println("\nverify = $allOk")
-        return allOk
     }
 
-    fun verifyCvrSampleNumbers(): Boolean {
+    fun verifyCvrSampleNumbers(): Int {
         val cvrs: List<CvrUnderAudit> = readCvrsJsonFile(publish.cvrsFile()).unwrap()
         val prng = Prng(auditConfig.seed)
         var countBad = 0
@@ -53,10 +54,10 @@ class Verifier(val publish: Publisher, val show: Boolean = false) {
         }
         val ok = (countBad == 0)
         if (show) println("  verifyCvrs $ok size=${cvrs.size} bad=${countBad} ")
-        return ok
+        return cvrs.size
     }
 
-    fun verifyBallotManifest(): Boolean {
+    fun verifyBallotManifest(): Int {
         val ballotManifest = readBallotManifestJsonFile(publish.ballotManifestFile()).unwrap()
         val prng = Prng(auditConfig.seed)
         var countBad = 0
@@ -68,7 +69,7 @@ class Verifier(val publish: Publisher, val show: Boolean = false) {
         }
         val ok = (countBad == 0)
         if (show) println("  verifyBallots $ok size=${ballotManifest.ballots.size} bad=${countBad} ")
-        return ok
+        return ballotManifest.ballots.size
     }
 
     fun verifyRound(roundIdx: Int): AuditState {
@@ -95,6 +96,13 @@ class Verifier(val publish: Publisher, val show: Boolean = false) {
             }
         }
         return state
+    }
+
+    fun showContests(contests: List<ContestUnderAudit>): Boolean {
+        contests.forEach { contest ->
+             println(contest.toString())
+        }
+        return true
     }
 
     fun verifyContests(contests: List<ContestUnderAudit>, roundIdx: Int?): Boolean {

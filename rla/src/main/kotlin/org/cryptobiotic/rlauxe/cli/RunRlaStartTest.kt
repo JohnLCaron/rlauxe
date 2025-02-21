@@ -51,6 +51,11 @@ object RunRlaStartTest {
             shortName = "ncards",
             description = "Total number of ballot/cards"
         ).default(10000)
+        val ncontests by parser.option(
+            ArgType.Int,
+            shortName = "ncontests",
+            description = "Number of contests"
+        ).default(11)
         val mvrFile by parser.option(
             ArgType.String,
             shortName = "mvrs",
@@ -58,8 +63,9 @@ object RunRlaStartTest {
         ).required()
 
         parser.parse(args)
-        println("RunStartTestElection on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards\n  mvrFile=$mvrFile")
-        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, mvrFile)
+        println("RunRlaStartTest on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
+                "\n  mvrFile=$mvrFile")
+        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, mvrFile)
         else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, mvrFile)
     }
 
@@ -69,11 +75,12 @@ object RunRlaStartTest {
         fuzzMvrs: Double,
         pctPhantoms: Double?,
         ncards: Int,
+        ncontests: Int,
         mvrFile: String,
     ): Int {
         println("Start startTestElectionClca")
         val publish = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 10, samplePctCutoff=.42, minMargin=.005, removeTooManyPhantoms=true)
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
 
         val maxMargin = .05
@@ -82,7 +89,7 @@ object RunRlaStartTest {
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
 
         val testData =
-            MultiContestTestData(11, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
 
         val contests: List<Contest> = testData.contests
         println("$testData")

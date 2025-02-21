@@ -5,14 +5,14 @@ import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowIF
 
-private val debug = false
+private val debug = true
 
 /** must have sampleSizes set. must have sampleNums assigned */
 fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> {
     val auditConfig = workflow.auditConfig()
     val borc = workflow.getBallotsOrCvrs()
 
-    // count the number of cvrs that has at least one contest under audit.
+    // count the number of cvrs that have at least one contest under audit.
     val N = if (!auditConfig.hasStyles) borc.size
                 else workflow.getBallotsOrCvrs().filter { it.hasOneOrMoreContest(workflow.getContests()) }.count()
 
@@ -29,7 +29,7 @@ fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> 
          // find the contest with the largest estimation size, remove it
         val maxEstimation = contestsNotDone.maxOf { it.estSampleSize }
         val maxContest = contestsNotDone.first { it.estSampleSize == maxEstimation }
-        println(" ***too many samples, remove contest ${maxContest}")
+        println(" ***too many samples, remove contest ${maxContest} with status FailMaxSamplesAllowed")
 
         // information we want in the persisted record
         val minAssertion = maxContest.minAssertion()!!
@@ -67,6 +67,7 @@ fun createSampleIndices(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean
 }
 
 // for audits with hasStyles
+// TODO samplePctCutoff: Double,
 fun consistentSampling(
     contests: List<ContestUnderAudit>,
     ballotOrCvrs: List<BallotOrCvr>,

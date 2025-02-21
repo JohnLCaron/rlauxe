@@ -6,7 +6,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.persist.json.Publisher
-import org.cryptobiotic.rlauxe.verifier.Verifier
+import org.cryptobiotic.rlauxe.verifier.ShowPersistantStateResults
 
 /** Run election record verification CLI. */
 object RunVerifier {
@@ -35,10 +35,9 @@ object RunVerifier {
         runVerifier(inputDir, nthreads, showTime)
     }
 
-    fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false): Int {
+    fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false) {
         val publisher = Publisher(inputDir)
-        val verifier = Verifier(publisher)
-        val allOk = verifier.verify()
-        return if (allOk) 0 else 1
+        val verifier = ShowPersistantStateResults(publisher)
+        verifier.verify()
     }
 }

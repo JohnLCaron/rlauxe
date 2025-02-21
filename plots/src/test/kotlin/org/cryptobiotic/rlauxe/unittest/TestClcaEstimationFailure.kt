@@ -28,7 +28,7 @@ class TestClcaEstimationFailure {
             hasStyles = true,
             quantile = .50,     // TODO review
             samplePctCutoff = .10,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms)
         )
         val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), cvrs)
 

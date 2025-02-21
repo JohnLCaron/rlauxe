@@ -2,7 +2,17 @@ package org.cryptobiotic.rlauxe.cli
 
 import kotlin.test.Test
 
-class TestRunVerifier {
+class TestRunShowPersistantStateResults {
+
+    @Test
+    fun testRunCli() {
+        val topdir = "/home/stormy/temp/persist/testRunCli"
+        RunVerifier.main(
+            arrayOf(
+                "-in", topdir
+            )
+        )
+    }
 
     @Test
     fun testClcaVerify() {

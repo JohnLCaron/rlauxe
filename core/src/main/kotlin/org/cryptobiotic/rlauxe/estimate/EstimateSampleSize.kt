@@ -182,11 +182,7 @@ fun simulateSampleSizeClcaAssorter(
     val roundIdx = cassertion.roundResults.size + 1  // TODO is this accurate ?
 
     val errorRates = when {
-        (clcaConfig.strategy == ClcaStrategyType.previous && roundIdx > 1) -> {
-            if (debugErrorRates) println("previous simulate round $roundIdx using lastRound errorRates=${cassertion.roundResults.last().errorRates}")
-            cassertion.roundResults.last().errorRates!!
-        }
-        (clcaConfig.strategy == ClcaStrategyType.phantoms || clcaConfig.strategy == ClcaStrategyType.previous) -> {
+        (clcaConfig.strategy == ClcaStrategyType.phantoms) -> {
             val phantomRate = contest.phantomRate()
             val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
             if (debugErrorRates) println("phantoms simulate round $roundIdx using errorRates=$errorRates")

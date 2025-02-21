@@ -285,7 +285,7 @@ open class ContestUnderAudit(
     }
 
     override fun toString() = buildString {
-        append("${name} ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize")
+        append("$name ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estSampleSize status=$status")
     }
 
     override fun equals(other: Any?): Boolean {

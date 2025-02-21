@@ -98,7 +98,7 @@ fun readPersistentWorkflow(round: Int, publish: Publisher): Pair<AuditState, Per
         return Pair(auditState, null)
     }
 
-    if (auditConfig.auditType == AuditType.CARD_COMPARISON) {
+    if (auditConfig.auditType == AuditType.CLCA) {
         val resultCvrs = readCvrsJsonFile(publish.cvrsFile())
         if (resultCvrs is Err) println(resultCvrs)
         require(resultCvrs is Ok)

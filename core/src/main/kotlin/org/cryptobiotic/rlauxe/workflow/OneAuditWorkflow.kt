@@ -46,41 +46,47 @@ class OneAuditWorkflow(
         return sample(this, roundIdx, quiet)
     }
 
-    //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        val contestsNotDone = contestsUA.filter{ !it.done }
-        val sampledCvrs = sampleIndices.map { cvrs[it] }
-
-        // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrs.size)
-        val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
-
-        if (!quiet) println("runAudit round $roundIdx")
-        var allDone = true
-        contestsNotDone.forEach { contestUA ->
-            var allAssertionsDone = true
-            contestUA.clcaAssertions.forEach { assertion ->
-                  if (!assertion.status.complete) {
-                    val testH0Result = runOneAuditAssertionAlpha(auditConfig, contestUA, assertion, cvrPairs, roundIdx, quiet=quiet)
-                    assertion.status = testH0Result.status
-                    assertion.round = roundIdx
-                    allAssertionsDone = allAssertionsDone && assertion.status.complete
-                }
-            }
-            if (allAssertionsDone) {
-                contestUA.done = true
-                contestUA.status = TestH0Status.StatRejectNull // TODO
-            }
-            allDone = allDone && contestUA.done
-
-        }
-        return allDone
+        return runOneAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun getContests(): List<ContestUnderAudit> = contestsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
+}
+
+fun runOneAudit(auditConfig: AuditConfig,
+                 contestsUA: List<ContestUnderAudit>,
+                 sampleIndices: List<Int>,
+                 mvrs: List<Cvr>,
+                 cvrs: List<Cvr>,
+                 roundIdx: Int,
+                 quiet: Boolean): Boolean {
+    val contestsNotDone = contestsUA.filter{ !it.done }
+    val sampledCvrs = sampleIndices.map { cvrs[it] }
+
+    // prove that sampledCvrs correspond to mvrs
+    require(sampledCvrs.size == mvrs.size)
+    val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
+    cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
+
+    if (!quiet) println("runAudit round $roundIdx")
+    var allDone = true
+    contestsNotDone.forEach { contestUA ->
+        var contestAssertionStatus = mutableListOf<TestH0Status>()
+        contestUA.clcaAssertions.forEach { cassertion ->
+            if (!cassertion.status.complete) {
+                val testH0Result = runOneAuditAssertionAlpha(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
+                cassertion.status = testH0Result.status
+                cassertion.round = roundIdx
+            }
+            contestAssertionStatus.add(cassertion.status)
+        }
+        contestUA.done = contestAssertionStatus.all { it.complete }
+        contestUA.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        allDone = allDone && contestUA.done
+    }
+    return allDone
 }
 
 fun runOneAuditAssertionAlpha(

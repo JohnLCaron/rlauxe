@@ -61,7 +61,7 @@ class TestAuditStateJson {
     fun testRoundtripWithRounds() {
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
-            AuditType.CARD_COMPARISON, hasStyles = true, seed = 12356667890L, nsimEst = 10,
+            AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
         )
 
         val N = 5000

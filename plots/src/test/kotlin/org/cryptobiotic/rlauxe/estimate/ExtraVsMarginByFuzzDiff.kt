@@ -26,7 +26,7 @@ class ExtraVsMarginByFuzzDiff {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff=1.0, minMargin = 0.0,
+            val auditConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0, minMargin = 0.0,
                 clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct))
 
             margins.forEach { margin ->
@@ -105,7 +105,7 @@ class ExtraVsMarginByFuzzDiff {
         repeat(10) {
             val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)
             val auditConfig = AuditConfig(
-                AuditType.CARD_COMPARISON,
+                AuditType.CLCA,
                 true,
                 quantile = .50,
                 nsimEst = 100,

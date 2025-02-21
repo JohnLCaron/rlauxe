@@ -22,7 +22,7 @@ class EstimationVersion2 {
         val simFuzzPct = .02
 
         val auditConfig = AuditConfig(
-            AuditType.CARD_COMPARISON,
+            AuditType.CLCA,
             true,
             quantile = .50,
             nsimEst = 100,

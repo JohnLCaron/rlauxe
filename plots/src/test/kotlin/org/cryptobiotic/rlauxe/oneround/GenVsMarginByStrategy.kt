@@ -22,7 +22,7 @@ class GenVsMarginByStrategy {
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->

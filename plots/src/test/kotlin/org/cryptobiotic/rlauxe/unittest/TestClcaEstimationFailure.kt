@@ -24,7 +24,7 @@ class TestClcaEstimationFailure {
         val cvrs = test.makeCvrsFromContests()
 
         val auditConfig = AuditConfig(
-            AuditType.CARD_COMPARISON,
+            AuditType.CLCA,
             hasStyles = true,
             quantile = .50,     // TODO review
             samplePctCutoff = .10,

@@ -15,11 +15,11 @@ class TestAuditConfigJson {
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L))
         testRoundtrips(AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L))
         testRoundtrips(AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = 12356667890L))
 
-        testRoundtrips(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+        testRoundtrips(AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
             samplePctCutoff=.10,  version=2.0,
             clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, ClcaErrorRates(.01, .02, .03, .04), d = 99)
         ))
@@ -47,7 +47,7 @@ class TestAuditConfigJson {
     }
 
     fun testRoundtripIO(target: AuditConfig) {
-        val target = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L)
+        val target = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L)
         writeAuditConfigJsonFile(target, filename)
         val result = readAuditConfigJsonFile(filename)
         assertTrue(result is Ok)

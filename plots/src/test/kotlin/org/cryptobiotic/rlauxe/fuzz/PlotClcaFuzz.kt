@@ -22,7 +22,7 @@ class PlotClcaFuzz {
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         // do all margins and sample sizes
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = 100, minMargin = 0.0, samplePctCutoff = 1.0)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = 100, minMargin = 0.0, samplePctCutoff = 1.0)
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<RepeatedWorkflowRunner>()

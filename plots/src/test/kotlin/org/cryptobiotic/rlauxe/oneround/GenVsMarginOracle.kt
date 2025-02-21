@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.oneround
 
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.core.ClcaAssorter
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
@@ -24,7 +21,7 @@ class GenVsMarginOracle {
 
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
@@ -88,7 +85,7 @@ class GenVsMarginOracle {
 
     @Test
     fun runOne() {
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
         val reportedMargin = .01
         val flip2 = .01
         val taskgen = ClcaOneRoundAuditTaskGenerator(

@@ -30,7 +30,7 @@ class ClcaWorkflow(
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
     init {
-        require (auditConfig.auditType == AuditType.CARD_COMPARISON)
+        require (auditConfig.auditType == AuditType.CLCA)
 
         // 2. Pre-processing and consistency checks
         // 	a) Check that the winners according to the CVRs are the reported winners.
@@ -78,7 +78,7 @@ class ClcaWorkflow(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-//   The auditors retrieved the indicated cards, manually read the votes from those cards, and input the MVRs
+// TODO lot of common code between the audit types...
 fun runClcaAudit(auditConfig: AuditConfig,
                  contestsUA: List<ContestUnderAudit>,
                  sampleIndices: List<Int>,
@@ -104,25 +104,21 @@ fun runClcaAudit(auditConfig: AuditConfig,
     val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
     cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
-    // TODO could parallelize across assertions
     if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
     contestsNotDone.forEach { contestUA ->
-        var allAssertionsDone = true
+        var contestAssertionStatus = mutableListOf<TestH0Status>()
         contestUA.clcaAssertions.forEach { cassertion ->
             if (!cassertion.status.complete) {
                 val testH0Result = auditClcaAssertion(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
                 cassertion.status = testH0Result.status
                 cassertion.round = roundIdx
-                allAssertionsDone = allAssertionsDone && cassertion.status.complete
             }
+            contestAssertionStatus.add(cassertion.status)
         }
-        if (allAssertionsDone) {
-            contestUA.done = true
-            contestUA.status = TestH0Status.StatRejectNull // TODO ???
-        }
+        contestUA.done = contestAssertionStatus.all { it.complete }
+        contestUA.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
         allDone = allDone && contestUA.done
-
     }
     return allDone
 }

@@ -24,7 +24,7 @@ class TestClcaFuzzSampler {
         println("total ncvrs = ${cvrs.size}\n")
 
         val auditConfig = AuditConfig(
-            AuditType.CARD_COMPARISON,
+            AuditType.CLCA,
             hasStyles = true,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous, simFuzzPct = .011)
         )

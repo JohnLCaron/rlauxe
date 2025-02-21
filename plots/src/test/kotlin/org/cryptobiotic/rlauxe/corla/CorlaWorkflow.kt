@@ -23,7 +23,7 @@ class CorlaWorkflowTaskGenerator(
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?:
         AuditConfig(
-            AuditType.CARD_COMPARISON, true, nsimEst = 10,
+            AuditType.CLCA, true, nsimEst = 10,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct)
         )
 
@@ -54,7 +54,7 @@ class CorlaWorkflow(
     val cvrsUA: List<CvrUnderAudit>
 
     init {
-        require (auditConfig.auditType == AuditType.CARD_COMPARISON)
+        require (auditConfig.auditType == AuditType.CLCA)
 
         // 2. Pre-processing and consistency checks
         // 	a) Check that the winners according to the CVRs are the reported winners.

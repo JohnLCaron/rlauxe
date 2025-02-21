@@ -91,7 +91,7 @@ class ClcaWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-            AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff=1.0,
+            AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0,
                 clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -209,7 +209,7 @@ class RaireWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-        AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff=1.0,
+        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val (rcontest, testCvrs) = makeRaireContest(N=Nc, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)

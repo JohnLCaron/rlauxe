@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.verifier
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -22,7 +21,7 @@ class Verifier(val publish: Publisher, val show: Boolean = false) {
     fun verify(): Boolean {
         var allOk = true
 
-        if (auditConfig.auditType == AuditType.CARD_COMPARISON) {
+        if (auditConfig.auditType == AuditType.CLCA) {
             allOk = allOk && verifyCvrSampleNumbers()
         } else {
             allOk = allOk && verifyBallotManifest()

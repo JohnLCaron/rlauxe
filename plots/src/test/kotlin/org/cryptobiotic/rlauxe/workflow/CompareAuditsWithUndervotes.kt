@@ -30,7 +30,7 @@ class CompareAuditsWithUndervotes {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, undervote, 0.0, mvrFuzzPct,
-                auditConfig=AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst),
+                auditConfig=AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 

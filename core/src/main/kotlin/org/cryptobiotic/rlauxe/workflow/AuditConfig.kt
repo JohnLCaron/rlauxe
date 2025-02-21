@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 
-enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
+enum class AuditType { POLLING, CLCA, ONEAUDIT }
 
 data class AuditConfig(
     val auditType: AuditType,
@@ -28,7 +28,7 @@ data class AuditConfig(
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, samplePctCutoff=$samplePctCutoff, minMargin=$minMargin version=$version")
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
-            AuditType.CARD_COMPARISON -> appendLine("  $clcaConfig")
+            AuditType.CLCA -> appendLine("  $clcaConfig")
             AuditType.ONEAUDIT -> appendLine("  $oaConfig, ")
         }
     }

@@ -9,12 +9,12 @@ class TestRaireWorkflow {
 
     @Test
     fun testRaireComparisonWithStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, nsimEst=10))
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10))
     }
 
     @Test
     fun testRaireComparisonNoStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, nsimEst=10))
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10))
     }
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
@@ -26,7 +26,7 @@ class TestRaireWorkflow {
     @Test
     fun testRaireFuzz() {
         val mvrFuzzPct = .02
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=false, nsimEst=10,
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = mvrFuzzPct))
 
         val (rcontest: RaireContestUnderAudit, cvrs: List<Cvr>) = makeRaireContest(N=20000, minMargin=.04, quiet = true)

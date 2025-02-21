@@ -71,21 +71,20 @@ fun runPollingAudit(
         return true
     }
 
+    if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
     contestsNotDone.forEach { contestUA ->
-        var allAssertionsDone = true
+        var contestAssertionStatus = mutableListOf<TestH0Status>()
         contestUA.pollingAssertions.forEach { assertion ->
             if (!assertion.status.complete) {
-                val testResult = auditPollingAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
-                assertion.status = testResult.status
+                val testH0Result = auditPollingAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
+                assertion.status = testH0Result.status
                 assertion.round = roundIdx
-                allAssertionsDone = allAssertionsDone && assertion.status.complete
             }
+            contestAssertionStatus.add(assertion.status)
         }
-        if (allAssertionsDone) {
-            contestUA.done = true
-            contestUA.status = TestH0Status.StatRejectNull // TODO
-        }
+        contestUA.done = contestAssertionStatus.all { it.complete }
+        contestUA.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
         allDone = allDone && contestUA.done
     }
     return allDone

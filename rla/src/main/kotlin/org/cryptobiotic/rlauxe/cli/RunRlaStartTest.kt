@@ -73,7 +73,7 @@ object RunRlaStartTest {
     ): Int {
         println("Start startTestElectionClca")
         val publish = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles = true, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 10)
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
 
         val maxMargin = .05

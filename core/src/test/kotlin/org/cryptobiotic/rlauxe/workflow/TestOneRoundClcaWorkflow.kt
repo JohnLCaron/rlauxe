@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 
 class TestOneRoundClcaWorkflow {
-    val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, nsimEst=10)
+    val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10)
 
     @Test
     fun testOneContest() {

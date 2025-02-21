@@ -62,6 +62,10 @@ class OneRoundAuditTask(
         val assorter = minAssertion.assorter
 
         val mvrMargin = assorter.calcAssorterMargin(contestUA.id, testMvrs, usePhantoms = true)
+        if (debug) println(" mvrMargin=$mvrMargin")
+        if (mvrMargin > .5) {
+            println(" **** mvrMargin=$mvrMargin")
+        }
 
         return if (minAssertion.roundResults.isEmpty()) { // TODO why is this empty?
             WorkflowResult(
@@ -131,11 +135,16 @@ fun runSingleClcaAudit(
     contestsNotDone.forEach { contestUA ->
         contestUA.clcaAssertions.forEach { cassertion ->
             val testH0Result = auditClcaAssertion(auditConfig, contestUA, cassertion, cvrPairs, 1, quiet = quiet)
+            if (debug) {
+                println(" testH0Result=$testH0Result")
+            }
             cassertion.status = testH0Result.status
             cassertion.round = 1
         }
     }
     return true
 }
+
+private val debug = false
 
 

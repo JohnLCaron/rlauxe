@@ -12,7 +12,7 @@ class TestCvrFlips {
     @Test
     fun testCvrFlips() {
         val mean = .55
-        val cvrs = makeCvrsByExactMean(1000, mean)
+        val cvrs = makeCvrsByExactMean(1000, mean) // no phantoms
 
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
@@ -56,6 +56,12 @@ class TestCvrFlips {
         println("flip p2o= $p2o: calcMargin = ${df(calcMargin)} diff = ${df(margin-calcMargin)}")
         assertEquals(margin-calcMargin, 2 * p2o, doublePrecision)
     }
+
+    //flip p2o=0.01: calcMargin = 0.0800 diff = 0.0200
+    //flip p2o= 0.02: calcMargin = 0.0600 diff = 0.0400
+    //flip p1o= 0.02: calcMargin = 0.0800 diff = 0.0200
+    //flip p1o= 0.01: calcMargin = 0.0900 diff = 0.0100
+    //flip p2o= 0.03: calcMargin = 0.0400 diff = 0.0600
 
     @Test
     fun testFalsePositives() {

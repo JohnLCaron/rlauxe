@@ -43,7 +43,6 @@ fun estimateSampleSizeSimple(
     return max(r, over_under_sum).toInt()
 }
 
-
 // COBRA equation 1 is a deterministic lower bound on sample size, dependent on margin and risk limit.
 // COBRA equation 2 has the maximum expected value for given over/understatement rates. See OptimalLambda class for implementation.
 

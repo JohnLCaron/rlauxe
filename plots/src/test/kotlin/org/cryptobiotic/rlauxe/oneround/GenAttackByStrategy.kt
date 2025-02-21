@@ -6,42 +6,46 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-class GenVsMarginByStrategy2 {
-    val name = "clcaOneRoundByStrategy"
-    var dirName = "/home/stormy/temp/oneround/marginByStrategy2"
+class GenAttackByStrategy {
+    val name = "clcaAttacksByStrategy"
+    var dirName = "/home/stormy/temp/oneround/attacksByStrategy"
 
     val N = 100000
     val nruns = 1000
     val nsimEst = 10
-    val fuzzPct = .01
-    var phantomPct = .02
+    val fuzzPct = .00
+    var phantomPct = .00
 
     @Test
     fun genSamplesVsMarginByStrategy() {
-        val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .025, .03, .04, .05, .06, .07, .08, .10)
+        val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01)
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CARD_COMPARISON, true)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
             val clcaGenerator1 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle, fuzzPct))
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
+                p1flips=margin,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
             val clcaGenerator2 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror)),
+                        p1flips=margin,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val clcaGenerator3 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
-            )
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)),
+                p1flips=margin,
+
+                )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             /* val clcaGenerator4 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
@@ -51,7 +55,9 @@ class GenVsMarginByStrategy2 {
 
             val clcaGenerator5 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)),
+                p1flips=margin,
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
 
             /* val clcaGenerator6 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
@@ -76,7 +82,7 @@ class GenVsMarginByStrategy2 {
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.Linear)
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLog)
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLinear)
-        showFailuresVsMargin(dirName, name, subtitle)
+        showFalsePositivesVsMargin(dirName, name, subtitle)
     }
 
     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
@@ -87,24 +93,40 @@ class GenVsMarginByStrategy2 {
             subtitleS = subtitle,
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
-            xname = "true margin", xfld = { it.mvrMargin},
+            xname = "margin", xfld = { it.margin},
             yname = "samplesNeeded", yfld = { it.samplesNeeded },
             catName = "strategy", catfld = { category(it) },
             scaleType = scaleType
         )
     }
 
-    fun showFailuresVsMargin(dirName: String, name:String, subtitle: String) {
+    fun showFalsePositivesVsMargin(dirName: String, name:String, subtitle: String) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name failurePct",
             subtitleS = subtitle,
-            writeFile = "$dirName/${name}Failure",
+            writeFile = "$dirName/${name}FalsePositives",
             wrs = data,
-            xname = "true margin", xfld = { it.mvrMargin },
-            yname = "failPct", yfld = { it.failPct },
-            catName = "flipPct", catfld = { category(it) },
+            xname = "margin", xfld = { it.margin },
+            yname = "successPct", yfld = { 100.0 - it.failPct },
+            catName = "strategy", catfld = { category(it) },
         )
+    }
+
+    @Test
+    fun runOne() {
+        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
+        val reportedMargin = .01
+        val flip1 = .01
+        val taskgen = ClcaOneRoundAuditTaskGenerator(
+            N, margin=reportedMargin, 0.0, 0.0, 0.0,
+            parameters = mapOf("nruns" to nruns, "cat" to flip1),
+            auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
+            p1flips=flip1,
+        )
+        val task: OneRoundAuditTask = taskgen.generateNewTask()
+        val result =  task.run()
+        println(result)
     }
 }

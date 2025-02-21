@@ -93,7 +93,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 }
 
 fun AuditConfigJson.import(): AuditConfig {
-    val auditType = safeEnumValueOf(this.auditType) ?: AuditType.CARD_COMPARISON
+    val auditType = safeEnumValueOf(this.auditType) ?: AuditType.CLCA
     return AuditConfig(
         auditType,
         this.hasStyles,

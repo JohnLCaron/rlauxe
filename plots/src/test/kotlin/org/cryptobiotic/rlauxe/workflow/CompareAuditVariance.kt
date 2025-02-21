@@ -56,7 +56,7 @@ class CompareAuditVariance {
         val margins =
             listOf(.006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
-        val clcaConfig = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
+        val clcaConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
             clcaConfig =ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
 
         val stopwatch = Stopwatch()

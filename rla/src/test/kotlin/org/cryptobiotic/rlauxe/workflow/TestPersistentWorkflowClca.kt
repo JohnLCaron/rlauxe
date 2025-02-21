@@ -23,7 +23,7 @@ class TestPersistentWorkflowClca {
     fun testPersistentWorkflowClca() {
         val fuzzMvrs = .01
         val publish = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10)
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
 
         val N = 5000
@@ -104,7 +104,7 @@ fun readPersistentWorkflow(round: Int, publish: Publisher): PersistentWorkflow {
     val electionState = resultAuditResult.unwrap()
     assertNotNull(electionState)
 
-    if (auditConfig.auditType == AuditType.CARD_COMPARISON) {
+    if (auditConfig.auditType == AuditType.CLCA) {
         val resultCvrs = readCvrsJsonFile(publish.cvrsFile())
         if (resultCvrs is Err) println(resultCvrs)
         assertTrue(resultCvrs is Ok)

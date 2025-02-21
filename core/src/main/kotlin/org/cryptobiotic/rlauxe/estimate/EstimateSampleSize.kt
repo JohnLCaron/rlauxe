@@ -136,7 +136,7 @@ class SimulateSampleSizeTask(
     override fun name() = "task ${contestUA.name} ${assertion.assorter.desc()}}"
     override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (auditConfig.auditType) {
-            AuditType.CARD_COMPARISON ->
+            AuditType.CLCA ->
                 simulateSampleSizeClcaAssorter(
                     auditConfig,
                     contestUA.contest,

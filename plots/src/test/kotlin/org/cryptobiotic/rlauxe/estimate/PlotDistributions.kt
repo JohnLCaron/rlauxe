@@ -23,7 +23,7 @@ class PlotDistributions {
     @Test
     fun plotDistributions() {
         val auditConfig = AuditConfig(
-            AuditType.CARD_COMPARISON,
+            AuditType.CLCA,
             true,
             samplePctCutoff = 1.0,
             nsimEst = nsimEst,

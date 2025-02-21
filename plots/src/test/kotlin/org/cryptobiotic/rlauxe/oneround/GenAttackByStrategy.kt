@@ -22,7 +22,7 @@ class GenAttackByStrategy {
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true)
+        val config = AuditConfig(AuditType.CLCA, true)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
@@ -116,7 +116,7 @@ class GenAttackByStrategy {
 
     @Test
     fun runOne() {
-        val config = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
         val reportedMargin = .01
         val flip1 = .01
         val taskgen = ClcaOneRoundAuditTaskGenerator(

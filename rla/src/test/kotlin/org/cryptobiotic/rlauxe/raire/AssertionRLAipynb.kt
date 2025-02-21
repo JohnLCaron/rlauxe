@@ -276,7 +276,7 @@ class AssertionRLA {
             candidate = listOf(15, 16, 17, 18, 45),
             winner = listOf(15),
             assertion_file = "./data/SFDA2019/SF2019Nov8Assertions.json",
-            audit_type = AuditType.CARD_COMPARISON,
+            audit_type = AuditType.CLCA,
         )
 
         // Raire Assertions

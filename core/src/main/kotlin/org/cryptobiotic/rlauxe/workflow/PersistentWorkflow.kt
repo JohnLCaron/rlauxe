@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.*
 import kotlin.math.max
 
-/** created from persistent state */
+/** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartTest.kt */
 class PersistentWorkflow(
     val auditConfig: AuditConfig,
     val contestsUA: List<ContestUnderAudit>,
@@ -32,10 +32,10 @@ class PersistentWorkflow(
     }
 
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        return if (auditConfig.auditType == AuditType.POLLING) {
-            runPollingAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
-        } else {
-            runClcaAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
+        return when (auditConfig.auditType) {
+            AuditType.CLCA -> runClcaAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
+            AuditType.POLLING -> runPollingAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
+            AuditType.ONEAUDIT -> runOneAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
         }
     }
 

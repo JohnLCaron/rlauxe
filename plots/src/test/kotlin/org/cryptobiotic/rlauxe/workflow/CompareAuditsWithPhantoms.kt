@@ -29,7 +29,7 @@ class CompareAuditsWithPhantoms {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfig=AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst),
+                auditConfig=AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
@@ -86,7 +86,7 @@ class CompareAuditsWithPhantoms {
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
         val stopwatch = Stopwatch()
 
-        val auditConfig = AuditConfig(AuditType.CARD_COMPARISON, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
+        val auditConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
             clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

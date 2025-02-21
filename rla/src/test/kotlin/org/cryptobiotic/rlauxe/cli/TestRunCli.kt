@@ -6,7 +6,8 @@ class TestRunCli {
 
     @Test
     fun testCliRoundClca() {
-        val topdir = kotlin.io.path.createTempDirectory().toString()
+        val topdir = "/home/stormy/temp/persist/testRunCli"
+        // val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/testMvrs.json"
         RunRlaStartTest.main(
             arrayOf(
@@ -15,6 +16,8 @@ class TestRunCli {
                 "-fuzzMvrs", ".0123",
                 "-pctPhantoms", "0.001",
                 "-mvrs", mvrs,
+                "-ncards", "5000",
+                "-ncontests", "5",
             )
         )
 
@@ -22,6 +25,7 @@ class TestRunCli {
             RunRound.main(arrayOf("-in", topdir, "-mvrs", mvrs))
         }
 
+        println("============================================================")
         RunVerifier.main(arrayOf("-in", topdir))
     }
 

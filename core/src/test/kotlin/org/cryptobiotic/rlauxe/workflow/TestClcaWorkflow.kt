@@ -91,16 +91,8 @@ class TestClcaWorkflow {
     }
 
     @Test
-    fun testComparisonPrevious() {
-        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous))
-        val N = 50000
-        val testData = MultiContestTestData(11, 4, N)
-        testComparisonWorkflow(auditConfig, testData)
-    }
-
-    @Test
-    fun testComparisonMixed() {
-        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.mixed))
+    fun testComparisonPhantomStrategy() {
+        val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         testComparisonWorkflow(auditConfig, testData)

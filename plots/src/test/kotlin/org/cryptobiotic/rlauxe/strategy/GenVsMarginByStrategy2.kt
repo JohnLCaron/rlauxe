@@ -33,7 +33,7 @@ class GenVsMarginByStrategy2 {
 
             val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.mixed, fuzzPct))
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
@@ -43,22 +43,10 @@ class GenVsMarginByStrategy2 {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
-            val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
-
-            //if (phantomPct > 0.0) {
-                val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                    parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
-                    auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
-                tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
-
-                val clcaGenerator6 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                    parameters= mapOf("nruns" to nruns, "cat" to "mixed", "fuzzPct" to fuzzPct),
-                    auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.mixed)))
-                tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator6))
-            //}
+            val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+                parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
 
         // run tasks concurrently and average the results

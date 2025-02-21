@@ -137,22 +137,6 @@ fun auditClcaAssertion(
     val clcaConfig = auditConfig.clcaConfig
     val bettingFn: BettingFn = when (clcaConfig.strategy) {
 
-        ClcaStrategyType.previous -> {
-            // use previous round errors as apriori, then adapt to actual mvrs
-            val phantomRate = contestUA.contest.phantomRate()
-            val errorRates = if (roundIdx > 1) (cassertion.roundResults.last().errorRates!!) // TODO minimum phantomRate for p1o?
-                    else if (phantomRate == 0.0) ClcaErrorRates(0.0, 0.0, 0.0, 0.0) else ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
-            if (debugErrorRates) println(" previous audit round $roundIdx errorRates=$errorRates")
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                errorRates
-            )
-        }
-
-        ClcaStrategyType.mixed,
         ClcaStrategyType.phantoms -> {
             // use phantomRate as apriori, then adapt to actual mvrs
             val errorRates = ClcaErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)

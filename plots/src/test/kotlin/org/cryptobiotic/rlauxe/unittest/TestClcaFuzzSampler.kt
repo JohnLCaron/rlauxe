@@ -26,7 +26,7 @@ class TestClcaFuzzSampler {
         val auditConfig = AuditConfig(
             AuditType.CLCA,
             hasStyles = true,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous, simFuzzPct = .011)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms, simFuzzPct = .011)
         )
 
         contestsUA.forEach { contestUA ->

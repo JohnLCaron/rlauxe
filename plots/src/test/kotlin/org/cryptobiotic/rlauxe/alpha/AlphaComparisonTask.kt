@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.sampling.runTestRepeated
-import org.cryptobiotic.rlauxe.sampling.Sampler
+import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 

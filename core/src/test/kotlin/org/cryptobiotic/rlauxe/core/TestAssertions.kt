@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import kotlin.test.Test

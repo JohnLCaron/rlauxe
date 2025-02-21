@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ClcaSimulation
+import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import kotlin.test.Test
 
 class TestComparisonSamplerWithRaire {
@@ -35,7 +35,7 @@ class TestComparisonSamplerWithRaire {
     fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ClcaAssorter) {
         println("\n${cassorter.assorter().desc()}")
 
-        val sampler = ClcaSimulation(cvrs, contestUA.contest, cassorter, ClcaErrorRates.standard)
+        val sampler = ClcaSimulation(cvrs, contestUA.contest, cassorter, ClcaErrorTable.standard)
 
         val orgCvrs = cvrs.map { cassorter.assorter().assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { cassorter.assorter().assort(it) }.average()

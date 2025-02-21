@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals

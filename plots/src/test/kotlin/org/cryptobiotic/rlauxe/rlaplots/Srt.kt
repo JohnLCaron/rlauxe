@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.sampling.EstimationResult
-import org.cryptobiotic.rlauxe.sampling.SimulateSampleSizeTask
-import org.cryptobiotic.rlauxe.sampling.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.EstimationResult
+import org.cryptobiotic.rlauxe.estimate.SimulateSampleSizeTask
+import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.*
 import java.io.BufferedReader
 import java.io.File

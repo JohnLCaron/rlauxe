@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.sampling.*
+import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 
 private val debugErrorRates = false
@@ -145,7 +145,7 @@ fun auditClcaAssertion(
             // use previous round errors as apriori, then adapt to actual mvrs
             val phantomRate = contestUA.contest.phantomRate()
             val errorRates = if (roundIdx > 1) (cassertion.roundResults.last().errorRates!!) // TODO minimum phantomRate for p1o?
-                    else if (phantomRate == 0.0) ErrorRates(0.0, 0.0, 0.0, 0.0) else ErrorRates(0.0, phantomRate, 0.0, 0.0)
+                    else if (phantomRate == 0.0) ClcaErrorRates(0.0, 0.0, 0.0, 0.0) else ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
             if (debugErrorRates) println(" previous audit round $roundIdx errorRates=$errorRates")
             AdaptiveComparison(
                 Nc = contestUA.Nc,
@@ -159,7 +159,7 @@ fun auditClcaAssertion(
         ClcaStrategyType.mixed,
         ClcaStrategyType.phantoms -> {
             // use phantomRate as apriori, then adapt to actual mvrs
-            val errorRates = ErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)
+            val errorRates = ClcaErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)
             if (debugErrorRates) println(" phantoms audit round $roundIdx errorRates=$errorRates")
             AdaptiveComparison(
                 Nc = contestUA.Nc,
@@ -172,7 +172,7 @@ fun auditClcaAssertion(
 
         ClcaStrategyType.oracle -> {
             // use the actual errors comparing mvrs to cvrs. Testing only
-            val errorRates = ClcaErrorRates.calcErrorRates(contestUA.id, cassorter, cvrPairs)
+            val errorRates = ClcaErrorTable.calcErrorRates(contestUA.id, cassorter, cvrPairs)
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }
 
@@ -183,13 +183,13 @@ fun auditClcaAssertion(
                 withoutReplacement = true,
                 a = cassorter.noerror(),
                 d = clcaConfig.d,
-                ErrorRates(0.0, 0.0, 0.0, 0.0)
+                ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
             )
         }
 
         ClcaStrategyType.fuzzPct -> {
             // use computed errors as apriori, then adapt to actual mvrs.
-            val errorRates = ClcaErrorRates.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
+            val errorRates = ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
             if (debugErrorRates) println(" fuzzPct errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
 
             AdaptiveComparison(

@@ -4,28 +4,28 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.test.*
 
-class TestErrorRates {
+class TestClcaErrorRates {
 
     @Test
     fun testBasics() {
-        val er = ErrorRates.fromList(listOf(0.1, 0.2, 0.3, 0.4))
+        val er = ClcaErrorRates.fromList(listOf(0.1, 0.2, 0.3, 0.4))
         val erl = er.toList()
-        val er2 = ErrorRates.fromList(erl)
-        val er3 = ErrorRates(0.1, 0.2, 0.3, 0.4)
+        val er2 = ClcaErrorRates.fromList(erl)
+        val er3 = ClcaErrorRates(0.1, 0.2, 0.3, 0.4)
 
         assertEquals(er, er2)
         assertEquals(er, er3)
         assertEquals(er2, er3)
         assertFalse(er.areZero())
-        assertTrue(ErrorRates(0.0, 0.0, 0.0, 0.0).areZero())
+        assertTrue(ClcaErrorRates(0.0, 0.0, 0.0, 0.0).areZero())
 
         val mess = assertFailsWith<RuntimeException> {
-            ErrorRates.fromList(listOf(0.1, 0.2, 0.3, 0.4, 0.5))
+            ClcaErrorRates.fromList(listOf(0.1, 0.2, 0.3, 0.4, 0.5))
         }.message
         assertEquals("ErrorRates list must have 4 elements", mess)
 
         val mess2 = assertFailsWith<RuntimeException> {
-            ErrorRates.fromList(listOf(0.1, 0.2, 0.3, 1.1))
+            ClcaErrorRates.fromList(listOf(0.1, 0.2, 0.3, 1.1))
         }.message
         assertEquals("p2u out of range 1.1", mess2)
     }

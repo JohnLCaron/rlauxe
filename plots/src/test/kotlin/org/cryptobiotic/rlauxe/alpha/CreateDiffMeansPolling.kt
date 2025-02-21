@@ -24,8 +24,9 @@ import org.cryptobiotic.rlauxe.plots.plotSRTstdev
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.sampling.*
+import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
 import kotlin.test.Test
 
 // CANDIDATE FOR REFACTOR

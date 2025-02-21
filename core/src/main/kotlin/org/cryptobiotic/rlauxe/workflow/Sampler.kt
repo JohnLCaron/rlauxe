@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
 
-//// abstraction for creating a sequence of samples // rename "Predictable Sequence" ??
+//// abstraction for creating a sequence of samples
 interface Sampler: Iterator<Double> {
     fun sample(): Double // get next in sample
     fun maxSamples(): Int  // population size

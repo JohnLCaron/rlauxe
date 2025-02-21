@@ -6,10 +6,10 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
-import org.cryptobiotic.rlauxe.sampling.ContestSimulation
-import org.cryptobiotic.rlauxe.sampling.makeFlippedMvrs
-import org.cryptobiotic.rlauxe.sampling.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.sampling.makeOtherCvrForContest
+import org.cryptobiotic.rlauxe.estimate.ContestSimulation
+import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeOtherCvrForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
 import java.util.concurrent.TimeUnit

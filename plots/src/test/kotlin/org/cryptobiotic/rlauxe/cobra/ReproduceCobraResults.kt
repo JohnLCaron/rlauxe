@@ -1,15 +1,15 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.sampling.ClcaAttackSampler
-import org.cryptobiotic.rlauxe.sampling.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
+import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.math.ln
 import kotlin.test.Test
@@ -163,7 +163,7 @@ class ReproduceCobraResults {
 
                         val oracle = OracleComparison(
                             a = compareAssorter.noerror,
-                            ErrorRates(p2, p1, 0.0, 0.0)
+                            ClcaErrorRates(p2, p1, 0.0, 0.0)
                         )
                         val betting =
                             BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror, upperBound = upperBound, withoutReplacement = false)
@@ -246,7 +246,7 @@ class ReproduceCobraResults {
                             withoutReplacement = false,
                             a = compareAssorter.noerror,
                             d = d,
-                            ErrorRates(p2prior, p1prior, 0.0, 0.0),
+                            ClcaErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
                         val betting =

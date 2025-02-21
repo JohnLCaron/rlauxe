@@ -226,7 +226,7 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * .5
         override fun mean() = 0.5
         override fun variance() = 0.0
-        override fun errorRates() = ErrorRates(0.0, 0.0, 0.0, 0.0, )
+        override fun errorRates() = ClcaErrorRates(0.0, 0.0, 0.0, 0.0, )
     }
 
     @Test
@@ -251,7 +251,7 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * noerror
         override fun mean() = noerror
         override fun variance() = 0.0
-        override fun errorRates() = ErrorRates(0.0, 0.0, 0.0, 0.0, )
+        override fun errorRates() = ClcaErrorRates(0.0, 0.0, 0.0, 0.0, )
     }
 }
 

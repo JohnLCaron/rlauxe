@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit

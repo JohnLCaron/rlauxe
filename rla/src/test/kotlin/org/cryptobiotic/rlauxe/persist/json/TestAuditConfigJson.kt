@@ -2,9 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ErrorRates
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,7 +21,7 @@ class TestAuditConfigJson {
 
         testRoundtrips(AuditConfig(AuditType.CARD_COMPARISON, hasStyles=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
             samplePctCutoff=.10,  version=2.0,
-            clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, ErrorRates(.01, .02, .03, .04), d = 99)
+            clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, ClcaErrorRates(.01, .02, .03, .04), d = 99)
         ))
         testRoundtrips(AuditConfig(AuditType.POLLING, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
             samplePctCutoff=.10,  version=2.0,

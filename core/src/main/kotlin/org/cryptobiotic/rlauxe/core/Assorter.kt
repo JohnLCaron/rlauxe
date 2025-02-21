@@ -223,7 +223,7 @@ data class AuditRoundResult(
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
-    val errorRates: ErrorRates? = null, // measured error rates (clca only)
+    val errorRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
     override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotsUsed=$maxBallotsUsed " +
             " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"

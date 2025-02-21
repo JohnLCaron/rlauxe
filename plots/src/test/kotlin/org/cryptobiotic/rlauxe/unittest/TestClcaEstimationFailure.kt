@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.sampling.ClcaSimulation
-import org.cryptobiotic.rlauxe.sampling.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.*
@@ -48,7 +48,7 @@ class TestClcaEstimationFailure {
         if (debug) println("\n$contest phantomRate=${contest.phantomRate()}")
 
         val phantomRate = contest.phantomRate()
-        val errorRates = ErrorRates(0.0, phantomRate, 0.0, 0.0)
+        val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulation(cvrs, contestUA.contest, cassorter, errorRates)
         if (debug) print(sampler.showFlips())
 

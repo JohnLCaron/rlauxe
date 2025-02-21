@@ -1,9 +1,10 @@
-package org.cryptobiotic.rlauxe.sampling
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.random.Random
 
 // this takes a list of cvrs and fuzzes them

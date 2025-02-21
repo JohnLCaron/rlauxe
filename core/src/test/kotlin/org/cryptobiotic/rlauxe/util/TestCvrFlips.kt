@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.sampling.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.sampling.makeFlippedMvrs
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 

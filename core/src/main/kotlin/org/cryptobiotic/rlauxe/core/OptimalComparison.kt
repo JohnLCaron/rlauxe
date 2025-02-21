@@ -71,7 +71,7 @@ class AdaptiveComparison(
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
-    errorRates: ErrorRates, // ? = null,  // a priori estimate of the error rates
+    errorRates: ClcaErrorRates, // ? = null,  // a priori estimate of the error rates
     val eps: Double = .00001
 ): BettingFn {
     val p2o: Double = if (errorRates == null) -1.0 else errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
@@ -87,7 +87,7 @@ class AdaptiveComparison(
         val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
-        val kelly = OptimalLambda(a, ErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
+        val kelly = OptimalLambda(a, ClcaErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
         return kelly.solve()
     }
 
@@ -106,7 +106,7 @@ class AdaptiveComparison(
 // We know the true rate of all errors
 class OracleComparison(
     val a: Double, // noerror
-    val errorRates: ErrorRates,
+    val errorRates: ClcaErrorRates,
 ): BettingFn {
     val lam: Double
     init {
@@ -135,7 +135,7 @@ class OracleComparison(
  * p1u := #{xi = 3a/2}/N is the rate of 1-vote understatements.
  * p2u := #{xi = 2a}/N is the rate of 2-vote understatements.
  */
-class OptimalLambda(val a: Double, val errorRates: ErrorRates, val mui: Double = 0.5) {
+class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Double = 0.5) {
     val p2o = errorRates.p2o
     val p1o = errorRates.p1o
     val p1u = errorRates.p1u

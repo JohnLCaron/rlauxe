@@ -11,7 +11,7 @@ interface SampleTracker {
     fun sum(): Double   // sum of samples so far
     fun mean(): Double   // average of samples so far
     fun variance(): Double   // variance of samples so far
-    fun errorRates(): ErrorRates   // only for clca
+    fun errorRates(): ClcaErrorRates   // only for clca
 }
 
 /**
@@ -30,7 +30,7 @@ class PrevSamples : SampleTracker {
     override fun sum() = sum
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
-    override fun errorRates() = ErrorRates(0.0, 0.0, 0.0, 0.0, )
+    override fun errorRates() = ClcaErrorRates(0.0, 0.0, 0.0, 0.0, )
 
     fun addSample(sample : Double) {
         last = sample
@@ -81,9 +81,9 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     }
 
     fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
-    override fun errorRates(): ErrorRates {
+    override fun errorRates(): ClcaErrorRates {
         val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
-        return ErrorRates(p[1], p[2], p[3], p[4])
+        return ClcaErrorRates(p[1], p[2], p[3], p[4])
     }
     fun errorRatesList(): List<Double> {
         val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
@@ -91,23 +91,3 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     }
 }
 
-data class ErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
-    init {
-        require(p2o in 0.0..1.0) {"p2o out of range $p2o"}
-        require(p1o in 0.0..1.0) {"p1o out of range $p1o"}
-        require(p1u in 0.0..1.0) {"p1u out of range $p1u"}
-        require(p2u in 0.0..1.0) {"p2u out of range $p2u"}
-    }
-    override fun toString(): String {
-        return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
-    }
-    fun toList() = listOf(p2o, p1o, p1u, p2u)
-    fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
-
-    companion object {
-        fun fromList(list: List<Double>): ErrorRates {
-            require(list.size == 4) { "ErrorRates list must have 4 elements"}
-            return ErrorRates(list[0], list[1], list[2], list[3])
-        }
-    }
-}

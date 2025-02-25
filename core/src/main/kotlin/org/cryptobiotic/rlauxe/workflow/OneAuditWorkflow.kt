@@ -135,12 +135,12 @@ fun runOneAuditAssertionAlpha(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
-        maxBallotsUsed = sampler.maxSamplesUsed(),
+        maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
-        errorRates = testH0Result.tracker.errorRates()
+        measuredMean = testH0Result.tracker.mean(),
     )
     cassertion.roundResults.add(roundResult)
 

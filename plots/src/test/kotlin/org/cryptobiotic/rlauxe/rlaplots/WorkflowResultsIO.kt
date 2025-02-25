@@ -75,7 +75,7 @@ class WorkflowResultsIO(val filename: String) {
         val stddev = if (tokens.size > 9) ttokens[idx++].toDouble() else 0.0
         val mvrMargin = if (tokens.size > 10) ttokens[idx++].toDouble() else 0.0
 
-        val status = safeEnumValueOf(statusS) ?: TestH0Status.InProgress
+        val status = enumValueOf(statusS, TestH0Status.entries) ?: TestH0Status.InProgress
         return WorkflowResult(N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, readParameters(parameters), failPct, stddev, mvrMargin)
     }
 

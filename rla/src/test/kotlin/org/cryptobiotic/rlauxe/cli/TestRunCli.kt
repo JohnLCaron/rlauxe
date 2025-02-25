@@ -17,7 +17,7 @@ class TestRunCli {
                 "-pctPhantoms", "0.001",
                 "-mvrs", mvrs,
                 "-ncards", "5000",
-                "-ncontests", "5",
+                "-ncontests", "15",
             )
         )
 
@@ -31,7 +31,8 @@ class TestRunCli {
 
     @Test
     fun testCliRoundPolling() {
-        val topdir = kotlin.io.path.createTempDirectory().toString()
+        val topdir = "/home/stormy/temp/persist/testRunCli2"
+        // val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/testMvrs.json"
         RunRlaStartTest.main(
             arrayOf(
@@ -39,6 +40,7 @@ class TestRunCli {
                 "-isPolling",
                 "-fuzzMvrs", ".0123",
                 "-mvrs", mvrs,
+                "-ncards", "20000",
             )
         )
 

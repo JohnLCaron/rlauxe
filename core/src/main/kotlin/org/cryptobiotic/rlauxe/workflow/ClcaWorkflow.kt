@@ -135,61 +135,36 @@ fun auditClcaAssertion(
     val sampler = ClcaWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
 
     val clcaConfig = auditConfig.clcaConfig
-    val bettingFn: BettingFn = when (clcaConfig.strategy) {
-
+    val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
+        ClcaStrategyType.previous,
         ClcaStrategyType.phantoms -> {
-            // use phantomRate as apriori, then adapt to actual mvrs
-            val errorRates = ClcaErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)
-            if (debugErrorRates) println(" phantoms audit round $roundIdx errorRates=$errorRates")
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                errorRates
-            )
+            // use phantomRate as apriori
+            ClcaErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)
         }
 
         ClcaStrategyType.oracle -> {
             // use the actual errors comparing mvrs to cvrs. Testing only
-            val errorRates = ClcaErrorTable.calcErrorRates(contestUA.id, cassorter, cvrPairs)
-            OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+            ClcaErrorTable.calcErrorRates(contestUA.id, cassorter, cvrPairs)
         }
 
         ClcaStrategyType.noerror -> {
-            // no errors as apriori, then adapt to actual mvrs
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
-            )
+            ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
         }
 
         ClcaStrategyType.fuzzPct -> {
-            // use computed errors as apriori, then adapt to actual mvrs.
-            val errorRates = ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
-            if (debugErrorRates) println(" fuzzPct errorRates = ${errorRates} for round ${cassertion.roundResults.size + 1}")
-
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                errorRates
-            )
+            // use computed errors as apriori
+            ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
         }
 
         ClcaStrategyType.apriori ->
-            // use given errors as apriori, then adapt to actual mvrs.
-            AdaptiveComparison(
-                Nc = contestUA.Nc,
-                withoutReplacement = true,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                clcaConfig.errorRates!!
-            )
+            // use given errors as apriori
+            clcaConfig.errorRates!!
+    }
+
+    val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
+        OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+    } else {
+        AdaptiveComparison(Nc = contestUA.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
     }
 
     val testFn = BettingMart(
@@ -205,12 +180,14 @@ fun auditClcaAssertion(
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=cassertion.estSampleSize,
-        maxBallotsUsed = sampler.maxSamplesUsed(),
+        maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
-        errorRates = testH0Result.tracker.errorRates()
+        measuredMean = testH0Result.tracker.mean(),
+        startingRates = errorRates,
+        measuredRates = testH0Result.tracker.errorRates(),
     )
     cassertion.roundResults.add(roundResult)
 

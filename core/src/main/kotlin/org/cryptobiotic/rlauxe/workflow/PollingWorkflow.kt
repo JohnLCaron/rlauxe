@@ -120,17 +120,16 @@ fun auditPollingAssertion(
         upperBound = assorter.upperBound(),
     )
 
-    // do not terminate on null reject, continue to use all available samples
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 
     val roundResult = AuditRoundResult(roundIdx,
         estSampleSize=assertion.estSampleSize,
-        maxBallotsUsed = sampler.maxSamplesUsed(),
+        maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
-        errorRates = testH0Result.tracker.errorRates()
+        measuredMean = testH0Result.tracker.mean(),
     )
     assertion.roundResults.add(roundResult)
 

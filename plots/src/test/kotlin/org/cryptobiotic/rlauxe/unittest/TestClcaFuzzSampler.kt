@@ -70,6 +70,7 @@ fun runWithComparisonFuzzSampler(
     )
 
     return simulateSampleSizeBetaMart(
+        1,
         auditConfig,
         sampler,
         optimal,

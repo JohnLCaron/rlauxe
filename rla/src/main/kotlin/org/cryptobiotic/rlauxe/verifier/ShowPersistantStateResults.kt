@@ -82,13 +82,12 @@ class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = fal
             result = false
         }
 
-        val indices = readSampleIndicesJsonFile(publish.sampleIndicesFile(roundIdx)).unwrap()
-        if (indices.size != state.nmvrs) {
-            println("  *** nmvrs = ${state.nmvrs} should be = ${indices.size} ")
-            result = false
-        }
-
         if (state.auditWasDone) {
+            val indices = readSampleIndicesJsonFile(publish.sampleIndicesFile(roundIdx)).unwrap()
+            if (indices.size != state.nmvrs) {
+                println("  *** nmvrs = ${state.nmvrs} should be = ${indices.size} ")
+                result = false
+            }
             val mvrs = readCvrsJsonFile(publish.sampleMvrsFile(roundIdx)).unwrap()
             if (indices.size != mvrs.size) {
                 println("*** indices = ${indices.size} NOT EQUAL mvrs = ${mvrs.size}")

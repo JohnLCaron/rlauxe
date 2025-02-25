@@ -34,6 +34,7 @@ class GenPollingNoStylesOrg {
                 val moreParameters = mapOf("N" to N.toDouble(), "reportedMargin" to margin)
 
                 val task = SimulateSampleSizeTask(
+                    1,
                     auditConfig,
                     contestUA,
                     assertion,

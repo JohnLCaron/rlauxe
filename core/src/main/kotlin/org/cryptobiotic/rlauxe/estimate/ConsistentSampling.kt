@@ -5,16 +5,17 @@ import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowIF
 
-private val debug = true
+private val debug = false
 
-/** must have sampleSizes set. must have sampleNums assigned */
+/** must have contest.estSampleSize set. must have borc.sampleNumber assigned. */
 fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> {
     val auditConfig = workflow.auditConfig()
     val borc = workflow.getBallotsOrCvrs()
 
     // count the number of cvrs that have at least one contest under audit.
+    // TODO this is wrong for samplePctCutoff, except maybe the first round ??
     val N = if (!auditConfig.hasStyles) borc.size
-                else workflow.getBallotsOrCvrs().filter { it.hasOneOrMoreContest(workflow.getContests()) }.count()
+                  else borc.filter { it.hasOneOrMoreContest(workflow.getContests()) }.count()
 
     var sampleIndices: List<Int> = emptyList()
     val contestsNotDone = workflow.getContests().filter { !it.done }.toMutableList()
@@ -22,7 +23,7 @@ fun sample(workflow: RlauxWorkflowIF, roundIdx: Int, quiet: Boolean): List<Int> 
     while (contestsNotDone.isNotEmpty()) {
         sampleIndices = createSampleIndices(workflow, roundIdx, quiet)
         val pct = sampleIndices.size / N.toDouble()
-        if (debug) println(" createSampleIndices size = ${sampleIndices.size}, pct= $pct max=${auditConfig.samplePctCutoff}")
+        if (debug) println(" createSampleIndices size = ${sampleIndices.size} N=$N pct= $pct max=${auditConfig.samplePctCutoff}")
         if (pct <= auditConfig.samplePctCutoff) {
             break
         }

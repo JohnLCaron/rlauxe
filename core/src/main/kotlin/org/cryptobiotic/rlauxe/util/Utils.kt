@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import java.security.SecureRandom
+import kotlin.enums.EnumEntries
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
@@ -88,25 +89,16 @@ fun showDeciles(data: List<Int>) = buildString {
     appendLine("]")
 }
 
-/**
- * Normally, Kotlin's `Enum.valueOf` or [enumValueOf] method will throw an exception for an invalid
- * input. This method will instead return `null` if the string doesn't map to a valid value of the enum.
- */
-inline fun <reified T : Enum<T>> safeEnumValueOf(name: String?): T? {
-    if (name == null) {
-        return null
-    }
-
-    return try {
-        enumValueOf<T>(name)
-    } catch (e: IllegalArgumentException) {
-        null
-    }
-}
-
 fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
 
 fun MutableMap<String, Int>.mergeReduceS(others: List<Map<String, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
+
+fun <T : Enum<T>> enumValueOf(name: String, entries: EnumEntries<T>): T? {
+    for (status in entries) {
+        if (status.name.lowercase() == name.lowercase()) return status
+    }
+    return null
+}
 

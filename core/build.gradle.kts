@@ -32,19 +32,3 @@ tasks.test {
 kotlin {
     jvmToolchain(21)
 }
-
-tasks.register<Jar>("uberJar") {
-    archiveClassifier = "uber"
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    manifest {
-        attributes("Main-Class" to "org.cryptobiotic.eg.cli.RunShowSystem")
-    }
-
-    from(sourceSets.main.get().output)
-
-    dependsOn(configurations.runtimeClasspath)
-    from({
-        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-    })
-}

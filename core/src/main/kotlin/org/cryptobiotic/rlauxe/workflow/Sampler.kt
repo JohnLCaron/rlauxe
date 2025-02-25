@@ -46,14 +46,13 @@ class PollWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
-    fun maxSamplesUsed() = count
+    fun maxSampleIndexUsed() = idx
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
 }
 
 //// For clca audits
-// the values produced here are the B assort values, SHANGRLA section 3.2.
 class ClcaWithoutReplacement(
     val contestUA: ContestIF,
     val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
@@ -92,7 +91,7 @@ class ClcaWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
-    fun maxSamplesUsed() = count
+    fun maxSampleIndexUsed() = idx
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()

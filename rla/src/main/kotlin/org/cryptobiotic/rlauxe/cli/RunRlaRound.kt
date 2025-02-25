@@ -44,9 +44,9 @@ object RunRound {
         // read last state
         val publisher = Publisher(inputDir)
         val round = publisher.rounds()
-        val (auditConfig, workflow) = readPersistentWorkflow(round, publisher)
-        require(round == auditConfig.roundIdx)
-        require((workflow == null) == auditConfig.auditIsComplete)
+        val (prevState, workflow) = readPersistentWorkflow(round, publisher)
+        require(round == prevState.roundIdx)
+        require((workflow == null) == prevState.auditIsComplete)
 
         if (workflow == null) {
             println("***No more rounds, all done")
@@ -56,27 +56,24 @@ object RunRound {
             require(resultMvrs is Ok)
             val mvrs = resultMvrs.unwrap()
 
-            val (allDone, prevSamples) = runAuditStage(auditConfig, workflow, mvrs, publisher)
+            val (allDone, prevSamples) = runAuditStage(prevState, workflow, mvrs, publisher)
             if (!allDone) {
                 // get the next round of samples wanted
                 val samples = runChooseSamples(round + 1, workflow, publisher)
-                if (samples.size == 0) {
-                    println("***FAILED TO GET ANY SAMPLES***")
-                    return -1
+                val state = if (samples.size == 0) {
+                    println("*** NO SAMPLES: audit is done ***")
+                    AuditState("Round${round + 1}", round + 1, samples.size, 0, false, true, emptyList())
                 } else {
                     val roundSet = RoundIndexSet(round + 1, samples, prevSamples.toSet())
-                    println("  newSamplesNeeded=${roundSet.newSamples}, total samples=${samples.size}, ready to audit") // TODO save this number
+                    println("  newSamplesNeeded=${roundSet.newSamples}, total samples=${samples.size}, ready to audit")
 
                     // write the partial election state to round+1
                     // we want FailMaxSamplesAllowed to get recorded in the persistent state, even though its done
-                    val notdone =
-                        workflow.getContests().filter { !it.done || it.status == TestH0Status.FailMaxSamplesAllowed }
-
-                    val state =
-                        AuditState("Starting", round + 1, samples.size, roundSet.newSamples, false, false, notdone)
-                    writeAuditStateJsonFile(state, publisher.auditRoundFile(round + 1))
-                    println("   writeAuditStateJsonFile ${publisher.auditRoundFile(round + 1)}")
+                    val contestsNotDone = workflow.getContests().filter { !it.done || it.status == TestH0Status.FailMaxSamplesAllowed }
+                    AuditState("Round${round + 1}", round + 1, samples.size, roundSet.newSamples, false, false, contestsNotDone)
                 }
+                writeAuditStateJsonFile(state, publisher.auditRoundFile(round + 1))
+                println("   writeAuditStateJsonFile ${publisher.auditRoundFile(round + 1)}")
             }
         }
         return 0
@@ -169,7 +166,6 @@ fun runAuditStage(
 
 data class RoundIndexSet(val round: Int, val sampledIndices: List<Int>, val previousSamples: Set<Int>) {
     var newSamples: Int = 0
-
     init {
         newSamples = sampledIndices.count { it !in previousSamples }
     }

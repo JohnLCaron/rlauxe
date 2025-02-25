@@ -45,7 +45,7 @@ tasks.register<Jar>("uberJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes("Main-Class" to "org.cryptobiotic.eg.cli.RunShowSystem")
+        attributes("Main-Class" to "org.cryptobiotic.rlauxe.cli.verifier.RunVerifier")
     }
 
     from(sourceSets.main.get().output)

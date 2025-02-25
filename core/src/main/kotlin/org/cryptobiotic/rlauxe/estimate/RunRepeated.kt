@@ -70,17 +70,16 @@ data class RunTestRepeatedResult(
     val nsuccess: Int,           // number of successful trials
     val ntrials: Int,            // total number of trials
     val variance: Double,        // variance over ntrials of samples needed
-    val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
+    val percentHist: Deciles? = null, // TODO remove
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
-    val margin: Double?,
+    val margin: Double?, // TODO needed?
 ) {
 
     fun successPct(): Double = 100.0 * nsuccess / (if (ntrials == 0) 1 else ntrials)
     fun failPct(): Double  = if (nsuccess == 0) 100.0 else 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
     fun avgSamplesNeeded(): Int  = totalSamplesNeeded / (if (nsuccess == 0) 1 else nsuccess)
     fun pctSamplesNeeded(): Double  = 100.0 * avgSamplesNeeded().toDouble() / (if (Nc == 0) 1 else Nc)
-    // fun errorRates() = buildString { errorRate.forEach{ append("${df(it)},") } }
 
     override fun toString() = buildString {
         appendLine("RunTestRepeatedResult: testParameters=$testParameters Nc=$Nc successPct=${successPct()} in ntrials=$ntrials")

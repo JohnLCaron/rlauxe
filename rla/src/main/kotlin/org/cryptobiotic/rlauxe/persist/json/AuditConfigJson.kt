@@ -11,7 +11,7 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.safeEnumValueOf
+import org.cryptobiotic.rlauxe.util.enumValueOf
 import org.cryptobiotic.rlauxe.workflow.*
 
 import java.io.FileOutputStream
@@ -93,7 +93,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 }
 
 fun AuditConfigJson.import(): AuditConfig {
-    val auditType = safeEnumValueOf(this.auditType) ?: AuditType.CLCA
+    val auditType = enumValueOf(this.auditType, AuditType.entries) ?: AuditType.CLCA
     return AuditConfig(
         auditType,
         this.hasStyles,
@@ -160,7 +160,7 @@ fun ClcaConfig.publishJson() : ClcaConfigJson {
 }
 
 fun ClcaConfigJson.import(): ClcaConfig {
-    val strategy = safeEnumValueOf(this.strategy) ?: ClcaStrategyType.noerror
+    val strategy = enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.noerror
     return ClcaConfig(
         strategy,
         this.simFuzzPct,
@@ -191,7 +191,7 @@ fun OneAuditConfig.publishJson() : OneAuditConfigJson {
 }
 
 fun OneAuditConfigJson.import(): OneAuditConfig {
-    val strategy = safeEnumValueOf(this.strategy) ?: OneAuditStrategyType.default
+    val strategy = enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.default
     return OneAuditConfig(
         strategy,
         this.simFuzzPct,

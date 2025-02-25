@@ -214,18 +214,31 @@ data class ClcaAssorter(
 }
 
 ///////////////////////////////////////////////////////////////////
+data class EstimationRoundResult(
+    val roundIdx: Int,
+    val strategy: String,
+    val fuzzPct: Double,
+    val startingTestStatistic: Double,
+    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
+    val sampleDeciles: List<Int>,   // distribution of estimated sample size as deciles
+) {
+    override fun toString() = "round=$roundIdx sampleDeciles=$sampleDeciles fuzzPct=$fuzzPct " +
+            " startingRates=$startingRates"
+}
 
 data class AuditRoundResult(
     val roundIdx: Int,
     val estSampleSize: Int,   // estimated sample size
-    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits)
+    val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
-    val errorRates: ClcaErrorRates? = null, // measured error rates (clca only)
+    val measuredMean: Double, // measured population mean
+    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
+    val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
-    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotsUsed=$maxBallotsUsed " +
+    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotIndexUsed=$maxBallotIndexUsed " +
             " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
 }
 
@@ -238,6 +251,7 @@ open class Assertion(
 
     // these values are set during estimateSampleSizes()
     var estSampleSize = 0   // estimated sample size for current round
+    val estRoundResults = mutableListOf<EstimationRoundResult>()
 
     // these values are set during runAudit()
     val roundResults = mutableListOf<AuditRoundResult>()

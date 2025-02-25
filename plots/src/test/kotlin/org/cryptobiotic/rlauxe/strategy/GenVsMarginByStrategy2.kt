@@ -7,13 +7,13 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenVsMarginByStrategy2 {
-    var name = "clcaVsMarginByStrategy0"
-    val dirName = "/home/stormy/temp/strategy2"
+    var name = "clcaVsMarginByStrategy1"
+    val dirName = "/home/stormy/temp/strategy3"
 
     val N = 50000
-    val nruns = 100  // number of times to run workflow
+    val nruns = 10  // number of times to run workflow
     val fuzzPct = .01
-    var phantomPct = .00
+    var phantomPct = .01
 
     @Test
     fun genSamplesVsMarginByStrategy() {
@@ -21,7 +21,7 @@ class GenVsMarginByStrategy2 {
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = 100, minMargin = 0.0, samplePctCutoff = 1.0)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = 10, minMargin = 0.0, samplePctCutoff = 1.0)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
@@ -42,6 +42,11 @@ class GenVsMarginByStrategy2 {
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
+
+            val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+                parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzPct),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),

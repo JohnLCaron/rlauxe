@@ -1,22 +1,11 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 package org.cryptobiotic.rlauxe.persist.json
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.safeEnumValueOf
+import org.cryptobiotic.rlauxe.util.enumValueOf
 
-import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 
 // data class ContestInfo(
 //    val name: String,
@@ -48,7 +37,7 @@ fun ContestInfo.publishJson() : ContestInfoJson {
 }
 
 fun ContestInfoJson.import(): ContestInfo {
-    val choiceFunction = safeEnumValueOf(this.choiceFunction) ?: SocialChoiceFunction.PLURALITY
+    val choiceFunction = enumValueOf(this.choiceFunction, SocialChoiceFunction.entries) ?: SocialChoiceFunction.PLURALITY
     return ContestInfo(
         this.name,
         this.id,

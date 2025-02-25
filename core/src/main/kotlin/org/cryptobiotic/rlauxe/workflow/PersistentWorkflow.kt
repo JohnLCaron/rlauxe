@@ -66,7 +66,7 @@ fun RlauxWorkflowIF.showResults(estSampleSize: Int) {
     this.getContests().forEach { contest ->
         contest.assertions().filter { it.roundResults.isNotEmpty() }.forEach { assertion ->
             val lastRound = assertion.roundResults.last()
-            maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotsUsed)
+            maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotIndexUsed)
         }
     }
     println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")

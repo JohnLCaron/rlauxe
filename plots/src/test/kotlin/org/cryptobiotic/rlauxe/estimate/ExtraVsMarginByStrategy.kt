@@ -1,0 +1,157 @@
+package org.cryptobiotic.rlauxe.estimate
+
+import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.rlaplots.*
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.test.Test
+
+class ExtraVsMarginByStrategy {
+    val N = 50000
+    val nruns = 10
+    val nsimEst = 100
+    val name = "extraVsMarginByStrategy"
+    val dirName = "/home/stormy/temp/extra/$name"
+    val fuzzMvrs = .01
+    var phantomPct = .01
+
+    @Test
+    fun estSamplesVsMarginByStrategy() {
+        val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
+        val stopwatch = Stopwatch()
+
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0, minMargin = 0.0)
+
+        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        margins.forEach { margin ->
+            val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+                parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzMvrs),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
+
+            val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+                parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzMvrs),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
+
+            val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+                parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzMvrs),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzMvrs))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
+
+            val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+                parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzMvrs),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
+
+            val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+                parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzMvrs),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
+        }
+
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        println(stopwatch.took())
+
+        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        writer.writeResults(results)
+
+        regenPlots()
+    }
+
+    @Test
+    fun regenPlots() {
+        val subtitle = " Nc=${N} nruns=${nruns} fuzzPct=${fuzzMvrs} phantomPct=${phantomPct}"
+        showNmrsVsMargin(dirName, name, subtitle, ScaleType.LogLinear)
+        showNmrsVsMargin(dirName, name, subtitle, ScaleType.LogLog)
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear)
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLog)
+        showFailuresVsMargin(subtitle)
+        showNroundsVsMargin(subtitle)
+    }
+
+    fun showNmrsVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val data = io.readResults()
+        wrsPlot(
+            titleS = "$name number of mvrs used",
+            subtitleS = subtitle,
+            writeFile = "$dirName/${name}Nmrs${scaleType.name}",
+            wrs = data,
+            xname = "margin", xfld = { it.margin },
+            yname = "nmrvs", yfld = { it.nmvrs },
+            catName = "strategy", catfld = { category(it) },
+            scaleType = scaleType
+        )
+    }
+
+    fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val data = io.readResults()
+        wrsPlot(
+            titleS = "$name extra samples needed",
+            subtitleS = subtitle,
+            writeFile = "$dirName/${name}Extra${scaleType.name}",
+            wrs = data,
+            xname = "margin", xfld = { it.margin },
+            yname = "extraSamples", yfld = { it.nmvrs - it.samplesNeeded },
+            catName = "strategy", catfld = { category(it) },
+            scaleType = scaleType
+        )
+    }
+
+    fun showFailuresVsMargin(subtitle: String, ) {
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val results = io.readResults()
+
+        val plotter = WorkflowResultsPlotter(dirName, name)
+        plotter.showFailuresVsMargin(results, subtitle, "category") { category(it) }
+    }
+
+    fun showNroundsVsMargin(subtitle: String, ) {
+        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val results = io.readResults()
+
+        val plotter = WorkflowResultsPlotter(dirName, name)
+        plotter.showNroundsVsMargin(results, subtitle, "category") { category(it) }
+    }
+
+    @Test
+    fun testOne() {
+        val N = 50000
+        val margin = .02
+        val fuzzPct = .01
+
+        repeat(10) {
+            val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)
+            val auditConfig = AuditConfig(
+                AuditType.CLCA,
+                true,
+                quantile = .50,
+                nsimEst = 100,
+                clcaConfig = clcaConfig
+            )
+
+            val clcaGenerator2 = ClcaWorkflowTaskGenerator(
+                N, margin, 0.0, 0.0, fuzzPct,
+                parameters = mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct),
+                auditConfig = auditConfig
+            )
+            val task = clcaGenerator2.generateNewTask()
+
+            val nmvrs = runWorkflow(name, task.workflow, task.testCvrs, quiet = false)
+            println("nmvrs = $nmvrs")
+
+            val minAssertion = task.workflow.getContests().first().minClcaAssertion()!!
+            val lastRound = minAssertion.roundResults.last()
+            println("lastRound = $lastRound")
+            println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
+        }
+
+    }
+
+}

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.safeEnumValueOf
+import org.cryptobiotic.rlauxe.util.enumValueOf
 
 // open class ClcaAssertion(
 //    contest: ContestIF,
@@ -28,6 +28,7 @@ fun ClcaAssertionJson.import(): ClcaAssertion {
        this.cassorter.import(),
     )
     result.estSampleSize = assertion.estSampleSize
+    result.estRoundResults.addAll( assertion.estRoundResults)
     result.roundResults.addAll( assertion.roundResults)
     result.status = assertion.status
     result.round = assertion.round
@@ -91,6 +92,7 @@ data class AssertionJson(
     val contest: ContestJson,
     val assorter: AssorterJson,
     val estSampleSize: Int,   // estimated sample size
+    val estRoundResults: List<EstimationRoundResultJson>,   // first sample when pvalue < riskLimit
     val roundResults: List<AuditRoundResultJson>,   // first sample when pvalue < riskLimit
     val status: String, // testH0 status
     val round: Int,
@@ -100,33 +102,75 @@ fun Assertion.publishJson() = AssertionJson(
         (this.contest as Contest).publishJson(),
         this.assorter.publishJson(),
         this.estSampleSize,
+        this.estRoundResults.map { it.publishJson() },
         this.roundResults.map { it.publishJson() },
         this.status.name,
         this.round,
     )
 
 fun AssertionJson.import() : Assertion {
-    val status = safeEnumValueOf(this.status) ?: TestH0Status.InProgress
+    val status = enumValueOf(this.status, TestH0Status.entries) ?: TestH0Status.InProgress
     val result = Assertion(
         this.contest.import(),
         this.assorter.import(),
     )
     result.estSampleSize = this.estSampleSize
     result.roundResults.addAll(this.roundResults.map { it.import() })
+    result.estRoundResults.addAll(this.estRoundResults.map { it.import() })
     result.status = status
     result.round = this.round
     return result
 }
 
+// data class EstimationRoundResult(
+//    val roundIdx: Int,
+//    val fuzzPct: Double,
+//    val startingTestStatistic: Double,
+//    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
+//    val sampleDeciles: List<Int>,   // distribution of estimated sample size as deciles
+//)
+
+@Serializable
+data class EstimationRoundResultJson(
+    val roundIdx: Int,
+    val strategy: String,
+    val fuzzPct: Double,
+    val startingTestStatistic: Double,
+    val startingRates: List<Double>?,
+    val sampleDeciles: List<Int>,
+)
+
+fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
+    this.roundIdx,
+    this.strategy,
+    this.fuzzPct,
+    this.startingTestStatistic,
+    this.startingRates?.toList(),
+    this.sampleDeciles,
+)
+
+fun EstimationRoundResultJson.import() : EstimationRoundResult {
+    return EstimationRoundResult(
+        this.roundIdx,
+        this.strategy,
+        this.fuzzPct,
+        this.startingTestStatistic,
+        if (this.startingRates != null) ClcaErrorRates.fromList(this.startingRates) else null,
+        this.sampleDeciles,
+    )
+}
+
 // data class AuditRoundResult(
 //    val roundIdx: Int,
 //    val estSampleSize: Int,   // estimated sample size
-//    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits)
+//    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits) TODO needed?
 //    val pvalue: Double,       // last pvalue when testH0 terminates
 //    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
 //    val samplesUsed: Int,     // sample count when testH0 terminates
 //    val status: TestH0Status, // testH0 status
-//    val errorRates: ErrorRates? = null, // measured error rates (clca only)
+//    val measuredMean: Double, // measured population mean
+//    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
+//    val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 //)
 
 @Serializable
@@ -134,37 +178,43 @@ data class AuditRoundResultJson(
     val desc: String,
     val roundIdx: Int,
     val estSampleSize: Int,   // estimated sample size
-    val maxBallotsUsed: Int,   // estimated sample size
+    val maxBallotIndexUsed: Int,   // max index used
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    val errorRates: List<Double>?,
+    val measuredMean: Double,     // measured population mean
+    val startingRates: List<Double>?,
+    val measuredRates: List<Double>?,
 )
 
 fun AuditRoundResult.publishJson() = AuditRoundResultJson(
         this.toString(),
         this.roundIdx,
         this.estSampleSize,
-        this.maxBallotsUsed,
+        this.maxBallotIndexUsed,
         this.pvalue,
         this.samplesNeeded,
         this.samplesUsed,
         this.status.name,
-        this.errorRates?.toList(),
+        this.measuredMean,
+        this.startingRates?.toList(),
+        this.measuredRates?.toList(),
     )
 
 fun AuditRoundResultJson.import() : AuditRoundResult {
-    val status = safeEnumValueOf(this.status) ?: TestH0Status.InProgress
+    val status = enumValueOf(this.status, TestH0Status.entries) ?: TestH0Status.InProgress
     return AuditRoundResult(
         this.roundIdx,
         this.estSampleSize,
-        this.maxBallotsUsed,
+        this.maxBallotIndexUsed,
         this.pvalue,
         this.samplesNeeded,
         this.samplesUsed,
         status,
-        if (this.errorRates != null) ClcaErrorRates.fromList(this.errorRates) else null,
+        this.measuredMean,
+        if (this.startingRates != null) ClcaErrorRates.fromList(this.startingRates) else null,
+        if (this.measuredRates != null) ClcaErrorRates.fromList(this.measuredRates) else null,
     )
 }
 

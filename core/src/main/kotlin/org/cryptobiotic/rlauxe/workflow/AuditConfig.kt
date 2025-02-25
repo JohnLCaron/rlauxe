@@ -32,6 +32,13 @@ data class AuditConfig(
             AuditType.ONEAUDIT -> appendLine("  $oaConfig, ")
         }
     }
+    fun strategy() : String {
+        return when (auditType) {
+            AuditType.POLLING -> "polling"
+            AuditType.CLCA -> clcaConfig.strategy.toString()
+            AuditType.ONEAUDIT -> "oneaudit"
+        }
+    }
 }
 
 data class PollingConfig(
@@ -44,11 +51,11 @@ data class PollingConfig(
 // fuzzPct: model errors with fuzz simulation, with adaptation
 // apriori: pass in apriori errorRates, with adaptation
 // phantoms: use phantom rates for apriori
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms }
+enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
-    val errorRates: ClcaErrorRates? = null, // use as apriori
+    val errorRates: ClcaErrorRates? = null, // use as apriori errorRates for simulation and audit
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 

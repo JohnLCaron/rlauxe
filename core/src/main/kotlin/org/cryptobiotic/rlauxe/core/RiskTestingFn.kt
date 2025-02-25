@@ -11,8 +11,8 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
     FailMaxSamplesAllowed(4,true, false),  // estimated samples greater than maximum samples allowed
 
     // possible returns from RiskTestingFn
-    StatRejectNull(10,true, true), // statistical rejection of H0
-    LimitReached(11,false, false),  // cant tell from the number of samples available
+    LimitReached(10,false, false),  // cant tell from the number of samples available
+    StatRejectNull(11,true, true), // statistical rejection of H0
     //// only when sampling without replacement all the way close to Nc
     SampleSumRejectNull(12,true, false), // SampleSum > Nc / 2, so we know H0 is false
     AcceptNull(13,true, false), // SampleSum + (all remaining ballots == 1) < Nc / 2, so we know that H0 is true.

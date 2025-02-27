@@ -112,7 +112,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
             if (!cassertion.status.complete) {
                 val testH0Result = auditClcaAssertion(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
                 cassertion.status = testH0Result.status
-                cassertion.round = roundIdx
+                if (testH0Result.status.complete) cassertion.round = roundIdx
             }
             contestAssertionStatus.add(cassertion.status)
         }

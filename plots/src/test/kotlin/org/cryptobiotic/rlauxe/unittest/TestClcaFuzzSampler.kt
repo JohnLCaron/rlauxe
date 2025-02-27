@@ -43,8 +43,8 @@ class TestClcaFuzzSampler {
             // TODO use minAssertion()
             val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.map { it.first }.max() ?: 0
             val pair = if (sampleSizes.isEmpty()) Pair(0, 0.0) else sampleSizes.find{ it.first == maxSize }!!
-            contestUA.estSampleSize = pair.first
-            println("${contestUA.name} estSize=${contestUA.estSampleSize} margin=${df(pair.second)}")
+            contestUA.estMvrs = pair.first
+            println("${contestUA.name} estSize=${contestUA.estMvrs} margin=${df(pair.second)}")
         }
     }
 }

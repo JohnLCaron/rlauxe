@@ -8,16 +8,15 @@ class TestRunCli {
     fun testCliRoundClca() {
         val topdir = "/home/stormy/temp/persist/testRunCli"
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val mvrs =  "$topdir/testMvrs.json"
+        val mvrs =  "$topdir/private/testMvrs.json"
         RunRlaStartTest.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.005",
                 "-fuzzMvrs", ".0123",
-                "-pctPhantoms", "0.001",
                 "-mvrs", mvrs,
-                "-ncards", "5000",
-                "-ncontests", "15",
+                "-ncards", "50000",
+                "-ncontests", "25",
             )
         )
 
@@ -33,7 +32,7 @@ class TestRunCli {
     fun testCliRoundPolling() {
         val topdir = "/home/stormy/temp/persist/testRunCli2"
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val mvrs =  "$topdir/testMvrs.json"
+        val mvrs =  "$topdir/private/testMvrs.json"
         RunRlaStartTest.main(
             arrayOf(
                 "-in", topdir,

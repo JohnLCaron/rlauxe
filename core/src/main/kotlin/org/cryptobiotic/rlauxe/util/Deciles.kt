@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
+// TODO get rid of, or port to Distribution
+
 data class Deciles(val ntrials: Int, val hist: MutableMap<Int, Int>) {
     private val incr = 10
 

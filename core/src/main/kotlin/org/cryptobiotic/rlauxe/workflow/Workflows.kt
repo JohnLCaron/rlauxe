@@ -2,28 +2,15 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 
-interface RlauxWorkflowIF {
-    fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int> // return ballot indices to sample
-    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean  // return allDone
-
+interface RlauxWorkflowProxy {
     fun auditConfig() : AuditConfig
     fun getContests() : List<ContestUnderAudit>
     fun getBallotsOrCvrs() : List<BallotOrCvr>
 }
 
-// per round
-data class AuditState(
-    val name: String,
-    val roundIdx: Int,
-    val nmvrs: Int,
-    val newMvrs: Int,
-    val auditWasDone: Boolean,
-    val auditIsComplete: Boolean,
-    val contests: List<ContestUnderAudit>,
-) {
-    fun show() =
-        "AuditState($name, $roundIdx, nmvrs=$nmvrs, newMvrs=$newMvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
-                " ncontests=${contests.size} ncontestsDone=${contests.filter { it.done }.count()}"
+interface RlauxWorkflowIF: RlauxWorkflowProxy {
+    fun chooseSamples(roundIdx: Int, show: Boolean = false): List<Int> // return ballot indices to sample
+    fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean  // return allDone
 }
 
 fun check(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {

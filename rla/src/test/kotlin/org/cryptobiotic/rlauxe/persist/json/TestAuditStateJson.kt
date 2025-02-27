@@ -128,6 +128,7 @@ fun check(s1: AuditState, s2: AuditState) {
         assertEquals(c1.contest, c2.contest, "contest ${c1.contest.show()}\n not ${c2.contest.show()}")
         c1.clcaAssertions.forEachIndexed { idx, a1 ->
             val a2 = c2.clcaAssertions[idx]
+            assertEquals(a1.cassorter, a2.cassorter, "clcaAssertion.cassorter ${a1.cassorter}\n not ${a2.cassorter}")
             assertEquals(a1, a2, "clcaAssertion ${a1.show()}\n not ${a2.show()}")
         }
         assertEquals(c1, c2, "contestUA $c1\n not $c2")

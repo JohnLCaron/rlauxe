@@ -44,9 +44,9 @@ object RunRound {
         // read last state
         val publisher = Publisher(inputDir)
         val round = publisher.rounds()
-        val (prevState, workflow) = readPersistentWorkflow(round, publisher)
-        require(round == prevState.roundIdx)
-        require((workflow == null) == prevState.auditIsComplete)
+        val (auditState, workflow) = readPersistentWorkflow(round, publisher)
+        require(round == auditState.roundIdx)
+        require((workflow == null) == auditState.auditIsComplete)
 
         if (workflow == null) {
             println("***No more rounds, all done")
@@ -56,7 +56,7 @@ object RunRound {
             require(resultMvrs is Ok)
             val mvrs = resultMvrs.unwrap()
 
-            val (allDone, prevSamples) = runAuditStage(prevState, workflow, mvrs, publisher)
+            val (allDone, prevSamples) = runAuditStage(auditState, workflow, mvrs, publisher)
             if (!allDone) {
                 // get the next round of samples wanted
                 val samples = runChooseSamples(round + 1, workflow, publisher)
@@ -64,7 +64,7 @@ object RunRound {
                     println("*** NO SAMPLES: audit is done ***")
                     AuditState("Round${round + 1}", round + 1, samples.size, 0, false, true, emptyList())
                 } else {
-                    val roundSet = RoundIndexSet(round + 1, samples, prevSamples.toSet())
+                    val roundSet = RoundIndexSet(round + 1, samples, prevSamples)
                     println("  newSamplesNeeded=${roundSet.newSamples}, total samples=${samples.size}, ready to audit")
 
                     // write the partial election state to round+1
@@ -143,7 +143,8 @@ fun runAuditStage(
         allDone = workflow.runAudit(indices, sampledMvrs.map { it.cvr }, roundIdx)
         println("  allDone=$allDone took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
-        val state = AuditState(
+        // heres the state now that the audit has been run
+        val updateStated = AuditState(
             auditState.name,
             auditState.roundIdx,
             auditState.nmvrs,
@@ -152,7 +153,7 @@ fun runAuditStage(
             allDone,
             workflow.getContests(),
         )
-        writeAuditStateJsonFile(state, publish.auditRoundFile(roundIdx))
+        writeAuditStateJsonFile(updateStated, publish.auditRoundFile(roundIdx))
         println("   writeAuditStateJsonFile ${publish.auditRoundFile(roundIdx)}")
 
         writeCvrsJsonFile(sampledMvrs, publish.sampleMvrsFile(roundIdx))
@@ -164,10 +165,22 @@ fun runAuditStage(
     return Pair(allDone, indices)
 }
 
-data class RoundIndexSet(val round: Int, val sampledIndices: List<Int>, val previousSamples: Set<Int>) {
-    var newSamples: Int = 0
+class RoundIndexSet(val round: Int, sampledIndices: List<Int>, previousSamples: List<Int>) {
+    val previousSet = previousSamples.toSet()
+    val newSamples: Int = sampledIndices.count { it !in previousSet }
+
+    /*
     init {
-        newSamples = sampledIndices.count { it !in previousSamples }
-    }
+        val indexSet = sampledIndices.toSet()
+        require(sampledIndices.size == indexSet.size)
+        previousSamples.forEach {
+            if (it !in indexSet)
+                println("previousSample $it not in sampledIndices")
+        }
+
+        require(previousSamples.size == previousSet.size)
+        println("${sampledIndices.size} should equal ${(newSamples +  previousSet.size)}")
+        require(sampledIndices.size == (newSamples +  previousSet.size))
+    } */
 }
 

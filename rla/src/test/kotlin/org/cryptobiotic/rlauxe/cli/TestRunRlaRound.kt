@@ -6,25 +6,23 @@ class TestRunRlaRound {
 
     @Test
     fun testRlaRoundClca() {
-        val topdir = "/home/stormy/temp/persist/testRlaStartClca"
-        val mvrs = "/home/stormy/temp/persist/testRlaStartClca/testMvrs.json"
+        val topdir = "/home/stormy/temp/persist/testRunAuditClca"
         RunRound.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", mvrs,
+                "-mvrs", "$topdir/private/testMvrs.json",
             )
         )
     }
 
     @Test
     fun testRlaRoundPolling() {
-        val topdir = "/home/stormy/temp/persist/testRlaStartPolling"
-        val mvrs =  "/home/stormy/temp/persist/testRlaStartPolling/testMvrs.json"
+        val topdir = "/home/stormy/temp/persist/testRunAuditPolling"
 
         RunRound.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", mvrs,
+                "-mvrs", "$topdir/private/testMvrs.json",
             )
         )
     }

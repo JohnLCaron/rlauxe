@@ -80,12 +80,12 @@ object RunRlaStartTest {
     ): Int {
         println("Start startTestElectionClca")
         val publish = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 10, samplePctCutoff=.42, minMargin=.005,
-            removeTooManyPhantoms=true, clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 100, samplePctCutoff=1.0, minMargin=.0,
+            removeTooManyPhantoms=false, clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
 
-        val maxMargin = .05
+        val maxMargin = .10
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
@@ -144,7 +144,7 @@ object RunRlaStartTest {
         mvrFile: String,
     ): Int {
         val publish = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 10, samplePctCutoff=.42, minMargin=.005, removeTooManyPhantoms=true, )
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100, samplePctCutoff=1.0, minMargin=.00, removeTooManyPhantoms=false, )
         writeAuditConfigJsonFile(auditConfig, publish.auditConfigFile())
         println("   writeAuditConfigJsonFile ${publish.auditConfigFile()}")
 

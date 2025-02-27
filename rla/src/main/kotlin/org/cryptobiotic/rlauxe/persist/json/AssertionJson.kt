@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.persist.json
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.enumValueOf
+import org.cryptobiotic.rlauxe.workflow.AuditRoundResult
+import org.cryptobiotic.rlauxe.workflow.EstimationRoundResult
 
 // open class ClcaAssertion(
 //    contest: ContestIF,
@@ -28,6 +30,7 @@ fun ClcaAssertionJson.import(): ClcaAssertion {
        this.cassorter.import(),
     )
     result.estSampleSize = assertion.estSampleSize
+    result.estNewSamples = assertion.estNewSamples
     result.estRoundResults.addAll( assertion.estRoundResults)
     result.roundResults.addAll( assertion.roundResults)
     result.status = assertion.status
@@ -77,6 +80,7 @@ fun ClcaAssorterJson.import(): ClcaAssorter {
 //
 //    // these values are set during estimateSampleSizes()
 //    var estSampleSize = 0   // estimated sample size for current round
+//    var estNewSamples = 0   // estimated new sample size for current round
 //
 //    // these values are set during runAudit()
 //    val roundResults = mutableListOf<AuditRoundResult>()
@@ -92,6 +96,7 @@ data class AssertionJson(
     val contest: ContestJson,
     val assorter: AssorterJson,
     val estSampleSize: Int,   // estimated sample size
+    val estNewSamples: Int,   // estimated sample size
     val estRoundResults: List<EstimationRoundResultJson>,   // first sample when pvalue < riskLimit
     val roundResults: List<AuditRoundResultJson>,   // first sample when pvalue < riskLimit
     val status: String, // testH0 status
@@ -102,6 +107,7 @@ fun Assertion.publishJson() = AssertionJson(
         (this.contest as Contest).publishJson(),
         this.assorter.publishJson(),
         this.estSampleSize,
+        this.estNewSamples,
         this.estRoundResults.map { it.publishJson() },
         this.roundResults.map { it.publishJson() },
         this.status.name,
@@ -115,6 +121,7 @@ fun AssertionJson.import() : Assertion {
         this.assorter.import(),
     )
     result.estSampleSize = this.estSampleSize
+    result.estNewSamples = this.estNewSamples
     result.roundResults.addAll(this.roundResults.map { it.import() })
     result.estRoundResults.addAll(this.estRoundResults.map { it.import() })
     result.status = status
@@ -137,7 +144,7 @@ data class EstimationRoundResultJson(
     val fuzzPct: Double,
     val startingTestStatistic: Double,
     val startingRates: List<Double>?,
-    val sampleDeciles: List<Int>,
+    val estimatedDistribution: List<Int>,
 )
 
 fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
@@ -146,7 +153,7 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.fuzzPct,
     this.startingTestStatistic,
     this.startingRates?.toList(),
-    this.sampleDeciles,
+    this.estimatedDistribution,
 )
 
 fun EstimationRoundResultJson.import() : EstimationRoundResult {
@@ -156,7 +163,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
         this.fuzzPct,
         this.startingTestStatistic,
         if (this.startingRates != null) ClcaErrorRates.fromList(this.startingRates) else null,
-        this.sampleDeciles,
+        this.estimatedDistribution,
     )
 }
 

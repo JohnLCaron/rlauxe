@@ -66,7 +66,7 @@ class RaireContestUnderAudit(
     }
 
     override fun show(roundIdx: Int?) = buildString {
-        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())} est=$estSampleSize status=$status")
+        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())} est=$estMvrs status=$status")
         assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
             append(" ${it.show()}")
         }

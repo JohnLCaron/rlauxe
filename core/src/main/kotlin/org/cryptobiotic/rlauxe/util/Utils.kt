@@ -54,41 +54,6 @@ fun showLast(x: List<Double>, n: Int) = buildString {
     last.forEach { append("${df(it)}, ") }
 }
 
-// find the sample value where percent of samples < that value equals quantile percent
-fun quantile(data: List<Int>, quantile: Double): Int {
-    require(quantile in 0.0..1.0)
-    if (data.isEmpty()) return 0
-    if (quantile == 0.0) return 0
-
-    val sortedData = data.sorted()
-    if (quantile == 100.0) return sortedData.last()
-    // println(showDeciles(sortedData))
-
-    // rounding down
-    val p = min((quantile * data.size).toInt(), data.size-1)
-    return sortedData[p]
-}
-
-fun makeDeciles(data: List<Int>): List<Int> {
-    val sortedData = data.sorted()
-    val deciles = mutableListOf<Int>()
-    val n = sortedData.size
-    repeat(10) {
-        val quantile = .10 * (it + 1)
-        val p = min((quantile * n).toInt(), n - 1)
-        deciles.add(sortedData[p])
-    }
-    return deciles
-}
-
-fun showDeciles(data: List<Int>) = buildString {
-    if (data.isEmpty()) return ""
-    val deciles = makeDeciles(data)
-    append(" deciles=[")
-    deciles.forEach { append(" $it, ") };
-    appendLine("]")
-}
-
 fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
 

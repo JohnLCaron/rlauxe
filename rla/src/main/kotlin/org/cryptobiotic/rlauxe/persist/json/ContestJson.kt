@@ -83,10 +83,27 @@ fun ContestJson.import(): Contest {
 }
 
 // open class ContestUnderAudit(
-//    val contest: ContestIF,           // TODO Rlauxe
+//    val contest: ContestIF,
 //    val isComparison: Boolean = true, // TODO change to AuditType?
 //    val hasStyle: Boolean = true,
-//)
+//) {
+//    val id = contest.info.id
+//    val name = contest.info.name
+//    val choiceFunction = contest.info.choiceFunction
+//    val ncandidates = contest.info.candidateIds.size
+//    val Nc = contest.Nc
+//    val Np = contest.Np
+//
+//    var pollingAssertions: List<Assertion> = emptyList()
+//    var clcaAssertions: List<ClcaAssertion> = emptyList()
+//
+//    var actualMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
+//    var estMvrs = 0 // Estimate of the sample size required to confirm the contest
+//    var estNewMvrs = 0 // Estimate of the new sample size
+//    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
+//    var done = false
+//    var included = true
+//    var status = TestH0Status.InProgress // or its own enum ??)
 @Serializable
 data class ContestUnderAuditJson(
     val contest: ContestJson,
@@ -95,10 +112,13 @@ data class ContestUnderAuditJson(
     var pollingAssertions: List<AssertionJson>,
     var clcaAssertions: List<ClcaAssertionJson>,
 
-    val estSampleSize: Int,  // Estimate of the sample size required to confirm the contest
-    val done: Boolean,
-    val status: TestH0Status, // or its own enum ??
+    val actualMvrs: Int,  // Actual number of new ballots with this contest contained in this round's sample.
+    val estMvrs: Int,  // Estimate of the sample size required to confirm the contest
+    val estNewMvrs: Int,  // Estimate of new sample size
     val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
+    val done: Boolean,
+    val included: Boolean,
+    val status: TestH0Status, // or its own enum ??
 )
 
 fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
@@ -108,10 +128,13 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
         this.hasStyle,
         this.pollingAssertions.map { it.publishJson() },
         this.clcaAssertions.map { it.publishJson() },
-        this.estSampleSize,
-        this.done,
-        this.status,
+        this.actualMvrs,
+        this.estMvrs,
+        this.estNewMvrs,
         this.estSampleSizeNoStyles,
+        this.done,
+        this.included,
+        this.status,
     )
 }
 
@@ -123,10 +146,13 @@ fun ContestUnderAuditJson.import(): ContestUnderAudit {
     )
     result.pollingAssertions = this.pollingAssertions.map { it.import() }
     result.clcaAssertions = this.clcaAssertions.map { it.import() }
-    result.estSampleSize = this.estSampleSize
-    result.done = this.done
-    result.status = this.status
+    result.actualMvrs = this.actualMvrs
+    result.estMvrs = this.estMvrs
+    result.estNewMvrs = this.estNewMvrs
     result.estSampleSizeNoStyles = this.estSampleSizeNoStyles
+    result.done = this.done
+    result.included = this.included
+    result.status = this.status
 
     return result
 }

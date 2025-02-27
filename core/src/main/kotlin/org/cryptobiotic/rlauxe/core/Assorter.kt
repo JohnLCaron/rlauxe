@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.workflow.AuditRoundResult
+import org.cryptobiotic.rlauxe.workflow.EstimationRoundResult
 
 interface AssorterFunction {
     fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
@@ -214,33 +216,6 @@ data class ClcaAssorter(
 }
 
 ///////////////////////////////////////////////////////////////////
-data class EstimationRoundResult(
-    val roundIdx: Int,
-    val strategy: String,
-    val fuzzPct: Double,
-    val startingTestStatistic: Double,
-    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
-    val sampleDeciles: List<Int>,   // distribution of estimated sample size as deciles
-) {
-    override fun toString() = "round=$roundIdx sampleDeciles=$sampleDeciles fuzzPct=$fuzzPct " +
-            " startingRates=$startingRates"
-}
-
-data class AuditRoundResult(
-    val roundIdx: Int,
-    val estSampleSize: Int,   // estimated sample size
-    val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
-    val pvalue: Double,       // last pvalue when testH0 terminates
-    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
-    val samplesUsed: Int,     // sample count when testH0 terminates
-    val status: TestH0Status, // testH0 status
-    val measuredMean: Double, // measured population mean
-    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
-    val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
-) {
-    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotIndexUsed=$maxBallotIndexUsed " +
-            " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
-}
 
 open class Assertion(
     val contest: ContestIF,
@@ -251,6 +226,7 @@ open class Assertion(
 
     // these values are set during estimateSampleSizes()
     var estSampleSize = 0   // estimated sample size for current round
+    var estNewSamples = 0   // estimated new sample size for current round
     val estRoundResults = mutableListOf<EstimationRoundResult>()
 
     // these values are set during runAudit()
@@ -260,18 +236,25 @@ open class Assertion(
 
     override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"
 
+    open fun show() = buildString {
+        appendLine(" assertion: ${assorter.desc()}, estSampleSize=$estSampleSize, estNew = $estNewSamples status=$status, round=$round)")
+        roundResults.forEach {
+            appendLine("    $it")
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as Assertion
 
-        if (winner != other.winner) return false
-        if (loser != other.loser) return false
         if (estSampleSize != other.estSampleSize) return false
+        if (estNewSamples != other.estNewSamples) return false
         if (round != other.round) return false
         if (contest != other.contest) return false
         if (assorter != other.assorter) return false
+        if (estRoundResults != other.estRoundResults) return false
         if (roundResults != other.roundResults) return false
         if (status != other.status) return false
 
@@ -279,22 +262,15 @@ open class Assertion(
     }
 
     override fun hashCode(): Int {
-        var result = winner
-        result = 31 * result + loser
-        result = 31 * result + estSampleSize
+        var result = estSampleSize
+        result = 31 * result + estNewSamples
         result = 31 * result + round
         result = 31 * result + contest.hashCode()
         result = 31 * result + assorter.hashCode()
+        result = 31 * result + estRoundResults.hashCode()
         result = 31 * result + roundResults.hashCode()
         result = 31 * result + status.hashCode()
         return result
-    }
-
-    open fun show() = buildString {
-        appendLine(" assertion: ${assorter.desc()}, estSampleSize=$estSampleSize, status=$status, round=$round)")
-        roundResults.forEach {
-            appendLine("    $it")
-        }
     }
 
 }
@@ -303,7 +279,8 @@ open class ClcaAssertion(
     contest: ContestIF,
     val cassorter: ClcaAssorterIF,
 ): Assertion(contest, cassorter.assorter()) {
-    override fun toString() = "${cassorter.assorter().desc()} estSampleSize=$estSampleSize"
+
+    // override fun toString() = "${cassorter.assorter().desc()} estSampleSize=$estSampleSize"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -320,5 +297,4 @@ open class ClcaAssertion(
         result = 31 * result + cassorter.hashCode()
         return result
     }
-
 }

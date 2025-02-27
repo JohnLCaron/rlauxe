@@ -40,8 +40,8 @@ class TestConsistentSamplingFromShangrla {
         val contestsUA = contestInfos.mapIndexed { idx, it ->
             makeContestUAfromCvrs( it, cvrs)
         }
-        contestsUA[0].estSampleSize = 3
-        contestsUA[1].estSampleSize = 4
+        contestsUA[0].estMvrs = 3
+        contestsUA[1].estMvrs = 4
 
         val sample_cvr_indices = consistentSampling(contestsUA, cvrsUA)
         assertEquals(5, sample_cvr_indices.size)
@@ -77,9 +77,9 @@ class TestConsistentSamplingFromShangrla {
 
         val contests = makeContestsFromCvrs(cvrs)
         val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it) }
-        contestsUA[0].estSampleSize = 3
-        contestsUA[1].estSampleSize = 3
-        contestsUA[2].estSampleSize = 2
+        contestsUA[0].estMvrs = 3
+        contestsUA[1].estMvrs = 3
+        contestsUA[2].estMvrs = 2
 
         val ncvrs = makeNcvrsPerContest(contests, cvrs)
         val phantomCVRs = makePhantomCvrs(contests, ncvrs)

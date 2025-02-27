@@ -13,7 +13,7 @@ class TestConsistentSampling {
     fun testConsistentCvrSampling() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
-        contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
+        contestsUA.forEach { it.estMvrs = it.Nc / 11 } // random
 
         val prng = Prng(Random.nextLong())
         val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it, prng.next()) }
@@ -24,7 +24,7 @@ class TestConsistentSampling {
             assertTrue(it < cvrsUAP.size)
         }
         contestsUA.forEach { contest ->
-            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estMvrs}")
         }
 
         // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
@@ -35,8 +35,8 @@ class TestConsistentSampling {
             cvrs.forEachIndexed { idx, it ->
                 if (it.sampled) count++
             }
-            assertTrue(contest.estSampleSize <= cvrs.size)
-            assertTrue(contest.estSampleSize <= count)
+            assertTrue(contest.estMvrs <= cvrs.size)
+            assertTrue(contest.estMvrs <= count)
             // TODO what else can we check ??
         }
     }
@@ -45,7 +45,7 @@ class TestConsistentSampling {
     fun testConsistentPollingSampling() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
-        contestsUA.forEach { it.estSampleSize = it.Nc / 11 } // random
+        contestsUA.forEach { it.estMvrs = it.Nc / 11 } // random
 
         val ballotManifest = test.makeBallotManifest(true)
 
@@ -58,7 +58,7 @@ class TestConsistentSampling {
             assertTrue(it < ballotsUA.size)
         }
         contestsUA.forEach { contest ->
-            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estMvrs}")
         }
 
         // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
@@ -71,8 +71,8 @@ class TestConsistentSampling {
             ballotsUA.forEachIndexed { idx, it ->
                 if (it.sampled) count++
             }
-            assertTrue(contest.estSampleSize <= ballotsForContest.size)
-            assertTrue(contest.estSampleSize <= count)
+            assertTrue(contest.estMvrs <= ballotsForContest.size)
+            assertTrue(contest.estMvrs <= count)
         }
     }
 
@@ -81,7 +81,7 @@ class TestConsistentSampling {
         val N = 20000
         val test = MultiContestTestData(20, 11, N)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
-        contestsUA.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
+        contestsUA.forEach { it.estMvrs = 100 + Random.nextInt(it.Nc/2) }
 
         val ballotManifest = test.makeBallotManifest(false)
         val prng = Prng(Random.nextLong())
@@ -99,16 +99,16 @@ class TestConsistentSampling {
             assertTrue(it < ballotsUA.size)
         }
         contestsUA.forEach { contest ->
-            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estMvrs}")
         }
 
         // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
         println("contest.name (id) == sampleSize")
         contestsUA.forEach { contest ->
-            assertTrue(contest.estSampleSize <= sampleIndices.size)
+            assertTrue(contest.estMvrs <= sampleIndices.size)
             assertTrue(contest.done || contest.estSampleSizeNoStyles <= sampleIndices.size)
 
-            val estPct = contest.estSampleSize / contest.Nc.toDouble()
+            val estPct = contest.estMvrs / contest.Nc.toDouble()
             println("contest ${contest.id} estPct=$estPct done=${contest.done}")
             if (estPct > estPctCutoff)
                 assertTrue(contest.done)

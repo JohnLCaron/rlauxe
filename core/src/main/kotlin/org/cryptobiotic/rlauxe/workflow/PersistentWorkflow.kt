@@ -52,10 +52,10 @@ fun RlauxWorkflowIF.showResults(estSampleSize: Int) {
             println(" $contest has no assertions; status=${contest.status}")
         } else {
             if (minAssertion.roundResults.size == 1) {
-                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estSampleSize} ${minAssertion.roundResults[0]}")
+                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estMvrs} ${minAssertion.roundResults[0]}")
                 if (!this.auditConfig().hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
             } else {
-                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estSampleSize}")
+                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estMvrs}")
                 if (!this.auditConfig().hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
                 minAssertion.roundResults.forEach { rr -> println("   $rr") }
             }

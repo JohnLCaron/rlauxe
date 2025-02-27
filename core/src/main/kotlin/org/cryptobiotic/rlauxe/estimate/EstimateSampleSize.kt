@@ -13,7 +13,7 @@ import kotlin.math.min
 
 private val debug = false
 private val debugErrorRates = false
-private val debugSampleDist = false
+private val debugSampleDist = true
 private val debugSizeNudge = true
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,33 +40,28 @@ fun estimateSampleSizes(
         val result = estResult.repeatedResult
 
         if (auditConfig.version == 1.0) {
-            val quantile = result.findQuantile(auditConfig.quantile)
-            var size = task.prevSampleSize + quantile
-            if (roundIdx > 1) {
-                val sizeNudged = 1.25 * task.contestUA.estSampleSize
-                if (sizeNudged > size) {
-                    if (debugSizeNudge) println(" ** sizeNudged $sizeNudged > $size; round=$roundIdx task=${task.name()}")
+            var estNew = result.findQuantile(auditConfig.quantile)
+            if (roundIdx > 2) {
+                val prevNudged = (0.25 * task.prevSampleSize).toInt()
+                if (prevNudged > estNew) {
+                    if (debugSizeNudge) println(" ** prevNudged $prevNudged > $estNew; round=$roundIdx task=${task.name()}")
                 }
-                // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle)
-                size = max(sizeNudged, size.toDouble()).toInt() // TODO do we really need this? seems too crude
+                // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle?)
+                // TODO do we really need this? seems too crude
+                estNew = max(prevNudged, estNew)
             }
-            task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-
-        } else { // TODO WTF?
-            val quantile = result.findQuantile(if (roundIdx == 1) .50 else .80)
-            val size = task.prevSampleSize + quantile
-            task.assertion.estSampleSize = min(size, task.contestUA.Nc)
-            if (debug) println(" round=$roundIdx quantile=$quantile prev=${task.prevSampleSize} estSampleSize=${task.assertion.estSampleSize}")
+            task.assertion.estNewSamples = estNew;
+            task.assertion.estSampleSize = min(estNew + task.prevSampleSize, task.contestUA.Nc)
         }
+
         if (debug) println(result.showSampleDist())
         if (result.avgSamplesNeeded() < 10) {
             println(" ** avgSamplesNeeded ${result.avgSamplesNeeded()} task=${task.name()}")
         }
-
         if (debugSampleDist) {
             println(
                 "---debugSampleDist for '${task.name()}' $roundIdx ntrials=${auditConfig.nsimEst} pctSamplesNeeded=" +
-                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertion.estSampleSize} Nc=${result.Nc}" +
+                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertion.estSampleSize} estNew=${task.assertion.estNewSamples}" +
                         " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
                         "\n  sampleDist = ${result.showSampleDist()}"
             )
@@ -77,7 +72,12 @@ fun estimateSampleSizes(
     contestsUA.filter { !it.done }.forEach { contestUA ->
         val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id }
             .map { it.task.assertion.estSampleSize }
-        contestUA.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        contestUA.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        // TODO how do we know these came from the same assertion?
+        val estNew = estResults.filter { it.task.contestUA.id == contestUA.id }
+            .map { it.task.assertion.estNewSamples }
+        contestUA.estNewMvrs = if (estNew.isEmpty()) 0 else estNew.max()
+
         val results = contestUA.minAssertion()?.roundResults
         val pvalue = if (results.isNullOrEmpty()) 1.0 else results.last().pvalue
         if (show) println("  ${contestUA} pvalue=$pvalue")
@@ -276,7 +276,7 @@ fun simulateSampleSizeClcaAssorter(
         fuzzPct = fuzzPct,
         startingTestStatistic = startingTestStatistic,
         startingRates = errorRates,
-        sampleDeciles = makeDeciles(result.sampleCount),
+        estimatedDistribution = makeDeciles(result.sampleCount),
     )
     cassertion.estRoundResults.add(estRound)
 
@@ -356,7 +356,7 @@ fun simulateSampleSizePollingAssorter(
         "default",
         fuzzPct = fuzzPct,
         startingTestStatistic = startingTestStatistic,
-        sampleDeciles = makeDeciles(result.sampleCount),
+        estimatedDistribution = makeDeciles(result.sampleCount),
     )
     assertion.estRoundResults.add(estRound)
 
@@ -442,7 +442,7 @@ fun simulateSampleSizeOneAuditAssorter(
         oaConfig.strategy.name,
         fuzzPct = fuzzPct,
         startingTestStatistic = startingTestStatistic,
-        sampleDeciles = makeDeciles(result.sampleCount),
+        estimatedDistribution = makeDeciles(result.sampleCount),
     )
     cassertion.estRoundResults.add(estRound)
 

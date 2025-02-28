@@ -33,7 +33,7 @@ class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = fal
             //println("Round $roundIdx ------------------------------------")
             state = verifyRound(roundIdx)
             state.contests.forEach { contests[it.id] = it }
-            totalMvrs += state.newMvrs
+            totalMvrs += state.nmvrs // TODO Wrong
         }
         println("  totalMvrs = $totalMvrs = ${df(100.0 * totalMvrs / ncards)} %")
         println()

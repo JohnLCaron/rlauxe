@@ -50,7 +50,6 @@ fun estimateSampleSizes(
                 // TODO do we really need this? seems too crude
                 estNew = max(prevNudged, estNew)
             }
-            task.assertion.estNewSamples = estNew;
             task.assertion.estSampleSize = min(estNew + task.prevSampleSize, task.contestUA.Nc)
         }
 
@@ -61,7 +60,7 @@ fun estimateSampleSizes(
         if (debugSampleDist) {
             println(
                 "---debugSampleDist for '${task.name()}' $roundIdx ntrials=${auditConfig.nsimEst} pctSamplesNeeded=" +
-                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertion.estSampleSize} estNew=${task.assertion.estNewSamples}" +
+                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertion.estSampleSize}" +
                         " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
                         "\n  sampleDist = ${result.showSampleDist()}"
             )
@@ -73,10 +72,6 @@ fun estimateSampleSizes(
         val sampleSizes = estResults.filter { it.task.contestUA.id == contestUA.id }
             .map { it.task.assertion.estSampleSize }
         contestUA.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        // TODO how do we know these came from the same assertion?
-        val estNew = estResults.filter { it.task.contestUA.id == contestUA.id }
-            .map { it.task.assertion.estNewSamples }
-        contestUA.estNewMvrs = if (estNew.isEmpty()) 0 else estNew.max()
 
         val results = contestUA.minAssertion()?.roundResults
         val pvalue = if (results.isNullOrEmpty()) 1.0 else results.last().pvalue

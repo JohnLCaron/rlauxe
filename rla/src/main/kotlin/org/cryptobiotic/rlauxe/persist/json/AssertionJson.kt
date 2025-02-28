@@ -30,7 +30,6 @@ fun ClcaAssertionJson.import(): ClcaAssertion {
        this.cassorter.import(),
     )
     result.estSampleSize = assertion.estSampleSize
-    result.estNewSamples = assertion.estNewSamples
     result.estRoundResults.addAll( assertion.estRoundResults)
     result.roundResults.addAll( assertion.roundResults)
     result.status = assertion.status
@@ -96,7 +95,6 @@ data class AssertionJson(
     val contest: ContestJson,
     val assorter: AssorterJson,
     val estSampleSize: Int,   // estimated sample size
-    val estNewSamples: Int,   // estimated sample size
     val estRoundResults: List<EstimationRoundResultJson>,   // first sample when pvalue < riskLimit
     val roundResults: List<AuditRoundResultJson>,   // first sample when pvalue < riskLimit
     val status: String, // testH0 status
@@ -107,7 +105,6 @@ fun Assertion.publishJson() = AssertionJson(
         (this.contest as Contest).publishJson(),
         this.assorter.publishJson(),
         this.estSampleSize,
-        this.estNewSamples,
         this.estRoundResults.map { it.publishJson() },
         this.roundResults.map { it.publishJson() },
         this.status.name,
@@ -121,7 +118,6 @@ fun AssertionJson.import() : Assertion {
         this.assorter.import(),
     )
     result.estSampleSize = this.estSampleSize
-    result.estNewSamples = this.estNewSamples
     result.roundResults.addAll(this.roundResults.map { it.import() })
     result.estRoundResults.addAll(this.estRoundResults.map { it.import() })
     result.status = status

@@ -5,8 +5,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class Publisher(val topdir: String) {
+    val errs =  ErrorMessages("Publisher");
     init {
-        validateOutputDir(Path.of(topdir), ErrorMessages("Publisher"))
+        validateOutputDir(Path.of(topdir), errs)
     }
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
@@ -15,19 +16,19 @@ class Publisher(val topdir: String) {
 
     fun sampleIndicesFile(round: Int): String {
         val dir = "$topdir/round$round"
-        validateOutputDir(Path.of(dir), ErrorMessages("Publisher"))
+        validateOutputDir(Path.of(dir), errs)
         return "$dir/sampleIndices.json"
     }
 
     fun sampleMvrsFile(round: Int): String {
         val dir = "$topdir/round$round"
-        validateOutputDir(Path.of(dir), ErrorMessages("Publisher"))
+        validateOutputDir(Path.of(dir), errs)
         return "$dir/sampleMvrs.json"
     }
 
     fun auditRoundFile(round: Int): String {
         val dir = "$topdir/round$round"
-        validateOutputDir(Path.of(dir), ErrorMessages("Publisher"))
+        validateOutputDir(Path.of(dir), errs)
         return "$dir/auditState.json"
     }
 
@@ -38,6 +39,13 @@ class Publisher(val topdir: String) {
             roundIdx++
         }
         return roundIdx - 1
+    }
+
+    fun validateOutputDirOfFile(filename: String) {
+        val parentDir = Path.of(filename).parent
+        if (!validateOutputDir(parentDir, errs)) {
+            println(errs)
+        }
     }
 }
 

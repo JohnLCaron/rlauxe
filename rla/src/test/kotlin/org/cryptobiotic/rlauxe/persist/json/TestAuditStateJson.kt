@@ -24,7 +24,6 @@ class TestAuditStateJson {
             "TestContestJson",
             2,
             42,
-            99,
             true,
             false,
             contests,
@@ -44,7 +43,6 @@ class TestAuditStateJson {
             "TestContestJson",
             1,
             129182,
-            423487234,
             false,
             false,
             contests,
@@ -85,7 +83,6 @@ class TestAuditStateJson {
             "TestContestJson",
             1,
             nmvrs,
-            nmvrs,
             false,
             false,
             clcaWorkflow.contestsUA,
@@ -119,7 +116,6 @@ fun check(s1: AuditState, s2: AuditState) {
     assertEquals(s1.name, s2.name)
     assertEquals(s1.roundIdx, s2.roundIdx)
     assertEquals(s1.nmvrs, s2.nmvrs)
-    assertEquals(s1.newMvrs, s2.newMvrs)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
     assertEquals(s1.auditIsComplete, s2.auditIsComplete)
     assertEquals(s1.contests.size, s2.contests.size)

@@ -112,9 +112,7 @@ data class ContestUnderAuditJson(
     var pollingAssertions: List<AssertionJson>,
     var clcaAssertions: List<ClcaAssertionJson>,
 
-    val actualMvrs: Int,  // Actual number of new ballots with this contest contained in this round's sample.
     val estMvrs: Int,  // Estimate of the sample size required to confirm the contest
-    val estNewMvrs: Int,  // Estimate of new sample size
     val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
     val done: Boolean,
     val included: Boolean,
@@ -128,9 +126,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
         this.hasStyle,
         this.pollingAssertions.map { it.publishJson() },
         this.clcaAssertions.map { it.publishJson() },
-        this.actualMvrs,
         this.estMvrs,
-        this.estNewMvrs,
         this.estSampleSizeNoStyles,
         this.done,
         this.included,
@@ -146,9 +142,7 @@ fun ContestUnderAuditJson.import(): ContestUnderAudit {
     )
     result.pollingAssertions = this.pollingAssertions.map { it.import() }
     result.clcaAssertions = this.clcaAssertions.map { it.import() }
-    result.actualMvrs = this.actualMvrs
     result.estMvrs = this.estMvrs
-    result.estNewMvrs = this.estNewMvrs
     result.estSampleSizeNoStyles = this.estSampleSizeNoStyles
     result.done = this.done
     result.included = this.included

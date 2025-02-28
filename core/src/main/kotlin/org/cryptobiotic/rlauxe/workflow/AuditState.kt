@@ -1,21 +1,18 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.core.*
 
 // per round
 data class AuditState(
     val name: String,
     val roundIdx: Int,
     val nmvrs: Int,
-    val newMvrs: Int,
     val auditWasDone: Boolean,
     val auditIsComplete: Boolean,
     val contests: List<ContestUnderAudit>,
 ) {
     fun show() =
-        "AuditState($name, $roundIdx, nmvrs=$nmvrs, newMvrs=$newMvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
+        "AuditState($name, $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contests.size} ncontestsDone=${contests.filter { it.done }.count()}"
 }
 

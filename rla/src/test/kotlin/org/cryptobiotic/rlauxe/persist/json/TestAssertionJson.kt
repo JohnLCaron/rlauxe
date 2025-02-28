@@ -1,15 +1,10 @@
 package org.cryptobiotic.rlauxe.persist.json
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import kotlin.random.Random
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
@@ -18,8 +13,20 @@ class TestAssertionJson {
     val filename = "/home/stormy/temp/persist/test/TestAssertion.json"
 
     @Test
-    fun testRoundtrip() {
+    fun testAssertionRoundtrip() {
         val target = makeAssertion()
+
+        val json = target.publishJson()
+        val roundtrip = json.import()
+        assertNotNull(roundtrip)
+        assertTrue(roundtrip.equals(target))
+    }
+
+    @Test
+    fun testClcaAssertionRoundtrip() {
+        val assertion = makeAssertion()
+        val cassorter =  ClcaAssorter(assertion.contest, assertion.assorter, .52, false, true)
+        val target = ClcaAssertion(assertion.contest, cassorter)
 
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -58,7 +65,6 @@ class TestAssertionJson {
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         val target = Assertion(contest, assorter)
         target.estSampleSize = 1000
-        target.estNewSamples = 500
         target.status = TestH0Status.AuditorRemoved
         target.round = 42
 

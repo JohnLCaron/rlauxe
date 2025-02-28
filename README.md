@@ -1,13 +1,14 @@
-**RLAUXE (WORK IN PROGRESS)**
+**RLAUXE ("relax")**
 
-_last update: 02/18/2025_
+WORK IN PROGRESS
+_last update: 02/27/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
-Click on plot images to get an interactive html plot.
+Also see [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
 
-You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
+Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 **Table of Contents**
 <!-- TOC -->

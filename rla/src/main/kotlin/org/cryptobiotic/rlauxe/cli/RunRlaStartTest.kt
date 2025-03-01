@@ -7,11 +7,14 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
@@ -61,11 +64,16 @@ object RunRlaStartTest {
             shortName = "mvrs",
             description = "File containing sampled Mvrs"
         ).required()
+        val addRaire by parser.option(
+            ArgType.Boolean,
+            shortName = "addRaireContest",
+            description = "Add a Raire Contest"
+        ).default(false)
 
         parser.parse(args)
         println("RunRlaStartTest on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                "\n  mvrFile=$mvrFile")
-        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, mvrFile)
+                "addRaire=$addRaire\n  mvrFile=$mvrFile")
+        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaire, mvrFile)
         else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, mvrFile)
     }
 
@@ -76,6 +84,7 @@ object RunRlaStartTest {
         pctPhantoms: Double?,
         ncards: Int,
         ncontests: Int,
+        addRaire: Boolean,
         mvrFile: String,
     ): Int {
         println("Start startTestElectionClca")
@@ -98,14 +107,25 @@ object RunRlaStartTest {
         contests.forEach { println("  $it") }
         println()
 
-        // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
-        val testCvrs = testData.makeCvrsFromContests()
+        // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+        // TODO add raire cvrs here
+        var testCvrs = testData.makeCvrsFromContests()
+
+        val raireContests = mutableListOf<RaireContestUnderAudit>()
+        if (addRaire) {
+            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N=ncards/2, minMargin=.04, quiet = true)
+            raireContests.add(rcontest)
+            // TODO merge(testCvrs + rcvrs)
+            testCvrs = testCvrs + rcvrs
+        }
+
+        // TODO are these randomized?
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-        // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-        else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+                    // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
+                    else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         // ClcaWorkflow assigns the sample numbers, and creates the assertions
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs, quiet = false)
+        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, testCvrs, quiet = false)
         writeCvrsJsonFile(clcaWorkflow.cvrsUA, publisher.cvrsFile())
         println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
 

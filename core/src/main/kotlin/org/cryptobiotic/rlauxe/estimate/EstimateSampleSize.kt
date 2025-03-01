@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -409,7 +409,7 @@ fun simulateSampleSizeOneAuditAssorter(
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val cassorter = cassertion.cassorter as OneAuditComparisonAssorter
+    val cassorter = cassertion.cassorter as OneAuditClcaAssorter
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 

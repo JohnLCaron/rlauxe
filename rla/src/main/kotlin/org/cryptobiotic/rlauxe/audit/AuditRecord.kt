@@ -34,6 +34,7 @@ class AuditRecord(
             for (roundIdx in 1..publisher.rounds()) {
                 val state = readAuditStateJsonFile(publisher.auditRoundFile(roundIdx)).unwrap()
                 val contests = state.contests.map { contest -> ContestRound(contest) }
+
                 val sampledIndices = readSampleIndicesJsonFile(publisher.sampleIndicesFile(roundIdx)).unwrap()
                 // may not exist yet
                 val sampledMvrsResult = readCvrsJsonFile(publisher.sampleMvrsFile(roundIdx))
@@ -89,7 +90,7 @@ class AuditRound(
         newMvrsCount.forEach { contest, count ->  contest.actualNewMvrs = count }
     }
 
-    // TODO look only in auditRR for this round
+    // used in viewer
     fun maxBallotsUsed(): Int {
         var result = 0
         contests.forEach { contest ->

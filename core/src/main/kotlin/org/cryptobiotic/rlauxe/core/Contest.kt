@@ -254,7 +254,7 @@ open class ContestUnderAudit(
 
         this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            val clcaAssorter = ClcaAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
+            val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ClcaAssertion(contest, clcaAssorter)
         }
         return this

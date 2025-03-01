@@ -2,10 +2,8 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.workflow.AuditRoundResult
-import org.cryptobiotic.rlauxe.workflow.EstimationRoundResult
 
-interface AssorterFunction {
+interface AssorterIF {
     fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
     fun upperBound(): Double
     fun desc(): String
@@ -47,16 +45,16 @@ interface AssorterFunction {
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
-data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterFunction {
+data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterIF {
     // If a ballot cannot be found (because the manifest is wrong—either because it lists a ballot that is not there, or
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(contest.info.id)) return 0.5
+        if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
-        val w = mvr.hasMarkFor(contest.info.id, winner)
-        val l = mvr.hasMarkFor(contest.info.id, loser)
+        val w = mvr.hasMarkFor(info.id, winner)
+        val l = mvr.hasMarkFor(info.id, loser)
         return (w - l + 1) * 0.5
     }
     override fun upperBound() = 1.0
@@ -71,20 +69,20 @@ data class PluralityAssorter(val contest: ContestIF, val winner: Int, val loser:
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
             val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
-            return PluralityAssorter(contest, winner, loser, reportedMargin)
+            return PluralityAssorter(contest.info, winner, loser, reportedMargin)
         }
     }
 }
 
 /** See SHANGRLA, section 2.3, p.5. */
-data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterFunction {
+data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterIF {
     val upperBound = 0.5 / minFraction // 1/2f
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(contest.info.id)) return 0.5
+        if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
-        val w = mvr.hasMarkFor(contest.info.id, winner)
-        return if (mvr.hasOneVote(contest.info.id, contest.info.candidateIds)) (w / (2 * minFraction)) else .5
+        val w = mvr.hasMarkFor(info.id, winner)
+        return if (mvr.hasOneVote(info.id, info.candidateIds)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound
@@ -105,25 +103,25 @@ data class SuperMajorityAssorter(val contest: ContestIF, val winner: Int, val mi
             val weight = 1 / (2 * minFraction)
             val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
             val reportedMargin = mean2margin(mean)
-            return SuperMajorityAssorter(contest, winner, minFraction, reportedMargin)
+            return SuperMajorityAssorter(contest.info, winner, minFraction, reportedMargin)
         }
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 interface ClcaAssorterIF {
     fun noerror(): Double
     fun upperBound(): Double
 
-    fun assorter(): AssorterFunction
+    fun assorter(): AssorterIF
     fun bassort(mvr: Cvr, cvr:Cvr): Double
 }
 
 /** See SHANGRLA Section 3.2 */
 data class ClcaAssorter(
-    val contest: ContestIF,
-    val assorter: AssorterFunction,   // A
+    val info: ContestInfo,
+    val assorter: AssorterIF,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
     val hasStyle: Boolean = true, // TODO could be on the Contest ??
     val check: Boolean = true, // TODO get rid of
@@ -134,8 +132,8 @@ data class ClcaAssorter(
 
     init {
         if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
-            require(avgCvrAssortValue > 0.5) { "$contest: ($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
-            require(noerror > 0.5) { "$contest: ($noerror) noerror must be > .5" }
+            require(avgCvrAssortValue > 0.5) { "$info: ($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            require(noerror > 0.5) { "$info: ($noerror) noerror must be > .5" }
         }
     }
 
@@ -144,7 +142,7 @@ data class ClcaAssorter(
     override fun assorter() = assorter
 
     fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
-        val mean = cvrPairs.filter{ it.first.hasContest(contest.id) }
+        val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
             .map { bassort(it.first, it.second) }.average()
         return mean2margin(mean)
     }
@@ -186,8 +184,8 @@ data class ClcaAssorter(
         //            raise ValueError(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
-        if (hasStyle and !cvr.hasContest(contest.info.id)) {
-            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contest.info.name} (${contest.info.id})")
+        if (hasStyle and !cvr.hasContest(info.id)) {
+            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
         //        If use_style, then if the CVR contains the contest but the MVR does
@@ -197,7 +195,7 @@ data class ClcaAssorter(
         //            0
         //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
         //            else self.assort(mvr)
-        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(contest.info.id))) 0.0
+        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
                          else this.assorter.assort(mvr, usePhantoms = false)
 
         //        If not use_style, then if the CVR contains the contest but the MVR does not,
@@ -212,86 +210,5 @@ data class ClcaAssorter(
 
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
-    }
-}
-
-///////////////////////////////////////////////////////////////////
-
-open class Assertion(
-    val contest: ContestIF,
-    val assorter: AssorterFunction,
-) {
-    val winner = assorter.winner()
-    val loser = assorter.loser()
-
-    // these values are set during estimateSampleSizes()
-    var estSampleSize = 0   // estimated sample size for current round
-    val estRoundResults = mutableListOf<EstimationRoundResult>()
-
-    // these values are set during runAudit()
-    val roundResults = mutableListOf<AuditRoundResult>()
-    var status = TestH0Status.InProgress
-    var round = 0           // round when set to proved or disproved
-
-    override fun toString() = "'${contest.info.name}' (${contest.info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"
-
-    open fun show() = buildString {
-        appendLine(" assertion: ${assorter.desc()}, estSampleSize=$estSampleSize, status=$status, round=$round)")
-        roundResults.forEach {
-            appendLine("    $it")
-        }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Assertion
-
-        if (estSampleSize != other.estSampleSize) return false
-        if (round != other.round) return false
-        if (contest != other.contest) return false
-        if (assorter != other.assorter) return false
-        if (estRoundResults != other.estRoundResults) return false
-        if (roundResults != other.roundResults) return false
-        if (status != other.status) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = estSampleSize
-        result = 31 * result + round
-        result = 31 * result + contest.hashCode()
-        result = 31 * result + assorter.hashCode()
-        result = 31 * result + estRoundResults.hashCode()
-        result = 31 * result + roundResults.hashCode()
-        result = 31 * result + status.hashCode()
-        return result
-    }
-
-}
-
-open class ClcaAssertion(
-    contest: ContestIF,
-    val cassorter: ClcaAssorterIF,
-): Assertion(contest, cassorter.assorter()) {
-
-    override fun toString() = "${cassorter.assorter().desc()} estSampleSize=$estSampleSize"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
-
-        other as ClcaAssertion
-
-        return cassorter == other.cassorter
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + cassorter.hashCode()
-        return result
     }
 }

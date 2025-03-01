@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Sampler
@@ -61,7 +61,7 @@ class PollingFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
     val contest: Contest,
-    val assorter: AssorterFunction
+    val assorter: AssorterIF
 ): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size
@@ -108,7 +108,7 @@ class OneAuditFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
     val contestUA: OneAuditContestUnderAudit,
-    val cassorter: OneAuditComparisonAssorter
+    val cassorter: OneAuditClcaAssorter
 ): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contestUA.id) }
     val N = cvrs.size

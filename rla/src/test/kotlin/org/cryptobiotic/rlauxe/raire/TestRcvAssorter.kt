@@ -15,10 +15,10 @@ class TestRcvAssorter {
     // testing
     fun RaireAssorter.match(winner: Int, loser: Int, winnerType: Boolean, already: List<Int> = emptyList()): Boolean {
         if (this.winner() != winner || this.loser() != loser) return false
-        if (winnerType && (this.assertion.assertionType != RaireAssertionType.winner_only)) return false
-        if (!winnerType && (this.assertion.assertionType == RaireAssertionType.winner_only)) return false
+        if (winnerType && (this.rassertion.assertionType != RaireAssertionType.winner_only)) return false
+        if (!winnerType && (this.rassertion.assertionType == RaireAssertionType.winner_only)) return false
         if (winnerType) return true
-        return already == this.assertion.alreadyEliminated
+        return already == this.rassertion.alreadyEliminated
     }
     
     // SHANGRLA TestAssertion.test_rcv_assorter()
@@ -96,7 +96,7 @@ class TestRcvAssorter {
         val assorters = rrContest.makeAssorters() // adds assorts to the assertion
         val wassorter = assorters.find { it.match(28, 50, true) }
         assertNotNull(wassorter)
-        println("wassorter = ${wassorter.assertion}")
+        println("wassorter = ${wassorter.rassertion}")
         // wassorter = RaireAssertion(winner=28, loser=50, alreadyEliminated=[], assertionType=winner_only, explanation=Rules out case where 28 is eliminated before 50)
 
         ////            # winner-only assertion
@@ -172,7 +172,7 @@ class TestRcvAssorter {
 
         val eassorter = assorters.find { it.match(27, 26, false, listOf(28, 50)) }
         assertNotNull(eassorter)
-        println("eassorter = ${eassorter.assertion}")
+        println("eassorter = ${eassorter.rassertion}")
         //eassorter = RaireAssertion(winner=27, loser=26, alreadyEliminated=[28, 50], assertionType=irv_elimination, explanation=Rules out outcomes with tail [... 27 26])
 
         assertEquals(1.0, eassorter.assort(Cvr(contest, listOf(27))))

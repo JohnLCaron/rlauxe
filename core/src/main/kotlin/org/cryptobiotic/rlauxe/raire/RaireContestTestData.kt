@@ -36,6 +36,7 @@ data class RaireContestTestData(
     val phantomCount = (this.ncards * phantomPct).toInt()
     val Nc = this.ncards
 
+    // this whole thing depends on RaireCvr separate from Cvr ??
     fun makeCvrs(): List<RaireCvr> {
         var count = 0
         val cvrs = mutableListOf<RaireCvr>()
@@ -44,7 +45,7 @@ data class RaireContestTestData(
         repeat(excess) {
             cvrs.add(makeCvrWithLeading0(count++))
         }
-        repeat(this.ncards-excess-this.phantomCount) {
+        repeat(this.ncards - excess - this.phantomCount) {
             cvrs.add(makeCvr(count++))
         }
         repeat(this.phantomCount) {
@@ -122,7 +123,7 @@ fun makeRaireContest(N: Int, minMargin: Double, undervotePct: Double = .10, phan
 fun trytoMakeRaireContest(N: Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val ncands = 4
 
-    val testContest = RaireContestTestData(0, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
+    val testContest = RaireContestTestData(111, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
     var round = 1

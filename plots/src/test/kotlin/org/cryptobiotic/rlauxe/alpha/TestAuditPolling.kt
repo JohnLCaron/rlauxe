@@ -155,7 +155,7 @@ class TestAuditPolling {
 
 }
 
-class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterFunction): Sampler {
+class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterIF): Sampler {
     val maxSamples = mvrs.count { it.hasContest(contest.id) }
     private var count = 0
 

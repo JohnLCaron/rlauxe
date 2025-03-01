@@ -4,8 +4,12 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -101,6 +105,59 @@ class TestAuditStateJson {
         assertTrue(roundtripIO.equals(target))
         assertEquals(roundtripIO, target)
     }
+
+    @Test
+    fun testRoundtripWithRaire() {
+        val fuzzMvrs = .01
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
+        )
+
+        val N = 5000
+        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
+
+        val contests: List<Contest> = testData.contests
+        println("Start testComparisonWorkflow $testData")
+        contests.forEach { println("  $it") }
+
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N/2, minMargin=.04, quiet = true)
+        println(rcontest)
+        println()
+
+        val testCvrs = testData.makeCvrsFromContests() + rcvrs
+
+        val testMvrs = if (fuzzMvrs == 0.0) testCvrs
+            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+
+        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, listOf(rcontest), testCvrs)
+        val sampleIndices = clcaWorkflow.chooseSamples(1)
+        val sampledMvrs = sampleIndices.map {
+            testMvrs[it]
+        }
+        clcaWorkflow.runAudit(sampleIndices, sampledMvrs, 1)
+
+        val target = AuditState(
+            "TestContestJson",
+            1,
+            42,
+            false,
+            false,
+            clcaWorkflow.contestsUA,
+        )
+        val json = target.publishJson()
+        val roundtrip = json.import()
+        assertNotNull(roundtrip)
+        check(target, roundtrip)
+        assertEquals(roundtrip, target)
+
+        val useFilename = filename + "2"
+        writeAuditStateJsonFile(target, useFilename)
+        val result = readAuditStateJsonFile(useFilename)
+        assertTrue(result is Ok)
+        val roundtripIO = result.unwrap()
+        assertTrue(roundtripIO.equals(target))
+        assertEquals(roundtripIO, target)
+    }
 }
 
 // data class AuditState(
@@ -120,6 +177,9 @@ fun check(s1: AuditState, s2: AuditState) {
     assertEquals(s1.auditIsComplete, s2.auditIsComplete)
     assertEquals(s1.contests.size, s2.contests.size)
     s1.contests.forEachIndexed { idx, c1 ->
+        if (c1.contest.choiceFunction == SocialChoiceFunction.IRV) {
+            println("here")
+        }
         val c2 = s2.contests[idx]
         assertEquals(c1.contest, c2.contest, "contest ${c1.contest.show()}\n not ${c2.contest.show()}")
         c1.clcaAssertions.forEachIndexed { idx, a1 ->

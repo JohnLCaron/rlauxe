@@ -1,11 +1,5 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.AssorterFunction
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.workflow.AuditType
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 // SHANGRLA test_Assertion.py
 // TODO move useful tests over to TestAssertionsFromShangrla
 

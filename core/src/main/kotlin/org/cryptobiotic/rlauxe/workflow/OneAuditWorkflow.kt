@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
@@ -97,7 +97,7 @@ fun runOneAuditAssertionAlpha(
     roundIdx: Int,
     quiet: Boolean = false,
 ): TestH0Result{
-    val assorter = cassertion.cassorter as OneAuditComparisonAssorter
+    val assorter = cassertion.cassorter as OneAuditClcaAssorter
     val sampler = ClcaWithoutReplacement(
         contestUA.contest,
         cvrPairs,

@@ -10,7 +10,7 @@ import kotlin.random.Random
 data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
                              val p2: Double, val p1: Double = 0.0,
                              val withoutReplacement: Boolean = true): Sampler {
-    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
+    val maxSamples = cvrs.count { it.hasContest(cassorter.info.id) }
     val N = cvrs.size
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(N) { it }
@@ -71,7 +71,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
 // only used by compareAlphaPaperMasses
 data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter, val mvrMean: Double,
                                  val withoutReplacement: Boolean = true): Sampler {
-    val maxSamples = cvrs.count { it.hasContest(cassorter.contest.info.id) }
+    val maxSamples = cvrs.count { it.hasContest(cassorter.info.id) }
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(cvrs.size) { it }
     val sampleMean: Double

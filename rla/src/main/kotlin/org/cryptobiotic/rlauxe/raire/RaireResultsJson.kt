@@ -32,39 +32,9 @@ data class RaireResultsJson(
     val overallExpectedPollsNumber : String,
     @SerialName("Ballots involved in audit (#)")
     val ballotsInvolvedInAuditNumber : String,
-    val audits: List<RaireContestAuditJson>,
+    val audits: List<RaireResultsContestAuditJson>,
 )
 
-@Serializable
-data class RaireContestAuditJson(
-    val contest: String,
-    val winner: String,
-    val eliminated: List<String>,
-    @SerialName("Expected Polls (#)")
-    val expectedPollsNumber : String,
-    @SerialName("Expected Polls (%)")
-    val expectedPollsPercent : String,
-    val assertions: List<RaireAssertionJson>,
-)
-
-@Serializable
-data class RaireAssertionJson(
-    val winner: String,
-    val loser: String,
-    val already_eliminated: List<String>,
-    val assertion_type: String,
-    val explanation: String,
-)
-
-@OptIn(ExperimentalSerializationApi::class)
-fun readRaireResultsJson(filename: String): RaireResultsJson {
-    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
-    Files.newInputStream(Path.of(filename), StandardOpenOption.READ).use { inp ->
-        val result =  jsonReader.decodeFromStream<RaireResultsJson>(inp)
-        // println(Json.encodeToString(result))
-        return result
-    }
-}
 
 fun RaireResultsJson.import(ncs: Map<String, Int>, nps: Map<String, Int>) =
     RaireResults(
@@ -73,7 +43,19 @@ fun RaireResultsJson.import(ncs: Map<String, Int>, nps: Map<String, Int>) =
         this.audits.map { it.import(ncs[it.contest]!!, nps[it.contest]!!) },
     )
 
-fun RaireContestAuditJson.import(Nc: Int, Np: Int) =
+@Serializable
+data class RaireResultsContestAuditJson(
+    val contest: String,
+    val winner: String,
+    val eliminated: List<String>,
+    @SerialName("Expected Polls (#)")
+    val expectedPollsNumber : String,
+    @SerialName("Expected Polls (%)")
+    val expectedPollsPercent : String,
+    val assertions: List<RaireResultsAssertionJson>,
+)
+
+fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int) =
     RaireContestUnderAudit.make(
         this.contest,
         this.winner.toInt(),
@@ -85,8 +67,17 @@ fun RaireContestAuditJson.import(Nc: Int, Np: Int) =
         this.assertions.map { it.import() },
     )
 
-fun RaireAssertionJson.import() =
-    RaireAssertion(
+@Serializable
+data class RaireResultsAssertionJson(
+    val winner: String,
+    val loser: String,
+    val assertion_type: String,
+    val already_eliminated: List<String>,
+    val explanation: String?,
+)
+
+fun RaireResultsAssertionJson.import(): RaireAssertion {
+    return RaireAssertion(
         this.winner.toInt(),
         this.loser.toInt(),
         0, // not available, calculate instead
@@ -94,3 +85,14 @@ fun RaireAssertionJson.import() =
         this.already_eliminated.map { it.toInt() },
         this.explanation,
     )
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun readRaireResultsJson(filename: String): RaireResultsJson {
+    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
+    Files.newInputStream(Path.of(filename), StandardOpenOption.READ).use { inp ->
+        val result =  jsonReader.decodeFromStream<RaireResultsJson>(inp)
+        // println(Json.encodeToString(result))
+        return result
+    }
+}

@@ -110,19 +110,6 @@ fun consistentSampling(
     if (inx > sortedBocIndices.size) {
         throw RuntimeException("ran out of samples!!")
     }
-
-    // now we count the actualMvrs for each contest, now that we know what ballots are sampled.
-    // modifying the contest directly.
-    val contestCount = mutableMapOf<ContestUnderAudit, Int>() // contestId -> ncvrs in sample
-    sampledIndices.forEach { sidx ->
-        val boc = ballotOrCvrs[sidx]
-        contestsNotDone.forEach { contest ->
-            if (boc.hasContest(contest.id)) {
-                contestCount[contest] = contestCount[contest]?.plus(1) ?: 1
-            }
-        }
-    }
-    contestCount.forEach { contest, count ->  contest.actualMvrs = count }
     return sampledIndices
 }
 

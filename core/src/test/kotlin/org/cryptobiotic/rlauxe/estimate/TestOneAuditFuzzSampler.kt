@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditComparisonAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.util.mergeReduceS
@@ -26,7 +26,7 @@ class TestOneAuditFuzzSampler {
                 val ncands = contest.ncandidates
                 val contestUA: OneAuditContestUnderAudit = contest.makeContestUnderAudit(cvrs)
                 val assertion = contestUA.minClcaAssertion()!!
-                val cassorter = assertion.cassorter as OneAuditComparisonAssorter // TODO why so complicated?
+                val cassorter = assertion.cassorter as OneAuditClcaAssorter // TODO why so complicated?
                 val fuzzer = OneAuditFuzzSampler(fuzzPct, cvrs, contestUA, cassorter)
                 val cvrPairs = fuzzer.cvrPairs
 

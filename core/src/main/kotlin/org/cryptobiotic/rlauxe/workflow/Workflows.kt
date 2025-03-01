@@ -20,22 +20,22 @@ fun check(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
             checkWinners(
                 contestUA,
                 (contestUA.contest as Contest).votes.entries.sortedByDescending { it.value })  // 2.a)
-        }
 
-        // see if margin is too small
-        val minMargin = contestUA.minAssertion()!!.assorter.reportedMargin()
-        if (minMargin <= auditConfig.minMargin) {
-            println("***MinMargin contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
-            contestUA.done = true
-            contestUA.status = TestH0Status.MinMargin
-        }
+            // see if margin is too small
+            val minMargin = contestUA.minAssertion()!!.assorter.reportedMargin()
+            if (minMargin <= auditConfig.minMargin) {
+                println("***MinMargin contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
+                contestUA.done = true
+                contestUA.status = TestH0Status.MinMargin
+            }
 
-        // see if too many phantoms
-        val adjustedMargin = minMargin - contestUA.contest.phantomRate()
-        if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
-            println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
-            contestUA.done = true
-            contestUA.status = TestH0Status.TooManyPhantoms
+            // see if too many phantoms
+            val adjustedMargin = minMargin - contestUA.contest.phantomRate()
+            if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
+                println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
+                contestUA.done = true
+                contestUA.status = TestH0Status.TooManyPhantoms
+            }
         }
         // println("contest ${contestUA} minMargin ${minMargin} + phantomRate ${contestUA.contest.phantomRate()} = adjustedMargin ${adjustedMargin}")
     }

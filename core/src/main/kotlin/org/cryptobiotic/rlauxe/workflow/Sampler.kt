@@ -15,7 +15,7 @@ interface Sampler: Iterator<Double> {
 class PollWithoutReplacement(
     val contest: ContestIF,
     val mvrs : List<Cvr>,
-    val assorter: AssorterFunction,
+    val assorter: AssorterIF,
     val allowReset: Boolean = true,
 ): Sampler {
     val maxSamples = mvrs.count { it.hasContest(contest.id) }

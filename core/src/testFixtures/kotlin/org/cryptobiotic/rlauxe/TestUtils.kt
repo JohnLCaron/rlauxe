@@ -48,6 +48,6 @@ fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
 
 // deprecate
 fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int) =
-    ClcaAssorter(makeStandardContest(Nc), makeStandardPluralityAssorter(Nc), avgCvrAssortValue, check=false)
+    ClcaAssorter(makeStandardContest(Nc).info, makeStandardPluralityAssorter(Nc), avgCvrAssortValue, check=false)
 
 

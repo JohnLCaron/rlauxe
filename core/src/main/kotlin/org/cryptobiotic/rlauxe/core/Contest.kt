@@ -195,9 +195,7 @@ open class ContestUnderAudit(
     var pollingAssertions: List<Assertion> = emptyList()
     var clcaAssertions: List<ClcaAssertion> = emptyList()
 
-    var actualMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
     var estMvrs = 0 // Estimate of the sample size required to confirm the contest
-    var estNewMvrs = 0 // Estimate of the new samples required to confirm the contest
     var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
     var done = false
     var included = true
@@ -256,7 +254,7 @@ open class ContestUnderAudit(
 
         this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            val clcaAssorter = ClcaAssorter(contest, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
+            val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ClcaAssertion(contest, clcaAssorter)
         }
         return this
@@ -307,9 +305,7 @@ open class ContestUnderAudit(
 
         if (isComparison != other.isComparison) return false
         if (hasStyle != other.hasStyle) return false
-        if (actualMvrs != other.actualMvrs) return false
         if (estMvrs != other.estMvrs) return false
-        if (estNewMvrs != other.estNewMvrs) return false
         if (estSampleSizeNoStyles != other.estSampleSizeNoStyles) return false
         if (done != other.done) return false
         if (included != other.included) return false
@@ -324,9 +320,7 @@ open class ContestUnderAudit(
     override fun hashCode(): Int {
         var result = isComparison.hashCode()
         result = 31 * result + hasStyle.hashCode()
-        result = 31 * result + actualMvrs
         result = 31 * result + estMvrs
-        result = 31 * result + estNewMvrs
         result = 31 * result + estSampleSizeNoStyles
         result = 31 * result + done.hashCode()
         result = 31 * result + included.hashCode()

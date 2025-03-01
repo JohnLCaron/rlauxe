@@ -76,7 +76,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: L
         done = workflow.runAudit(indices, sampledMvrs, roundIdx)
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
-        val state = AuditState("Round$roundIdx", roundIdx, sampledMvrs.size, sampledMvrs.size, true, done, workflow.getContests())
+        val state = AuditState("Round$roundIdx", roundIdx, sampledMvrs.size, true, done, workflow.getContests())
         writeAuditStateJsonFile(state, publish.auditRoundFile(roundIdx))
 
         val sampledMvrus = indices.map {

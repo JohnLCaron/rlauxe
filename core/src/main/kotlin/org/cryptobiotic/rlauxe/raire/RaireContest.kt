@@ -40,7 +40,7 @@ class RaireContestUnderAudit(
 ): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     val candidates =  contest.info.candidateIds
 
-    // TODO eliminate
+    // TODO eliminate who calls this?
     fun makeAssorters(): List<RaireAssorter> {
         return this.rassertions.map {
             RaireAssorter(contest.info, it)
@@ -59,7 +59,7 @@ class RaireContestUnderAudit(
                 require(doubleIsClose(calcMargin, reportedMargin))
             }
             assorter.reportedMargin = calcMargin
-            val clcaAssorter = ClcaAssorter(contest, assorter, margin2mean(calcMargin), hasStyle=hasStyle)
+            val clcaAssorter = ClcaAssorter(contest.info, assorter, margin2mean(calcMargin), hasStyle=hasStyle)
             ClcaAssertion(contest, clcaAssorter)
         }
         return this
@@ -70,6 +70,28 @@ class RaireContestUnderAudit(
         assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
             append(" ${it.show()}")
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as RaireContestUnderAudit
+
+        if (winner != other.winner) return false
+        if (rassertions != other.rassertions) return false
+        if (candidates != other.candidates) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + winner
+        result = 31 * result + rassertions.hashCode()
+        result = 31 * result + candidates.hashCode()
+        return result
     }
 
     companion object {
@@ -201,25 +223,25 @@ data class RaireAssertion(
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This a primitive assorter.
-class RaireAssorter(info: ContestInfo, val assertion: RaireAssertion): AssorterFunction {
+data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
     val contestId = info.id
-    val remaining = info.candidateIds.filter { !assertion.alreadyEliminated.contains(it) }
+    val remaining = info.candidateIds.filter { !rassertion.alreadyEliminated.contains(it) }
     var reportedMargin: Double = 0.0
 
     override fun upperBound() = 1.0
-    override fun winner() = assertion.winner
-    override fun loser() = assertion.loser
+    override fun winner() = rassertion.winner
+    override fun loser() = rassertion.loser
     override fun reportedMargin() = reportedMargin
     override fun desc() = buildString {
-        append("RaireAssorter winner/loser=${assertion.winner}/${assertion.loser}")
-        if (assertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${assertion.alreadyEliminated}")
+        append("RaireAssorter winner/loser=${rassertion.winner}/${rassertion.loser}")
+        if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${rassertion.alreadyEliminated}")
     }
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (usePhantoms && mvr.phantom) return 0.5;
         val rcvr = RaireCvr(mvr)
-        return if (assertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
-        else  if (assertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
+        return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
+        else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")
     }
 
@@ -231,9 +253,9 @@ class RaireAssorter(info: ContestInfo, val assertion: RaireAssertion): AssorterF
     // aka NEB
     fun assortWinnerOnly(rcvr: RaireCvr): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
-        val awinner = if (rcvr.get_vote_for(contestId, assertion.winner) == 1) 1 else 0
+        val awinner = if (rcvr.get_vote_for(contestId, rassertion.winner) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = rcvr.rcv_lfunc_wo( contestId, assertion.winner, assertion.loser)
+        val aloser = rcvr.rcv_lfunc_wo( contestId, rassertion.winner, rassertion.loser)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
@@ -245,8 +267,8 @@ class RaireAssorter(info: ContestInfo, val assertion: RaireAssertion): AssorterF
     fun assortIrvElimination(rcvr: RaireCvr): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
-        val awinner = rcvr.rcv_votefor_cand(contestId, assertion.winner, remaining)
-        val aloser = rcvr.rcv_votefor_cand(contestId, assertion.loser, remaining)
+        val awinner = rcvr.rcv_votefor_cand(contestId, rassertion.winner, remaining)
+        val aloser = rcvr.rcv_votefor_cand(contestId, rassertion.loser, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 }

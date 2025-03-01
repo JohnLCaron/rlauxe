@@ -82,8 +82,9 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
 
     fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
     override fun errorRates(): ClcaErrorRates {
-        val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
-        return ClcaErrorRates(p[1], p[2], p[3], p[4])
+        val n = if (numberOfSamples() > 0) numberOfSamples().toDouble() else 1.0
+        val p =  errorCounts().map { it / n }
+        return ClcaErrorRates(p[1], p[2], p[3], p[4]) // skip p0
     }
     fun errorRatesList(): List<Double> {
         val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }

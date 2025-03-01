@@ -32,22 +32,16 @@ class ClcaWorkflow(
     init {
         require (auditConfig.auditType == AuditType.CLCA)
 
-        // 2. Pre-processing and consistency checks
-        // 	a) Check that the winners according to the CVRs are the reported winners.
-        //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
-        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) } + raireContests
+        val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
 
-        // 3. Prepare for sampling
-        //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
-        //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
-        contestsUA.filter{ !it.done }.forEach { contest ->
+        contestsUA = regularContests + raireContests
+        contestsUA.forEach { contest ->
             contest.makeClcaAssertions(cvrs)
         }
 
-        // check contests well formed etc
-        check(auditConfig, contestsUA)
+        // only check regular contests
+        check(auditConfig, regularContests)
 
-        // must be done once and for all
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
@@ -67,6 +61,7 @@ class ClcaWorkflow(
         return sample(this, roundIdx, quiet)
     }
 
+    //  return allDone
     override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
         return runClcaAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
     }
@@ -86,15 +81,6 @@ fun runClcaAudit(auditConfig: AuditConfig,
                  cvrs: List<Cvr>,
                  roundIdx: Int,
                  quiet: Boolean): Boolean {
-    //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
-    // 	e) Import the MVRs.
-    //	f) For each MVR 𝑖:
-    //		For each 𝑐 ∈ C:
-    //			If 𝑢_𝑖 ≤ 𝑡_𝑐 , then for each 𝑎 ∈ A 𝑐 ∩ A:
-    //				• If the 𝑖th CVR is a phantom, define 𝑎(CVR𝑖 ) := 1/2.
-    //				• If card 𝑖 cannot be found or if it is a phantom, define 𝑎(MVR𝑖 ) := 0.
-    //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
-    //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
     val contestsNotDone = contestsUA.filter{ !it.done }
     val sampledCvrs = sampleIndices.map { cvrs[it] }
@@ -107,6 +93,9 @@ fun runClcaAudit(auditConfig: AuditConfig,
     if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
     contestsNotDone.forEach { contestUA ->
+        if (contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
+            println("here")
+        }
         var contestAssertionStatus = mutableListOf<TestH0Status>()
         contestUA.clcaAssertions.forEach { cassertion ->
             if (!cassertion.status.complete) {

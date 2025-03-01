@@ -67,7 +67,7 @@ class TestOverstatementsFromShangrla {
         val contest = makeFakeContest(info, 100)
         val assort = PluralityAssorter.makeWithVotes(contest, 0, 1)
         var margin = 0.5
-        var aVb = ClcaAssorter(contest, assort, (margin + 1) / 2)
+        var aVb = ClcaAssorter(info, assort, (margin + 1) / 2)
 
         //        assert Assertion.overstatement_assorter_margin(AvB_asrtn) == 1 / 3
         assertEquals(1.0/3.0, overstatement_assorter_margin(aVb))
@@ -141,7 +141,7 @@ class TestOverstatementsFromShangrla {
 
         val assort = PluralityAssorter.makeWithVotes(contest, 0, 1)
         var margin = 0.5
-        var aVb = ClcaAssorter(contest, assort, (margin + 1) / 2)
+        var aVb = ClcaAssorter(info, assort, (margin + 1) / 2)
 
         //        assert Assertion.overstatement_assorter_mean(AvB_asrtn) == 1/1.5
         assertEquals(1.0/1.5, overstatement_assorter_mean(aVb))
@@ -213,7 +213,7 @@ class TestOverstatementsFromShangrla {
 
         val margin = 0.2
 
-        var aVb = ClcaAssorter(contest, assort, (margin + 1.0)/2)
+        var aVb = ClcaAssorter(info, assort, (margin + 1.0)/2)
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0
@@ -360,7 +360,7 @@ class TestOverstatementsFromShangrla {
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[0], use_style=True) == 1/1.8
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[0], use_style=False) == 1/1.8
         var margin = 0.2
-        var aVb = ClcaAssorter(contest, assort, (margin + 1) / 2)
+        var aVb = ClcaAssorter(info, assort, (margin + 1) / 2)
         var have = aVb.bassort(mvrs[0], cvrs[0])
         assertEquals(1.0 / 1.8, have)
 
@@ -373,7 +373,7 @@ class TestOverstatementsFromShangrla {
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=True) == 2/1.7
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=False) == 2/1.7
         margin = 0.3
-        aVb = ClcaAssorter(contest, assort, (margin + 1) / 2)
+        aVb = ClcaAssorter(info, assort, (margin + 1) / 2)
         have = aVb.bassort(mvrs[0], cvrs[1])
         assertEquals(2.0 / 1.7, have)
 
@@ -382,7 +382,7 @@ class TestOverstatementsFromShangrla {
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=True) == 0.5/1.9
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=False) == 0.5/1.9
         margin = 0.1
-        aVb = ClcaAssorter(contest, assort, (margin + 1) / 2)
+        aVb = ClcaAssorter(info, assort, (margin + 1) / 2)
         have = aVb.bassort(mvrs[2], cvrs[0])
         assertEquals(0.5 / 1.9, have)
     }
@@ -444,7 +444,7 @@ class TestOverstatementsFromShangrla {
 
         val margin = 0.2
 
-        var aVb = ClcaAssorter(contest, assort, (margin + 1.0)/2)
+        var aVb = ClcaAssorter(info, assort, (margin + 1.0)/2)
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0

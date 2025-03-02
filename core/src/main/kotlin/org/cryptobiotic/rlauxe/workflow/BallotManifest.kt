@@ -37,6 +37,7 @@ data class BallotManifestUnderAudit(
 interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
+    fun isSampled(): Boolean
     fun setIsSampled(isSampled: Boolean): BallotOrCvr
 
     fun hasOneOrMoreContest(contests: List<ContestUnderAudit>): Boolean {
@@ -71,6 +72,7 @@ data class BallotUnderAudit (val ballot: Ballot, val sampleNum: Long) : BallotOr
         this.sampled = isSampled
         return this
     }
+    override fun isSampled() = sampled
 }
 
 // The term ballot style generally refers to the set of contests on a given voter’s ballot. (Ballot

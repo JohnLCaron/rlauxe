@@ -1,20 +1,9 @@
 package org.cryptobiotic.rlauxe.raire
 
-import io.kotest.core.test.TestCaseOrder
-import org.cryptobiotic.rlauxe.core.ClcaAssorter
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.roundToInt
-import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.util.doubleIsClose
-import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TestRaireContestTestData {
     val N = 50000
@@ -32,7 +21,7 @@ class TestRaireContestTestData {
         val phantomPct = phantomRange.start + Random.nextDouble(phantomRange.endInclusive - phantomRange.start)
         println("minMargin = $minMargin, phantomPct=${phantomPct}")
 
-        val makeRaireContestResult = makeRaireContest(N=N, minMargin=minMargin, phantomPct=phantomPct, quiet=false)
+        val makeRaireContestResult = makeRaireContest(N=N, ncands=4, minMargin=minMargin, phantomPct=phantomPct, quiet=false)
         rcontest = makeRaireContestResult.first
         cvrs = makeRaireContestResult.second
         rcontest.makeClcaAssertions(cvrs)

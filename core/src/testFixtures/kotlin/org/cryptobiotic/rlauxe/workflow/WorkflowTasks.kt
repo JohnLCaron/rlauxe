@@ -212,7 +212,7 @@ class RaireWorkflowTaskGenerator(
         AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
-        val (rcontest, testCvrs) = makeRaireContest(N=Nc, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
+        val (rcontest, testCvrs) = makeRaireContest(N=Nc, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
         val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest), testCvrs, quiet = quiet)

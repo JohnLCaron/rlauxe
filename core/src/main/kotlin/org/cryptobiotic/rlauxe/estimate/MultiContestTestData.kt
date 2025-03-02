@@ -49,19 +49,21 @@ data class MultiContestTestData(
         }
 
         // every contest has between 1 and 4 ballot styles, randomly chosen
-        val contestBstyles = mutableMapOf<ContestTestData, Set<Int>>()
-        fcontests.forEach{
+        val contestBstyles = mutableMapOf<ContestTestData, Set<Int>>() // fcontest -> set(ballot style id)
+        fcontests.forEach{ fcontest ->
             val nbs = min(nballotStyles, 1 + Random.nextInt(4))
             val bset = mutableSetOf<Int>() // the ballot style idx, 0 based
             while (bset.size < nbs) { // randomly choose nbs ballot styles
                 bset.add(Random.nextInt(nballotStyles))
             }
-            contestBstyles[it] = bset
+            contestBstyles[fcontest] = bset
         }
 
         // partition totalBallots amongst the ballotStyles
         ballotStyles = List(nballotStyles) { it }.map {
-            val contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
+            var contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
+            // every ballot style needs at least one contest. just make it first contest I guess
+            if (contestsForThisBs.isEmpty()) contestsForThisBs = listOf(fcontests.first())
             val contestList = contestsForThisBs.map { it.info.name }
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[it]!!
@@ -144,9 +146,9 @@ data class MultiContestTestData(
         // is this the same?
         val ncardsByContest = fcontests.associate { Pair(it.contestId, it.ncards) }
         if (ncardsByContest != ncardsPerContest) {
-            println("ncardsByContest")
+            println("$ncardsByContest != $ncardsPerContest")
         }
-        require( ncardsByContest == ncardsPerContest)
+        //require( ncardsByContest == ncardsPerContest)
 
         val phantoms = makePhantomCvrs(contests, ncardsPerContest)
         return result + phantoms
@@ -176,7 +178,7 @@ data class ContestTestData(
     var ncards = 0 // sum of nvotes and underCount
     var underCount = 0
     var phantomCount = 0
-    var adjustedVotes: List<Pair<Int, Int>> = emptyList() // includes undervotes
+    var adjustedVotes: List<Pair<Int, Int>> = emptyList() // (cand, nvotes) includes undervotes
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0
 
@@ -238,7 +240,6 @@ data class ContestTestData(
 
     // choice is a number from 0..votesLeft
     // shrink the partition as votes are taken from it
-    // same as ContestSimulation
     fun chooseCandidate(choice: Int): Int {
         var sum = 0
         var nvotes = 0

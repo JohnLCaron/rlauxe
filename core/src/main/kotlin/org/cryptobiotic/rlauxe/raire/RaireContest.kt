@@ -43,7 +43,7 @@ class RaireContestUnderAudit(
     // TODO eliminate who calls this?
     fun makeAssorters(): List<RaireAssorter> {
         return this.rassertions.map {
-            RaireAssorter(contest.info, it)
+            RaireAssorter(contest.info, it, (it.margin.toDouble() / contest.Nc))
         }
     }
 
@@ -51,14 +51,14 @@ class RaireContestUnderAudit(
     override fun makeClcaAssertions(cvrs: Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         this.clcaAssertions = rassertions.map { assertion ->
-            val assorter = RaireAssorter(contest.info, assertion)
+            val assorter = RaireAssorter(contest.info, assertion, (assertion.margin.toDouble() / contest.Nc))
             val calcMargin = assorter.calcAssorterMargin(id, cvrs)
             if (assertion.margin != 0) {
                 val reportedMargin = assertion.margin / this.Nc.toDouble()
                 // println(" calcMargin=$calcMargin reportedMargin=$reportedMargin")
                 require(doubleIsClose(calcMargin, reportedMargin))
             }
-            assorter.reportedMargin = calcMargin
+            // assorter.reportedMargin = calcMargin
             val clcaAssorter = ClcaAssorter(contest.info, assorter, margin2mean(calcMargin), hasStyle=hasStyle)
             ClcaAssertion(contest, clcaAssorter)
         }
@@ -191,6 +191,7 @@ data class RaireAssertion(
     val margin: Int,
     val assertionType: RaireAssertionType,
     val alreadyEliminated: List<Int> = emptyList(), // NEN only; already eliminated for the purpose of this assertion
+    val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
     val explanation: String? = null,
 ) {
     fun show() = buildString {
@@ -198,10 +199,10 @@ data class RaireAssertion(
     }
 
     companion object {
-        fun convertAssertion(candidates: List<Int>, aandd: AssertionAndDifficulty): RaireAssertion {
+        fun convertAssertion(candidates: List<Int>, aandd: AssertionAndDifficulty, votes: Map<Int, Int>): RaireAssertion {
             val assertion = aandd.assertion
             return if (assertion is NotEliminatedBefore) {
-                RaireAssertion(assertion.winner, assertion.loser, aandd.margin, RaireAssertionType.winner_only)
+                RaireAssertion(assertion.winner, assertion.loser, aandd.margin, RaireAssertionType.winner_only, votes = votes)
             } else if (assertion is NotEliminatedNext) {
                 // have to convert continuing (aka remaining) -> alreadyEliminated
                 val continuing = assertion.continuing.toList()
@@ -212,6 +213,7 @@ data class RaireAssertion(
                     aandd.margin,
                     RaireAssertionType.irv_elimination,
                     alreadyEliminated,
+                    votes = votes,
                 )
             } else {
                 throw Exception("Unknown assertion type: ${assertion.javaClass.name}")
@@ -223,18 +225,18 @@ data class RaireAssertion(
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This a primitive assorter.
-data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
+data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, val reportedMargin: Double): AssorterIF {
     val contestId = info.id
     val remaining = info.candidateIds.filter { !rassertion.alreadyEliminated.contains(it) }
-    var reportedMargin: Double = 0.0
 
     override fun upperBound() = 1.0
     override fun winner() = rassertion.winner
     override fun loser() = rassertion.loser
     override fun reportedMargin() = reportedMargin
     override fun desc() = buildString {
-        append("RaireAssorter winner/loser=${rassertion.winner}/${rassertion.loser}")
+        append("winner/loser=${rassertion.winner}/${rassertion.loser} margin=${rassertion.margin}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${rassertion.alreadyEliminated}")
+        append(" votes=${rassertion.votes}")
     }
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {

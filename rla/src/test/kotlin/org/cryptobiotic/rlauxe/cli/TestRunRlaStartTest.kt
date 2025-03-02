@@ -21,7 +21,7 @@ class TestRunRlaStartTest {
 
     @Test
     fun testRlaStartRaireClca() {
-        val topdir = "/home/stormy/temp/persist/testRunRaireClca"
+        val topdir = "/home/stormy/temp/persist/runClcaRaire"
         RunRlaStartTest.main(
             arrayOf(
                 "-in", topdir,
@@ -29,8 +29,9 @@ class TestRunRlaStartTest {
                 "-fuzzMvrs", ".0123",
                 "-mvrs", "$topdir/private/testMvrs.json",
                 "-ncards", "10000",
-                "-ncontests", "11",
-                "-addRaireContest",
+                "-ncontests", "10",
+                "--addRaireContest",
+                "--addRaireCandidates", "5",
             )
         )
     }

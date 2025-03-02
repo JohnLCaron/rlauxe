@@ -75,7 +75,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
             AssorterIFJson(
                 "RaireAssorter",
                 this.info.publishJson(),
-                0.0,
+                this.reportedMargin,
                 this.rassertion.winner,
                 this.rassertion.loser,
                 rassertion = this.rassertion.publishJson(),
@@ -105,6 +105,7 @@ fun AssorterIFJson.import(): AssorterIF {
             RaireAssorter(
                 this.info.import(),
                 this.rassertion!!.import(),
+                this.reportedMargin,
             )
         else -> throw RuntimeException()
     }

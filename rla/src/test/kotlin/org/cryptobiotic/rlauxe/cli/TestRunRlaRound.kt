@@ -14,6 +14,16 @@ class TestRunRlaRound {
             )
         )
     }
+    @Test
+    fun testRlaRoundRaireClca() {
+        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+        RunRound.main(
+            arrayOf(
+                "-in", topdir,
+                "-mvrs", "$topdir/private/testMvrs.json",
+            )
+        )
+    }
 
     @Test
     fun testRlaRoundPolling() {

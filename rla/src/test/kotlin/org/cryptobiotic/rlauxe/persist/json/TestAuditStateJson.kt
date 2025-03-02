@@ -120,7 +120,7 @@ class TestAuditStateJson {
         println("Start testComparisonWorkflow $testData")
         contests.forEach { println("  $it") }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N/2, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N/2, ncands=5, minMargin=.04, quiet = true)
         println(rcontest)
         println()
 

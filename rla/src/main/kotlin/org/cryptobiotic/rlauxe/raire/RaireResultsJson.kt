@@ -83,6 +83,7 @@ fun RaireResultsAssertionJson.import(): RaireAssertion {
         0, // not available, calculate instead
         RaireAssertionType.fromString(this.assertion_type),
         this.already_eliminated.map { it.toInt() },
+        emptyMap(),
         this.explanation,
     )
 }

@@ -30,6 +30,7 @@ data class RaireContestTestData(
     val excessVotes: Int? = null,   // control this for testing
 ) {
     val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
+    val candidateIds: List<Int> = List(ncands) { it }.map { it }
     val info = ContestInfo("rcontest$contestId", contestId, candidateNames = listToMap(candidateNames), SocialChoiceFunction.IRV)
 
     val underCount = (this.ncards * undervotePct).toInt()
@@ -81,13 +82,9 @@ data class RaireContestTestData(
         return RaireCvr(Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray())))
     }
 
-    // adjust in place
-    fun adjust(testCvrs: List<RaireCvr>, minAssertion: AssertionAndDifficulty) {
-        var have = minAssertion.margin
+    fun adjustRanks(testCvrs: List<RaireCvr>, margin: Int, winner: Int, loser: Int) {
+        var have = margin
         val want = this.minMargin * this.ncards
-        val nen = minAssertion.assertion as NotEliminatedNext
-        val winner = nen.winner
-        val loser = nen.loser
         var cvrIdx = 0
         // println("have=$have, want = $want")
         while (have < want) {
@@ -112,17 +109,15 @@ data class RaireContestTestData(
     }
 }
 
-fun makeRaireContest(N: Int, minMargin: Double, undervotePct: Double = .10, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
+fun makeRaireContest(N: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
     repeat(11) {
-        val result = trytoMakeRaireContest(N, minMargin, undervotePct, phantomPct, quiet)
+        val result = trytoMakeRaireContest(N, ncands, minMargin, undervotePct, phantomPct, quiet)
         if (result != null) return result
     }
     throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
 }
 
-fun trytoMakeRaireContest(N: Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
-    val ncands = 4
-
+fun trytoMakeRaireContest(N: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val testContest = RaireContestTestData(111, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
@@ -138,7 +133,23 @@ fun trytoMakeRaireContest(N: Int, minMargin: Double, undervotePct: Double, phant
 
     // iteratively modify the testCvrs until the minAssertion margin is > margin TODO cleanup
     while (marginPct < minMargin) {
-        testContest.adjust(testCvrs, solution!!.third)
+        val aandd = solution!!.third
+
+        when (aandd.assertion) {
+            is NotEliminatedNext -> {
+                val nen = (aandd.assertion as NotEliminatedNext)
+                testContest.adjustRanks(testCvrs, aandd.margin, nen.winner, nen.loser)
+            }
+
+            is NotEliminatedBefore -> {
+                val neb = (aandd.assertion as NotEliminatedBefore)
+                testContest.adjustRanks(testCvrs, aandd.margin, neb.winner, neb.loser)
+            }
+
+            else -> {
+                throw RuntimeException("unexpected assertion type ${aandd.assertion::class.simpleName}")
+            }
+        }
 
         if (!quiet) println("===================================\nRound $round")
         solution = findMinAssertion(testContest, testCvrs, quiet)
@@ -150,7 +161,37 @@ fun trytoMakeRaireContest(N: Int, minMargin: Double, undervotePct: Double, phant
         round++
     }
 
-    val raireAssertions = solution!!.second.assertions.map { RaireAssertion.convertAssertion(testContest.info.candidateIds, it) }
+    val vc = VoteConsolidator()
+    testCvrs.forEach {
+        val votes = it.cvr.votes[testContest.info.id]
+        if (votes != null) {
+            vc.addVote(votes)
+        }
+    }
+    val startingVotes = vc.makeVoteList()
+
+    val raireAssertions = solution!!.second.assertions.map {  aand ->
+        val votes = if (aand.assertion is NotEliminatedNext) {
+            val nen = (aand.assertion as NotEliminatedNext)
+            val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
+            val nenChoices = voteSeq.nenChoices(nen.winner, nen.loser)
+            val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
+            // println("    nenChoices = $nenChoices margin=$margin\n")
+            require(aand.margin == margin)
+            nenChoices
+
+        } else {
+            val neb = (aand.assertion as NotEliminatedBefore)
+            val voteSeq = VoteSequences(startingVotes)
+            val nebChoices = voteSeq.nebChoices(neb.winner, neb.loser)
+            val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
+            // println("    nebChoices = $nebChoices margin=$margin\n")
+            require(aand.margin == margin)
+            nebChoices
+        }
+
+        RaireAssertion.convertAssertion(testContest.info.candidateIds, aand, votes)
+    }
 
     val rcontentUA = RaireContestUnderAudit.makeFromInfo(
         testContest.info,
@@ -174,9 +215,8 @@ fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>
         }
     }
     val cvotes = vc.makeVotes()
-
-    // public Votes(Vote[] votes, int numCandidates) throws RaireException {
     val votes = Votes(cvotes, testContest.ncands)
+
     // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
     val result: IRVResult = votes.runElection(TimeOut.never())
     if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
@@ -187,14 +227,6 @@ fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>
     }
     val winner:Int = result.possibleWinners[0] // we need a winner in order to generate the assertions
 
-    // Map<String, Object> metadata,
-    // Vote[] votes,
-    // int num_candidates,
-    // Integer winner,
-    // AuditType audit,
-    // TrimAlgorithm trim_algorithm,
-    // Double difficulty_estimate,
-    // Double time_limit_seconds) {
     val problem = RaireProblem(
         mapOf("candidates" to testContest.candidateNames),
         cvotes,

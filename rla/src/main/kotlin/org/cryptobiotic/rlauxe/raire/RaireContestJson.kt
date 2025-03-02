@@ -113,6 +113,7 @@ data class RaireAssertionJson(
     val margin: Int,
     val assertion_type: String,
     val already_eliminated: List<String>,
+    val votes: Map<Int, Int>,
     val explanation: String?,
 )
 
@@ -122,6 +123,7 @@ fun RaireAssertion.publishJson() = RaireAssertionJson(
     this.margin,
     this.assertionType.name,
     this.alreadyEliminated.map { it.toString() },
+    this.votes,
     this.explanation,
 )
 
@@ -132,6 +134,7 @@ fun RaireAssertionJson.import(): RaireAssertion {
         this.margin,
         RaireAssertionType.fromString(this.assertion_type),
         this.already_eliminated.map { it.toInt() },
+        this.votes,
         this.explanation,
     )
 }

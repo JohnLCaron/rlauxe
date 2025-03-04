@@ -131,7 +131,7 @@ object RunRlaStartTest {
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
 
         // ClcaWorkflow assigns the sample numbers, and creates the assertions
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, testCvrs, quiet = false)
+        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, testCvrs)
         writeCvrsJsonFile(clcaWorkflow.cvrsUA, publisher.cvrsFile())
         println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
 
@@ -144,22 +144,14 @@ object RunRlaStartTest {
         writeCvrsJsonFile(mvrus, mvrFile)
         println("   writeCvrsJsonFile ${mvrFile}")
 
-        // get the first round of samples wanted, write them to round1
-        val samples = runChooseSamples(1, clcaWorkflow, publisher)
-        val result = if (samples.size == 0) {
-            println("***FAILED TO GET ANY SAMPLES***")
-            -1
-        } else {
-            println("nsamples needed = ${samples.size}, ready to audit")
-            0
-        }
+        // get the first round of samples wanted, write them to round1 subdir
+        val auditRound = runChooseSamples(clcaWorkflow, publisher)
 
         // write the partial audit state to round1
-        val state = AuditState("Starting", 1, samples.size, false, false, clcaWorkflow.getContests())
-        writeAuditStateJsonFile(state, publisher.auditRoundFile(1))
+        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
 
-        return result
+        return if (auditRound.sampledIndices.isNotEmpty()) 0 else 1
     }
 
     fun startTestElectionPolling(
@@ -177,7 +169,9 @@ object RunRlaStartTest {
 
         val maxMargin = .08
         val useMin = min(minMargin, maxMargin)
-        val testData = MultiContestTestData(11, 4, ncards, marginRange = useMin..maxMargin)
+        val phantomPctRange: ClosedFloatingPointRange<Double> =
+            if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
+        val testData = MultiContestTestData(11, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
@@ -188,7 +182,7 @@ object RunRlaStartTest {
         val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         // PollingWorkflow assigns the sample numbers, and creates the assertions
-        val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size, quiet = false)
+        val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
         val ballotManifestUA = BallotManifestUnderAudit(pollingWorkflow.ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publisher.ballotManifestFile())
         println("   writeBallotManifestJsonFile ${publisher.ballotManifestFile()}")
@@ -203,29 +197,23 @@ object RunRlaStartTest {
         println("   writeCvrsJsonFile ${mvrFile}")
 
         // get the first round of samples wanted, write them to round1 subdir
-        val samples = runChooseSamples(1, pollingWorkflow, publisher)
-        val result = if (samples.size == 0) {
-            println("***FAILED TO GET ANY SAMPLES***")
-            -1
-        } else {
-            println("nsamples needed = ${samples.size}, ready to audit")
-            0
-        }
+        val auditRound = runChooseSamples(pollingWorkflow, publisher)
 
         // write the partial audit state to round1
-        val state = AuditState("Starting", 1, samples.size, false, false, pollingWorkflow.getContests())
-        writeAuditStateJsonFile(state, publisher.auditRoundFile(1))
+        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
 
-        return result
+        return if (auditRound.sampledIndices.isNotEmpty()) 0 else 1
     }
 }
 
-fun runChooseSamples(roundIdx: Int, workflow: RlauxWorkflowIF, publish: Publisher): List<Int> {
-    val indices = workflow.chooseSamples(roundIdx, show = true)
-    if (indices.isNotEmpty()) {
-        writeSampleIndicesJsonFile(indices, publish.sampleIndicesFile(roundIdx))
-        println("   writeSampleIndicesJsonFile ${publish.sampleIndicesFile(roundIdx)}")
+fun runChooseSamples(workflow: RlauxWorkflowIF, publish: Publisher): AuditRound {
+    val round = workflow.startNewRound(quiet = false)
+    if (round.sampledIndices.isNotEmpty()) {
+        writeSampleIndicesJsonFile(round.sampledIndices, publish.sampleIndicesFile(round.roundIdx))
+        println("   writeSampleIndicesJsonFile ${publish.sampleIndicesFile(round.roundIdx)}")
+    } else {
+        println("*** FAILED TO GET ANY SAMPLES ***")
     }
-    return indices
+    return round
 }

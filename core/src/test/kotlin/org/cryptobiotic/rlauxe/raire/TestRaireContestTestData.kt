@@ -36,7 +36,7 @@ class TestRaireContestTestData {
         assertEquals(rcontest.Np, np)
 
         assertEquals(rcontest.winner, 0)
-        rcontest.rassertions.forEach { println("  $it marginPct=${it.margin/N.toDouble()}") }
+        rcontest.rassertions.forEach { println("  $it marginPct=${it.marginInVotes/N.toDouble()}") }
     }
 
     /*

@@ -76,8 +76,8 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 "RaireAssorter",
                 this.info.publishJson(),
                 this.reportedMargin,
-                this.rassertion.winner,
-                this.rassertion.loser,
+                this.rassertion.winnerId,
+                this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
             )
         else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")

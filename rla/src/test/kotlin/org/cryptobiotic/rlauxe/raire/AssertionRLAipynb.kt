@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.workflow.AssertionRound
+import org.cryptobiotic.rlauxe.workflow.ContestRound
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -238,8 +240,8 @@ class AssertionRLA {
             1234567890123456789L,
             314159265,
             0.8,
-            "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
-            manifestFile = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/N19-manifest.csv",
+            "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
+            manifestFile = "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/N19-manifest.csv",
             // "./data/SFDA2019/N19 ballot manifest with WH location for RLA Upload VBM 11-14.xlsx",
             true,
             "./data/sample.csv",
@@ -275,7 +277,7 @@ class AssertionRLA {
             n_winners = 1,
             candidate = listOf(15, 16, 17, 18, 45),
             winner = listOf(15),
-            assertion_file = "./data/SFDA2019/SF2019Nov8Assertions.json",
+            assertion_file = "./data/raire/SFDA2019/SF2019Nov8Assertions.json",
             audit_type = AuditType.CLCA,
         )
 
@@ -296,7 +298,7 @@ class AssertionRLA {
         val nps = mapOf("334" to 0, "339" to 0) // TODO
 
         val rr =
-            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json")
+            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SF2019Nov8Assertions.json")
         val raireResults = rr.import(ncs, nps)
         val show = raireResults.show()
         println(show)
@@ -444,12 +446,13 @@ class AssertionRLA {
 
 //#%%
 //sampled_cvr_indices = CVR.consistent_sampling(cvr_list=cvr_list, contests=contests)
-        val contestUA = raireResults.contests.map {
+        val contestUAs = raireResults.contests.map {
             // TODO it.ncvrs = N
-            it.estMvrs = sampleSize
             it
         }
-        val sampled_cvr_indices = consistentSampling(contestUA, cvras)
+        val contestRounds = contestUAs.map{ contest -> ContestRound(contest, 1) }
+
+        val sampled_cvr_indices = consistentSampling(contestRounds, cvras)
         println("sampled = ${sampled_cvr_indices.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)

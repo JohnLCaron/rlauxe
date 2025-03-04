@@ -33,13 +33,13 @@ class TestClcaEstimationFailure {
         val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), cvrs)
 
         println("\nrunClcaSimulation")
-        workflow.contestsUA.forEach { contestUA ->
+        workflow.getContests().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { assertion ->
                 runClcaSimulation(cvrs, contestUA, assertion.cassorter as ClcaAssorter)
             }
         }
-        println("\nchooseSamples")
-        workflow.chooseSamples(1, show = true)
+        //println("\nchooseSamples")
+        //workflow.chooseSamples(1, show = true)
     }
 
     val debug = false

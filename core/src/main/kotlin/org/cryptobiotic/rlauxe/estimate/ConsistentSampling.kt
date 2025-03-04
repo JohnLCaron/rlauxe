@@ -2,27 +2,30 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.roundToInt
+import org.cryptobiotic.rlauxe.workflow.AuditRound
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
+import org.cryptobiotic.rlauxe.workflow.ContestRound
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowProxy
 
 private val debug = false
 
-/** iterates on createSampleIndices, checking for pct <= auditConfig.samplePctCutoff, removing contests
- * until satisfied. */
-fun sample(workflow: RlauxWorkflowProxy, roundIdx: Int, quiet: Boolean): List<Int> {
+/** iterates on createSampleIndices, checking for pct <= auditConfig.samplePctCutoff,
+ * removing contests until satisfied. */
+fun sample(workflow: RlauxWorkflowProxy, auditRound: AuditRound, quiet: Boolean): List<Int> {
     val auditConfig = workflow.auditConfig()
     val borc = workflow.getBallotsOrCvrs()
+    val roundIdx = auditRound.roundIdx
 
     // count the number of cvrs that have at least one contest under audit.
     // TODO this is wrong for samplePctCutoff, except maybe the first round ??
     val N = if (!auditConfig.hasStyles) borc.size
-                  else borc.filter { it.hasOneOrMoreContest(workflow.getContests()) }.count()
+                  else borc.filter { it.hasOneOrMoreContest(auditRound.contests) }.count()
 
     var sampleIndices: List<Int> = emptyList()
-    val contestsNotDone = workflow.getContests().filter { !it.done }.toMutableList()
+    val contestsNotDone = auditRound.contests.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
-        sampleIndices = createSampleIndices(workflow, roundIdx, -1, quiet)
+        sampleIndices = createSampleIndices(workflow, auditRound, -1, quiet)
 
         // the rest of this implements samplePctCutoff TODO refactor this
         val pct = sampleIndices.size / N.toDouble()
@@ -36,7 +39,7 @@ fun sample(workflow: RlauxWorkflowProxy, roundIdx: Int, quiet: Boolean): List<In
         println(" ***too many samples, remove contest ${maxContest} with status FailMaxSamplesAllowed")
 
         // information we want in the persisted record
-        val minAssertion = maxContest.minAssertion()!!
+        val minAssertion = maxContest.minAssertion()
         minAssertion.status = TestH0Status.FailMaxSamplesAllowed
         minAssertion.round = roundIdx
         maxContest.done = true
@@ -50,21 +53,21 @@ fun sample(workflow: RlauxWorkflowProxy, roundIdx: Int, quiet: Boolean): List<In
 }
 
 /** must have contest.estSampleSize set. must have borc.sampleNumber assigned. */
-fun createSampleIndices(workflow: RlauxWorkflowProxy, roundIdx: Int, wantNewMvrs: Int, quiet: Boolean): List<Int> {
+fun createSampleIndices(workflow: RlauxWorkflowProxy, auditRound: AuditRound, wantNewMvrs: Int, quiet: Boolean): List<Int> {
     val auditConfig = workflow.auditConfig()
-    val contestsNotDone = workflow.getContests().filter { !it.done }
+    val contestsNotDone = auditRound.contests.filter { !it.done }
     if (contestsNotDone.isEmpty()) return emptyList()
 
     val maxContestSize = contestsNotDone.maxOf { it.estMvrs }
     return if (auditConfig.hasStyles) {
-        if (!quiet) println("\nconsistentSampling round $roundIdx")
+        println("consistentSampling round ${auditRound.roundIdx} wantNewMvrs=$wantNewMvrs")
         val sampleIndices = consistentSampling(contestsNotDone, workflow.getBallotsOrCvrs(), wantNewMvrs)
-        if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
+        println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
         sampleIndices
     } else {
-        if (!quiet) println("\nuniformSampling round $roundIdx")
+        if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
         val sampleIndices =
-            uniformSampling(contestsNotDone, workflow.getBallotsOrCvrs(), auditConfig.samplePctCutoff, roundIdx)
+            uniformSampling(contestsNotDone, workflow.getBallotsOrCvrs(), auditConfig.samplePctCutoff, auditRound.roundIdx)
         if (!quiet) println(" maxContestSize=$maxContestSize consistentSamplingSize= ${sampleIndices.size}")
         sampleIndices
     }
@@ -73,9 +76,9 @@ fun createSampleIndices(workflow: RlauxWorkflowProxy, roundIdx: Int, wantNewMvrs
 // for audits with hasStyles
 // TODO samplePctCutoff: Double,
 fun consistentSampling(
-    contestsNotDone: List<ContestUnderAudit>,
+    contestsNotDone: List<ContestRound>,
     ballotOrCvrs: List<BallotOrCvr>,
-    wantNewMvrs: Int, // target newMvrs may be set manually, else -1
+    wantNewMvrs: Int = -1, // target newMvrs may be set manually, else -1
     ): List<Int> {
     if (ballotOrCvrs.isEmpty()) return emptyList()
 
@@ -85,7 +88,7 @@ fun consistentSampling(
     val contestsIncluded = contestsNotDone.filter { it.included }
 
     val currentSizes = mutableMapOf<Int, Int>() // contestId -> ncvrs in sample
-    fun contestInProgress(c: ContestUnderAudit) = (currentSizes[c.id] ?: 0) < c.estMvrs
+    fun contestInProgress(c: ContestRound) = (currentSizes[c.id] ?: 0) < c.estMvrs
 
     // get list of cvr indexes sorted by sampleNum
     val sortedBocIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
@@ -124,7 +127,7 @@ fun consistentSampling(
 
 // for audits with !hasStyles
 fun uniformSampling(
-    contests: List<ContestUnderAudit>,
+    contests: List<ContestRound>,
     ballotOrCvrs: List<BallotOrCvr>,
     samplePctCutoff: Double,  // TODO
     roundIdx: Int,

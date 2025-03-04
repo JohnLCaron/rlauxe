@@ -40,7 +40,7 @@ interface BallotOrCvr {
     fun isSampled(): Boolean
     fun setIsSampled(isSampled: Boolean): BallotOrCvr
 
-    fun hasOneOrMoreContest(contests: List<ContestUnderAudit>): Boolean {
+    fun hasOneOrMoreContest(contests: List<ContestRound>): Boolean {
         for (contest in contests) {
             if (hasContest(contest.id)) return true
         }

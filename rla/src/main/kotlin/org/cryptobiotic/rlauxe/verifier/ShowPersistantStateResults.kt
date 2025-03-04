@@ -1,16 +1,17 @@
 package org.cryptobiotic.rlauxe.verifier
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditState
+import org.cryptobiotic.rlauxe.workflow.AuditRound
 import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.workflow.ContestRound
 
+// TODO
 class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = false) {
     var auditConfig : AuditConfig = readAuditConfigJsonFile(publish.auditConfigFile()).unwrap()
 
@@ -27,8 +28,8 @@ class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = fal
         }
 
         var totalMvrs = 0
-        val contests = mutableMapOf<Int, ContestUnderAudit>()
-        var state: AuditState? = null
+        val contests = mutableMapOf<Int, ContestRound>()
+        var state: AuditRound? = null
         for (roundIdx in 1..publish.rounds()) {
             //println("Round $roundIdx ------------------------------------")
             state = verifyRound(roundIdx)
@@ -72,9 +73,9 @@ class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = fal
         return ballotManifest.ballots.size
     }
 
-    fun verifyRound(roundIdx: Int): AuditState {
+    fun verifyRound(roundIdx: Int): AuditRound {
         var result = true
-        val state = readAuditStateJsonFile(publish.auditRoundFile(roundIdx)).unwrap()
+        val state = readAuditRoundJsonFile(publish.auditRoundFile(roundIdx)).unwrap()
         println("${state.show()} ")
 
         if (roundIdx != state.roundIdx) {
@@ -97,17 +98,17 @@ class ShowPersistantStateResults(val publish: Publisher, val show: Boolean = fal
         return state
     }
 
-    fun showContests(contests: List<ContestUnderAudit>): Boolean {
+    fun showContests(contests: List<ContestRound>): Boolean {
         contests.forEach { contest ->
              println(contest.toString())
         }
         return true
     }
 
-    fun verifyContests(contests: List<ContestUnderAudit>, roundIdx: Int?): Boolean {
+    fun verifyContests(contests: List<ContestRound>, roundIdx: Int?): Boolean {
         contests.forEach { contest ->
-            if (contest.assertions().filter { roundIdx == null || it.round == roundIdx}.count() > 0) {
-                println(contest.show(roundIdx))
+            if (contest.assertions.filter { roundIdx == null || it.round == roundIdx}.count() > 0) {
+                println(contest.contestUA.show(roundIdx))
             }
         }
         return true

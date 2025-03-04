@@ -69,8 +69,10 @@ data class VoteSequences(val votes: List<VoteList>) {
         votes.forEach { vote ->
             val winnerIdx = vote.candRanks.indexOf(winner)
             val loserIdx = vote.candRanks.indexOf(loser)
-            if (loserIdx > winnerIdx) {
-                maxLoser += vote.n
+            if (loserIdx != -1) {
+                if ((winnerIdx == -1) || (loserIdx < winnerIdx)) {
+                    maxLoser += vote.n
+                }
             }
         }
         return mapOf(winner to minWinner, loser to maxLoser)

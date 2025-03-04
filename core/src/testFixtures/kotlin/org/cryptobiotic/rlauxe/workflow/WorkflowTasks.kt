@@ -20,43 +20,37 @@ import kotlin.math.sqrt
 private val quiet = true
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
-// return number of mvrs hand counted
-fun runWorkflow(name: String, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, quiet: Boolean=false): Int {
+// return last audit round
+fun runWorkflow(name: String, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, quiet: Boolean=false): AuditRound? {
     val stopwatch = Stopwatch()
 
-    val previousSamples = mutableSetOf<Int>()
-    val rounds = mutableListOf<Round>()
-    var roundIdx = 1
-
+    var nextRound: AuditRound? = null
     var done = false
     while (!done) {
-        val indices = workflow.chooseSamples(roundIdx, show=false)
-        if (indices.isEmpty()) {
+
+        nextRound = workflow.startNewRound(quiet=quiet)
+        if (nextRound.sampledIndices.isEmpty()) {
             done = true
 
         } else {
-            val currRound = Round(roundIdx, indices, previousSamples.toSet())
-            rounds.add(currRound)
-            previousSamples.addAll(indices)
-
-            if (!quiet) println("estimateSampleSizes round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
             stopwatch.start()
 
-            val sampledMvrs = indices.map {
+            val sampledMvrs = nextRound.sampledIndices.map {
                 testMvrs[it]
             }
+            done = workflow.runAudit(nextRound, sampledMvrs)
 
-            done = workflow.runAudit(indices, sampledMvrs, roundIdx)
-            if (!quiet) println("runAudit $roundIdx done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
-            roundIdx++
+            if (!quiet) println("runAudit ${nextRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         }
     }
 
+    /*
     if (!quiet && rounds.isNotEmpty()) {
         rounds.forEach { println(it) }
         workflow.showResults(rounds.last().sampledIndices.size)
-    }
-    return if (rounds.isEmpty()) 0 else rounds.last().sampledIndices.size
+    } */
+
+    return nextRound
 }
 
 data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamples: Set<Int>) {
@@ -106,7 +100,7 @@ class ClcaWorkflowTaskGenerator(
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs)
         return WorkflowTask(
             name(),
             clcaWorkflow,
@@ -150,7 +144,7 @@ class PollingWorkflowTaskGenerator(
             ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
         }
 
-        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotManifest, Nb, quiet = quiet)
+        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotManifest, Nb)
         return WorkflowTask(
             name(),
             pollingWorkflow,
@@ -184,7 +178,7 @@ class OneAuditWorkflowTaskGenerator(
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), oaCvrs, quiet = quiet)
+        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), oaCvrs)
         return WorkflowTask(
             name(),
             oneaudit,
@@ -215,7 +209,7 @@ class RaireWorkflowTaskGenerator(
         val (rcontest, testCvrs) = makeRaireContest(N=Nc, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest), testCvrs, quiet = quiet)
+        val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest), testCvrs)
         return WorkflowTask(
             name(),
             clca,
@@ -233,25 +227,37 @@ class WorkflowTask(
 ) : ConcurrentTaskG<WorkflowResult> {
     override fun name() = name
     override fun run(): WorkflowResult {
-        val nmvrs = runWorkflow(name, workflow, testCvrs, quiet = quiet)
+        val lastRound = runWorkflow(name, workflow, testCvrs, quiet = quiet)
+        if (lastRound == null) {
+            return WorkflowResult(
+                0,
+                0.0,
+                TestH0Status.ContestMisformed, // TODO why empty?
+                0.0, 0.0, 0.0, 0.0,
+                otherParameters,
+                100.0,
+            )
+        }
 
-        val contestUA = workflow.getContests().first() // theres only one
-        val minAssertion = contestUA.minAssertion()!!
+        val nmvrs = lastRound.sampledIndices.size // LOOK ??
+        val contest = lastRound.contests.first() // theres only one
+        val minAssertion = contest.minAssertion()
+        val assorter = minAssertion.assertion.assorter
 
-        return if (minAssertion.roundResults.isEmpty()) {
+        return if (minAssertion.auditResult == null) { // TODO why is this empty?
             WorkflowResult(
-                contestUA.Nc,
-                minAssertion.assorter.reportedMargin(),
+                contest.Nc,
+                assorter.reportedMargin(),
                 TestH0Status.ContestMisformed, // TODO why empty?
                 0.0, 0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
             )
         } else {
-            val lastRound = minAssertion.roundResults.last()
+            val lastRound = minAssertion.auditResult!!
             WorkflowResult(
-                contestUA.Nc,
-                minAssertion.assorter.reportedMargin(),
+                contest.Nc,
+                assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),
                 lastRound.samplesUsed.toDouble(),

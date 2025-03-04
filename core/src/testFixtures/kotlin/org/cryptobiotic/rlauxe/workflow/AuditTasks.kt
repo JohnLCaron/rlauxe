@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-class ClcaOneRoundAuditTaskGenerator(
+class ClcaSingleRoundAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
@@ -23,9 +23,9 @@ class ClcaOneRoundAuditTaskGenerator(
     val p2flips: Double? = null,
     val p1flips: Double? = null,
     ): WorkflowTaskGenerator {
-    override fun name() = "ClcaWorkflowTaskGenerator"
+    override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 
-    override fun generateNewTask(): OneRoundAuditTask {
+    override fun generateNewTask(): SingleRoundAuditTask {
         val useConfig = auditConfig ?:
         AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
@@ -35,8 +35,8 @@ class ClcaOneRoundAuditTaskGenerator(
         val testMvrs =  if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs, quiet = quiet)
-        return OneRoundAuditTask(
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs)
+        return SingleRoundAuditTask(
             name(),
             clcaWorkflow,
             testMvrs,
@@ -46,7 +46,7 @@ class ClcaOneRoundAuditTaskGenerator(
     }
 }
 
-class OneRoundAuditTask(
+class SingleRoundAuditTask(
     val name: String,
     val workflow: ClcaWorkflow,
     val testMvrs: List<Cvr>,
@@ -55,32 +55,34 @@ class OneRoundAuditTask(
 ) : ConcurrentTaskG<WorkflowResult> {
     override fun name() = name
     override fun run(): WorkflowResult {
-        val nmvrs = runSingleRoundAudit(name, workflow, testMvrs, quiet = quiet)
 
-        val contestUA = workflow.getContests().first() // theres only one
-        val minAssertion = contestUA.minAssertion()!!
-        val assorter = minAssertion.assorter
+        val contestRounds = workflow.getContests().map { ContestRound(it, 1) }
+        val nmvrs = runSingleRoundAudit(name, workflow, contestRounds, testMvrs, quiet = quiet)
 
-        val mvrMargin = assorter.calcAssorterMargin(contestUA.id, testMvrs, usePhantoms = true)
+        val contest = contestRounds.first() // theres only one
+        val minAssertion = contest.minAssertion()!!
+        val assorter = minAssertion.assertion.assorter
+
+        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
         if (debug) println(" mvrMargin=$mvrMargin")
         if (mvrMargin > .5) {
             println(" **** mvrMargin=$mvrMargin")
         }
 
-        return if (minAssertion.roundResults.isEmpty()) { // TODO why is this empty?
+        return if (minAssertion.auditResult == null) { // TODO why is this empty?
             WorkflowResult(
-                contestUA.Nc,
-                minAssertion.assorter.reportedMargin(),
+                contest.Nc,
+                assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
             )
         } else {
-            val lastRound = minAssertion.roundResults.last()
+            val lastRound = minAssertion.auditResult!!
             WorkflowResult(
-                contestUA.Nc,
-                minAssertion.assorter.reportedMargin(),
+                contest.Nc,
+                assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),
                 lastRound.samplesUsed.toDouble(),
@@ -96,19 +98,20 @@ class OneRoundAuditTask(
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
 // return number of mvrs hand counted
-fun runSingleRoundAudit(name: String, workflow: ClcaWorkflow, testMvrs: List<Cvr>, quiet: Boolean = false): Int {
+fun runSingleRoundAudit(name: String, workflow: ClcaWorkflow, contestRounds: List<ContestRound>, testMvrs: List<Cvr>, quiet: Boolean = false): Int {
     val stopwatch = Stopwatch()
     var roundIdx = 1
 
     val cvrsUA = workflow.cvrsUA
     val indices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
 
-    runSingleClcaAudit(workflow.auditConfig(), workflow.getContests(), indices, testMvrs, workflow.cvrs, quiet)
+    runSingleClcaAudit(workflow.auditConfig(), contestRounds, indices, testMvrs, workflow.cvrs, quiet)
+
     if (!quiet) println("round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
     var maxSamples = 0
-    workflow.getContests().forEach { contestUA ->
-        contestUA.clcaAssertions.forEach { cassertion ->
-            maxSamples = max( maxSamples, cassertion.estSampleSize)
+    contestRounds.forEach { contest->
+        contest.assertions.forEach { assertion ->
+            maxSamples = max( maxSamples, assertion.estSampleSize)
         }
     }
     return maxSamples
@@ -116,14 +119,14 @@ fun runSingleRoundAudit(name: String, workflow: ClcaWorkflow, testMvrs: List<Cvr
 
 fun runSingleClcaAudit(
     auditConfig: AuditConfig,
-    contestsUA: List<ContestUnderAudit>,
+    contests: List<ContestRound>,
     sampleIndices: List<Int>,
     mvrs: List<Cvr>,
     cvrs: List<Cvr>,
     quiet: Boolean,
 ): Boolean {
 
-    val contestsNotDone = contestsUA.filter { !it.done }
+    val contestsNotDone = contests.filter { !it.done }
     val sampledCvrs = sampleIndices.map { cvrs[it] }
     val sampledMvrs = sampleIndices.map { mvrs[it] }
 
@@ -132,14 +135,14 @@ fun runSingleClcaAudit(
     cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) } // prove that sampledCvrs correspond to mvrs
 
     // TODO could parallelize across contests and/or assertions
-    contestsNotDone.forEach { contestUA ->
-        contestUA.clcaAssertions.forEach { cassertion ->
-            val testH0Result = auditClcaAssertion(auditConfig, contestUA, cassertion, cvrPairs, 1, quiet = quiet)
+    contestsNotDone.forEach { contest ->
+        contest.assertions.forEach { assertion ->
+            val testH0Result = auditClcaAssertion(auditConfig, contest.contestUA.contest, assertion, cvrPairs, 1, quiet = quiet)
             if (debug) {
                 println(" testH0Result=$testH0Result")
             }
-            cassertion.status = testH0Result.status
-            cassertion.round = 1
+            assertion.status = testH0Result.status
+            assertion.round = 1
         }
     }
     return true

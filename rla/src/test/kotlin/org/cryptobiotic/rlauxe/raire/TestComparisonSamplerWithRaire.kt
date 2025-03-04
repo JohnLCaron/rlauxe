@@ -12,7 +12,7 @@ class TestComparisonSamplerWithRaire {
     fun testComparisonSamplerForRaire() {
         // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile =
-            "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
+            "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallotsCsv(cvrFile)
         val cvrs = raireCvrs.cvrs
         // val cvrsUA = cvrs.map { CvrUnderAudit(it) }
@@ -20,7 +20,7 @@ class TestComparisonSamplerWithRaire {
         val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
         val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()
         val raireResults =
-            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
+            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
                 .import(ncs, nps)
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()

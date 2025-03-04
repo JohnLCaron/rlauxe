@@ -6,7 +6,7 @@ class TestRunRlaStartTest {
 
     @Test
     fun testRlaStartClca() {
-        val topdir = "/home/stormy/temp/persist/testRunAuditClca"
+        val topdir = "/home/stormy/temp/persist/runAuditClca"
         RunRlaStartTest.main(
             arrayOf(
                 "-in", topdir,

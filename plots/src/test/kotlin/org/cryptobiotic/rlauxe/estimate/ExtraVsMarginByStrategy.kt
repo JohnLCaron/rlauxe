@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class ExtraVsMarginByStrategy {
     val N = 50000
@@ -143,13 +144,14 @@ class ExtraVsMarginByStrategy {
             )
             val task = clcaGenerator2.generateNewTask()
 
-            val nmvrs = runWorkflow(name, task.workflow, task.testCvrs, quiet = false)
-            println("nmvrs = $nmvrs")
+            val lastAuditRound = runWorkflow(name, task.workflow, task.testCvrs, quiet = false)
+            assertNotNull(lastAuditRound)
+            println("nmvrs = ${lastAuditRound.nmvrs}")
 
-            val minAssertion = task.workflow.getContests().first().minClcaAssertion()!!
-            val lastRound = minAssertion.roundResults.last()
-            println("lastRound = $lastRound")
-            println("extra = ${lastRound.estSampleSize - lastRound.samplesNeeded}")
+            val minAssertion = lastAuditRound.contests.first().minAssertion()
+            val lastAuditResult = minAssertion.auditResult!!
+            println("lastAuditResult = $lastAuditResult")
+            println("extra = ${lastAuditResult.estSampleSize - lastAuditResult.samplesNeeded}")
         }
 
     }

@@ -26,7 +26,7 @@ class GenVsMarginOracle {
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
             flips.forEach { flip ->
-                val clcaGenerator1 = ClcaOneRoundAuditTaskGenerator(
+                val clcaGenerator1 = ClcaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, 0.0,
                     parameters = mapOf("nruns" to nruns, "cat" to flip),
                     auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
@@ -88,13 +88,13 @@ class GenVsMarginOracle {
         val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
         val reportedMargin = .01
         val flip2 = .01
-        val taskgen = ClcaOneRoundAuditTaskGenerator(
+        val taskgen = ClcaSingleRoundAuditTaskGenerator(
             N, margin=reportedMargin, 0.0, 0.0, 0.0,
             parameters = mapOf("nruns" to nruns, "cat" to flip2),
             auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
             p2flips=flip2,
         )
-        val task: OneRoundAuditTask = taskgen.generateNewTask()
+        val task: SingleRoundAuditTask = taskgen.generateNewTask()
         val result =  task.run()
         println(result)
     }

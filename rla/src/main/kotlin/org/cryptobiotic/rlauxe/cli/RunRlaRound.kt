@@ -7,8 +7,7 @@ import com.github.michaelbull.result.unwrap
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.audit.AuditRecord
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -38,70 +37,41 @@ object RunRound {
         // println("  retval $retval")
     }
 
-    fun runRound(inputDir: String, mvrFile: String): Int {
-        val auditRecord = AuditRecord.readFrom(inputDir)
-        val auditConfig = auditRecord.auditConfig
-        val auditRound = auditRecord.rounds.last()
-        val state = auditRound.state
-        val round = auditRecord.nrounds
-        require(round == state.roundIdx)
-
-        val workflow = PersistentWorkflow(auditConfig, state.contests, emptyList(), auditRecord.cvrs) // TODO other auditTypes
-
-        /*
-        val workflow = if (auditConfig.auditType == AuditType.CLCA) {
-            PersistentWorkflow(auditConfig, auditState.contests, emptyList(), cvrs)
-        } else {
-            PersistentWorkflow(auditConfig, auditState.contests, ballotManifest.ballots, emptyList())
-        }
-
-        // read last state
-        val publisher = Publisher(inputDir)
-        val round = publisher.rounds()
-        val (auditState, workflow) = readPersistentWorkflow(round, publisher)
-        require(round == auditState.roundIdx)
-        require((workflow == null) == auditState.auditIsComplete)
-
-        if (workflow == null) {
-            println("***No more rounds, all done")
-        } else {
-        */
+    fun runRound(inputDir: String, mvrFile: String): AuditRound? {
+        val workflow = PersistentWorkflow(inputDir)
+        val auditRound = workflow.getLastRound()
 
         val publisher = Publisher(inputDir)
 
-        val (allDone, prevSamples) = runAuditStage(state, workflow, mvrFile, publisher)
+        val allDone = runAuditStage(auditRound, workflow, mvrFile, publisher)
         if (!allDone) {
-            val nextRound = round + 1
-            // get the next round of samples wanted
-            val indices = workflow.chooseSamples(nextRound, show = true)
+            // start next round and get default sample indices
+            val nextRound = workflow.startNewRound(quiet = false)
 
-            val nextState = if (indices.size == 0) {
-                println("*** NO SAMPLES: audit is done ***") // TODO just skip it?
-                AuditState("Round${nextRound}", nextRound, indices.size, false, true, emptyList())
-            } else {
-                // we want FailMaxSamplesAllowed to get recorded in the persistent state, even though its done TODO review
-                val contestsNotDone = workflow.getContests().filter { !it.done || it.status == TestH0Status.FailMaxSamplesAllowed }
-                AuditState("Round${nextRound}", round + 1, indices.size,  false, false, contestsNotDone)
+            if (nextRound.sampledIndices.isEmpty()) {
+                println("*** FAILED TO GET ANY SAMPLES ***")
+                nextRound.auditIsComplete = true
             }
+
             // write the partial election state to round+1
-            writeAuditStateJsonFile(nextState, publisher.auditRoundFile(nextRound))
-            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound)}")
+            writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
+            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}")
 
-            writeSampleIndicesJsonFile(indices, publisher.sampleIndicesFile(nextRound))
-            println("   writeSampleIndicesJsonFile ${publisher.sampleIndicesFile(nextRound)}")
+            writeSampleIndicesJsonFile(nextRound.sampledIndices, publisher.sampleIndicesFile(nextRound.roundIdx))
+            println("   writeSampleIndicesJsonFile ${publisher.sampleIndicesFile(nextRound.roundIdx)}")
+
+            return if (nextRound.auditIsComplete) null else nextRound
         }
-
-        return 0
+        return null
     }
 }
 
-
 fun runAuditStage(
-    auditState: AuditState,
-    workflow: RlauxWorkflowIF,
+    auditRound: AuditRound,
+    workflow: PersistentWorkflow,
     mvrFile: String,
     publisher: Publisher,
-): Pair<Boolean, List<Int>> {
+): Boolean {
 
     // the only place privy to private data
     val resultMvrs = readCvrsJsonFile(mvrFile)
@@ -111,7 +81,7 @@ fun runAuditStage(
 
     val roundStopwatch = Stopwatch()
     var allDone = false
-    val roundIdx = auditState.roundIdx
+    val roundIdx = auditRound.roundIdx
 
     val resultIndices = readSampleIndicesJsonFile(publisher.sampleIndicesFile(roundIdx))
     if (resultIndices is Err) println(resultIndices)
@@ -120,7 +90,7 @@ fun runAuditStage(
 
     if (indices.isEmpty()) {
         println("***Error sampled Indices are empty for round $roundIdx")
-        allDone = true
+        return true
 
     } else {
         println("runAudit $roundIdx samples=${indices.size}")
@@ -128,30 +98,21 @@ fun runAuditStage(
             testMvrs[it]
         }
 
-        // TODO why not runAudit on CvrUnderAudit?
-        allDone = workflow.runAudit(indices, sampledMvrs.map { it.cvr }, roundIdx)
+        allDone = workflow.runAudit(auditRound, sampledMvrs.map { it.cvr })
         println("  allDone=$allDone took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
-        // heres the state now that the audit has been run
-        val updateStated = AuditState(
-            auditState.name,
-            auditState.roundIdx,
-            auditState.nmvrs,
-            true,
-            allDone,
-            workflow.getContests(),
-        )
+        // heres the changed state now that the audit has been run.
+        val updatedState = auditRound.copy(auditWasDone = true, auditIsComplete = allDone)
+
         // overwriting it with audit info, a bit messy TODO separate estimation and audit?
-        writeAuditStateJsonFile(updateStated, publisher.auditRoundFile(roundIdx))
-        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(roundIdx)}")
+        writeAuditRoundJsonFile(updatedState, publisher.auditRoundFile(roundIdx))
+        println("   writeAuditRoundJsonFile ${publisher.auditRoundFile(roundIdx)}")
 
         writeCvrsJsonFile(sampledMvrs, publisher.sampleMvrsFile(roundIdx))
         println("   write sampledMvrs ${publisher.sampleMvrsFile(roundIdx)}")
-
-        workflow.showResults(indices.size)
+        return allDone
     }
 
-    return Pair(allDone, indices)
 }
 
 

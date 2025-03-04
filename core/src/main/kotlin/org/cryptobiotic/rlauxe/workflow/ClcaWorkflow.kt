@@ -24,11 +24,11 @@ class ClcaWorkflow(
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-    val quiet: Boolean = true,
 ): RlauxWorkflowIF {
-
-    val contestsUA: List<ContestUnderAudit>
+    private val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
+    private val auditRounds = mutableListOf<AuditRound>()
+
     init {
         require (auditConfig.auditType == AuditType.CLCA)
 
@@ -39,31 +39,40 @@ class ClcaWorkflow(
             contest.makeClcaAssertions(cvrs)
         }
 
-        // only check regular contests
-        check(auditConfig, regularContests)
+        /* TODO only check regular contests ??
+        check(auditConfig, contests)
+        // TODO filter out contests that are done... */
 
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    /** Choose lists of ballots to sample. */
-    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
-        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
+    override fun startNewRound(quiet: Boolean): AuditRound {
+        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
+        val roundIdx = auditRounds.size + 1
+
+        val auditRound = if (previousRound == null) {
+            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
+            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+        } else {
+            previousRound.createNextRound()
+        }
+        auditRounds.add(auditRound)
 
         estimateSampleSizes(
             auditConfig,
-            contestsUA,
+            auditRound,
             cvrs,
-            roundIdx,
-            show=show,
+            show=!quiet,
         )
 
-        return sample(this, roundIdx, quiet)
+        auditRound.sampledIndices = sample(this, auditRound, quiet)
+        return auditRound
     }
 
     //  return allDone
-    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        return runClcaAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
+    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
+        return runClcaAudit(auditConfig, auditRound.contests, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
@@ -75,14 +84,14 @@ class ClcaWorkflow(
 
 // TODO lot of common code between the audit types...
 fun runClcaAudit(auditConfig: AuditConfig,
-                 contestsUA: List<ContestUnderAudit>,
+                 contests: List<ContestRound>,
                  sampleIndices: List<Int>,
                  mvrs: List<Cvr>,
                  cvrs: List<Cvr>,
                  roundIdx: Int,
                  quiet: Boolean): Boolean {
 
-    val contestsNotDone = contestsUA.filter{ !it.done }
+    val contestsNotDone = contests.filter{ !it.done }
     val sampledCvrs = sampleIndices.map { cvrs[it] }
 
     // prove that sampledCvrs correspond to mvrs
@@ -92,48 +101,49 @@ fun runClcaAudit(auditConfig: AuditConfig,
 
     if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
-    contestsNotDone.forEach { contestUA ->
-        if (contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
+    contestsNotDone.forEach { contest ->
+        if (contest.contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
             println("here")
         }
-        var contestAssertionStatus = mutableListOf<TestH0Status>()
-        contestUA.clcaAssertions.forEach { cassertion ->
-            if (!cassertion.status.complete) {
-                val testH0Result = auditClcaAssertion(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
-                cassertion.status = testH0Result.status
-                if (testH0Result.status.complete) cassertion.round = roundIdx
+        val contestAssertionStatus = mutableListOf<TestH0Status>()
+        contest.assertions.forEach { assertionRound ->
+            if (!assertionRound.status.complete) {
+                val testH0Result = auditClcaAssertion(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
+                assertionRound.status = testH0Result.status
+                if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
-            contestAssertionStatus.add(cassertion.status)
+            contestAssertionStatus.add(assertionRound.status)
         }
-        contestUA.done = contestAssertionStatus.all { it.complete }
-        contestUA.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contestUA.done
+        contest.done = contestAssertionStatus.all { it.complete }
+        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        allDone = allDone && contest.done
     }
     return allDone
 }
 
 fun auditClcaAssertion(
     auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
-    cassertion: ClcaAssertion,
+    contest: ContestIF,
+    assertionRound: AssertionRound,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = true,
 ): TestH0Result {
+    val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
-    val sampler = ClcaWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
+    val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
 
     val clcaConfig = auditConfig.clcaConfig
     val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
         ClcaStrategyType.previous,
         ClcaStrategyType.phantoms -> {
             // use phantomRate as apriori
-            ClcaErrorRates(0.0, contestUA.contest.phantomRate(), 0.0, 0.0)
+            ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
         }
 
         ClcaStrategyType.oracle -> {
             // use the actual errors comparing mvrs to cvrs. Testing only
-            ClcaErrorTable.calcErrorRates(contestUA.id, cassorter, cvrPairs)
+            ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
         }
 
         ClcaStrategyType.noerror -> {
@@ -142,7 +152,7 @@ fun auditClcaAssertion(
 
         ClcaStrategyType.fuzzPct -> {
             // use computed errors as apriori
-            ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct)
+            ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
         }
 
         ClcaStrategyType.apriori ->
@@ -153,12 +163,12 @@ fun auditClcaAssertion(
     val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
         OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
     } else {
-        AdaptiveComparison(Nc = contestUA.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+        AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
     }
 
     val testFn = BettingMart(
         bettingFn = bettingFn,
-        Nc = contestUA.Nc,
+        Nc = contest.Nc,
         noerror = cassorter.noerror(),
         upperBound = cassorter.upperBound(),
         riskLimit = auditConfig.riskLimit,
@@ -167,8 +177,8 @@ fun auditClcaAssertion(
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
 
-    val roundResult = AuditRoundResult(roundIdx,
-        estSampleSize=cassertion.estSampleSize,
+    assertionRound.auditResult  = AuditRoundResult(roundIdx,
+        estSampleSize=assertionRound.estSampleSize,  // needed?
         maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
@@ -178,8 +188,7 @@ fun auditClcaAssertion(
         startingRates = errorRates,
         measuredRates = testH0Result.tracker.errorRates(),
     )
-    cassertion.roundResults.add(roundResult)
 
-    if (!quiet) println(" ${contestUA.name} ${cassertion} $roundResult")
+    if (!quiet) println(" ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
     return testH0Result
 }

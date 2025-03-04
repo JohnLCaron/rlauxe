@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 // show distribution of samplesNeeded estimations
 class PlotDistributions {
@@ -75,13 +76,14 @@ class PlotDistributions {
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
 
+        val contestRounds = workflow.getContests().map { ContestRound(it, 1) }
+        val auditRound = AuditRound(1, contests = contestRounds, sampledIndices = emptyList())
+
         // just want the sample estimation stuff
         return estimateSampleSizes(
             auditConfig,
-            workflow.contestsUA,
+            auditRound,
             workflow.cvrs,
-            1,
-            show = false,
         )
     }
 
@@ -113,10 +115,11 @@ class PlotDistributions {
             val sortedPairs: List<Pair<Cvr, Cvr>> = sortedMvrs.zip(sortedCvrs)
 
             // "oracle" audit
-            val contestUA = workflow.contestsUA.first()
-            val assertion = contestUA.minClcaAssertion()!!
-            auditClcaAssertion(auditConfig, contestUA, assertion, sortedPairs, 1)
-            results.add(assertion.roundResults.last().samplesNeeded)
+            val contestUA = workflow.getContests().first()
+            val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1)
+
+            auditClcaAssertion(auditConfig, contestUA.contest, assertionRound, sortedPairs, 1)
+            results.add(assertionRound.auditResult!!.samplesNeeded)
         }
 
         // just want the sample estimation stuff

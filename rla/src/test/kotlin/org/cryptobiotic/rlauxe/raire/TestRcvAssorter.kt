@@ -6,19 +6,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class TestRcvAssorter {
-    val rr = readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json")
+    val rr = readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/334_361_vbm.json")
     val ncs = mapOf("361" to 1000, "334" to 12000) // TODO
     val nps = mapOf("361" to 0, "334" to 0) // TODO
 
     val raireResults = rr.import(ncs, nps)
 
     // testing
-    fun RaireAssorter.match(winner: Int, loser: Int, winnerType: Boolean, already: List<Int> = emptyList()): Boolean {
+    fun RaireAssorter.match(winner: Int, loser: Int, winnerType: Boolean, continuing: List<Int> = emptyList()): Boolean {
         if (this.winner() != winner || this.loser() != loser) return false
         if (winnerType && (this.rassertion.assertionType != RaireAssertionType.winner_only)) return false
         if (!winnerType && (this.rassertion.assertionType == RaireAssertionType.winner_only)) return false
         if (winnerType) return true
-        return already == this.rassertion.alreadyEliminated
+        return continuing == this.rassertion.eliminated
     }
     
     // SHANGRLA TestAssertion.test_rcv_assorter()

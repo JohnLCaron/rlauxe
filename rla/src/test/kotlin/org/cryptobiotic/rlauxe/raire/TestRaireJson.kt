@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.persist.json.import
 import org.cryptobiotic.rlauxe.persist.json.publishJson
 import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -88,7 +86,7 @@ class TestRaireJson {
         )
         val rassertion = RaireAssertion(4, 2, 42, RaireAssertionType.irv_elimination,
             listOf(1,3,5),  mapOf(1 to 111, 2 to 222, 3 to 333), "some explanation")
-        val target = RaireAssorter(info, rassertion, rassertion.margin.toDouble() / 1000)
+        val target = RaireAssorter(info, rassertion, rassertion.marginInVotes.toDouble() / 1000)
 
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -97,25 +95,4 @@ class TestRaireJson {
         assertTrue(roundtrip.equals(target))
     }
 
-}
-
-fun make(): Assertion {
-    val info = ContestInfo(
-        name = "AvB",
-        id = 0,
-        choiceFunction = SocialChoiceFunction.PLURALITY,
-        candidateNames = listToMap("A", "B", "C"),
-    )
-    val winnerCvr = makeCvr(0)
-    val loserCvr = makeCvr(1)
-    val otherCvr = makeCvr(2)
-    val contest = makeContestFromCvrs(info, listOf(winnerCvr, loserCvr, otherCvr))
-
-    val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-    val target = Assertion(contest, assorter)
-    target.estSampleSize = 1000
-    target.status = TestH0Status.AuditorRemoved
-    target.round = 42
-
-    return target
 }

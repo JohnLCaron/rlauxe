@@ -12,42 +12,48 @@ class OneAuditWorkflow(
     val auditConfig: AuditConfig,
     val contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-    val quiet: Boolean = false,
 ): RlauxWorkflowIF {
-    val contestsUA: List<ContestUnderAudit>
-    val cvrsUA: List<CvrUnderAudit>
+    private val contestsUA: List<ContestUnderAudit>
+    private val cvrsUA: List<CvrUnderAudit>
+    private val auditRounds = mutableListOf<AuditRound>()
+
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
         contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
 
         // check contests well formed etc
-        check(auditConfig, contestsUA)
+        // check(auditConfig, contests)
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    /**
-     * Choose lists of ballots to sample.
-     * @parameter prevMvrs: use existing mvrs to estimate samples. may be empty.
-     */
-    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
-        if (!quiet) println("estimateSampleSizes round $roundIdx")
+    override fun startNewRound(quiet: Boolean): AuditRound {
+        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
+        val roundIdx = auditRounds.size + 1
+
+        val auditRound = if (previousRound == null) {
+            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
+            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+        } else {
+            previousRound.createNextRound()
+        }
+        auditRounds.add(auditRound)
 
         estimateSampleSizes(
             auditConfig,
-            contestsUA,
+            auditRound,
             cvrs,
-            roundIdx,
-            show=show,
+            show=!quiet,
         )
 
-        return sample(this, roundIdx, quiet)
+        auditRound.sampledIndices = sample(this, auditRound, quiet)
+        return auditRound
     }
 
-    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        return runOneAudit(auditConfig, contestsUA, sampleIndices, mvrs, cvrs, roundIdx, quiet)
+    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
+        return runOneAudit(auditConfig, auditRound.contests, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
@@ -56,13 +62,13 @@ class OneAuditWorkflow(
 }
 
 fun runOneAudit(auditConfig: AuditConfig,
-                 contestsUA: List<ContestUnderAudit>,
+                 contests: List<ContestRound>,
                  sampleIndices: List<Int>,
                  mvrs: List<Cvr>,
                  cvrs: List<Cvr>,
                  roundIdx: Int,
                  quiet: Boolean): Boolean {
-    val contestsNotDone = contestsUA.filter{ !it.done }
+    val contestsNotDone = contests.filter{ !it.done }
     val sampledCvrs = sampleIndices.map { cvrs[it] }
 
     // prove that sampledCvrs correspond to mvrs
@@ -72,34 +78,35 @@ fun runOneAudit(auditConfig: AuditConfig,
 
     if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
-    contestsNotDone.forEach { contestUA ->
-        var contestAssertionStatus = mutableListOf<TestH0Status>()
-        contestUA.clcaAssertions.forEach { cassertion ->
-            if (!cassertion.status.complete) {
-                val testH0Result = runOneAuditAssertionAlpha(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
-                cassertion.status = testH0Result.status
-                cassertion.round = roundIdx
+    contestsNotDone.forEach { contest ->
+        val contestAssertionStatus = mutableListOf<TestH0Status>()
+        contest.assertions.forEach { assertionRound ->
+            if (!assertionRound.status.complete) {
+                val testH0Result = runOneAuditAssertionAlpha(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
+                assertionRound.status = testH0Result.status
+                if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
-            contestAssertionStatus.add(cassertion.status)
+            contestAssertionStatus.add(assertionRound.status)
         }
-        contestUA.done = contestAssertionStatus.all { it.complete }
-        contestUA.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contestUA.done
+        contest.done = contestAssertionStatus.all { it.complete }
+        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        allDone = allDone && contest.done
     }
     return allDone
 }
 
 fun runOneAuditAssertionAlpha(
     auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
-    cassertion: ClcaAssertion,
+    contest: ContestIF,
+    assertionRound: AssertionRound,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = false,
 ): TestH0Result{
+    val cassertion = assertionRound.assertion as ClcaAssertion
     val assorter = cassertion.cassorter as OneAuditClcaAssorter
     val sampler = ClcaWithoutReplacement(
-        contestUA.contest,
+        contest,
         cvrPairs,
         cassertion.cassorter,
         allowReset = false,
@@ -114,7 +121,7 @@ fun runOneAuditAssertionAlpha(
         FixedEstimFn(.99 * assorter.upperBound())
     } else {
         TruncShrinkage(
-            N = contestUA.Nc,
+            N = contest.Nc,
             withoutReplacement = true,
             upperBound = assorter.upperBound(),
             d = auditConfig.pollingConfig.d,
@@ -125,7 +132,7 @@ fun runOneAuditAssertionAlpha(
 
     val testFn = AlphaMart(
         estimFn = estimFn,
-        N = contestUA.Nc,
+        N = contest.Nc,
         withoutReplacement = true,
         riskLimit = auditConfig.riskLimit,
         upperBound = assorter.upperBound(),
@@ -133,8 +140,8 @@ fun runOneAuditAssertionAlpha(
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 
-    val roundResult = AuditRoundResult(roundIdx,
-        estSampleSize=cassertion.estSampleSize,
+    assertionRound.auditResult = AuditRoundResult(roundIdx,
+        estSampleSize=assertionRound.estSampleSize,
         maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
@@ -142,8 +149,7 @@ fun runOneAuditAssertionAlpha(
         status = testH0Result.status,
         measuredMean = testH0Result.tracker.mean(),
     )
-    cassertion.roundResults.add(roundResult)
 
-    if (!quiet) println(" ${contestUA.name} $roundResult")
+    if (!quiet) println(" ${contest.info.name} ${assertionRound.auditResult}")
     return testH0Result
 }

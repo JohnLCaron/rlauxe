@@ -35,7 +35,6 @@ data class RaireResultsJson(
     val audits: List<RaireResultsContestAuditJson>,
 )
 
-
 fun RaireResultsJson.import(ncs: Map<String, Int>, nps: Map<String, Int>) =
     RaireResults(
         this.overallExpectedPollsNumber.toInt(),
@@ -61,7 +60,7 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int) =
         this.winner.toInt(),
         Nc = Nc,
         Np = Np,
-        this.eliminated.map { it.toInt() },
+        this.eliminated.map { it.toInt() }, // eliminated
         // this.expectedPollsNumber.toInt(),
         // this.expectedPollsPercent.toDouble(),
         this.assertions.map { it.import() },
@@ -82,7 +81,7 @@ fun RaireResultsAssertionJson.import(): RaireAssertion {
         this.loser.toInt(),
         0, // not available, calculate instead
         RaireAssertionType.fromString(this.assertion_type),
-        this.already_eliminated.map { it.toInt() },
+        this.already_eliminated.map { it.toInt() },  // must invert
         emptyMap(),
         this.explanation,
     )

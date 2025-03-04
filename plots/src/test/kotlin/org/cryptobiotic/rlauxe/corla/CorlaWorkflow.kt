@@ -52,6 +52,8 @@ class CorlaWorkflow(
 ): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
+    private val contestRounds: List<ContestRound>
+    private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.CLCA)
@@ -66,8 +68,9 @@ class CorlaWorkflow(
         //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
 
         // val votes =  makeVotesPerContest(contests, cvrs)
-        contestsUA.filter{ !it.done }.forEach { contest ->
-            contest.makeClcaAssertions(cvrs)
+        contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
+        contestRounds.filter{ !it.done }.forEach { contest ->
+            contest.contestUA.makeClcaAssertions(cvrs)
         }
 
         // must be done once and for all rounds
@@ -75,25 +78,31 @@ class CorlaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    /**
-     * Choose lists of ballots to sample.
-     * TODO is this how CORLA does it?
-     */
-    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
-        if (!quiet) println("----------estimateSampleSizes round $roundIdx")
+    override fun startNewRound(quiet: Boolean): AuditRound {
+        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
+        val roundIdx = auditRounds.size + 1
+
+        val auditRound = if (previousRound == null) {
+            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
+            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+        } else {
+            previousRound.createNextRound()
+        }
+        auditRounds.add(auditRound)
 
         estimateSampleSizes(
             auditConfig,
-            contestsUA,
+            auditRound,
             cvrs,
-            roundIdx,
-            show=show,
+            show=!quiet,
         )
-        return sample(this, roundIdx, quiet)
+
+        auditRound.sampledIndices = sample(this, auditRound, quiet)
+        return auditRound
     }
 
     //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
+    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet:Boolean): Boolean {
         //4.d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
         // 	e) Import the MVRs.
         //	f) For each MVR 𝑖:
@@ -104,8 +113,9 @@ class CorlaWorkflow(
         //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
         //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
-        val contestsNotDone = contestsUA.filter{ !it.done }
-        val sampledCvrs = sampleIndices.map { cvrs[it] }
+        val contestsNotDone = contestRounds.filter{ !it.done }
+        val sampledCvrs = auditRound.sampledIndices.map { cvrs[it] }
+        val roundIdx = auditRound.roundIdx
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrs.size)
@@ -115,21 +125,22 @@ class CorlaWorkflow(
         // TODO could parallelize across assertions
         if (!quiet) println("runAudit round $roundIdx")
         var allDone = true
-        contestsNotDone.forEach { contestUA ->
+        contestsNotDone.forEach { contest ->
+            val contestUA = contest.contestUA
             var allAssertionsDone = true
-            contestUA.clcaAssertions.forEach { cassertion ->
-                if (!cassertion.status.complete) {
-                    val testH0Result = runCorlaAudit(auditConfig, contestUA, cassertion, cvrPairs, roundIdx, quiet=quiet)
-                    cassertion.status = testH0Result.status
-                    cassertion.round = roundIdx
-                    allAssertionsDone = allAssertionsDone && cassertion.status.complete
+            contest.assertions.forEach { assertion ->
+                if (!assertion.status.complete) {
+                    val testH0Result = runCorlaAudit(auditConfig, contestUA.contest, assertion, cvrPairs, roundIdx, quiet=quiet)
+                    assertion.status = testH0Result.status
+                    assertion.round = roundIdx
+                    allAssertionsDone = allAssertionsDone && assertion.status.complete
                 }
             }
             if (allAssertionsDone) {
-                contestUA.done = true
-                contestUA.status = TestH0Status.StatRejectNull // TODO ???
+                contest.done = true
+                contest.status = TestH0Status.StatRejectNull // TODO ???
             }
-            allDone = allDone && contestUA.done
+            allDone = allDone && contest.done
 
         }
         return allDone
@@ -144,19 +155,20 @@ class CorlaWorkflow(
 
 fun runCorlaAudit(
     auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
-    cassertion: ClcaAssertion,
+    contest: ContestIF,
+    assertionRound: AssertionRound,
     cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     roundIdx: Int,
     quiet: Boolean = true,
 ): TestH0Result {
+    val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
-    val sampler = ClcaWithoutReplacement(contestUA.contest, cvrPairs, cassorter, allowReset = false)
+    val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
 
     // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
     //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn
     val testFn = Corla(
-        N = contestUA.Nc,
+        N = contest.Nc,
         riskLimit = auditConfig.riskLimit,
         reportedMargin = cassertion.assorter.reportedMargin(),
         noerror = cassorter.noerror(),
@@ -165,8 +177,8 @@ fun runCorlaAudit(
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
 
-    val roundResult = AuditRoundResult(roundIdx,
-        estSampleSize=cassertion.estSampleSize,
+    assertionRound.auditResult = AuditRoundResult(roundIdx,
+        estSampleSize=assertionRound.estSampleSize,
         maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
@@ -175,8 +187,7 @@ fun runCorlaAudit(
         measuredMean = testH0Result.tracker.mean(),
         measuredRates = testH0Result.tracker.errorRates(),
     )
-    cassertion.roundResults.add(roundResult)
 
-    if (!quiet) println(" ${contestUA.name} $roundResult")
+    if (!quiet) println(" ${contest.info.name} ${assertionRound.auditResult}")
     return testH0Result
 }

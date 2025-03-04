@@ -87,7 +87,7 @@ data class RaireContestTestData(
         val want = this.minMargin * this.ncards
         var cvrIdx = 0
         // println("have=$have, want = $want")
-        while (have < want) {
+        while (have < want && cvrIdx < testCvrs.size) {
             val rcvr = testCvrs[cvrIdx]
             val votes: IntArray = rcvr.cvr.votes[contestId]!!
             if (votes.contains(winner) && votes.contains(loser)) {

@@ -116,7 +116,7 @@ class TestClcaWorkflowNoStyles {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        val nassertions = workflow.contestsUA.sumOf { it.assertions().size }
+        val nassertions = workflow.getContests().sumOf { it.assertions().size }
         runWorkflow("TestComparisonWorkflowNoStyles", workflow, testMvrs)
     }
 

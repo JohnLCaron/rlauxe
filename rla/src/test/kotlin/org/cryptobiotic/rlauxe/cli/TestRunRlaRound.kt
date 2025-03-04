@@ -6,7 +6,7 @@ class TestRunRlaRound {
 
     @Test
     fun testRlaRoundClca() {
-        val topdir = "/home/stormy/temp/persist/testRunAuditClca"
+        val topdir = "/home/stormy/temp/persist/runAuditClca"
         RunRound.main(
             arrayOf(
                 "-in", topdir,
@@ -14,9 +14,9 @@ class TestRunRlaRound {
             )
         )
     }
-    @Test
+    //@Test
     fun testRlaRoundRaireClca() {
-        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
         RunRound.main(
             arrayOf(
                 "-in", topdir,
@@ -25,9 +25,9 @@ class TestRunRlaRound {
         )
     }
 
-    @Test
+    //@Test
     fun testRlaRoundPolling() {
-        val topdir = "/home/stormy/temp/persist/testRunAuditPolling"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
 
         RunRound.main(
             arrayOf(

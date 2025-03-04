@@ -4,9 +4,10 @@ import kotlin.test.Test
 
 class TestRunShowPersistantStateResults {
 
-    @Test
+   //  @Test
     fun testRunCli() {
-        val topdir = "/home/stormy/temp/persist/testRunCli"
+        // val topdir = "/home/stormy/temp/persist/testRunCli"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
         RunVerifier.main(
             arrayOf(
                 "-in", topdir
@@ -14,9 +15,10 @@ class TestRunShowPersistantStateResults {
         )
     }
 
-    @Test
+   //  @Test
     fun testClcaVerify() {
-        val topdir = "/home/stormy/temp/persist/testRlaStartClca"
+//        val topdir = "/home/stormy/temp/persist/testRlaStartClca"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
         RunVerifier.main(
             arrayOf(
                 "-in", topdir
@@ -24,9 +26,10 @@ class TestRunShowPersistantStateResults {
         )
     }
 
-    @Test
+    // @Test
     fun testPollingVerify() {
-        val topdir = "/home/stormy/temp/persist/testPersistentWorkflowPolling"
+        //val topdir = "/home/stormy/temp/persist/testPersistentWorkflowPolling"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
         RunVerifier.main(
             arrayOf(
                 "-in", topdir

@@ -30,14 +30,14 @@ class GenPollingNoStylesOrg {
                 print("reportedMargin = $margin ${contest.votes} Nc=$Nc N=$N")
                 val contestUA = ContestUnderAudit(contest, isComparison = false)
                 contestUA.makePollingAssertions()
-                val assertion = contestUA.minAssertion()!!
                 val moreParameters = mapOf("N" to N.toDouble(), "reportedMargin" to margin)
+                val contestRound = ContestRound(contestUA, 1)
 
                 val task = SimulateSampleSizeTask(
                     1,
                     auditConfig,
-                    contestUA,
-                    assertion,
+                    contestRound,
+                    contestRound.minAssertion(),
                     emptyList(),
                     1.0,
                     0,

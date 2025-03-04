@@ -64,9 +64,6 @@ class TestAssertionJson {
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         val target = Assertion(contest, assorter)
-        target.estSampleSize = 1000
-        target.status = TestH0Status.AuditorRemoved
-        target.round = 42
 
         return target
     }

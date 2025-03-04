@@ -22,6 +22,7 @@ class TestClcaFuzzSampler {
             contest.makeClcaAssertions(cvrs)
         }
         println("total ncvrs = ${cvrs.size}\n")
+        val contests = contestsUA.map { ContestRound(it, 1) }
 
         val auditConfig = AuditConfig(
             AuditType.CLCA,
@@ -29,13 +30,13 @@ class TestClcaFuzzSampler {
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms, simFuzzPct = .011)
         )
 
-        contestsUA.forEach { contestUA ->
-
+        contests.forEach { contest ->
             val sampleSizes = mutableListOf<Pair<Int, Double>>()
-            contestUA.clcaAssertions.map { assertion ->
-                val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contestUA, assertion, cvrs)
+            contest.assertions.map { assertionRound ->
+                val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contest.contestUA, assertionRound, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
-                assertion.estSampleSize = size
+                assertionRound.estSampleSize = size
+                val assertion = assertionRound.assertion as ClcaAssertion
                 sampleSizes.add(Pair(size, assertion.assorter.reportedMargin()))
                 println(" ${assertion.cassorter.assorter().desc()} margin=${df(assertion.assorter.reportedMargin())} estSize=${size}}")
 
@@ -43,8 +44,8 @@ class TestClcaFuzzSampler {
             // TODO use minAssertion()
             val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.map { it.first }.max() ?: 0
             val pair = if (sampleSizes.isEmpty()) Pair(0, 0.0) else sampleSizes.find{ it.first == maxSize }!!
-            contestUA.estMvrs = pair.first
-            println("${contestUA.name} estSize=${contestUA.estMvrs} margin=${df(pair.second)}")
+            contest.estMvrs = pair.first
+            println("${contest.contestUA.name} estSize=${contest.estMvrs} margin=${df(pair.second)}")
         }
     }
 }
@@ -52,11 +53,12 @@ class TestClcaFuzzSampler {
 fun runWithComparisonFuzzSampler(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
-    assertion: ClcaAssertion,
+    assertionRound: AssertionRound,
     cvrs: List<Cvr>, // (mvr, cvr)
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
+    val assertion = assertionRound.assertion as ClcaAssertion
     val assorter = assertion.cassorter
 
     // TODO using fuzzPct as mvrsFuzz

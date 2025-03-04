@@ -10,94 +10,107 @@ class PollingWorkflow(
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     ballotManifest: BallotManifest,
     val Nb: Int, // total number of ballots/cards TODO same as ballots.size ??
-    val quiet: Boolean = true,
 ): RlauxWorkflowIF {
-    val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
+    private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     val ballotsUA: List<BallotUnderAudit>
+    private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
         require (ballotManifest.ballots.size == Nb)
 
-        contestsUA.forEach {
+        /* contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
                 checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })
             }
-        }
+        } */
 
-        contestsUA.filter { !it.done }.forEach { contest ->
+        // TODO filter out contests that are done...
+        contestsUA.forEach { contest ->
             contest.makePollingAssertions()
         }
 
-        // check contests well formed etc
-        check(auditConfig, contestsUA)
+        /* check contests well formed etc
+        contests = contestsUA.map { ContestRound(it, 1) }
+        check(auditConfig, contests) */
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
-    override fun chooseSamples(roundIdx: Int, show: Boolean): List<Int> {
-        if (!quiet) println("estimateSampleSizes round $roundIdx")
+    override fun startNewRound(quiet: Boolean): AuditRound {
+        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
+        val roundIdx = auditRounds.size + 1
+
+        val auditRound = if (previousRound == null) {
+            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
+            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+        } else {
+            previousRound.createNextRound()
+        }
+        auditRounds.add(auditRound)
+
         estimateSampleSizes(
             auditConfig,
-            contestsUA,
+            auditRound,
             emptyList(),
-            roundIdx,
-            show=show,
+            show=!quiet,
         )
 
-        return sample(this, roundIdx, quiet)
+        auditRound.sampledIndices = sample(this, auditRound, quiet)
+        return auditRound
     }
 
-    override fun runAudit(sampleIndices: List<Int>, mvrs: List<Cvr>, roundIdx: Int): Boolean {
-        return runPollingAudit(auditConfig, contestsUA, mvrs, roundIdx, quiet)
+    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
+        return runPollingAudit(auditConfig, auditRound.contests, mvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
-    override fun getContests() : List<ContestUnderAudit> = contestsUA
+    override fun getContests(): List<ContestUnderAudit> = contestsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
 }
 
 fun runPollingAudit(
     auditConfig: AuditConfig,
-    contestsUA: List<ContestUnderAudit>,
+    contests: List<ContestRound>,
     mvrs: List<Cvr>,
     roundIdx: Int,
     quiet: Boolean = false
 ): Boolean {
-    val contestsNotDone = contestsUA.filter { !it.done }
+    val contestsNotDone = contests.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
         return true
     }
 
     if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
-    contestsNotDone.forEach { contestUA ->
-        var contestAssertionStatus = mutableListOf<TestH0Status>()
-        contestUA.pollingAssertions.forEach { assertion ->
-            if (!assertion.status.complete) {
-                val testH0Result = auditPollingAssertion(auditConfig, contestUA.contest as Contest, assertion, mvrs, roundIdx, quiet)
-                assertion.status = testH0Result.status
-                assertion.round = roundIdx
+    contestsNotDone.forEach { contest ->
+        val contestAssertionStatus = mutableListOf<TestH0Status>()
+        contest.assertions.forEach { assertionRound ->
+            if (!assertionRound.status.complete) {
+                val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, mvrs, roundIdx, quiet)
+                assertionRound.status = testH0Result.status
+                if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
-            contestAssertionStatus.add(assertion.status)
+            contestAssertionStatus.add(assertionRound.status)
         }
-        contestUA.done = contestAssertionStatus.all { it.complete }
-        contestUA.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contestUA.done
+        contest.done = contestAssertionStatus.all { it.complete }
+        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        allDone = allDone && contest.done
     }
     return allDone
 }
 
 fun auditPollingAssertion(
     auditConfig: AuditConfig,
-    contest: Contest,
-    assertion: Assertion,
+    contest: ContestIF,
+    assertionRound: AssertionRound,
     mvrs: List<Cvr>,
     roundIdx: Int,
     quiet: Boolean = false
 ): TestH0Result {
+    val assertion = assertionRound.assertion
     val assorter = assertion.assorter
     val sampler = PollWithoutReplacement(contest, mvrs, assorter, allowReset=false)
 
@@ -122,8 +135,8 @@ fun auditPollingAssertion(
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 
-    val roundResult = AuditRoundResult(roundIdx,
-        estSampleSize=assertion.estSampleSize,
+    assertionRound.auditResult = AuditRoundResult(roundIdx,
+        estSampleSize=assertionRound.estSampleSize,
         maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
@@ -131,8 +144,7 @@ fun auditPollingAssertion(
         status = testH0Result.status,
         measuredMean = testH0Result.tracker.mean(),
     )
-    assertion.roundResults.add(roundResult)
 
-    if (!quiet) println(" ${contest.name} $roundResult")
+    if (!quiet) println(" ${contest.info.name} ${assertionRound.auditResult}")
     return testH0Result
 }

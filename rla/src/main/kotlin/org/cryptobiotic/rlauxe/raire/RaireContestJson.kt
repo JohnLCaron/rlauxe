@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
 import kotlinx.serialization.Serializable
-import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.persist.json.*
 
 // data class RaireContest(
@@ -50,11 +49,11 @@ data class RaireContestUnderAuditJson(
     var pollingAssertions: List<AssertionJson>,
     var clcaAssertions: List<ClcaAssertionJson>,
 
-    val estMvrs: Int,  // Estimate of the sample size required to confirm the contest
+    /* val estMvrs: Int,  // Estimate of the sample size required to confirm the contest
     val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
     val done: Boolean,
     val included: Boolean,
-    val status: TestH0Status, // or its own enum ??
+    val status: TestH0Status, // or its own enum ?? */
 )
 
 fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
@@ -65,26 +64,17 @@ fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
         this.hasStyle,
         this.pollingAssertions.map { it.publishJson() },
         this.clcaAssertions.map { it.publishJson() },
-        this.estMvrs,
-        this.estSampleSizeNoStyles,
-        this.done,
-        this.included,
-        this.status,
     )
 
 fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
+    val contest = this.contest.import()
     val result = RaireContestUnderAudit(
-        this.contest.import(),
+        contest,
         this.winner,
         this.rassertions.map { it.import() },
     )
     result.pollingAssertions = this.pollingAssertions.map{ it.import() }
     result.clcaAssertions = this.clcaAssertions.map{ it.import() }
-    result.estMvrs = this.estMvrs
-    result.estSampleSizeNoStyles = this.estSampleSizeNoStyles
-    result.done = this.done
-    result.included = this.included
-    result.status = this.status
     return result
 }
 
@@ -112,17 +102,17 @@ data class RaireAssertionJson(
     val loser: Int,
     val margin: Int,
     val assertion_type: String,
-    val already_eliminated: List<String>,
+    val eliminated: List<Int>,
     val votes: Map<Int, Int>,
     val explanation: String?,
 )
 
 fun RaireAssertion.publishJson() = RaireAssertionJson(
-    this.winner,
-    this.loser,
-    this.margin,
+    this.winnerId,
+    this.loserId,
+    this.marginInVotes,
     this.assertionType.name,
-    this.alreadyEliminated.map { it.toString() },
+    this.eliminated,
     this.votes,
     this.explanation,
 )
@@ -133,7 +123,7 @@ fun RaireAssertionJson.import(): RaireAssertion {
         this.loser,
         this.margin,
         RaireAssertionType.fromString(this.assertion_type),
-        this.already_eliminated.map { it.toInt() },
+        this.eliminated,
         this.votes,
         this.explanation,
     )

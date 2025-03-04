@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -8,7 +9,8 @@ import org.cryptobiotic.rlauxe.persist.json.Publisher
 import kotlin.test.Test
 
 class TestPersistentWorkflowPolling {
-    val topdir = "/home/stormy/temp/persist/testPersistentWorkflowPolling"
+    // val topdir = "/home/stormy/temp/persist/testPersistentWorkflowPolling"
+    val topdir = kotlin.io.path.createTempDirectory().toString()
 
     @Test
     fun testPersistentWorkflowPolling() {
@@ -37,7 +39,7 @@ class TestPersistentWorkflowPolling {
         var workflow : RlauxWorkflowIF = pollingWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, pollingWorkflow.ballotsUA, testMvrs, publish)
-            workflow = readPersistentWorkflow(round, publish)
+            workflow = PersistentWorkflow(topdir)
             round++
         }
     }

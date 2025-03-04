@@ -1,12 +1,13 @@
 # Development
-last changed: 12/24/2024
+last changed: 03/03/2026
 
-![rlauxe UML](images/rlauxeUML.svg)
+![rlauxe core UML](images/rlauxeUML.svg)
+
+![rlauxe Audit UML](images/rlauxeAuditUML.svg)
 
 ## TODO
 
 ### core
-* raire library
 * hybrid audits
 * the effect of adding n worst-case ballots to an audit.
 
@@ -19,14 +20,6 @@ last changed: 12/24/2024
   BigIntegers? Strings? Maybe hex strings?
 * COBRA 4.3 Diversified betting
 
-### plots
-* cobra/GenAdaptiveComparison
-* sampling/GenPollingDvalues
-* sampling/GenPollingNoStyles
-* sampling/GenSampleSizeEstimates
-
-### multiple rounds
-* Serialization of intermediate stages
 
 ### interface
 * CLI
@@ -74,35 +67,6 @@ A PostGres DB that you have to trust.
 Theres not a problem using a DB, but you should be able to recreate it from the raw data.
 
 OTOH the RLA should detect a compromised DB?
-
-## Classes
-
-### core
-Samples       // keeps track of the latest sample, number of samples, and the sample sum.
-
-### sampling
-
-ConsistentSampling    // implement consistent or uniform sampling
-EstimateSampleSize    / estimates sample size; polling or comparison, with/out styles
-
-ComparisonSimulation // create internal cvr and mvr with the correct under/over statements based on the error rates.
-                     // specific to a contest. only used for estimating the sample size
-
-PollingFuzzSampler, ComparisonFuzzSampler           // this takes a list of cvrs and fuzzes them. New fuzz each reset.
-                      // fun makeFuzzedCvrsFrom(contests: List<Contest>, cvrs: List<Cvr>, fuzzPct: Double): List<Cvr> 
-
-MultiContestTestData  // creates a set of contests and ballotStyles, with randomly chosen candidates and margins. create cvrs that reflect the contests' exact votes.
-PollingSimulation
-
-SampleGenerator       // abstraction for creating a sequence of samples. 
-PollWithoutReplacement
-ComparisonWithoutReplacement
-
-### plots module
-betting/GenBettingPayoff
-sampling/GenerateComparisonErrorTable  
-sampling/PlotPollingNoStyles  
-sampling/PlotSampleSizeEstimates 
 
 ## Notes
 

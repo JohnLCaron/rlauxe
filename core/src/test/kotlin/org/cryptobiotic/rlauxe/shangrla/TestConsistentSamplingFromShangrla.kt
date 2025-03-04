@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.AssertionRound
+import org.cryptobiotic.rlauxe.workflow.ContestRound
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -40,10 +42,12 @@ class TestConsistentSamplingFromShangrla {
         val contestsUA = contestInfos.mapIndexed { idx, it ->
             makeContestUAfromCvrs( it, cvrs)
         }
-        contestsUA[0].estMvrs = 3
-        contestsUA[1].estMvrs = 4
+        val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
+        contestRounds[0].estMvrs = 3
+        contestRounds[1].estMvrs = 4
 
-        val sample_cvr_indices = consistentSampling(contestsUA, cvrsUA)
+
+        val sample_cvr_indices = consistentSampling(contestRounds, cvrsUA)
         assertEquals(5, sample_cvr_indices.size)
 
         assertEquals(listOf(3, 2, 1, 5, 0), sample_cvr_indices)
@@ -77,9 +81,10 @@ class TestConsistentSamplingFromShangrla {
 
         val contests = makeContestsFromCvrs(cvrs)
         val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it) }
-        contestsUA[0].estMvrs = 3
-        contestsUA[1].estMvrs = 3
-        contestsUA[2].estMvrs = 2
+        val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
+        contestRounds[0].estMvrs = 3
+        contestRounds[1].estMvrs = 3
+        contestRounds[2].estMvrs = 2
 
         val ncvrs = makeNcvrsPerContest(contests, cvrs)
         val phantomCVRs = makePhantomCvrs(contests, ncvrs)
@@ -88,7 +93,7 @@ class TestConsistentSamplingFromShangrla {
         val cvrsUAP = (cvrs + phantomCVRs).map { CvrUnderAudit( it, prng.next()) }
         assertEquals(9, cvrsUAP.size)
 
-        val sample_cvr_indices = consistentSampling(contestsUA, cvrsUAP)
+        val sample_cvr_indices = consistentSampling(contestRounds, cvrsUAP)
         assertEquals(6, sample_cvr_indices.size)
         assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
     }

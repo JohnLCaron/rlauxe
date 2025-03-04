@@ -43,22 +43,16 @@ class RaireContestUnderAudit(
     // TODO eliminate who calls this?
     fun makeAssorters(): List<RaireAssorter> {
         return this.rassertions.map {
-            RaireAssorter(contest.info, it, (it.margin.toDouble() / contest.Nc))
+            RaireAssorter(contest.info, it, (it.marginInVotes.toDouble() / contest.Nc))
         }
     }
 
     // override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
     override fun makeClcaAssertions(cvrs: Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        this.clcaAssertions = rassertions.map { assertion ->
-            val assorter = RaireAssorter(contest.info, assertion, (assertion.margin.toDouble() / contest.Nc))
+        this.clcaAssertions = rassertions.map { rassertion ->
+            val assorter = RaireAssorter(contest.info, rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
             val calcMargin = assorter.calcAssorterMargin(id, cvrs)
-            if (assertion.margin != 0) {
-                val reportedMargin = assertion.margin / this.Nc.toDouble()
-                // println(" calcMargin=$calcMargin reportedMargin=$reportedMargin")
-                require(doubleIsClose(calcMargin, reportedMargin))
-            }
-            // assorter.reportedMargin = calcMargin
             val clcaAssorter = ClcaAssorter(contest.info, assorter, margin2mean(calcMargin), hasStyle=hasStyle)
             ClcaAssertion(contest, clcaAssorter)
         }
@@ -66,10 +60,10 @@ class RaireContestUnderAudit(
     }
 
     override fun show(roundIdx: Int?) = buildString {
-        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())} est=$estMvrs status=$status")
-        assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
+        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
+        /* assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
             append(" ${it.show()}")
-        }
+        } */
     }
 
     override fun equals(other: Any?): Boolean {
@@ -186,17 +180,19 @@ enum class RaireAssertionType(val aname:String) {
 }
 
 data class RaireAssertion(
-    val winner: Int,
-    val loser: Int,
-    val margin: Int,
+    val winnerId: Int,
+    val loserId: Int,
+    var marginInVotes: Int,
     val assertionType: RaireAssertionType,
-    val alreadyEliminated: List<Int> = emptyList(), // NEN only; already eliminated for the purpose of this assertion
+    val eliminated: List<Int> = emptyList(), // NEN only; already eliminated for the purpose of this assertion
     val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
     val explanation: String? = null,
 ) {
     fun show() = buildString {
-        appendLine("    assertion type '$assertionType' winner $winner loser $loser alreadyEliminated $alreadyEliminated explanation: '$explanation'")
+        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated explanation: '$explanation'")
     }
+
+    fun remaining(candidateIds: List<Int>) = candidateIds.filter { !eliminated.contains(it) }
 
     companion object {
         fun convertAssertion(candidates: List<Int>, aandd: AssertionAndDifficulty, votes: Map<Int, Int>): RaireAssertion {
@@ -206,13 +202,13 @@ data class RaireAssertion(
             } else if (assertion is NotEliminatedNext) {
                 // have to convert continuing (aka remaining) -> alreadyEliminated
                 val continuing = assertion.continuing.toList()
-                val alreadyEliminated = candidates.filter { !continuing.contains(it) }
-                RaireAssertion(
+                val eliminated = candidates.filter { !continuing.contains(it) }
+                return RaireAssertion(
                     assertion.winner,
                     assertion.loser,
                     aandd.margin,
                     RaireAssertionType.irv_elimination,
-                    alreadyEliminated,
+                    eliminated,
                     votes = votes,
                 )
             } else {
@@ -227,20 +223,20 @@ data class RaireAssertion(
 // This a primitive assorter.
 data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, val reportedMargin: Double): AssorterIF {
     val contestId = info.id
-    val remaining = info.candidateIds.filter { !rassertion.alreadyEliminated.contains(it) }
+    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) }
 
     override fun upperBound() = 1.0
-    override fun winner() = rassertion.winner
-    override fun loser() = rassertion.loser
+    override fun winner() = rassertion.winnerId
+    override fun loser() = rassertion.loserId
     override fun reportedMargin() = reportedMargin
     override fun desc() = buildString {
-        append("winner/loser=${rassertion.winner}/${rassertion.loser} margin=${rassertion.margin}")
-        if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" alreadyElim=${rassertion.alreadyEliminated}")
+        append("winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes}")
+        if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (usePhantoms && mvr.phantom) return 0.5;
+        if (usePhantoms && mvr.phantom) return 0.5
         val rcvr = RaireCvr(mvr)
         return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
         else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
@@ -255,9 +251,9 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     // aka NEB
     fun assortWinnerOnly(rcvr: RaireCvr): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
-        val awinner = if (rcvr.get_vote_for(contestId, rassertion.winner) == 1) 1 else 0
+        val awinner = if (rcvr.get_vote_for(contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = rcvr.rcv_lfunc_wo( contestId, rassertion.winner, rassertion.loser)
+        val aloser = rcvr.rcv_lfunc_wo( contestId, rassertion.winnerId, rassertion.loserId)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
@@ -269,8 +265,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     fun assortIrvElimination(rcvr: RaireCvr): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
-        val awinner = rcvr.rcv_votefor_cand(contestId, rassertion.winner, remaining)
-        val aloser = rcvr.rcv_votefor_cand(contestId, rassertion.loser, remaining)
+        val awinner = rcvr.rcv_votefor_cand(contestId, rassertion.winnerId, remaining)
+        val aloser = rcvr.rcv_votefor_cand(contestId, rassertion.loserId, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 }

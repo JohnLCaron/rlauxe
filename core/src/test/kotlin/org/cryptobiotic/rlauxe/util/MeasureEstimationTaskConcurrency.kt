@@ -17,8 +17,10 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.EstimationResult
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
+import org.cryptobiotic.rlauxe.workflow.AssertionRound
 import org.cryptobiotic.rlauxe.workflow.AuditConfig
 import org.cryptobiotic.rlauxe.workflow.AuditType
+import org.cryptobiotic.rlauxe.workflow.ContestRound
 import kotlin.test.Test
 
 class MeasureEstimationTaskConcurrency {
@@ -30,12 +32,13 @@ class MeasureEstimationTaskConcurrency {
             test.contests.map { ContestUnderAudit(it).makeClcaAssertions(cvrs) }
         val nassertions = contestsUA.sumOf { it.assertions().size }
         println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
+        val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
 
         val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 10)
         val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
 
-        contestsUA.filter { !it.done }.forEach { contestUA ->
-            tasks.addAll(makeEstimationTasks(auditConfig, contestUA, cvrs, 1))
+        contestRounds.filter { !it.done }.forEach { contest ->
+            tasks.addAll(makeEstimationTasks(auditConfig, contest, cvrs, 1))
         }
 
         val one = runWest(1, tasks, 0.0).toDouble()

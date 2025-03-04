@@ -70,6 +70,7 @@ data class CvrUnderAudit (val cvr: Cvr, val sampleNum: Long): BallotOrCvr {
 
     override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun sampleNumber() = sampleNum
+    override fun isSampled() = sampled
     override fun setIsSampled(isSampled: Boolean): CvrUnderAudit {
         this.sampled = isSampled
         return this

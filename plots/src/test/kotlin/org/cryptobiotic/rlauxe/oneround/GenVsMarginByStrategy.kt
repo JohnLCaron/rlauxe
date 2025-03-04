@@ -26,19 +26,19 @@ class GenVsMarginByStrategy {
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
-            val clcaGenerator1 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            val clcaGenerator1 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
-            val clcaGenerator2 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
-            val clcaGenerator3 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            val clcaGenerator3 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
             )
@@ -49,7 +49,7 @@ class GenVsMarginByStrategy {
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4)) */
 
-            val clcaGenerator5 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
+            val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))

@@ -179,7 +179,7 @@ class Contest(
     }
 }
 
-/** Mutable form of Contest. Specific to a Round. */
+/** Contest with assertions. */
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true, // TODO change to AuditType?
@@ -194,12 +194,6 @@ open class ContestUnderAudit(
 
     var pollingAssertions: List<Assertion> = emptyList()
     var clcaAssertions: List<ClcaAssertion> = emptyList()
-
-    var estMvrs = 0 // Estimate of the sample size required to confirm the contest
-    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
-    var done = false
-    var included = true
-    var status = TestH0Status.InProgress // or its own enum ??
 
     // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
     open fun makePollingAssertions(): ContestUnderAudit {
@@ -285,16 +279,14 @@ open class ContestUnderAudit(
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
-    override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc minMargin=${df(minMargin())} est=$estMvrs status=$status")
-    }
+    override fun toString() = contest.toString()
 
     open fun show(roundIdx: Int?) = buildString {
         val votes = if (contest is Contest) contest.votes.toString() else "N/A"
-        appendLine("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())} est=$estMvrs status=$status")
-        assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
+        appendLine("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
+        /* assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
             append(" ${it.show()}")
-        }
+        } */
     }
 
     override fun equals(other: Any?): Boolean {
@@ -305,14 +297,9 @@ open class ContestUnderAudit(
 
         if (isComparison != other.isComparison) return false
         if (hasStyle != other.hasStyle) return false
-        if (estMvrs != other.estMvrs) return false
-        if (estSampleSizeNoStyles != other.estSampleSizeNoStyles) return false
-        if (done != other.done) return false
-        if (included != other.included) return false
         if (contest != other.contest) return false
         if (pollingAssertions != other.pollingAssertions) return false
         if (clcaAssertions != other.clcaAssertions) return false
-        if (status != other.status) return false
 
         return true
     }
@@ -320,16 +307,12 @@ open class ContestUnderAudit(
     override fun hashCode(): Int {
         var result = isComparison.hashCode()
         result = 31 * result + hasStyle.hashCode()
-        result = 31 * result + estMvrs
-        result = 31 * result + estSampleSizeNoStyles
-        result = 31 * result + done.hashCode()
-        result = 31 * result + included.hashCode()
         result = 31 * result + contest.hashCode()
         result = 31 * result + pollingAssertions.hashCode()
         result = 31 * result + clcaAssertions.hashCode()
-        result = 31 * result + status.hashCode()
         return result
     }
+
 
 }
 

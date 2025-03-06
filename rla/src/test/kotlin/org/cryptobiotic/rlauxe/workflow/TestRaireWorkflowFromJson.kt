@@ -58,8 +58,8 @@ fun runComparisonWorkflowR(workflow: ClcaWorkflow, testMvrs: List<Cvr>, nasserti
         val roundStopwatch = Stopwatch()
         println("---------------------------")
         val currRound = workflow.startNewRound()
-        println("${currRound.roundIdx} choose ${currRound.sampledIndices.size} samples, new=${currRound.newSamples} took ${roundStopwatch.elapsed(
-            TimeUnit.MILLISECONDS)} ms\n")
+        println("${currRound.roundIdx} choose ${currRound.sampledIndices.size} samples, new=${currRound.newmvrs} " +
+                "took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
         val sampledMvrs = currRound.sampledIndices.map { testMvrs[it] }
         done = workflow.runAudit(currRound, sampledMvrs)

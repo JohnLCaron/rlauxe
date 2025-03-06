@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.simulateSampleSizeClcaAssorter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.AssertionRound
 import org.cryptobiotic.rlauxe.workflow.ContestRound
 import kotlin.test.Test
 
@@ -74,8 +73,8 @@ class TestCorlaEstimateSampleSize {
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()
-            contest.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contest.name} estSize=$estSize  simSize=${contest.estMvrs}\n")
+            contest.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            println("${contest.name} estSize=$estSize  simSize=${contest.estSampleSize}\n")
         }
     }
 }

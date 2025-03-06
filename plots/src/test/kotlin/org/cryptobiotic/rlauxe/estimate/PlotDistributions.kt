@@ -116,7 +116,7 @@ class PlotDistributions {
 
             // "oracle" audit
             val contestUA = workflow.getContests().first()
-            val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1)
+            val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1, null)
 
             auditClcaAssertion(auditConfig, contestUA.contest, assertionRound, sortedPairs, 1)
             results.add(assertionRound.auditResult!!.samplesNeeded)

@@ -25,8 +25,6 @@ class AuditRecord(
             val cvrs = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
 
             val mvrs = mutableSetOf<CvrUnderAudit>()
-            val previousSamples = mutableSetOf<Int>()
-            var previousRound: AuditRound? = null
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.rounds()) {
@@ -39,17 +37,7 @@ class AuditRecord(
                 val sampledMvrs = if (sampledMvrsResult is Ok) sampledMvrsResult.unwrap() else emptyList()
                 mvrs.addAll(sampledMvrs) // cumulative
 
-                auditRound.calcNewSamples(previousSamples)
-                if (auditConfig.auditType == AuditType.CLCA) auditRound.calcContestMvrs(cvrs)
-                previousSamples.addAll(sampledIndices) // cumulative
-
-                /* i htink you dont need this because the serialization store it
-                if (previousRound != null) {
-                    auditRound.setPreviousRound(previousRound)
-                } */
-
                 rounds.add(auditRound)
-                previousRound = auditRound
             }
             return AuditRecord(location, auditConfig, rounds, cvrs, mvrs)
         }

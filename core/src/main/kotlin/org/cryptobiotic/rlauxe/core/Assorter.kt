@@ -140,6 +140,7 @@ data class ClcaAssorter(
     override fun noerror() = noerror
     override fun upperBound() = upperBound
     override fun assorter() = assorter
+    override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$margin noerror=$noerror upperBound=$upperBound"
 
     fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
         val mean = cvrPairs.filter{ it.first.hasContest(info.id) }

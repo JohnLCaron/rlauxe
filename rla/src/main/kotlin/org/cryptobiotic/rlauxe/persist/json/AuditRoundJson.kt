@@ -24,24 +24,16 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-//data class AuditRound(
-//    val name: String,
-//    val roundIdx: Int,
-//    val contests: List<ContestRound>,
-//
-//    val auditWasDone: Boolean = false,
-//    val auditIsComplete: Boolean = false,
-//    var sampledIndices: List<Int>, // TODO this is stored separately
-//    val nmvrs: Int = 0, // TODO whats ?
-
 // data class AuditRound(
 //    val roundIdx: Int,
 //    val contests: List<ContestRound>,
-//
 //    val auditWasDone: Boolean = false,
 //    var auditIsComplete: Boolean = false,
-//    var sampledIndices: List<Int>, // TODO this is stored separately; called when user chooses new algorithm for sampling
-//    val nmvrs: Int = 0, // TODO whats ?
+//    var sampledIndices: List<Int>,
+//    var nmvrs: Int = 0,
+//    var newmvrs: Int = 0,
+//    var auditorSetNewMvrs: Int = -1,
+//) {
 
 // one in each roundXX subdirectory
 @Serializable
@@ -52,6 +44,8 @@ data class AuditRoundJson(
     val auditIsComplete: Boolean,
     val sampledIndices: List<Int>,
     val nmvrs: Int,
+    var newmvrs: Int,
+    var auditorSetNewMvrs: Int,
     )
 
 fun AuditRound.publishJson() : AuditRoundJson {
@@ -62,6 +56,8 @@ fun AuditRound.publishJson() : AuditRoundJson {
         this.auditIsComplete,
         this.sampledIndices,
         this.nmvrs,
+        this.newmvrs,
+        this.auditorSetNewMvrs,
     )
 }
 
@@ -73,6 +69,8 @@ fun AuditRoundJson.import(): AuditRound {
         this.auditIsComplete,
         this.sampledIndices,
         this.nmvrs,
+        this.newmvrs,
+        this.auditorSetNewMvrs,
     )
 }
 
@@ -81,11 +79,12 @@ fun AuditRoundJson.import(): AuditRound {
 //    val name = contestUA.name
 //    val Nc = contestUA.Nc
 //
-//    var actualMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
-//    var actualNewMvrs = 0 // Estimate of the new samples required to confirm the contest
+//    var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
+//    var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
 //
-//    var estMvrs = 0 // Estimate of the sample size required to confirm the contest
-//    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformPolling (Polling, no style only)
+//    var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
+//    var estSampleSize = 0 // number of total samples estimated needed, consistentSampling
+//    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformSampling
 //    var done = false
 //    var included = true
 //    var status = TestH0Status.InProgress // or its own enum ??
@@ -97,7 +96,10 @@ data class ContestRoundJson(
     var assertions: List<AssertionRoundJson>,
     val roundIdx: Int,
 
-    val estMvrs: Int,  // Estimate of the sample size required to confirm the contest
+    val actualMvrs: Int,
+    val actualNewMvrs: Int,  // Estimate of new sample size required to confirm the contest
+    val estNewSamples: Int,
+    val estSampleSize: Int,  // Estimate of total sample size required to confirm the contest
     val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
     val done: Boolean,
     val included: Boolean,
@@ -113,7 +115,10 @@ fun ContestRound.publishJson() : ContestRoundJson {
         if (isRaire) (this.contestUA as RaireContestUnderAudit).publishRaireJson() else null,
         assertions.map { it.publishJson() },
         this.roundIdx,
-        this.estMvrs,
+        this.actualMvrs,
+        this.actualNewMvrs,
+        this.estNewSamples,
+        this.estSampleSize,
         this.estSampleSizeNoStyles,
         this.done,
         this.included,
@@ -127,7 +132,10 @@ fun ContestRoundJson.import(): ContestRound {
 
     val contestRound = ContestRound(contest, assertions.map { it.import() }, this.roundIdx)
 
-    contestRound.estMvrs = this.estMvrs
+    contestRound.actualMvrs = this.actualMvrs
+    contestRound.actualNewMvrs = this.actualNewMvrs
+    contestRound.estNewSamples = this.estNewSamples
+    contestRound.estSampleSize = this.estSampleSize
     contestRound.estSampleSizeNoStyles = this.estSampleSizeNoStyles
     contestRound.done = this.done
     contestRound.included = this.included
@@ -136,11 +144,10 @@ fun ContestRoundJson.import(): ContestRound {
     return contestRound
 }
 
-// data class AssertionRound(val assertion: Assertion, val roundIdx: Int) {
-//    val prevAuditResult: AuditRoundResult? = null // TODO who sets this?
-//
+// data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAuditResult: AuditRoundResult?) {
 //    // these values are set during estimateSampleSizes()
 //    var estSampleSize = 0   // estimated sample size for current round
+//    var estNewSampleSize = 0   // estimated new sample size for current round
 //    var estimationResult: EstimationRoundResult? = null
 //
 //    // these values are set during runAudit()
@@ -154,6 +161,7 @@ data class AssertionRoundJson(
     val clcaAssertion: ClcaAssertionJson?,
     val roundIdx: Int,
     val estSampleSize: Int,
+    val estNewSampleSize: Int,
     val estimationResult: EstimationRoundResultJson?,
     val auditResult: AuditRoundResultJson?,
     val prevAuditResult: AuditRoundResultJson?,
@@ -169,6 +177,7 @@ fun AssertionRound.publishJson() : AssertionRoundJson {
         if (isClca) (this.assertion as ClcaAssertion).publishJson() else null,
         this.roundIdx,
         this.estSampleSize,
+        this.estNewSampleSize,
         this.estimationResult?.publishJson(),
         this.auditResult?.publishJson(),
         this.prevAuditResult?.publishJson(),
@@ -184,6 +193,7 @@ fun AssertionRoundJson.import(): AssertionRound {
         else AssertionRound(this.clcaAssertion!!.import(), this.roundIdx, prevAuditResult)
 
     assertionRound.estSampleSize = this.estSampleSize
+    assertionRound.estNewSampleSize = this.estNewSampleSize
     assertionRound.estimationResult = this.estimationResult?.import()
     assertionRound.auditResult = this.auditResult?.import()
     assertionRound.prevAuditResult = this.prevAuditResult?.import()

@@ -36,34 +36,34 @@ object RunRound {
         runRound(inputDir, mvrFile)
         // println("  retval $retval")
     }
+}
 
-    fun runRound(inputDir: String, mvrFile: String): AuditRound? {
-        val workflow = PersistentWorkflow(inputDir)
-        val auditRound = workflow.getLastRound()
+fun runRound(inputDir: String, mvrFile: String): AuditRound? {
+    val workflow = PersistentWorkflow(inputDir)
+    val auditRound = workflow.getLastRound()
 
-        val publisher = Publisher(inputDir)
+    val publisher = Publisher(inputDir)
 
-        val allDone = runAuditStage(auditRound, workflow, mvrFile, publisher)
-        if (!allDone) {
-            // start next round and get default sample indices
-            val nextRound = workflow.startNewRound(quiet = false)
+    val allDone = runAuditStage(auditRound, workflow, mvrFile, publisher)
+    if (!allDone) {
+        // start next round and get default sample indices
+        val nextRound = workflow.startNewRound(quiet = false)
 
-            if (nextRound.sampledIndices.isEmpty()) {
-                println("*** FAILED TO GET ANY SAMPLES ***")
-                nextRound.auditIsComplete = true
-            }
-
-            // write the partial election state to round+1
-            writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
-            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}")
-
-            writeSampleIndicesJsonFile(nextRound.sampledIndices, publisher.sampleIndicesFile(nextRound.roundIdx))
-            println("   writeSampleIndicesJsonFile ${publisher.sampleIndicesFile(nextRound.roundIdx)}")
-
-            return if (nextRound.auditIsComplete) null else nextRound
+        if (nextRound.sampledIndices.isEmpty()) {
+            println("*** FAILED TO GET ANY SAMPLES ***")
+            nextRound.auditIsComplete = true
         }
-        return null
+
+        // write the partial election state to round+1
+        writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
+        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}")
+
+        writeSampleIndicesJsonFile(nextRound.sampledIndices, publisher.sampleIndicesFile(nextRound.roundIdx))
+        println("   writeSampleIndicesJsonFile ${publisher.sampleIndicesFile(nextRound.roundIdx)}")
+
+        return if (nextRound.auditIsComplete) null else nextRound
     }
+    return null
 }
 
 fun runAuditStage(
@@ -86,15 +86,15 @@ fun runAuditStage(
     val resultIndices = readSampleIndicesJsonFile(publisher.sampleIndicesFile(roundIdx))
     if (resultIndices is Err) println(resultIndices)
     require(resultIndices is Ok)
-    val indices = resultIndices.unwrap()
+    val sampleIndices = resultIndices.unwrap() // these are the samples we are going to audit.
 
-    if (indices.isEmpty()) {
+    if (sampleIndices.isEmpty()) {
         println("***Error sampled Indices are empty for round $roundIdx")
         return true
 
     } else {
-        println("runAudit $roundIdx samples=${indices.size}")
-        val sampledMvrs = indices.map {
+        println("runAudit $roundIdx samples=${sampleIndices.size}")
+        val sampledMvrs = sampleIndices.map {
             testMvrs[it]
         }
 

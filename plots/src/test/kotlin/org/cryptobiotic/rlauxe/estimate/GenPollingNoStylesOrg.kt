@@ -37,7 +37,7 @@ class GenPollingNoStylesOrg {
                     1,
                     auditConfig,
                     contestRound,
-                    contestRound.minAssertion(),
+                    contestRound.minAssertion()!!,
                     emptyList(),
                     1.0,
                     0,

@@ -241,14 +241,23 @@ class WorkflowTask(
 
         val nmvrs = lastRound.sampledIndices.size // LOOK ??
         val contest = lastRound.contests.first() // theres only one
-        val minAssertion = contest.minAssertion()
-        val assorter = minAssertion.assertion.assorter
 
+        val minAssertion = contest.minAssertion() // TODO why would this fail ?
+            ?: return WorkflowResult(
+                    contest.Nc,
+                    0.0,
+                    TestH0Status.ContestMisformed,
+                    0.0, 0.0, 0.0, 0.0,
+                    otherParameters,
+                    100.0,
+                )
+
+        val assorter = minAssertion.assertion.assorter
         return if (minAssertion.auditResult == null) { // TODO why is this empty?
             WorkflowResult(
                 contest.Nc,
                 assorter.reportedMargin(),
-                TestH0Status.ContestMisformed, // TODO why empty?
+                TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,

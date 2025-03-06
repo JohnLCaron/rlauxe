@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -18,7 +19,6 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestAuditRoundJson {
-    val filename = "/home/stormy/temp/persist/test/TestAuditStateJson.json"
 
     @Test
     fun testRoundtripNaked() {
@@ -43,6 +43,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripIOnaked() {
+        val filename = "/home/stormy/temp/persist/test/TestAuditStateJson.json"
+
         val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
@@ -54,6 +56,7 @@ class TestAuditRoundJson {
             false,
             sampledIndices = listOf(1,2,3, 21),
             nmvrs = 129182,
+            auditorSetNewMvrs = 2223,
             )
         writeAuditRoundJsonFile(target, filename)
         val result = readAuditRoundJsonFile(filename)
@@ -65,6 +68,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithRounds() {
+        val filename = "/home/stormy/temp/persist/test/TestAuditStateJson2.json"
+
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
             AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
@@ -93,7 +98,8 @@ class TestAuditRoundJson {
             false,
             false,
             sampledIndices = lastRound.sampledIndices,
-            nmvrs = 33333
+            nmvrs = 33333,
+            auditorSetNewMvrs = 33334533,
         )
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -101,9 +107,9 @@ class TestAuditRoundJson {
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
-        val useFilename = filename + "2"
-        writeAuditRoundJsonFile(target, useFilename)
-        val result = readAuditRoundJsonFile(useFilename)
+        writeAuditRoundJsonFile(target, filename)
+        val result = readAuditRoundJsonFile(filename)
+        if (result is Err) println("result = $result")
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
@@ -112,6 +118,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithRaire() {
+        val filename = "/home/stormy/temp/persist/test/TestAuditStateJson3.json"
+
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
             AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
@@ -146,7 +154,8 @@ class TestAuditRoundJson {
             false,
             false,
             sampledIndices = nextRound.sampledIndices,
-            nmvrs = 33333
+            nmvrs = 33333,
+            auditorSetNewMvrs = 33733,
         )
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -154,9 +163,8 @@ class TestAuditRoundJson {
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
-        val useFilename = filename + "2"
-        writeAuditRoundJsonFile(target, useFilename)
-        val result = readAuditRoundJsonFile(useFilename)
+        writeAuditRoundJsonFile(target, filename)
+        val result = readAuditRoundJsonFile(filename)
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
@@ -164,20 +172,26 @@ class TestAuditRoundJson {
     }
 }
 
-// data class AuditState(
-//    val name: String,
+// data class AuditRound(
 //    val roundIdx: Int,
-//    val nmvrs: Int,
-//    val newMvrs: Int,
-//    val auditWasDone: Boolean,
-//    val auditIsComplete: Boolean,
-//    val contests: List<ContestUnderAudit>,
+//    val contests: List<ContestRound>,
+//
+//    val auditWasDone: Boolean = false,
+//    var auditIsComplete: Boolean = false,
+//    var sampledIndices: List<Int>, // ballots to sample for this round
+//    var nmvrs: Int = 0,
+//    var newmvrs: Int = 0,
+//    var auditorSetNewMvrs: Int = -1,
 //)
 fun check(s1: AuditRound, s2: AuditRound) {
     assertEquals(s1.roundIdx, s2.roundIdx)
-    assertEquals(s1.nmvrs, s2.nmvrs)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
     assertEquals(s1.auditIsComplete, s2.auditIsComplete)
+    assertEquals(s1.sampledIndices, s2.sampledIndices)
+    assertEquals(s1.nmvrs, s2.nmvrs)
+    assertEquals(s1.newmvrs, s2.newmvrs)
+    assertEquals(s1.auditorSetNewMvrs, s2.auditorSetNewMvrs)
+
     assertEquals(s1.contests.size, s2.contests.size)
     s1.contests.forEachIndexed { idx, c1 ->
         if (c1.contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {

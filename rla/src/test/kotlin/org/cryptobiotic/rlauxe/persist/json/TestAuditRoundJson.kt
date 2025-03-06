@@ -3,10 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
@@ -21,10 +18,34 @@ import kotlin.test.assertNotNull
 class TestAuditRoundJson {
 
     @Test
-    fun testRoundtripNaked() {
+    fun testRoundtrip() {
         val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
-        val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
+        val contestRounds = contestsUAs.map{ contest ->
+            val cr = ContestRound(contest, 1,)
+            //     var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
+            //    var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
+            //
+            //    var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
+            //    var estSampleSize = 0 // number of total samples estimated needed, consistentSampling
+            //    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformSampling
+            //    var auditorWantNewMvrs: Int = -1
+            //
+            //    var done = false
+            //    var included = true
+            //    var status = TestH0Status.InProgress
+            cr.actualMvrs = 420
+            cr.actualNewMvrs = 42
+            cr.estNewSamples = 66
+            cr.estSampleSize = 77
+            cr.estSampleSizeNoStyles = 88
+            cr.auditorWantNewMvrs = 88
+            cr.done = true
+            cr.included = false
+            cr.status = TestH0Status.FailMaxSamplesAllowed
+
+            cr
+        }
 
         val target = AuditRound(
             2,
@@ -37,18 +58,31 @@ class TestAuditRoundJson {
         val json = target.publishJson()
         val roundtrip = json.import()
         assertNotNull(roundtrip)
+        check(target, roundtrip)
         assertTrue(roundtrip.equals(target))
         assertEquals(roundtrip, target)
     }
 
     @Test
-    fun testRoundtripIOnaked() {
+    fun testRoundtripIO() {
         val filename = "/home/stormy/temp/persist/test/TestAuditStateJson.json"
 
         val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
-        val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
+        val contestRounds = contestsUAs.map{ contest ->
+            val cr = ContestRound(contest, 1)
+            cr.actualMvrs = 420
+            cr.actualNewMvrs = 42
+            cr.estNewSamples = 66
+            cr.estSampleSize = 77
+            cr.estSampleSizeNoStyles = 88
+            cr.auditorWantNewMvrs = 88
+            cr.done = true
+            cr.included = false
+            cr.status = TestH0Status.FailMaxSamplesAllowed
 
+            cr
+        }
         val target = AuditRound(
             1,
             contestRounds,
@@ -56,12 +90,13 @@ class TestAuditRoundJson {
             false,
             sampledIndices = listOf(1,2,3, 21),
             nmvrs = 129182,
-            auditorSetNewMvrs = 2223,
+            auditorWantNewMvrs = 2223,
             )
         writeAuditRoundJsonFile(target, filename)
         val result = readAuditRoundJsonFile(filename)
         assertTrue(result is Ok)
         val roundtrip = result.unwrap()
+        check(target, roundtrip)
         assertTrue(roundtrip.equals(target))
         assertEquals(roundtrip, target)
     }
@@ -99,7 +134,7 @@ class TestAuditRoundJson {
             false,
             sampledIndices = lastRound.sampledIndices,
             nmvrs = 33333,
-            auditorSetNewMvrs = 33334533,
+            auditorWantNewMvrs = 33334533,
         )
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -155,7 +190,7 @@ class TestAuditRoundJson {
             false,
             sampledIndices = nextRound.sampledIndices,
             nmvrs = 33333,
-            auditorSetNewMvrs = 33733,
+            auditorWantNewMvrs = 33733,
         )
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -172,17 +207,6 @@ class TestAuditRoundJson {
     }
 }
 
-// data class AuditRound(
-//    val roundIdx: Int,
-//    val contests: List<ContestRound>,
-//
-//    val auditWasDone: Boolean = false,
-//    var auditIsComplete: Boolean = false,
-//    var sampledIndices: List<Int>, // ballots to sample for this round
-//    var nmvrs: Int = 0,
-//    var newmvrs: Int = 0,
-//    var auditorSetNewMvrs: Int = -1,
-//)
 fun check(s1: AuditRound, s2: AuditRound) {
     assertEquals(s1.roundIdx, s2.roundIdx)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
@@ -190,7 +214,7 @@ fun check(s1: AuditRound, s2: AuditRound) {
     assertEquals(s1.sampledIndices, s2.sampledIndices)
     assertEquals(s1.nmvrs, s2.nmvrs)
     assertEquals(s1.newmvrs, s2.newmvrs)
-    assertEquals(s1.auditorSetNewMvrs, s2.auditorSetNewMvrs)
+    assertEquals(s1.auditorWantNewMvrs, s2.auditorWantNewMvrs)
 
     assertEquals(s1.contests.size, s2.contests.size)
     s1.contests.forEachIndexed { idx, c1 ->

@@ -52,26 +52,12 @@ class CorlaWorkflow(
 ): RlauxWorkflowIF {
     val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
-    private val contestRounds: List<ContestRound>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.CLCA)
 
-        // 2. Pre-processing and consistency checks
-        // 	a) Check that the winners according to the CVRs are the reported winners.
-        //	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-
-        // 3. Prepare for sampling
-        //	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
-        //	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}. (Keep track of what assertions are proved)
-
-        // val votes =  makeVotesPerContest(contests, cvrs)
-        contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.filter{ !it.done }.forEach { contest ->
-            contest.contestUA.makeClcaAssertions(cvrs)
-        }
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
@@ -113,7 +99,7 @@ class CorlaWorkflow(
         //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
         //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
-        val contestsNotDone = contestRounds.filter{ !it.done }
+        val contestsNotDone = auditRound.contests.filter{ !it.done }
         val sampledCvrs = auditRound.sampledIndices.map { cvrs[it] }
         val roundIdx = auditRound.roundIdx
 

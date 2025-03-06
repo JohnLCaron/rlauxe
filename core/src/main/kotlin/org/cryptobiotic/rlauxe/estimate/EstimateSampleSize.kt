@@ -38,20 +38,18 @@ fun estimateSampleSizes(
         val task = estResult.task
         val result = estResult.repeatedResult
 
-        if (auditConfig.version == 1.0) {
-            var estNewSamples = result.findQuantile(auditConfig.quantile)
-            // TODO this nudging too crude, only needed when samples (or variance?) are really small ??
-            /* if (auditRound.roundIdx > 2) {
-                val prevNudged = (0.25 * task.prevSampleSize).toInt()
-                if (prevNudged > estNewSamples) {
-                    if (debugSizeNudge) println(" ** prevNudged $prevNudged > $estNewSamples; round=${auditRound.roundIdx} task=${task.name()}")
-                }
-                // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle?)
-                estNewSamples = max(prevNudged, estNewSamples)
-            } */
-            task.assertionRound.estNewSampleSize = estNewSamples
-            task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
-        }
+        var estNewSamples = result.findQuantile(auditConfig.quantile)
+        // TODO this nudging is too crude, only needed when samples (or variance?) are really small ??
+        /* if (auditRound.roundIdx > 2) {
+            val prevNudged = (0.25 * task.prevSampleSize).toInt()
+            if (prevNudged > estNewSamples) {
+                if (debugSizeNudge) println(" ** prevNudged $prevNudged > $estNewSamples; round=${auditRound.roundIdx} task=${task.name()}")
+            }
+            // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle?)
+            estNewSamples = max(prevNudged, estNewSamples)
+        } */
+        task.assertionRound.estNewSampleSize = estNewSamples
+        task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
 
         if (debug) println(result.showSampleDist())
         if (result.avgSamplesNeeded() < 10) {

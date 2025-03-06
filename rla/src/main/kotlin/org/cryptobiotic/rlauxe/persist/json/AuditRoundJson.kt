@@ -45,8 +45,8 @@ data class AuditRoundJson(
     val sampledIndices: List<Int>,
     val nmvrs: Int,
     var newmvrs: Int,
-    var auditorSetNewMvrs: Int,
-    )
+    var auditorWantNewMvrs: Int,
+)
 
 fun AuditRound.publishJson() : AuditRoundJson {
     return AuditRoundJson(
@@ -57,7 +57,7 @@ fun AuditRound.publishJson() : AuditRoundJson {
         this.sampledIndices,
         this.nmvrs,
         this.newmvrs,
-        this.auditorSetNewMvrs,
+        this.auditorWantNewMvrs,
     )
 }
 
@@ -70,7 +70,7 @@ fun AuditRoundJson.import(): AuditRound {
         this.sampledIndices,
         this.nmvrs,
         this.newmvrs,
-        this.auditorSetNewMvrs,
+        this.auditorWantNewMvrs,
     )
 }
 
@@ -101,6 +101,8 @@ data class ContestRoundJson(
     val estNewSamples: Int,
     val estSampleSize: Int,  // Estimate of total sample size required to confirm the contest
     val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
+    val auditorWantNewMvrs: Int,
+
     val done: Boolean,
     val included: Boolean,
     val status: TestH0Status, // or its own enum ??
@@ -108,7 +110,6 @@ data class ContestRoundJson(
 
 fun ContestRound.publishJson() : ContestRoundJson {
     val isRaire = (this.contestUA is RaireContestUnderAudit)
-    val isClca = (this.contestUA.isComparison)
 
     return ContestRoundJson(
         if (!isRaire) this.contestUA.publishJson() else null,
@@ -120,6 +121,7 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.estNewSamples,
         this.estSampleSize,
         this.estSampleSizeNoStyles,
+        this.auditorWantNewMvrs,
         this.done,
         this.included,
         this.status,
@@ -137,6 +139,8 @@ fun ContestRoundJson.import(): ContestRound {
     contestRound.estNewSamples = this.estNewSamples
     contestRound.estSampleSize = this.estSampleSize
     contestRound.estSampleSizeNoStyles = this.estSampleSizeNoStyles
+    contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
+
     contestRound.done = this.done
     contestRound.included = this.included
     contestRound.status = this.status

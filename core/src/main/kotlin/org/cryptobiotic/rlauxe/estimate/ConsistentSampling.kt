@@ -89,6 +89,7 @@ fun consistentSampling(
 
     // count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
+    contestsNotDone.forEach { prevContestCounts[it] = 0 }
     previousSamples.forEach { sampleIdx ->
         val boc = ballotOrCvrs[sampleIdx]
         contestsNotDone.forEach { contest ->
@@ -109,8 +110,9 @@ fun consistentSampling(
     val contestNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     fun contestWantsMoreSamples(c: ContestRound): Boolean {
         if (c.auditorWantNewMvrs > 0 && (contestNewSamples[c.id] ?: 0) >= c.auditorWantNewMvrs) return false
-        else return (contestSamples[c.id] ?: 0) < contestSampleSizes[c.id]!!
+        return (contestSamples[c.id] ?: 0) < (contestSampleSizes[c.id] ?: 0)
     }
+    // fun contestInProgress(c: ContestRound) = (currentSizes[c.id] ?: 0) < c.estMvrs
 
     val contestsIncluded = contestsNotDone.filter { it.included }
     val contestActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample

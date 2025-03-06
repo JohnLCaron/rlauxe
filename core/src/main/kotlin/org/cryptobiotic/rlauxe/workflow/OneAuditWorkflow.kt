@@ -48,7 +48,7 @@ class OneAuditWorkflow(
             show=!quiet,
         )
 
-        auditRound.sampledIndices = sample(this, auditRound, quiet)
+        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
         return auditRound
     }
 

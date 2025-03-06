@@ -39,17 +39,18 @@ fun estimateSampleSizes(
         val result = estResult.repeatedResult
 
         if (auditConfig.version == 1.0) {
-            var estNew = result.findQuantile(auditConfig.quantile)
-            if (auditRound.roundIdx > 2) {
+            var estNewSamples = result.findQuantile(auditConfig.quantile)
+            // TODO this nudging too crude, only needed when samples (or variance?) are really small ??
+            /* if (auditRound.roundIdx > 2) {
                 val prevNudged = (0.25 * task.prevSampleSize).toInt()
-                if (prevNudged > estNew) {
-                    if (debugSizeNudge) println(" ** prevNudged $prevNudged > $estNew; round=${auditRound.roundIdx} task=${task.name()}")
+                if (prevNudged > estNewSamples) {
+                    if (debugSizeNudge) println(" ** prevNudged $prevNudged > $estNewSamples; round=${auditRound.roundIdx} task=${task.name()}")
                 }
                 // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle?)
-                // TODO do we really need this? seems too crude
-                estNew = max(prevNudged, estNew)
-            }
-            task.assertionRound.estSampleSize = min(estNew + task.prevSampleSize, task.contest.Nc)
+                estNewSamples = max(prevNudged, estNewSamples)
+            } */
+            task.assertionRound.estNewSampleSize = estNewSamples
+            task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
         }
 
         if (debug) println(result.showSampleDist())
@@ -66,15 +67,16 @@ fun estimateSampleSizes(
         }
     }
 
-    // pull out the sampleSizes for all successful assertions in the contest
+    // find largest estSampleSize, estNewSamples over successful assertions in each contest
     auditRound.contests.filter { !it.done }.forEach { contest ->
         val sampleSizes = estResults.filter { it.task.contest.id == contest.id }
             .map { it.task.assertionRound.estSampleSize }
-        contest.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        contest.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        val newSampleSizes = estResults.filter { it.task.contest.id == contest.id }
+            .map { it.task.assertionRound.estNewSampleSize }
+        contest.estNewSamples = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
+        println(" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}")
 
-        /* val minAssertion = contest.minAssertion()
-        val pvalue = minAssertion.auditResult.pvalue
-        if (show) println("  ${contest.name} pvalue=$pvalue") */
     }
     if (show) println()
     return estResults.map { it.repeatedResult }

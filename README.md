@@ -82,9 +82,9 @@ VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir,
 # SHANGRLA framework
 
 SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
-It uses _statistical risk testing function_ that allows an audit to statistically
+It uses a _statistical risk testing function_ that allows an audit to statistically
 prove that an election outcome is correct (or not) to within a _risk level α_. For example, a risk limit of 5% means that
-the election is correct with 95% probability.
+the election outcome (i.e. the winner(s)) is correct with 95% probability.
 
 It uses an _assorter_ to assign a number to each ballot, and checks outcomes by testing _half-average assertions_, 
 each of which claims that the mean of a finite list of numbers is greater than 1/2. 
@@ -182,7 +182,7 @@ In each round, the candidate with the fewest first-preferences (among the remain
 This continues until only one candidate is left.
 
 We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions 
-that fit into the SHANGRLA framewok, and makes them IRV contests amenable to risk limiting auditing, just like plurality contests.
+that fit into the SHANGRLA framewok, and makes IRV contests amenable to risk limiting auditing, just like plurality contests.
 
 See the RAIRE guides for details:
 * [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)

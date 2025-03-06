@@ -261,7 +261,7 @@ open class ContestUnderAudit(
     fun minClcaAssertion(): ClcaAssertion? {
         val margins = clcaAssertions.map { it.assorter.reportedMargin()  }
         val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return clcaAssertions.find { it.assorter.reportedMargin()  == minMargin }
+        return clcaAssertions.find { it.assorter.reportedMargin() == minMargin }
     }
 
     fun minPollingAssertion(): Assertion? {

@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
-import org.cryptobiotic.rlauxe.workflow.AssertionRound
+import org.cryptobiotic.rlauxe.workflow.AuditRound
 import org.cryptobiotic.rlauxe.workflow.ContestRound
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
@@ -451,8 +451,9 @@ class AssertionRLA {
             it
         }
         val contestRounds = contestUAs.map{ contest -> ContestRound(contest, 1) }
+        val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
 
-        val sampled_cvr_indices = consistentSampling(contestRounds, cvras)
+        val sampled_cvr_indices = consistentSampling(auditRound, cvras)
         println("sampled = ${sampled_cvr_indices.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)

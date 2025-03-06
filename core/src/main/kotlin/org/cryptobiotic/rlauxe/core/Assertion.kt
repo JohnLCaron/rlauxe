@@ -28,13 +28,10 @@ open class Assertion(
         return result
     }
 
-    /*
     open fun show() = buildString {
-        appendLine(" assertion: ${assorter.desc()}, estSampleSize=$estSampleSize, status=$status, round=$round)")
-        roundResults.forEach {
-            appendLine("    $it")
-        }
-    } */
+        appendLine(" contest: $contest")
+        appendLine(" assorter: ${assorter.desc()}")
+    }
 
 }
 
@@ -59,5 +56,25 @@ open class ClcaAssertion(
         var result = super.hashCode()
         result = 31 * result + cassorter.hashCode()
         return result
+    }
+
+    //     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
+    //    val hasStyle: Boolean = true, // TODO could be on the Contest ??
+    //    val check: Boolean = true, // TODO get rid of
+    override fun show() = buildString {
+        append(super.show())
+        appendLine(" cassorter: ${cassorter}")
+    }
+
+    fun checkEquals(other: ClcaAssertion) = buildString {
+        if (contest != other.contest) {
+            append(" contest not equal")
+        }
+        if (assorter != other.assorter) {
+            append(" assorter not equal")
+        }
+        if (cassorter != other.cassorter) {
+            append(" cassorter not equal")
+        }
     }
 }

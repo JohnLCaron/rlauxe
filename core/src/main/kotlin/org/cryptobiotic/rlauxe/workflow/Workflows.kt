@@ -2,13 +2,14 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 
+// used in ConsistentSampling
 interface RlauxWorkflowProxy {
     fun auditConfig() : AuditConfig
-    fun getContests(): List<ContestUnderAudit>
     fun getBallotsOrCvrs() : List<BallotOrCvr>
 }
 
 interface RlauxWorkflowIF: RlauxWorkflowProxy {
+    fun getContests(): List<ContestUnderAudit>
     fun startNewRound(quiet: Boolean = true): AuditRound
     fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean = true): Boolean  // return allDone
 }

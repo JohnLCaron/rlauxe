@@ -99,6 +99,8 @@ object RunRlaStartTest {
         )
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
+        // TODO something better about generating range of margins, phantoms, fuzz, etc.
+        //   maybe just make it all configurable...
         val maxMargin = .10
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =

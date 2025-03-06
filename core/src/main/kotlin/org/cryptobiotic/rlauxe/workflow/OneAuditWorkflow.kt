@@ -141,7 +141,7 @@ fun runOneAuditAssertionAlpha(
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
-        estSampleSize=assertionRound.estSampleSize,
+        nmvrs = sampler.maxSamples(),
         maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based

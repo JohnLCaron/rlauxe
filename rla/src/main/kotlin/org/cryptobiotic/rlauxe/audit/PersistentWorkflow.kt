@@ -13,9 +13,10 @@ class PersistentWorkflow(
     private val cvrs: List<Cvr>
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
+    val auditRecord: AuditRecord
 
     init {
-        val auditRecord = AuditRecord.readFrom(inputDir)
+        auditRecord = AuditRecord.readFrom(inputDir)
         auditConfig = auditRecord.auditConfig
         auditRounds.addAll(auditRecord.rounds)
 

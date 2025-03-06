@@ -12,7 +12,7 @@ data class AuditRound(
     var sampledIndices: List<Int>, // ballots to sample for this round
     var nmvrs: Int = 0,
     var newmvrs: Int = 0,
-    var auditorSetNewMvrs: Int = -1,
+    var auditorWantNewMvrs: Int = -1,
 ) {
     fun show() =
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
@@ -23,54 +23,7 @@ data class AuditRound(
         return AuditRound(roundIdx + 1, nextContests, sampledIndices = emptyList())
     }
 
-    // fun sampledIndicesSet(): Set<Int> = sampledIndices.toSet()
-
-    /* TODO this sucks, not needed?
-    fun setPreviousRound(previousRound : AuditRound) {
-        contests.forEach { contest ->
-            val previousContest = previousRound.contests.find { it.id == contest.id }!!
-            contest.assertions.forEach { assertion ->
-                val previousAssertion = previousContest.assertions.find { assertion == it }!!
-                assertion.prevAuditResult = previousAssertion.auditResult
-            }
-        }
-    } */
-
     //// called from viewer
-
-    /*
-    private var newSamples: Set<Int> = emptySet()
-    private var previousSetCopy: Set<Int> = emptySet()
-
-    fun recalcSamples(sampledIndices: List<Int>, cvrs: List<BallotOrCvr>) {
-        this.sampledIndices = sampledIndices
-        calcNewSamples()
-        calcContestMvrs(cvrs)
-    }
-
-    fun calcNewSamples(previousSet: Set<Int>? = null) {
-        if (previousSet != null) this.previousSetCopy = setOf(*previousSet.toTypedArray())
-        newSamples = sampledIndices.filter { it !in previousSetCopy }.toSet()
-    }
-
-    fun calcContestMvrs(cvrs: List<BallotOrCvr>) {
-        val actualMvrsCount = mutableMapOf<ContestRound, Int>() // contestId -> mvrs in sample
-        val newMvrsCount = mutableMapOf<ContestRound, Int>() // contestId -> new mvrs in sample
-        sampledIndices.forEach { sidx ->
-            val boc = cvrs[sidx] // TODO this requires the cvrs be in order!!
-            contests.forEach { contest ->
-                if (boc.hasContest(contest.id)) {
-                    actualMvrsCount[contest] = actualMvrsCount[contest]?.plus(1) ?: 1
-                    if (sidx in newSamples) {
-                        newMvrsCount[contest] = newMvrsCount[contest]?.plus(1) ?: 1
-                    }
-                }
-            }
-        }
-        actualMvrsCount.forEach { contest, count ->  contest.actualMvrs = count }
-        newMvrsCount.forEach { contest, count ->  contest.actualNewMvrs = count }
-    } */
-
     fun maxBallotsUsed(): Int {
         var result = 0
         contests.forEach { contest ->
@@ -101,22 +54,67 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertions: List<A
     var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
     var estSampleSize = 0 // number of total samples estimated needed, consistentSampling
     var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformSampling
+    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for his audit round.
+
     var done = false
     var included = true
-    var status = TestH0Status.InProgress // or its own enum ??
+    var status = TestH0Status.InProgress
 
     constructor(contestUA: ContestUnderAudit, roundIdx: Int) :
             this(contestUA, contestUA.assertions().map{ AssertionRound(it, roundIdx, null) }, roundIdx)
+
+    fun sampleSize(prevCount: Int): Int {
+        return if (auditorWantNewMvrs > 0) (auditorWantNewMvrs + prevCount)
+                else estSampleSize
+    }
 
     fun minAssertion(): AssertionRound? {
         return assertions.minByOrNull { it.assertion.assorter.reportedMargin() }
     }
 
     fun createNextRound() : ContestRound {
-        val next =  assertions.filter { !it.status.complete }.map{
+        val nextAssertions =  assertions.filter { !it.status.complete }.map{
             AssertionRound(it.assertion, roundIdx + 1, it.auditResult)
         }
-        return ContestRound(contestUA, next, roundIdx + 1)
+        return ContestRound(contestUA, nextAssertions, roundIdx + 1)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ContestRound
+
+        if (roundIdx != other.roundIdx) return false
+        if (actualMvrs != other.actualMvrs) return false
+        if (actualNewMvrs != other.actualNewMvrs) return false
+        if (estNewSamples != other.estNewSamples) return false
+        if (estSampleSize != other.estSampleSize) return false
+        if (estSampleSizeNoStyles != other.estSampleSizeNoStyles) return false
+        if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
+        if (done != other.done) return false
+        if (included != other.included) return false
+        if (contestUA != other.contestUA) return false
+        if (assertions != other.assertions) return false
+        if (status != other.status) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = roundIdx
+        result = 31 * result + actualMvrs
+        result = 31 * result + actualNewMvrs
+        result = 31 * result + estNewSamples
+        result = 31 * result + estSampleSize
+        result = 31 * result + estSampleSizeNoStyles
+        result = 31 * result + auditorWantNewMvrs
+        result = 31 * result + done.hashCode()
+        result = 31 * result + included.hashCode()
+        result = 31 * result + contestUA.hashCode()
+        result = 31 * result + assertions.hashCode()
+        result = 31 * result + status.hashCode()
+        return result
     }
 }
 
@@ -130,6 +128,39 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var auditResult: AuditRoundResult? = null
     var status = TestH0Status.InProgress
     var round = 0           // round when set to proved or disproved
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AssertionRound
+
+        if (roundIdx != other.roundIdx) return false
+        if (estSampleSize != other.estSampleSize) return false
+        if (estNewSampleSize != other.estNewSampleSize) return false
+        if (round != other.round) return false
+        if (assertion != other.assertion) return false
+        if (prevAuditResult != other.prevAuditResult) return false
+        if (estimationResult != other.estimationResult) return false
+        if (auditResult != other.auditResult) return false
+        if (status != other.status) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = roundIdx
+        result = 31 * result + estSampleSize
+        result = 31 * result + estNewSampleSize
+        result = 31 * result + round
+        result = 31 * result + assertion.hashCode()
+        result = 31 * result + (prevAuditResult?.hashCode() ?: 0)
+        result = 31 * result + (estimationResult?.hashCode() ?: 0)
+        result = 31 * result + (auditResult?.hashCode() ?: 0)
+        result = 31 * result + status.hashCode()
+        return result
+    }
+
+
 }
 
 data class EstimationRoundResult(
@@ -146,7 +177,7 @@ data class EstimationRoundResult(
 
 data class AuditRoundResult(
     val roundIdx: Int,
-    val estSampleSize: Int,   // estimated sample size
+    val nmvrs: Int,               // number of mvrs available for this contest for this round
     val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
@@ -156,6 +187,6 @@ data class AuditRoundResult(
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
-    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotIndexUsed=$maxBallotIndexUsed " +
+    override fun toString() = "round=$roundIdx nmvrs=$nmvrs maxBallotIndexUsed=$maxBallotIndexUsed " +
             " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
 }

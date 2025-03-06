@@ -10,22 +10,22 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         auditRecord = AuditRecord.readFrom(auditRecordLocation)
     }
 
-    fun verify() {
-        println("verify auditRecord in ${auditRecordLocation}")
-        auditRecord.rounds.forEach { verify(it) }
+    fun verify() = buildString {
+        appendLine("verify auditRecord in ${auditRecordLocation}")
+        auditRecord.rounds.forEach { append(verify(it)) }
     }
 
-    fun verify(round: AuditRound) {
-        println(" verify round = ${round.roundIdx}")
-        round.contests.forEach { verify(it) }
+    fun verify(round: AuditRound) = buildString {
+        appendLine(" verify round = ${round.roundIdx}")
+        round.contests.forEach { append(verify(it)) }
     }
 
-    fun verify(contest: ContestRound) {
-        println("  verify contest = ${contest.id}")
+    fun verify(contest: ContestRound) = buildString {
+        appendLine("  verify contest = ${contest.id}")
         val minAssertion = contest.minAssertion()
         requireNotNull(minAssertion) {"    minAssertion = $minAssertion"}
 
-        contest.assertions.forEach { verify(it) }
+        contest.assertions.forEach { append(verify(it)) }
 
         val contestUA = contest.contestUA
         contest.assertions.forEach { assertionRound ->
@@ -33,7 +33,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         }
     }
 
-    fun verify(assertion: AssertionRound) {
+    fun verify(assertion: AssertionRound) = buildString {
         if (assertion.prevAuditResult != null) {
             verify(assertion.prevAuditResult!!)
         }
@@ -45,9 +45,9 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         }
     }
 
-    fun verify(auditResult: AuditRoundResult) {
+    fun verify(auditResult: AuditRoundResult) = buildString {
     }
 
-    fun verify(estResult: EstimationRoundResult) {
+    fun verify(estResult: EstimationRoundResult) = buildString {
     }
 }

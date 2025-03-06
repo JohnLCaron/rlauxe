@@ -304,7 +304,7 @@ Here we show the average and standard deviation over 250 independent trials at e
 
 * In a card-level comparison audit, the estimated sample size scales with 1/margin, while polling scales as the square of 1/margin.
 * The variation in polling sample sizes is about half the sample sizes, and so potentially adds a large burden to the audit.
-* When there are errors, CLCA audits also have potentially wide variance in sample sizes due to sample ordering. 
+* When there are errors and/or phantoms, CLCA audits also have potentially wide variance in sample sizes due to sample ordering. 
   See [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes) below.
 
 ## Samples needed when there are errors

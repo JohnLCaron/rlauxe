@@ -12,7 +12,7 @@ class TestRaireReader {
     // ...
     @Test
     fun testReadAspenCityCouncilCvrs() {
-        val cvrFile = "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/Aspen_2009_CityCouncil.raire"
+        val cvrFile = "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/ballotCsv/Aspen_2009_CityCouncil.raire"
         val raireCvrs: RaireCvrs = readRaireBallotsCsv(cvrFile)
         assertEquals(1, raireCvrs.contests.size)
         val contest = raireCvrs.contests.first()

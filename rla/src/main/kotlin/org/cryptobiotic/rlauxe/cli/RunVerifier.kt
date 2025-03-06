@@ -34,8 +34,8 @@ object RunVerifier {
         runVerifier(inputDir, nthreads, showTime)
     }
 
-    fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false) {
+    fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false): String {
         val verifier = VerifyAuditRecord(inputDir)
-        verifier.verify()
+        return verifier.verify()
     }
 }

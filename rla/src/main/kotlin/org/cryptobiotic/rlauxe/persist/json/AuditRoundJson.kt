@@ -258,7 +258,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
 data class AuditRoundResultJson(
     val desc: String,
     val roundIdx: Int,
-    val estSampleSize: Int,   // estimated sample size
+    val nmvrs: Int,   // estimated sample size
     val maxBallotIndexUsed: Int,   // max index used
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
@@ -272,7 +272,7 @@ data class AuditRoundResultJson(
 fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.toString(),
     this.roundIdx,
-    this.estSampleSize,
+    this.nmvrs,
     this.maxBallotIndexUsed,
     this.pvalue,
     this.samplesNeeded,
@@ -287,7 +287,7 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
     val status = org.cryptobiotic.rlauxe.util.enumValueOf(this.status, TestH0Status.entries) ?: TestH0Status.InProgress
     return AuditRoundResult(
         this.roundIdx,
-        this.estSampleSize,
+        this.nmvrs,
         this.maxBallotIndexUsed,
         this.pvalue,
         this.samplesNeeded,

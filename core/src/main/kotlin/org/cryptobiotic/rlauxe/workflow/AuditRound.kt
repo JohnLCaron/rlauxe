@@ -146,7 +146,7 @@ data class EstimationRoundResult(
 
 data class AuditRoundResult(
     val roundIdx: Int,
-    val estSampleSize: Int,   // estimated sample size
+    val nmvrs: Int,               // number of mvrs available for this contest for this round
     val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesNeeded: Int,   // first sample when pvalue < riskLimit
@@ -156,6 +156,6 @@ data class AuditRoundResult(
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
-    override fun toString() = "round=$roundIdx estSampleSize=$estSampleSize maxBallotIndexUsed=$maxBallotIndexUsed " +
+    override fun toString() = "round=$roundIdx nmvrs=$nmvrs maxBallotIndexUsed=$maxBallotIndexUsed " +
             " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
 }

@@ -53,7 +53,7 @@ fun readRaireBallotsCsv(fileName: String): RaireCvrs {
         contest_info[cid] = RaireContestInfo(cands, winner, order)
     }
 
-    // TODO I dont see how this code works for more than one contest
+    // I dont see how this code works for more than one contest
 
     //         for l in range(ncontests+1,len(lines)):
     //            toks = [line.strip() for line in lines[l].strip().split(',')]

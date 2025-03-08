@@ -29,7 +29,7 @@ import java.nio.file.StandardOpenOption
 //    // simulation control
 //    val nsimEst: Int = 100, // number of simulation estimations
 //    val quantile: Double = 0.80, // use this percentile success for estimated sample size
-//    val samplePctCutoff: Double = .42, // dont sample more than this pct of N TODO whats N?
+//    val samplePctCutoff: Double = .42, // dont sample more than this pct of N
 //    val minMargin: Double = 0.005,
 //
 //    val pollingConfig: PollingConfig = PollingConfig(),

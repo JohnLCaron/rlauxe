@@ -172,7 +172,7 @@ class SimulateSampleSizeTask(
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-//// Clca, including Raire
+//// Clca, including with IRV
 
 fun simulateSampleSizeClcaAssorter(
     roundIdx: Int,
@@ -222,7 +222,7 @@ fun simulateSampleSizeClcaAssorter(
         if (irvFuzz) fuzzPct = clcaConfig.simFuzzPct!! // TODO
         Pair(
             if (irvFuzz) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter)
-            else ClcaSimulation(cvrs, contest, cassorter, errorRates),
+            else ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
             AdaptiveComparison(
                 Nc = contest.Nc,
                 a = cassorter.noerror(),
@@ -324,7 +324,7 @@ fun simulateSampleSizePollingAssorter(
     val margin = assorter.reportedMargin()
     // TODO 2 candidate plurality Contest with given margin
     val simContest = ContestSimulation(contest)
-    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin, what about suprmajority?
+    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin, TODO what about supermajority?
     var fuzzPct = 0.0
 
     val pollingConfig = auditConfig.pollingConfig
@@ -366,7 +366,7 @@ fun simulateSampleSizeAlphaMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val eta0 = margin2mean(margin)
-    val c = (eta0 - 0.5) / 2 // TODO
+    val c = (eta0 - 0.5) / 2 // TODO should this be somtimes different? TruncShrinkage with AlphaMart
 
     val estimFn = TruncShrinkage(
         N = Nc,
@@ -463,7 +463,7 @@ fun computeSampleSize(
     val old_sizes: MutableMap<Int, Int> =
         rcontests.associate { it.id to 0 }.toMutableMap()
 
-    // setting p TODO whats this doing here? shouldnt it be in consistent sampling ?? MoreStyle section 3 ??
+    // setting p toodoo whats this doing here? shouldnt it be in consistent sampling ?? MoreStyle section 3 ??
     for (cvr in cvrs) {
         if (cvr.sampled) {
             cvr.p = 1.0
@@ -472,7 +472,7 @@ fun computeSampleSize(
             for (con in rcontests) {
                 if (cvr.hasContest(con.id) && !cvr.sampled) {
                     val p1 = con.estSampleSize.toDouble() / (con.Nc!! - old_sizes[con.id]!!)
-                    cvr.p = max(p1, cvr.p) // TODO nullability
+                    cvr.p = max(p1, cvr.p) // toodoo nullability
                 }
             }
         }
@@ -480,10 +480,10 @@ fun computeSampleSize(
 
     // when old_sizes == 0, total_size should be con.sample_size (61); python has roundoff to get 62
     // total_size = ceil(np.sum([x.p for x in cvrs if !x.phantom))
-    // TODO total size is the sum of the p's over the cvrs (!wtf)
+    // toodoo total size is the sum of the p's over the cvrs (!wtf)
     val summ: Double = cvrs.filter { !it.phantom }.map { it.p }.sum()
     val total_size = ceil(summ).toInt()
-    return total_size // TODO what is this? doesnt consistent sampling decide this ??
+    return total_size // toodoo what is this? doesnt consistent sampling decide this ??
 }
 
 // STYLISH 4 a,b. I think maybe only works when you use sampleThreshold ??

@@ -123,7 +123,7 @@ data class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
-    val hasStyle: Boolean = true, // TODO could be on the Contest ??
+    val hasStyle: Boolean = true,
     val check: Boolean = true, // TODO get rid of
 ) : ClcaAssorterIF {
     val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
@@ -131,7 +131,7 @@ data class ClcaAssorter(
     val upperBound = 2.0 * noerror  // maximum assort value
 
     init {
-        if (check) { // suspend checking for some tests that expect to fail TODO maybe bad idea
+        if (check) { // suspend checking for some tests that expect to fail
             require(avgCvrAssortValue > 0.5) { "$info: ($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "$info: ($noerror) noerror must be > .5" }
         }

@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.raire.publishJson
 // data class OAClcaAssorter(
 //    val contestOA: OneAuditContest,
 //    val assorter: AssorterIF,   // A(mvr)
-//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value TODO why?
+//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
 //)
 
 @Serializable

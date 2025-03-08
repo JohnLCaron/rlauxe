@@ -42,8 +42,7 @@ class TestOneAudit {
         val minAssorterMargin = minAllAssorter.calcAssorterMargin(contest.id, testCvrs)
         println(" calcAssorterMargin for minAllAssorter = $minAssorterMargin")
 
-        val cass = minAllAsserter.cassorter as OneAuditClcaAssorter
+        val cass = minAllAsserter.cassorter as OAClcaAssorter
         println("   $cass")
-
     }
 }

@@ -36,7 +36,7 @@ import kotlin.test.assertEquals
 //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
 //    otherwise = 1/2
 
-class TestOneAuditClcaAssorter {
+class TestOAClcaAssorter {
 
     @Test
     fun testOABasics() {
@@ -64,7 +64,7 @@ class TestOneAuditClcaAssorter {
         val stratum = OneAuditStratum("card", true, contest.info, contest.votes, cvrs.size, 0)
 
         val contestOA = OneAuditContest(contest.info, listOf(stratum))
-        val bassorter = OneAuditClcaAssorter(contestOA, assorter, awinnerAvg)
+        val bassorter = OAClcaAssorter(contestOA, assorter, awinnerAvg)
 
         // assertEquals(noerror, bassorter.clcaMargin, doublePrecision)
         assertEquals(1.0 / (2.0 - margin), bassorter.noerror(), doublePrecision)
@@ -112,7 +112,7 @@ class TestOneAuditClcaAssorter {
         val loserCvr = makeCvr(1, "noCvr")
         val otherCvr = makeCvr(2, "noCvr")
 
-        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OAClcaAssorter
         println(bassorter)
 
         val assorter_mean_poll = bassorter.stratumInfos["noCvr"]!!.avgBatchAssortValue
@@ -151,7 +151,7 @@ class TestOneAuditClcaAssorter {
         val contestOA = contest.makeContestUnderAudit(testCvrs)
         println(contestOA)
 
-        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter
         println(bassorter)
         println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${bassorter.clcaMargin} ")
 

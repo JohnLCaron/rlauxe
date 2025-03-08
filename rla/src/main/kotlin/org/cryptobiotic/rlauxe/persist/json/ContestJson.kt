@@ -1,15 +1,27 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 package org.cryptobiotic.rlauxe.persist.json
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.raire.RaireAssorter
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.import
-import org.cryptobiotic.rlauxe.raire.publishJson
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAuditJson
+import org.cryptobiotic.rlauxe.oneaudit.import
+import org.cryptobiotic.rlauxe.oneaudit.publishOAJson
+import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
-
+import org.cryptobiotic.rlauxe.workflow.AuditRound
+import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 
 // data class ContestInfo(
 //    val name: String,
@@ -67,7 +79,7 @@ fun ContestInfoJson.import(): ContestInfo {
 @Serializable
 data class ContestIFJson(
     val className: String,
-    val info: ContestInfoJson,
+    // val info: ContestInfoJson,
     val votes: Map<Int, Int>?, // candidate name -> candidate id
     val winners: List<Int>?,
     val Nc: Int,
@@ -79,7 +91,7 @@ fun ContestIF.publishJson() : ContestIFJson {
         is Contest ->
             ContestIFJson(
                 "Contest",
-                this.info.publishJson(),
+                // this.info.publishJson(),
                 this.votes,
                 null,
                 this.Nc,
@@ -88,7 +100,7 @@ fun ContestIF.publishJson() : ContestIFJson {
         is RaireContest ->
             ContestIFJson(
                 "RaireContest",
-                this.info.publishJson(),
+                // this.info.publishJson(),
                 null,
                 this.winners,
                 this.Nc,
@@ -98,18 +110,18 @@ fun ContestIF.publishJson() : ContestIFJson {
     }
 }
 
-fun ContestIFJson.import(): ContestIF {
+fun ContestIFJson.import(info: ContestInfo): ContestIF {
     return when (this.className) {
         "Contest" ->
             Contest(
-                this.info.import(),
+                info,
                 this.votes!!,
                 this.Nc,
                 this.Np,
             )
         "RaireContest" ->
             RaireContest(
-                this.info.import(),
+                info,
                 this.winners!!,
                 this.Nc,
                 this.Np,
@@ -134,6 +146,7 @@ fun ContestIFJson.import(): ContestIF {
 //    var clcaAssertions: List<ClcaAssertion> = emptyList()
 @Serializable
 data class ContestUnderAuditJson(
+    val info: ContestInfoJson,
     val contest: ContestIFJson,
     val isComparison: Boolean,
     val hasStyle: Boolean,
@@ -143,6 +156,7 @@ data class ContestUnderAuditJson(
 
 fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
     return ContestUnderAuditJson(
+        this.contest.info.publishJson(),
         this.contest.publishJson(),
         this.isComparison,
         this.hasStyle,
@@ -152,12 +166,73 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
 }
 
 fun ContestUnderAuditJson.import(): ContestUnderAudit {
-    val result = ContestUnderAudit(
-        this.contest.import(),
+    val info = this.info.import()
+    val contestUA = ContestUnderAudit(
+        this.contest.import(info),
         this.isComparison,
         this.hasStyle,
     )
-    result.pollingAssertions = this.pollingAssertions.map { it.import() }
-    result.clcaAssertions = this.clcaAssertions.map { it.import() }
-    return result
+    contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
+    contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
+    return contestUA
+}
+
+//////////////////////////////////////////////////////////////////////////
+@Serializable
+data class ContestsUnderAuditJson(
+    val contestsUnderAudit: List<ContestUnderAuditJson>,
+    val rcontestsUnderAudit: List<RaireContestUnderAuditJson>,
+    val oacontestsUnderAudit: List<OAContestUnderAuditJson>,
+)
+
+fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
+    val contests = mutableListOf<ContestUnderAuditJson>()
+    val rcontests = mutableListOf<RaireContestUnderAuditJson>()
+    val oacontests = mutableListOf<OAContestUnderAuditJson>()
+    this.forEach {
+        if (it is RaireContestUnderAudit) {
+            rcontests.add( it.publishRaireJson())
+        } else if (it is OAContestUnderAudit) {
+            oacontests.add( it.publishOAJson())
+        } else {
+            contests.add( it.publishJson())
+        }
+    }
+    return ContestsUnderAuditJson(contests, rcontests, oacontests)
+}
+
+fun ContestsUnderAuditJson.import() : List<ContestUnderAudit> {
+    return this.contestsUnderAudit.map { it.import() } +
+            this.rcontestsUnderAudit.map { it.import() } +
+            this.oacontestsUnderAudit.map { it.import() }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+fun writeContestsJsonFile(contests: List<ContestUnderAudit>, filename: String) {
+    val json = contests.publishJson()
+    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
+    FileOutputStream(filename).use { out ->
+        jsonReader.encodeToStream(json, out)
+        out.close()
+    }
+}
+
+fun readContestsJsonFile(filename: String): Result<List<ContestUnderAudit>, ErrorMessages> {
+    val errs = ErrorMessages("readContestsJsonFile '${filename}'")
+    val filepath = Path.of(filename)
+    if (!Files.exists(filepath)) {
+        return errs.add("file does not exist")
+    }
+    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
+
+    return try {
+        Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
+            val json = jsonReader.decodeFromStream<ContestsUnderAuditJson>(inp)
+            val contests = json.import()
+            if (errs.hasErrors()) Err(errs) else Ok(contests)
+        }
+    } catch (t: Throwable) {
+        errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
+    }
 }

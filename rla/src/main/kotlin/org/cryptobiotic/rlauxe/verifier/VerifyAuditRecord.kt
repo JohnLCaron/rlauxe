@@ -17,7 +17,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     fun verify(round: AuditRound) = buildString {
         appendLine(" verify round = ${round.roundIdx}")
-        round.contests.forEach { append(verify(it)) }
+        round.contestRounds.forEach { append(verify(it)) }
     }
 
     fun verify(contest: ContestRound) = buildString {
@@ -25,10 +25,10 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         val minAssertion = contest.minAssertion()
         requireNotNull(minAssertion) {"    minAssertion = $minAssertion"}
 
-        contest.assertions.forEach { append(verify(it)) }
+        contest.assertionRounds.forEach { append(verify(it)) }
 
         val contestUA = contest.contestUA
-        contest.assertions.forEach { assertionRound ->
+        contest.assertionRounds.forEach { assertionRound ->
             require(contestUA.assertions().contains(assertionRound.assertion))
         }
     }

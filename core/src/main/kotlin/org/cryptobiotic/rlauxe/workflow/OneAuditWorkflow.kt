@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
@@ -35,7 +35,7 @@ class OneAuditWorkflow(
 
         val auditRound = if (previousRound == null) {
             val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
         } else {
             previousRound.createNextRound()
         }
@@ -53,7 +53,7 @@ class OneAuditWorkflow(
     }
 
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
-        return runOneAudit(auditConfig, auditRound.contests, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+        return runOneAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
@@ -80,7 +80,7 @@ fun runOneAudit(auditConfig: AuditConfig,
     var allDone = true
     contestsNotDone.forEach { contest ->
         val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertions.forEach { assertionRound ->
+        contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
                 val testH0Result = runOneAuditAssertionAlpha(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
                 assertionRound.status = testH0Result.status
@@ -104,7 +104,7 @@ fun runOneAuditAssertionAlpha(
     quiet: Boolean = false,
 ): TestH0Result{
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val assorter = cassertion.cassorter as OneAuditClcaAssorter
+    val assorter = cassertion.cassorter as OAClcaAssorter
     val sampler = ClcaWithoutReplacement(
         contest,
         cvrPairs,

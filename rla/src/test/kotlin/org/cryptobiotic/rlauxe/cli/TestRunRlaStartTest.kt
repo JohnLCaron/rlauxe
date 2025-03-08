@@ -36,9 +36,26 @@ class TestRunRlaStartTest {
         )
     }
 
+    // @Test
+    fun testRlaStartOAClca() {
+        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+        RunRlaStartTest.main(
+            arrayOf(
+                "-in", topdir,
+                "-minMargin", "0.01",
+                "-fuzzMvrs", ".0123",
+                "-mvrs", "$topdir/private/testMvrs.json",
+                "-ncards", "10000",
+                "-ncontests", "10",
+                "--addOAContest",
+                "--addRaireCandidates", "5",
+            )
+        )
+    }
+
     @Test
-    fun testRlaStartPolling() {
-        val topdir = "/home/stormy/temp/persist/testRunAuditPolling"
+    fun testRunAuditPolling() {
+        val topdir = "/home/stormy/temp/persist/runAuditPolling"
 
         RunRlaStartTest.main(
             arrayOf(

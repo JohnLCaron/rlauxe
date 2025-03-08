@@ -70,7 +70,7 @@ class CorlaWorkflow(
 
         val auditRound = if (previousRound == null) {
             val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
         } else {
             previousRound.createNextRound()
         }
@@ -99,7 +99,7 @@ class CorlaWorkflow(
         //				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
         //	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
 
-        val contestsNotDone = auditRound.contests.filter{ !it.done }
+        val contestsNotDone = auditRound.contestRounds.filter{ !it.done }
         val sampledCvrs = auditRound.sampledIndices.map { cvrs[it] }
         val roundIdx = auditRound.roundIdx
 
@@ -114,7 +114,7 @@ class CorlaWorkflow(
         contestsNotDone.forEach { contest ->
             val contestUA = contest.contestUA
             var allAssertionsDone = true
-            contest.assertions.forEach { assertion ->
+            contest.assertionRounds.forEach { assertion ->
                 if (!assertion.status.complete) {
                     val testH0Result = runCorlaAudit(auditConfig, contestUA.contest, assertion, cvrPairs, roundIdx, quiet=quiet)
                     assertion.status = testH0Result.status

@@ -3,6 +3,46 @@ package org.cryptobiotic.rlauxe.persist.json
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
 
+@Serializable
+data class AssertionIFJson(
+    val className: String,
+    val cassorter: ClcaAssorterIFJson?,
+    val assorter: AssorterIFJson?,
+)
+
+fun Assertion.publishIFJson(): AssertionIFJson {
+    return when (this) {
+        is ClcaAssertion ->
+            AssertionIFJson(
+                "ClcaAssertion",
+                this.cassorter.publishJson(),
+                null
+            )
+        else ->
+            AssertionIFJson(
+                this.javaClass.name,
+                null,
+                this.assorter.publishJson(),
+            )
+    }
+}
+
+fun AssertionIFJson.import(info: ContestInfo): Assertion {
+    return when (this.className) {
+        "ClcaAssertion" ->
+            ClcaAssertion(
+                info,
+                this.cassorter!!.import(info),
+            )
+
+        else ->
+            Assertion(
+                info,
+                this.assorter!!.import(info),
+            )
+    }
+}
+
 // open class ClcaAssertion(
 //    contest: ContestIF,
 //    val cassorter: ClcaAssorterIF,
@@ -10,21 +50,18 @@ import org.cryptobiotic.rlauxe.core.*
 
 @Serializable
 data class ClcaAssertionJson(
-    val cassorter: ClcaAssorterJson,
-    val assertion: AssertionJson,
+    val cassorter: ClcaAssorterIFJson,
 )
 
 fun ClcaAssertion.publishJson() = ClcaAssertionJson(
-        (this.cassorter as ClcaAssorter).publishJson(),
-        (this as Assertion).publishJson(),
+        this.cassorter.publishJson(),
     )
 
 // TODO make inheritence less clumsy
-fun ClcaAssertionJson.import(): ClcaAssertion {
-   val assertion = this.assertion.import()
+fun ClcaAssertionJson.import(info: ContestInfo): ClcaAssertion {
    val result = ClcaAssertion(
-       assertion.contest,
-       this.cassorter.import(),
+       info,
+       this.cassorter.import(info),
     )
     return result
 }
@@ -36,19 +73,19 @@ fun ClcaAssertionJson.import(): ClcaAssertion {
 
 @Serializable
 data class AssertionJson(
-    val contest: ContestIFJson,
+    //val contest: ContestIFJson,
     val assorter: AssorterIFJson,
 )
 
 fun Assertion.publishJson() = AssertionJson(
-        this.contest.publishJson(),
-        this.assorter.publishJson(),
-    )
+    //this.contest.publishJson(),
+    this.assorter.publishJson(),
+)
 
-fun AssertionJson.import() : Assertion {
+fun AssertionJson.import(info: ContestInfo) : Assertion {
     val result = Assertion(
-        this.contest.import(),
-        this.assorter.import(),
+        info,
+        this.assorter.import(info),
     )
     return result
 }

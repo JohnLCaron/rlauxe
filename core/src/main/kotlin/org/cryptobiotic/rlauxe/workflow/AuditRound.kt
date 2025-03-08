@@ -5,7 +5,7 @@ import kotlin.math.max
 
 data class AuditRound(
     val roundIdx: Int,
-    val contests: List<ContestRound>,
+    val contestRounds: List<ContestRound>,
 
     val auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
@@ -16,18 +16,18 @@ data class AuditRound(
 ) {
     fun show() =
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
-                " ncontests=${contests.size} ncontestsDone=${contests.filter { it.done }.count()}"
+                " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.filter { it.done }.count()}"
 
     fun createNextRound() : AuditRound {
-        val nextContests = contests.filter { !it.status.complete }.map{ it.createNextRound() }
+        val nextContests = contestRounds.filter { !it.status.complete }.map{ it.createNextRound() }
         return AuditRound(roundIdx + 1, nextContests, sampledIndices = emptyList())
     }
 
     //// called from viewer
     fun maxBallotsUsed(): Int {
         var result = 0
-        contests.forEach { contest ->
-            contest.assertions.forEach { assertion ->
+        contestRounds.forEach { contest ->
+            contest.assertionRounds.forEach { assertion ->
                 result = max(result, assertion.auditResult?.maxBallotIndexUsed ?: 0)
             }
         }
@@ -43,7 +43,7 @@ fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Int> {
     return result.toSet()
 }
 
-data class ContestRound(val contestUA: ContestUnderAudit, val assertions: List<AssertionRound>, val roundIdx: Int) {
+data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
     val name = contestUA.name
     val Nc = contestUA.Nc
@@ -69,11 +69,11 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertions: List<A
     }
 
     fun minAssertion(): AssertionRound? {
-        return assertions.minByOrNull { it.assertion.assorter.reportedMargin() }
+        return assertionRounds.minByOrNull { it.assertion.assorter.reportedMargin() }
     }
 
     fun createNextRound() : ContestRound {
-        val nextAssertions =  assertions.filter { !it.status.complete }.map{
+        val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{
             AssertionRound(it.assertion, roundIdx + 1, it.auditResult)
         }
         return ContestRound(contestUA, nextAssertions, roundIdx + 1)
@@ -95,7 +95,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertions: List<A
         if (done != other.done) return false
         if (included != other.included) return false
         if (contestUA != other.contestUA) return false
-        if (assertions != other.assertions) return false
+        if (assertionRounds != other.assertionRounds) return false
         if (status != other.status) return false
 
         return true
@@ -112,7 +112,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertions: List<A
         result = 31 * result + done.hashCode()
         result = 31 * result + included.hashCode()
         result = 31 * result + contestUA.hashCode()
-        result = 31 * result + assertions.hashCode()
+        result = 31 * result + assertionRounds.hashCode()
         result = 31 * result + status.hashCode()
         return result
     }

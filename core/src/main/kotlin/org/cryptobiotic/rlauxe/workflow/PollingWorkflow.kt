@@ -45,7 +45,7 @@ class PollingWorkflow(
 
         val auditRound = if (previousRound == null) {
             val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
         } else {
             previousRound.createNextRound()
         }
@@ -63,7 +63,7 @@ class PollingWorkflow(
     }
 
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
-        return runPollingAudit(auditConfig, auditRound.contests, mvrs, auditRound.roundIdx, quiet)
+        return runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
@@ -87,7 +87,7 @@ fun runPollingAudit(
     var allDone = true
     contestsNotDone.forEach { contest ->
         val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertions.forEach { assertionRound ->
+        contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
                 val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, mvrs, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

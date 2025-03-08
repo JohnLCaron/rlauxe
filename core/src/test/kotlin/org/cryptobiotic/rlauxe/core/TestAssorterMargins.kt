@@ -91,12 +91,12 @@ class TestAssorterMargins {
             assertTrue(checkEquivilentVotes(contest.votes, votem))
 
             val calcReportedMargin = contest.calcMargin(ast.winner, ast.loser)
-            val calcAssorterMargin = ast.assorter.calcAssorterMargin(ast.contest.info.id, cvrs)
+            val calcAssorterMargin = ast.assorter.calcAssorterMargin(ast.info.id, cvrs)
             assertEquals(calcReportedMargin, calcAssorterMargin, doublePrecision, "calcReportedMargin")
             assertEquals(ast.assorter.reportedMargin(), calcAssorterMargin, doublePrecision, "calcAssorterMargin")
 
             val assortWithoutPhantoms = margin2mean(calcAssorterMargin)
-            val assortWithPhantoms = cvrs.filter { it.hasContest(ast.contest.info.id) }
+            val assortWithPhantoms = cvrs.filter { it.hasContest(ast.info.id) }
                 .map { cvr -> ast.assorter.assort(cvr, usePhantoms = true) }.average()
             println(" assortDiffPhantoms= ${df(assortWithoutPhantoms)} - ${df(assortWithPhantoms)} = " +
                     df(assortWithoutPhantoms - assortWithPhantoms)

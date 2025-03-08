@@ -53,7 +53,7 @@ class ClcaWorkflow(
 
         val auditRound = if (previousRound == null) {
             val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
         } else {
             previousRound.createNextRound()
         }
@@ -72,7 +72,7 @@ class ClcaWorkflow(
 
     //  return allDone
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
-        return runClcaAudit(auditConfig, auditRound.contests, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+        return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
@@ -106,7 +106,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
             println("here")
         }
         val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertions.forEach { assertionRound ->
+        contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
                 val testH0Result = auditClcaAssertion(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
                 assertionRound.status = testH0Result.status

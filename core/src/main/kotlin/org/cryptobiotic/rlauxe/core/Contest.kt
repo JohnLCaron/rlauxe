@@ -216,7 +216,7 @@ open class ContestUnderAudit(
         contest.winners.forEach { winner ->
             contest.losers.forEach { loser ->
                 val assorter = PluralityAssorter.makeWithVotes(contest, winner, loser, votes)
-                assertions.add(Assertion(contest, assorter))
+                assertions.add(Assertion(contest.info, assorter))
             }
         }
         return assertions
@@ -228,7 +228,7 @@ open class ContestUnderAudit(
         val assertions = mutableListOf<Assertion>()
         contest.winners.forEach { winner ->
             val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!, votes)
-            assertions.add(Assertion(contest, assorter))
+            assertions.add(Assertion(contest.info, assorter))
         }
         return assertions
     }
@@ -249,7 +249,7 @@ open class ContestUnderAudit(
         this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
             val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
-            ClcaAssertion(contest, clcaAssorter)
+            ClcaAssertion(contest.info, clcaAssorter)
         }
         return this
     }

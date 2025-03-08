@@ -2,13 +2,12 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.math.max
 import kotlin.math.min
 
 private val debug = false
@@ -27,7 +26,7 @@ fun estimateSampleSizes(
     nthreads: Int = 30,
 ): List<RunTestRepeatedResult> {
     val tasks = mutableListOf<SimulateSampleSizeTask>()
-    auditRound.contests.filter { !it.done }.forEach { contest ->
+    auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         tasks.addAll(makeEstimationTasks(auditConfig, contest, cvrs, auditRound.roundIdx))
     }
     // run tasks concurrently
@@ -66,7 +65,7 @@ fun estimateSampleSizes(
     }
 
     // find largest estSampleSize, estNewSamples over successful assertions in each contest
-    auditRound.contests.filter { !it.done }.forEach { contest ->
+    auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         val sampleSizes = estResults.filter { it.task.contest.id == contest.id }
             .map { it.task.assertionRound.estSampleSize }
         contest.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
@@ -90,7 +89,7 @@ fun makeEstimationTasks(
 ): List<SimulateSampleSizeTask> {
     val tasks = mutableListOf<SimulateSampleSizeTask>()
 
-    contest.assertions.map { assertionRound -> // pollingAssertions vs comparisonAssertions
+    contest.assertionRounds.map { assertionRound -> // pollingAssertions vs comparisonAssertions
         if (!assertionRound.status.complete) {
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
@@ -161,7 +160,7 @@ class SimulateSampleSizeTask(
                 simulateSampleSizeOneAuditAssorter(
                     roundIdx,
                     auditConfig,
-                    contest.contestUA as OneAuditContestUnderAudit,
+                    contest.contestUA as OAContestUnderAudit,
                     assertionRound,
                     cvrs,
                     startingTestStatistic,
@@ -401,14 +400,14 @@ fun simulateSampleSizeAlphaMart(
 fun simulateSampleSizeOneAuditAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
-    contestUA: OneAuditContestUnderAudit,
+    contestUA: OAContestUnderAudit,
     assertionRound: AssertionRound,
     cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val cassorter = cassertion.cassorter as OneAuditClcaAssorter
+    val cassorter = cassertion.cassorter as OAClcaAssorter
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 

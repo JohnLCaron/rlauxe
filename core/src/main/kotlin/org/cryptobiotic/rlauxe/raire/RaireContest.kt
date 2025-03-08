@@ -37,7 +37,9 @@ class RaireContestUnderAudit(
     contest: RaireContest,
     val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
     val rassertions: List<RaireAssertion>,
-): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
+    isComparison: Boolean = true,
+    hasStyle: Boolean = true
+): ContestUnderAudit(contest, isComparison=isComparison, hasStyle=hasStyle) {
     val candidates =  contest.info.candidateIds
 
     // TODO eliminate who calls this?
@@ -54,7 +56,7 @@ class RaireContestUnderAudit(
             val assorter = RaireAssorter(contest.info, rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
             val calcMargin = assorter.calcAssorterMargin(id, cvrs)
             val clcaAssorter = ClcaAssorter(contest.info, assorter, margin2mean(calcMargin), hasStyle=hasStyle)
-            ClcaAssertion(contest, clcaAssorter)
+            ClcaAssertion(contest.info, clcaAssorter)
         }
         return this
     }

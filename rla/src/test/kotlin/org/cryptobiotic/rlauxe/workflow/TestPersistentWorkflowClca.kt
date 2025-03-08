@@ -38,6 +38,8 @@ class TestPersistentWorkflowClca {
         var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         writeCvrsJsonFile(clcaWorkflow.cvrsUA, publish.cvrsFile())
 
+        writeContestsJsonFile(clcaWorkflow.getContests(), publish.contestsFile())
+
         var round = 1
         var done = false
         var workflow : RlauxWorkflowIF = clcaWorkflow

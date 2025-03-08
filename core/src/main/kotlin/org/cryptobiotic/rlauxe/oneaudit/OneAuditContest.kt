@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import kotlin.math.min
 
-class OneAuditContest (
+data class OneAuditContest (
     override val info: ContestInfo,
     val strata: List<OneAuditStratum>,
 ) : ContestIF {
@@ -66,8 +66,8 @@ class OneAuditContest (
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
-    fun makeContestUnderAudit(cvrs: List<Cvr>):OneAuditContestUnderAudit {
-        val contestUA = OneAuditContestUnderAudit(this)
+    fun makeContestUnderAudit(cvrs: List<Cvr>):OAContestUnderAudit {
+        val contestUA = OAContestUnderAudit(this)
         contestUA.makeClcaAssertions(cvrs)
         return contestUA
     }
@@ -102,7 +102,7 @@ class OneAuditContest (
     }
 }
 
-class OneAuditStratum (
+data class OneAuditStratum (
     val strataName: String,
     val hasCvrs: Boolean,
     val info: ContestInfo,
@@ -154,9 +154,11 @@ class OneAuditStratum (
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-class OneAuditContestUnderAudit(
+class OAContestUnderAudit(
     val contestOA: OneAuditContest,
-): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=true) {
+    isComparison: Boolean = true,
+    hasStyle: Boolean = true
+): ContestUnderAudit(contestOA.makeContest(), isComparison=isComparison, hasStyle=hasStyle) {
 
     override fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         // TODO assume its plurality for now
@@ -164,13 +166,13 @@ class OneAuditContestUnderAudit(
         contest.winners.forEach { winner ->
             contest.losers.forEach { loser ->
                 val baseAssorter = PluralityAssorter.makeWithVotes(this.contest, winner, loser, contestOA.votes)
-                assertions.add( Assertion( this.contest, baseAssorter))
+                assertions.add( Assertion( this.contest.info, baseAssorter))
             }
         }
         // turn into comparison assertions
         this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            ClcaAssertion(contest, OneAuditClcaAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
+            ClcaAssertion(contest.info, OAClcaAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
         }
         return this
     }
@@ -204,7 +206,7 @@ class OneAuditContestUnderAudit(
 //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
 //    otherwise = 1/2
 
-data class OneAuditClcaAssorter(
+data class OAClcaAssorter(
     val contestOA: OneAuditContest,
     val assorter: AssorterIF,   // A(mvr)
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value TODO why?

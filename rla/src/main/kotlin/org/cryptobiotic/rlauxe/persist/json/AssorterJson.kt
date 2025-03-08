@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.raire.RaireAssertionJson
 import org.cryptobiotic.rlauxe.raire.import
@@ -13,39 +14,68 @@ import org.cryptobiotic.rlauxe.raire.publishJson
 //    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
 //    val hasStyle: Boolean = true
 
-// think of it as serializing a ClcaAssorterIF?
+// data class OAClcaAssorter(
+//    val contestOA: OneAuditContest,
+//    val assorter: AssorterIF,   // A(mvr)
+//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value TODO why?
+//)
+
 @Serializable
-data class ClcaAssorterJson(
-    val info: ContestInfoJson,
+data class ClcaAssorterIFJson(
+    val className: String,
+    val contestOA: OAContestJson?, // duplicate storage, argghh
     val assorter: AssorterIFJson,
     val avgCvrAssortValue: Double,
     val hasStyle: Boolean,
 )
 
-// val contest: ContestIF, val winner: Int, val loser: Int, val reportedMargin: Double
-// TODO add OneAuditClcaAssorter
-fun ClcaAssorter.publishJson() : ClcaAssorterJson {
-    return ClcaAssorterJson(
-            this.info.publishJson(),
-            this.assorter.publishJson(),
-            this.avgCvrAssortValue,
-            this.hasStyle,
-        )
+fun ClcaAssorterIF.publishJson() : ClcaAssorterIFJson {
+    return when (this) {
+        is ClcaAssorter ->
+            ClcaAssorterIFJson(
+                "ClcaAssorter",
+                null,
+                this.assorter.publishJson(),
+                this.avgCvrAssortValue,
+                this.hasStyle,
+            )
+
+        is OAClcaAssorter ->
+            ClcaAssorterIFJson(
+                "OAClcaAssorter",
+                this.contestOA.publishOAJson(),
+                this.assorter.publishJson(),
+                this.avgCvrAssortValue,
+                true, // TODO
+            )
+
+        else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
+    }
 }
 
-fun ClcaAssorterJson.import(): ClcaAssorter {
-    return ClcaAssorter(
-        this.info.import(),
-        this.assorter.import(),
-        this.avgCvrAssortValue,
-        this.hasStyle,
-    )
+fun ClcaAssorterIFJson.import(info: ContestInfo): ClcaAssorterIF {
+    return when (this.className) {
+        "ClcaAssorter" ->
+            return ClcaAssorter(
+                info,
+                this.assorter.import(info),
+                this.avgCvrAssortValue,
+                this.hasStyle,
+            )
+        "OAClcaAssorter" ->
+            OAClcaAssorter(
+                this.contestOA!!.import(info),
+                this.assorter.import(info),
+                this.avgCvrAssortValue,
+            )
+        else -> throw RuntimeException()
+    }
 }
 
 @Serializable
 data class AssorterIFJson(
     val className: String,
-    val info: ContestInfoJson,
+    // val info: ContestInfoJson,
     val reportedMargin: Double,
     val winner: Int,   // estimated sample size
     val loser: Int? = null,   // estimated sample size
@@ -58,7 +88,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is PluralityAssorter ->
             AssorterIFJson(
                 "PluralityAssorter",
-                this.info.publishJson(),
+                // this.info.publishJson(),
                 this.reportedMargin,
                 this.winner,
                 this.loser,
@@ -66,7 +96,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is SuperMajorityAssorter ->
             AssorterIFJson(
                 "SuperMajorityAssorter",
-                this.info.publishJson(),
+                // this.info.publishJson(),
                 this.reportedMargin,
                 this.winner,
                 minFraction = this.minFraction,
@@ -74,7 +104,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is RaireAssorter ->
             AssorterIFJson(
                 "RaireAssorter",
-                this.info.publishJson(),
+                // this.info.publishJson(),
                 this.reportedMargin,
                 this.rassertion.winnerId,
                 this.rassertion.loserId,
@@ -84,18 +114,18 @@ fun AssorterIF.publishJson() : AssorterIFJson {
     }
 }
 
-fun AssorterIFJson.import(): AssorterIF {
+fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
     return when (this.className) {
         "PluralityAssorter" ->
             PluralityAssorter(
-                this.info.import(),
+                info,
                 this.winner,
                 this.loser!!,
                 this.reportedMargin,
             )
         "SuperMajorityAssorter" ->
             SuperMajorityAssorter(
-                this.info.import(),
+                info,
                 this.winner,
                 this.minFraction!!,
                 this.reportedMargin,
@@ -103,7 +133,7 @@ fun AssorterIFJson.import(): AssorterIF {
         "RaireAssorter" ->
             // data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
             RaireAssorter(
-                this.info.import(),
+                info,
                 this.rassertion!!.import(),
                 this.reportedMargin,
             )

@@ -24,7 +24,7 @@ class PersistentWorkflow(
         // bcUA = if (auditConfig.auditType == AuditType.POLLING) auditRecord.ballots else auditRecord.cvrs
         bcUA = auditRecord.cvrs
         cvrs = auditRecord.cvrs.map { it.cvr }
-        contestsUA = auditRounds.last().contests.map { it.contestUA } // TODO
+        contestsUA = auditRounds.last().contestRounds.map { it.contestUA } // TODO
     }
 
     fun getLastRound() = auditRounds.last()
@@ -35,7 +35,7 @@ class PersistentWorkflow(
 
         val auditRound = if (previousRound == null) {
             val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contests = contestRounds, sampledIndices = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
         } else {
             previousRound.createNextRound()
         }
@@ -55,9 +55,9 @@ class PersistentWorkflow(
     //  return allDone
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
         return when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contests, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
-            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contests, mvrs, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runOneAudit(auditConfig, auditRound.contests, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runOneAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
         }
     }
 

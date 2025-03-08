@@ -240,7 +240,7 @@ class WorkflowTask(
         }
 
         val nmvrs = lastRound.sampledIndices.size // LOOK ??
-        val contest = lastRound.contests.first() // theres only one
+        val contest = lastRound.contestRounds.first() // theres only one
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?
             ?: return WorkflowResult(

@@ -19,10 +19,10 @@ fun sample(workflow: RlauxWorkflowProxy, auditRound: AuditRound, previousSamples
     // count the number of cvrs that have at least one contest under audit.
     // TODO this is wrong for samplePctCutoff, except maybe the first round ??
     val N = if (!auditConfig.hasStyles) borc.size
-                  else borc.filter { it.hasOneOrMoreContest(auditRound.contests) }.count()
+                  else borc.filter { it.hasOneOrMoreContest(auditRound.contestRounds) }.count()
 
     var sampleIndices: List<Int> = emptyList()
-    val contestsNotDone = auditRound.contests.filter { !it.done }.toMutableList()
+    val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
         sampleIndices = createSampleIndices(workflow, auditRound, previousSamples, quiet = quiet)
@@ -39,11 +39,6 @@ fun sample(workflow: RlauxWorkflowProxy, auditRound: AuditRound, previousSamples
         println(" ***too many samples, remove contest ${maxContest} with status FailMaxSamplesAllowed")
 
         // information we want in the persisted record
-        /* val minAssertion = maxContest.minAssertion()
-        if (minAssertion != null) {
-            minAssertion.status = TestH0Status.FailMaxSamplesAllowed
-            minAssertion.round = roundIdx
-        } */
         maxContest.done = true
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
 
@@ -83,7 +78,7 @@ fun consistentSampling(
     ballotOrCvrs: List<BallotOrCvr>,
     previousSamples: Set<Int> = emptySet(),
 ): List<Int> {
-    val contestsNotDone = auditRound.contests.filter { !it.done }
+    val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) return emptyList()
     if (ballotOrCvrs.isEmpty()) return emptyList()
 
@@ -189,7 +184,7 @@ fun uniformSampling(
     samplePctCutoff: Double,  // TODO
     roundIdx: Int,
 ): List<Int> {
-    val contestsNotDone = auditRound.contests.filter { !it.done }
+    val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) return emptyList()
     if (ballotOrCvrs.isEmpty()) return emptyList()
     val Nb = ballotOrCvrs.size // TODO is it always all ballots ?? could it be contest specific ??

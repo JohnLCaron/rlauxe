@@ -21,16 +21,21 @@ class AuditRecord(
             val publisher = Publisher(location)
             val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
             val auditConfig = auditConfigResult.unwrap()
+
             val cvrResult = readCvrsJsonFile(publisher.cvrsFile())
             val cvrs = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
+
+            val contestsResults = readContestsJsonFile(publisher.contestsFile())
+            val contests = if (contestsResults is Ok) contestsResults.unwrap()
+                else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()}")
 
             val mvrs = mutableSetOf<CvrUnderAudit>()
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.rounds()) {
-                val auditRound = readAuditRoundJsonFile(publisher.auditRoundFile(roundIdx)).unwrap()
-
                 val sampledIndices = readSampleIndicesJsonFile(publisher.sampleIndicesFile(roundIdx)).unwrap()
+
+                val auditRound = readAuditRoundJsonFile(contests, sampledIndices, publisher.auditRoundFile(roundIdx)).unwrap()
 
                 // may not exist yet
                 val sampledMvrsResult = readCvrsJsonFile(publisher.sampleMvrsFile(roundIdx))

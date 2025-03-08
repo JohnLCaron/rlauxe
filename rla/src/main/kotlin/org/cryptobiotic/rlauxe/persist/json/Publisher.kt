@@ -11,6 +11,7 @@ class Publisher(val topdir: String) {
     }
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
+    fun contestsFile() = "$topdir/contests.json"
     fun cvrsFile() = "$topdir/cvrs.json"
     fun ballotManifestFile() = "$topdir/ballotManifest.json"
 

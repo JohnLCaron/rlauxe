@@ -110,7 +110,7 @@ fun runSingleRoundAudit(name: String, workflow: ClcaWorkflow, contestRounds: Lis
     if (!quiet) println("round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
     var maxSamples = 0
     contestRounds.forEach { contest->
-        contest.assertions.forEach { assertion ->
+        contest.assertionRounds.forEach { assertion ->
             maxSamples = max( maxSamples, assertion.estSampleSize)
         }
     }
@@ -136,7 +136,7 @@ fun runSingleClcaAudit(
 
     // TODO could parallelize across contests and/or assertions
     contestsNotDone.forEach { contest ->
-        contest.assertions.forEach { assertion ->
+        contest.assertionRounds.forEach { assertion ->
             val testH0Result = auditClcaAssertion(auditConfig, contest.contestUA.contest, assertion, cvrPairs, 1, quiet = quiet)
             if (debug) {
                 println(" testH0Result=$testH0Result")

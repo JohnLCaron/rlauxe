@@ -148,7 +148,7 @@ class ExtraVsMarginByStrategy {
             assertNotNull(lastAuditRound)
             println("nmvrs = ${lastAuditRound.nmvrs}")
 
-            val minAssertion = lastAuditRound.contests.first().minAssertion()
+            val minAssertion = lastAuditRound.contestRounds.first().minAssertion()
             val lastAuditResult = minAssertion!!.auditResult!!
             println("lastAuditResult = $lastAuditResult")
             println("extra = ${lastAuditResult.nmvrs - lastAuditResult.samplesNeeded}")

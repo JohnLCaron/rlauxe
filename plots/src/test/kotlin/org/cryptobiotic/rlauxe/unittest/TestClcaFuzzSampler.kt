@@ -32,7 +32,7 @@ class TestClcaFuzzSampler {
 
         contests.forEach { contest ->
             val sampleSizes = mutableListOf<Pair<Int, Double>>()
-            contest.assertions.map { assertionRound ->
+            contest.assertionRounds.map { assertionRound ->
                 val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contest.contestUA, assertionRound, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
                 assertionRound.estSampleSize = size

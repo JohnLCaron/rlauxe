@@ -4,18 +4,14 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAuditJson
-import org.cryptobiotic.rlauxe.raire.import
-import org.cryptobiotic.rlauxe.raire.publishRaireJson
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.workflow.*
 
@@ -39,10 +35,10 @@ import java.nio.file.StandardOpenOption
 @Serializable
 data class AuditRoundJson(
     val roundIdx: Int,
-    val contests: List<ContestRoundJson>,
+    val contestRounds: List<ContestRoundJson>,
     val auditWasDone: Boolean,
     val auditIsComplete: Boolean,
-    val sampledIndices: List<Int>,
+    // val sampledIndices: List<Int>,
     val nmvrs: Int,
     var newmvrs: Int,
     var auditorWantNewMvrs: Int,
@@ -51,23 +47,27 @@ data class AuditRoundJson(
 fun AuditRound.publishJson() : AuditRoundJson {
     return AuditRoundJson(
         this.roundIdx,
-        contests.map { it.publishJson() },
+        contestRounds.map { it.publishJson() },
         this.auditWasDone,
         this.auditIsComplete,
-        this.sampledIndices,
+        // this.sampledIndices,
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
     )
 }
 
-fun AuditRoundJson.import(): AuditRound {
+fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampledIndices: List<Int>): AuditRound {
+    val contestUAmap = contestUAs.associateBy { it.id }
+    val contestRounds = this.contestRounds.map {
+        it.import( contestUAmap[it.id]!! )
+    }
     return AuditRound(
         this.roundIdx,
-        contests.map { it.import() },
+        contestRounds,
         this.auditWasDone,
         this.auditIsComplete,
-        this.sampledIndices,
+        sampledIndices,
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
@@ -91,9 +91,10 @@ fun AuditRoundJson.import(): AuditRound {
 
 @Serializable
 data class ContestRoundJson(
-    val contestUA: ContestUnderAuditJson?,
-    val raireContestUA: RaireContestUnderAuditJson?,
-    var assertions: List<AssertionRoundJson>,
+    // val contestUA: ContestUnderAuditJson?,
+    // val raireContestUA: RaireContestUnderAuditJson?,
+    val id: Int,
+    var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
 
     val actualMvrs: Int,
@@ -109,12 +110,14 @@ data class ContestRoundJson(
 )
 
 fun ContestRound.publishJson() : ContestRoundJson {
-    val isRaire = (this.contestUA is RaireContestUnderAudit)
+    if (this.contestUA is RaireContestUnderAudit)
+        println()
 
     return ContestRoundJson(
-        if (!isRaire) this.contestUA.publishJson() else null,
-        if (isRaire) (this.contestUA as RaireContestUnderAudit).publishRaireJson() else null,
-        assertions.map { it.publishJson() },
+        // if (!isRaire) this.contestUA.publishJson() else null,
+        // if (isRaire) (this.contestUA as RaireContestUnderAudit).publishRaireJson() else null,
+        this.id,
+        assertionRounds.map { it.publishJson() },
         this.roundIdx,
         this.actualMvrs,
         this.actualNewMvrs,
@@ -128,11 +131,19 @@ fun ContestRound.publishJson() : ContestRoundJson {
     )
 }
 
-fun ContestRoundJson.import(): ContestRound {
-    val contest = if (this.contestUA != null) this.contestUA.import()
-    else this.raireContestUA!!.import()
+fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
+    if (contestUA is RaireContestUnderAudit)
+        println()
 
-    val contestRound = ContestRound(contest, assertions.map { it.import() }, this.roundIdx)
+    //val contest = if (this.contestUA != null) this.contestUA.import()
+    //else this.raireContestUA!!.import()
+
+    // not exactly type safe TODO fails on Raire
+    val assertionMap = contestUA.assertions().associateBy { it.assorter.desc() }
+    val assertionRounds = assertionRounds.map {
+        it.import( assertionMap[it.assorterDesc]!! )
+    }
+    val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 
     contestRound.actualMvrs = this.actualMvrs
     contestRound.actualNewMvrs = this.actualNewMvrs
@@ -161,8 +172,9 @@ fun ContestRoundJson.import(): ContestRound {
 //}
 @Serializable
 data class AssertionRoundJson(
-    val assertion: AssertionJson?,
-    val clcaAssertion: ClcaAssertionJson?,
+    // val assertion: AssertionJson?,
+    // val clcaAssertion: ClcaAssertionJson?,
+    val assorterDesc: String,
     val roundIdx: Int,
     val estSampleSize: Int,
     val estNewSampleSize: Int,
@@ -177,8 +189,9 @@ data class AssertionRoundJson(
 fun AssertionRound.publishJson() : AssertionRoundJson {
     val isClca = this.assertion is ClcaAssertion
     return AssertionRoundJson(
-        if (!isClca) this.assertion.publishJson() else null,
-        if (isClca) (this.assertion as ClcaAssertion).publishJson() else null,
+        // if (!isClca) this.assertion.publishJson() else null,
+        // if (isClca) (this.assertion as ClcaAssertion).publishJson() else null,
+        this.assertion.assorter.desc(),
         this.roundIdx,
         this.estSampleSize,
         this.estNewSampleSize,
@@ -190,11 +203,11 @@ fun AssertionRound.publishJson() : AssertionRoundJson {
     )
 }
 
-fun AssertionRoundJson.import(): AssertionRound {
+fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
     val prevAuditResult = this.prevAuditResult?.import()
-    val assertionRound =
-        if (this.assertion != null) AssertionRound(this.assertion.import(), this.roundIdx, prevAuditResult)
-        else AssertionRound(this.clcaAssertion!!.import(), this.roundIdx, prevAuditResult)
+    val assertionRound = AssertionRound(assertion, this.roundIdx, prevAuditResult)
+    //    if (this.assertion != null) AssertionRound(this.assertion.import(), this.roundIdx, prevAuditResult)
+   //     else AssertionRound(this.clcaAssertion!!.import(), this.roundIdx, prevAuditResult)
 
     assertionRound.estSampleSize = this.estSampleSize
     assertionRound.estNewSampleSize = this.estNewSampleSize
@@ -314,9 +327,21 @@ fun writeAuditRoundJsonFile(AuditRound: AuditRound, filename: String) {
     }
 }
 
-fun readAuditRoundJsonFile(filename: String): Result<AuditRound, ErrorMessages> {
-    val errs = ErrorMessages("readAuditConfigJsonFile '${filename}'")
-    val filepath = Path.of(filename)
+fun readAuditRoundJsonFile(contestsFile: String, samplesFile: String, auditRoundFile: String): Result<AuditRound, ErrorMessages> {
+    val contestsResult = readContestsJsonFile(contestsFile)
+    if (contestsResult is Err) return contestsResult
+    val contests = contestsResult.unwrap()
+
+    val sampleResult = readSampleIndicesJsonFile(samplesFile)
+    if (sampleResult is Err) return sampleResult
+    val samples = sampleResult.unwrap()
+
+    return readAuditRoundJsonFile(contests, samples, auditRoundFile)
+}
+
+fun readAuditRoundJsonFile(contests: List<ContestUnderAudit>, sampledIndices: List<Int>, auditRoundFile: String): Result<AuditRound, ErrorMessages> {
+    val errs = ErrorMessages("readAuditConfigJsonFile '${auditRoundFile}'")
+    val filepath = Path.of(auditRoundFile)
     if (!Files.exists(filepath)) {
         return errs.add("file does not exist")
     }
@@ -325,7 +350,7 @@ fun readAuditRoundJsonFile(filename: String): Result<AuditRound, ErrorMessages> 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
             val json = jsonReader.decodeFromStream<AuditRoundJson>(inp)
-            val AuditRound = json.import()
+            val AuditRound = json.import(contests, sampledIndices)
             if (errs.hasErrors()) Err(errs) else Ok(AuditRound)
         }
     } catch (t: Throwable) {

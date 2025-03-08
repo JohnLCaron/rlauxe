@@ -30,7 +30,7 @@ class TestRaireJson {
         val target = RaireContest(info, listOf(3), 42, 33)
 
         val json = target.publishJson()
-        val roundtrip = json.import()
+        val roundtrip = json.import(info)
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -89,7 +89,7 @@ class TestRaireJson {
         val target = RaireAssorter(info, rassertion, rassertion.marginInVotes.toDouble() / 1000)
 
         val json = target.publishJson()
-        val roundtrip = json.import()
+        val roundtrip = json.import(info)
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))

@@ -1,9 +1,13 @@
 package org.cryptobiotic.rlauxe.raire
 
 import kotlinx.serialization.Serializable
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.import
+import org.cryptobiotic.rlauxe.oneaudit.publishOAJson
 import org.cryptobiotic.rlauxe.persist.json.*
 
-// data class RaireContest(
+/* data class RaireContest(
 //    override val info: ContestInfo,
 //    override val winners: List<Int>,
 //    override val Nc: Int,
@@ -12,69 +16,65 @@ import org.cryptobiotic.rlauxe.persist.json.*
 // TODO duplicated in ContestIFJson
 @Serializable
 data class RaireContestJson(
-    val info: ContestInfoJson,
+    // val info: ContestInfoJson,
     val winners: List<Int>,
     val Nc: Int,
     val Np: Int,
 )
 
 fun RaireContest.publishJson() = RaireContestJson(
-        this.info.publishJson(),
+        // this.info.publishJson(),
         this.winners,
         this.Nc,
         this.Np,
     )
 
-fun RaireContestJson.import() = RaireContest(
-        this.info.import(),
+fun RaireContestJson.import(info: ContestInfo) = RaireContest(
+        info,
         this.winners,
         this.Nc,
         this.Np,
     )
+
+ */
 
 // class RaireContestUnderAudit(
 //    contest: RaireContest,
 //    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
 //    val rassertions: List<RaireAssertion>,
 //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
-// TODO make inheritence less clumsy
 
 @Serializable
 data class RaireContestUnderAuditJson(
-    val contest: RaireContestJson,
-    val winner: Int,
-    val rassertions: List<RaireAssertionJson>,
-    val isComparison: Boolean,
-    val hasStyle: Boolean,
-    var pollingAssertions: List<AssertionJson>,
-    var clcaAssertions: List<ClcaAssertionJson>,
-
-    /* val estMvrs: Int,  // Estimate of the sample size required to confirm the contest
-    val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
-    val done: Boolean,
-    val included: Boolean,
-    val status: TestH0Status, // or its own enum ?? */
-)
+        // val info: ContestInfoJson,
+        val raireContest: ContestIFJson,
+        val winner: Int,
+        val rassertions: List<RaireAssertionJson>,
+        val contestUA: ContestUnderAuditJson,
+    )
 
 fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
-        (this.contest as RaireContest).publishJson(),
+        // this.contest.info.publishJson(),
+        this.contest.publishJson(),
         this.winner,
         this.rassertions.map { it.publishJson() },
-        this.isComparison,
-        this.hasStyle,
-        this.pollingAssertions.map { it.publishJson() },
-        this.clcaAssertions.map { it.publishJson() },
+        (this as ContestUnderAudit).publishJson(),
     )
 
 fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
-    val contest = this.contest.import()
+    // val info = this.info.import()
+    val contestUA = this.contestUA.import()
+    val raireContest = this.raireContest.import(contestUA.contest.info)
+
     val result = RaireContestUnderAudit(
-        contest,
+        raireContest as RaireContest,
         this.winner,
         this.rassertions.map { it.import() },
+        contestUA.isComparison,
+        contestUA.hasStyle,
     )
-    result.pollingAssertions = this.pollingAssertions.map{ it.import() }
-    result.clcaAssertions = this.clcaAssertions.map{ it.import() }
+    result.pollingAssertions = contestUA.pollingAssertions
+    result.clcaAssertions = contestUA.clcaAssertions
     return result
 }
 

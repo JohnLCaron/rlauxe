@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestReadRaireAssertions {
+class TestReadRaireBallotsCsv {
     val cvrFile = "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
     val raireCvrs = readRaireBallotsCsv(cvrFile)
     val cvrs = raireCvrs.cvrs

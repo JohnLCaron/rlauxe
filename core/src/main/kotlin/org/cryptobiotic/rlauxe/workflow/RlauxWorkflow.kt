@@ -15,7 +15,6 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
     fun auditRounds(): MutableList<AuditRound>
     fun contestUA(): List<ContestUnderAudit>
     fun cvrs(): List<Cvr>
-    // fun startNewRound(quiet: Boolean = true): AuditRound
 
     fun startNewRound(quiet: Boolean = true): AuditRound {
         val auditRounds = auditRounds()

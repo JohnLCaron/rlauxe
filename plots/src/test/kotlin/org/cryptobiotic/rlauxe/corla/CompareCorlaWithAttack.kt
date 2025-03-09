@@ -12,11 +12,10 @@ import kotlin.test.Test
 // generate cvrs as usual. Use ClcaAttackSampler to flip enough votes to flip the winner.
 
 class CompareCorlaWithAttack {
-    val nruns = 1000  // number of times to run workflow
-    val N = 10000
+    val nruns = 10  // number of times to run workflow
+    val N = 100000
     val name = "corlaWithAttack"
     val dirName = "/home/stormy/temp/corla/$name"
-    val mvrsFuzzPct = .02
 
     @Test
     fun corlaWithAttack() {
@@ -30,32 +29,31 @@ class CompareCorlaWithAttack {
             p2s.forEach { p2 ->
                 val margin = mean2margin(mean)
                 val theta = mean - p2
-                val corlaGenerator = CorlaWorkflowTaskGenerator(
-                    N, margin, 0.0, 0.0, mvrsFuzzPct,
-                    clcaConfigIn = ClcaConfig(ClcaStrategyType.noerror, 0.0),
+                val corlaGenerator = CorlaSingleRoundAuditTaskGenerator(
+                    N, margin, 0.0, 0.0, 0.0,
+                    clcaConfigIn = ClcaConfig(ClcaStrategyType.noerror),
                     parameters = mapOf("nruns" to nruns, "theta" to theta, "p2" to p2, "cat" to df(p2)),
                     p2flips = p2
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, corlaGenerator))
             }
         }
-
-        // run tasks concurrently and average the results
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsTheta(name, dirName, subtitle, ScaleTypeOld.Linear)
-        showSampleSizesVsTheta(name, dirName, subtitle, ScaleTypeOld.Log)
-        showSampleSizesVsTheta(name, dirName, subtitle, ScaleTypeOld.Pct)
-        showNroundsVsTheta(name, dirName, subtitle)
+        regenPlots()
     }
 
     @Test
-    fun regenNoerrorsPlots() {
+    fun regenPlots() {
+        val subtitle = "Nc=${N} nruns=${nruns}"
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.Linear)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.LogLog)
+
         showFailuresVsTheta(name, dirName, "${name}Failures", "Nc=${N} nruns=${nruns}") { true }
         showFailuresVsTheta(name, dirName, "${name}FailuresUnder", "Nc=${N} nruns=${nruns}") { it.Dparam("theta") <= .5 }
         showFailuresVsTheta(name, dirName, "${name}FailuresOver", "Nc=${N} nruns=${nruns}") { it.Dparam("theta") in 0.5..0.52 }
@@ -85,13 +83,5 @@ class CompareCorlaWithAttack {
             yfld = { it.failPct },
             catfld =  { category(it) },
         )
-    }
-
-    fun showNroundsVsTheta(name: String, dirName: String, subtitle: String) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showNroundsVsTheta(results, subtitle, "p2rate") { category(it) }
     }
 }

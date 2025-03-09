@@ -1,71 +1,131 @@
-parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, failPct
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.002, StatRejectNull, 1.0, 9905.64, 9905.64, 9914.82, 98.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.001, FailPct, 0.0, 10000.0, 10000.0, 10000.0, 100.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.008, StatRejectNull, 1.010204081632653, 2438.57, 2438.57, 7512.179999999999, 2.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.003, StatRejectNull, 1.0, 9912.51, 9912.51, 9923.19, 99.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.001, FailPct, 0.0, 10000.0, 10000.0, 10000.0, 100.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.001, StatRejectNull, 1.5, 9915.31, 9915.31, 9926.77, 99.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.002, FailPct, 0.0, 10000.0, 10000.0, 10000.0, 100.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.01, StatRejectNull, 1.02, 2015.45, 2015.45, 6817.28, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.002, FailPct, 0.0, 10000.0, 10000.0, 10000.0, 100.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.008, StatRejectNull, 1.04, 3095.85, 3095.85, 6323.93, 0.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.004, StatRejectNull, 1.2, 9567.37, 9567.37, 9920.85, 93.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.006, StatRejectNull, 1.0317460317460319, 6599.58, 6599.58, 8751.15, 43.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.01, StatRejectNull, 1.08, 1897.06, 1897.06, 4463.43, 0.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.005, StatRejectNull, 1.1785714285714286, 8546.35, 8546.35, 9508.92, 77.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.006, StatRejectNull, 1.1, 3535.27, 3535.27, 7903.31, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.003, StatRejectNull, 1.0555555555555556, 9670.4, 9670.4, 9839.72, 92.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.005, StatRejectNull, 1.0842105263157895, 4777.41, 4777.41, 8130.2300000000005, 10.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.006, StatRejectNull, 1.15, 3737.24, 3737.24, 6812.41, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.005, StatRejectNull, 1.18, 4476.45, 4476.45, 8153.89, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.004, StatRejectNull, 1.16, 5298.860000000001, 5298.860000000001, 8572.520000000002, 7.000000000000001
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.004, StatRejectNull, 1.2, 7847.21, 7847.21, 9321.06, 59.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.008, StatRejectNull, 1.36, 3109.15, 3109.15, 5147.98, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.01, StatRejectNull, 1.37, 1977.94, 1977.94, 3316.55, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.003, StatRejectNull, 1.2205882352941178, 8331.869999999999, 8331.869999999999, 9241.06, 57.99999999999999
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.012, StatRejectNull, 1.0, 1377.36, 1377.36, 5560.72, 0.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.016, StatRejectNull, 1.01, 733.75, 733.75, 3222.58, 0.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.02, StatRejectNull, 1.01, 681.49, 681.49, 2173.31, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.016, StatRejectNull, 1.16, 941.81, 941.81, 2132.61, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.012, StatRejectNull, 1.15, 1496.47, 1496.47, 3394.92, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.02, StatRejectNull, 1.14, 631.27, 631.27, 1361.98, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.001, StatRejectNull, 1.13, 9068.93, 9068.93, 9566.19, 79.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.03, StatRejectNull, 1.03, 338.36, 338.36, 1059.76, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.03, StatRejectNull, 1.16, 344.49, 344.49, 728.89, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.016, StatRejectNull, 1.4, 966.22, 966.22, 1629.85, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.002, StatRejectNull, 2.19, 7940.4800000000005, 7940.4800000000005, 8925.53, 20.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.012, StatRejectNull, 1.43, 1572.11, 1572.11, 2626.96, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.02, StatRejectNull, 1.38, 671.5, 671.5, 1150.72, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.03, StatRejectNull, 1.38, 383.16, 383.16, 627.98, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.04, StatRejectNull, 1.18, 225.99, 225.99, 457.55, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.04, StatRejectNull, 1.45, 270.58, 270.58, 390.55, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.03, StatRejectNull, 2.21, 561.14, 561.14, 626.73, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.04, StatRejectNull, 1.79, 278.48, 278.48, 314.24, 0.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.04, StatRejectNull, 2.44, 266.42, 266.42, 311.62, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.01, StatRejectNull, 3.25, 2819.95, 2819.95, 3205.35, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.02, StatRejectNull, 2.55, 981.47, 981.47, 1096.38, 0.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.03, StatRejectNull, 2.91, 511.74, 511.74, 578.19, 0.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.04, StatRejectNull, 1.05, 253.22, 253.22, 596.31, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.05, StatRejectNull, 1.65, 215.78, 215.78, 239.47, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.003, StatRejectNull, 2.78, 7431.830000000001, 7431.830000000001, 8279.2, 7.000000000000001
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.016, StatRejectNull, 2.78, 1353.71, 1353.71, 1523.08, 0.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.05, StatRejectNull, 2.22, 181.34, 181.34, 210.97, 0.0
-"nruns=100 cat=clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.05, StatRejectNull, 1.26, 198.37, 198.37, 338.4, 0.0
-"nruns=100 cat=2*clcaFuzzPct mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.05, StatRejectNull, 1.09, 185.2, 185.2, 414.95, 0.0
-"nruns=100 cat=clcaFuzzPct/2 mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.05, StatRejectNull, 1.33, 170.85, 170.85, 269.55, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.004, StatRejectNull, 3.15, 6499.17, 6499.17, 7317.95, 5.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.001, StatRejectNull, 1.95, 9554.92, 9554.92, 9803.7, 95.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.008, StatRejectNull, 3.47, 3801.29, 3801.29, 4314.8, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.005, StatRejectNull, 3.38, 6081.54, 6081.54, 6919.05, 0.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.012, StatRejectNull, 2.98, 2053.11, 2053.11, 2337.74, 0.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.02, StatRejectNull, 4.29, 1642.31, 1642.31, 1781.85, 5.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.016, StatRejectNull, 3.83, 1882.1, 1882.1, 1978.7, 11.0
-"nruns=100 cat=clcaNoerror mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.006, StatRejectNull, 3.62, 5369.63, 5369.63, 6038.48, 0.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.008, StatRejectNull, 6.11, 5649.85, 5649.85, 5798.28, 50.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.01, StatRejectNull, 6.87, 5796.23, 5796.23, 5889.26, 53.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.012, StatRejectNull, 6.81, 5161.28, 5161.28, 5301.77, 45.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.002, StatRejectNull, 3.76, 9283.57, 9283.57, 9441.6, 92.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.003, StatRejectNull, 4.64, 9156.88, 9156.88, 9280.72, 91.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.005, StatRejectNull, 6.26, 7629.55, 7629.55, 7771.62, 74.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.006, StatRejectNull, 7.39, 8066.61, 8066.61, 8146.76, 79.0
-"nruns=100 cat=corla mvrsFuzzPct=0.01 auditType=3.0 ", 10000, 0.004, StatRejectNull, 6.23, 8782.52, 8782.52, 8903.43, 87.0
+parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, failPct, neededStddev, mvrMargin
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 1542.0, 1543.0, 0.0, 0.0, 0.0, 0.0040000000000000036
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 996.0, 997.0, 0.0, 0.0, 0.0, 0.006000000000000005
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 1233.0, 1234.0, 0.0, 0.0, 0.0, 0.004999999999999893
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 2300.92, 2301.9200000000005, 0.0, 0.0, 2190.9132008365827, 0.005996100000000002
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 4966.91, 4967.909999999997, 0.0, 0.0, 4224.680101723681, 0.005922000000000005
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 1028.0, 1029.0, 0.0, 0.0, 0.0, 0.006000000000000005
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 39866.7, 39867.32, 38000.0, 38.0, 4022.5200929296666, 0.005868799999999996
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 2635.16, 2636.1600000000008, 0.0, 0.0, 2265.6474249979856, 0.004964399999999989
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 1195.0, 1196.0, 0.0, 0.0, 0.0, 0.004999999999999893
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 3036.46, 3037.4599999999996, 0.0, 0.0, 4193.10299759021, 0.005029399999999997
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 81240.93, 81241.12, 81000.0, 81.0, 964.3622093975517, 0.005925199999999997
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 60016.03, 60016.44, 59000.0, 59.0, 4219.523023530445, 0.0049723999999999905
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 7922.76, 7923.759999999999, 0.0, 0.0, 5622.932781245034, 0.004968600000000005
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 19366.16, 19367.159999999993, 0.0, 0.0, 11683.317831609309, 0.004021699999999988
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 69670.29, 69670.6, 69000.0, 69.0, 3369.3297764629438, 0.004022800000000002
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 9878.95, 9879.95, 0.0, 0.0, 6576.8780122106555, 0.005879100000000006
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 75274.86, 75275.11, 75000.0, 75.0, 1170.232048099863, 0.004975899999999995
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 35281.17, 35282.169999999984, 0.0, 0.0, 17145.75141605348, 0.0038737999999999984
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 93086.05, 93086.12, 93000.0, 93.0, 535.154907956756, 0.002992100000000002
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 1493.0, 1494.0, 0.0, 0.0, 0.0, 0.0040000000000000036
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 87109.2, 87109.33, 87000.0, 87.0, 332.0549074151164, 0.0039527999999999985
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 88060.72, 88060.84, 88000.0, 88.0, 199.385305376299, 0.0038499000000000085
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 1989.0, 1990.0, 0.0, 0.0, 0.0, 0.0029999999999998916
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 92027.41, 92027.49, 92000.0, 92.0, 226.40171018567858, 0.0047820000000000015
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 2056.0, 2057.0, 0.0, 0.0, 0.0, 0.0029999999999998916
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 28934.07, 28935.069999999992, 0.0, 0.0, 16003.628082566154, 0.002990900000000003
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 20604.5, 20605.500000000004, 0.0, 0.0, 10873.517167411843, 0.0057546000000000055
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 24870.16, 24871.16, 0.0, 0.0, 13634.184211547094, 0.004782199999999997
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 94026.17, 94026.23, 94000.0, 94.0, 251.2199678015707, 0.0057358999999999934
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 75477.64, 75477.89, 75000.0, 75.0, 1190.186845163397, 0.0029834000000000006
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.005, StatRejectNull, 1.0, 12522.78, 12523.780000000008, 0.0, 0.0, 9140.904271000765, 0.004884200000000003
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 16356.25, 16357.250000000004, 0.0, 0.0, 11346.189135013572, 0.0029496999999999974
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 96026.38, 96026.42, 96000.0, 96.0, 370.0043918658264, 0.0029894000000000066
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 23641.5, 23642.329999999998, 17000.0, 17.0, 11243.401339171462, 0.002994900000000014
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 12126.3, 12127.299999999994, 0.0, 0.0, 6903.748557848846, 0.003946999999999998
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.006, StatRejectNull, 1.0, 2545.46, 2546.46, 0.0, 0.0, 2797.7629221218863, 0.005996899999999999
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 4777.19, 4778.190000000002, 0.0, 0.0, 4457.124417592581, 0.003975800000000005
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.004, StatRejectNull, 1.0, 5664.38, 5665.369999999999, 1000.0, 1.0, 7251.694863367365, 0.003960199999999992
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 7944.24, 7945.240000000001, 0.0, 0.0, 6518.915557238028, 0.002979099999999999
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.003, StatRejectNull, 1.0, 50470.36, 50471.359999999986, 0.0, 0.0, 21831.19819822998, 0.002693699999999997
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 616.0, 617.0, 0.0, 0.0, 0.0, 0.010000000000000009
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 1345.34, 1346.34, 0.0, 0.0, 1204.8614710413808, 0.0079822
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 747.0, 748.0, 0.0, 0.0, 0.0, 0.008000000000000007
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 1618.54, 1619.54, 0.0, 0.0, 1444.0589559986809, 0.007957699999999991
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 598.0, 599.0, 0.0, 0.0, 0.0, 0.010000000000000009
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 799.62, 800.6200000000002, 0.0, 0.0, 553.6577603538128, 0.00995569999999999
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 513.0, 514.0, 0.0, 0.0, 0.0, 0.01200000000000001
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 770.0, 771.0, 0.0, 0.0, 0.0, 0.008000000000000007
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 57574.659999999996, 57575.08999999999, 56999.99999999999, 56.99999999999999, 1665.7660886149197, 0.007812999999999997
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 1941.42, 1942.4200000000003, 0.0, 0.0, 1870.8305117246725, 0.009889000000000005
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 11306.66, 11307.66, 0.0, 0.0, 6926.807723937484, 0.007825399999999998
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 4174.59, 4175.589999999998, 0.0, 0.0, 3229.372378946101, 0.009799699999999998
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 821.19, 822.1899999999999, 0.0, 0.0, 778.8377070352976, 0.011977699999999996
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 84082.82, 84082.98, 84000.0, 84.0, 321.1555065307148, 0.00974979999999999
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 385.0, 386.0, 0.0, 0.0, 0.0, 0.016000000000000014
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 1561.61, 1562.609999999999, 0.0, 0.0, 1442.9875945066196, 0.011880999999999996
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 373.0, 374.0, 0.0, 0.0, 0.0, 0.016000000000000014
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 2877.24, 2878.24, 0.0, 0.0, 2356.680110324691, 0.007953300000000003
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 14497.720000000001, 14498.64, 8000.0, 8.0, 14872.46591777656, 0.007930399999999997
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 84073.9, 84074.06, 84000.0, 84.0, 254.14584272617958, 0.007882600000000009
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 75111.65, 75111.9, 75000.0, 75.0, 320.18007433317894, 0.011556900000000002
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.008, StatRejectNull, 1.0, 6072.27, 6073.2699999999995, 0.0, 0.0, 4268.384684760734, 0.0079201
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 539.44, 540.4399999999996, 0.0, 0.0, 460.1097112646069, 0.0159415
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 989.9, 990.9000000000003, 0.0, 0.0, 994.1232670046506, 0.015834800000000003
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 498.0, 499.0, 0.0, 0.0, 0.0, 0.01200000000000001
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 632.51, 633.5100000000001, 0.0, 0.0, 541.6429357981142, 0.01587479999999999
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 493.67, 494.6699999999998, 0.0, 0.0, 289.53987825513775, 0.0159454
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 1238.99, 1239.9900000000002, 0.0, 0.0, 1152.1094001439274, 0.009952300000000002
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 55605.43000000001, 55605.880000000005, 55000.00000000001, 55.00000000000001, 2071.9101160255213, 0.009878699999999997
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 3198.0, 3199.0, 0.0, 0.0, 8076.827166653996, 0.009930200000000016
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 710.37, 711.37, 0.0, 0.0, 469.6657248511968, 0.011934900000000003
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 3465.62, 3466.620000000001, 0.0, 0.0, 2463.856943006229, 0.015684200000000002
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.01, StatRejectNull, 1.0, 7911.3, 7912.300000000001, 0.0, 0.0, 5620.0271894360085, 0.009789799999999998
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 1840.91, 1841.91, 0.0, 0.0, 3818.137480748958, 0.011946100000000001
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 6360.75, 6361.75, 0.0, 0.0, 4190.272946658725, 0.011647400000000007
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 2615.15, 2616.150000000001, 0.0, 0.0, 2147.167722256461, 0.011886600000000004
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 66130.13, 66130.47, 66000.0, 66.0, 272.0910648622161, 0.015581800000000003
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.012, StatRejectNull, 1.0, 34218.75, 34219.42, 33000.0, 33.0, 2301.318531664741, 0.011696599999999988
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 1958.39, 1959.39, 0.0, 0.0, 1560.4128549521758, 0.015704200000000005
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.016, StatRejectNull, 1.0, 12914.779999999999, 12915.69, 9000.0, 9.0, 8809.460867005348, 0.015779100000000004
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 308.0, 309.0, 0.0, 0.0, 0.0, 0.020000000000000018
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 298.0, 299.0, 0.0, 0.0, 0.0, 0.020000000000000018
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 460.25, 461.25, 0.0, 0.0, 364.82533834699586, 0.019940199999999995
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 468.77, 469.77000000000004, 0.0, 0.0, 334.1634885800662, 0.019925300000000003
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 57240.91999999999, 57241.34999999999, 56999.99999999999, 56.99999999999999, 620.9576372316745, 0.01937180000000001
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 380.38, 381.38000000000017, 0.0, 0.0, 237.53289372211168, 0.01987649999999999
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 1839.79, 1840.79, 0.0, 0.0, 1739.1415830518229, 0.0194874
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 199.0, 200.0, 0.0, 0.0, 0.0, 0.030000000000000096
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 1562.48, 1563.4799999999996, 0.0, 0.0, 2987.0543466097156, 0.019631399999999993
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 257.6, 258.6, 0.0, 0.0, 209.89735586709998, 0.029919200000000014
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 238.53, 239.53, 0.0, 0.0, 86.38697297625376, 0.029912300000000013
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 756.4, 757.4, 0.0, 0.0, 656.126222612692, 0.01981219999999999
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 153.0, 154.0, 0.0, 0.0, 0.0, 0.040000000000000036
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 507.26, 508.2599999999997, 0.0, 0.0, 1019.0000551521084, 0.029533800000000002
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 205.0, 206.0, 0.0, 0.0, 0.0, 0.030000000000000096
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 149.0, 150.0, 0.0, 0.0, 0.0, 0.040000000000000036
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 192.68, 193.68, 0.0, 0.0, 156.26361572675836, 0.039868799999999996
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 119.0, 120.0, 0.0, 0.0, 0.0, 0.04999999999999991
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 329.78, 330.7799999999999, 0.0, 0.0, 300.9330018459258, 0.029774799999999994
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.02, StatRejectNull, 1.0, 1287.01, 1288.0099999999998, 0.0, 0.0, 988.6851217146943, 0.019674900000000002
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 168.9, 169.89999999999998, 0.0, 0.0, 58.41977404954594, 0.0399091
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 541.25, 542.2499999999998, 0.0, 0.0, 502.6495871877346, 0.038765600000000025
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 17201.3, 17202.14, 16000.0, 16.0, 4192.159113565074, 0.029045699999999983
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 348.26, 349.26000000000005, 0.0, 0.0, 350.96619837243577, 0.03945980000000002
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 122.0, 123.0, 0.0, 0.0, 0.0, 0.04999999999999991
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 629.53, 630.5300000000001, 0.0, 0.0, 578.9950337438138, 0.02951030000000001
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 224.33, 225.33, 0.0, 0.0, 180.78197116969383, 0.0396997
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 280.22, 281.22000000000025, 0.0, 0.0, 372.04310449193935, 0.03935240000000001
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 145.74, 146.73999999999998, 0.0, 0.0, 68.42669362171463, 0.049638799999999976
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 199.19, 200.19, 0.0, 0.0, 128.04223482898132, 0.03973020000000001
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 1012.02, 1013.0200000000001, 0.0, 0.0, 858.5497653601683, 0.029190099999999993
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.04, StatRejectNull, 1.0, 617.8, 618.8, 0.0, 0.0, 984.8314881237299, 0.03887570000000001
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.03, StatRejectNull, 1.0, 270.93, 271.93, 0.0, 0.0, 206.41745347717085, 0.029777799999999983
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 150.54, 151.54, 0.0, 0.0, 109.12235517986221, 0.04982780000000003
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 189.44, 190.44000000000003, 0.0, 0.0, 166.33155563512295, 0.04963939999999999
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 417.63, 418.6300000000001, 0.0, 0.0, 895.2565403838164, 0.04846730000000001
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 133.42, 134.41999999999996, 0.0, 0.0, 40.4717629959457, 0.0498216
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 179.19, 180.19, 0.0, 0.0, 128.82078209667878, 0.04928660000000001
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 241.19, 242.18999999999994, 0.0, 0.0, 237.55814846054005, 0.04937630000000001
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.05, StatRejectNull, 1.0, 382.92, 383.9200000000001, 0.0, 0.0, 356.91367807916805, 0.048421900000000004
+"nruns=100 cat=corla.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 61.0, 62.0, 0.0, 0.0, 0.0, 0.09999999999999983
+"nruns=100 cat=rlauxe.000 mvrsFuzzPct=0.0 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 59.0, 60.0, 0.0, 0.0, 0.0, 0.09999999999999983
+"nruns=100 cat=corla.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 66.26, 67.25999999999999, 0.0, 0.0, 19.072818354925943, 0.09969219999999997
+"nruns=100 cat=rlauxe.002 mvrsFuzzPct=0.002 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 63.66, 64.66000000000001, 0.0, 0.0, 32.78085416824888, 0.09972819999999993
+"nruns=100 cat=corla.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 66.84, 67.84000000000002, 0.0, 0.0, 20.634786163176003, 0.0993066
+"nruns=100 cat=rlauxe.005 mvrsFuzzPct=0.005 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 70.58, 71.58000000000003, 0.0, 0.0, 44.91195386531296, 0.09928369999999997
+"nruns=100 cat=corla.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 75.04, 76.04000000000006, 0.0, 0.0, 38.892138022998935, 0.098488
+"nruns=100 cat=corla.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 106.76, 107.76000000000005, 0.0, 0.0, 89.6362783698654, 0.09692440000000001
+"nruns=100 cat=rlauxe.02 mvrsFuzzPct=0.02 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 132.91, 133.91000000000005, 0.0, 0.0, 116.34707516736292, 0.09696960000000004
+"nruns=100 cat=rlauxe.01 mvrsFuzzPct=0.01 auditType=3.0 ", 100000, 0.1, StatRejectNull, 1.0, 92.1, 93.09999999999997, 0.0, 0.0, 84.17083818045296, 0.09844350000000002

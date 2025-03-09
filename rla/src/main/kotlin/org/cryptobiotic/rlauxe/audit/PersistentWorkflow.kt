@@ -29,29 +29,6 @@ class PersistentWorkflow(
 
     fun getLastRound() = auditRounds.last()
 
-    override fun startNewRound(quiet: Boolean): AuditRound {
-        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
-        val roundIdx = auditRounds.size + 1
-
-        val auditRound = if (previousRound == null) {
-            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
-        } else {
-            previousRound.createNextRound()
-        }
-        auditRounds.add(auditRound)
-
-        estimateSampleSizes(
-            auditConfig,
-            auditRound,
-            cvrs,
-            show=!quiet,
-        )
-
-        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
-        return auditRound
-    }
-
     //  return allDone
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
         return when (auditConfig.auditType) {

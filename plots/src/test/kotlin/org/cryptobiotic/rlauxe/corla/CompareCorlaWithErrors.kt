@@ -2,63 +2,111 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.ScaleTypeOld
-import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
+import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-class CompareCorlaWithErrors {
-    val nruns = 250  // number of times to run workflow
-    val N = 10000
-    val name = "corlaWithTwoPercentErrors"
-    val dirName = "/home/stormy/temp/corla/$name"
-    val mvrsFuzzPct = .02
+import org.jetbrains.kotlinx.kandy.util.color.Color
 
-    /*
+class CompareCorlaPlots {
+    val nruns = 100
+    val nsimEst = 100
+    val name = "corlaWithPhantoms2"
+    val dirName = "/home/stormy/temp/corla/$name"
+    val N = 100000
+
     @Test
-    fun corlaWithFuzz() {
+    fun corlaComparePlots() {
         val margins =
-            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05)
+            listOf(.003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .10)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
 
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val corlaGenerator = CorlaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, mvrsFuzzPct,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.noerror, 0.0),
-                parameters=mapOf("nruns" to nruns, "cat" to "corla")
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, corlaGenerator))
+            var fuzzPct = .0
+            var phantomPct = 0.0
+            var name = "000"
 
-            val noerrorGenerator = ClcaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, mvrsFuzzPct,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.noerror, 0.0),
-                parameters=mapOf("nruns" to nruns, "cat" to "clcaNoerror")
+            val corla0 = CorlaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "corla.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, noerrorGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, corla0))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, mvrsFuzzPct,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct),
-                parameters=mapOf("nruns" to nruns, "cat" to "clcaFuzzPct")
+            val clca0 = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, clca0))
 
-            val clcaGeneratorHalf = ClcaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, mvrsFuzzPct,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct/2),
-                parameters=mapOf("nruns" to nruns, "cat" to "clcaFuzzPct/2")
+            phantomPct = 0.002
+            name = "002"
+            val corla1 = CorlaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "corla.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorHalf))
+            tasks.add(RepeatedWorkflowRunner(nruns, corla1))
 
-            val clcaGeneratorTwice = ClcaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, mvrsFuzzPct,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, 2*mvrsFuzzPct),
-                parameters=mapOf("nruns" to nruns, "cat" to "2*clcaFuzzPct")
+            val clca1 = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorTwice))
+            tasks.add(RepeatedWorkflowRunner(nruns, clca1))
+
+            phantomPct = 0.005
+            name = "005"
+            val corla2 = CorlaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "corla.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, corla2))
+
+            val clca2 = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, clca2))
+
+            phantomPct = 0.01
+            name = "01"
+            val corla3 = CorlaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "corla.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, corla3))
+
+            val clca3= ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, clca3))
+
+            phantomPct = 0.02
+            name = "02"
+            val corla4 = CorlaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "corla.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, corla4))
+
+            val clca4 = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct, fuzzPct,
+                parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
+                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, clca4))
         }
 
         // run tasks concurrently and average the results
@@ -68,24 +116,55 @@ class CompareCorlaWithErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
 
-        val subtitle = "Nc=${N} nruns=${nruns} mvrsFuzzPct=$mvrsFuzzPct"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
-        showFailuresVsMargin(name, dirName, subtitle)
-        showNroundsVsMargin(name, dirName, subtitle)
+        regenPlots()
     }
 
     @Test
-    fun regenNoerrorsPlots() {
-        val subtitle = "Nc=${N} nruns=${nruns} mvrsFuzzPct=$mvrsFuzzPct"
-
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Log)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleTypeOld.Pct)
-        showFailuresVsMargin(name, dirName, subtitle)
-        showNroundsVsMargin(name, dirName, subtitle)
+    fun regenPlots() {
+        val subtitle = "Nc=${N} nruns=${nruns}"
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.Linear)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.LogLog)
+        //showFailuresVsMargin(name, dirName, subtitle)
     }
+}
 
-     */
+fun showSampleSizesVsTheta(name:String, dirName: String, subtitle: String, scaleType: ScaleType) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "Corla vs Rlauxe with phantoms",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "true margin", xfld = { it.mvrMargin},
+        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        catName = "audit.phantomPct", catfld = { category(it) },
+        scaleType = scaleType,
+        colorChoices = { colorChoices(it) },
+    )
+}
+
+fun showFailuresVsMargin(name:String, dirName: String, subtitle: String) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name failurePct",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}Failure",
+        wrs = data,
+        xname = "true margin", xfld = { it.mvrMargin },
+        yname = "failPct", yfld = { it.failPct },
+        catName = "flipPct", catfld = { category(it) },
+        colorChoices = { colorChoices(it) },
+    )
+}
+
+fun colorChoices(cats: Set<String>): Array<Pair<String, Color>> {
+    val result = mutableListOf<Pair<String, Color>>()
+    cats.forEach { cat ->
+        val color = if (cat.contains("corla")) Color.ORANGE else Color.LIGHT_GREEN
+        result.add( Pair(cat, color))
+    }
+    return result.toTypedArray()
 }

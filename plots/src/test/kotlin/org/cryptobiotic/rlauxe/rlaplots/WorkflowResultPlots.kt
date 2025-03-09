@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
+import org.jetbrains.kotlinx.kandy.dsl.categorical
 import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.scale.Scale
@@ -25,7 +26,8 @@ fun wrsPlot(
     xfld: (WorkflowResult) -> Double,
     yfld: (WorkflowResult) -> Double,
     catfld: (WorkflowResult) -> String,
-    scaleType: ScaleType = ScaleType.Linear
+    scaleType: ScaleType = ScaleType.Linear,
+    colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null
 ) {
     // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
     val groups = makeWrGroups(wrs, catfld)
@@ -61,7 +63,13 @@ fun wrsPlot(
             line {
                 x(xname) { scale = xScale }
                 y(yname) { scale = yScale }
-                color(catName)
+                if (colorChoices != null) {
+                    color(catName) {
+                        scale = categorical(*colorChoices(groups.keys))
+                    }
+                } else {
+                    color(catName)
+                }
             }
 
             points {

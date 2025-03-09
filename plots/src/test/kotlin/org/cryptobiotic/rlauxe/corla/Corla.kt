@@ -8,6 +8,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 // The algorithm that colorado-rla uses, from SuperSimple paper
+// Corla is a RiskTestingFn
+// TODO does Corla use phantoms ?
 class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
     val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn {
     val gamma = 1.03
@@ -57,6 +59,8 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
     }
 
     /**
+     * From colorado-rla Audit class, pValueApproximation method.
+     *
      * Conservative approximation of the Kaplan-Markov P-value.
      *
      * The audit can stop when the P-value drops to or below the defined risk
@@ -128,6 +132,22 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
     }
 
     /**
+     *  From colorado-rla Audit class, optimistic method.
+     *  Not using this at the moment, testing Corla with SingleRound task.
+     *
+     * Computes the expected number of ballots to audit overall given the
+     * specified numbers of over- and understatements.
+     *
+     * @param the_two_under The two-vote understatements.
+     * @param the_one_under The one-vote understatements.
+     * @param the_one_over The one-vote overstatements.
+     * @param the_two_over The two-vote overstatements.
+     *
+     * @return the expected number of ballots remaining to audit.
+     * This is the stopping sample size as defined in the literature:
+     * https://www.stat.berkeley.edu/~stark/Preprints/gentle12.pdf
+     *
+     *
      * @param dilutedMargin the diluted margin of the contest
      * @param gamma the "error inflator" parameter from the literature
      * @param twoUnder the number of two-vote understatements
@@ -135,7 +155,7 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
      * @param oneOver the number of one-vote overstatements
      * @param twoOver the number of two-vote overstatements
      */
-    fun estimateSampleSize(
+    fun optimistic(
         riskLimit: Double,
         dilutedMargin: Double,
         gamma: Double,

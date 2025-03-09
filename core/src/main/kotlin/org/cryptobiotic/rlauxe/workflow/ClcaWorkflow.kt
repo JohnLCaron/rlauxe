@@ -6,16 +6,6 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 
-// "Stylish Risk-Limiting Audits in Practice" STYLISH 2.1
-// 1. Set up the audit
-//	a) Read contest descriptors, candidate names, social choice functions, and reported winners.
-//     Read upper bounds on the number of cards that contain each contest:
-//	     Let 𝑁_𝑐 denote the upper bound on the number of cards that contain contest 𝑐, 𝑐 = 1, . . . , 𝐶.
-//	b) Read audit parameters (risk limit for each contest, risk-measuring function to use for each contest,
-//	   assumptions about errors for computing initial sample sizes), and seed for pseudo-random sampling.
-//	c) Read ballot manifest.
-//	d) Read CVRs.
-
 class ClcaWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
@@ -43,30 +33,6 @@ class ClcaWorkflow(
         val prng = Prng(auditConfig.seed)
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
-
-    /* TODO how to share this ??
-    override fun startNewRound(quiet: Boolean): AuditRound {
-        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
-        val roundIdx = auditRounds.size + 1
-
-        val auditRound = if (previousRound == null) {
-            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
-        } else {
-            previousRound.createNextRound()
-        }
-        auditRounds.add(auditRound)
-
-        estimateSampleSizes(
-            auditConfig,
-            auditRound,
-            cvrs,
-            show=!quiet,
-        )
-
-        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
-        return auditRound
-    } */
 
     //  return allDone
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
@@ -139,6 +105,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
         roundIdx: Int,
     ): TestH0Result {
+
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
         val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)

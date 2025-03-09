@@ -39,32 +39,6 @@ class PollingWorkflow(
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
-    /*
-    override fun startNewRound(quiet: Boolean): AuditRound {
-        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
-        val roundIdx = auditRounds.size + 1
-
-        val auditRound = if (previousRound == null) {
-            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
-        } else {
-            previousRound.createNextRound()
-        }
-        auditRounds.add(auditRound)
-
-        estimateSampleSizes(
-            auditConfig,
-            auditRound,
-            emptyList(),
-            show=!quiet,
-        )
-
-        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
-        return auditRound
-    }
-
-     */
-
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
         return runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
     }

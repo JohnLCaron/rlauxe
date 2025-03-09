@@ -1,65 +1,48 @@
 # CORLA
-02/02/2025
+03/09/2025
 
-The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for calculating pvalues, 
-from "Gentle Introduction" and "Super Simple" papers. It makes use of measured error rates as they are sampled.
+The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) suggest the following
+issues should be addressed:
+
+1. The current version (1.1.0) of RLATool needs to be modified to
+  recognize and group together contests that cross jurisdictional boundaries.
+  Currently, it treats every contest as if it were entirely contained in a single county. 
+  It does not allow the user to select the sample size, nor directly allow an unstratified random sample to be drawn across counties.
+2. New statistical methods are needed needed to deal with contests that include both CVR counties and no-CVR counties.
+3. Auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from
+  just those ballots that contain the contest.
+
+# Comparing COBRA and Rlauxe
+
+The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for its risk measuring function
+(from "Gentle Introduction" and "Super Simple" papers). It makes use of measured error rates as they are sampled.
 
 We have a Kotlin port of the CORLA Java code in order to compare performance with our CLCA algorithm. Its possible
 that our port does not accurately reflect what CORLA does.
 
-The following plots compare our Corla implementation with our CLCA algorithm, using several "strategies". 
-The CLCA "noerror" strategy is similar to CORLA in that it uses 0% error rates for the
-apriori rates, then adjusts to the actual error rates as they are measured in the sampled ballots. This has the advantage
-of not trying to guess the actual error rates. They differ in that CORLA uses the Kaplan-Markov bound (eq 10 of SuperSimple)
+The following plots compare our Corla implementation with the Rlauxe algorithm based on Philip Stark's SHANGRLA framework. 
+They differ in that CORLA uses the Kaplan-Markov bound (eq 10 of SuperSimple)
 for the risk estimation function, while CLCA uses the BettingMart supermartingale and Adaptive / Optimal betting as described in
 the COBRA paper.
 
-We compare also with the CLCA "fuzzPct" strategy, where the apriori error rates are estimated from a presumed "fuzz percentage",
-which randomly changed the voted-for candidate in a percentage of the ballots. We generate "fuzzed MRVS" using this technique
-when simulating the effect of errors on the audit. The "clcaFuzzPct" is when we use exactly the same fuzzPct for the
-apriri error rates as the MVRs were generated with. In theory, this should give us the best results. To see how things change
-when our estimates are wrong, we have a "2*clcaFuzzPct" scenario where we overestimate the error rates by a factor of 2, and
-a "clcaFuzzPct/2" scenario where we underestimate the error rates by a factor of 2.
+## Compare COBRA and Rlauxe with no errors
 
-## Comparison with no errors
+Comparison when there are no errors found in the MVRs, so they always agree with the CVRs:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsPct.html" rel="corlaNoErrorsPct">![corlaNoErrorsPct](plots/corla/corlaNoErrors/corlaNoErrorsPct.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsLinear.html" rel="corlaNoErrorsLinear">![corlaNoErrorsLinear](plots/corla/corlaNoErrors/corlaNoErrorsLinear.png)</a>
 
-* The algorithms give essentially the same results. One needs 1133 ballots to successfully audit a margin of .005.
+* The algorithms give essentially the same results. One needs about 2000 ballots to successfully audit a margin of .003 when there are no errors.
 
-## Comparison with fuzzPct .001
+## Compare COBRA and Rlauxe with errors
 
-Here we add errors between the MVRS and CVRS at a rate of 1 per 1000 ballots. We also show the three fuzzPct strategies described above.
+Here we add random errors between the MVRS and CVRS at rates of 2 per 1000 ballots (.002), 5 per 1000 ballots (.005),
+1 per 100 ballots (.01), and 2 per 100 ballots (.02):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.html" rel="corlaWithSmallErrorsPct">![corlaWithSmallErrorsPct](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsPct.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.html" rel="corlaWithSmallErrorsFailures">![corlaWithSmallErrorsFailures](plots/corla/corlaWithSmallErrors/corlaWithSmallErrorsFailures.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLinear.html" rel="corlaWithErrorsLinear">![corlaWithErrorsLinear](plots/corla/corlaWithErrors/corlaWithErrorsLinear.png)</a>
 
-* When margins < .005, we start to see "failures" which sends the audit to hand count.
-* All of the strategies give essentially the same results.
+The same plot on a log-log scale. A straight line means that the sample size is proportional to 1/margin.
 
-## Comparison with fuzzPct .01
-
-Here we add errors between the MVRS and CVRS at a rate of 1 per 100 ballots. 
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsPct.html" rel="corlaWithErrorsPct">![corlaWithErrorsPct](plots/corla/corlaWithErrors/corlaWithErrorsPct.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsFailures.html" rel="corlaWithErrorsFailures">![corlaWithErrorsFailures](plots/corla/corlaWithErrors/corlaWithErrorsFailures.png)</a>
-
-* The various strategies are giving different results.
-* CORLA is doing worse when margin <= .02.
-* The clca strategies are all approximately similar, useable down to maybe .01 margins.
-
-## Comparison with fuzzPct .02
-
-Here we add errors between the MVRS and CVRS at a rate of 1 per 50 ballots.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsPct.html" rel="corlaWithTwoPercentErrorsPct">![corlaWithTwoPercentErrorsPct](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsPct.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsFailures.html" rel="corlaWithTwoPercentErrorsFailures">![corlaWithTwoPercentErrorsFailures](plots/corla/corlaWithTwoPercentErrors/corlaWithTwoPercentErrorsFailures.png)</a>
-
-* CORLA only useable when margin >= .03.
-* CLCA noerror strategy doing worse when margin < .03.
-* The other clca strategies are all approximately similar, still useable down to maybe .01 margins.
-
-## Conclusions
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLogLog.html" rel="corlaWithErrorsLogLog">![corlaWithErrorsLogLog](plots/corla/corlaWithErrors/corlaWithErrorsLogLog.png)</a>
 
 * COBRA is impressively good in the absence of errors.
 * As expected, it does progressively worse as the error rate increases.
@@ -72,19 +55,13 @@ Here we add errors between the MVRS and CVRS at a rate of 1 per 50 ballots.
 * everything revolves around the database as global, mutable shared state. No real separation of business logic
   from the persistence layer, unless you count the ASMs.
 * The auditing math is contained in a few dozen line of code in the Audit class.
-* Almost no unit testing, there may be some integration testing I havent found yet.
 * Uses BigDecimal instead of Double for some reason.
 * Log4J 2.17.2 (not vulnerable to RCE attack, but stable release is 2.24.0)
 * Gson 2.8.1 (should be upgraded to latest stable).
 * Maven build
 * Eclipse project source layout
 
-The value of the current code is the web based interface tailored to the desired workflow, no doubt
-familiar to the Colorado Dept of State.
+Other issues that are not clear to me:
 
-In principle, it might be easy to switch to using a different algorithm / library, but i havent yet untangled 
-the workflow logic that feeds it. In particular:
-
-* batching of ballots for auditing (must already be done in CORLA)
-* lots of work that Stark et al are doing on stratification will likely require lots of code that isnt part 
-  of the algorithm per se. Can we provide that? Is CORLA planning to? 
+* Handling of phantom records.
+* batching of ballots for auditing (must already be done in CORLA?)

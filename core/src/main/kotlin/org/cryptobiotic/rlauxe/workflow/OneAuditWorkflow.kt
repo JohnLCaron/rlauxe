@@ -28,32 +28,6 @@ class OneAuditWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    /*
-    override fun startNewRound(quiet: Boolean): AuditRound {
-        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
-        val roundIdx = auditRounds.size + 1
-
-        val auditRound = if (previousRound == null) {
-            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
-        } else {
-            previousRound.createNextRound()
-        }
-        auditRounds.add(auditRound)
-
-        estimateSampleSizes(
-            auditConfig,
-            auditRound,
-            cvrs,
-            show=!quiet,
-        )
-
-        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
-        return auditRound
-    }
-
-     */
-
     //  return allDone
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
         return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs,
@@ -66,43 +40,6 @@ class OneAuditWorkflow(
     override fun cvrs() = cvrs
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
-
-/*
-fun runOneAudit(auditConfig: AuditConfig,
-                 contests: List<ContestRound>,
-                 sampleIndices: List<Int>,
-                 mvrs: List<Cvr>,
-                 cvrs: List<Cvr>,
-                 roundIdx: Int,
-                 quiet: Boolean): Boolean {
-    val contestsNotDone = contests.filter{ !it.done }
-    val sampledCvrs = sampleIndices.map { cvrs[it] }
-
-    // prove that sampledCvrs correspond to mvrs
-    require(sampledCvrs.size == mvrs.size)
-    val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-    cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
-
-    if (!quiet) println("runAudit round $roundIdx")
-    var allDone = true
-    contestsNotDone.forEach { contest ->
-        val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertionRounds.forEach { assertionRound ->
-            if (!assertionRound.status.complete) {
-                val testH0Result = runOneAuditAssertionAlpha(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
-                assertionRound.status = testH0Result.status
-                if (testH0Result.status.complete) assertionRound.round = roundIdx
-            }
-            contestAssertionStatus.add(assertionRound.status)
-        }
-        contest.done = contestAssertionStatus.all { it.complete }
-        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contest.done
-    }
-    return allDone
-}
-
- */
 
 class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
 

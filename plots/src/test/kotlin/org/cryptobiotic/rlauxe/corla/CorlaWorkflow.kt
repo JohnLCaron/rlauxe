@@ -83,7 +83,6 @@ class CorlaWorkflowTaskGenerator(
     }
 }
 
-// cloned ClcaWorkflow
 class CorlaWorkflow(
     val auditConfig: AuditConfig,
     val contestsToAudit: List<Contest>, // the contests you want to audit
@@ -106,32 +105,6 @@ class CorlaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
-    /*
-    override fun startNewRound(quiet: Boolean): AuditRound {
-        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
-        val roundIdx = auditRounds.size + 1
-
-        val auditRound = if (previousRound == null) {
-            val contestRounds = contestsUA.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
-        } else {
-            previousRound.createNextRound()
-        }
-        auditRounds.add(auditRound)
-
-        estimateSampleSizes(
-            auditConfig,
-            auditRound,
-            cvrs,
-            show=!quiet,
-        )
-
-        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
-        return auditRound
-    }
-
-     */
-
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
         return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs,
             auditRound.roundIdx, auditor = AuditCorlaAssertion())
@@ -146,88 +119,7 @@ class CorlaWorkflow(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-/*
-fun runCorlaAudit(auditConfig: AuditConfig,
-                 contests: List<ContestRound>,
-                 sampleIndices: List<Int>,
-                 mvrs: List<Cvr>,
-                 cvrs: List<Cvr>,
-                 roundIdx: Int,
-                 quiet: Boolean): Boolean {
-
-
-    val contestsNotDone = contests.filter{ !it.done }
-    val sampledCvrs = sampleIndices.map { cvrs[it] }
-
-    // prove that sampledCvrs correspond to mvrs
-    require(sampledCvrs.size == mvrs.size)
-    val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-    cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
-
-    if (!quiet) println("runAudit round $roundIdx")
-    var allDone = true
-    contestsNotDone.forEach { contest ->
-        if (contest.contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
-            println("here")
-        }
-        val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertionRounds.forEach { assertionRound ->
-            if (!assertionRound.status.complete) {
-                val testH0Result = runCorlaAudit(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
-                assertionRound.status = testH0Result.status
-                if (testH0Result.status.complete) assertionRound.round = roundIdx
-            }
-            contestAssertionStatus.add(assertionRound.status)
-        }
-        contest.done = contestAssertionStatus.all { it.complete }
-        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contest.done
-    }
-    return allDone
-}
- */
-/*
-
-    //   The auditors retrieve the indicated cards, manually read the votes from those cards, and input the MVRs
-    // fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet:Boolean): Boolean {
-
-        val contestsNotDone = auditRound.contestRounds.filter{ !it.done }
-        val sampledCvrs = auditRound.sampledIndices.map { cvrs[it] }
-        val roundIdx = auditRound.roundIdx
-
-        // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrs.size)
-        val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
-
-        // TODO could parallelize across assertions
-        if (!quiet) println("runAudit round $roundIdx")
-        var allDone = true
-        contestsNotDone.forEach { contest ->
-            val contestUA = contest.contestUA
-            var allAssertionsDone = true
-            contest.assertionRounds.forEach { assertion ->
-                if (!assertion.status.complete) {
-                    val testH0Result = runCorlaAudit(auditConfig, contestUA.contest, assertion, cvrPairs, roundIdx, quiet=quiet)
-                    assertion.status = testH0Result.status
-                    assertion.round = roundIdx
-                    allAssertionsDone = allAssertionsDone && assertion.status.complete
-                }
-            }
-            if (allAssertionsDone) {
-                contest.done = true
-                contest.status = TestH0Status.StatRejectNull // TODO ???
-            }
-            allDone = allDone && contest.done
-
-        }
-        return allDone
-    }
-
- */
-
-/////////////////////////////////////////////////////////////////////////////////
-
+// See ComparisonAudit.riskMeasurement() in colorado-rla us.freeandfair.corla.model
 class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
 
     override fun run(

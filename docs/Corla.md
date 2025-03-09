@@ -12,20 +12,24 @@ issues should be addressed:
 3. Auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from
   just those ballots that contain the contest.
 
-# Comparing COBRA and Rlauxe
+Its not clear what the current version of colorado-rla is, or if any of these issues have been addressed.
+
+# Comparing CORLA and Rlauxe
 
 The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for its risk measuring function
 (from "Gentle Introduction" and "Super Simple" papers). It makes use of measured error rates as they are sampled.
 
 We have a Kotlin port of the CORLA Java code in order to compare performance with our CLCA algorithm. Its possible
-that our port does not accurately reflect what CORLA does.
+that our port does not accurately reflect what CORLA does. 
 
 The following plots compare our Corla implementation with the Rlauxe algorithm based on Philip Stark's SHANGRLA framework. 
 They differ in that CORLA uses the Kaplan-Markov bound (eq 10 of SuperSimple)
 for the risk estimation function, while CLCA uses the BettingMart supermartingale and Adaptive / Optimal betting as described in
-the COBRA paper.
+the COBRA paper. 
 
-## Compare COBRA and Rlauxe with no errors
+These are "one-round" plots, so we dont limit the number of samples, or use the estimation algorithms.
+
+## Compare CORLA and Rlauxe with no errors
 
 Comparison when there are no errors found in the MVRs, so they always agree with the CVRs:
 
@@ -33,7 +37,7 @@ Comparison when there are no errors found in the MVRs, so they always agree with
 
 * The algorithms give essentially the same results. One needs about 2000 ballots to successfully audit a margin of .003 when there are no errors.
 
-## Compare COBRA and Rlauxe with errors
+## Compare CORLA and Rlauxe with errors
 
 Here we add random errors between the MVRS and CVRS at rates of 2 per 1000 ballots (.002), 5 per 1000 ballots (.005),
 1 per 100 ballots (.01), and 2 per 100 ballots (.02):
@@ -45,8 +49,7 @@ The same plot on a log-log scale. A straight line means that the sample size is 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLogLog.html" rel="corlaWithErrorsLogLog">![corlaWithErrorsLogLog](plots/corla/corlaWithErrors/corlaWithErrorsLogLog.png)</a>
 
 * COBRA is impressively good in the absence of errors.
-* As expected, it does progressively worse as the error rate increases.
-* Not clear if COBRA can efficiently do multiple contests at once.
+* It does progressively worse as the error rate increases and the margin decreases.
 
 # Notes on CORLA implementation
 
@@ -63,5 +66,6 @@ The same plot on a log-log scale. A straight line means that the sample size is 
 
 Other issues that are not clear to me:
 
-* Handling of phantom records.
-* batching of ballots for auditing (must already be done in CORLA?)
+* Can CORLA efficiently do multiple contests at once?
+* How dors CORLA handle phantom records?
+* How is batching of ballots for auditing done?

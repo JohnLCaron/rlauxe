@@ -39,6 +39,7 @@ class PollingWorkflow(
         ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
     }
 
+    /*
     override fun startNewRound(quiet: Boolean): AuditRound {
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
@@ -62,12 +63,16 @@ class PollingWorkflow(
         return auditRound
     }
 
+     */
+
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
         return runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
-    override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun auditRounds() = auditRounds
+    override fun contestUA(): List<ContestUnderAudit> = contestsUA
+    override fun cvrs() = emptyList<Cvr>()
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
 }
 

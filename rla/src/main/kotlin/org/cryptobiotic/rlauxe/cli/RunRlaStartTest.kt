@@ -146,7 +146,7 @@ object RunRlaStartTest {
         writeCvrsJsonFile(mvrus, mvrFile)
         println("   writeCvrsJsonFile ${mvrFile}")
 
-        writeContestsJsonFile(clcaWorkflow.getContests(), publisher.contestsFile())
+        writeContestsJsonFile(clcaWorkflow.contestUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
         // get the first round of samples wanted, write them to round1 subdir
@@ -201,7 +201,7 @@ object RunRlaStartTest {
         writeCvrsJsonFile(mvrus, mvrFile)
         println("   writeCvrsJsonFile ${mvrFile}")
 
-        writeContestsJsonFile(pollingWorkflow.getContests(), publisher.contestsFile())
+        writeContestsJsonFile(pollingWorkflow.contestUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
         // get the first round of samples wanted, write them to round1 subdir

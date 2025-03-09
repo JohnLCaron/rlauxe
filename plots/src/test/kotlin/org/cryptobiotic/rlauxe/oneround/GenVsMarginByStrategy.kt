@@ -11,7 +11,7 @@ class GenVsMarginByStrategy {
     var dirName = "/home/stormy/temp/oneround/marginByStrategy2"
 
     val N = 100000
-    val nruns = 1000
+    val nruns = 10
     val nsimEst = 10
     val fuzzPct = .01
     var phantomPct = .02

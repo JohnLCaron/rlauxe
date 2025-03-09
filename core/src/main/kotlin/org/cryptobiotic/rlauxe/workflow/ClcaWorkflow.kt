@@ -4,10 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
-
-private val debugErrorRates = false
 
 // "Stylish Risk-Limiting Audits in Practice" STYLISH 2.1
 // 1. Set up the audit
@@ -47,6 +44,7 @@ class ClcaWorkflow(
         cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
     }
 
+    /* TODO how to share this ??
     override fun startNewRound(quiet: Boolean): AuditRound {
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
@@ -68,28 +66,30 @@ class ClcaWorkflow(
 
         auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
         return auditRound
-    }
+    } */
 
     //  return allDone
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
-        return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
+        return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, 
+            auditRound.roundIdx, auditor = AuditClcaAssertion())
     }
 
     override fun auditConfig() =  this.auditConfig
-    override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun auditRounds() = auditRounds
+    override fun contestUA(): List<ContestUnderAudit> = contestsUA
+    override fun cvrs() = cvrs
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 
-// TODO lot of common code between the audit types...
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
                  sampleIndices: List<Int>,
                  mvrs: List<Cvr>,
                  cvrs: List<Cvr>,
                  roundIdx: Int,
-                 quiet: Boolean): Boolean {
+                 auditor: ClcaAssertionAuditor): Boolean {
 
     val contestsNotDone = contests.filter{ !it.done }
     val sampledCvrs = sampleIndices.map { cvrs[it] }
@@ -99,7 +99,6 @@ fun runClcaAudit(auditConfig: AuditConfig,
     val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
     cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
 
-    if (!quiet) println("runAudit round $roundIdx")
     var allDone = true
     contestsNotDone.forEach { contest ->
         if (contest.contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
@@ -108,7 +107,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
-                val testH0Result = auditClcaAssertion(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx, quiet=quiet)
+                val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -121,74 +120,88 @@ fun runClcaAudit(auditConfig: AuditConfig,
     return allDone
 }
 
-fun auditClcaAssertion(
-    auditConfig: AuditConfig,
-    contest: ContestIF,
-    assertionRound: AssertionRound,
-    cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    roundIdx: Int,
-    quiet: Boolean = true,
-): TestH0Result {
-    val cassertion = assertionRound.assertion as ClcaAssertion
-    val cassorter = cassertion.cassorter
-    val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
+fun interface ClcaAssertionAuditor {
+    fun run(
+        auditConfig: AuditConfig,
+        contest: ContestIF,
+        assertionRound: AssertionRound,
+        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        roundIdx: Int,
+    ): TestH0Result
+}
 
-    val clcaConfig = auditConfig.clcaConfig
-    val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
-        ClcaStrategyType.previous,
-        ClcaStrategyType.phantoms -> {
-            // use phantomRate as apriori
-            ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
+class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
+
+    override fun run(
+        auditConfig: AuditConfig,
+        contest: ContestIF,
+        assertionRound: AssertionRound,
+        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        roundIdx: Int,
+    ): TestH0Result {
+        val cassertion = assertionRound.assertion as ClcaAssertion
+        val cassorter = cassertion.cassorter
+        val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
+
+        val clcaConfig = auditConfig.clcaConfig
+        val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
+            ClcaStrategyType.previous,
+            ClcaStrategyType.phantoms
+                -> {
+                // use phantomRate as apriori
+                ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
+            }
+
+            ClcaStrategyType.oracle -> {
+                // use the actual errors comparing mvrs to cvrs. Testing only
+                ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
+            }
+
+            ClcaStrategyType.noerror -> {
+                ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
+            }
+
+            ClcaStrategyType.fuzzPct -> {
+                // use computed errors as apriori
+                ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
+            }
+
+            ClcaStrategyType.apriori ->
+                // use given errors as apriori
+                clcaConfig.errorRates!!
         }
 
-        ClcaStrategyType.oracle -> {
-            // use the actual errors comparing mvrs to cvrs. Testing only
-            ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
+        val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
+            OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+        } else {
+            AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         }
 
-        ClcaStrategyType.noerror -> {
-            ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
-        }
+        val testFn = BettingMart(
+            bettingFn = bettingFn,
+            Nc = contest.Nc,
+            noerror = cassorter.noerror(),
+            upperBound = cassorter.upperBound(),
+            riskLimit = auditConfig.riskLimit,
+            withoutReplacement = true
+        )
 
-        ClcaStrategyType.fuzzPct -> {
-            // use computed errors as apriori
-            ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
-        }
+        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
 
-        ClcaStrategyType.apriori ->
-            // use given errors as apriori
-            clcaConfig.errorRates!!
+        assertionRound.auditResult = AuditRoundResult(
+            roundIdx,
+            nmvrs = sampler.maxSamples(),
+            maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
+            pvalue = testH0Result.pvalueLast,
+            samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
+            samplesUsed = testH0Result.sampleCount,
+            status = testH0Result.status,
+            measuredMean = testH0Result.tracker.mean(),
+            startingRates = errorRates,
+            measuredRates = testH0Result.tracker.errorRates(),
+        )
+
+        if (!quiet) println(" ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
+        return testH0Result
     }
-
-    val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
-        OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
-    } else {
-        AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
-    }
-
-    val testFn = BettingMart(
-        bettingFn = bettingFn,
-        Nc = contest.Nc,
-        noerror = cassorter.noerror(),
-        upperBound = cassorter.upperBound(),
-        riskLimit = auditConfig.riskLimit,
-        withoutReplacement = true
-    )
-
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
-
-    assertionRound.auditResult  = AuditRoundResult(roundIdx,
-        nmvrs = sampler.maxSamples(),
-        maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
-        pvalue = testH0Result.pvalueLast,
-        samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
-        samplesUsed = testH0Result.sampleCount,
-        status = testH0Result.status,
-        measuredMean = testH0Result.tracker.mean(),
-        startingRates = errorRates,
-        measuredRates = testH0Result.tracker.errorRates(),
-    )
-
-    if (!quiet) println(" ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
-    return testH0Result
 }

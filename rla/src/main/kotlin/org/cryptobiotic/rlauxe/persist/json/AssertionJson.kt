@@ -57,7 +57,6 @@ fun ClcaAssertion.publishJson() = ClcaAssertionJson(
         this.cassorter.publishJson(),
     )
 
-// TODO make inheritence less clumsy
 fun ClcaAssertionJson.import(info: ContestInfo): ClcaAssertion {
    val result = ClcaAssertion(
        info,

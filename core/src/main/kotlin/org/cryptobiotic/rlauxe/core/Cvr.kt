@@ -62,7 +62,7 @@ data class Cvr(
 
 /** Mutable version of Cvr. */
 data class CvrUnderAudit (val cvr: Cvr, val sampleNum: Long): BallotOrCvr {
-    var sampled = false // is this CVR in the sample?
+    var sampled = false // is this CVR in the sample TODO needed?
 
     val id = cvr.id
     val votes = cvr.votes

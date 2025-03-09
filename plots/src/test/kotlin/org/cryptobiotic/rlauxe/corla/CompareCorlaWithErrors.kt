@@ -15,6 +15,7 @@ class CompareCorlaWithErrors {
     val dirName = "/home/stormy/temp/corla/$name"
     val mvrsFuzzPct = .02
 
+    /*
     @Test
     fun corlaWithFuzz() {
         val margins =
@@ -85,4 +86,6 @@ class CompareCorlaWithErrors {
         showFailuresVsMargin(name, dirName, subtitle)
         showNroundsVsMargin(name, dirName, subtitle)
     }
+
+     */
 }

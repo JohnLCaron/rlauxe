@@ -55,14 +55,16 @@ class PersistentWorkflow(
     //  return allDone
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
         return when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, auditor = AuditClcaAssertion())
             AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runOneAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, auditor = OneAuditClcaAssertion())
         }
     }
 
     override fun auditConfig() =  this.auditConfig
-    override fun getContests(): List<ContestUnderAudit> = contestsUA
+    override fun auditRounds() = auditRounds
+    override fun contestUA(): List<ContestUnderAudit> = contestsUA
+    override fun cvrs() = cvrs
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = bcUA
 }
 

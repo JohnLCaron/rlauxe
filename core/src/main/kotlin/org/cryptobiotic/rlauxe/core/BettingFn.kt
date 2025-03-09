@@ -58,7 +58,8 @@ fun etaToLam(eta: Double, mu: Double, upper: Double): Double {
 //  the bets to be positive (for one-sided tests against the alternative that the true mean is larger than hypothesized)
 //
 // Note that the initial guess is only used for the first lam, rather than a weighted average as in shrink_trunc.
-// Note that upperBound is not used, which seem suspicious, especpecially because SHANGRLA says \mu \in [0, u].
+// Note that upperBound is not used, which seems suspicious, especially because SHANGRLA says \mu \in [0, u].
+// Currently not used in production
 /**
  * Approximate Growth rate adaptive to the particular alternative (AGRAPA)
  * @parameter t hypothesized population mean
@@ -68,8 +69,8 @@ fun etaToLam(eta: Double, mu: Double, upper: Double): Double {
 class AgrapaBet(
     val N: Int,
     val withoutReplacement: Boolean = true,
-    val upperBound: Double, // TODO why not used ??
-    val lam0: Double, // initial guess TODO how to pick this? should be < 2 * c_grapa_0?
+    val upperBound: Double, // why not used ??
+    val lam0: Double, // initial guess; how to pick this? should be < 2 * c_grapa_0?
     val c_grapa_0: Double,
     val c_grapa_max: Double,
     val c_grapa_grow: Double

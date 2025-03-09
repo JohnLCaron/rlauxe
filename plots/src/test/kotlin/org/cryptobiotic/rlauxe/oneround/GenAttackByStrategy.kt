@@ -125,7 +125,7 @@ class GenAttackByStrategy {
             auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
             p1flips=flip1,
         )
-        val task: SingleRoundAuditTask = taskgen.generateNewTask()
+        val task: ClcaSingleRoundAuditTask = taskgen.generateNewTask()
         val result =  task.run()
         println(result)
     }

@@ -28,7 +28,7 @@ class BettingMart(
                         terminateOnNullReject: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
-        require(maxSamples <= Nc) // TODO assumes sample without replacement?
+        require(!withoutReplacement || maxSamples <= Nc)
 
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic

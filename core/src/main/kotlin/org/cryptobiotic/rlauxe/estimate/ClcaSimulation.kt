@@ -10,7 +10,7 @@ private val show = true
 
 /** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
  * Specific to a contest. Only used for estimating the sample size.
- * TODO cant use Raire??
+ * TODO why cant we use this with Raire??
  */
 class ClcaSimulation(
     rcvrs: List<Cvr>, // may have phantoms
@@ -50,7 +50,7 @@ class ClcaSimulation(
         flippedVotesP1o = flipP1o(mmvrs, needToChange = (Nc * errorRates.p1o).toInt())
         flippedVotesP2o = flipP2o(mmvrs, needToChange = (Nc * errorRates.p2o).toInt())
         flippedVotesP2u = flipP2u(mmvrs, needToChange = (Nc * errorRates.p2u).toInt())
-        flippedVotesP1u = if (isIRV) flipP1u(mmvrs, needToChange = (Nc * errorRates.p1u).toInt())
+        flippedVotesP1u = if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt())
                         else flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
@@ -217,7 +217,7 @@ class ClcaSimulation(
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1)
     //  NEB one vote understatement: cvr has winner preceding loser (1/2), but not first, mvr has winner as first pref (1)
     //  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining (1)
-    fun flipP1u(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP1uIRV(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0

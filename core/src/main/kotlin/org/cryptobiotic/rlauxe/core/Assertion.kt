@@ -58,9 +58,6 @@ class ClcaAssertion(
         return result
     }
 
-    //     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
-    //    val hasStyle: Boolean = true, // TODO could be on the Contest ??
-    //    val check: Boolean = true, // TODO get rid of
     override fun show() = buildString {
         append(super.show())
         appendLine(" cassorter: ${cassorter}")

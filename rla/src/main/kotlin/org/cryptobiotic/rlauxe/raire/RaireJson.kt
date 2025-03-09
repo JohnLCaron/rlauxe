@@ -7,37 +7,6 @@ import org.cryptobiotic.rlauxe.oneaudit.import
 import org.cryptobiotic.rlauxe.oneaudit.publishOAJson
 import org.cryptobiotic.rlauxe.persist.json.*
 
-/* data class RaireContest(
-//    override val info: ContestInfo,
-//    override val winners: List<Int>,
-//    override val Nc: Int,
-//    override val Np: Int,
-//)
-// TODO duplicated in ContestIFJson
-@Serializable
-data class RaireContestJson(
-    // val info: ContestInfoJson,
-    val winners: List<Int>,
-    val Nc: Int,
-    val Np: Int,
-)
-
-fun RaireContest.publishJson() = RaireContestJson(
-        // this.info.publishJson(),
-        this.winners,
-        this.Nc,
-        this.Np,
-    )
-
-fun RaireContestJson.import(info: ContestInfo) = RaireContest(
-        info,
-        this.winners,
-        this.Nc,
-        this.Np,
-    )
-
- */
-
 // class RaireContestUnderAudit(
 //    contest: RaireContest,
 //    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest

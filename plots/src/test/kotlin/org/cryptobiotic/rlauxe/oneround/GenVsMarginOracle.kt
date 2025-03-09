@@ -94,7 +94,7 @@ class GenVsMarginOracle {
             auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
             p2flips=flip2,
         )
-        val task: SingleRoundAuditTask = taskgen.generateNewTask()
+        val task: ClcaSingleRoundAuditTask = taskgen.generateNewTask()
         val result =  task.run()
         println(result)
     }

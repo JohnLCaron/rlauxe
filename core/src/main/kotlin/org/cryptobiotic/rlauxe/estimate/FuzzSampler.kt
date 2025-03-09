@@ -155,7 +155,7 @@ class OneAuditFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO cant be used on approval
+// TODO cant be used on approval?
 
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs

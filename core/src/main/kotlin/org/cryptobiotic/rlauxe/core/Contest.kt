@@ -78,7 +78,7 @@ class Contest(
         override val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
         override val Nc: Int,
-        override val Np: Int,       // TODO may not know this, if !hasStyles
+        override val Np: Int,       // TODO may not know this value, if !hasStyles
     ): ContestIF {
     override val id = info.id
     val name = info.name
@@ -182,7 +182,7 @@ class Contest(
 /** Contest with assertions. */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    val isComparison: Boolean = true, // TODO change to AuditType?
+    val isComparison: Boolean = true,
     val hasStyle: Boolean = true,
 ) {
     val id = contest.info.id

@@ -261,7 +261,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
 // data class AuditRoundResult(
 //    val roundIdx: Int,
 //    val estSampleSize: Int,   // estimated sample size
-//    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits) TODO needed?
+//    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits)
 //    val pvalue: Double,       // last pvalue when testH0 terminates
 //    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
 //    val samplesUsed: Int,     // sample count when testH0 terminates

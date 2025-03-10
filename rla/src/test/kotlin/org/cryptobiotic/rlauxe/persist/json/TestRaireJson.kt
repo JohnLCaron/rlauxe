@@ -1,8 +1,7 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.json.import
-import org.cryptobiotic.rlauxe.persist.json.publishJson
+import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.test.Test
 import kotlin.test.assertTrue

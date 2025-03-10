@@ -1,14 +1,14 @@
 # CORLA
 03/09/2025
 
-The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) suggest the following
+The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) (2018) suggest the following
 issues should be addressed:
 
 1. The current version (1.1.0) of RLATool needs to be modified to
   recognize and group together contests that cross jurisdictional boundaries.
   Currently, it treats every contest as if it were entirely contained in a single county. 
   It does not allow the user to select the sample size, nor directly allow an unstratified random sample to be drawn across counties.
-2. New statistical methods are needed needed to deal with contests that include both CVR counties and no-CVR counties.
+2. New statistical methods are needed to deal with contests that include both CVR counties and no-CVR counties.
 3. Auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from
   just those ballots that contain the contest.
 
@@ -48,7 +48,7 @@ The same plot on a log-log scale. A straight line means that the sample size is 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLogLog.html" rel="corlaWithErrorsLogLog">![corlaWithErrorsLogLog](plots/corla/corlaWithErrors/corlaWithErrorsLogLog.png)</a>
 
-* COBRA is impressively good in the absence of errors.
+* CORLA is impressively good in the absence of errors.
 * It does progressively worse as the error rate increases and the margin decreases.
 
 # Notes on CORLA implementation

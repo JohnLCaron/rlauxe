@@ -5,8 +5,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class TestRcvAssorter {
-    val rr = readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/334_361_vbm.json")
+class TestReadRaireResultsJson {
+    val rr = readRaireResultsJson("src/test/data/raire/334_361_vbm.json")
     val ncs = mapOf("361" to 1000, "334" to 12000) // TODO
     val nps = mapOf("361" to 0, "334" to 0) // TODO
 

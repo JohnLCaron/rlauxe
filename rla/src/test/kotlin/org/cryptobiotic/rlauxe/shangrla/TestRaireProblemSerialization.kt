@@ -9,7 +9,7 @@
   You should have received a copy of the GNU Affero General Public License along with ConcreteSTV.  If not, see <https://www.gnu.org/licenses/>.
 
  */
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.shangrla
 
 import au.org.democracydevelopers.raire.RaireError.*
 import au.org.democracydevelopers.raire.RaireProblem
@@ -27,7 +27,8 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class TestSerialization {
+// Not really sure if this should be here. Its testing the raire-java code.
+class TestRaireProblemSerialization {
     private val mapper = ObjectMapper()
 
     @Test

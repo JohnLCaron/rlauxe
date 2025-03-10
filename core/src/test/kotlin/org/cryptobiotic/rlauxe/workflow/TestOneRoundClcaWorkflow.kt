@@ -33,7 +33,7 @@ class TestOneRoundClcaWorkflow {
 
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val contestRounds = workflow.contestUA().map { ContestRound(it, 1) }
-        runClcaSingleRoundAudit("testOneRoundClcaWorkflow", workflow, contestRounds, testMvrs, auditor = AuditClcaAssertion())
+        runClcaSingleRoundAudit(workflow, contestRounds, testMvrs, auditor = AuditClcaAssertion())
     }
 
 }

@@ -25,13 +25,13 @@ class CorlaSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff = 1.0,
+            AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
         )
 
         val sim =
             ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
-        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
@@ -102,7 +102,7 @@ class CorlaWorkflow(
         }
 
         val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
+        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy{ it.sampleNumber() }
     }
 
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
@@ -114,7 +114,7 @@ class CorlaWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
-    override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
+    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 
 /////////////////////////////////////////////////////////////////////////////////

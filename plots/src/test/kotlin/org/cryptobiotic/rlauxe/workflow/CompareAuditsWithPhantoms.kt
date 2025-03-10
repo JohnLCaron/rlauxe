@@ -86,7 +86,7 @@ class CompareAuditsWithPhantoms {
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
         val stopwatch = Stopwatch()
 
-        val auditConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
+        val auditConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

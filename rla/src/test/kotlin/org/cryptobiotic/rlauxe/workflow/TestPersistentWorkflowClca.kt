@@ -36,7 +36,9 @@ class TestPersistentWorkflowClca {
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        writeCvrsJsonFile(clcaWorkflow.cvrsUA, publish.cvrsFile())
+        val cvrsUA = clcaWorkflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
+
+        writeCvrsJsonFile(cvrsUA, publish.cvrsFile())
 
         writeContestsJsonFile(clcaWorkflow.contestUA(), publish.contestsFile())
 
@@ -44,7 +46,7 @@ class TestPersistentWorkflowClca {
         var done = false
         var workflow : RlauxWorkflowIF = clcaWorkflow
         while (!done) {
-            done = runPersistentWorkflowStage(round, workflow, clcaWorkflow.cvrsUA, testMvrs, publish)
+            done = runPersistentWorkflowStage(round, workflow, cvrsUA, testMvrs, publish)
             workflow = PersistentWorkflow(topdir)
             round++
         }
@@ -73,7 +75,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: L
 
         val sampledMvrus = nextRound.sampledIndices.map {
             val cvr = bcUA[it]
-            CvrUnderAudit(testMvrs[it], cvr.sampleNumber())
+            CvrUnderAudit(testMvrs[it], it, cvr.sampleNumber())
         }
         writeCvrsJsonFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
 

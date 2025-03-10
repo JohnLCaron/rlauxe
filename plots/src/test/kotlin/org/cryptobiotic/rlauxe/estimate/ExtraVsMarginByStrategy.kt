@@ -22,7 +22,7 @@ class ExtraVsMarginByStrategy {
         val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0, minMargin = 0.0)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->

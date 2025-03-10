@@ -12,7 +12,7 @@ class PollingWorkflow(
     val Nb: Int, // total number of ballots/cards TODO same as ballots.size ??
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-    val ballotsUA: List<BallotUnderAudit>
+    private val ballotsUA: List<BallotUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -36,7 +36,7 @@ class PollingWorkflow(
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
-        ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
+        ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, prng.next()) }.sortedBy{ it.sampleNumber() }
     }
 
     override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
@@ -47,7 +47,7 @@ class PollingWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = emptyList<Cvr>()
-    override fun getBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
+    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
 }
 
 fun runPollingAudit(

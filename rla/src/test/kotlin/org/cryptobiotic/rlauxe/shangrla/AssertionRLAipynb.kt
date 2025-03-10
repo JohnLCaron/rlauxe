@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.workflow.AuditRound
 import org.cryptobiotic.rlauxe.workflow.ContestRound
 import org.cryptobiotic.rlauxe.workflow.Sampler
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -441,8 +442,8 @@ class AssertionRLA {
 //prng = SHA256(audit.seed)
 //CVR.assign_sample_nums(cvr_list, prng)
         // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
-        val prng = Prng(secureRandom.nextLong())
-        val cvras = rcvrs.map { CvrUnderAudit(it, prng.next()) }
+        val cvras = rcvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, Random.nextLong())}
+
         println("calc_sample_sizes = $results")
 
 //#%%

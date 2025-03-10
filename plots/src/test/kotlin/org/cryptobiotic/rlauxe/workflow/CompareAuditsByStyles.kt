@@ -24,7 +24,7 @@ class CompareAuditsByStyles {
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val pollingConfigNS = AuditConfig(AuditType.POLLING, false, samplePctCutoff=1.0, nsimEst = nsimEst)
+            val pollingConfigNS = AuditConfig(AuditType.POLLING, false, nsimEst = nsimEst)
             val pollingGeneratorNS = PollingWorkflowTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to "pollingNoStyles"),
@@ -32,7 +32,7 @@ class CompareAuditsByStyles {
                 Nb=Nb)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGeneratorNS))
 
-            val pollingConfig = AuditConfig(AuditType.POLLING, true, samplePctCutoff=1.0, nsimEst = nsimEst)
+            val pollingConfig = AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst)
             val pollingGenerator = PollingWorkflowTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to "pollingWithStyles"),
@@ -40,7 +40,7 @@ class CompareAuditsByStyles {
                 Nb=Nc)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaConfigNS = AuditConfig(AuditType.CLCA, false, samplePctCutoff=1.0, nsimEst = nsimEst,
+            val clcaConfigNS = AuditConfig(AuditType.CLCA, false, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGeneratorNS = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaNoStyles"),
@@ -49,7 +49,7 @@ class CompareAuditsByStyles {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorNS))
 
-            val clcaConfig = AuditConfig(AuditType.CLCA, true, samplePctCutoff=1.0, nsimEst = nsimEst,
+            val clcaConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaWithStyles"),

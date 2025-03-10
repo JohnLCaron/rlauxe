@@ -9,7 +9,7 @@ data class AuditConfig(
     val auditType: AuditType,
     val hasStyles: Boolean,
     val riskLimit: Double = 0.05,
-    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
+    val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
@@ -62,7 +62,7 @@ data class ClcaConfig(
 
 enum class OneAuditStrategyType { default, max99 }
 data class OneAuditConfig(
-    val strategy: OneAuditStrategyType,
+    val strategy: OneAuditStrategyType = OneAuditStrategyType.default,
     val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight
 )

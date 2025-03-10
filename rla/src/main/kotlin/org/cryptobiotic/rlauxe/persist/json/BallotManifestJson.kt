@@ -61,6 +61,7 @@ data class BallotJson(
     val phantom: Boolean,
     val ballotStyle: BallotStyleJson?,
     val contestIds: List<Int>?,
+    val index: Int,
     val sampleNumber: Long,
 )
 
@@ -70,6 +71,7 @@ fun BallotUnderAudit.publishJson() : BallotJson {
         this.phantom,
         this.ballot.ballotStyle?.publishJson(),
         this.ballot.contestIds,
+        this.index,
         this.sampleNum,
     )
 }
@@ -82,6 +84,7 @@ fun BallotJson.import(): BallotUnderAudit {
             this.ballotStyle?.import(),
             this.contestIds,
         ),
+        this.index,
         this.sampleNumber)
 }
 

@@ -11,9 +11,9 @@ class ClcaWorkflow(
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-): RlauxWorkflowClca {
+): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    val cvrsUA: List<CvrUnderAudit>
+    private val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -30,8 +30,9 @@ class ClcaWorkflow(
         check(auditConfig, contests)
         // TODO filter out contests that are done... */
 
+        // the order of the cvrs cannot be changed.
         val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
+        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
     }
 
     //  return allDone
@@ -44,8 +45,7 @@ class ClcaWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
-    override fun cvrsUA() = cvrsUA
-    override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
+    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA // sorted by sampleNum
 }
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -30,8 +30,9 @@ class TestPersistentWorkflowPolling {
         val (testCvrs, ballotManifest) = testData.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
         val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
+        val ballotsUA = pollingWorkflow.sortedBallotsOrCvrs().map{ it as BallotUnderAudit }
 
-        val ballotManifestUA = BallotManifestUnderAudit(pollingWorkflow.ballotsUA, ballotManifest.ballotStyles)
+        val ballotManifestUA = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publish.ballotManifestFile())
 
         writeContestsJsonFile(pollingWorkflow.contestUA(), publish.contestsFile())
@@ -40,7 +41,7 @@ class TestPersistentWorkflowPolling {
         var done = false
         var workflow : RlauxWorkflowIF = pollingWorkflow
         while (!done) {
-            done = runPersistentWorkflowStage(round, workflow, pollingWorkflow.ballotsUA, testMvrs, publish)
+            done = runPersistentWorkflowStage(round, workflow, ballotsUA, testMvrs, publish)
             workflow = PersistentWorkflow(topdir)
             round++
         }

@@ -18,7 +18,7 @@ class TestCvrsJson {
     fun testRoundtrip() {
         val testData = MultiContestTestData(11, 4, 1000)
         val cvrs = testData.makeCvrsFromContests()
-        val target = cvrs.map { CvrUnderAudit(it, Random.nextLong())}
+        val target = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, Random.nextLong())}
 
         val json = target.publishJson()
         val roundtrip = json.import()
@@ -34,7 +34,7 @@ class TestCvrsJson {
     fun testRoundtripIO() {
         val testData = MultiContestTestData(11, 4, 1000)
         val cvrs = testData.makeCvrsFromContests()
-        val target = cvrs.map { CvrUnderAudit(it, Random.nextLong())}
+        val target = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, Random.nextLong())}
 
         writeCvrsJsonFile(target, filename)
         val result = readCvrsJsonFile(filename)

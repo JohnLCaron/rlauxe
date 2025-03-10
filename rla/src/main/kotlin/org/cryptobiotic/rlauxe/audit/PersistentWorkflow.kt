@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 class PersistentWorkflow(
     val inputDir: String,
 ): RlauxWorkflowIF {
+
     private val auditConfig: AuditConfig
     private val bcUA: List<BallotOrCvr>
     private val cvrs: List<Cvr>
@@ -22,8 +23,8 @@ class PersistentWorkflow(
 
         // TODO other auditTypes
         // bcUA = if (auditConfig.auditType == AuditType.POLLING) auditRecord.ballots else auditRecord.cvrs
-        bcUA = auditRecord.cvrs
-        cvrs = auditRecord.cvrs.map { it.cvr }
+        bcUA = auditRecord.bcUA // sorted by sampleNum
+        cvrs = auditRecord.cvrs // original order
         contestsUA = auditRounds.last().contestRounds.map { it.contestUA } // TODO
     }
 
@@ -42,7 +43,7 @@ class PersistentWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
-    override fun getBallotsOrCvrs() : List<BallotOrCvr> = bcUA
+    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = bcUA
 }
 
 fun RlauxWorkflowIF.showResults(estSampleSize: Int) {

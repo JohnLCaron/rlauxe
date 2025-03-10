@@ -85,7 +85,7 @@ class ClcaWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-            AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0,
+            AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
                 clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -126,7 +126,7 @@ class PollingWorkflowTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = nsimEst,  samplePctCutoff=1.0,
+            AuditType.POLLING, true, nsimEst = nsimEst,
             pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
         )
 
@@ -170,7 +170,7 @@ class OneAuditWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = nsimEst,  samplePctCutoff=1.0,
+            AuditType.ONEAUDIT, true, nsimEst = nsimEst,
             oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
         )
 
@@ -203,7 +203,7 @@ class RaireWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff=1.0,
+        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
         val (rcontest, testCvrs) = makeRaireContest(N=Nc, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)

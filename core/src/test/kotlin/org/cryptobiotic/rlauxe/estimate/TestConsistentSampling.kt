@@ -21,7 +21,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
         val prng = Prng(Random.nextLong())
-        val cvrsUAP = test.makeCvrsFromContests().map { CvrUnderAudit( it, prng.next()) }
+        val cvrsUAP = test.makeCvrsFromContests().mapIndexed { idx, it -> CvrUnderAudit( it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
         val sampleIndices = consistentSampling(auditRound, cvrsUAP)
@@ -41,12 +41,7 @@ class TestConsistentSampling {
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
             val cvrs = cvrsUAP.filter { it.hasContest(contest.id) }
-            var count = 0
-            cvrs.forEachIndexed { idx, it ->
-                if (it.sampled) count++
-            }
             assertTrue(contest.estSampleSize <= cvrs.size)
-            assertTrue(contest.estSampleSize <= count)
             // TODO what else can we check ??
         }
     }
@@ -61,7 +56,7 @@ class TestConsistentSampling {
         val ballotManifest = test.makeBallotManifest(true)
 
         val prng = Prng(Random.nextLong())
-        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
+        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
         val sampleIndices = consistentSampling(auditRound, ballotsUA)
@@ -79,12 +74,7 @@ class TestConsistentSampling {
             val ballotsForContest = ballotsUA.filter {
                 it.ballot.hasContest(contest.id)
             }
-            var count = 0
-            ballotsUA.forEachIndexed { idx, it ->
-                if (it.sampled) count++
-            }
             assertTrue(contest.estSampleSize <= ballotsForContest.size)
-            assertTrue(contest.estSampleSize <= count)
         }
     }
 
@@ -98,7 +88,7 @@ class TestConsistentSampling {
 
         val ballotManifest = test.makeBallotManifest(false)
         val prng = Prng(Random.nextLong())
-        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, prng.next()) }
+        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
 
         //    contests: List<ContestUnderAudit>,
         //    ballots: List<BallotUnderAudit>, // all the ballots available to sample

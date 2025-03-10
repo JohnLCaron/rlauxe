@@ -94,8 +94,8 @@ object RunRlaStartTest {
     ): Int {
         println("Start startTestElectionClca")
         val publisher = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 100, samplePctCutoff=1.0, minMargin=.0,
-            removeTooManyPhantoms=false, clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 100,
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
@@ -133,14 +133,15 @@ object RunRlaStartTest {
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
 
         // ClcaWorkflow assigns the sample numbers, and creates the assertions
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, testCvrs)
-        writeCvrsJsonFile(clcaWorkflow.cvrsUA, publisher.cvrsFile())
+        val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, testCvrs)
+        val cvrsUA = clcaWorkflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
+        writeCvrsJsonFile(cvrsUA, publisher.cvrsFile())
         println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
 
-        // save the testMvrs. kludgey
+        // save the testMvrs
         val mvrus = testMvrs.mapIndexed { idx, mvr ->
-            val cvr = clcaWorkflow.cvrsUA[idx]
-            CvrUnderAudit(mvr, cvr.sampleNumber())
+            val cvr = cvrsUA[idx]
+            CvrUnderAudit(mvr, cvr.index(), cvr.sampleNumber())
         }
         publisher.validateOutputDirOfFile(mvrFile)
         writeCvrsJsonFile(mvrus, mvrFile)
@@ -168,7 +169,7 @@ object RunRlaStartTest {
         mvrFile: String,
     ): Int {
         val publisher = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100, samplePctCutoff=1.0, minMargin=.00, removeTooManyPhantoms=false, )
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
         println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
 
@@ -188,14 +189,16 @@ object RunRlaStartTest {
 
         // PollingWorkflow assigns the sample numbers, and creates the assertions
         val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
-        val ballotManifestUA = BallotManifestUnderAudit(pollingWorkflow.ballotsUA, ballotManifest.ballotStyles)
+        val ballotsUA = pollingWorkflow.sortedBallotsOrCvrs().map{ it as BallotUnderAudit }
+
+        val ballotManifestUA = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publisher.ballotManifestFile())
         println("   writeBallotManifestJsonFile ${publisher.ballotManifestFile()}")
 
-        // save the testMvrs. kludgey
+        // save the testMvrs
         val mvrus = testMvrs.mapIndexed { idx, mvr ->
-            val ballot = pollingWorkflow.ballotsUA[idx]
-            CvrUnderAudit(mvr, ballot.sampleNumber())
+            val ballot = ballotsUA[idx]
+            CvrUnderAudit(mvr, ballot.index(), ballot.sampleNumber())
         }
         publisher.validateOutputDirOfFile(mvrFile)
         writeCvrsJsonFile(mvrus, mvrFile)

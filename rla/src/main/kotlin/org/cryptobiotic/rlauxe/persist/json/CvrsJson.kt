@@ -29,6 +29,7 @@ data class CvrJson(
     val id: String,
     val votes: List<VoteJson>,
     val phantom: Boolean,
+    val index: Int,
     val sampleNumber: Long,
 )
 
@@ -38,6 +39,7 @@ fun CvrUnderAudit.publishJson() : CvrJson {
         this.id,
         votes,
         this.cvr.phantom,
+        this.index,
         this.sampleNum,
     )
 }
@@ -50,6 +52,7 @@ fun CvrJson.import(): CvrUnderAudit {
             votes,
             this.phantom,
         ),
+        this.index,
         this.sampleNumber)
 }
 

@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 
-// immutable, TODO except for the IntArray!
+// TODO immutable except for the IntArray (!)
 data class Cvr(
     val id: String,
-    val votes: Map<Int, IntArray>, // contest : list of candidates voted for; for IRV, ranked hi to lo
+    val votes: Map<Int, IntArray>, // contest : list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
 ) {
     fun hasContest(contestId: Int): Boolean = votes[contestId] != null
@@ -33,6 +33,7 @@ data class Cvr(
         votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 
+    //// overriding because of IntArray ??
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -60,24 +61,18 @@ data class Cvr(
     }
 }
 
-/** Mutable version of Cvr. */
-data class CvrUnderAudit (val cvr: Cvr, val sampleNum: Long): BallotOrCvr {
-    var sampled = false // is this CVR in the sample TODO needed?
-
+/** Cvr that has been assigned a sampleNum. */
+data class CvrUnderAudit (val cvr: Cvr, val index: Int, val sampleNum: Long): BallotOrCvr {
     val id = cvr.id
     val votes = cvr.votes
     val phantom = cvr.phantom
 
     override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
     override fun sampleNumber() = sampleNum
-    override fun isSampled() = sampled
-    override fun setIsSampled(isSampled: Boolean): CvrUnderAudit {
-        this.sampled = isSampled
-        return this
-    }
+    override fun index() = index
 
     override fun toString() = buildString {
-        append("$id ($phantom)")
+        append("$id $index ($phantom)")
         votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 }

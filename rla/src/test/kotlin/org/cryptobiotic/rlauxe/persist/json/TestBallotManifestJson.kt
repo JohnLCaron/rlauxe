@@ -19,7 +19,7 @@ class TestBallotManifestJson {
     fun testRoundtripWithStyle() {
         val testData = MultiContestTestData(11, 4, 1000)
         val (_, ballotManifest) = testData.makeCvrsAndBallotManifest(true)
-        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, Random.nextLong()) }
+        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, Random.nextLong()) }
         val target = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
 
         val json = target.publishJson()
@@ -32,7 +32,8 @@ class TestBallotManifestJson {
     fun testRoundtripWithNoStyle() {
         val testData = MultiContestTestData(11, 4, 1000)
         val (_, ballotManifest) = testData.makeCvrsAndBallotManifest(false)
-        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, Random.nextLong()) }
+        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, Random.nextLong()) }
+
         val target = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
 
         val json = target.publishJson()
@@ -45,7 +46,7 @@ class TestBallotManifestJson {
     fun testRoundtripIO() {
         val testData = MultiContestTestData(11, 4, 1000)
         val (_, ballotManifest) = testData.makeCvrsAndBallotManifest(true)
-        val ballotsUA = ballotManifest.ballots.map { BallotUnderAudit(it, Random.nextLong()) }
+        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, Random.nextLong()) }
         val target = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
 
         writeBallotManifestJsonFile(target, filename)

@@ -11,7 +11,7 @@ class OneAuditWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-): RlauxWorkflowClca {
+): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
     private val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
@@ -25,7 +25,7 @@ class OneAuditWorkflow(
 
         // must be done once and for all rounds
         val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) }
+        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
     }
 
     //  return allDone
@@ -38,8 +38,8 @@ class OneAuditWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
-    override fun cvrsUA() = cvrsUA
-    override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
+    // override fun cvrsUA() = cvrsUA
+    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 
 class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {

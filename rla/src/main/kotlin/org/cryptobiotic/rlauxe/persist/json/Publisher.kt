@@ -4,6 +4,23 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.nio.file.Files
 import java.nio.file.Path
 
+/*
+    topdir/
+      auditConfig.json      // AuditConfigJson
+      contests.json         // ContestsUnderAuditJson
+      cvrs.json             // CvrsJson (or)
+      ballotManifest.json   // BallotManifestJson
+      roundX/
+        auditState.json     // AuditRoundJson
+        sampleIndices.json  // SampleIndicesJson // choose the sample indices to be audited
+        sampleMvrs.json     // CvrsJson // get the mvrs needed for the audit
+
+      altRoundX/
+        estRound.json       // EstimationRoundJson, includes SampleIndices ??
+        sampleMvrs.json     // CvrsJson // get the mvrs needed for the audit  // check agree with SampleIndices
+        auditResult.json     // AuditResultJson
+ */
+
 class Publisher(val topdir: String) {
     val errs =  ErrorMessages("Publisher");
     init {

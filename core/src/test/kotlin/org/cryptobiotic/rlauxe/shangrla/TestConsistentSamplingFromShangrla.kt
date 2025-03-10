@@ -36,9 +36,11 @@ class TestConsistentSamplingFromShangrla {
             .build()
 
         val prng = Prng(12345678901L)
-        val cvrsUA = cvrs.mapIndexed { idx, it ->
-            CvrUnderAudit( it, prng.next()) // here we assign sample number deterministically
+        var cvrsUA = cvrs.mapIndexed { idx, it ->
+            CvrUnderAudit( it, idx, prng.next()) // here we assign sample number deterministically
         }
+        cvrsUA = cvrsUA.sortedBy { it.sampleNumber() }
+
         val contestsUA = contestInfos.mapIndexed { idx, it ->
             makeContestUAfromCvrs( it, cvrs)
         }
@@ -90,9 +92,9 @@ class TestConsistentSamplingFromShangrla {
         val phantomCVRs = makePhantomCvrs(contests, ncvrs)
 
         val prng = Prng(123456789012L)
-        val cvrsUAP = (cvrs + phantomCVRs).map { CvrUnderAudit( it, prng.next()) }
+        var cvrsUAP = (cvrs + phantomCVRs).mapIndexed { idx, it -> CvrUnderAudit( it, idx, prng.next()) }
         assertEquals(9, cvrsUAP.size)
-
+        cvrsUAP = cvrsUAP.sortedBy { it.sampleNumber() }
         val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
         val sample_cvr_indices = consistentSampling(auditRound, cvrsUAP)
         assertEquals(6, sample_cvr_indices.size)

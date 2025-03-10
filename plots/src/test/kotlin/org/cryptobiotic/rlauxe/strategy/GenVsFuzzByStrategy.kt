@@ -23,7 +23,7 @@ class GenVsFuzzByStrategy {
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
 
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = 100, minMargin = 0.0, samplePctCutoff = 1.0)
+        val config = AuditConfig(AuditType.CLCA, true, nsimEst = 100)
 
         fuzzPcts.forEach { fuzzPct ->
             val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,

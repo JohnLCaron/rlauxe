@@ -17,12 +17,12 @@ private val debugSizeNudge = true
  * removing contests until satisfied. */
 fun sample(workflow: RlauxWorkflowProxy, auditRound: AuditRound, previousSamples: Set<Int>, quiet: Boolean): List<Int> {
     val auditConfig = workflow.auditConfig()
-    val borc = workflow.getBallotsOrCvrs()
+    val sortedBorc = workflow.sortedBallotsOrCvrs()
 
     // count the number of cvrs that have at least one contest under audit.
     // TODO this is wrong for samplePctCutoff, except maybe the first round ??
-    val N = if (!auditConfig.hasStyles) borc.size
-                  else borc.filter { it.hasOneOrMoreContest(auditRound.contestRounds) }.count()
+    val N = if (!auditConfig.hasStyles) sortedBorc.size
+                  else sortedBorc.filter { it.hasOneOrMoreContest(auditRound.contestRounds) }.count()
 
     var sampleIndices: List<Int> = emptyList()
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
@@ -63,13 +63,13 @@ fun createSampleIndices(
     val auditConfig = workflow.auditConfig()
     return if (auditConfig.hasStyles) {
         println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
-        val sampleIndices = consistentSampling(auditRound, workflow.getBallotsOrCvrs(), previousSamples)
+        val sampleIndices = consistentSampling(auditRound, workflow.sortedBallotsOrCvrs(), previousSamples)
         println(" consistentSamplingSize= ${sampleIndices.size}")
         sampleIndices
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
         val sampleIndices =
-            uniformSampling(auditRound, workflow.getBallotsOrCvrs(), previousSamples.size, auditConfig.samplePctCutoff, auditRound.roundIdx)
+            uniformSampling(auditRound, workflow.sortedBallotsOrCvrs(), previousSamples.size, auditConfig.samplePctCutoff, auditRound.roundIdx)
         if (!quiet) println(" consistentSamplingSize= ${sampleIndices.size}")
         sampleIndices
     }
@@ -78,15 +78,15 @@ fun createSampleIndices(
 // for audits with hasStyles
 fun consistentSampling(
     auditRound: AuditRound,
-    ballotOrCvrs: List<BallotOrCvr>,
+    sortedBorc: List<BallotOrCvr>,
     previousSamples: Set<Int> = emptySet(),
 ): List<Int> {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) return emptyList()
-    if (ballotOrCvrs.isEmpty()) return emptyList()
+    if (sortedBorc.isEmpty()) return emptyList()
 
     // calculate how many samples are wanted for each contest
-    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, ballotOrCvrs)
+    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, sortedBorc)
 
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
@@ -99,7 +99,7 @@ fun consistentSampling(
     val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
 
     // get list of cvr indexes sorted by sampleNum TODO these should already be sorted
-    val sortedBocIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
+    // val sortedBocIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
 
     var newMvrs = 0
     val sampledIndices = mutableListOf<Int>()
@@ -109,11 +109,11 @@ fun consistentSampling(
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
         contestsIncluded.any { contestWantsMoreSamples(it) } &&
-        inx < sortedBocIndices.size) {
+        inx < sortedBorc.size) {
 
         // get the next sorted cvr
-        val sampleIdx = sortedBocIndices[inx]
-        val boc = ballotOrCvrs[sampleIdx]
+        val boc = sortedBorc[inx]
+        val sampleIdx = boc.index()
         // does this contribute to one or more contests that need more samples?
         if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && boc.hasContest(contestRound.id) }) {
             // then use it
@@ -121,7 +121,6 @@ fun consistentSampling(
             if (!previousSamples.contains(sampleIdx)) {
                 newMvrs++
             }
-            boc.setIsSampled(true) // not needed?
 
             // only if included
             contestsIncluded.forEach { contest ->
@@ -140,7 +139,7 @@ fun consistentSampling(
         }
         inx++
     }
-    if (inx > sortedBocIndices.size) {
+    if (inx > sortedBorc.size) {
         throw RuntimeException("ran out of samples!!")
     }
 
@@ -163,12 +162,12 @@ fun consistentSampling(
     return sampledIndices
 }
 
-fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Int>, ballotOrCvrs: List<BallotOrCvr>): Map<Int, Int> {
+fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Int>, sortedBorc: List<BallotOrCvr>): Map<Int, Int> {
     // count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }
     previousSamples.forEach { sampleIdx ->
-        val boc = ballotOrCvrs[sampleIdx]
+        val boc = sortedBorc[sampleIdx] // TODO WRONG!
         contestsNotDone.forEach { contest ->
             if (boc.hasContest(contest.id)) {
                 prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
@@ -190,15 +189,15 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Int
 // for audits with !hasStyles
 fun uniformSampling(
     auditRound: AuditRound,
-    ballotOrCvrs: List<BallotOrCvr>,
+    sortedBorc: List<BallotOrCvr>,
     prevSampleSize: Int,
     samplePctCutoff: Double,  // TODO
     roundIdx: Int,
 ): List<Int> {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) return emptyList()
-    if (ballotOrCvrs.isEmpty()) return emptyList()
-    val Nb = ballotOrCvrs.size // TODO is it always all ballots ?? could it be contest specific ??
+    if (sortedBorc.isEmpty()) return emptyList()
+    val Nb = sortedBorc.size // TODO is it always all ballots ?? could it be contest specific ??
 
     // set all sampled to false, so each round is independent TODO not needed
     // ballotOrCvrs.forEach{ it.setIsSampled(false)}
@@ -227,10 +226,10 @@ fun uniformSampling(
         }
     }
 
-    // get list of ballot indexes sorted by sampleNum TODO sort this already
-    val sortedCvrIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
+    // get list of ballot indexes sorted by sampleNum
+    val sortedCvrIndices = sortedBorc.map { it.index() }
 
-    // take the first estSampleSize of the sorted ballots
+    // take the first nmvrs of the sorted ballots
     return sortedCvrIndices.take(nmvrs)
 }
 

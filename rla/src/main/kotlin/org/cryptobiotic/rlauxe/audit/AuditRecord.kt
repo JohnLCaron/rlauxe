@@ -10,7 +10,8 @@ class AuditRecord(
     val location: String,
     val auditConfig: AuditConfig,
     val rounds: List<AuditRound>,
-    val cvrs: List<CvrUnderAudit>,
+    val cvrs: List<Cvr>, // in the original order
+    val bcUA: List<BallotOrCvr>,
     val mvrs: Set<CvrUnderAudit>,
 ) {
     val nrounds = rounds.size
@@ -23,7 +24,8 @@ class AuditRecord(
             val auditConfig = auditConfigResult.unwrap()
 
             val cvrResult = readCvrsJsonFile(publisher.cvrsFile())
-            val cvrs = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
+            val cvrsUA = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
+            val cvrs = cvrsUA.sortedBy { it.index() }.map { it.cvr }
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
             val contests = if (contestsResults is Ok) contestsResults.unwrap()
@@ -44,7 +46,7 @@ class AuditRecord(
 
                 rounds.add(auditRound)
             }
-            return AuditRecord(location, auditConfig, rounds, cvrs, mvrs)
+            return AuditRecord(location, auditConfig, rounds, cvrs, cvrsUA, mvrs)
         }
     }
 }

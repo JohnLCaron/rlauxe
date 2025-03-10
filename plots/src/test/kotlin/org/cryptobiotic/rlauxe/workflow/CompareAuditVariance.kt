@@ -17,7 +17,7 @@ class CompareAuditVariance {
         val margins =
             listOf(.02, .03, .04, .05, .06, .07, .08, .10)
 
-        val pollConfig = AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0)
+        val pollConfig = AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst)
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
@@ -56,7 +56,7 @@ class CompareAuditVariance {
         val margins =
             listOf(.006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
-        val clcaConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst, samplePctCutoff = 1.0, minMargin = 0.0,
+        val clcaConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig =ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
 
         val stopwatch = Stopwatch()

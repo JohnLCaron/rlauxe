@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-
 // The id must uniquely identify the paper ballot. Here it may be some simple thing (seq number) that points to
 // the paper ballot location. Its necessary that the system publically commit to that mapping before the Audit,
 // as well as to sampleNum.
@@ -37,8 +35,7 @@ data class BallotManifestUnderAudit(
 interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
-    fun isSampled(): Boolean
-    fun setIsSampled(isSampled: Boolean): BallotOrCvr
+    fun index(): Int
 
     fun hasOneOrMoreContest(contests: List<ContestRound>): Boolean {
         for (contest in contests) {
@@ -61,18 +58,13 @@ data class Ballot(
     }
 }
 
-data class BallotUnderAudit (val ballot: Ballot, val sampleNum: Long) : BallotOrCvr {
-    var sampled = false //  # is this in the sample?
+data class BallotUnderAudit (val ballot: Ballot, val index: Int, val sampleNum: Long) : BallotOrCvr {
     val id = ballot.id
     val phantom = ballot.phantom
 
     override fun hasContest(contestId: Int) = ballot.hasContest(contestId)
     override fun sampleNumber() = sampleNum
-    override fun setIsSampled(isSampled: Boolean): BallotUnderAudit {
-        this.sampled = isSampled
-        return this
-    }
-    override fun isSampled() = sampled
+    override fun index() = index
 }
 
 // The term ballot style generally refers to the set of contests on a given voter’s ballot. (Ballot

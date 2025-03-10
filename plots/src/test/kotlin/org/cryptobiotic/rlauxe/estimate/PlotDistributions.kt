@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
@@ -25,7 +26,6 @@ class PlotDistributions {
         val auditConfig = AuditConfig(
             AuditType.CLCA,
             true,
-            samplePctCutoff = 1.0,
             nsimEst = nsimEst,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct),
         )
@@ -107,7 +107,8 @@ class PlotDistributions {
             val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
 
             // heres the ConsistentSample permutation
-            val cvrsUA = workflow.cvrsUA
+            val cvrsUA = workflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
+
             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
             val sortedCvrs = sortedIndices.map { testCvrs[it] }
             val sortedMvrs = sortedIndices.map { testMvrs[it] }

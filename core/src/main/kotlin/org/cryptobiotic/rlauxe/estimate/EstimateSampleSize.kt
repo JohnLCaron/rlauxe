@@ -37,17 +37,7 @@ fun estimateSampleSizes(
         val task = estResult.task
         val result = estResult.repeatedResult
 
-        var estNewSamples = result.findQuantile(auditConfig.quantile)
-        // TODO this nudging is too crude, only needed when samples (or variance?) are really small ??
-        // TODO I think TestClcaWorkflowNoStyles.noErrorsNoPhantoms will hang without this code
-        /* if (auditRound.roundIdx > 2) {
-            val prevNudged = (0.25 * task.prevSampleSize).toInt()
-            if (prevNudged > estNewSamples) {
-                if (debugSizeNudge) println(" ** prevNudged $prevNudged > $estNewSamples; round=${auditRound.roundIdx} task=${task.name()}")
-            }
-            // make sure we grow at least 25% from previous estimate (TODO might need special code for nostyle?)
-            estNewSamples = max(prevNudged, estNewSamples)
-        } */
+        val estNewSamples = result.findQuantile(auditConfig.quantile)
         task.assertionRound.estNewSampleSize = estNewSamples
         task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
 
@@ -367,7 +357,7 @@ fun simulateSampleSizeAlphaMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val eta0 = margin2mean(margin)
-    val c = (eta0 - 0.5) / 2 // TODO should this be somtimes different? TruncShrinkage with AlphaMart
+    val c = (eta0 - 0.5) / 2 // TODO should this be sometimes different? TruncShrinkage with AlphaMart
 
     val estimFn = TruncShrinkage(
         N = Nc,

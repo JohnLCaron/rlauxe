@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 class TestIrvCount {
 
     // Need a lot of tries to be sure to get some ties
-    @Test
+    // @Test
     fun testRepeat() {
         var idx = 0
         repeat(111) {

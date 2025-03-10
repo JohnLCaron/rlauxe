@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sample
 
@@ -41,4 +42,8 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
     }
 
     fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean = true): Boolean  // return allDone
+}
+
+interface RlauxWorkflowClca: RlauxWorkflowIF {
+    fun cvrsUA(): List<CvrUnderAudit>
 }

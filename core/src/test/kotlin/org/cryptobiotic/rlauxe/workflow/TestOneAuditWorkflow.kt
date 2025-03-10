@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
@@ -57,5 +60,21 @@ class TestOneAuditWorkflow {
 
         val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
         runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
+    }
+
+    @Test
+    fun testOneAuditSingleRoundAudit() {
+        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
+
+        val contestOA = makeContestOA(10000, 5000, cvrPercent = .80, 0.0, undervotePercent=.0, phantomPercent = .0)
+        val contests = listOf(contestOA)
+
+        val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
+        val testMvrs = if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
+            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
+
+        val workflow = OneAuditWorkflow(auditConfig, contests, testCvrs)
+        val contestRounds = workflow.contestUA().map { ContestRound(it, 1) }
+        runClcaSingleRoundAudit("testOneAuditSingleRoundAudit", workflow, contestRounds, testMvrs, auditor = OneAuditClcaAssertion())
     }
 }

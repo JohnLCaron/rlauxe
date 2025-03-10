@@ -9,7 +9,7 @@ class TestOneRoundClcaWorkflow {
     val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10)
 
     @Test
-    fun testOneContest() {
+    fun testClcaSingleRoundAudit() {
         val N = 100000
         val ncontests = 1
         val nbs = 1
@@ -22,10 +22,6 @@ class TestOneRoundClcaWorkflow {
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
-        testOneRoundClcaWorkflow(auditConfig, testData)
-    }
-
-    fun testOneRoundClcaWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.contests
         println("Start testOneRoundClcaWorkflow $testData")
 
@@ -37,6 +33,7 @@ class TestOneRoundClcaWorkflow {
 
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
         val contestRounds = workflow.contestUA().map { ContestRound(it, 1) }
-        runClcaSingleRoundAudit("testOneRoundClcaWorkflow", workflow, contestRounds, testMvrs, auditor = OneAuditClcaAssertion())
+        runClcaSingleRoundAudit("testOneRoundClcaWorkflow", workflow, contestRounds, testMvrs, auditor = AuditClcaAssertion())
     }
+
 }

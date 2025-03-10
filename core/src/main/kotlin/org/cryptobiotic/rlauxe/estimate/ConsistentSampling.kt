@@ -8,6 +8,9 @@ import org.cryptobiotic.rlauxe.workflow.ContestRound
 import org.cryptobiotic.rlauxe.workflow.RlauxWorkflowProxy
 
 private val debug = false
+private val debugConsistent = false
+private val debugUniform = true
+private val debugSizeNudge = true
 
 /**
  * iterates on createSampleIndices, checking for pct <= auditConfig.samplePctCutoff,
@@ -66,7 +69,7 @@ fun createSampleIndices(
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
         val sampleIndices =
-            uniformSampling(auditRound, workflow.getBallotsOrCvrs(), auditConfig.samplePctCutoff, auditRound.roundIdx)
+            uniformSampling(auditRound, workflow.getBallotsOrCvrs(), previousSamples.size, auditConfig.samplePctCutoff, auditRound.roundIdx)
         if (!quiet) println(" consistentSamplingSize= ${sampleIndices.size}")
         sampleIndices
     }
@@ -82,37 +85,20 @@ fun consistentSampling(
     if (contestsNotDone.isEmpty()) return emptyList()
     if (ballotOrCvrs.isEmpty()) return emptyList()
 
-    // count how many samples each contest already has
-    val prevContestCounts = mutableMapOf<ContestRound, Int>()
-    contestsNotDone.forEach { prevContestCounts[it] = 0 }
-    previousSamples.forEach { sampleIdx ->
-        val boc = ballotOrCvrs[sampleIdx]
-        contestsNotDone.forEach { contest ->
-            if (boc.hasContest(contest.id)) {
-                prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
-            }
-        }
-    }
-    if (debug) {
-        val contestSampleSizesById = prevContestCounts.entries.map { it.key.id to it.value }.toMap()
-        println("**prevContestCounts = ${contestSampleSizesById}")
-    }
+    // calculate how many samples are wanted for each contest
+    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, ballotOrCvrs)
 
-    val contestSampleSizes = prevContestCounts.entries.map { it.key.id to it.key.sampleSize(it.value) }.toMap()
-    if (debug) println("**contestSampleSizes = $contestSampleSizes")
-
-    val contestSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-    val contestNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
+    val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
+    val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     fun contestWantsMoreSamples(c: ContestRound): Boolean {
-        if (c.auditorWantNewMvrs > 0 && (contestNewSamples[c.id] ?: 0) >= c.auditorWantNewMvrs) return false
-        return (contestSamples[c.id] ?: 0) < (contestSampleSizes[c.id] ?: 0)
+        if (c.auditorWantNewMvrs > 0 && (haveNewSamples[c.id] ?: 0) >= c.auditorWantNewMvrs) return false
+        return (haveSampleSize[c.id] ?: 0) < (wantSampleSize[c.id] ?: 0)
     }
-    // fun contestInProgress(c: ContestRound) = (currentSizes[c.id] ?: 0) < c.estMvrs
 
     val contestsIncluded = contestsNotDone.filter { it.included }
-    val contestActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
+    val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
 
-    // get list of cvr indexes sorted by sampleNum
+    // get list of cvr indexes sorted by sampleNum TODO these should already be sorted
     val sortedBocIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
 
     var newMvrs = 0
@@ -140,15 +126,15 @@ fun consistentSampling(
             // only if included
             contestsIncluded.forEach { contest ->
                 if (boc.hasContest(contest.id)) {
-                    contestSamples[contest.id] = contestSamples[contest.id]?.plus(1) ?: 1
+                    haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
                 }
             }
             // track actual for all contests not done
             contestsNotDone.forEach { contest ->
                 if (boc.hasContest(contest.id)) {
-                    contestActualMvrs[contest.id] = contestActualMvrs[contest.id]?.plus(1) ?: 1
+                    haveActualMvrs[contest.id] = haveActualMvrs[contest.id]?.plus(1) ?: 1
                     if (!previousSamples.contains(sampleIdx))
-                        contestNewSamples[contest.id] = contestNewSamples[contest.id]?.plus(1) ?: 1
+                        haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
                 }
             }
         }
@@ -158,16 +144,16 @@ fun consistentSampling(
         throw RuntimeException("ran out of samples!!")
     }
 
-    if (debug) println("**consistentSampling contestActualMvrs = $contestActualMvrs, contestNewSamples = $contestNewSamples, newMvrs=$newMvrs")
+    if (debugConsistent) println("**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs")
     val contestIdMap = contestsNotDone.associate { it.id to it }
     contestIdMap.values.forEach { // defaults to 0
         it.actualMvrs = 0
         it.actualNewMvrs = 0
     }
-    contestActualMvrs.forEach { (contestId, nmvrs) ->
+    haveActualMvrs.forEach { (contestId, nmvrs) ->
         contestIdMap[contestId]?.actualMvrs = nmvrs
     }
-    contestNewSamples.forEach { (contestId, nnmvrs) ->
+    haveNewSamples.forEach { (contestId, nnmvrs) ->
         contestIdMap[contestId]?.actualNewMvrs = nnmvrs
     }
     auditRound.nmvrs = sampledIndices.size
@@ -177,10 +163,35 @@ fun consistentSampling(
     return sampledIndices
 }
 
+fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Int>, ballotOrCvrs: List<BallotOrCvr>): Map<Int, Int> {
+    // count how many samples each contest already has
+    val prevContestCounts = mutableMapOf<ContestRound, Int>()
+    contestsNotDone.forEach { prevContestCounts[it] = 0 }
+    previousSamples.forEach { sampleIdx ->
+        val boc = ballotOrCvrs[sampleIdx]
+        contestsNotDone.forEach { contest ->
+            if (boc.hasContest(contest.id)) {
+                prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
+            }
+        }
+    }
+    if (debugConsistent) {
+        val contestSampleSizesById = prevContestCounts.entries.map { it.key.id to it.value }.toMap()
+        println("**prevContestCounts = ${contestSampleSizesById}")
+    }
+
+    // we need that in order to calculate wantedSampleSizes
+    val wantSampleSize = prevContestCounts.entries.map { it.key.id to it.key.sampleSize(it.value) }.toMap()
+    if (debugConsistent) println("**wantSampleSize = $wantSampleSize")
+
+    return wantSampleSize
+}
+
 // for audits with !hasStyles
 fun uniformSampling(
     auditRound: AuditRound,
     ballotOrCvrs: List<BallotOrCvr>,
+    prevSampleSize: Int,
     samplePctCutoff: Double,  // TODO
     roundIdx: Int,
 ): List<Int> {
@@ -190,9 +201,7 @@ fun uniformSampling(
     val Nb = ballotOrCvrs.size // TODO is it always all ballots ?? could it be contest specific ??
 
     // set all sampled to false, so each round is independent TODO not needed
-    ballotOrCvrs.forEach{ it.setIsSampled(false)}
-
-    // TODO included
+    // ballotOrCvrs.forEach{ it.setIsSampled(false)}
 
     // scale by proportion of ballots that have this contest
     contestsNotDone.forEach { contestUA ->
@@ -201,16 +210,24 @@ fun uniformSampling(
         contestUA.estSampleSizeNoStyles = estWithFactor
         val estPct = estWithFactor / Nb.toDouble()
         if (estPct > samplePctCutoff) {
-            if (debug) println("uniformSampling samplePctCutoff: $contestUA estPct $estPct > $samplePctCutoff round $roundIdx")
-            contestUA.done = true // TODO dont do this here
+            if (debugUniform) println("uniformSampling samplePctCutoff: $contestUA estPct $estPct > $samplePctCutoff round $roundIdx")
+            contestUA.done = true // TODO dont do this here?
             contestUA.status = TestH0Status.FailMaxSamplesAllowed
         }
     }
     val estTotalSampleSizes = contestsNotDone.filter { !it.done }.map { it.estSampleSizeNoStyles }
     if (estTotalSampleSizes.isEmpty()) return emptyList()
-    val nmvrs = estTotalSampleSizes.max()
+    var nmvrs = estTotalSampleSizes.max()
 
-    // get list of ballot indexes sorted by sampleNum
+    if (auditRound.roundIdx > 2) {
+        val prevNudged = (1.25 * prevSampleSize).toInt()
+        if (prevNudged > nmvrs) {
+            if (debugSizeNudge) println(" ** uniformSampling prevNudged $prevNudged > $nmvrs; round=${auditRound.roundIdx}")
+            nmvrs = prevNudged
+        }
+    }
+
+    // get list of ballot indexes sorted by sampleNum TODO sort this already
     val sortedCvrIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
 
     // take the first estSampleSize of the sorted ballots

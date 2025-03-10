@@ -11,7 +11,7 @@ class ClcaWorkflow(
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
     val cvrs: List<Cvr>, // includes undervotes and phantoms.
-): RlauxWorkflowIF {
+): RlauxWorkflowClca {
     private val contestsUA: List<ContestUnderAudit>
     val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
@@ -44,6 +44,7 @@ class ClcaWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
+    override fun cvrsUA() = cvrsUA
     override fun getBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 

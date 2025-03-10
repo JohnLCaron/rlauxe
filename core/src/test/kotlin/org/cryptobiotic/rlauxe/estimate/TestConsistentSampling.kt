@@ -108,7 +108,7 @@ class TestConsistentSampling {
         val estPctCutoff = .50
 
         val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
-        val sampleIndices = uniformSampling(auditRound, ballotsUA, estPctCutoff, 0)
+        val sampleIndices = uniformSampling(auditRound, ballotsUA, 0, estPctCutoff, 0)
         println("nsamples needed = ${sampleIndices.size}\n")
         sampleIndices.forEach {
             assertTrue(it < ballotsUA.size)

@@ -102,15 +102,15 @@ class ClcaSingleRoundAuditTask(
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
 // return number of mvrs hand counted
-fun runClcaSingleRoundAudit(name: String, workflow: ClcaWorkflow, contestRounds: List<ContestRound>, testMvrs: List<Cvr>, quiet: Boolean = false,
+fun runClcaSingleRoundAudit(name: String, workflow: RlauxWorkflowClca, contestRounds: List<ContestRound>, testMvrs: List<Cvr>, quiet: Boolean = false,
                             auditor: ClcaAssertionAuditor): Int {
     val stopwatch = Stopwatch()
     var roundIdx = 1
 
-    val cvrsUA = workflow.cvrsUA
+    val cvrsUA = workflow.cvrsUA()
     val indices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
 
-    runSingleClcaAudit(workflow.auditConfig(), contestRounds, indices, testMvrs, workflow.cvrs, quiet, auditor)
+    runSingleClcaAudit(workflow.auditConfig(), contestRounds, indices, testMvrs, workflow.cvrs(), auditor)
 
     if (!quiet) println("round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
     var maxSamples = 0
@@ -128,7 +128,6 @@ fun runSingleClcaAudit(
     sampleIndices: List<Int>,
     mvrs: List<Cvr>,
     cvrs: List<Cvr>,
-    quiet: Boolean,
     auditor: ClcaAssertionAuditor,
 ): Boolean {
 

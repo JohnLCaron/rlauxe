@@ -9,10 +9,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+
 // reading RAIRE JSON assertion files
-// TestRcvAssorter reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json"
-// TestRaireAssertions,AssertionRLAipynb  reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json"
-// TestRaireWorkflow reads   "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json"
+// TestReadRaireResultsJson reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json"
+// TestRaireWorkflowFromJson reads   "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json"
 
 // The output of RAIRE assertion generator, read from JSON files
 data class RaireResults(
@@ -29,16 +29,16 @@ data class RaireResults(
 @Serializable
 data class RaireResultsJson(
     @SerialName("Overall Expected Polls (#)")
-    val overallExpectedPollsNumber : String,
+    val overallExpectedPollsNumber : String?,
     @SerialName("Ballots involved in audit (#)")
-    val ballotsInvolvedInAuditNumber : String,
+    val ballotsInvolvedInAuditNumber : String?,
     val audits: List<RaireResultsContestAuditJson>,
 )
 
 fun RaireResultsJson.import(ncs: Map<String, Int>, nps: Map<String, Int>) =
     RaireResults(
-        this.overallExpectedPollsNumber.toInt(),
-        this.ballotsInvolvedInAuditNumber.toInt(),
+        this.overallExpectedPollsNumber?.toInt() ?: 0,
+        this.ballotsInvolvedInAuditNumber?.toInt() ?: 0,
         this.audits.map { it.import(ncs[it.contest]!!, nps[it.contest]!!) },
     )
 

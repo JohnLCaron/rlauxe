@@ -39,6 +39,7 @@ fun estimateSampleSizes(
 
         var estNewSamples = result.findQuantile(auditConfig.quantile)
         // TODO this nudging is too crude, only needed when samples (or variance?) are really small ??
+        // TODO I think TestClcaWorkflowNoStyles.noErrorsNoPhantoms will hang without this code
         /* if (auditRound.roundIdx > 2) {
             val prevNudged = (0.25 * task.prevSampleSize).toInt()
             if (prevNudged > estNewSamples) {

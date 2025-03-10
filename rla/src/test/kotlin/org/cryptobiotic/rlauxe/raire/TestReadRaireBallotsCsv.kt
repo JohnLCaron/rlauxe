@@ -3,12 +3,14 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.junit.jupiter.api.Assertions
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestReadRaireBallotsCsv {
-    val cvrFile = "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
+    val cvrFile = "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
     val raireCvrs = readRaireBallotsCsv(cvrFile)
     val cvrs = raireCvrs.cvrs
 
@@ -16,7 +18,7 @@ class TestReadRaireBallotsCsv {
     val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
     val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()
 
-    val rr = readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SF2019Nov8Assertions.json")
+    val rr = readRaireResultsJson("src/test/data/raire/SFDA2019/SF2019Nov8Assertions.json")
     val raireResults = rr.import(ncs, nps)
 
     @Test
@@ -41,6 +43,57 @@ class TestReadRaireBallotsCsv {
                 if (!it.phantom) assertEquals(cassertion.cassorter.noerror(), cassertion.cassorter.bassort(it, it))
                 else assertEquals(cassertion.cassorter.noerror()/2, cassertion.cassorter.bassort(it, it))
             }
+        }
+    }
+
+    @Test
+    fun testReadAspenCityCouncilCvrs() {
+        val cvrFile = "src/test/data/raire/ballotCsv/Aspen_2009_CityCouncil.raire"
+        val raireCvrs: RaireCvrs = readRaireBallotsCsv(cvrFile)
+        Assertions.assertEquals(1, raireCvrs.contests.size)
+        val contest = raireCvrs.contests.first()
+        Assertions.assertEquals(1, contest.contestNumber)
+        Assertions.assertEquals(11, contest.candidates.size)
+        Assertions.assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), contest.candidates)
+        Assertions.assertEquals(8, contest.winner)
+        Assertions.assertEquals(2487, contest.ncvrs)
+    }
+
+    // 1
+    //Contest,339,4,15,16,17,18
+    //339,99813_1_1,17
+    //339,99813_1_3,16
+    //339,99813_1_6,18,17,15,16
+
+    @Test
+    fun testReadSfdaCvrs() { // ??
+        val cvrFile = "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
+        val raireCvrs: RaireCvrs = readRaireBallotsCsv(cvrFile)
+        Assertions.assertEquals(1, raireCvrs.contests.size)
+        val contest = raireCvrs.contests.first()
+        Assertions.assertEquals(339, contest.contestNumber)
+        Assertions.assertEquals(4, contest.candidates.size)
+        Assertions.assertEquals(listOf(15, 16, 17, 18), contest.candidates)
+        Assertions.assertEquals(-1, contest.winner)
+        Assertions.assertEquals(146662, contest.ncvrs)
+    }
+
+    @Test
+    fun testReadAspenCvrs() {
+        val dataDir = "src/test/data/raire/ballotCsv"
+        val dataDirFile = File(dataDir)
+        dataDirFile.listFiles().forEach {
+            if (!it.isDirectory) {
+                println(it.path)
+                testReadRaireCvrs(it.path)
+            }
+        }
+    }
+
+    fun testReadRaireCvrs(cvrFile: String) {
+        val raireCvrs: RaireCvrs = readRaireBallotsCsv(cvrFile)
+        raireCvrs.contests.forEach {
+            println("  ${it.show()}")
         }
     }
 }

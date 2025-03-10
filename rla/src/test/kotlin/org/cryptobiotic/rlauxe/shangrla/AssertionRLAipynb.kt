@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.readDominionBallotManifest
@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.workflow.AuditRound
 import org.cryptobiotic.rlauxe.workflow.ContestRound
 import org.cryptobiotic.rlauxe.workflow.Sampler
@@ -240,8 +241,8 @@ class AssertionRLA {
             1234567890123456789L,
             314159265,
             0.8,
-            "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
-            manifestFile = "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/N19-manifest.csv",
+            "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire",
+            manifestFile = "src/test/data/raire/SFDA2019/N19-manifest.csv",
             // "./data/SFDA2019/N19 ballot manifest with WH location for RLA Upload VBM 11-14.xlsx",
             true,
             "./data/sample.csv",
@@ -298,7 +299,7 @@ class AssertionRLA {
         val nps = mapOf("334" to 0, "339" to 0) // TODO
 
         val rr =
-            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SF2019Nov8Assertions.json")
+            readRaireResultsJson("src/test/data/raire/SFDA2019/SF2019Nov8Assertions.json")
         val raireResults = rr.import(ncs, nps)
         val show = raireResults.show()
         println(show)

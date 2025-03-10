@@ -1,9 +1,10 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.persist.json.import
-import org.cryptobiotic.rlauxe.persist.json.publishIFJson
-import org.cryptobiotic.rlauxe.persist.json.publishJson
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.import
+import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
+import org.cryptobiotic.rlauxe.oneaudit.publishOAJson
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

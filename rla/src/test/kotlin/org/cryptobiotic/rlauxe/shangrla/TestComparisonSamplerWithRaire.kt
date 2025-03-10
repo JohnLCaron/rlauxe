@@ -1,9 +1,12 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
+import org.cryptobiotic.rlauxe.raire.import
+import org.cryptobiotic.rlauxe.raire.readRaireBallotsCsv
+import org.cryptobiotic.rlauxe.raire.readRaireResultsJson
 import kotlin.test.Test
 
 class TestComparisonSamplerWithRaire {
@@ -12,7 +15,7 @@ class TestComparisonSamplerWithRaire {
     fun testComparisonSamplerForRaire() {
         // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile =
-            "/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
+            "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallotsCsv(cvrFile)
         val cvrs = raireCvrs.cvrs
         // val cvrsUA = cvrs.map { CvrUnderAudit(it) }
@@ -20,7 +23,7 @@ class TestComparisonSamplerWithRaire {
         val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
         val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()
         val raireResults =
-            readRaireResultsJson("/home/stormy/dev/github/rla/rlauxe/rla/src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
+            readRaireResultsJson("src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json")
                 .import(ncs, nps)
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()

@@ -75,7 +75,7 @@ class PlotDistributions {
 
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
 
-        val contestRounds = workflow.contestUA().map { ContestRound(it, 1) }
+        val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, sampledIndices = emptyList())
 
         // just want the sample estimation stuff
@@ -115,7 +115,7 @@ class PlotDistributions {
             val sortedPairs: List<Pair<Cvr, Cvr>> = sortedMvrs.zip(sortedCvrs)
 
             // "oracle" audit
-            val contestUA = workflow.contestUA().first()
+            val contestUA = workflow.contestsUA().first()
             val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1, null)
 
             AuditClcaAssertion().run(auditConfig, contestUA.contest, assertionRound, sortedPairs, 1)

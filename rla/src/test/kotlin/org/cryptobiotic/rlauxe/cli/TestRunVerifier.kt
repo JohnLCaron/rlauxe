@@ -6,7 +6,7 @@ class TestRunVerifier {
 
     @Test
     fun testClcaVerify() {
-        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+        val topdir = "/home/stormy/temp/persist/testRunCli"
         RunVerifier.main(
             arrayOf(
                 "-in", topdir

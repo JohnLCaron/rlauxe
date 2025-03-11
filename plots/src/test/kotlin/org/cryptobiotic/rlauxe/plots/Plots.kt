@@ -4,45 +4,6 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 
 // CANDIDATE FOR REMOVAL: find all uses, delete or rplace
 
-//// plots for crtMean by meanDiff
-fun plotMeanFailPct(srs: List<SRT>, title: String) {
-    val utitle = "pct failed cvrMean (row) vs meanDiff (col): " + title
-    plotSRS(srs, utitle, true, ff = "%6.3f", rowf = "%6.3f",
-        colFld = { srt: SRT -> srt.reportedMeanDiff },
-        rowFld = { srt: SRT -> srt.reportedMean },
-        fld = { srt: SRT -> srt.failPct }
-    )
-}
-
-fun plotMeanSamples(srs: List<SRT>, title: String) {
-    val utitle = "nsamples, cvrMean (row) vs meanDiff (col): " + title
-    plotSRS(srs, utitle, false, ff = "%6.0f", rowf = "%6.3f",
-        colFld = { srt: SRT -> srt.reportedMeanDiff },
-        rowFld = { srt: SRT -> srt.reportedMean },
-        fld = { srt: SRT -> srt.nsamples }
-    )
-}
-
-fun plotMeanPct(srs: List<SRT>, title: String) {
-    val utitle = "pct samples, cvrMean (row) vs meanDiff (col): " + title
-    plotSRS(srs, utitle, false, ff = "%6.1f", rowf = "%6.3f",
-        colFld = { srt: SRT -> srt.reportedMeanDiff },
-        rowFld = { srt: SRT -> srt.reportedMean },
-        fld = { srt: SRT -> srt.pctSamples}
-    )
-}
-
-
-//// plots for N vs theta
-fun plotNTsuccess(srs: List<SRT>, title: String, colTitle: String= "") {
-    val utitle = "nsuccess cvrMean (col) vs N (row): " + title
-    plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
-        colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.Nc.toDouble() },
-        fld = { srt: SRT -> srt.nsuccess.toDouble() }
-    )
-}
-
 fun plotNTsuccessPct(srs: List<SRT>, title: String, colTitle: String= "") {
     val utitle = "successPct cvrMean (col) vs N (row): " + title
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
@@ -67,15 +28,6 @@ fun plotNTsamplesPct(srs: List<SRT>, title: String, colTitle: String= "") {
         colFld = { srt: SRT -> srt.reportedMean },
         rowFld = { srt: SRT -> srt.Nc.toDouble() },
         fld = { srt: SRT -> srt.pctSamples }
-    )
-}
-
-fun plotNTsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
-    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-    plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
-        colFld = { srt: SRT -> srt.reportedMean },
-        rowFld = { srt: SRT -> srt.Nc.toDouble() },
-        fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct) ?: -1.0  }
     )
 }
 
@@ -116,37 +68,10 @@ fun plotDDsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTit
     )
 }
 
-//// plots for theta vs eta0Factor
-fun plotTFsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
-    val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-    plotSRS(srs, utitle, false, rowf = "%6.2f", ff = "%6.1f", colTitle = colTitle,
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT -> extractDecile(srt, sampleMaxPct) }
-    )
-}
-
 fun extractDecile(srt: SRT, sampleMaxPct: Int): Double {
     return if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
         srt.percentHist.cumul(sampleMaxPct)
     }
-}
-
-fun plotTFdiffSuccessDecile(pollSrs: List<SRT>, compareSrs: List<SRT>, sampleMaxPct: Int, title: String = "", colTitle: String= "") {
-    val utitle = "Comparison - Polling: % successRLA, for sampleMaxPct=$sampleMaxPct: " + title
-
-    val srs = pollSrs.mapIndexed { idx, it ->
-        val pollDecile = extractDecile(it, sampleMaxPct)
-        val compSrt = compareSrs[idx]
-        val compDecile = extractDecile(compSrt, sampleMaxPct)
-        it.copy(stddev = compDecile - pollDecile) // hijack stddev
-    }
-
-    plotSRS(srs, utitle, false, ff = "%6.2f", rowf = "%6.2f", colTitle = "theta",
-        colFld = { srt: SRT -> srt.theta },
-        rowFld = { srt: SRT -> srt.eta0Factor },
-        fld = { srt: SRT -> srt.stddev }
-    )
 }
 
 ////

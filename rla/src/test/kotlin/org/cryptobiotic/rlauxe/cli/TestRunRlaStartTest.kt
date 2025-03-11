@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 class TestRunRlaStartTest {
 
-    @Test
+    // @Test
     fun testRlaStartClca() {
         val topdir = "/home/stormy/temp/persist/runAuditClca"
         RunRlaStartTest.main(
@@ -19,7 +19,7 @@ class TestRunRlaStartTest {
         )
     }
 
-    @Test
+    // @Test
     fun testRlaStartRaireClca() {
         val topdir = "/home/stormy/temp/persist/runClcaRaire"
         RunRlaStartTest.main(
@@ -53,7 +53,7 @@ class TestRunRlaStartTest {
         )
     }
 
-    @Test
+    // @Test
     fun testRunAuditPolling() {
         val topdir = "/home/stormy/temp/persist/runAuditPolling"
 

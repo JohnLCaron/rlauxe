@@ -112,7 +112,7 @@ class CorlaWorkflow(
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
-    override fun contestUA(): List<ContestUnderAudit> = contestsUA
+    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
     override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
@@ -140,7 +140,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             riskLimit = auditConfig.riskLimit,
             reportedMargin = cassertion.assorter.reportedMargin(),
             noerror = cassorter.noerror(),
-            p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // todo
+            p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // TODO
         )
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }

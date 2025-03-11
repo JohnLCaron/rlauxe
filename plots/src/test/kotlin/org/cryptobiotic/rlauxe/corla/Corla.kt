@@ -14,10 +14,12 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
     val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn {
     val gamma = 1.03
 
-    override fun testH0(maxSample: Int,
-                        terminateOnNullReject: Boolean,
-                        startingTestStatistic: Double, // TODO ignore?
-                        drawSample : () -> Double) : TestH0Result {
+    override fun testH0(
+        maxSample: Int,
+        terminateOnNullReject: Boolean,
+        startingTestStatistic: Double, // TODO ignore?
+        drawSample: () -> Double
+    ): TestH0Result {
         require(maxSample <= N)
 
         var sampleNumber = 0        // – j ← 0: sample number
@@ -57,6 +59,7 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
 
         return TestH0Result(status, sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalue, prevSamples)
     }
+}
 
     /**
      * From colorado-rla Audit class, pValueApproximation method.
@@ -183,4 +186,3 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
 
         return result
     }
-}

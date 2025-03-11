@@ -23,12 +23,12 @@ class PValueTest {
     }
 }
 
-fun pValue(row: T3row) = pValueApprox(row.n, row.mu, row.gamma, row.n1, row.n2)
+fun pValue(row: T3row) = pValueApproxOld(row.n, row.mu, row.gamma, row.n1, row.n2)
 
 // Kaplan-Markov bound: eq 10 of SuperSimple
 // these are for simultaneous auditing of multiple contests, giving a more conservative estimate of the risk
 // we dont actually know if colorado-rla is combining contests
-fun pValueApprox(
+fun pValueApproxOld(
     n: Int, // n is the sample size, not N total ballots
     dilutedMargin: Double, // V is the smallest reported margin = min_c { min w∈Wc ∈Lc (V_wl) } over contests c
     gamma: Double,  // use 1.01 or 1.10 ??

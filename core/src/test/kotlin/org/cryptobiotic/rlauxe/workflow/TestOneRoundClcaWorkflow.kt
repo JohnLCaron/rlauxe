@@ -32,7 +32,7 @@ class TestOneRoundClcaWorkflow {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
         val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        val contestRounds = workflow.contestUA().map { ContestRound(it, 1) }
+        val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         runClcaSingleRoundAudit(workflow, contestRounds, testMvrs, auditor = AuditClcaAssertion())
     }
 

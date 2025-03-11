@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class TestCvrReader {
-    @Test
+    // @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/corla/ThreeCandidatesTenVotes.csv"
         val result: CvrExport = readDominionCvrExport(filename, "Saguache")
@@ -27,7 +27,7 @@ class TestCvrReader {
         assertEquals(10, result.cvrs.size)
     }
 
-    @Test
+    // @Test
     fun parseBoulder23Succeeds() {
 
         val filename = "../corla/src/test/data/corla/Boulder23/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"

@@ -50,7 +50,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 
 class ClcaSingleRoundAuditTask(
     val name: String,
-    val workflow: ClcaWorkflow,
+    val workflow: RlauxWorkflowIF,
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
@@ -60,7 +60,7 @@ class ClcaSingleRoundAuditTask(
     override fun name() = name
 
     override fun run(): WorkflowResult {
-        val contestRounds = workflow.contestUA().map { ContestRound(it, 1) }
+        val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, testMvrs, quiet = quiet, auditor)
 
         val contest = contestRounds.first() // theres only one

@@ -35,7 +35,7 @@ class TestPersistentWorkflowPolling {
         val ballotManifestUA = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publish.ballotManifestFile())
 
-        writeContestsJsonFile(pollingWorkflow.contestUA(), publish.contestsFile())
+        writeContestsJsonFile(pollingWorkflow.contestsUA(), publish.contestsFile())
 
         var round = 1
         var done = false

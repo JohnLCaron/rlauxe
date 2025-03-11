@@ -40,7 +40,7 @@ class TestPersistentWorkflowClca {
 
         writeCvrsJsonFile(cvrsUA, publish.cvrsFile())
 
-        writeContestsJsonFile(clcaWorkflow.contestUA(), publish.contestsFile())
+        writeContestsJsonFile(clcaWorkflow.contestsUA(), publish.contestsFile())
 
         var round = 1
         var done = false

@@ -111,6 +111,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
 ////////////////////////////////////////////////////////////////////////////
 
 interface ClcaAssorterIF {
+    fun id(): Int
     fun noerror(): Double
     fun upperBound(): Double
 
@@ -137,6 +138,7 @@ data class ClcaAssorter(
         }
     }
 
+    override fun id() = info.id
     override fun noerror() = noerror
     override fun upperBound() = upperBound
     override fun assorter() = assorter

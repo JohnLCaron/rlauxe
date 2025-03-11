@@ -219,6 +219,7 @@ data class OAClcaAssorter(
     override fun noerror() = cvrStrata.cassorter!!.noerror
     override fun upperBound() = cvrStrata.cassorter!!.upperBound
     override fun assorter() = assorter
+    override fun id() = contestOA.id
 
     init {
         var weightedMeanAssortValue = 0.0

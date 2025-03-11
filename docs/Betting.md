@@ -1,10 +1,10 @@
 # Ballot Comparison using Betting Martingales
 
-last changed: 12/10/24
+last changed: 03/10/25
 
-The BETTING paper presents general techniques for estimating an unknown mean from bounded observations.
+The "Estimating means of bounded random variables by betting" paper presents general techniques for estimating an unknown mean from bounded observations.
 
-ALPHA summarizes this for RLAs, in section 2.3. While formally equivalent to the sequential probability ratios (SPR) approach, 
+The ALPHA paper summarizes this for RLAs, in section 2.3. While formally equivalent to the sequential probability ratios (SPR) approach, 
 the betting strategy approach gives better intuition on the "aggressive betting" strategy, which is necessary to
 get good performance for ballot comparison audits.
 

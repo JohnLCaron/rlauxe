@@ -612,7 +612,7 @@ first n sorted samples, which the code seems to assume. But I think the question
 ## Other Notes
 
 * [ALPHA testing statistic](docs/AlphaMart.md)
-* [Notes on Corla](docs/Corla.md)
+* [Notes on Colorado RLA](docs/Corla.md)
 
 ## Development Notes
 

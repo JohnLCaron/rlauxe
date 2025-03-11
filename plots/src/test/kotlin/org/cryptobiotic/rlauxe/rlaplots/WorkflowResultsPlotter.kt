@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.math.log10
 
+// TODO replace with wrsPlot()
+
 enum class ScaleTypeOld { Linear, Log, Pct;
     fun desc(what: String): String =
         when (this) {

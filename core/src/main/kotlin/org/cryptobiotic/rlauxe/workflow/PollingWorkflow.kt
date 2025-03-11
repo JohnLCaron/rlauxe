@@ -45,7 +45,7 @@ class PollingWorkflow(
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
-    override fun contestUA(): List<ContestUnderAudit> = contestsUA
+    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = emptyList<Cvr>()
     override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
 }

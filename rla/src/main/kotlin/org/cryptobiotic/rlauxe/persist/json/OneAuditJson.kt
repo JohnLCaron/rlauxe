@@ -1,9 +1,12 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditStratum
 
 // class OneAuditContest (
 //    override val info: ContestInfo,

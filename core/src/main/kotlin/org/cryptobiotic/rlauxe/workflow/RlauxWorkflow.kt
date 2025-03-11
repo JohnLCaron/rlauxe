@@ -13,7 +13,7 @@ interface RlauxWorkflowProxy {
 
 interface RlauxWorkflowIF: RlauxWorkflowProxy {
     fun auditRounds(): MutableList<AuditRound>
-    fun contestUA(): List<ContestUnderAudit>
+    fun contestsUA(): List<ContestUnderAudit>
     fun cvrs(): List<Cvr>
 
     fun startNewRound(quiet: Boolean = true): AuditRound {
@@ -22,7 +22,7 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
         val roundIdx = auditRounds.size + 1
 
         val auditRound = if (previousRound == null) {
-            val contestRounds = contestUA().map { ContestRound(it, roundIdx) }
+            val contestRounds = contestsUA().map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
         } else {
             previousRound.createNextRound()

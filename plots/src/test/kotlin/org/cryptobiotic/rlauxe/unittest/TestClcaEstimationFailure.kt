@@ -33,7 +33,7 @@ class TestClcaEstimationFailure {
         val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), cvrs)
 
         println("\nrunClcaSimulation")
-        workflow.contestUA().forEach { contestUA ->
+        workflow.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { assertion ->
                 runClcaSimulation(cvrs, contestUA, assertion.cassorter as ClcaAssorter)
             }

@@ -160,3 +160,19 @@ class ContestVoteBuilder(
     fun done() = builder
     fun ddone() = builder.builders
 }
+
+class CvrBuilder2(
+    val id: String,
+    val phantom: Boolean = false,
+) {
+    val allVotes = mutableMapOf<Int, IntArray>()
+
+    fun addContest(contestId: Int, votes: IntArray): CvrBuilder2  {
+        allVotes[contestId] = votes
+        return this
+    }
+
+    fun build() : Cvr {
+        return Cvr(id, allVotes, phantom)
+    }
+}

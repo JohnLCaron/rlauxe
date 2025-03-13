@@ -64,7 +64,11 @@ fun runClcaAudit(auditConfig: AuditConfig,
     // prove that sampledCvrs correspond to mvrs
     require(sampledCvrs.size == mvrs.size)
     val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-    cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) }
+    cvrPairs.forEach { (mvr, cvr) ->
+        if (mvr.id != cvr.id)
+            println("why")
+        require(mvr.id == cvr.id)
+    }
 
     var allDone = true
     contestsNotDone.forEach { contest ->

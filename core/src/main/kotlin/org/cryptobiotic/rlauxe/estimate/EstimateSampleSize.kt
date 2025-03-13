@@ -284,6 +284,7 @@ fun simulateSampleSizeBetaMart(
         bettingFn = bettingFn,
         Nc = Nc,
         noerror = noerror,
+        riskLimit = auditConfig.riskLimit,
         upperBound = upperBound,
     )
 

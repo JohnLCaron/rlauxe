@@ -132,9 +132,11 @@ data class ClcaAssorter(
     val upperBound = 2.0 * noerror  // maximum assort value
 
     init {
+        if (avgCvrAssortValue < 0.5)
+            println("*** ${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" )
         if (check) { // suspend checking for some tests that expect to fail
-            require(avgCvrAssortValue > 0.5) { "$info: ($avgCvrAssortValue) avgCvrAssortValue must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
-            require(noerror > 0.5) { "$info: ($noerror) noerror must be > .5" }
+            require(avgCvrAssortValue > 0.5) { "${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
         }
     }
 

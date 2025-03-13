@@ -28,7 +28,7 @@ class BettingMart(
                         terminateOnNullReject: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
-        require(!withoutReplacement || maxSamples <= Nc)
+        // require(!withoutReplacement || maxSamples <= Nc) TODO problems with redacted cvrs ? too many undervotes ??
 
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic

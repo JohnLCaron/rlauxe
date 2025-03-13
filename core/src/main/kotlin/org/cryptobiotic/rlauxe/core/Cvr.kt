@@ -3,9 +3,10 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.workflow.BallotOrCvr
 
 // TODO immutable except for the IntArray (!)
+// assumes that a vote is 0 or 1. compact form might be List<Pair<contestId, candidateId>>
 data class Cvr(
     val id: String,
-    val votes: Map<Int, IntArray>, // contest : list of candidates voted for; for IRV, ranked first to last
+    val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
 ) {
     fun hasContest(contestId: Int): Boolean = votes[contestId] != null

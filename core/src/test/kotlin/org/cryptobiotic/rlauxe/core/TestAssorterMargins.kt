@@ -20,13 +20,15 @@ class TestAssorterMargins {
 
     @Test
     fun testProblem() {
-        val test = MultiContestTestData(16, 13, 27703, 0.02..0.033)
-        test.contests.forEach { contest ->
-            val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
-            val cvrs = test.makeCvrsFromContests()
-            assertNotNull(test.fcontests.find { it.info.name == contest.name })
-            testAssertions(contest, contestUA.pollingAssertions, cvrs)
-        }
+        //repeat(100) {
+            val test = MultiContestTestData(16, 13, 27703, 0.02..0.033)
+            test.contests.forEach { contest ->
+                val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+                val cvrs = test.makeCvrsFromContests()
+                assertNotNull(test.fcontests.find { it.info.name == contest.name })
+                testAssertions(contest, contestUA.pollingAssertions, cvrs)
+            }
+        //}
     }
 
     @Test

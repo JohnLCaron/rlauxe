@@ -25,7 +25,7 @@ data class OneAuditContest (
     override val Nc: Int  // upper limit on number of ballots for all strata for this contest
     override val Np: Int  // number of phantom ballots for all strata for this contest
 
-    val undervotes: Int
+    override val undervotes: Int
     val minMargin: Double
 
     init {
@@ -60,7 +60,7 @@ data class OneAuditContest (
         Nc = strata.sumOf { it.Ng }
         Np = strata.sumOf { it.Np }
         require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
-        undervotes = Nc - nvotes - Np
+        undervotes = Nc * info.nwinners - nvotes - Np
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()

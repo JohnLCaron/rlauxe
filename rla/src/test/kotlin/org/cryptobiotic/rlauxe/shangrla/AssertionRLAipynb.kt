@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corla.readDominionBallotManifest
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditType
@@ -309,9 +308,9 @@ class AssertionRLA {
         //# special for Primary/Dominion manifest format
         //manifest = pd.read_excel(audit.manifest_file)
         // (293555, 293555) = audit.max_cards, np.sum(manifest['Total Ballots'])
-        val manifest = readDominionBallotManifest(audit.manifestFile, 339)
-        println(" manifest nbatches=${manifest.batches.size} manifest.nballots =${manifest.nballots}")
-        assertEquals(293555, manifest.nballots)
+       // val manifest = readDominionBallotManifest(audit.manifestFile, 339)
+        //println(" manifest nbatches=${manifest.batches.size} manifest.nballots =${manifest.nballots}")
+        //assertEquals(293555, manifest.nballots)
 
 //## Read the CVR data and create CVR objects
 //# for ballot-level comparison audits

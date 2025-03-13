@@ -12,7 +12,11 @@ import kotlin.text.appendLine
 // Colorado Election Results
 // https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Statement-of-Votes.xlsx
 
-// "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+//        "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
+//(2023R) "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
+// (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+// (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+
 //100,2181207100,Presidential Electors,Kamala D. Harris / Tim Walz,"1,569","1,325",900,24,0
 //100,2181207100,Presidential Electors,Donald J. Trump / JD Vance,"1,569","1,325",354,24,0
 //100,2181207100,Presidential Electors,Blake Huber / Andrea Denault,"1,569","1,325",1,24,0
@@ -29,7 +33,15 @@ data class BoulderStatementOfVotes(val filename: String, val contests: List<Boul
             appendLine(it)
         }
     }
+
+    companion object {
+        fun combine(sovos: List<BoulderStatementOfVotes>): BoulderStatementOfVotes {
+            val combined = sovos.map { it.contests }.flatten()
+            return BoulderStatementOfVotes("combined", combined)
+        }
+    }
 }
+
 class BoulderContestVotes(
     val contestTitle: String,
 ) {
@@ -96,9 +108,56 @@ data class BoulderStatementLine(
     val totalVotes: Int,
     val totalUnderVotes: Int,
     val totalOverVotes: Int,
-)
+) {
+    companion object {
+        // (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+        fun make2024(line: CSVRecord): BoulderStatementLine {
+            return BoulderStatementLine(
+                line.get(0),
+                line.get(1),
+                line.get(2),
+                line.get(3),
+                line.get(4).convertToInteger(),
+                line.get(5).convertToInteger(),
+                line.get(6).convertToInteger(),
+                line.get(7).convertToInteger(),
+                line.get(8).convertToInteger(),
+            )
+        }
 
-fun readBoulderStatementOfVotes(filename: String): BoulderStatementOfVotes {
+        // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+        fun make2023(line: CSVRecord): BoulderStatementLine {
+            return BoulderStatementLine(
+                line.get(0),    // code
+                line.get(1),    // precinct
+                line.get(3),    // contest
+                line.get(4),    // choice, candidate
+                line.get(2).convertToInteger(), // activeVoters
+                line.get(5).convertToInteger(), // totalBallots
+                line.get(6).convertToInteger(), // totalVotes
+                line.get(7).convertToInteger(), // under
+                line.get(8).convertToInteger(), // over
+            )
+        }
+
+        // "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
+        fun make2023Rcv(line: CSVRecord): BoulderStatementLine {
+            return BoulderStatementLine(
+                line.get(0),    // code
+                line.get(1),    // precinct
+                line.get(3),    // contest
+                line.get(4),    // choice, candidate
+                line.get(2).convertToInteger(), // activeVoters
+                line.get(5).convertToInteger(), // totalBallots
+                line.get(8).convertToInteger(), // totalVotes
+                line.get(9).convertToInteger(), // under
+                line.get(10).convertToInteger(), // over
+            )
+        }
+    }
+}
+
+fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderStatementOfVotes {
     val path: Path = Paths.get(filename)
     val reader: Reader = Files.newBufferedReader(path)
     val parser = CSVParser(reader, CSVFormat.RFC4180)
@@ -116,18 +175,12 @@ fun readBoulderStatementOfVotes(filename: String): BoulderStatementOfVotes {
     try {
         while (records.hasNext()) {
             line = records.next()
-            var idx = 0
-            val bmi = BoulderStatementLine(
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++).convertToInteger(),
-                line.get(idx++).convertToInteger(),
-                line.get(idx++).convertToInteger(),
-                line.get(idx++).convertToInteger(),
-                line.get(idx).convertToInteger(),
-            )
+            val bmi = when (variation) {
+                "Boulder2024" -> BoulderStatementLine.make2024(line)
+                "Boulder2023" -> BoulderStatementLine.make2023(line)
+                "Boulder2023Rcv" -> BoulderStatementLine.make2023Rcv(line)
+                else -> { throw RuntimeException("Unknown variation $variation")}
+            }
             lines.add(bmi)
         }
     } catch (ex: Exception) {
@@ -160,6 +213,7 @@ fun readBoulderStatementOfVotes(filename: String): BoulderStatementOfVotes {
 }
 
 fun String.convertToInteger(): Int {
+    if (this == "N/A") return -1
     val cs = mutableListOf<Char>()
     // remove quotes and comma
     for (i in 0 until this.length) {

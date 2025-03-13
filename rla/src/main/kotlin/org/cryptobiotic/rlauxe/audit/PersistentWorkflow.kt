@@ -22,8 +22,8 @@ class PersistentWorkflow(
 
         // TODO other auditTypes
         // bcUA = if (auditConfig.auditType == AuditType.POLLING) auditRecord.ballots else auditRecord.cvrs
-        bcUA = auditRecord.bcUA // sorted by sampleNum
-        cvrs = auditRecord.cvrs // original order
+        bcUA = auditRecord.bcUA() // sorted by sampleNum
+        cvrs = auditRecord.cvrs() // original order
         contestsUA = auditRounds.last().contestRounds.map { it.contestUA } // TODO
     }
 

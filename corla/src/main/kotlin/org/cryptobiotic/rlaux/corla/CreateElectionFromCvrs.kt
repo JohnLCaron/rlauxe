@@ -18,18 +18,29 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.cryptobiotic.rlauxe.workflow.*
 
-class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes? = null) {
+class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes) {
     val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
 
     fun makeContestInfo(): List<ContestInfo> {
         val columns = export.schema.columns
-        return export.schema.contests.map { contest ->
+
+        return sovo.contests.map { sovoContest ->
+            val contest = export.schema.contests.find { it.contestName.startsWith(sovoContest.contestTitle) }!!
+
             val candidates = mutableListOf<String>()
             for (col in contest.startCol .. contest.startCol+contest.ncols-1) {
                 val extra = if (columns[col].header.trim().isEmpty()) "" else " (${columns[col].header.trim()})"
                 candidates.add(columns[col].choice + extra)
             }
-            val candidateMap = candidates.mapIndexed { idx, it -> it to idx}.toMap()
+            val candidateMap = if (!contest.isIRV)
+                candidates.mapIndexed { idx, it -> it to idx}.toMap()
+            else {
+                val pairs = mutableListOf<Pair<String, Int>>()
+                repeat(contest.nchoices) { idx ->
+                    pairs.add(Pair(candidates[idx], idx))
+                }
+                pairs.toMap()
+            }
             val choiceFunction = if (contest.isIRV) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY
             val (name, nwinners) = if (contest.isIRV) parseIrvContestName(contest.contestName) else parseContestName(contest.contestName)
             ContestInfo( name, contest.contestIdx, candidateMap, choiceFunction, nwinners)
@@ -64,10 +75,12 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
         println("ncontests with info = ${infos.size}")
 
         val countVotes = countVotes()
-        val allContests = countVotes.map { contestCount ->
-            val info = infos.find { it.id == contestCount.contestId }!!
-            val sovContest = if (sovo == null) null else sovo.contests.find { it.contestTitle == info.name }
-            if (sovo != null && sovContest == null) {
+        val allContests = infos.map { info ->
+            val contestCount = countVotes.find { it.contestId == info.id }!!
+            val sovContest = sovo.contests.find {
+                it.contestTitle == info.name
+            }
+            if (sovContest == null) {
                 println("HEY cant find '${info.name}' in BoulderStatementOfVotes")
             }
             val Nc = if (sovContest == null) contestCount.Nc else sovContest.totalBallots
@@ -289,11 +302,17 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
 }
 
 // use sov to define what contests are in the audit (?)
-fun createElectionFromDominionCvrs(exportFile: String, auditDir: String, sovoFile: String? = null, riskLimit: Double = 0.03) {
-    val stopwatch = Stopwatch()
-    val export: DominionCvrExport = readDominionCvrExport(exportFile, "Boulder")
+fun createElectionFromDominionCvrs(exportFile: String, auditDir: String, sovoFile: String, riskLimit: Double = 0.03) {
+    val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
+    val sovo = readBoulderStatementOfVotes(sovoFile, variation)
 
-    val sovo = if (sovoFile == null) null else readBoulderStatementOfVotes(sovoFile)
+    createElectionFromDominionCvrs(exportFile, auditDir, sovo, riskLimit)
+}
+
+// use sov to define what contests are in the audit (?)
+fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo: BoulderStatementOfVotes, riskLimit: Double = 0.03) {
+    val stopwatch = Stopwatch()
+    val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")
 
     val electionFromCvrs = CreateElectionFromCvrs(export, sovo)
     val (contests, raireContests) = electionFromCvrs.makeContests()

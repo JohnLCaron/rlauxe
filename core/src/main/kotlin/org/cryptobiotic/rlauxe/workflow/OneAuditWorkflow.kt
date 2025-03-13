@@ -38,7 +38,6 @@ class OneAuditWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
     override fun cvrs() = cvrs
-    // override fun cvrsUA() = cvrsUA
     override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
 }
 

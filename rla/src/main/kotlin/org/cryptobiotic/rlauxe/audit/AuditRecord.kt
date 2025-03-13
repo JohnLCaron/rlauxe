@@ -10,11 +10,30 @@ class AuditRecord(
     val location: String,
     val auditConfig: AuditConfig,
     val rounds: List<AuditRound>,
-    val cvrs: List<Cvr>, // in the original order
-    val bcUA: List<BallotOrCvr>,
     val mvrs: Set<CvrUnderAudit>,
 ) {
     val nrounds = rounds.size
+
+    fun bcUA(): List<BallotOrCvr> {
+        if (bcUA.isEmpty()) readCvrs()
+        return bcUA
+    }
+
+    // in the original order
+    fun cvrs(): List<Cvr> {
+        if (cvrs.isEmpty()) readCvrs()
+        return cvrs
+    }
+
+    private fun readCvrs() { // synchronized ?
+        val publisher = Publisher(location)
+        val cvrResult = readCvrsJsonFile(publisher.cvrsFile())
+        val cvrsUA = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
+        this.cvrs = cvrsUA.sortedBy { it.index() }.map { it.cvr }
+        this.bcUA = cvrsUA
+    }
+    private var cvrs: List<Cvr> = emptyList()
+    private var bcUA: List<BallotOrCvr> = emptyList()
 
     companion object {
 
@@ -22,10 +41,6 @@ class AuditRecord(
             val publisher = Publisher(location)
             val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
             val auditConfig = auditConfigResult.unwrap()
-
-            val cvrResult = readCvrsJsonFile(publisher.cvrsFile())
-            val cvrsUA = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
-            val cvrs = cvrsUA.sortedBy { it.index() }.map { it.cvr }
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
             val contests = if (contestsResults is Ok) contestsResults.unwrap()
@@ -46,7 +61,7 @@ class AuditRecord(
 
                 rounds.add(auditRound)
             }
-            return AuditRecord(location, auditConfig, rounds, cvrs, cvrsUA, mvrs)
+            return AuditRecord(location, auditConfig, rounds, mvrs)
         }
     }
 }

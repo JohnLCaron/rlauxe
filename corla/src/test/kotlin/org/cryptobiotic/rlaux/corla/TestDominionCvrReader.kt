@@ -385,7 +385,11 @@ class TestDominionCvrReader {
         assertEquals(65, export.schema.contests.size)
         assertEquals(384384, export.cvrs.size)
 
-        val maker = CreateElectionFromCvrs(export)
+        val sovo = readBoulderStatementOfVotes(
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            "Boulder2024")
+
+        val maker = CreateElectionFromCvrs(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -436,7 +440,12 @@ class TestDominionCvrReader {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv"
         val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
-        val maker = CreateElectionFromCvrs(export)
+
+        val sovo = readBoulderStatementOfVotes(
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            "Boulder2024")
+
+        val maker = CreateElectionFromCvrs(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

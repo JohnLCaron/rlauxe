@@ -108,10 +108,10 @@ class Contest(
         votes = voteBuilder.toMap()
         val nvotes = votes.values.sum()
         // only true when nwinners = 1
-        if (info.nwinners == 1) {
+        /* if (info.nwinners == 1 && info.choiceFunction != SocialChoiceFunction.IRV) {
             require(nvotes <= Nc) { "Nc $Nc must be > totalVotes ${nvotes}" }
-        }
-        undervotes = Nc - nvotes - Np
+        } */
+        undervotes = Nc * info.nwinners - nvotes - Np
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest

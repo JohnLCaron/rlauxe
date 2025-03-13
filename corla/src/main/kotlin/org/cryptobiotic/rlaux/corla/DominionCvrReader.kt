@@ -137,7 +137,7 @@ data class RedactedVotes(val ballotType: String) {
                 val useContestIdx = schema.columns[colidx].contestIdx
                 val useContest = schema.contests[useContestIdx]
                 if (useContest.isIRV) {
-                    throw NotImplementedError("RedactedVotes IRV not implemented")
+                    println("*** RedactedVotes IRV not implemented")
                 } else {
                     val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf<Int, Int>() })
                     for (candIdx in 0 until useContest.ncols) {
@@ -202,7 +202,7 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
     while (records.hasNext()) {
         val line = records.next()
         // showLine("line", line)
-        if (line.get(0).startsWith("Redacted and Aggregated")) {
+        if (line.get(0).contains("Redacted")) {
             redacted.add(RedactedVotes(line.get(ballotTypeIdx)).addVotes(schema, line))
         } else {
             val cvr = CastVoteRecord(

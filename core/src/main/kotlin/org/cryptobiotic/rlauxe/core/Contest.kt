@@ -50,6 +50,7 @@ interface ContestIF {
     val Np: Int
     val ncandidates: Int
     val choiceFunction: SocialChoiceFunction
+    val undervotes: Int
 
     val winnerNames: List<String>
     val winners: List<Int>
@@ -90,7 +91,7 @@ class Contest(
     override val winners: List<Int>
     override val losers: List<Int>
 
-    val undervotes: Int // TODO may not know this, if !hasStyles
+    override val undervotes: Int // TODO may not know this, if !hasStyles
 
     init {
         // construct votes, adding 0 votes if needed
@@ -106,7 +107,10 @@ class Contest(
         }
         votes = voteBuilder.toMap()
         val nvotes = votes.values.sum()
-        require(nvotes <= Nc) { "Nc $Nc must be <= totalVotes ${nvotes}"}
+        // only true when nwinners = 1
+        if (info.nwinners == 1) {
+            require(nvotes <= Nc) { "Nc $Nc must be > totalVotes ${nvotes}" }
+        }
         undervotes = Nc - nvotes - Np
 
         //// find winners, check that the minimum value is satisfied
@@ -281,12 +285,18 @@ open class ContestUnderAudit(
 
     override fun toString() = contest.toString()
 
+    open fun show() = buildString {
+        val votes = if (contest is Contest) contest.votes else emptyMap()
+        appendLine("$name ($id) votes=${votes} minMargin=${df(minMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
+        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners})")
+        contest.info.candidateNames.forEach { (name, id) ->
+            appendLine("   $id '$name': votes=${votes[id]}") }
+        appendLine("    Total=${votes.values.sum()}")
+    }
+
     open fun show(roundIdx: Int?) = buildString {
         val votes = if (contest is Contest) contest.votes.toString() else "N/A"
         appendLine("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
-        /* assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
-            append(" ${it.show()}")
-        } */
     }
 
     override fun equals(other: Any?): Boolean {

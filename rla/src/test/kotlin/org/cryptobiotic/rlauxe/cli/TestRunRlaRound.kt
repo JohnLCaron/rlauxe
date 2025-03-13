@@ -4,9 +4,9 @@ import kotlin.test.Test
 
 class TestRunRlaRound {
 
-    // @Test
+    @Test
     fun testRlaRoundClca() {
-        val topdir = "/home/stormy/temp/persist/runAuditClca"
+        val topdir = "/home/stormy/temp/persist/runBoulder23"
         RunRound.main(
             arrayOf(
                 "-in", topdir,

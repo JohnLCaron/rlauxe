@@ -193,7 +193,7 @@ fun trytoMakeRaireContest(N: Int, ncands:Int, minMargin: Double, undervotePct: D
         RaireAssertion.convertAssertion(testContest.info.candidateIds, aand, votes)
     }
 
-    val rcontentUA = RaireContestUnderAudit.makeFromInfo(
+    val rcontestUA = RaireContestUnderAudit.makeFromInfo(
         testContest.info,
         winner=solution.first,
         Nc=testContest.Nc,
@@ -201,7 +201,7 @@ fun trytoMakeRaireContest(N: Int, ncands:Int, minMargin: Double, undervotePct: D
         raireAssertions,
     )
 
-    return Pair(rcontentUA, testCvrs.map { it.cvr })
+    return Pair(rcontestUA, testCvrs.map { it.cvr })
 }
 
 // TODO using testCvrs.size as Nc I think

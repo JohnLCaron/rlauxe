@@ -9,7 +9,7 @@ class TestRunCli {
         // val topdir = "/home/stormy/temp/persist/testRunCli"
         val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/private/testMvrs.json"
-        RunRlaStartTest.main(
+        RunRlaStart.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.005",
@@ -33,7 +33,7 @@ class TestRunCli {
         // val topdir = "/home/stormy/temp/persist/testCliRoundPolling"
         val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/private/testMvrs.json"
-        RunRlaStartTest.main(
+        RunRlaStart.main(
             arrayOf(
                 "-in", topdir,
                 "-isPolling",

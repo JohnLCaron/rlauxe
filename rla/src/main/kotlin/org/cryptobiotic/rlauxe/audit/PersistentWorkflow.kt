@@ -2,9 +2,8 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.workflow.*
-import org.cryptobiotic.rlauxe.estimate.*
 
-/** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartTest.kt */
+/** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStart.kt */
 class PersistentWorkflow(
     val inputDir: String,
 ): RlauxWorkflowIF {

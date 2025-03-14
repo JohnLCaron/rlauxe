@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.polling
 
 import org.cryptobiotic.rlauxe.concur.*
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn

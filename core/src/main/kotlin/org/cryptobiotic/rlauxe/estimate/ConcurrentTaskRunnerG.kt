@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.concur
+package org.cryptobiotic.rlauxe.estimate
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

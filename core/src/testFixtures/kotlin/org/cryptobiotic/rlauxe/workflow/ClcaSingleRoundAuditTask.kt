@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs

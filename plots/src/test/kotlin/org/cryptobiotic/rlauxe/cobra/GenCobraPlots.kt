@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.concur.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.workflow.*

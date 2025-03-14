@@ -1,6 +1,7 @@
 
 package org.cryptobiotic.rlauxe.concur
 
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import org.cryptobiotic.rlauxe.workflow.WorkflowTaskGenerator
 

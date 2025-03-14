@@ -159,8 +159,6 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         result = 31 * result + status.hashCode()
         return result
     }
-
-
 }
 
 data class EstimationRoundResult(

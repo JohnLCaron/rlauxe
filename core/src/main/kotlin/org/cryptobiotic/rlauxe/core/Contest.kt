@@ -287,7 +287,8 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votes else emptyMap()
-        appendLine("$name ($id) votes=${votes} minMargin=${df(minMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
+        appendLine("$name ($id) votes=${votes}")
+        appendLine(" minMargin=${df(minMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners})")
         contest.info.candidateNames.forEach { (name, id) ->
             appendLine("   $id '$name': votes=${votes[id]}") }

@@ -1,27 +1,5 @@
 package org.cryptobiotic.rlauxe.workflow
 
-// The id must uniquely identify the paper ballot. Here it may be some simple thing (seq number) that points to
-// the paper ballot location. Its necessary that the system publically commit to that mapping before the Audit,
-// as well as to sampleNum.
-// TODO conform better to this spec:
-// B7. Proper bookkeeping of voter participation records and voter registration, and proper ballot
-//      accounting. This gives a trustworthy upper bound on the number of cards validly cast in each
-//      contest under audit. This upper bound must come from some procedure distict/decoupled from the voting system/equipment
-// B8. The ballots are stored securely, creating a trustworthy but possibly incomplete paper trail (some ballots might be missing).
-//      A ballot manifest is created (untrusted, possibly by card style), giving a list of where the ballots are.
-//      It may also be a style manifest which tells you which contests are on which ballots. This does not need to be trusted, but the upper bounds on
-//      the number of cards for each contest do.
-// B9. Untrusted imprinter claims to assign a unique identifier to every card in the manifest. Imprinter
-//      commits to the identifiers it claims to have used. Identifiers, once applied, cannot be altered.
-//      Once audit starts, identifiers cannot be added.
-// B10. Voting system commits to reported winners and possibly other information such as totals, batch
-//      subtotals, or CVRs. Public commitment to CVRs can shroud votes, eg using SOBA or VAULT.
-//      For card-level comparison audits, each CVR is labeled with a unique identifier from the set of
-//      identifiers previously reported (checked later). Identifier is in plaintext even if votes are shrouded.
-
-// C16. Commit to and disclose mapping from PRNG output to identifiers.
-
-
 data class BallotManifest(
     val ballots: List<Ballot>,
     val ballotStyles: List<BallotStyle> // empty if style info not available
@@ -73,7 +51,6 @@ data class BallotUnderAudit (val ballot: Ballot, val index: Int, val sampleNum: 
 // be of two different styles.) Here, we use card style to refer to the set of contests on a given
 // ballot card, and CSD to refer to card-style data for an election. (MoreStyle p.2)
 
-// Auditors compare upper bounds (possibly by style) to numbers in manifest (PubliclyVerifiable)
 data class BallotStyle(
     val name: String,
     val id: Int,

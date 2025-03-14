@@ -126,12 +126,13 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
+        // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
         // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
         //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn

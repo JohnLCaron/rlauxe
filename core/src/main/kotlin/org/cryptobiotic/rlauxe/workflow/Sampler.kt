@@ -9,6 +9,7 @@ interface Sampler: Iterator<Double> {
     fun sample(): Double // get next in sample
     fun maxSamples(): Int  // population size
     fun reset()   // start over again with different permutation (may be prohibited)
+    fun maxSampleIndexUsed(): Int // the largest cvr index used in the sampling
 }
 
 //// For polling audits.
@@ -46,7 +47,7 @@ class PollWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
-    fun maxSampleIndexUsed() = idx
+    override fun maxSampleIndexUsed() = idx
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
@@ -54,13 +55,13 @@ class PollWithoutReplacement(
 
 //// For clca audits
 class ClcaWithoutReplacement(
-    val contestUA: ContestIF,
+    val contestId: Int,
     val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     val cassorter: ClcaAssorterIF,
     val allowReset: Boolean,
-    val trackStratum: Boolean = false,
+    val trackStratum: Boolean = false, // debugging for oneaudit
 ): Sampler, Iterator<Double> {
-    val maxSamples = cvrPairs.count { it.first.hasContest(contestUA.id) }
+    val maxSamples = cvrPairs.count { it.first.hasContest(contestId) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
     private var count = 0
@@ -73,14 +74,14 @@ class ClcaWithoutReplacement(
         while (idx < cvrPairs.size) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
             idx++
-            if (cvr.hasContest(contestUA.id)) {
+            if (cvr.hasContest(contestId)) {
                 val result = cassorter.bassort(mvr, cvr)
                 if (trackStratum) print("${sfn(cvr.id, 8)} ")
                 count++
                 return result
             }
         }
-        throw RuntimeException("ClcaWithoutReplacement no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
+        throw RuntimeException("ClcaWithoutReplacement no samples left for ${contestId} and ComparisonAssorter ${cassorter}")
     }
 
     override fun reset() {
@@ -91,10 +92,15 @@ class ClcaWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
-    fun maxSampleIndexUsed() = idx
+    override fun maxSampleIndexUsed() = idx
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
+}
+
+fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorterIF): Sampler {
+    val cvrPairs = cvrs.zip(cvrs)
+    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true, false)
 }
 
 

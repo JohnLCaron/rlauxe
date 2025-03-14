@@ -25,7 +25,7 @@ class TestMakeFuzzedCvrsFrom {
         // fuzz
         val testMvrs = makeFuzzedCvrsFrom(listOf(contest), testCvrs, mvrsFuzzPct)
         var sampler = ClcaWithoutReplacement(
-            contestUA.contest as Contest,
+            contestUA.id,
             testMvrs.zip(testCvrs),
             assort,
             allowReset = true

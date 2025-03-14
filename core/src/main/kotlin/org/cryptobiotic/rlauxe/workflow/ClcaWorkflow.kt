@@ -78,7 +78,10 @@ fun runClcaAudit(auditConfig: AuditConfig,
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
-                val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, cvrPairs, roundIdx)
+                val cassertion = assertionRound.assertion as ClcaAssertion
+                val cassorter = cassertion.cassorter
+                val sampler = ClcaWithoutReplacement(contest.contestUA.id, cvrPairs, cassorter, allowReset = false)
+                val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -96,7 +99,8 @@ fun interface ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result
 }
@@ -107,28 +111,30 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
+
+        // val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
 
         val clcaConfig = auditConfig.clcaConfig
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
             ClcaStrategyType.previous,
-            ClcaStrategyType.phantoms
-                -> {
+            ClcaStrategyType.phantoms -> {
                 // use phantomRate as apriori
                 ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
             }
 
-            ClcaStrategyType.oracle -> {
+            /* ClcaStrategyType.oracle -> {
                 // use the actual errors comparing mvrs to cvrs. Testing only
                 ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
-            }
+            } */
 
+            ClcaStrategyType.oracle, // TODO: disabled
             ClcaStrategyType.noerror -> {
                 ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
             }
@@ -163,7 +169,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.maxSamples(),
-            maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
+            maxBallotIndexUsed = sampler.maxSampleIndexUsed(), // TODO only for audit, bot estimation I think
             pvalue = testH0Result.pvalueLast,
             samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
             samplesUsed = testH0Result.sampleCount,

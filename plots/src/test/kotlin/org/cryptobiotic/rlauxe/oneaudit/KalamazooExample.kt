@@ -95,6 +95,7 @@ class KalamazooExample {
         val alpha = 0.05
         val pv = mutableListOf<Double>()
 
+        // Note our bet is always .99 of maximum; using sprt_mart here
         repeat(reps) {
             sam.shuffle() // random shuffles so results wont exactly match
             val mart = sprtMart(sam, N = N, mu = 1.0 / 2, eta = 0.99 * uB, u = uB, randomOrder = true)

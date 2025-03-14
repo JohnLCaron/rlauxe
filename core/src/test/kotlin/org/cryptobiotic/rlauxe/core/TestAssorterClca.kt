@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -46,6 +47,8 @@ class TestAssorterClca {
         assertEquals(.02, margin, doublePrecision)
         val bassorter = ClcaAssorter(info, assorter, awinnerAvg)
         assertEquals(.02, mean2margin(bassorter.avgCvrAssortValue), doublePrecision)
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
 
         assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
         assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser
@@ -430,6 +433,27 @@ class TestAssorterClca {
 
         assertEquals(0.5, bassorter.overstatementError(differentContest, winnerCvr, false))
         assertEquals(1.0, bassorter.overstatementError(differentContest, winnerCvr, true))
+    }
+
+    @Test
+    fun testMeanAssort() {
+        val N = 1000
+        val cvrMean = 0.55
+
+        val info = ContestInfo("standard", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
+        val cvrs = makeCvrsByExactMean(N, cvrMean)
+        val contest = makeContestUAfromCvrs(info, cvrs)
+        val contestAU = contest.makeClcaAssertions(cvrs)
+        val compareAssertion = contestAU.clcaAssertions.first()
+        val bassorter = compareAssertion.cassorter as ClcaAssorter
+
+        val theta = bassorter.meanAssort()
+        val expected = 1.0 / (3 - 2 * cvrMean)
+        assertEquals(expected, theta, doublePrecision)
+
+        val calcMargin = bassorter.calcAssorterMargin(cvrs.zip(cvrs))
+        val calcMean = margin2mean(calcMargin)
+        assertEquals(expected, calcMean, doublePrecision)
     }
 
 }

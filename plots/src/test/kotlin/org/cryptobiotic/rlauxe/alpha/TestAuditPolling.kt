@@ -172,6 +172,7 @@ class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assort
 
     override fun reset() { count = 0 }
     override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = count
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()

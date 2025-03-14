@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,11 +19,13 @@ class TestAlphaMartComparison {
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
+        val calcMargin = (compareAssorter as ClcaAssorter).calcAssorterMargin(cvrs.zip(cvrs))
+        val calcMean = margin2mean(calcMargin)
 
-        val sampler = ClcaNoErrorSampler(contest.id, cvrs, compareAssorter)
-        val theta = sampler.sampleMean()
+        val sampler = makeClcaNoErrorSampler(contest.id, cvrs, compareAssorter)
+        val theta = compareAssorter.meanAssort()
         val expected = 1.0 / (3 - 2 * cvrMean)
-        assertEquals(expected, theta, doublePrecision)
+        assertEquals(expected, theta, 3.0/N)
 
         val eta0 = theta
         val d = 100

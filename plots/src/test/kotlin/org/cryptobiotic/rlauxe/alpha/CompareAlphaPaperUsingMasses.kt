@@ -135,9 +135,11 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampler
         count = 0
     }
 
-    fun sampleCount() = assortValues.sum()
     fun sampleMean() = assortValues.average()
+
     override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
 }

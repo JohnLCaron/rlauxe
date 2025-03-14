@@ -140,13 +140,17 @@ fun runSingleClcaAudit(
     cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) } // prove that sampledCvrs correspond to mvrs
 
     contestsNotDone.forEach { contest ->
-        contest.assertionRounds.forEach { assertion ->
-            val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertion, cvrPairs, 1)
+        contest.assertionRounds.forEach { assertionRound ->
+            val cassertion = assertionRound.assertion as ClcaAssertion
+            val cassorter = cassertion.cassorter
+            val sampler = ClcaWithoutReplacement(contest.contestUA.id, cvrPairs, cassorter, allowReset = false)
+
+            val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, 1)
             if (debug) {
                 println(" testH0Result=$testH0Result")
             }
-            assertion.status = testH0Result.status
-            assertion.round = 1
+            assertionRound.status = testH0Result.status
+            assertionRound.round = 1
         }
     }
     return true

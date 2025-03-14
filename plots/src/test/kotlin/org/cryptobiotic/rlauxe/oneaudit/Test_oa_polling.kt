@@ -1,6 +1,6 @@
 import kotlin.math.*
 
-// Generalized Wald SPRT
+// Generalized Wald SPRT, corresponds to ALphaMart (TODO test that)
 fun sprtMart(
     x: DoubleArray,
     N: Int,

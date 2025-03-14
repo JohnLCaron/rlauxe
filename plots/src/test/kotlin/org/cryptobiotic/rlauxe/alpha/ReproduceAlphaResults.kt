@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -485,8 +486,8 @@ class ReproduceAlphaResults {
 
                 val margin = assorter.assorter().reportedMargin()
                 val compareUpper = 2.0/(2-margin)
-                val drawSample = ClcaNoErrorSampler(contest.id, cvrs, assorter)
-                val etaActual = drawSample.sampleMean()
+                val drawSample = makeClcaNoErrorSampler(contest.id, cvrs, assorter)
+                val etaActual =  assorter.meanAssort()
                 val etaExpect =  1.0/(2-margin)
                 val same = doubleIsClose(etaActual, etaExpect)
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
@@ -573,8 +574,8 @@ class ReproduceAlphaResults {
             val contestUA = makeContestUAfromCvrs(info, cvrs).makeClcaAssertions(cvrs)
             val compareAssorter = contestUA.minClcaAssertion()!!.cassorter
             val margin = compareAssorter.assorter().reportedMargin()
-            val drawSample = ClcaNoErrorSampler(info.id, cvrs, compareAssorter)
-            val etaActual = drawSample.sampleMean()
+            val drawSample = makeClcaNoErrorSampler(info.id, cvrs, compareAssorter)
+            val etaActual = compareAssorter.meanAssort()
             val eta0 = factor / (2 - margin)
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
 

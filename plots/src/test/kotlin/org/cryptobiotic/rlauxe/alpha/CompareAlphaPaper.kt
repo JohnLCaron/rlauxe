@@ -7,12 +7,12 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.test.Test
 
 // compare ballot polling to card comparison
@@ -46,7 +46,7 @@ class CompareAlphaPaper {
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = ClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
+                    drawSample = makeClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
                     // maxSamples = N,
                     eta0 = eta,
                     d = d,

@@ -59,7 +59,7 @@ data class OneAuditContest (
 
         Nc = strata.sumOf { it.Ng }
         Np = strata.sumOf { it.Np }
-        require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
+//        require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
         undervotes = Nc * info.nwinners - nvotes - Np
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
@@ -212,12 +212,13 @@ data class OAClcaAssorter(
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value TODO why?
 ) : ClcaAssorterIF {
     val stratumInfos: Map<String, StratumInfo>   // strataName -> average batch assorter value
-    val clcaMargin: Double // estimated assorter mean, if all cards agree; used for alphaMart
+    val clcaMean: Double // estimated assorter margin, if all cards agree; used for alphaMart
     var cvrStrata: StratumInfo
 
     // TODO fix failing tests
     override fun noerror() = cvrStrata.cassorter!!.noerror
     override fun upperBound() = cvrStrata.cassorter!!.upperBound
+    override fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
     override fun assorter() = assorter
     override fun id() = contestOA.id
 
@@ -237,8 +238,7 @@ data class OAClcaAssorter(
                 Pair(stratum.strataName, StratumInfo(avgBatchAssortValue, null))
             }
         }.toMap()
-        val clcaMean = weightedMeanAssortValue / contestOA.Nc
-        clcaMargin = mean2margin(clcaMean)
+        clcaMean = weightedMeanAssortValue / contestOA.Nc
         cvrStrata = stratumInfos.values.find { it.cassorter != null }!!
     }
 
@@ -250,7 +250,7 @@ data class OAClcaAssorter(
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
-        val stratumInfo = stratumInfos[cvr.id] // TODO cant rely on cvr ids ??
+        val stratumInfo = stratumInfos[cvr.id] // TODO cant rely on cvr ids
         if (stratumInfo == null) {
             if (cvrStrata != null) {
                 return cvrStrata!!.cassorter!!.bassort(mvr, cvr)

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
@@ -118,7 +119,11 @@ class PlotDistributions {
             val contestUA = workflow.contestsUA().first()
             val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1, null)
 
-            AuditClcaAssertion().run(auditConfig, contestUA.contest, assertionRound, sortedPairs, 1)
+            val cassertion = assertionRound.assertion as ClcaAssertion
+            val cassorter = cassertion.cassorter
+            val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false)
+
+            AuditClcaAssertion().run(auditConfig, contestUA.contest, assertionRound, sampler, 1)
             results.add(assertionRound.auditResult!!.samplesNeeded)
         }
 

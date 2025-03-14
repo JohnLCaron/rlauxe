@@ -62,9 +62,9 @@ fun createSampleIndices(
 
     val auditConfig = workflow.auditConfig()
     return if (auditConfig.hasStyles) {
-        println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
+        if (!quiet) println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
         val sampleIndices = consistentSampling(auditRound, workflow.sortedBallotsOrCvrs(), previousSamples)
-        println(" consistentSamplingSize= ${sampleIndices.size}")
+        if (!quiet) println(" consistentSamplingSize= ${sampleIndices.size}")
         sampleIndices
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")

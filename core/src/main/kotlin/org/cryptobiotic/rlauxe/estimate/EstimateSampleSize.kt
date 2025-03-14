@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
@@ -62,7 +63,7 @@ fun estimateSampleSizes(
         val newSampleSizes = estResults.filter { it.task.contest.id == contest.id }
             .map { it.task.assertionRound.estNewSampleSize }
         contest.estNewSamples = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
-        println(" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}")
+        // if (!quiet) println(" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}")
 
     }
     if (show) println()
@@ -223,12 +224,10 @@ fun simulateSampleSizeClcaAssorter(
     } else {
         // this is noerrors
         Pair(
-            ClcaWithoutReplacement(
-                contest,
-                cvrs.zip(cvrs),
+            makeClcaNoErrorSampler(
+                contest.id,
+                cvrs,
                 cassorter,
-                allowReset = true,
-                trackStratum = false
             ),
             AdaptiveComparison(
                 Nc = contest.Nc,
@@ -404,7 +403,7 @@ fun simulateSampleSizeOneAuditAssorter(
 
     // TODO is this right, no special processing for the "hasCvr" strata?
     val sampler = if (oaConfig.simFuzzPct == null) {
-        ClcaWithoutReplacement(contestUA.contest, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
+        ClcaWithoutReplacement(contestUA.id, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
     } else {
         fuzzPct = oaConfig.simFuzzPct
         OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
@@ -415,7 +414,7 @@ fun simulateSampleSizeOneAuditAssorter(
     val result = simulateSampleSizeAlphaMart(
         auditConfig,
         sampler,
-        cassorter.clcaMargin,
+        mean2margin(cassorter.meanAssort()),
         cassorter.upperBound(),
         contestUA.Nc,
         startingTestStatistic,

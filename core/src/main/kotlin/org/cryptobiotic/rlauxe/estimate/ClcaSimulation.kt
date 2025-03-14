@@ -63,6 +63,7 @@ class ClcaSimulation(
     fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
 
     override fun reset() {
         permutedIndex.shuffle(Random)

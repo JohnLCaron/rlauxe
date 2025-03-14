@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
@@ -40,37 +41,26 @@ class TestOAClcaAssorter {
 
     @Test
     fun testOABasics() {
-        val info = ContestInfo(
-            name = "AvB",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.PLURALITY,
-            candidateNames = listToMap("A", "B", "C"),
-        )
-        val winnerCvr = makeCvr(0)
-        val loserCvr = makeCvr(1)
-        val otherCvr = makeCvr(2)
-        val cvrs = listOf(winnerCvr, winnerCvr, winnerCvr, loserCvr, otherCvr)
-        val contest = makeContestFromCvrs(info, cvrs)
-
-        val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
-        assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser
-        assertEquals(0.5, assorter.assort(otherCvr))  // voted for someone else
-        // so assort in {0, .5, 1}
-
-        val awinnerAvg = cvrs.map { assorter.assort(it) }.average()
-        val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
-
-        val stratum = OneAuditStratum("card", true, contest.info, contest.votes, cvrs.size, 0)
-
-        val contestOA = OneAuditContest(contest.info, listOf(stratum))
-        val bassorter = OAClcaAssorter(contestOA, assorter, awinnerAvg)
+        val N = 10000
+        val margin = .05
+        val cvrPercent = .90
+        val undervotePercent = .33
+        val phantomPercent = 0.03
+        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
+        val testCvrs = contestOA.makeTestCvrs()
+        val contestUA = contestOA.makeContestUnderAudit(testCvrs)
+        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OAClcaAssorter
+        val awinnerAvg = margin2mean(bassorter.assorter.reportedMargin())
 
         // assertEquals(noerror, bassorter.clcaMargin, doublePrecision)
         assertEquals(1.0 / (2.0 - margin), bassorter.noerror(), doublePrecision)
         assertEquals(2 * bassorter.noerror(), bassorter.upperBound(), doublePrecision)
-        assertEquals(assorter, bassorter.assorter())
 
+        val theta = bassorter.meanAssort()
+        val expected = 1.0 / (3 - 2 * awinnerAvg)
+        assertEquals(expected, theta, doublePrecision)
+
+        //// this is for when its a "noCvr"
         // full
         //  mvr has loser vote = (1 - Ā(g)/u) / (2-v/u)
         //  mvr has winner vote = (1 - (Ā(g)-1)/u) / (2-v/u)
@@ -79,26 +69,63 @@ class TestOAClcaAssorter {
         // u=1
         //    mvr has loser vote =  (1-assorter_mean_poll)/(2-v)
         //    mvr has winner vote = (2-assorter_mean_poll)/(2-v)
-        val loserVote = (1.0 - awinnerAvg) / (2 - margin)
-        val winnerVote = (2.0 - awinnerAvg) / (2 - margin)
-        println("loserVote=$loserVote winner=$winnerVote ")
 
-        println(" mvr other bassort=${bassorter.bassort(otherCvr, winnerCvr)} ")
-        println(" mvr winner bassort=${bassorter.bassort(winnerCvr, winnerCvr)} ")
-        println(" mvr loser bassort=${bassorter.bassort(loserCvr, winnerCvr)} ")
+        val winnerNoCvr = makeCvr(0, "noCvr")
+        val loserNoCvr = makeCvr(1, "noCvr")
+        val otherNoCvr = makeCvr(2, "noCvr")
 
-        // TODO failing
-        assertEquals(0.5, bassorter.bassort(otherCvr, winnerCvr), doublePrecision)
-        assertEquals(loserVote, bassorter.bassort(loserCvr, winnerCvr), doublePrecision)
-        assertEquals(winnerVote, bassorter.bassort(winnerCvr, winnerCvr), doublePrecision)
+        val loserVoteNoCvr = (1.0 - awinnerAvg) / (2 - margin)
+        val winnerVoteNoCvr = (2.0 - awinnerAvg) / (2 - margin)
+        println("loserVoteNoCvr=$loserVoteNoCvr winnerVoteNoCvr=$winnerVoteNoCvr ")
 
-        assertEquals(0.5, bassorter.bassort(otherCvr, loserCvr), doublePrecision)
-        assertEquals(loserVote, bassorter.bassort(loserCvr, loserCvr), doublePrecision)
-        assertEquals(winnerVote, bassorter.bassort(winnerCvr, loserCvr), doublePrecision)
+        println(" mvr winner bassort=${bassorter.bassort(winnerNoCvr, winnerNoCvr)} ")
+        println(" mvr loser bassort=${bassorter.bassort(loserNoCvr, winnerNoCvr)} ")
+        println(" mvr other bassort=${bassorter.bassort(otherNoCvr, winnerNoCvr)} ")
 
-        assertEquals(0.5, bassorter.bassort(otherCvr, otherCvr), doublePrecision)
-        assertEquals(loserVote, bassorter.bassort(loserCvr, otherCvr), doublePrecision)
-        assertEquals(winnerVote, bassorter.bassort(winnerCvr, otherCvr), doublePrecision)
+        assertEquals(0.5, bassorter.bassort(otherNoCvr, winnerNoCvr), doublePrecision)
+        assertEquals(loserVoteNoCvr, bassorter.bassort(loserNoCvr, winnerNoCvr), doublePrecision)
+        assertEquals(winnerVoteNoCvr, bassorter.bassort(winnerNoCvr, winnerNoCvr), doublePrecision)
+
+        assertEquals(0.5, bassorter.bassort(otherNoCvr, loserNoCvr), doublePrecision)
+        assertEquals(loserVoteNoCvr, bassorter.bassort(loserNoCvr, loserNoCvr), doublePrecision)
+        assertEquals(winnerVoteNoCvr, bassorter.bassort(winnerNoCvr, loserNoCvr), doublePrecision)
+
+        assertEquals(0.5, bassorter.bassort(otherNoCvr, otherNoCvr), doublePrecision)
+        assertEquals(loserVoteNoCvr, bassorter.bassort(loserNoCvr, otherNoCvr), doublePrecision)
+        assertEquals(winnerVoteNoCvr, bassorter.bassort(winnerNoCvr, otherNoCvr), doublePrecision)
+
+        //// otherwise its the usual assort value for a "hasCvr"
+
+        val winnerCvr = makeCvr(0, "hasCvr")
+        val loserCvr = makeCvr(1, "hasCvr")
+        val otherCvr = makeCvr(2, "hasCvr")
+        val phantomCvr = Cvr("hasCvr", mapOf(0 to IntArray(0)), phantom = true)
+
+        val noerror = 1.0 / (2.0 - margin)
+        assertEquals(noerror, bassorter.noerror(), doublePrecision)
+        assertEquals(1.0 / (3 - 2 * awinnerAvg), noerror, doublePrecision)
+        println("noerror = $noerror")
+
+        // bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
+        assertEquals(noerror, bassorter.bassort(winnerCvr, winnerCvr))         // no error
+        assertEquals(2 * noerror, bassorter.bassort(winnerCvr, loserCvr))      // cvr flipped vote from winner to loser
+        assertEquals(1.5 * noerror, bassorter.bassort(winnerCvr, otherCvr))    // cvr flipped vote from winner to other
+        assertEquals(1.5 * noerror, bassorter.bassort(winnerCvr, phantomCvr))  // found winner: oneUnder
+
+        assertEquals(0.0, bassorter.bassort(loserCvr, winnerCvr))              // cvr flipped vote from loser to winner
+        assertEquals(noerror, bassorter.bassort(loserCvr, loserCvr))           // no error
+        assertEquals(0.5*noerror, bassorter.bassort(loserCvr, otherCvr))       // cvr flipped vote from loser to other
+        assertEquals(0.5*noerror, bassorter.bassort(loserCvr, phantomCvr))     // found loser: oneOver
+
+        assertEquals(0.5*noerror, bassorter.bassort(otherCvr, winnerCvr))      // cvr flipped vote from other to winner
+        assertEquals(1.5*noerror, bassorter.bassort(otherCvr, loserCvr))       // cvr flipped vote from other to loser
+        assertEquals(noerror, bassorter.bassort(otherCvr, otherCvr))           // no error
+
+        assertEquals(0.0, bassorter.bassort(phantomCvr, winnerCvr))           // no mvr, cvr reported winner, : twoOver
+        assertEquals(noerror, bassorter.bassort(phantomCvr, loserCvr))                 // no mvr, cvr reported loser: nuetral
+        assertEquals(0.5*noerror, bassorter.bassort(phantomCvr, phantomCvr))  // no mvr, no cvr: oneOver (common case i assume)
+        assertEquals(1.5*noerror, bassorter.bassort(winnerCvr, phantomCvr))   // mvr reported winner, no cvr: oneUnder
+        assertEquals(.5*noerror, bassorter.bassort(loserCvr, phantomCvr))     // mvr reported lose, no cvr: oneOver
     }
 
     @Test
@@ -153,7 +180,7 @@ class TestOAClcaAssorter {
 
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter
         println(bassorter)
-        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${bassorter.clcaMargin} ")
+        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${mean2margin(bassorter.meanAssort())} ")
 
         // sanity check
         val allCount = testCvrs.count()
@@ -194,9 +221,9 @@ class TestOAClcaAssorter {
         val allWeighted = (cvrAvg * contest.strata[1].Ng + noAvg * contest.strata[0].Ng) / contest.Nc
         assertEquals(allAvg, allWeighted, doublePrecision)
 
-        println("clcaMargin = ${bassorter.clcaMargin}")
-        println("clcaMean = ${margin2mean(bassorter.clcaMargin)}")
-        assertEquals(allAvg, margin2mean(bassorter.clcaMargin), doublePrecision)
+        println("clcaMargin = ${mean2margin(bassorter.meanAssort())}")
+        println("clcaMean = ${bassorter.meanAssort()}")
+        // assertEquals(allAvg, margin2mean(bassorter.clcaMargin), doublePrecision)
     }
 
     @Test

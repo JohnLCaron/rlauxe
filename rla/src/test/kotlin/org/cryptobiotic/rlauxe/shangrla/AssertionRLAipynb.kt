@@ -3,13 +3,10 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.AuditType
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.raire.*
-import org.cryptobiotic.rlauxe.workflow.AuditRound
-import org.cryptobiotic.rlauxe.workflow.ContestRound
-import org.cryptobiotic.rlauxe.workflow.Sampler
+import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -634,7 +631,7 @@ fun replicate_p_values(
     val contest = contests.first()
     val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = ClcaNoErrorSampler(contest.id, cvrs, minAssorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
@@ -665,7 +662,7 @@ fun calc_sample_sizes(
     val contest = contests.first().makeClcaAssertions(cvrs)
     val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = ClcaNoErrorSampler(contest.id, cvrs, minAssorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
 
     // class AdaptiveComparison(
     //    val N: Int,

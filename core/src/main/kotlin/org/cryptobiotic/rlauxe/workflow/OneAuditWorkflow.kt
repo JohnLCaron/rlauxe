@@ -47,20 +47,14 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+        sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val cassertion = assertionRound.assertion as ClcaAssertion
         val assorter = cassertion.cassorter as OAClcaAssorter
-        val sampler = ClcaWithoutReplacement(
-            contest,
-            cvrPairs,
-            cassertion.cassorter,
-            allowReset = false,
-            trackStratum = false
-        )
 
-        val eta0 = margin2mean(assorter.clcaMargin)
+        val eta0 = assorter.meanAssort()
         val c = (eta0 - 0.5) / 2
 
         // TODO is this right, no special processing for the "hasCvr" strata?

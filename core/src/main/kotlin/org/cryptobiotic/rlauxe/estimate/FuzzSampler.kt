@@ -29,13 +29,12 @@ class ClcaFuzzSampler(
     override fun sample(): Double {
         while (idx < N) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
+            idx++
             if (cvr.hasContest(contest.id)) {
                 val result = cassorter.bassort(mvr, cvr)
-                idx++
                 welford.update(result)
                 return result
             }
-            idx++
         }
         throw RuntimeException("no samples left for ${contest.id} and ComparisonAssorter ${cassorter}")
     }
@@ -52,6 +51,8 @@ class ClcaFuzzSampler(
     }
 
     override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
 }
@@ -77,13 +78,12 @@ class PollingFuzzSampler(
     override fun sample(): Double {
         while (idx < N) {
             val mvr = mvrs[permutedIndex[idx]]
+            idx++
             if (mvr.hasContest(contest.id)) {
                 val result = assorter.assort(mvr, usePhantoms = true)
-                idx++
                 welford.update(result)
                 return result
             }
-            idx++
         }
         throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
     }
@@ -99,6 +99,8 @@ class PollingFuzzSampler(
     }
 
     override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
 }
@@ -127,13 +129,12 @@ class OneAuditFuzzSampler(
     override fun sample(): Double {
         while (idx < N) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
+            idx++
             if (cvr.hasContest(contestUA.id)) {
                 val result = cassorter.bassort(mvr, cvr)
-                idx++
                 welford.update(result)
                 return result
             }
-            idx++
         }
         throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
     }
@@ -150,6 +151,8 @@ class OneAuditFuzzSampler(
     }
 
     override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
 }

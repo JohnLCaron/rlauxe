@@ -114,6 +114,7 @@ interface ClcaAssorterIF {
     fun id(): Int
     fun noerror(): Double
     fun upperBound(): Double
+    fun meanAssort(): Double
 
     fun assorter(): AssorterIF
     fun bassort(mvr: Cvr, cvr:Cvr): Double
@@ -127,13 +128,13 @@ data class ClcaAssorter(
     val hasStyle: Boolean = true,
     val check: Boolean = true, // TODO get rid of
 ) : ClcaAssorterIF {
-    val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin
+    val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
     val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
 
     init {
-        if (avgCvrAssortValue < 0.5)
-            println("*** ${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" )
+        if (avgCvrAssortValue <= 0.5 || (noerror <= 0.5))
+            println("*** ${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
         if (check) { // suspend checking for some tests that expect to fail
             require(avgCvrAssortValue > 0.5) { "${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
@@ -143,6 +144,7 @@ data class ClcaAssorter(
     override fun id() = info.id
     override fun noerror() = noerror
     override fun upperBound() = upperBound
+    override fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
     override fun assorter() = assorter
     override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$margin noerror=$noerror upperBound=$upperBound"
 

@@ -114,6 +114,8 @@ class GenSampleMeanWithReplacement(val N: Int, ratio: Double): Sampler {
         count = 0
     }
     override fun maxSamples() = N
+    override fun maxSampleIndexUsed() = count
+
     override fun hasNext() = (count < N)
     override fun next() = sample()
 }
@@ -132,6 +134,8 @@ class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): Sampler {
         count = 0
     }
     override fun maxSamples() = N
+    override fun maxSampleIndexUsed() = index
+
     override fun hasNext() = (count < N)
     override fun next() = sample()
 }

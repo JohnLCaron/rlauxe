@@ -5,34 +5,38 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-// making CVRs for simulations and testing
-fun makeCvrsByExactCount(counts : List<Int>) : List<Cvr> {
+/**
+ * single contest (=0), make candCounts.sum() cvrs
+ * where there are candCounts(i) cvrs that voted for for candidate i.
+ */
+fun makeCvrsByExactCount(candCounts : List<Int>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
-    var total = 0
-    counts.forEachIndexed { idx, it ->
+    var count = 0
+    candCounts.forEachIndexed { candId, it ->
         repeat(it) {
-            val votes = mutableMapOf<Int, IntArray>()
-            votes[0] = intArrayOf(idx)
-            cvrs.add(Cvr("card-$total", votes))
-            total++
+            cvrs.add(makeCvr(candId,"card-$count"))
+            count++
         }
     }
     cvrs.shuffle( Random )
     return cvrs
 }
 
-fun makeCvr(winner: Int, name:String?=null): Cvr {
+/** make a Cvr (contest 0) that voted for candId */
+fun makeCvr(candId: Int, name:String?=null): Cvr {
     val votes = mutableMapOf<Int, IntArray>()
-    votes[0] = intArrayOf(winner)
+    votes[0] = intArrayOf(candId)
     return Cvr(name?:"card", votes)
 }
 
-fun makeOtherCvrForContest(contestId: Int, name:String?=null): Cvr {
+/** make a Cvr undervote (no votes) for contest contestId */
+fun makeUndervoteForContest(contestId: Int, name:String?=null): Cvr {
     val votes = mutableMapOf<Int, IntArray>()
     votes[contestId] = IntArray(0)
     return Cvr(name?:"other", votes)
 }
 
+/** make ncards Cvrs for contest 0, candidates 0 and 1, that have the exact mean for candidate 0. */
 fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     val randomCvrs = mutableListOf<Cvr>()
     repeat(ncards) {

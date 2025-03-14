@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -11,6 +10,7 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -33,7 +33,7 @@ class ReproduceCobraResults {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta, N)
-                val sampler = ClcaNoErrorSampler(compareAssorter.info.id, cvrs, compareAssorter)
+                val sampler = makeClcaNoErrorSampler(compareAssorter.info.id, cvrs, compareAssorter)
                 val upperBound = compareAssorter.upperBound
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${compareAssorter.noerror}")
 

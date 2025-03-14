@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.estimate.makeOtherCvrForContest
+import org.cryptobiotic.rlauxe.estimate.makeUndervoteForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
 import java.util.concurrent.TimeUnit
@@ -95,7 +95,7 @@ class ClcaWorkflowTaskGenerator(
 
         if (!useConfig.hasStyles && Nb > Nc) { // TODO wtf?
             val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
+            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
             testCvrs = testCvrs + otherCvrs
             testMvrs = testMvrs + otherCvrs
         }
@@ -137,7 +137,7 @@ class PollingWorkflowTaskGenerator(
 
         if (!useConfig.hasStyles && Nb > Nc) {
             val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeOtherCvrForContest(otherContestId) }
+            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
             testMvrs = testMvrs + otherCvrs
 
             val otherBallots = List<Ballot>(Nb - Nc) { Ballot("other${Nc+it}", false, null) }
@@ -174,7 +174,7 @@ class OneAuditWorkflowTaskGenerator(
             oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
         )
 
-        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, phantomPct, undervotePercent = underVotePct, phantomPercent=phantomPct)
+        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 

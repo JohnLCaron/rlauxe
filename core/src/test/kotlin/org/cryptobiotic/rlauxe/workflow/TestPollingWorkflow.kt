@@ -35,9 +35,9 @@ class TestPollingWorkflow {
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
 
-        val testMvrs = testCvrs
-        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
-        runWorkflow("testPollingNoStyle", workflow, testMvrs)
+        val workflow = PollingWorkflow(auditConfig, contests,
+            BallotCardsPollingStart(ballotManifest.ballots, testCvrs, auditConfig.seed))
+        runWorkflow("testPollingNoStyle", workflow)
     }
 
     // @Test
@@ -75,8 +75,9 @@ class TestPollingWorkflow {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = testCvrs
 
-        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
-        runWorkflow("testPollingWithStyle", workflow, testMvrs)
+        val workflow = PollingWorkflow(auditConfig, contests,
+            BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed))
+        runWorkflow("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -101,8 +102,9 @@ class TestPollingWorkflow {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
 
-        val workflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
-        runWorkflow("testPollingWithStyle", workflow, testMvrs)
+        val workflow = PollingWorkflow(auditConfig, contests,
+            BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed))
+        runWorkflow("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -128,8 +130,9 @@ class TestPollingWorkflow {
 
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
-        val workflow = PollingWorkflow(auditConfig, test.contests, ballotManifest, testCvrs.size)
+        val workflow = PollingWorkflow(auditConfig, test.contests,
+            BallotCardsPollingStart(ballotManifest.ballots, testCvrs, auditConfig.seed))
 
-        runWorkflow("testPollingOneContest", workflow, testCvrs)
+        runWorkflow("testPollingOneContest", workflow)
     }
 }

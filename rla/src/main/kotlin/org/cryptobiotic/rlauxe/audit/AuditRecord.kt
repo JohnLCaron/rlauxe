@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
@@ -12,28 +13,60 @@ class AuditRecord(
     val rounds: List<AuditRound>,
     val mvrs: Set<CvrUnderAudit>,
 ) {
-    val nrounds = rounds.size
 
-    fun bcUA(): List<BallotOrCvr> {
-        if (bcUA.isEmpty()) readCvrs()
-        return bcUA
+    fun ballotCards(): BallotCards {
+        return if (auditConfig.isClca) {
+            BallotCardsClcaRecord(cvrsUA)
+        } else {
+            BallotCardsPollingRecord(ballotsUA)
+        }
     }
 
-    // in the original order
-    fun cvrs(): List<Cvr> {
-        if (cvrs.isEmpty()) readCvrs()
-        return cvrs
-    }
-
-    private fun readCvrs() { // synchronized ?
+    private val cvrsUA: List<CvrUnderAudit> by lazy {
         val publisher = Publisher(location)
         val cvrResult = readCvrsJsonFile(publisher.cvrsFile())
-        val cvrsUA = if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
-        this.cvrs = cvrsUA.sortedBy { it.index() }.map { it.cvr }
-        this.bcUA = cvrsUA
+        if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
     }
-    private var cvrs: List<Cvr> = emptyList()
-    private var bcUA: List<BallotOrCvr> = emptyList()
+
+    private val ballotsUA: List<BallotUnderAudit> by lazy {
+        val publisher = Publisher(location)
+        val bmResult = readBallotManifestJsonFile(publisher.ballotManifestFile())
+        if (bmResult is Ok) bmResult.unwrap().ballots else emptyList()
+    }
+
+    // read the sampleNumbers for this round and fetch the corresponding mvrs from the private file, add to ballotCards
+    // TODO in a real audit, these are added by the audit process, not from a private file
+    fun getMvrsForRound(ballotCards: BallotCards, roundIdx: Int, mvrFile: String): List<CvrUnderAudit> {
+        val publisher = Publisher(location)
+        val resultIndices = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx))
+        if (resultIndices is Err) println(resultIndices)
+        require(resultIndices is Ok)
+        val sampleIndices = resultIndices.unwrap() // these are the samples we are going to audit.
+
+        if (sampleIndices.isEmpty()) {
+            println("***Error sampled Indices are empty for round $roundIdx")
+            return emptyList()
+        }
+
+        // the only place privy to private data
+        val resultMvrs = readCvrsJsonFile(mvrFile)
+        if (resultMvrs is Err) println(resultMvrs)
+        require(resultMvrs is Ok)
+        val testMvrs = resultMvrs.unwrap()
+
+        val sampledMvrs = findSamples(sampleIndices, testMvrs)
+        require(sampledMvrs.size == sampleIndices.size)
+
+        // debugging sanity check
+        var lastRN = 0L
+        sampledMvrs.forEach { mvr ->
+            require(mvr.sampleNumber() > lastRN)
+            lastRN = mvr.sampleNumber()
+        }
+
+        ballotCards.setMvrs(sampledMvrs)
+        return sampledMvrs
+    }
 
     companion object {
 
@@ -50,9 +83,9 @@ class AuditRecord(
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.rounds()) {
-                val sampledIndices = readSampleIndicesJsonFile(publisher.sampleIndicesFile(roundIdx)).unwrap()
+                val sampledNumbers = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx)).unwrap()
 
-                val auditRound = readAuditRoundJsonFile(contests, sampledIndices, publisher.auditRoundFile(roundIdx)).unwrap()
+                val auditRound = readAuditRoundJsonFile(contests, sampledNumbers, publisher.auditRoundFile(roundIdx)).unwrap()
 
                 // may not exist yet
                 val sampledMvrsResult = readCvrsJsonFile(publisher.sampleMvrsFile(roundIdx))
@@ -63,5 +96,47 @@ class AuditRecord(
             }
             return AuditRecord(location, auditConfig, rounds, mvrs)
         }
+    }
+}
+
+class BallotCardsClcaRecord(private val cvrsUA: List<CvrUnderAudit>) : BallotCardsClca {
+    var mvrsForRound: List<CvrUnderAudit> = emptyList()
+
+    override fun nballotCards() = cvrsUA.size
+    override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
+    override fun setMvrs(mvrsUA: List<CvrUnderAudit>) {
+        mvrsForRound = mvrsUA
+    }
+
+    override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+        val sampleNumbers = mvrsForRound.map { it.sampleNum }
+        val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
+
+        // prove that sampledCvrs correspond to mvrs
+        require(sampledCvrs.size == mvrsForRound.size)
+        val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsForRound.zip(sampledCvrs)
+        cvruaPairs.forEach { (mvr, cvr) ->
+            require(mvr.id == cvr.id)
+            require(mvr.index == cvr.index)
+            require(mvr.sampleNumber() == cvr.sampleNumber())
+        }
+        // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
+        val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
+        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = false)
+    }
+}
+
+class BallotCardsPollingRecord(private val ballotsUA: List<BallotUnderAudit>) : BallotCardsPolling {
+    var mvrsForRound: List<CvrUnderAudit> = emptyList()
+
+    override fun nballotCards() = ballotsUA.size
+    override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
+    override fun setMvrs(mvrsUA: List<CvrUnderAudit>) {
+        mvrsForRound = mvrsUA
+    }
+
+    override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {
+        // // TODO why not CvrUnderAudit ?
+        return PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr } , assorter, allowReset=allowReset)
     }
 }

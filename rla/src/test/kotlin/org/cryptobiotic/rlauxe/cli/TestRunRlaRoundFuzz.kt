@@ -2,12 +2,12 @@ package org.cryptobiotic.rlauxe.cli
 
 import kotlin.test.Test
 
-class TestRunRlaRound {
+class TestRunRlaRoundFuzz {
 
-    @Test
+    // @Test
     fun testRlaRoundClca() {
-        val topdir = "/home/stormy/temp/persist/runBoulder23"
-        RunRound.main(
+        val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
+        RunRoundFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-mvrs", "$topdir/private/testMvrs.json",
@@ -18,7 +18,7 @@ class TestRunRlaRound {
     // @Test
     fun testRlaRoundRaireClca() {
         val topdir = "/home/stormy/temp/persist/runClcaRaire"
-        RunRound.main(
+        RunRoundFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-mvrs", "$topdir/private/testMvrs.json",
@@ -26,11 +26,10 @@ class TestRunRlaRound {
         )
     }
 
-    //@Test
+    // @Test
     fun testRlaRoundPolling() {
-        val topdir = "/home/stormy/temp/persist/runAuditPolling"
-
-        RunRound.main(
+        val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
+        RunRoundFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-mvrs", "$topdir/private/testMvrs.json",

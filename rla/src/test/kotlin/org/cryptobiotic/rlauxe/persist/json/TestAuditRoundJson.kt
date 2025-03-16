@@ -52,11 +52,11 @@ class TestAuditRoundJson {
             contestRounds,
             true,
             false,
-            sampledIndices = listOf(1,2,3),
+            sampleNumbers = listOf(1,2,3),
             nmvrs = 42,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(contestsUAs, target.sampledIndices)
+        val roundtrip = json.import(contestsUAs, target.sampleNumbers)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -88,12 +88,12 @@ class TestAuditRoundJson {
             contestRounds,
             false,
             false,
-            sampledIndices = listOf(1,2,3, 21),
+            sampleNumbers = listOf(1,2,3, 21),
             nmvrs = 129182,
             auditorWantNewMvrs = 2223,
             )
         writeAuditRoundJsonFile(target, filename)
-        val result = readAuditRoundJsonFile(contestsUAs, target.sampledIndices, filename)
+        val result = readAuditRoundJsonFile(contestsUAs, target.sampleNumbers, filename)
         assertTrue(result is Ok)
         val roundtrip = result.unwrap()
         check(target, roundtrip)
@@ -120,11 +120,11 @@ class TestAuditRoundJson {
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-        // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-        else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
+            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        val lastRound = runWorkflow("testComparisonWorkflow", clcaWorkflow, testMvrs, quiet = true)
+        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed))
+        val lastRound = runWorkflow("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
 
         val target = AuditRound(
@@ -132,18 +132,18 @@ class TestAuditRoundJson {
             lastRound.contestRounds,
             false,
             false,
-            sampledIndices = lastRound.sampledIndices,
+            sampleNumbers = lastRound.sampleNumbers,
             nmvrs = 33333,
             auditorWantNewMvrs = 33334533,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.sampledIndices)
+        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.sampleNumbers)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
         writeAuditRoundJsonFile(target, filename)
-        val result = readAuditRoundJsonFile(clcaWorkflow.contestsUA(), target.sampledIndices, filename)
+        val result = readAuditRoundJsonFile(clcaWorkflow.contestsUA(), target.sampleNumbers, filename)
         if (result is Err) println("result = $result")
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
@@ -167,7 +167,7 @@ class TestAuditRoundJson {
         println("Start testComparisonWorkflow $testData")
         contests.forEach { println("  $it") }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N/2, ncands=5, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
         println(rcontest)
         println()
 
@@ -176,30 +176,27 @@ class TestAuditRoundJson {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, listOf(rcontest), testCvrs)
+        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, listOf(rcontest), BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed))
         val nextRound = clcaWorkflow.startNewRound()
-        val sampledMvrs = nextRound.sampledIndices.map {
-            testMvrs[it]
-        }
-        val done = clcaWorkflow.runAudit(nextRound, sampledMvrs)
+        val done = clcaWorkflow.runAudit(nextRound)
 
         val target = AuditRound(
             1,
             nextRound.contestRounds,
             false,
             false,
-            sampledIndices = nextRound.sampledIndices,
+            sampleNumbers = nextRound.sampleNumbers,
             nmvrs = 33333,
             auditorWantNewMvrs = 33733,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.sampledIndices)
+        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.sampleNumbers)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
         writeAuditRoundJsonFile(target, filename)
-        val result = readAuditRoundJsonFile(clcaWorkflow.contestsUA(), target.sampledIndices, filename)
+        val result = readAuditRoundJsonFile(clcaWorkflow.contestsUA(), target.sampleNumbers, filename)
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
@@ -211,7 +208,7 @@ fun check(s1: AuditRound, s2: AuditRound) {
     assertEquals(s1.roundIdx, s2.roundIdx)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
     assertEquals(s1.auditIsComplete, s2.auditIsComplete)
-    assertEquals(s1.sampledIndices, s2.sampledIndices)
+    assertEquals(s1.sampleNumbers, s2.sampleNumbers)
     assertEquals(s1.nmvrs, s2.nmvrs)
     assertEquals(s1.newmvrs, s2.newmvrs)
     assertEquals(s1.auditorWantNewMvrs, s2.auditorWantNewMvrs)

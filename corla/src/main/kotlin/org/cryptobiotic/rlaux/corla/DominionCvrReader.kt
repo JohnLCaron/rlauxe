@@ -137,7 +137,9 @@ data class RedactedVotes(val ballotType: String) {
                 val useContestIdx = schema.columns[colidx].contestIdx
                 val useContest = schema.contests[useContestIdx]
                 if (useContest.isIRV) {
-                    println("*** RedactedVotes IRV not implemented")
+                    // I think these are just regular Cvrs but the IRV contest was made seperate for privacy reasons
+                    // "RCV Redacted & Randomly Sorted",,,,,"DS-01",0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+                    println("*** IRV RedactedVotes shouldnt get here!")
                 } else {
                     val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf<Int, Int>() })
                     for (candIdx in 0 until useContest.ncols) {
@@ -199,11 +201,23 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
     val cvrs = mutableListOf<CastVoteRecord>()
     val redacted = mutableListOf<RedactedVotes>()
 
+    var rcvRedacted = 0
     while (records.hasNext()) {
         val line = records.next()
         // showLine("line", line)
-        if (line.get(0).contains("Redacted")) {
+        if (line.get(0).startsWith("Redacted")) { // but not "RCV Redacted ..." which can be treated like a normal CVR
             redacted.add(RedactedVotes(line.get(ballotTypeIdx)).addVotes(schema, line))
+        } else if (line.get(0).startsWith("RCV Redacted")) {
+            val cvr = CastVoteRecord(
+                rcvRedacted,
+                0,
+                "N/A",
+                0,
+                "N/A",
+                line.get(ballotTypeIdx),
+            )
+            rcvRedacted++
+            cvrs.add(cvr.addVotes(schema, line))
         } else {
             val cvr = CastVoteRecord(
                 line.get(0).toInt(),
@@ -216,7 +230,7 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
             cvrs.add(cvr.addVotes(schema, line))
         }
     }
-
+    if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
     return DominionCvrExport(countyId, electionName, versionName, filename, schema, cvrs, redacted)
 }
 

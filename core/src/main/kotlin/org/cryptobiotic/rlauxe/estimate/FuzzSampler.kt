@@ -64,7 +64,7 @@ class PollingFuzzSampler(
     val contest: Contest,
     val assorter: AssorterIF
 ): Sampler, Iterator<Double> {
-    val maxSamples = cvrs.count { it.hasContest(contest.id) }
+    val maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this is its single contest
     val N = cvrs.size
     val welford = Welford()
     val permutedIndex = MutableList(N) { it }
@@ -72,7 +72,7 @@ class PollingFuzzSampler(
     private var idx = 0
 
     init {
-        mvrs = remakeFuzzed()
+        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
     }
 
     override fun sample(): Double {
@@ -95,7 +95,7 @@ class PollingFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct)
+        return makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct) // single contest
     }
 
     override fun maxSamples() = maxSamples

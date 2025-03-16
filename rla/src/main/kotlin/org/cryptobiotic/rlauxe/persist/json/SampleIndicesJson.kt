@@ -18,18 +18,18 @@ import java.nio.file.StandardOpenOption
 
 @Serializable
 data class SampleIndicesJson(
-    val sampleNumbers: List<Int>,
+    val sampleNumbers: List<Long>,
 )
 
-fun List<Int>.publishJson() = SampleIndicesJson(
+fun List<Long>.publishJson() = SampleIndicesJson(
     this.map { it },
 )
 
-fun SampleIndicesJson.import(): List<Int> {
+fun SampleIndicesJson.import(): List<Long> {
     return this.sampleNumbers
 }
 
-fun writeSampleIndicesJsonFile(sampleNumbers: List<Int>, filename: String) {
+fun writeSampleNumbersJsonFile(sampleNumbers: List<Long>, filename: String) {
     val cvrsj = sampleNumbers.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->
@@ -38,7 +38,7 @@ fun writeSampleIndicesJsonFile(sampleNumbers: List<Int>, filename: String) {
     }
 }
 
-fun readSampleIndicesJsonFile(filename: String): Result<List<Int>, ErrorMessages> {
+fun readSampleNumbersJsonFile(filename: String): Result<List<Long>, ErrorMessages> {
     val errs = ErrorMessages("readSampleIndicesJsonFile '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {

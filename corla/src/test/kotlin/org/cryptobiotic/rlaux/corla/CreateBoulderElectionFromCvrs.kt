@@ -54,7 +54,7 @@ class CreateBoulderElectionFromCvrs {
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
             "/home/stormy/temp/persist/runBoulder23",
             combined,
-            )
+        )
     }
 
     @Test

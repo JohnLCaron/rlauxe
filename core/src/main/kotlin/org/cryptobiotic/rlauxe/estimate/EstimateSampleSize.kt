@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.simulateRaireContest
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -21,13 +23,12 @@ private val debugSizeNudge = true
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
-    cvrs: List<Cvr>,        // Clca only
     show: Boolean = false,
     nthreads: Int = 30,
 ): List<RunTestRepeatedResult> {
     val tasks = mutableListOf<SimulateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
-        tasks.addAll(makeEstimationTasks(auditConfig, contest, cvrs, auditRound.roundIdx))
+        tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
     }
     // run tasks concurrently
     val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(show).run(tasks, nthreads)
@@ -74,7 +75,6 @@ fun estimateSampleSizes(
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contest: ContestRound,
-    cvrs: List<Cvr>,        // only needed when Comparison
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<SimulateSampleSizeTask> {
@@ -103,7 +103,6 @@ fun makeEstimationTasks(
                         auditConfig,
                         contest,
                         assertionRound,
-                        cvrs,
                         startingTestStatistic,
                         prevSampleSize,
                         moreParameters
@@ -120,7 +119,6 @@ class SimulateSampleSizeTask(
     val auditConfig: AuditConfig,
     val contest: ContestRound,
     val assertionRound: AssertionRound,
-    val cvrs: List<Cvr>,
     val startingTestStatistic: Double,
     val prevSampleSize: Int,
     val moreParameters: Map<String, Double> = emptyMap(),
@@ -135,7 +133,6 @@ class SimulateSampleSizeTask(
                     auditConfig,
                     contest.contestUA.contest,
                     assertionRound,
-                    cvrs,
                     startingTestStatistic
                 )
             AuditType.POLLING ->
@@ -153,7 +150,6 @@ class SimulateSampleSizeTask(
                     auditConfig,
                     contest.contestUA as OAContestUnderAudit,
                     assertionRound,
-                    cvrs,
                     startingTestStatistic,
                     moreParameters=moreParameters,
                 )
@@ -170,15 +166,22 @@ fun simulateSampleSizeClcaAssorter(
     auditConfig: AuditConfig,
     contest: ContestIF,
     assertionRound: AssertionRound,
-    cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
-    var fuzzPct = 0.0
 
+    val cvrs =  if (contest.isIRV()) {
+        simulateRaireContest(contest as RaireContest)
+    } else {
+        // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+        val contestSim = ContestSimulation(contest as Contest)
+        contestSim.makeCvrs()
+    }
+
+    var fuzzPct = 0.0
     val errorRates = when {
         (clcaConfig.strategy == ClcaStrategyType.previous) -> {
             var errorRates = ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
@@ -208,33 +211,20 @@ fun simulateSampleSizeClcaAssorter(
         }
     }
 
+    // optional fuzzing of the cvrs
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
-        val irvFuzz = (contest.choiceFunction == SocialChoiceFunction.IRV && clcaConfig.simFuzzPct != null)
+        val irvFuzz = (contest.isIRV() && clcaConfig.simFuzzPct != null)
         if (irvFuzz) fuzzPct = clcaConfig.simFuzzPct!! // TODO
         Pair(
             if (irvFuzz) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter)
             else ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
-            AdaptiveComparison(
-                Nc = contest.Nc,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                errorRates = errorRates,
-            )
+            AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )
     } else {
         // this is noerrors
         Pair(
-            makeClcaNoErrorSampler(
-                contest.id,
-                cvrs,
-                cassorter,
-            ),
-            AdaptiveComparison(
-                Nc = contest.Nc,
-                a = cassorter.noerror(),
-                d = clcaConfig.d,
-                errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
-            )
+            makeClcaNoErrorSampler(contest.id, cvrs, cassorter),
+            AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
         )
     }
 
@@ -305,21 +295,25 @@ fun simulateSampleSizeBetaMart(
 fun simulateSampleSizePollingAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
-    contest: Contest,  // TODO cant use Raire
+    contest: ContestIF,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val assorter = assertionRound.assertion.assorter
     val margin = assorter.reportedMargin()
-    // TODO 2 candidate plurality Contest with given margin
-    val simContest = ContestSimulation(contest)
-    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin, TODO what about supermajority?
-    var fuzzPct = 0.0
 
+    // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+    // TODO maximum cvrs for estimation
+    // TODO what about supermajority?
+    val simContest = /* if (contest.isIRV()) ContestIrvSimulation(contest as Contest) else */ ContestSimulation(contest as Contest)
+    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin,
+
+    // optional fuzzing of the cvrs
+    var fuzzPct = 0.0
     val pollingConfig = auditConfig.pollingConfig
     val sampler = if (pollingConfig.simFuzzPct == null || pollingConfig.simFuzzPct == 0.0) {
-        PollWithoutReplacement(contest, cvrs, assorter, allowReset=true)
+        PollWithoutReplacement(contest.id, cvrs, assorter, allowReset=true)
     } else {
         fuzzPct = pollingConfig.simFuzzPct
         PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest, assorter) // TODO cant use Raire
@@ -392,7 +386,6 @@ fun simulateSampleSizeOneAuditAssorter(
     auditConfig: AuditConfig,
     contestUA: OAContestUnderAudit,
     assertionRound: AssertionRound,
-    cvrs: List<Cvr>,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
@@ -400,6 +393,8 @@ fun simulateSampleSizeOneAuditAssorter(
     val cassorter = cassertion.cassorter as OAClcaAssorter
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
+
+    val cvrs = contestUA.contestOA.makeTestCvrs()
 
     // TODO is this right, no special processing for the "hasCvr" strata?
     val sampler = if (oaConfig.simFuzzPct == null) {

@@ -10,19 +10,6 @@ data class BallotManifestUnderAudit(
     val ballotStyles: List<BallotStyle> // empty if style info not available
 )
 
-interface BallotOrCvr {
-    fun hasContest(contestId: Int): Boolean
-    fun sampleNumber(): Long
-    fun index(): Int
-
-    fun hasOneOrMoreContest(contests: List<ContestRound>): Boolean {
-        for (contest in contests) {
-            if (hasContest(contest.id)) return true
-        }
-        return false
-    }
-}
-
 data class Ballot(
     val id: String,
     val phantom: Boolean = false,

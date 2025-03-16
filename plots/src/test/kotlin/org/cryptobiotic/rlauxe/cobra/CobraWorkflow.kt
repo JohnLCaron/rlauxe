@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
@@ -20,7 +19,7 @@ class CobraSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         // the cvrs get generated with the reportedMeans.
-        val cvrs = makeCvrsByExactMean(Nc, reportedMean)
+        val testCvrs = makeCvrsByExactMean(Nc, reportedMean)
 
         val info = ContestInfo(
             name = "AvB",
@@ -28,18 +27,25 @@ class CobraSingleRoundAuditTaskGenerator(
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap("A", "B"),
         )
-        val contest = makeContestFromCvrs(info, cvrs)
-        val cobraWorkflow = CobraWorkflow(auditConfig, listOf(contest), cvrs, p2prior)
-        val contestUA: ContestUnderAudit = cobraWorkflow.contestsUA().first()
+        val contest = makeContestFromCvrs(info, testCvrs)
+
+        // TODO: chicken or the egg
+        val cobraWorkflow1 = CobraWorkflow(auditConfig, listOf(contest), BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed), p2prior)
+        val contestUA: ContestUnderAudit = cobraWorkflow1.contestsUA().first()
         val cassorter = contestUA.clcaAssertions.first().cassorter
 
         // then the mvrs are generated with over/understatement errors, which means the cvrs overstate the winner's margin.
-        val sampler = ClcaAttackSampler(cvrs, cassorter, p2 = p2oracle, withoutReplacement = true)
+        val sampler = ClcaAttackSampler(testCvrs, cassorter, p2 = p2oracle, withoutReplacement = true)
         val mvrs = sampler.mvrs
+
+        // maybe bogus
+        val cobraWorkflow2 = CobraWorkflow(auditConfig, listOf(contest),
+            BallotCardsClcaStart(testCvrs, sampler.mvrs, auditConfig.seed),
+            p2prior)
 
         return ClcaSingleRoundAuditTask(
             name(),
-            cobraWorkflow,
+            cobraWorkflow2,
             mvrs,
             parameters + mapOf("p2oracle" to p2oracle, "p2prior" to p2prior),
             quiet,
@@ -50,12 +56,12 @@ class CobraSingleRoundAuditTaskGenerator(
 
 class CobraWorkflow(
     val auditConfig: AuditConfig,
-    val contestsToAudit: List<Contest>, // the contests you want to audit
-    val cvrs: List<Cvr>, // includes undervotes and phantoms.
+    contestsToAudit: List<Contest>, // the contests you want to audit
+    val ballotCards: BallotCardsClcaStart, // mutable
     val p2prior: Double,
 ) : RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    val cvrsUA: List<CvrUnderAudit>
+    // val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -63,25 +69,26 @@ class CobraWorkflow(
 
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison = true, auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(cvrs)
+            contest.makeClcaAssertions(ballotCards.cvrs)
         }
 
-        val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
+        //val prng = Prng(auditConfig.seed)
+        //cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
     }
 
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean {
-        return runClcaAudit(
-            auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs,
-            auditRound.roundIdx, auditor = AuditCobraAssertion(p2prior)
-        )
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
+            auditRound.roundIdx, auditor = AuditCobraAssertion(p2prior))
     }
 
     override fun auditConfig() = this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun cvrs() = cvrs
-    override fun sortedBallotsOrCvrs(): List<BallotOrCvr> = cvrsUA
+    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun ballotCards() = ballotCards
 }
 
 /////////////////////////////////////////////////////////////////////////////////

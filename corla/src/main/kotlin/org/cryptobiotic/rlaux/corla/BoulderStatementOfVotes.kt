@@ -166,8 +166,8 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
 
     // we expect the first line to be the headers
     val headerRecord = records.next()
-    val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // val header = headerRecord.toList().joinToString(", ")
+    // println(header)
 
     // subsequent lines contain ballot manifest info
     val lines = mutableListOf<BoulderStatementLine>()

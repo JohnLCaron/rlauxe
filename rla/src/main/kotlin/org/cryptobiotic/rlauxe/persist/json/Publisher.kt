@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -32,10 +33,10 @@ class Publisher(val topdir: String) {
     fun cvrsFile() = "$topdir/cvrs.json"
     fun ballotManifestFile() = "$topdir/ballotManifest.json"
 
-    fun sampleIndicesFile(round: Int): String {
+    fun sampleNumbersFile(round: Int): String {
         val dir = "$topdir/round$round"
         validateOutputDir(Path.of(dir), errs)
-        return "$dir/sampleIndices.json"
+        return "$dir/sampleNumbers.json"
     }
 
     fun sampleMvrsFile(round: Int): String {
@@ -65,6 +66,19 @@ class Publisher(val topdir: String) {
             println(errs)
         }
     }
+}
+
+/** Make sure output directories exists and are writeable.  */
+fun clearDirectory(path: Path): Boolean {
+    if (!Files.exists(path)) {
+        Files.createDirectories(path)
+    } else {
+        Files.walk(path)
+            .sorted(Comparator.reverseOrder())
+            .map { obj: Path -> obj.toFile() }
+            .forEach { obj: File -> obj.delete() }
+    }
+    return true
 }
 
 /** Make sure output directories exists and are writeable.  */

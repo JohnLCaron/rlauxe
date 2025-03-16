@@ -58,6 +58,8 @@ interface ContestIF {
     fun show() : String = toString()
 
     fun phantomRate() = Np / Nc.toDouble()
+    fun undervoteRate() = undervotes / Nc.toDouble()
+    fun isIRV() = choiceFunction == SocialChoiceFunction.IRV
 }
 
 //    When we have styles, we can calculate Nb_c = physical ballots for contest C.

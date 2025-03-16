@@ -4,16 +4,15 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.util.*
 
+// what if the workflows use List, put PersistentWorkflow doesnt ??
 class ClcaWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
-    val cvrs: List<Cvr>, // includes undervotes and phantoms.
+    val ballotCards: BallotCardsClcaStart, // mutable
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    private val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -23,64 +22,50 @@ class ClcaWorkflow(
 
         contestsUA = regularContests + raireContests
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(cvrs)
+            contest.makeClcaAssertions(ballotCards.cvrs)
         }
 
         /* TODO only check regular contests ??
         check(auditConfig, contests)
         // TODO filter out contests that are done... */
+    }
 
-        // the order of the cvrs cannot be changed.
-        val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
+    override fun addMvrs(mvrs: List<CvrUnderAudit>)  {
+        ballotCards.setMvrs(mvrs)
     }
 
     //  return allDone
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, 
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
             auditRound.roundIdx, auditor = AuditClcaAssertion())
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun cvrs() = cvrs
-    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA // sorted by sampleNum
+    override fun ballotCards() = ballotCards
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 
+// run all contests and assertion - TODO parellelize?
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
-                 sampleIndices: List<Int>,
-                 mvrs: List<Cvr>,
-                 cvrs: List<Cvr>,
+                 ballotCards: BallotCardsClca,
                  roundIdx: Int,
                  auditor: ClcaAssertionAuditor): Boolean {
 
     val contestsNotDone = contests.filter{ !it.done }
-    val sampledCvrs = sampleIndices.map { cvrs[it] }
-
-    // prove that sampledCvrs correspond to mvrs
-    require(sampledCvrs.size == mvrs.size)
-    val cvrPairs: List<Pair<Cvr, Cvr>> = mvrs.zip(sampledCvrs)
-    cvrPairs.forEach { (mvr, cvr) ->
-        if (mvr.id != cvr.id)
-            println("why")
-        require(mvr.id == cvr.id)
-    }
 
     var allDone = true
     contestsNotDone.forEach { contest ->
-        if (contest.contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
-            println("here")
-        }
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = ClcaWithoutReplacement(contest.contestUA.id, cvrPairs, cassorter, allowReset = false)
+                val sampler = ballotCards.makeSampler(contest.id, cassorter, allowReset = false)
+
                 val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
@@ -99,7 +84,6 @@ fun interface ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result
@@ -111,15 +95,12 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-
-        // val sampler = ClcaWithoutReplacement(contest, cvrPairs, cassorter, allowReset = false)
 
         val clcaConfig = auditConfig.clcaConfig
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {

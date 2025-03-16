@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.cobra.AuditCobraAssertion
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.*
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
 
@@ -35,7 +37,8 @@ class CorlaSingleRoundAuditTaskGenerator(
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs)
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             clcaWorkflow,
@@ -73,11 +76,10 @@ class CorlaWorkflowTaskGenerator(
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), testCvrs, quiet = true)
+        val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed), quiet = true)
         return WorkflowTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
-            testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
         )
     }
@@ -85,12 +87,12 @@ class CorlaWorkflowTaskGenerator(
 
 class CorlaWorkflow(
     val auditConfig: AuditConfig,
-    val contestsToAudit: List<Contest>, // the contests you want to audit
-    val cvrs: List<Cvr>, // includes undervotes and phantoms.
+    contestsToAudit: List<Contest>, // the contests you want to audit
+    val ballotCards: BallotCardsClcaStart, // mutable
     val quiet: Boolean = false,
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    val cvrsUA: List<CvrUnderAudit>
+    // val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -98,23 +100,27 @@ class CorlaWorkflow(
 
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(cvrs)
+            contest.makeClcaAssertions(ballotCards.cvrs)
         }
 
-        val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy{ it.sampleNumber() }
+        //val prng = Prng(auditConfig.seed)
+        //cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy{ it.sampleNumber() }
     }
 
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs,
-            auditRound.roundIdx, auditor = AuditCorlaAssertion())
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
+            auditRound.roundIdx, auditor = AuditCorlaAssertion()
+        )
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun cvrs() = cvrs
-    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
+    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun ballotCards() = ballotCards
 }
 
 /////////////////////////////////////////////////////////////////////////////////

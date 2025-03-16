@@ -4,12 +4,12 @@ import kotlin.test.Test
 
 class TestRunCli {
 
-    // @Test
+    @Test
     fun testCliRoundClca() {
-        val topdir = "/home/stormy/temp/persist/testRunCli"
-        // val topdir = kotlin.io.path.createTempDirectory().toString()
+        // val topdir = "/home/stormy/temp/persist/testRunCli"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/private/testMvrs.json"
-        RunRlaStart.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.005",
@@ -21,19 +21,19 @@ class TestRunCli {
         )
 
         repeat(3) {
-            RunRound.main(arrayOf("-in", topdir, "-mvrs", mvrs))
+            RunRoundFuzz.main(arrayOf("-in", topdir, "-mvrs", mvrs))
         }
 
         println("============================================================")
         RunVerifier.main(arrayOf("-in", topdir))
     }
 
-    // @Test
+    @Test
     fun testCliRoundPolling() {
         // val topdir = "/home/stormy/temp/persist/testCliRoundPolling"
         val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/private/testMvrs.json"
-        RunRlaStart.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-isPolling",
@@ -44,7 +44,7 @@ class TestRunCli {
         )
 
         repeat(3) {
-            RunRound.main(arrayOf("-in", topdir, "-mvrs", mvrs))
+            RunRoundFuzz.main(arrayOf("-in", topdir, "-mvrs", mvrs))
         }
 
         RunVerifier.main(arrayOf("-in", topdir))

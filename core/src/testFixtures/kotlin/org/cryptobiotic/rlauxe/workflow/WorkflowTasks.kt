@@ -21,7 +21,7 @@ private val quiet = true
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
 // return last audit round
-fun runWorkflow(name: String, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, quiet: Boolean=false): AuditRound? {
+fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=false): AuditRound? {
     val stopwatch = Stopwatch()
 
     var nextRound: AuditRound? = null
@@ -29,16 +29,16 @@ fun runWorkflow(name: String, workflow: RlauxWorkflowIF, testMvrs: List<Cvr>, qu
     while (!done) {
 
         nextRound = workflow.startNewRound(quiet=quiet)
-        if (nextRound.sampledIndices.isEmpty()) {
+        if (nextRound.sampleNumbers.isEmpty()) {
             done = true
 
         } else {
             stopwatch.start()
 
-            val sampledMvrs = nextRound.sampledIndices.map {
+            /* val sampledMvrs = nextRound.sampledIndices.map {
                 testMvrs[it]
-            }
-            done = workflow.runAudit(nextRound, sampledMvrs)
+            } */
+            done = workflow.runAudit(nextRound)
 
             if (!quiet) println("runAudit ${nextRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         }
@@ -100,11 +100,11 @@ class ClcaWorkflowTaskGenerator(
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs)
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
         return WorkflowTask(
             name(),
             clcaWorkflow,
-            testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
         )
     }
@@ -144,11 +144,12 @@ class PollingWorkflowTaskGenerator(
             ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
         }
 
-        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotManifest, Nb)
+        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, useConfig.seed)
+        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotCards)
         return WorkflowTask(
             name(),
             pollingWorkflow,
-            testMvrs,
+            // testMvrs,
             parameters + mapOf("fuzzPct" to mvrsFuzzPct, "auditType" to 2.0)
         )
     }
@@ -178,11 +179,11 @@ class OneAuditWorkflowTaskGenerator(
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), oaCvrs)
+        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), BallotCardsClcaStart(oaCvrs, oaMvrs, auditConfig.seed))
         return WorkflowTask(
             name(),
             oneaudit,
-            oaMvrs,
+            // oaMvrs,
             parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to mvrsFuzzPct, "auditType" to 1.0)
         )
     }
@@ -206,14 +207,15 @@ class RaireWorkflowTaskGenerator(
         AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
-        val (rcontest, testCvrs) = makeRaireContest(N=Nc, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
+        val (rcontest, testCvrs) = makeRaireContest(N=Nc, contestId=111, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest), testCvrs)
+        val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest),
+            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
         return WorkflowTask(
             name(),
             clca,
-            testMvrs,
+            // testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0)
         )
     }
@@ -222,12 +224,12 @@ class RaireWorkflowTaskGenerator(
 class WorkflowTask(
     val name: String,
     val workflow: RlauxWorkflowIF,
-    val testCvrs: List<Cvr>,
+    // val testCvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
     override fun name() = name
     override fun run(): WorkflowResult {
-        val lastRound = runWorkflow(name, workflow, testCvrs, quiet = quiet)
+        val lastRound = runWorkflow(name, workflow, quiet = quiet)
         if (lastRound == null) {
             return WorkflowResult(
                 0,
@@ -239,7 +241,7 @@ class WorkflowTask(
             )
         }
 
-        val nmvrs = lastRound.sampledIndices.size // LOOK ??
+        val nmvrs = lastRound.sampleNumbers.size // LOOK ??
         val contest = lastRound.contestRounds.first() // theres only one
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?

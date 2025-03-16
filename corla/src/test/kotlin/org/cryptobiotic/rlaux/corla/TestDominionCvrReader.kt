@@ -411,27 +411,36 @@ class TestDominionCvrReader {
         contests.forEach { contest ->
             println(contest.show2())
         }
-        val contestPrez = contests[0]
+
         // from https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
         val expected = mapOf(
-            0 to 150149,
-            1 to 40758,
-            2 to 123,
-            3 to 1263,
-            4 to 1499,
-            5 to 147,
-            6 to 457,
-            7 to 1754,
-            //   8 'Write-in': votes=2
-            8 to 4,
-            9 to 82,
-            10 to 2,
-            11 to 65,
-            12 to 1,
-            13 to 0,
-
+            "Kamala D. Harris / Tim Walz (DEM)" to 150149,
+            "Donald J. Trump / JD Vance (REP)" to 40758,
+            "Blake Huber / Andrea Denault (APV)" to 123,
+            "Chase Russell Oliver / Mike ter Maat (LBR)" to 1263,
+            "Jill Stein / Rudolph Ware (GRN)" to 1499,
+            "Randall Terry / Stephen E Broden (ACN)" to 147,
+            "Cornel West / Melina Abdullah (UNI)" to 457,
+            "Robert F. Kennedy Jr. / Nicole Shanahan (UNA)" to 1754,
+            "Write-in" to 2,
+            "Chris Garrity / Cody Ballard" to 4,
+            "Claudia De la Cruz / Karina GarcÃ­a" to 82,
+            "Shiva Ayyadurai / Crystal Ellis" to 2,
+            "Peter Sonski / Lauren Onak" to 65,
+            "Bill Frankel / Steve Jenkins" to 1,
+            "Brian Anthony Perry / Mark Sbani" to 0,
         )
-        assertEquals(expected, contestPrez.votes)
+
+        val contestPrez = contests[0]
+        val candidatesById = contestPrez.info.candidateNames.map { (name, id) -> id to name }.toMap()
+        val votesByCandidateName = contestPrez.votes.toSortedMap().map { (id, nvotes) ->
+            Pair(candidatesById[id]!!, nvotes)
+        }.toMap()
+        votesByCandidateName.forEach { (name, nvotes) ->
+            println("  \"$name\" to $nvotes,")
+        }
+
+        assertEquals(expected, votesByCandidateName)
     }
 
     @Test
@@ -449,17 +458,17 @@ class TestDominionCvrReader {
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
-        val rcvrs = maker.makeRedactedCvrs()
-        println("nredacted cvrs = ${rcvrs.size}")
+        val redactedCvrs = maker.makeRedactedCvrs()
+        println("nredacted cvrs = ${redactedCvrs.size}")
         println("took = $stopwatch")
 
         // TODO check that vote tallies agree...
-        val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(rcvrs)
+        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs)
 
-        val r = mutableMapOf<Int, MutableMap<Int, Int>>()
+        val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
         export.redacted.forEach { redacted ->
             redacted.contestVotes.forEach { (contestId, conVotes) ->
-                val accumVotes = r.getOrPut(contestId) { mutableMapOf() }
+                val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
                 conVotes.forEach { (cand, nvotes) ->
                     if (nvotes > 0) {
                         val accum = accumVotes.getOrPut(cand) { 0 }
@@ -468,27 +477,48 @@ class TestDominionCvrReader {
                 }
             }
         }
-        println(compare(cvrVotes, r))
-
-        assertEquals(cvrVotes, r)
+        println(compareRedactions(redactedCvrVotes, redactedDirect))
+        assertEquals(redactedCvrVotes, redactedDirect)
+        println("redactedCvrVotes agrees with redactedDirect")
     }
 
     @Test
-    fun whereIsDistrict19() {
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv"
+    fun testIrvRedactedCvrs() {
+        val stopwatch = Stopwatch()
+        // redaction lines are present
+        val filename = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv"
         val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
-        print(export.schema.show())
+
+        val sovo = readBoulderStatementOfVotes(
+            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv", "Boulder2023")
+        // println("sovo = ${sovo.show()}")
+
+        val sovoRcv = readBoulderStatementOfVotes(
+            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
+        // println("sovoRcv = ${sovoRcv.show()}")
+        val irvContest: BoulderContestVotes = sovoRcv.contests.first()
+        println("irvContest = ${irvContest}")
+
+        val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
+
+        val electionFromCvrs = CreateElectionFromCvrs(export, combined)
+        val (contests, raireContests) = electionFromCvrs.makeContests()
+        val irvId = raireContests.first().id
+
+        val countIrvCvrs = electionFromCvrs.cvrs.filter{ it.hasContest(irvId) }.count()
+        println("countIrvCvrs = $countIrvCvrs")
+        assertEquals(irvContest.totalBallots, countIrvCvrs)
     }
 
 }
 
-fun compare(votes1: Map<Int, Map<Int, Int>>, votes2: Map<Int, Map<Int, Int>>) = buildString {
+fun compareRedactions(votes1: Map<Int, Map<Int, Int>>, votes2: Map<Int, Map<Int, Int>>) = buildString {
     val svotes1 = votes1.toSortedMap()
     svotes1.forEach { (contestId, conVotes1) ->
         val conVotes2 = votes2[contestId]!!.toSortedMap()
         val sortedConVotes1 = conVotes1.toSortedMap()
-        appendLine("  cvrVotes $contestId = $sortedConVotes1")
-        appendLine("  redacted $contestId = $conVotes2")
+        appendLine("  contest $contestId: cvrVotes = $sortedConVotes1")
+        appendLine("  contest $contestId: redacted = $conVotes2")
     }
 }
 

@@ -13,9 +13,9 @@ class TestOneAuditWorkflow {
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
-        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
+        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed))
 
-        runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
+        runWorkflow("testOneAuditContestSmall", workflow)
     }
 
     @Test
@@ -25,9 +25,9 @@ class TestOneAuditWorkflow {
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
-        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
+        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed))
 
-        runWorkflow("testOneAuditContest", workflow, testCvrs)
+        runWorkflow("testOneAuditContest", workflow)
     }
 
     @Test
@@ -40,10 +40,10 @@ class TestOneAuditWorkflow {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
-        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
         val testMvrs = makeFuzzedCvrsFrom(listOf(contestOA.makeContest()), testCvrs, mvrFuzzPct)
+        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed))
 
-        runWorkflow("testOneAuditContest", workflow, testMvrs)
+        runWorkflow("testOneAuditContest", workflow)
     }
 
     @Test
@@ -55,8 +55,8 @@ class TestOneAuditWorkflow {
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.max99))
 
-        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), testCvrs)
-        runWorkflow("testOneAuditContestSmall", workflow, testCvrs)
+        val workflow = OneAuditWorkflow(auditConfig, listOf(contestOA), BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed))
+        runWorkflow("testOneAuditContestSmall", workflow)
     }
 
     @Test
@@ -70,8 +70,8 @@ class TestOneAuditWorkflow {
         val testMvrs = if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = OneAuditWorkflow(auditConfig, contests, testCvrs)
+        val workflow = OneAuditWorkflow(auditConfig, contests, BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        runClcaSingleRoundAudit(workflow, contestRounds, testMvrs, auditor = OneAuditClcaAssertion())
+        runClcaSingleRoundAudit(workflow, contestRounds, auditor = OneAuditClcaAssertion())
     }
 }

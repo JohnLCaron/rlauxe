@@ -11,10 +11,8 @@ import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMa
 import au.org.democracydevelopers.raire.irv.IRVResult
 import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
+import org.cryptobiotic.rlauxe.core.*
 
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
@@ -109,16 +107,25 @@ data class RaireContestTestData(
     }
 }
 
-fun makeRaireContest(N: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
+fun simulateRaireContest(contest: RaireContest, quiet: Boolean = true): List<Cvr> {
+    val minMargin = 0.0
     repeat(11) {
-        val result = trytoMakeRaireContest(N, ncands, minMargin, undervotePct, phantomPct, quiet)
+        val result = trytoMakeRaireContest(contest.Nc, contest.id, contest.ncandidates, minMargin, contest.undervoteRate(), contest.phantomRate(), quiet)
+        if (result != null) return result.second
+    }
+    throw RuntimeException("failed 11 times to make raire contest with N=${contest.Nc} minMargin=$minMargin")
+}
+
+fun makeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
+    repeat(11) {
+        val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
         if (result != null) return result
     }
     throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
 }
 
-fun trytoMakeRaireContest(N: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
-    val testContest = RaireContestTestData(111, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
+fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
+    val testContest = RaireContestTestData(contestId, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
     var round = 1

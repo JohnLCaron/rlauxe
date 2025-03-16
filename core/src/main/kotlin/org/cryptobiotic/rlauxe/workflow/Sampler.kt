@@ -14,12 +14,12 @@ interface Sampler: Iterator<Double> {
 
 //// For polling audits.
 class PollWithoutReplacement(
-    val contest: ContestIF,
-    val mvrs : List<Cvr>,
+    val contestId: Int,
+    val mvrs : List<Cvr>, // TODO why not CvrUnderAudit ?
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
 ): Sampler {
-    val maxSamples = mvrs.count { it.hasContest(contest.id) }
+    val maxSamples = mvrs.count { it.hasContest(contestId) }
     private val permutedIndex = MutableList(mvrs.size) { it }
     private var idx = 0
     private var count = 0
@@ -32,11 +32,11 @@ class PollWithoutReplacement(
         while (idx < mvrs.size) {
             val cvr = mvrs[permutedIndex[idx]]
             idx++
-            if (cvr.hasContest(contest.id)) {
+            if (cvr.hasContest(contestId)) {
                 return assorter.assort(cvr, usePhantoms = true)
             }
         }
-        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
+        throw RuntimeException("no samples left for ${contestId} and Assorter ${assorter}")
     }
 
     override fun reset() {
@@ -56,7 +56,7 @@ class PollWithoutReplacement(
 //// For clca audits
 class ClcaWithoutReplacement(
     val contestId: Int,
-    val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
+    val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr) why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
     val cassorter: ClcaAssorterIF,
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit

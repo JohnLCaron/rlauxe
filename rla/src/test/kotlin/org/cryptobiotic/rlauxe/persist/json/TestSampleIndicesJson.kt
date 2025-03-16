@@ -14,7 +14,7 @@ class TestSampleIndicesJson {
 
     @Test
     fun testRoundtrip() {
-        val target = List(1111) { Random.nextInt() }
+        val target = List(1111) { Random.nextLong() }
         val json = target.publishJson()
 
         val roundtrip = json.import()
@@ -28,10 +28,10 @@ class TestSampleIndicesJson {
 
     @Test
     fun testRoundtripIO() {
-        val target = List(1111) { Random.nextInt() }
+        val target = List(1111) { Random.nextLong() }
 
-        writeSampleIndicesJsonFile(target, filename)
-        val result = readSampleIndicesJsonFile(filename)
+        writeSampleNumbersJsonFile(target, filename)
+        val result = readSampleNumbersJsonFile(filename)
         assertTrue(result is Ok)
         val roundtripJson = result.unwrap()
         val roundtrip = roundtripJson

@@ -36,7 +36,8 @@ class ClcaSingleRoundAuditTaskGenerator(
         val testMvrs =  if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(), testCvrs)
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             clcaWorkflow,
@@ -61,13 +62,13 @@ class ClcaSingleRoundAuditTask(
 
     override fun run(): WorkflowResult {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, testMvrs, quiet = quiet, auditor)
+        val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, quiet = quiet, auditor)
 
         val contest = contestRounds.first() // theres only one
         val minAssertion = contest.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
 
-        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
+        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true) // TODO needed or debugging?
         if (debug) println(" mvrMargin=$mvrMargin")
         if (mvrMargin > .5) {
             println(" **** mvrMargin=$mvrMargin")
@@ -102,17 +103,16 @@ class ClcaSingleRoundAuditTask(
 
 // runs test workflow with fake mvrs already generated, and the cvrs are variants of those
 // return number of mvrs hand counted
-fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<ContestRound>, testMvrs: List<Cvr>, quiet: Boolean = false,
+fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<ContestRound>, quiet: Boolean = false,
                             auditor: ClcaAssertionAuditor): Int {
     val stopwatch = Stopwatch()
-    var roundIdx = 1
 
-    // the ballot indices sorted by the random sampleNum,
-    val sortedIndices = workflow.sortedBallotsOrCvrs().map{ it.index() }
+    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.ballotCards() as BallotCardsClca, 1, auditor = AuditClcaAssertion())
 
-    runSingleClcaAudit(workflow.auditConfig(), contestRounds, sortedIndices, testMvrs, workflow.cvrs(), auditor)
+    // runSingleClcaAudit(workflow.auditConfig(), contestRounds, sortedIndices, testMvrs, workflow.cvrs(), auditor)
+    // runClcaAudit(workflow.auditConfig(), contestRounds, sortedIndices, testMvrs, emptyList(), auditor)
 
-    if (!quiet) println("round $roundIdx took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
+    if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
     var maxSamples = 0
     contestRounds.forEach { contest->
         contest.assertionRounds.forEach { assertion ->
@@ -122,6 +122,7 @@ fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<Conte
     return maxSamples
 }
 
+/*
 fun runSingleClcaAudit(
     auditConfig: AuditConfig,
     contests: List<ContestRound>,
@@ -155,6 +156,8 @@ fun runSingleClcaAudit(
     }
     return true
 }
+
+ */
 
 private val debug = false
 

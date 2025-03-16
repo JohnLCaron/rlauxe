@@ -35,48 +35,45 @@ class TestPersistentWorkflowClca {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        val cvrsUA = clcaWorkflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
+        val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
+        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), ballotCards)
 
-        writeCvrsJsonFile(cvrsUA, publish.cvrsFile())
-
+        writeCvrsJsonFile(ballotCards.cvrsUA, publish.cvrsFile())
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publish.contestsFile())
 
         var round = 1
         var done = false
         var workflow : RlauxWorkflowIF = clcaWorkflow
         while (!done) {
-            done = runPersistentWorkflowStage(round, workflow, cvrsUA, testMvrs, publish)
+            done = runPersistentWorkflowStage(round, workflow, ballotCards.mvrsUA, publish)
             workflow = PersistentWorkflow(topdir)
             round++
         }
     }
 }
 
-fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: List<BallotOrCvr>, testMvrs: List<Cvr>, publish: Publisher): Boolean {
+fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, mvrsUA: Iterable<CvrUnderAudit>, publish: Publisher): Boolean {
     val roundStopwatch = Stopwatch()
     var done = false
 
     val nextRound = workflow.startNewRound()
 
-    if (nextRound.sampledIndices.isEmpty()) {
+    if (nextRound.sampleNumbers.isEmpty()) {
         done = true
 
     } else {
-        writeSampleIndicesJsonFile(nextRound.sampledIndices, publish.sampleIndicesFile(roundIdx))
+        writeSampleNumbersJsonFile(nextRound.sampleNumbers, publish.sampleNumbersFile(roundIdx))
 
-        val sampledMvrs = nextRound.sampledIndices.map {
-            testMvrs[it]
-        }
-        done = workflow.runAudit(nextRound, sampledMvrs)
+        // TODO updateMvrs I think
+        //val sampledMvrs = nextRound.sampleNumbers.map {
+        //    testMvrs[it]
+        //}
+        done = workflow.runAudit(nextRound)
 
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         writeAuditRoundJsonFile(nextRound, publish.auditRoundFile(roundIdx))
 
-        val sampledMvrus = nextRound.sampledIndices.map {
-            val cvr = bcUA[it]
-            CvrUnderAudit(testMvrs[it], it, cvr.sampleNumber())
-        }
+        val sampledMvrus = findSamples(nextRound.sampleNumbers, mvrsUA)
         writeCvrsJsonFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
 
         println(nextRound)
@@ -85,33 +82,3 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, bcUA: L
 
     return done
 }
-
-/*
-fun readPersistentWorkflow(round: Int, publish: Publisher): PersistentWorkflow {
-    val resultAuditConfig = readAuditConfigJsonFile(publish.auditConfigFile())
-    if (resultAuditConfig is Err) println(resultAuditConfig)
-    assertTrue(resultAuditConfig is Ok)
-    val auditConfig = resultAuditConfig.unwrap()
-
-    val resultAuditResult: Result<AuditRound, ErrorMessages> = readAuditRoundJsonFile(publish.auditRoundFile(round))
-    if (resultAuditResult is Err) println(resultAuditResult)
-    assertTrue(resultAuditResult is Ok)
-    val electionState = resultAuditResult.unwrap()
-    assertNotNull(electionState)
-
-    if (auditConfig.auditType == AuditType.CLCA) {
-        val resultCvrs = readCvrsJsonFile(publish.cvrsFile())
-        if (resultCvrs is Err) println(resultCvrs)
-        assertTrue(resultCvrs is Ok)
-        val cvrs = resultCvrs.unwrap()
-        return PersistentWorkflow(auditConfig, electionState.contests, emptyList(), cvrs)
-
-    } else {
-        val resultBallotManifest = readBallotManifestJsonFile(publish.ballotManifestFile())
-        if (resultBallotManifest is Err) println(resultBallotManifest)
-        assertTrue(resultBallotManifest is Ok)
-        val ballotManifest = resultBallotManifest.unwrap()
-        return PersistentWorkflow(auditConfig, electionState.contests, ballotManifest.ballots, emptyList())
-    }
-
-} */

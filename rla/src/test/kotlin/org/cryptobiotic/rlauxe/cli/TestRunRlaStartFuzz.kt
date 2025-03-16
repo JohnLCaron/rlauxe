@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.cli
 
-class TestRunRlaStart {
+import kotlin.test.Test
+
+class TestRunRlaStartFuzz {
 
     // @Test
     fun testRlaStartClca() {
-        val topdir = "/home/stormy/temp/persist/runAuditClca"
-        RunRlaStart.main(
+        val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -20,7 +22,7 @@ class TestRunRlaStart {
     // @Test
     fun testRlaStartRaireClca() {
         val topdir = "/home/stormy/temp/persist/runClcaRaire"
-        RunRlaStart.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -37,7 +39,7 @@ class TestRunRlaStart {
     // @Test
     fun testRlaStartOAClca() {
         val topdir = "/home/stormy/temp/persist/runClcaRaire"
-        RunRlaStart.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -53,9 +55,9 @@ class TestRunRlaStart {
 
     // @Test
     fun testRunAuditPolling() {
-        val topdir = "/home/stormy/temp/persist/runAuditPolling"
+        val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
 
-        RunRlaStart.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-isPolling",

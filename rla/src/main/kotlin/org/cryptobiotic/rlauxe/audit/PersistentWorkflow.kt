@@ -3,46 +3,46 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.workflow.*
 
-/** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStart.kt */
+/** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
 class PersistentWorkflow(
-    val inputDir: String,
+    inputDir: String,
 ): RlauxWorkflowIF {
 
     private val auditConfig: AuditConfig
-    private val bcUA: List<BallotOrCvr>
-    private val cvrs: List<Cvr>
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
     val auditRecord: AuditRecord
+    val ballotCards: BallotCards
 
     init {
         auditRecord = AuditRecord.readFrom(inputDir)
         auditConfig = auditRecord.auditConfig
         auditRounds.addAll(auditRecord.rounds)
+        contestsUA = auditRounds.last().contestRounds.map { it.contestUA }
 
-        // TODO other auditTypes
-        // bcUA = if (auditConfig.auditType == AuditType.POLLING) auditRecord.ballots else auditRecord.cvrs
-        bcUA = auditRecord.bcUA() // sorted by sampleNum
-        cvrs = auditRecord.cvrs() // original order
-        contestsUA = auditRounds.last().contestRounds.map { it.contestUA } // TODO
+        ballotCards = auditRecord.ballotCards()
+        println()
     }
 
     fun getLastRound() = auditRounds.last()
 
     //  return allDone
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  { // return allDone
         return when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, auditor = AuditClcaAssertion())
-            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs, auditRound.roundIdx, auditor = OneAuditClcaAssertion())
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards as BallotCardsClca, auditRound.roundIdx, auditor = AuditClcaAssertion())
+            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards as BallotCardsPolling, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards as BallotCardsClca, auditRound.roundIdx, auditor = OneAuditClcaAssertion())
         }
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun cvrs() = cvrs
-    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = bcUA
+    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
+        ballotCards.setMvrs(mvrs)
+    }
+
+    override fun ballotCards() = ballotCards
 }
 
 fun RlauxWorkflowIF.showResults(estSampleSize: Int) {

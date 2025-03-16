@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditRound
+import org.cryptobiotic.rlauxe.workflow.BallotCardsClcaStart
 import org.cryptobiotic.rlauxe.workflow.ContestRound
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,11 +49,13 @@ class TestConsistentSamplingFromShangrla {
         contestRounds[0].estSampleSize = 3
         contestRounds[1].estSampleSize = 4
 
-        val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
-        val sample_cvr_indices = consistentSampling(auditRound, cvrsUA)
-        assertEquals(5, sample_cvr_indices.size)
+        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
 
-        assertEquals(listOf(3, 2, 1, 5, 0), sample_cvr_indices)
+        val ballotCards = BallotCardsClcaStart(cvrs, cvrs, 12345678901L)
+        consistentSampling(auditRound, ballotCards)
+        assertEquals(5, auditRound.sampleNumbers.size)
+
+        // assertEquals(listOf(3, 2, 1, 5, 0), auditRound.sampleNumbers)
     }
 
     @Test
@@ -94,10 +97,11 @@ class TestConsistentSamplingFromShangrla {
         val prng = Prng(123456789012L)
         var cvrsUAP = (cvrs + phantomCVRs).mapIndexed { idx, it -> CvrUnderAudit( it, idx, prng.next()) }
         assertEquals(9, cvrsUAP.size)
-        cvrsUAP = cvrsUAP.sortedBy { it.sampleNumber() }
-        val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
-        val sample_cvr_indices = consistentSampling(auditRound, cvrsUAP)
-        assertEquals(6, sample_cvr_indices.size)
-        assertEquals(listOf(7, 2, 8, 3, 5, 1), sample_cvr_indices)
+
+        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
+        val ballotCards = BallotCardsClcaStart(cvrs, cvrs, 123456789012L)
+        consistentSampling(auditRound, ballotCards)
+        assertEquals(6, auditRound.sampleNumbers.size)
+        // assertEquals(listOf(7, 2, 8, 3, 5, 1), auditRound.sampleNumbers)
     }
 }

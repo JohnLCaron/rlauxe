@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
@@ -74,16 +73,17 @@ class PlotDistributions {
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         println("oracle errorRates = ${ClcaErrorTable.getErrorRates(2, mvrsFuzzPct)}")
 
-        val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
+        val ballotCards = BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed)
+        val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        val auditRound = AuditRound(1, contestRounds = contestRounds, sampledIndices = emptyList())
+        val auditRound = AuditRound(1, contestRounds = contestRounds, sampleNumbers = emptyList())
 
         // just want the sample estimation stuff
         return estimateSampleSizes(
             auditConfig,
             auditRound,
-            workflow.cvrs,
+            // workflow.cvrs,
         )
     }
 
@@ -105,12 +105,12 @@ class PlotDistributions {
             var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
             // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
-            val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), testCvrs)
+            val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
+            val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
             // heres the ConsistentSample permutation
-            val cvrsUA = workflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
-
-            val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
+            //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
+            val sortedIndices = ballotCards.cvrsUA.indices.sortedBy { ballotCards.cvrsUA[it].sampleNumber() } // TODO
             val sortedCvrs = sortedIndices.map { testCvrs[it] }
             val sortedMvrs = sortedIndices.map { testMvrs[it] }
             val sortedPairs: List<Pair<Cvr, Cvr>> = sortedMvrs.zip(sortedCvrs)

@@ -9,7 +9,8 @@ data class AuditRound(
 
     val auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
-    var sampledIndices: List<Int>, // ballots to sample for this round
+    var sampleNumbers: List<Long>, // ballot indices to sample for this round
+    var sampledBorc: List<BallotOrCvr> = emptyList(), // ballots to sample for this round
     var nmvrs: Int = 0,
     var newmvrs: Int = 0,
     var auditorWantNewMvrs: Int = -1,
@@ -20,7 +21,7 @@ data class AuditRound(
 
     fun createNextRound() : AuditRound {
         val nextContests = contestRounds.filter { !it.status.complete }.map{ it.createNextRound() }
-        return AuditRound(roundIdx + 1, nextContests, sampledIndices = emptyList())
+        return AuditRound(roundIdx + 1, nextContests, sampleNumbers = emptyList(), sampledBorc = emptyList())
     }
 
     //// called from viewer
@@ -35,10 +36,10 @@ data class AuditRound(
     }
 }
 
-fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Int> {
-    val result = mutableSetOf<Int>()
+fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
+    val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
-        result.addAll(auditRound.sampledIndices)
+        result.addAll(auditRound.sampleNumbers.map { it }) // TODO
     }
     return result.toSet()
 }

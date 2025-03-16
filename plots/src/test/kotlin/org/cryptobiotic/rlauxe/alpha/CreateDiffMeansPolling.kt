@@ -231,7 +231,7 @@ class CreatePollingDiffMeans {
             if (!silent && showContests) println("  ${assert}")
 
             val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
-            val cvrSampler = PollWithoutReplacement(contestUA.contest as Contest, cvrs, assert.assorter)
+            val cvrSampler = PollWithoutReplacement(contestUA.id, cvrs, assert.assorter)
 
             val result = runAlphaMartRepeated(
                 drawSample = cvrSampler,

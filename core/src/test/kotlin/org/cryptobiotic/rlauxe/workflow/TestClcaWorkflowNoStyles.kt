@@ -105,9 +105,6 @@ class TestClcaWorkflowNoStyles {
 
     fun testComparisonWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.contests
-        // println("Start testComparisonWorkflow $testData")
-        // contests.forEach{ println("  $it")}
-        // println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
@@ -115,8 +112,8 @@ class TestClcaWorkflowNoStyles {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), testCvrs)
-        runWorkflow("TestComparisonWorkflowNoStyles", workflow, testMvrs)
+        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed))
+        runWorkflow("TestComparisonWorkflowNoStyles", workflow)
     }
 
 }

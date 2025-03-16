@@ -449,10 +449,9 @@ class AssertionRLA {
             it
         }
         val contestRounds = contestUAs.map{ contest -> ContestRound(contest, 1) }
-        val auditRound = AuditRound(1, contestRounds, sampledIndices = emptyList())
-
-        val sampled_cvr_indices = consistentSampling(auditRound, cvras)
-        println("sampled = ${sampled_cvr_indices.size}")
+        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList())
+        consistentSampling(auditRound, BallotCardsClcaStart(rcvrs, rcvrs, 999666L))
+        println("sampled = ${auditRound.sampleNumbers.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
 //print(f'The sample includes {n_sampled_phantoms} phantom cards.')

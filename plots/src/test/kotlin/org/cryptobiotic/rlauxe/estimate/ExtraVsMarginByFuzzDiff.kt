@@ -95,40 +95,4 @@ class ExtraVsMarginByFuzzDiff {
         val plotter = WorkflowResultsPlotter(dirName, name)
         plotter.showNroundsVsMargin(results, subtitle, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
-
-    @Test
-    fun testOne() {
-        val N = 50000
-        val margin = .02
-        val fuzzPct = .01
-
-        repeat(10) {
-            val clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)
-            val auditConfig = AuditConfig(
-                AuditType.CLCA,
-                true,
-                quantile = .50,
-                nsimEst = 100,
-                clcaConfig = clcaConfig
-            )
-
-            val clcaGenerator2 = ClcaWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct,
-                parameters = mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct),
-                auditConfig = auditConfig
-            )
-            val task = clcaGenerator2.generateNewTask()
-
-            val lastAuditRound = runWorkflow(name, task.workflow, task.testCvrs, quiet = false)
-            assertNotNull(lastAuditRound)
-            println("nmvrs = ${lastAuditRound.nmvrs}")
-
-            val minAssertion = lastAuditRound.contestRounds.first().minAssertion()
-            val lastAuditResult = minAssertion!!.auditResult!!
-            println("lastAuditResult = $lastAuditResult")
-            println("extra = ${lastAuditResult.nmvrs - lastAuditResult.samplesNeeded}")
-        }
-
-    }
-
 }

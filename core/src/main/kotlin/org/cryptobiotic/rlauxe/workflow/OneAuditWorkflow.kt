@@ -5,40 +5,38 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
-import org.cryptobiotic.rlauxe.util.*
 
 class OneAuditWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
-    val cvrs: List<Cvr>, // includes undervotes and phantoms.
+    val ballotCards: BallotCardsClcaStart, // mutable
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    private val cvrsUA: List<CvrUnderAudit>
+    // private val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
+        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(ballotCards.cvrs) }
 
         // check contests well formed etc
         // check(auditConfig, contests)
-
-        // must be done once and for all rounds
-        val prng = Prng(auditConfig.seed)
-        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
     }
 
     //  return allDone
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, auditRound.sampledIndices, mvrs, cvrs,
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
             auditRound.roundIdx, auditor = OneAuditClcaAssertion())
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun cvrs() = cvrs
-    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = cvrsUA
+    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
+        ballotCards.setMvrs(mvrs)
+    }
+
+    override fun ballotCards() = ballotCards
 }
 
 class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {

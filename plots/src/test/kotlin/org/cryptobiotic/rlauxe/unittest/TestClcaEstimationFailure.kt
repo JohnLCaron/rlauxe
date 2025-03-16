@@ -21,7 +21,7 @@ class TestClcaEstimationFailure {
     fun testClcaEstimationFailure() {
         // TODO margin not accounting for phantoms
         val test = MultiContestTestData(50, 25, 50000) // , phantomPctRange = 0.0 .. 0.0)
-        val cvrs = test.makeCvrsFromContests()
+        val testCvrs = test.makeCvrsFromContests()
 
         val auditConfig = AuditConfig(
             AuditType.CLCA,
@@ -30,12 +30,14 @@ class TestClcaEstimationFailure {
             samplePctCutoff = .10,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms)
         )
-        val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), cvrs)
+
+        val ballotCards = BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed)
+        val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), ballotCards)
 
         println("\nrunClcaSimulation")
         workflow.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { assertion ->
-                runClcaSimulation(cvrs, contestUA, assertion.cassorter as ClcaAssorter)
+                runClcaSimulation(testCvrs, contestUA, assertion.cassorter as ClcaAssorter)
             }
         }
         //println("\nchooseSamples")

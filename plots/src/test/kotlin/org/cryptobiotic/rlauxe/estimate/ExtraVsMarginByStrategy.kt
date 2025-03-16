@@ -143,7 +143,7 @@ class ExtraVsMarginByStrategy {
             )
             val task = clcaGenerator2.generateNewTask()
 
-            val lastAuditRound = runWorkflow(name, task.workflow, task.testCvrs, quiet = false)
+            val lastAuditRound = runWorkflow(name, task.workflow, quiet = false)
             assertNotNull(lastAuditRound)
             println("nmvrs = ${lastAuditRound.nmvrs}")
 

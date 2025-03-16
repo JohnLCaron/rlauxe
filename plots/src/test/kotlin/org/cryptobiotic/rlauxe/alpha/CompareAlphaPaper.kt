@@ -56,7 +56,7 @@ class CompareAlphaPaper {
                 compareSrs.add(compareResult.makeSRT(theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
-                    drawSample = PollWithoutReplacement(contestUA.contest as Contest, cvrs, pollingAssertion.assorter),
+                    drawSample = PollWithoutReplacement(contestUA.id, cvrs, pollingAssertion.assorter),
                     // maxSamples = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

@@ -1,20 +1,19 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sample
 
 // used in ConsistentSampling
 interface RlauxWorkflowProxy {
     fun auditConfig() : AuditConfig
-    fun sortedBallotsOrCvrs() : List<BallotOrCvr>
+    fun ballotCards() : BallotCards
 }
 
 interface RlauxWorkflowIF: RlauxWorkflowProxy {
     fun auditRounds(): MutableList<AuditRound>
     fun contestsUA(): List<ContestUnderAudit>
-    fun cvrs(): List<Cvr> // TODO
 
     fun startNewRound(quiet: Boolean = true): AuditRound {
         val auditRounds = auditRounds()
@@ -23,7 +22,7 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
 
         val auditRound = if (previousRound == null) {
             val contestRounds = contestsUA().map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampledIndices = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
         } else {
             previousRound.createNextRound()
         }
@@ -32,13 +31,13 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
         estimateSampleSizes(
             auditConfig(),
             auditRound,
-            cvrs(),
             show=!quiet,
         )
 
-        auditRound.sampledIndices = sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
+        sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
         return auditRound
     }
 
-    fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean = true): Boolean  // return allDone
+    fun addMvrs(mvrs: List<CvrUnderAudit>)
+    fun runAudit(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return allDone
 }

@@ -11,14 +11,16 @@ import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import org.cryptobiotic.rlauxe.cli.runChooseSamples
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.cryptobiotic.rlauxe.workflow.*
+import java.nio.file.Path
 
-class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes) {
+class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes, val quiet: Boolean = true) {
     val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
 
     fun makeContestInfo(): List<ContestInfo> {
@@ -72,7 +74,7 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
 
     fun makeContests(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
         val infos = makeContestInfo()
-        println("ncontests with info = ${infos.size}")
+        if (!quiet) println("ncontests with info = ${infos.size}")
 
         val countVotes = countVotes()
         val allContests = infos.map { info ->
@@ -89,9 +91,11 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
         }
         // TODO no losers - leave in and mark "done? "
         val contests = allContests.filter { it.info.choiceFunction != SocialChoiceFunction.IRV && it.losers.size > 0 }
-        println("ncontests with votes = ${contests.size}")
-        contests.forEach { contest ->
-            println(contest.show2())
+        if (!quiet) {
+            println("ncontests with votes = ${contests.size}")
+            contests.forEach { contest ->
+                println(contest.show2())
+            }
         }
         val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
         val raireContests = if (irvContests.isEmpty()) emptyList() else {
@@ -99,9 +103,11 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
                 makeRaireContest(contest)
             }
         }
-        println("ncontests with IRV = ${raireContests.size}")
-        raireContests.forEach { contest ->
-            println(contest.show2())
+        if (!quiet) {
+            println("ncontests with IRV = ${raireContests.size}")
+            raireContests.forEach { contest ->
+                println(contest.show2())
+            }
         }
         return Pair(contests, raireContests)
     }
@@ -122,7 +128,7 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
 
         // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
         val result: IRVResult = votes.runElection(TimeOut.never())
-        println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
+        if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
 
         if (1 != result.possibleWinners.size) {
             throw RuntimeException("nwinners ${result.possibleWinners.size} must be 1")
@@ -309,8 +315,10 @@ fun createElectionFromDominionCvrs(exportFile: String, auditDir: String, sovoFil
     createElectionFromDominionCvrs(exportFile, auditDir, sovo, riskLimit)
 }
 
-// use sov to define what contests are in the audit (?)
+// use sov to define what contests are in the audit
 fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo: BoulderStatementOfVotes, riskLimit: Double = 0.03) {
+    clearDirectory(Path.of(auditDir))
+
     val stopwatch = Stopwatch()
     val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")
 
@@ -324,26 +332,28 @@ fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    val rcvrs = electionFromCvrs.makeRedactedCvrs()
-    val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(rcvrs)
-    println("added ${rcvrs.size} redacted cvrs with ${cvrVotes.values.sumOf { it.values.sum() }} total votes")
-    val allCvrs = electionFromCvrs.cvrs + rcvrs
+    val redactedCvrs = electionFromCvrs.makeRedactedCvrs()
+    val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs)
+    println("added ${redactedCvrs.size} redacted cvrs with ${cvrVotes.values.sumOf { it.values.sum() }} total votes")
+    val allCvrs = electionFromCvrs.cvrs + redactedCvrs
 
-    val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, allCvrs)
-    val cvrsUA = clcaWorkflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
-    writeCvrsJsonFile(cvrsUA, publisher.cvrsFile())
+    /////////////////
+    //val testMvrs = if (fuzzMvrs == 0.0) testCvrs
+    // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
+    //else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
+
+    val ballotCards = BallotCardsClcaStart(allCvrs, allCvrs, auditConfig.seed)
+
+    writeCvrsJsonFile(ballotCards.cvrsUA, publisher.cvrsFile())
     println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
 
-    // copy to mvrs, ie no errors
+    // replicated in RunRlaStartFuzz
     val mvrFile = "$auditDir/private/testMvrs.json"
-    val mvrus = allCvrs.mapIndexed { idx, org ->
-        val cvr = cvrsUA[idx]
-        CvrUnderAudit(org, cvr.index(), cvr.sampleNumber())
-    }
     publisher.validateOutputDirOfFile(mvrFile)
-    writeCvrsJsonFile(mvrus, mvrFile)
+    writeCvrsJsonFile(ballotCards.mvrsUA, mvrFile)
     println("   writeMvrsJsonFile ${mvrFile}")
 
+    val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)
     writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 

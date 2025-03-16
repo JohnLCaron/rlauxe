@@ -2,22 +2,18 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 
 class PollingWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
-    ballotManifest: BallotManifest,
-    val Nb: Int, // total number of ballots/cards TODO same as ballots.size ??
+    val ballotCards: BallotCardsPolling,
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-    private val ballotsUA: List<BallotUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.POLLING)
-        require (ballotManifest.ballots.size == Nb)
 
         /* contestsUA.forEach {
             if (it.choiceFunction != SocialChoiceFunction.IRV) {
@@ -33,27 +29,25 @@ class PollingWorkflow(
         /* check contests well formed etc
         contests = contestsUA.map { ContestRound(it, 1) }
         check(auditConfig, contests) */
-
-        // must be done once and for all rounds
-        val prng = Prng(auditConfig.seed)
-        ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, prng.next()) }.sortedBy{ it.sampleNumber() }
     }
 
-    override fun runAudit(auditRound: AuditRound, mvrs: List<Cvr>, quiet: Boolean): Boolean  { // return allDone
-        return runPollingAudit(auditConfig, auditRound.contestRounds, mvrs, auditRound.roundIdx, quiet)
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  { // return allDone
+        return runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx, quiet)
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun cvrs() = emptyList<Cvr>()
-    override fun sortedBallotsOrCvrs() : List<BallotOrCvr> = ballotsUA
+    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
+        ballotCards.setMvrs(mvrs)
+    }
+    override fun ballotCards() = ballotCards
 }
 
 fun runPollingAudit(
     auditConfig: AuditConfig,
     contests: List<ContestRound>,
-    mvrs: List<Cvr>,
+    ballotCards: BallotCardsPolling,
     roundIdx: Int,
     quiet: Boolean = false
 ): Boolean {
@@ -68,7 +62,11 @@ fun runPollingAudit(
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
-                val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, mvrs, roundIdx, quiet)
+                val assertion = assertionRound.assertion
+                val assorter = assertion.assorter
+                val sampler = ballotCards.makeSampler(contest.id, assorter, allowReset=false)
+
+                val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -85,13 +83,12 @@ fun auditPollingAssertion(
     auditConfig: AuditConfig,
     contest: ContestIF,
     assertionRound: AssertionRound,
-    mvrs: List<Cvr>,
+    sampler: Sampler,
     roundIdx: Int,
     quiet: Boolean = false
 ): TestH0Result {
     val assertion = assertionRound.assertion
     val assorter = assertion.assorter
-    val sampler = PollWithoutReplacement(contest, mvrs, assorter, allowReset=false)
 
     val eta0 = margin2mean(assorter.reportedMargin())
     val c = (eta0 - 0.5) / 2

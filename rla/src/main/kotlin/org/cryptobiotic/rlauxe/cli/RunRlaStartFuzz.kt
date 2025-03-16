@@ -15,10 +15,11 @@ import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.workflow.*
+import java.nio.file.Path
 import kotlin.math.min
 
-/** Create the starting election state. */
-object RunRlaStart {
+/** Create the starting election state, with fuzzed test data. */
+object RunRlaStartFuzz {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -93,6 +94,9 @@ object RunRlaStart {
         mvrFile: String,
     ): Int {
         println("Start startTestElectionClca")
+        // require(topdir.startsWith("/home/stormy/temp"))
+        // clearDirectory(Path.of(topdir))
+
         val publisher = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 100,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
@@ -120,7 +124,7 @@ object RunRlaStart {
 
         val raireContests = mutableListOf<RaireContestUnderAudit>()
         if (addRaire) {
-            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N=ncards/2, addRaireCandidates, minMargin=.04, quiet = true)
+            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
             raireContests.add(rcontest)
             // TODO merge(testCvrs + rcvrs)
             testCvrs = testCvrs + rcvrs
@@ -131,22 +135,18 @@ object RunRlaStart {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
                     // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
+        val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
 
-        // ClcaWorkflow assigns the sample numbers, and creates the assertions
-        val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, testCvrs)
-        val cvrsUA = clcaWorkflow.sortedBallotsOrCvrs().map{ it as CvrUnderAudit }
-        writeCvrsJsonFile(cvrsUA, publisher.cvrsFile())
+        //// could be inside of BallotCardsClca
+        writeCvrsJsonFile(ballotCards.cvrsUA, publisher.cvrsFile()) // sorted in order of sample number
         println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
 
-        // save the testMvrs
-        val mvrus = testMvrs.mapIndexed { idx, mvr ->
-            val cvr = cvrsUA[idx]
-            CvrUnderAudit(mvr, cvr.index(), cvr.sampleNumber())
-        }
+        // save the sorted testMvrs
         publisher.validateOutputDirOfFile(mvrFile)
-        writeCvrsJsonFile(mvrus, mvrFile)
-        println("   writeCvrsJsonFile ${mvrFile}")
+        writeCvrsJsonFile(ballotCards.mvrsUA, mvrFile)
+        println("   writeMvrsJsonFile ${mvrFile}")
 
+        val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
@@ -157,13 +157,13 @@ object RunRlaStart {
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
 
-        return if (auditRound.sampledIndices.isNotEmpty()) 0 else 1
+        return if (auditRound.sampleNumbers.isNotEmpty()) 0 else 1
     }
 
     fun startTestElectionPolling(
         topdir: String,
         minMargin: Double,
-        fuzzMvrs: Double,
+        fuzzMvrsPct: Double,
         pctPhantoms: Double?,
         ncards: Int,
         mvrFile: String,
@@ -185,24 +185,31 @@ object RunRlaStart {
         println()
 
         val (testCvrs, ballotManifest) = testData.makeCvrsAndBallotManifest(auditConfig.hasStyles)
-        val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+        val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct)
+        val pairs = testMvrs.zip(testCvrs)
+        pairs.forEach { (mvr, cvr) ->
+            require(mvr.id == cvr.id)
+        }
 
-        // PollingWorkflow assigns the sample numbers, and creates the assertions
-        val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotManifest, testCvrs.size)
-        val ballotsUA = pollingWorkflow.sortedBallotsOrCvrs().map{ it as BallotUnderAudit }
-
-        val ballotManifestUA = BallotManifestUnderAudit(ballotsUA, ballotManifest.ballotStyles)
+        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        val ballotManifestUA = BallotManifestUnderAudit(ballotCards.ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publisher.ballotManifestFile())
         println("   writeBallotManifestJsonFile ${publisher.ballotManifestFile()}")
 
-        // save the testMvrs
-        val mvrus = testMvrs.mapIndexed { idx, mvr ->
-            val ballot = ballotsUA[idx]
-            CvrUnderAudit(mvr, ballot.index(), ballot.sampleNumber())
+        // save the sorted testMvrs
+        var lastRN = 0L
+        val mvruas = ballotCards.ballotsUA.mapIndexed { idx, ballotUA ->
+            require(ballotUA.sampleNumber() > lastRN)
+            lastRN = ballotUA.sampleNumber()
+            val mvr = testMvrs[idx]
+            CvrUnderAudit(mvr, ballotUA.index(), ballotUA.sampleNumber())
         }
         publisher.validateOutputDirOfFile(mvrFile)
-        writeCvrsJsonFile(mvrus, mvrFile)
-        println("   writeCvrsJsonFile ${mvrFile}")
+        writeCvrsJsonFile(mvruas, mvrFile)
+        println("   writeMvrsJsonFile ${mvrFile}")
+
+        // PollingWorkflow creates the assertions
+        val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotCards)
 
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
@@ -214,15 +221,15 @@ object RunRlaStart {
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
 
-        return if (auditRound.sampledIndices.isNotEmpty()) 0 else 1
+        return if (auditRound.sampleNumbers.isNotEmpty()) 0 else 1
     }
 }
 
 fun runChooseSamples(workflow: RlauxWorkflowIF, publish: Publisher): AuditRound {
     val round = workflow.startNewRound(quiet = false)
-    if (round.sampledIndices.isNotEmpty()) {
-        writeSampleIndicesJsonFile(round.sampledIndices, publish.sampleIndicesFile(round.roundIdx))
-        println("   writeSampleIndicesJsonFile ${publish.sampleIndicesFile(round.roundIdx)}")
+    if (round.sampleNumbers.isNotEmpty()) {
+        writeSampleNumbersJsonFile(round.sampleNumbers, publish.sampleNumbersFile(round.roundIdx))
+        println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
     } else {
         println("*** FAILED TO GET ANY SAMPLES ***")
     }

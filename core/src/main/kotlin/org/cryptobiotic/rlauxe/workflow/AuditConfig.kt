@@ -23,6 +23,8 @@ data class AuditConfig(
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
     val version: Double = 1.0,
 ) {
+    val isClca = auditType == AuditType.CLCA || auditType == AuditType.ONEAUDIT
+
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, samplePctCutoff=$samplePctCutoff, minMargin=$minMargin version=$version")

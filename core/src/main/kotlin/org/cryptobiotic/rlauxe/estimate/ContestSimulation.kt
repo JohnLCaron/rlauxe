@@ -27,7 +27,8 @@ import kotlin.random.Random
 //    For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
 //    I think we must have a ballot manifest, which means we have Nb, and ...
 
-/** Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms. */
+/** Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms,
+ * as specified in Contest. TODO use for clca?? */
 class ContestSimulation(val contest: Contest) {
     val info = contest.info
     val ncands = info.candidateIds.size

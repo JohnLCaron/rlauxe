@@ -46,7 +46,7 @@ class CompareAuditsNoErrors {
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                         oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default)),
-                    parameters=mapOf("nruns" to nruns, "cat" to "oneudit ${(100 * cvrPercent).toInt()}%"),
+                    parameters=mapOf("nruns" to nruns, "cat" to "oneudit-${(100 * cvrPercent).toInt()}%"),
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
             }

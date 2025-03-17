@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
+import kotlin.math.sqrt
+
 /**
  * Welford's algorithm for running mean and variance.
  * see https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
@@ -30,6 +32,6 @@ class Welford(
     fun variance() = if (count == 0) 0.0 else M2 / count
 
     override fun toString(): String {
-        return "(mean, variance and sample) = ${this.result()}"
+        return "(mean, variance, sampleVariance, stddev) = ${this.result()}, ${sqrt(variance())}"
     }
 }

@@ -1,12 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.cobra.AuditCobraAssertion
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.*
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
 
 class CorlaSingleRoundAuditTaskGenerator(
@@ -102,22 +98,21 @@ class CorlaWorkflow(
         contestsUA.forEach { contest ->
             contest.makeClcaAssertions(ballotCards.cvrs)
         }
-
-        //val prng = Prng(auditConfig.seed)
-        //cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy{ it.sampleNumber() }
     }
 
     override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
-            auditRound.roundIdx, auditor = AuditCorlaAssertion()
-        )
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+            auditor = AuditCorlaAssertion())
+        auditRound.auditWasDone = true
+        auditRound.auditIsComplete = complete
+        return complete
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
-        TODO("Not yet implemented")
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        ballotCards.setMvrsBySampleNumber(sampleNumbers)
     }
 
     override fun ballotCards() = ballotCards

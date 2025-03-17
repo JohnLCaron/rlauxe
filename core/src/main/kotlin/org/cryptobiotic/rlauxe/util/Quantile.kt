@@ -37,7 +37,7 @@ fun showDeciles(data: List<Int>) = buildString {
     val deciles = makeDeciles(data)
     append(" deciles=[")
     deciles.forEach { append(" $it, ") };
-    appendLine("]")
+    append("]")
 }
 
 /**

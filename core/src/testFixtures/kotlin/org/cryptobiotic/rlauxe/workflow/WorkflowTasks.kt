@@ -12,14 +12,11 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.estimate.makeUndervoteForContest
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
-import java.util.concurrent.TimeUnit
 import kotlin.math.sqrt
 
-// for running workflows with one contest, multiple times for testing
+private val quiet = false
 
-private val quiet = true
-
-// runs test workflow with fake mvrs already generated, and the cvrs are variants of those
+// runs test workflow rounds until finished
 // return last audit round
 fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=false): AuditRound? {
     val stopwatch = Stopwatch()
@@ -27,20 +24,16 @@ fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=false): 
     var nextRound: AuditRound? = null
     var done = false
     while (!done) {
-
         nextRound = workflow.startNewRound(quiet=quiet)
         if (nextRound.sampleNumbers.isEmpty()) {
             done = true
 
         } else {
             stopwatch.start()
-
-            /* val sampledMvrs = nextRound.sampledIndices.map {
-                testMvrs[it]
-            } */
-            done = workflow.runAudit(nextRound)
-
-            if (!quiet) println("runAudit ${nextRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
+            workflow.setMvrsBySampleNumber(nextRound.sampleNumbers )
+            if (!quiet) println("\nrunAudit ${nextRound.roundIdx}")
+            done = workflow.runAudit(nextRound, quiet)
+            if (!quiet) println(" runAudit ${nextRound.roundIdx} done=$done samples=${nextRound.sampleNumbers.size}")
         }
     }
 
@@ -51,16 +44,6 @@ fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=false): 
     } */
 
     return nextRound
-}
-
-data class Round(val round: Int, val sampledIndices: List<Int>, val previousSamples: Set<Int>) {
-    var newSamples: Int = 0
-    init {
-        newSamples = sampledIndices.count { it !in previousSamples }
-    }
-    override fun toString(): String {
-        return "Round(round=$round, newSamples=$newSamples)"
-    }
 }
 
 interface WorkflowTaskGenerator {
@@ -102,6 +85,7 @@ class ClcaWorkflowTaskGenerator(
 
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
             BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+
         return WorkflowTask(
             name(),
             clcaWorkflow,

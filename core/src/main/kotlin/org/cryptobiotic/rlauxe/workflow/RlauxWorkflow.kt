@@ -15,6 +15,7 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
     fun auditRounds(): MutableList<AuditRound>
     fun contestsUA(): List<ContestUnderAudit>
 
+    // start new round and create estimate
     fun startNewRound(quiet: Boolean = true): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
@@ -28,16 +29,17 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
         }
         auditRounds.add(auditRound)
 
+        if (!quiet) println("Estimate round ${roundIdx}")
         estimateSampleSizes(
             auditConfig(),
             auditRound,
-            show=!quiet,
         )
 
         sample(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
         return auditRound
     }
 
-    fun addMvrs(mvrs: List<CvrUnderAudit>)
+    // you have to set the mvrs before you run the audit
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
     fun runAudit(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return allDone
 }

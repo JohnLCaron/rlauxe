@@ -93,7 +93,7 @@ Assuming betj are constant = b, then
 
 TODO: show plot
 
-One possibility is that we can mofify the betting function to take into account these known "errors"?
+One possibility is that we can modify the betting function to take into account these known "errors"?
 
 ## Notes from the paper
 

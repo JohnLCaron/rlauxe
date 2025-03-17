@@ -12,7 +12,6 @@ class OneAuditWorkflow(
     val ballotCards: BallotCardsClcaStart, // mutable
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    // private val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -23,17 +22,19 @@ class OneAuditWorkflow(
         // check(auditConfig, contests)
     }
 
-    //  return allDone
     override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
-            auditRound.roundIdx, auditor = OneAuditClcaAssertion())
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+            auditor = OneAuditClcaAssertion())
+        auditRound.auditWasDone = true
+        auditRound.auditIsComplete = complete
+        return complete
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
-        ballotCards.setMvrs(mvrs)
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        ballotCards.setMvrsBySampleNumber(sampleNumbers)
     }
 
     override fun ballotCards() = ballotCards

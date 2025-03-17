@@ -51,7 +51,7 @@ class ClcaSimulation(
         flippedVotesP2o = flipP2o(mmvrs, needToChange = (Nc * errorRates.p2o).toInt())
         flippedVotesP2u = flipP2u(mmvrs, needToChange = (Nc * errorRates.p2u).toInt())
         flippedVotesP1u = if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt())
-                        else flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
+                          else flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
@@ -60,7 +60,6 @@ class ClcaSimulation(
         sampleMean = sampleCount / Nc
     }
 
-    fun sampleMean() = sampleMean
     fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
@@ -114,7 +113,7 @@ class ClcaSimulation(
                 val alteredMvr = makeNewCvr(cvr, votes) // this is the altered mvr
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter().assort(alteredMvr) != 0.0) {
-                    println("  flip2votes ${cassorter.assorter().assort(alteredMvr)} != 0.0")
+                    println("  flipP2o ${cassorter.assorter().assort(alteredMvr)} != 0.0")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
                 }
@@ -130,7 +129,7 @@ class ClcaSimulation(
         }
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flip2votes could only flip $changed, wanted $needToChange")
+            println("flipP2o could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
@@ -153,7 +152,7 @@ class ClcaSimulation(
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter().assort(alteredMvr) != 1.0) {
-                    println("  flip4votes ${cassorter.assorter().assort(alteredMvr)} != 1.0")
+                    println("  flipP2u ${cassorter.assorter().assort(alteredMvr)} != 1.0")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
                 }
@@ -170,7 +169,7 @@ class ClcaSimulation(
 
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flip4votes could only flip $changed, wanted $needToChange")
+            println("flipP2u could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
@@ -193,7 +192,7 @@ class ClcaSimulation(
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter().assort(alteredMvr) != 0.5) {
-                    println("  flip1votes ${cassorter.assorter().assort(alteredMvr)} != 0.5")
+                    println("  flipP1o ${cassorter.assorter().assort(alteredMvr)} != 0.5")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
                 }
@@ -209,7 +208,7 @@ class ClcaSimulation(
         }
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flip1votes could only flip $changed, wanted $needToChange")
+            println("flipP1o could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
@@ -243,7 +242,7 @@ class ClcaSimulation(
         }
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.5 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flip3votes could only flip $changed, wanted $needToChange")
+            println("flipP1uIRV could only flip $changed, wanted $needToChange")
         // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
@@ -277,7 +276,7 @@ class ClcaSimulation(
         }
         val checkAvotes = cvrs.count { cassorter.assorter().assort(it) == 1.0 }
         if (checkAvotes != startingAvotes - needToChange)
-            println("flip3votesP could only flip $changed, wanted $needToChange")
+            println("flipP1uP could only flip $changed, wanted $needToChange")
        // require(checkAvotes == startingAvotes - needToChange)
 
         return changed

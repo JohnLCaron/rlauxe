@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
+// Do the audit in a single round, dont use estimateSampleSizes
 class ClcaSingleRoundAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,

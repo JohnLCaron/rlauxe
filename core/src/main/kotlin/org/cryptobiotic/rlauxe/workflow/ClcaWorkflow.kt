@@ -30,14 +30,17 @@ class ClcaWorkflow(
         // TODO filter out contests that are done... */
     }
 
-    override fun addMvrs(mvrs: List<CvrUnderAudit>)  {
-        ballotCards.setMvrs(mvrs)
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        ballotCards.setMvrsBySampleNumber(sampleNumbers)
     }
 
-    //  return allDone
+    //  return complete
     override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
-            auditRound.roundIdx, auditor = AuditClcaAssertion())
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+            auditor = AuditClcaAssertion(quiet))
+        auditRound.auditWasDone = true
+        auditRound.auditIsComplete = complete
+        return complete
     }
 
     override fun auditConfig() =  this.auditConfig

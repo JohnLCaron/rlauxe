@@ -1,0 +1,138 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;Mw04Sw&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAuditWithErrors95 samples vs fuzz&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100 cvrPercent=0.95 margin=0.02&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;mvrsFuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;samplesNeeded&quot;:[299.0,299.0,337.75,368.65000000000003,367.96,512.9200000000001,622.8600000000001,840.4800000000001,868.6800000000001,2311.0200000000004,3445.26,4549.6,6542.839999999998,18838.27000000001,18696.100000000002,18586.88,18944.240000000013,18605.799999999996,18979.320000000014,19307.16999999999,19059.03,19131.389999999996,19854.89,20187.6,20230.749999999996,21097.680000000004,1044.2999999999997,1172.1199999999994,847.0300000000002,978.2999999999994,1468.6500000000005,2647.7300000000005,5470.809999999997,9142.499999999996,16431.120000000003,34774.04999999998,39949.67,44036.350000000006,43607.67000000002,13516.629999999997,13296.189999999997,13105.729999999994,12441.519999999999,14819.939999999997,13128.589999999997,13684.749999999998,14808.249999999998,13982.320000000003,13778.519999999993,14620.430000000002,15826.19,15921.130000000005],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;mvrsFuzzPct&quot;:[0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;mvrsFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;mvrsFuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;samplesNeeded&quot;:[299.0,299.0,337.75,368.65000000000003,367.96,512.9200000000001,622.8600000000001,840.4800000000001,868.6800000000001,2311.0200000000004,3445.26,4549.6,6542.839999999998,18838.27000000001,18696.100000000002,18586.88,18944.240000000013,18605.799999999996,18979.320000000014,19307.16999999999,19059.03,19131.389999999996,19854.89,20187.6,20230.749999999996,21097.680000000004,1044.2999999999997,1172.1199999999994,847.0300000000002,978.2999999999994,1468.6500000000005,2647.7300000000005,5470.809999999997,9142.499999999996,16431.120000000003,34774.04999999998,39949.67,44036.350000000006,43607.67000000002,13516.629999999997,13296.189999999997,13105.729999999994,12441.519999999999,14819.939999999997,13128.589999999997,13684.749999999998,14808.249999999998,13982.320000000003,13778.519999999993,14620.430000000002,15826.19,15921.130000000005],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;max99&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;mvrsFuzzPct&quot;:[0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;mvrsFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;mvrsFuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+       var containerDiv = document.getElementById(&quot;Mw04Sw&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

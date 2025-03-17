@@ -14,11 +14,11 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.sqrt
 
-private val quiet = false
+private val quiet = true
 
 // runs test workflow rounds until finished
 // return last audit round
-fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=false): AuditRound? {
+fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=true): AuditRound? {
     val stopwatch = Stopwatch()
 
     var nextRound: AuditRound? = null
@@ -49,49 +49,6 @@ fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=false): 
 interface WorkflowTaskGenerator {
     fun name(): String
     fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
-}
-
-class ClcaWorkflowTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
-    val margin: Double,
-    val underVotePct: Double,
-    val phantomPct: Double,
-    val mvrsFuzzPct: Double,
-    val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
-    val Nb: Int = Nc,
-    val nsimEst: Int = 100,
-    val p2flips: Double? = null,
-    ): WorkflowTaskGenerator {
-    override fun name() = "ClcaWorkflowTaskGenerator"
-
-    override fun generateNewTask(): WorkflowTask {
-        val useConfig = auditConfig ?:
-            AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-                clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
-
-        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-
-        if (!useConfig.hasStyles && Nb > Nc) { // TODO wtf?
-            val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
-            testCvrs = testCvrs + otherCvrs
-            testMvrs = testMvrs + otherCvrs
-        }
-
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
-            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
-
-        return WorkflowTask(
-            name(),
-            clcaWorkflow,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
-        )
-    }
 }
 
 class PollingWorkflowTaskGenerator(
@@ -134,41 +91,7 @@ class PollingWorkflowTaskGenerator(
             name(),
             pollingWorkflow,
             // testMvrs,
-            parameters + mapOf("fuzzPct" to mvrsFuzzPct, "auditType" to 2.0)
-        )
-    }
-}
-
-// mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
-class OneAuditWorkflowTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
-    val margin: Double,
-    val underVotePct: Double,
-    val phantomPct: Double,
-    val cvrPercent: Double,
-    val mvrsFuzzPct: Double,
-    val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
-    val nsimEst: Int = 100,
-    ) : WorkflowTaskGenerator {
-    override fun name() = "OneAuditWorkflowTaskGenerator"
-
-    override fun generateNewTask(): WorkflowTask {
-        val auditConfig = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
-        )
-
-        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
-        val oaCvrs = contestOA2.makeTestCvrs()
-        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
-
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), BallotCardsClcaStart(oaCvrs, oaMvrs, auditConfig.seed))
-        return WorkflowTask(
-            name(),
-            oneaudit,
-            // oaMvrs,
-            parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to mvrsFuzzPct, "auditType" to 1.0)
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 2.0)
         )
     }
 }
@@ -208,7 +131,6 @@ class RaireWorkflowTaskGenerator(
 class WorkflowTask(
     val name: String,
     val workflow: RlauxWorkflowIF,
-    // val testCvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
     override fun name() = name
@@ -216,6 +138,7 @@ class WorkflowTask(
         val lastRound = runWorkflow(name, workflow, quiet = quiet)
         if (lastRound == null) {
             return WorkflowResult(
+                name,
                 0,
                 0.0,
                 TestH0Status.ContestMisformed, // TODO why empty?
@@ -230,7 +153,8 @@ class WorkflowTask(
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?
             ?: return WorkflowResult(
-                    contest.Nc,
+                name,
+                contest.Nc,
                     0.0,
                     TestH0Status.ContestMisformed,
                     0.0, 0.0, 0.0, 0.0,
@@ -241,6 +165,7 @@ class WorkflowTask(
         val assorter = minAssertion.assertion.assorter
         return if (minAssertion.auditResult == null) { // TODO why is this empty?
             WorkflowResult(
+                name,
                 contest.Nc,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
@@ -251,6 +176,7 @@ class WorkflowTask(
         } else {
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
+                name,
                 contest.Nc,
                 assorter.reportedMargin(),
                 lastRound.status,
@@ -265,13 +191,14 @@ class WorkflowTask(
     }
 }
 
-fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>): List<WorkflowResult> {
-    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=40)
+fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
     val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
     return results
 }
 
 data class WorkflowResult(
+        val name: String,
         val Nc: Int,
         val margin: Double,
         val status: TestH0Status,
@@ -294,6 +221,7 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
 
     val result =  if (runs.isEmpty()) { // TODO why all empty?
         WorkflowResult(
+            "empty",
             0,
             0.0,
             TestH0Status.ContestMisformed,
@@ -303,6 +231,7 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
     } else if (successRuns.isEmpty()) { // TODO why all empty?
         val first = runs.first()
         WorkflowResult(
+            first.name,
             first.Nc,
             first.margin,
             TestH0Status.MinMargin, // TODO maybe TestH0Status.AllFail ?
@@ -312,6 +241,11 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         )
     } else {
         val first = successRuns.first()
+        /* if (first.name == "ClcaSingleRoundAuditTaskGenerator" &&
+            ((first.parameters["cat"] as String) == "max99") &&
+            ((first.parameters["mvrsFuzzPct"] as Double) == .05)) {
+            print("")
+        } */
         val failures = runs.size - successRuns.count()
         val successPct = successRuns.count() / runs.size.toDouble()
         val failPct = failures / runs.size.toDouble()
@@ -320,13 +254,14 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         successRuns.forEach { welford.update(it.samplesNeeded) }
 
         WorkflowResult(
+            first.name,
             Nc,
             first.margin,
             first.status, // hmm kinda bogus
             runs.filter{ it.nrounds > 0 } .map { it.nrounds }.average(),
-            successPct * successRuns.map { it.samplesUsed }.average() + failPct * Nc,
-            successPct * welford.mean + failPct * Nc,
-            successPct * successRuns.map { it.nmvrs }.average() + failPct * Nc,
+            samplesUsed = successPct * successRuns.map { it.samplesUsed }.average() + failPct * Nc,
+            samplesNeeded = successPct * welford.mean + failPct * Nc,
+            nmvrs = successPct * successRuns.map { it.nmvrs }.average() + failPct * Nc,
             first.parameters,
 
             100.0 * failPct,

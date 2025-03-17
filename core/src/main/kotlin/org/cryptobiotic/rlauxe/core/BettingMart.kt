@@ -98,7 +98,15 @@ class BettingMart(
             }
         }
         // println(" status=$status mean = ${tracker.mean()} samplesUsed = ${sampleNumber/Nc.toDouble()}")
-        return TestH0Result(status, sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalueLast, tracker)
+        // data class TestH0Result(
+        //    val status: TestH0Status,  // how did the test conclude?
+        //    val sampleCount: Int,      // number of samples used in testH0
+        //    val sampleFirstUnderLimit: Int, // first sample index with pvalue with risk < limit, one based
+        //    val pvalueMin: Double,    // smallest pvalue in the sequence
+        //    val pvalueLast: Double,    // last pvalue
+        //    val tracker: SampleTracker,
+        //)
+        return TestH0Result(status, sampleCount=sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalueLast, tracker)
     }
 
     fun setDebuggingSequences(): DebuggingSequences {

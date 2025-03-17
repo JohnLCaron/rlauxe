@@ -52,7 +52,7 @@ fun runPollingAudit(
     contests: List<ContestRound>,
     ballotCards: BallotCardsPolling,
     roundIdx: Int,
-    quiet: Boolean = false
+    quiet: Boolean = true
 ): Boolean {
     val contestsNotDone = contests.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
@@ -113,12 +113,13 @@ fun auditPollingAssertion(
     )
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
+    val samplesNeeded = if (testH0Result.sampleFirstUnderLimit > 0) testH0Result.sampleFirstUnderLimit else testH0Result.sampleCount
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampler.maxSamples(),
         maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
-        samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
+        samplesNeeded = samplesNeeded, // one based
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
         measuredMean = testH0Result.tracker.mean(),

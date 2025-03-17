@@ -79,13 +79,14 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         )
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        val samplesNeeded = if (testH0Result.sampleFirstUnderLimit > 0) testH0Result.sampleFirstUnderLimit else testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.maxSamples(),
             maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
-            samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
+            samplesNeeded = samplesNeeded, // one based
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),

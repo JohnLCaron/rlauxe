@@ -149,13 +149,19 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         )
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        // TODO this is left over from when we ran testH0Result with terminateOnNullReject = false
+        //    I think we could probably just use testH0Result.sampleCount and ignore sampleFirstUnderLimit
+        val samplesNeeded = if (testH0Result.sampleFirstUnderLimit > 0) testH0Result.sampleFirstUnderLimit else testH0Result.sampleCount
+        if (testH0Result.sampleFirstUnderLimit > 0 && (testH0Result.sampleFirstUnderLimit != testH0Result.sampleCount + 1)) {
+            println("WARNING: sampleFirstUnderLimit = ${testH0Result.sampleFirstUnderLimit} != sampleCount = ${testH0Result.sampleCount}")
+        }
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.maxSamples(),
             maxBallotIndexUsed = sampler.maxSampleIndexUsed(), // TODO only for audit, bot estimation I think
             pvalue = testH0Result.pvalueLast,
-            samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
+            samplesNeeded = samplesNeeded, // one based
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),

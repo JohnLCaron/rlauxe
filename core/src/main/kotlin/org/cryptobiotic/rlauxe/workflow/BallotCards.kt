@@ -20,10 +20,12 @@ interface BallotCards {
 }
 
 interface BallotCardsClca : BallotCards {
-    fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler
+    // this is used for audit, not estimation
+    fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean = false): Sampler
 }
 
 interface BallotCardsPolling : BallotCards {
+    // this is used for audit, not estimation
     fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler
 }
 
@@ -61,6 +63,7 @@ class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : B
     }
 
     override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+        if (mvrsForRound.isEmpty()) return makeOneRoundSampler(contestId, cassorter, allowReset)
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
 
@@ -74,7 +77,13 @@ class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : B
         }
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
         val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = false)
+        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
+    }
+
+    // fust use the entire cvrs/mvrs
+    fun makeOneRoundSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+        val cvrPairs = mvrsUA.map{ it.cvr }.zip(cvrsUA.map{ it.cvr })
+        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
     }
 }
 

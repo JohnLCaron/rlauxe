@@ -8,34 +8,33 @@ import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.math.log10
 import kotlin.test.Test
 
-class OneAuditNoErrors {
-    val name = "OneAuditNoErrors"
+class OneAuditWithErrors {
+    val name = "OneAuditWithErrors95"
     val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
 
-    val nruns = 100  // number of times to run workflow
+    val nruns = 100 // number of times to run workflow
     val nsimEst = 10
-    val N = 10000
+    val N = 50000
     val cvrPercent = 0.95
+    val margin = .02
 
     @Test
-    fun oaNoErrorsPlots() {
-        val margins =
-            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        val fuzzPct = 0.0
+    fun oaWithErrorsPlots() {
+        val fuzzPcts = listOf(0.0, .0001, .00033, .00066, .001, .003, .005, .0075, .01, .02, .03, .04, .05)
 
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
-        margins.forEach { margin ->
+        fuzzPcts.forEach { fuzzPct ->
             val pollingGenerator = PollingWorkflowTaskGenerator(
-                N, margin, 0.0, 0.0, 0.0,
+                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
                 nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
-                Nc = N, margin=margin, underVotePct=0.0, phantomPct=0.0, mvrsFuzzPct=0.0,
+                Nc = N, margin=margin, underVotePct=0.0, phantomPct=0.0, mvrsFuzzPct=fuzzPct,
                 nsimEst = nsimEst,
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.noerror, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "clca")
@@ -70,10 +69,41 @@ class OneAuditNoErrors {
 
     @Test
     fun regenPlots() {
-        val subtitle = "Nc=${N} nruns=${nruns} cvrPercent=$cvrPercent"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
+        val subtitle = "Nc=${N} nruns=${nruns} cvrPercent=$cvrPercent margin=$margin"
+        showSampleSizesVsFuzzPct(name, dirName, subtitle, ScaleType.Linear)
+        showSampleSizesVsFuzzPct(name, dirName, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsFuzzPct(name, dirName, subtitle, ScaleType.LogLog)
+        showFailuresVsFuzzPct(name, dirName, subtitle)
     }
+}
 
+fun showSampleSizesVsFuzzPct(name: String, dirName: String, subtitle: String, yscale: ScaleType) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
+
+    wrsPlot(
+        titleS = "$name samples vs fuzz",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${yscale.name}",
+        wrs=data,
+        xname="mvrsFuzzPct", xfld = { it.Dparam("mvrsFuzzPct") },
+        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        catName = "auditType", catfld = { category(it) },
+        scaleType = yscale,
+    )
+}
+
+fun showFailuresVsFuzzPct(name: String, dirName: String, subtitle: String) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
+
+    wrsPlot(
+        titleS = "$name failurePct",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}Failures",
+        wrs = data,
+        xname = "fuzzPct", xfld = { it.Dparam("mvrsFuzzPct") },
+        yname = "failurePct", yfld = { it.failPct },
+        catName = "strategy", catfld = { category(it) },
+    )
 }

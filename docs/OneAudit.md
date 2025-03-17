@@ -1,6 +1,6 @@
 # OneAudit Notes
 
-last changed 03/16/2025
+last changed 03/17/2025
 
 ### Why you cant use BettingMart
 
@@ -262,9 +262,26 @@ the following plots show.
 In these plots we only use OneAudit with 95% of ballots having CVRs, and compare the "max99" and "default" OneAudit strategies 
 as well as polling and clca audits.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.html" rel="OneAuditNoErrorsLinear Linear">![OneAuditNoErrorsLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear Log">![OneAuditNoErrorsLogLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.html" rel="OneAuditNoErrorsLogLog Log">![OneAuditNoErrorsLogLog](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.html" rel="OneAuditNoErrorsLinear">![OneAuditNoErrorsLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.html" rel="OneAuditNoErrorsLogLog">![OneAuditNoErrorsLogLog](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.png)</a>
 
-TBD: show how much error can be tolerated by the max99 strategy.
+To get a sense for how much error can be tolerated by the max99 strategy, here are plots with the margin fixed at 2%, and
+the mvrs fuzzed at various percents. For OneAudit with 95% of ballots having CVRs:
 
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95Linear.html" rel="OneAuditWithErrors95Linear">![OneAuditWithErrors95Linear](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLinear.html" rel="OneAuditWithErrors95LogLinear">![OneAuditWithErrors95LogLinear](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLog.html" rel="OneAuditWithErrors95LogLog">![OneAuditWithErrors95LogLog](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLog.png)</a>
+
+For OneAudit with 99% of ballots having CVRs:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99Linear.html" rel="OneAuditWithErrors99Linear">![OneAuditWithErrors99Linear](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLinear.html" rel="OneAuditWithErrors99LogLinear">![OneAuditWithErrors99LogLinear](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLog.html" rel="OneAuditWithErrors99LogLog">![OneAuditWithErrors99LogLog](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLog.png)</a>
+
+* At 99% of ballots having CVRs, max99 OneAudit does well when the Mvr fuzz is < .01, that is 1 in 100 ballots have errors. 
+  Its likely there are scenarios where this is quite useful.
+* At 95% of ballots having CVRs, max99 OneAudit does well up to Mvr fuzz < .003, that is 3 in 1000 ballots have errors. 
+* The problem is that outside of those ranges, max99 OneAudit quickly blows up and does worse than polling.
+
+The task then is to find a decent strategy that does as well as max99, but can tolerate errors better.

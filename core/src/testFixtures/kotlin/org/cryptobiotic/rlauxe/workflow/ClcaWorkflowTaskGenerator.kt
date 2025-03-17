@@ -1,13 +1,53 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
+
+class ClcaWorkflowTaskGenerator(
+    val Nc: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val mvrsFuzzPct: Double,
+    val parameters : Map<String, Any>,
+    val auditConfig: AuditConfig? = null,
+    val clcaConfigIn: ClcaConfig? = null,
+    val Nb: Int = Nc,
+    val nsimEst: Int = 100,
+    val p2flips: Double? = null,
+): WorkflowTaskGenerator {
+    override fun name() = "ClcaWorkflowTaskGenerator"
+
+    override fun generateNewTask(): WorkflowTask {
+        val useConfig = auditConfig ?:
+        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
+            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
+
+        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
+        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
+            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+
+        if (!useConfig.hasStyles && Nb > Nc) { // TODO wtf?
+            val otherContestId = 42
+            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
+            testCvrs = testCvrs + otherCvrs
+            testMvrs = testMvrs + otherCvrs
+        }
+
+        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+
+        return WorkflowTask(
+            name(),
+            clcaWorkflow,
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
+        )
+    }
+}
 
 // Do the audit in a single round, dont use estimateSampleSizes
 class ClcaSingleRoundAuditTaskGenerator(
@@ -39,6 +79,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
             BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+
         return ClcaSingleRoundAuditTask(
             name(),
             clcaWorkflow,
@@ -68,15 +109,11 @@ class ClcaSingleRoundAuditTask(
         val contest = contestRounds.first() // theres only one
         val minAssertion = contest.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
-
         val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true) // TODO needed or debugging?
-        if (debug) println(" mvrMargin=$mvrMargin")
-        if (mvrMargin > .5) {
-            println(" **** mvrMargin=$mvrMargin")
-        }
 
         return if (minAssertion.auditResult == null) { // TODO why might this this empty?
             WorkflowResult(
+                name,
                 contest.Nc,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
@@ -87,6 +124,7 @@ class ClcaSingleRoundAuditTask(
         } else {
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
+                name,
                 contest.Nc,
                 assorter.reportedMargin(),
                 lastRound.status,
@@ -102,18 +140,13 @@ class ClcaSingleRoundAuditTask(
     }
 }
 
-// runs test workflow with fake mvrs already generated, and the cvrs are variants of those
-// return number of mvrs hand counted
-fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<ContestRound>, quiet: Boolean = false,
+// keep this seperate function for testing
+fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<ContestRound>, quiet: Boolean = true,
                             auditor: ClcaAssertionAuditor): Int {
     val stopwatch = Stopwatch()
-
-    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.ballotCards() as BallotCardsClca, 1, auditor = AuditClcaAssertion())
-
-    // runSingleClcaAudit(workflow.auditConfig(), contestRounds, sortedIndices, testMvrs, workflow.cvrs(), auditor)
-    // runClcaAudit(workflow.auditConfig(), contestRounds, sortedIndices, testMvrs, emptyList(), auditor)
-
+    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.ballotCards() as BallotCardsClca, 1, auditor = auditor)
     if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
+
     var maxSamples = 0
     contestRounds.forEach { contest->
         contest.assertionRounds.forEach { assertion ->
@@ -122,44 +155,5 @@ fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<Conte
     }
     return maxSamples
 }
-
-/*
-fun runSingleClcaAudit(
-    auditConfig: AuditConfig,
-    contests: List<ContestRound>,
-    sortedIndices: List<Int>,
-    mvrs: List<Cvr>,
-    cvrs: List<Cvr>,
-    auditor: ClcaAssertionAuditor,
-): Boolean {
-
-    val contestsNotDone = contests.filter { !it.done }
-    val sampledCvrs = sortedIndices.map { cvrs[it] }
-    val sampledMvrs = sortedIndices.map { mvrs[it] }
-
-    require(sampledCvrs.size == mvrs.size)
-    val cvrPairs: List<Pair<Cvr, Cvr>> = sampledMvrs.zip(sampledCvrs)
-    cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id) } // prove that sampledCvrs correspond to mvrs
-
-    contestsNotDone.forEach { contest ->
-        contest.assertionRounds.forEach { assertionRound ->
-            val cassertion = assertionRound.assertion as ClcaAssertion
-            val cassorter = cassertion.cassorter
-            val sampler = ClcaWithoutReplacement(contest.contestUA.id, cvrPairs, cassorter, allowReset = false)
-
-            val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, 1)
-            if (debug) {
-                println(" testH0Result=$testH0Result")
-            }
-            assertionRound.status = testH0Result.status
-            assertionRound.round = 1
-        }
-    }
-    return true
-}
-
- */
-
-private val debug = false
 
 

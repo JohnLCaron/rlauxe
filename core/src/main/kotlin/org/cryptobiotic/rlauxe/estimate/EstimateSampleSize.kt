@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
-private val debug = true
+private val debug = false
 private val debugErrorRates = false
 private val debugSampleDist = false
 private val debugSizeNudge = true

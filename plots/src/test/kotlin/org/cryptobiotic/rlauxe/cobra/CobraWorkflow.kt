@@ -61,7 +61,6 @@ class CobraWorkflow(
     val p2prior: Double,
 ) : RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
-    // val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -71,23 +70,23 @@ class CobraWorkflow(
         contestsUA.forEach { contest ->
             contest.makeClcaAssertions(ballotCards.cvrs)
         }
-
-        //val prng = Prng(auditConfig.seed)
-        //cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
     }
 
     override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        return runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards,
-            auditRound.roundIdx, auditor = AuditCobraAssertion(p2prior))
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+            auditor = AuditCobraAssertion(p2prior)
+        )
+        auditRound.auditWasDone = true
+        auditRound.auditIsComplete = complete
+        return complete
     }
 
     override fun auditConfig() = this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
-        TODO("Not yet implemented")
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        ballotCards.setMvrsBySampleNumber(sampleNumbers)
     }
-
     override fun ballotCards() = ballotCards
 }
 

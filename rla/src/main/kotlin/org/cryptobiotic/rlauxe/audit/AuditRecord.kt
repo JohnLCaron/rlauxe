@@ -16,9 +16,9 @@ class AuditRecord(
 
     fun ballotCards(): BallotCards {
         return if (auditConfig.isClca) {
-            BallotCardsClcaRecord(cvrsUA)
+            BallotCardsClcaRecord(cvrsUA, cvrsUA.size)
         } else {
-            BallotCardsPollingRecord(ballotsUA)
+            BallotCardsPollingRecord(ballotsUA, ballotsUA.size)
         }
     }
 
@@ -99,13 +99,16 @@ class AuditRecord(
     }
 }
 
-class BallotCardsClcaRecord(private val cvrsUA: List<CvrUnderAudit>) : BallotCardsClca {
-    var mvrsForRound: List<CvrUnderAudit> = emptyList()
+class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nballotCards: Int) : BallotCardsClca {
+    private var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
-    override fun nballotCards() = cvrsUA.size
+    override fun nballotCards() = nballotCards
     override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
-    override fun setMvrs(mvrsUA: List<CvrUnderAudit>) {
-        mvrsForRound = mvrsUA
+    override fun setMvrs(mvrs: List<CvrUnderAudit>) {
+        mvrsForRound = mvrs
+    }
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        TODO("Unimplemented")
     }
 
     override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
@@ -126,13 +129,16 @@ class BallotCardsClcaRecord(private val cvrsUA: List<CvrUnderAudit>) : BallotCar
     }
 }
 
-class BallotCardsPollingRecord(private val ballotsUA: List<BallotUnderAudit>) : BallotCardsPolling {
+class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) : BallotCardsPolling {
     var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
-    override fun nballotCards() = ballotsUA.size
+    override fun nballotCards() = nballotCards
     override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
-    override fun setMvrs(mvrsUA: List<CvrUnderAudit>) {
-        mvrsForRound = mvrsUA
+    override fun setMvrs(mvrs: List<CvrUnderAudit>) {
+        mvrsForRound = mvrs
+    }
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        TODO("Unimplemented")
     }
 
     override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {

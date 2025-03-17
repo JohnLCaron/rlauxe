@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
+import org.cryptobiotic.rlauxe.propTestSlowConfig
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
@@ -22,7 +24,7 @@ import kotlin.test.assertEquals
 class TestContestSimulation {
 
     @Test
-    fun testContestSimulationwWithoutPhantoms() {
+    fun testContestSimulationWithoutPhantoms() {
         val Nc = 10000
         val reportedMargin = .005
         val sim = ContestSimulation.make2wayTestContest(Nc, reportedMargin, undervotePct=0.10, phantomPct=0.0)
@@ -53,6 +55,7 @@ class TestContestSimulation {
                 val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
                 val cvrs = sim.makeCvrs() // phantoms have been added
                 assertEquals(contest.Nc, cvrs.size)
+
                 val calcMargin = assorter.calcAssorterMargin(contest.id, cvrs)
                 val Ncd = contest.Nc.toDouble()
                 val expectWithPhantoms = (margin2mean(calcMargin) * Ncd - 0.5 * sim.phantomCount) / Ncd
@@ -98,6 +101,69 @@ class TestContestSimulation {
         println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${underVotePct} abs=${abs(underPct - underVotePct)} " +
                 " rel=${abs(underPct - underVotePct) /underPct}")
         if (nunder > 2) assertEquals(underVotePct, underPct, .02)
+    }
+
+    @Test
+    fun compareEstimationSimulation() {
+        //// ClcaSingleRoundAuditTaskGenerator
+        val Nc = 10000
+        val margin = .02
+        val welford = Welford()
+        runTest {
+            checkAll(
+                propTestSlowConfig, // propTestFastConfig, // propTestSlowConfig,
+                Arb.double(min = 0.0, max = 0.05),
+                Arb.double(min = 0.001, max = 0.01),
+                Arb.double(min = 0.01, max = 0.05),
+            ) { mvrsFuzzPct, phantomPct, underVotePct ->
+
+                val sim = ContestSimulation.make2wayTestContest(
+                    Nc = Nc,
+                    margin,
+                    undervotePct = underVotePct,
+                    phantomPct = phantomPct
+                )
+                var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+                val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+                val testPairs = testMvrs.zip(testCvrs)
+
+                // speculative if this is really what happens
+                val contest = sim.contest
+                val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(testCvrs)
+                val cassertion: ClcaAssertion = contestUA.minClcaAssertion()!!
+                val cassorter = cassertion.cassorter as ClcaAssorter
+                val orgMargin = cassorter.calcAssorterMargin(testPairs)
+                // println("testPairs calcAssorterMargin= ${cassorter.calcAssorterMargin(testPairs)}")
+                val errorRates = ClcaErrorTable.getErrorRates(contest.ncandidates, mvrsFuzzPct)
+
+                //// what were we doing before ??
+
+                // first generate some test data
+                // val simOrg = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
+                // var testCvrsOrg = simOrg.makeCvrs() // includes undervotes and phantoms
+                // var testMvrsOrg = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrsOrg, mvrsFuzzPct) // audit, not sim
+
+                // then in the sim, use the actuals cvrs
+                val samplerOrg = ClcaSimulation(testCvrs, contest, cassorter, errorRates)
+                val pairsOrg = samplerOrg.mvrs.zip(samplerOrg.cvrs)
+                val marginOrg = cassorter.calcAssorterMargin(pairsOrg)
+
+                //// what are we doing now
+
+                // instead of using testCvrs, we generate the cvrs again
+                val contestSimNow = ContestSimulation(contest)
+                val cvrsNow = contestSimNow.makeCvrs()
+                val samplerNow = ClcaSimulation(cvrsNow, contest, cassorter, errorRates)
+                val pairsNow = samplerNow.mvrs.zip(samplerNow.cvrs)
+                val marginNow = cassorter.calcAssorterMargin(pairsNow)
+
+                //println("org margin= $marginOrg now margin= $marginNow")
+                // println("orgMargin margin= $orgMargin - errorRates margin= $marginNow = ${orgMargin - marginNow} ")
+                welford.update(orgMargin - marginNow)
+                assertEquals(marginOrg, marginNow, doublePrecision)
+            }
+        }
+        println("welford= $welford")
     }
 
 }

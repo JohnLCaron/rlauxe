@@ -31,15 +31,18 @@ class PollingWorkflow(
         check(auditConfig, contests) */
     }
 
-    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  { // return allDone
-        return runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx, quiet)
+    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        val complete = runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx, quiet)
+        auditRound.auditWasDone = true
+        auditRound.auditIsComplete = complete
+        return complete
     }
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
-        ballotCards.setMvrs(mvrs)
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        ballotCards.setMvrsBySampleNumber(sampleNumbers)
     }
     override fun ballotCards() = ballotCards
 }

@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.math.sqrt
 
+private const val showH0Result = false
+
 // single threaded, used for estimating sample size
 // runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
 fun runTestRepeated(
@@ -18,9 +20,6 @@ fun runTestRepeated(
     margin: Double?,
     Nc:Int, // maximum cards in the contest
 ): RunTestRepeatedResult {
-
-    val showH0Result = false
-
     var totalSamplesNeeded = 0
     var fail = 0
     var nsuccess = 0
@@ -36,11 +35,10 @@ fun runTestRepeated(
             terminateOnNullReject=terminateOnNullReject,
             startingTestStatistic = startingTestStatistic) { drawSample.sample() }
 
-
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
 
-        // samples cant fail (I think), since you can use the entire population
+        // samples cant fail (I think), since testH0 can use the entire population, so always gets an answer
         if (testH0Result.status == TestH0Status.LimitReached) {
             println("unexpected failure in sampling, status= ${testH0Result.status}")
             fail++
@@ -50,7 +48,7 @@ fun runTestRepeated(
             totalSamplesNeeded += testH0Result.sampleCount
             welford.update(testH0Result.sampleCount.toDouble()) // just to keep the stddev
 
-            // sampleCount was what percent of N? keep 10% histogram bins.
+            // sampleCount was what percent of N? keep 10% histogram bins. TODO remove
             val percent = ceilDiv(100 * testH0Result.sampleCount, Nc) // percent, rounded up
             percentHist.add(percent)
             sampleCounts.add(testH0Result.sampleCount)
@@ -60,7 +58,7 @@ fun runTestRepeated(
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, Nc=Nc, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance, percentHist, statusMap, sampleCounts, margin = margin)
+        ntrials=ntrials, variance=variance, percentHist, statusMap, sampleCounts, margin = margin)
 }
 
 data class RunTestRepeatedResult(
@@ -92,13 +90,8 @@ data class RunTestRepeatedResult(
         return quantile(sampleCount, quantile)
     }
 
-    fun showSampleDist() = buildString {
-        append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
+    fun showSampleDist(contestId: Int) = buildString {
+        append("  Contest $contestId had $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
         append(showDeciles(sampleCount))
     }
 }
-
-data class EstimationResult(
-    val task: SimulateSampleSizeTask,
-    val repeatedResult: RunTestRepeatedResult,
-)

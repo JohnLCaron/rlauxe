@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
-private val debug = false
+private val debug = true
 private val debugErrorRates = false
 private val debugSampleDist = false
 private val debugSizeNudge = true
@@ -23,17 +23,19 @@ private val debugSizeNudge = true
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
-    show: Boolean = false,
+    showTasks: Boolean = false,
     nthreads: Int = 30,
 ): List<RunTestRepeatedResult> {
+
+    // create the estimation tasks
     val tasks = mutableListOf<SimulateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
     }
     // run tasks concurrently
-    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(show).run(tasks, nthreads)
+    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads)
 
-    // cant modify contestUA until out of the concurrent tasks
+    // put results into assertionRounds
     estResults.forEach { estResult ->
         val task = estResult.task
         val result = estResult.repeatedResult
@@ -42,7 +44,7 @@ fun estimateSampleSizes(
         task.assertionRound.estNewSampleSize = estNewSamples
         task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
 
-        if (debug) println(result.showSampleDist())
+        if (debug) println(result.showSampleDist(estResult.task.contest.id))
         if (result.avgSamplesNeeded() < 10) {
             println(" ** avgSamplesNeeded ${result.avgSamplesNeeded()} task=${task.name()}")
         }
@@ -51,12 +53,12 @@ fun estimateSampleSizes(
                 "---debugSampleDist for '${task.name()}' ${auditRound.roundIdx} ntrials=${auditConfig.nsimEst} pctSamplesNeeded=" +
                         "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertionRound.estSampleSize}" +
                         " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
-                        "\n  sampleDist = ${result.showSampleDist()}"
+                        "\n  sampleDist = ${result.showSampleDist(estResult.task.contest.id)}"
             )
         }
     }
 
-    // find largest estSampleSize, estNewSamples over successful assertions in each contest
+    // put results into contestRounds
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         val sampleSizes = estResults.filter { it.task.contest.id == contest.id }
             .map { it.task.assertionRound.estSampleSize }
@@ -65,13 +67,14 @@ fun estimateSampleSizes(
             .map { it.task.assertionRound.estNewSampleSize }
         contest.estNewSamples = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
         // if (!quiet) println(" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}")
-
     }
-    if (show) println()
+
+    // return repeatedResult for debugging and diagnostics
     return estResults.map { it.repeatedResult }
 }
 
-// tries to start from where the last left off. Otherwise, wouldnt you just get the previous estimate?
+// For one contest, generate a task for each assertion thats not been completed
+// starts from where the last audit left off (prevAuditResult.pvalue)
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contest: ContestRound,
@@ -80,7 +83,7 @@ fun makeEstimationTasks(
 ): List<SimulateSampleSizeTask> {
     val tasks = mutableListOf<SimulateSampleSizeTask>()
 
-    contest.assertionRounds.map { assertionRound -> // pollingAssertions vs comparisonAssertions
+    contest.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
@@ -114,6 +117,7 @@ fun makeEstimationTasks(
     return tasks
 }
 
+// For one contest, for one assertion, a concurrent task
 class SimulateSampleSizeTask(
     val roundIdx: Int,
     val auditConfig: AuditConfig,
@@ -125,6 +129,9 @@ class SimulateSampleSizeTask(
 ) : ConcurrentTaskG<EstimationResult> {
 
     override fun name() = "task ${contest.name} ${assertionRound.assertion.assorter.desc()} ${auditConfig.strategy()}}"
+
+    // each time the task is run, the contest and cvr simulation is done once, then ran ntrials=auditConfig.nsimEst times,
+    // each time the cvrs are randomly permuted. The result is a distribution of ntrials sampleSizes.
     override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (auditConfig.auditType) {
             AuditType.CLCA ->
@@ -158,6 +165,11 @@ class SimulateSampleSizeTask(
     }
 }
 
+data class EstimationResult(
+    val task: SimulateSampleSizeTask,
+    val repeatedResult: RunTestRepeatedResult,
+)
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //// Clca, including with IRV
 
@@ -173,14 +185,15 @@ fun simulateSampleSizeClcaAssorter(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 
+    // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
     val cvrs =  if (contest.isIRV()) {
         simulateRaireContest(contest as RaireContest)
     } else {
-        // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
         val contestSim = ContestSimulation(contest as Contest)
         contestSim.makeCvrs()
     }
 
+    // strategies to choose how much error there is
     var fuzzPct = 0.0
     val errorRates = when {
         (clcaConfig.strategy == ClcaStrategyType.previous) -> {
@@ -228,11 +241,11 @@ fun simulateSampleSizeClcaAssorter(
         )
     }
 
-    // we need a permutation to get uniform distribution of errors, since some simulations puts all the errros at the beginning
+    // we need a permutation to get uniform distribution of errors, since some simulations puts all the errors at the beginning
     sampler.reset()
 
-    val result: RunTestRepeatedResult =  simulateSampleSizeBetaMart(
-        roundIdx,
+    // run the simulation ntrials (auditConfig.nsimEst) times
+    val result: RunTestRepeatedResult = simulateSampleSizeBetaMart(
         auditConfig,
         sampler,
         bettingFn,
@@ -243,7 +256,7 @@ fun simulateSampleSizeClcaAssorter(
         startingTestStatistic,
         moreParameters
     )
-
+    // The result is a distribution of ntrials sampleSizes
     assertionRound.estimationResult = EstimationRoundResult(roundIdx,
         clcaConfig.strategy.name,
         fuzzPct = fuzzPct,
@@ -256,7 +269,6 @@ fun simulateSampleSizeClcaAssorter(
 }
 
 fun simulateSampleSizeBetaMart(
-    roundIdx: Int,
     auditConfig: AuditConfig,
     sampleFn: Sampler,
     bettingFn: BettingFn,
@@ -276,6 +288,7 @@ fun simulateSampleSizeBetaMart(
         upperBound = upperBound,
     )
 
+    // run the simulation ntrials (auditConfig.nsimEst) times
     val result: RunTestRepeatedResult = runTestRepeated(
         drawSample = sampleFn,
         ntrials = auditConfig.nsimEst,
@@ -425,72 +438,3 @@ fun simulateSampleSizeOneAuditAssorter(
 
     return result
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-// SHANGRLA computeSampleSize not needed, I think
-
-//4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of sampling.
-//	    The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
-//      The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
-//	      for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
-//	    The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
-//	      𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
-//	b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except phantom cards.
-
-// given the contest.sampleSize, we can calculate the total number of ballots.
-// however, we get this from consistent sampling, which actually picks which ballots to sample.
-/* dont really need
-fun computeSampleSize(
-    rcontests: List<ContestUnderAudit>,
-    cvrs: List<CvrUnderAudit>,
-): Int {
-    // unless style information is being used, the sample size is the same for every contest.
-    val old_sizes: MutableMap<Int, Int> =
-        rcontests.associate { it.id to 0 }.toMutableMap()
-
-    // setting p toodoo whats this doing here? shouldnt it be in consistent sampling ?? MoreStyle section 3 ??
-    for (cvr in cvrs) {
-        if (cvr.sampled) {
-            cvr.p = 1.0
-        } else {
-            cvr.p = 0.0
-            for (con in rcontests) {
-                if (cvr.hasContest(con.id) && !cvr.sampled) {
-                    val p1 = con.estSampleSize.toDouble() / (con.Nc!! - old_sizes[con.id]!!)
-                    cvr.p = max(p1, cvr.p) // toodoo nullability
-                }
-            }
-        }
-    }
-
-    // when old_sizes == 0, total_size should be con.sample_size (61); python has roundoff to get 62
-    // total_size = ceil(np.sum([x.p for x in cvrs if !x.phantom))
-    // toodoo total size is the sum of the p's over the cvrs (!wtf)
-    val summ: Double = cvrs.filter { !it.phantom }.map { it.p }.sum()
-    val total_size = ceil(summ).toInt()
-    return total_size // toodoo what is this? doesnt consistent sampling decide this ??
-}
-
-// STYLISH 4 a,b. I think maybe only works when you use sampleThreshold ??
-fun computeSampleSizePolling(
-    rcontests: List<ContestUnderAudit>,
-    ballots: List<BallotUnderAudit>,
-): Int {
-    ballots.forEach { ballot ->
-        if (ballot.sampled) {
-            ballot.p = 1.0
-        } else {
-            ballot.p = 0.0
-            for (con in rcontests) {
-                if (ballot.hasContest(con.id) && !ballot.sampled) {
-                    val p1 = con.estSampleSize.toDouble() / con.Nc
-                    ballot.p = max(p1, ballot.p)
-                }
-            }
-        }
-    }
-    val summ: Double = ballots.filter { !it.phantom }.map { it.p }.sum()
-    return ceil(summ).toInt()
-}
- */
-

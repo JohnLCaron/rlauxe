@@ -1,13 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.max
 
 data class AuditRound(
     val roundIdx: Int,
     val contestRounds: List<ContestRound>,
 
-    val auditWasDone: Boolean = false,
+    var auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
     var sampleNumbers: List<Long>, // ballot indices to sample for this round
     var sampledBorc: List<BallotOrCvr> = emptyList(), // ballots to sample for this round
@@ -187,5 +188,5 @@ data class AuditRoundResult(
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
     override fun toString() = "round=$roundIdx nmvrs=$nmvrs maxBallotIndexUsed=$maxBallotIndexUsed " +
-            " pvalue=$pvalue samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
+            " pvalue=${df(pvalue)} samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
 }

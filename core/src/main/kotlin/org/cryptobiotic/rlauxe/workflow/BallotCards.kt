@@ -15,6 +15,7 @@ interface BallotCards {
     fun nballotCards(): Int
     fun ballotCards() : Iterable<BallotOrCvr>
     fun setMvrs(mvrs: List<CvrUnderAudit>)
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
     fun takeFirst(nmvrs: Int): List<BallotOrCvr> = ballotCards().take(nmvrs).toList()
 }
 
@@ -31,6 +32,7 @@ interface BallotCardsPolling : BallotCards {
 class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : BallotCardsClca {
     val cvrsUA: List<CvrUnderAudit>
     val mvrsUA: List<CvrUnderAudit>
+    private var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
     init {
         // the order of the cvrs cannot be changed.
@@ -42,13 +44,36 @@ class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : B
     override fun nballotCards() = cvrs.size
     override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {
-        TODO("Not used")
+        mvrsForRound = mvrs
+    }
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        val sampledMvrs = findSamples(sampleNumbers, mvrsUA)
+        require(sampledMvrs.size == sampleNumbers.size)
+
+        // debugging sanity check
+        var lastRN = 0L
+        sampledMvrs.forEach { mvr ->
+            require(mvr.sampleNumber() > lastRN)
+            lastRN = mvr.sampleNumber()
+        }
+
+        setMvrs(sampledMvrs)
     }
 
-    // perhaps we want to set a limit on the sampler size ?
     override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+        val sampleNumbers = mvrsForRound.map { it.sampleNum }
+        val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
+
+        // prove that sampledCvrs correspond to mvrs
+        require(sampledCvrs.size == mvrsForRound.size)
+        val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsForRound.zip(sampledCvrs)
+        cvruaPairs.forEach { (mvr, cvr) ->
+            require(mvr.id == cvr.id)
+            require(mvr.index == cvr.index)
+            require(mvr.sampleNumber() == cvr.sampleNumber())
+        }
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
-        val cvrPairs = mvrsUA.map{ it.cvr }.zip(cvrsUA.map{ it.cvr })
+        val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
         return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = false)
     }
 }
@@ -56,6 +81,7 @@ class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : B
 class BallotCardsPollingStart(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: Long) : BallotCardsPolling {
     val ballotsUA: List<BallotUnderAudit>
     val mvrsUA: List<CvrUnderAudit>
+    var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
     init {
         val prng = Prng(seed)
@@ -67,12 +93,25 @@ class BallotCardsPollingStart(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: 
     override fun nballotCards() = ballots.size
     override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {
-        TODO("Not used")
+        mvrsForRound = mvrs
+    }
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        val sampledMvrs = findSamples(sampleNumbers, mvrsUA)
+        require(sampledMvrs.size == sampleNumbers.size)
+
+        // debugging sanity check
+        var lastRN = 0L
+        sampledMvrs.forEach { mvr ->
+            require(mvr.sampleNumber() > lastRN)
+            lastRN = mvr.sampleNumber()
+        }
+
+        setMvrs(sampledMvrs)
     }
 
     override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {
         // why not List<CvrUnderAudit> ??
-        return PollWithoutReplacement(contestId, mvrsUA.map{ it.cvr }, assorter, allowReset=allowReset)
+        return PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr } , assorter, allowReset=allowReset)
     }
 }
 

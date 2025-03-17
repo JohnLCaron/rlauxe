@@ -83,7 +83,6 @@ class PlotDistributions {
         return estimateSampleSizes(
             auditConfig,
             auditRound,
-            // workflow.cvrs,
         )
     }
 

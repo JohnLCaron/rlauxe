@@ -205,7 +205,7 @@ open class ContestUnderAudit(
     open fun makePollingAssertions(): ContestUnderAudit {
         require(!isComparison) { "makePollingAssertions() can be called only on polling contest"}
         // val useVotes = if (votes != null) votes else (contest as Contest).votes
-        val useVotes = (contest as Contest).votes
+        val useVotes = (contest as Contest).votes // TODO assumes Contest ??
 
         this.pollingAssertions = when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
@@ -240,11 +240,11 @@ open class ContestUnderAudit(
     }
 
     // cvrs must be complete in order to get the margin right.
-    // open fun makeComparisonAssertions(cvrs : Iterable<Cvr>, votes: Map<Int, Int>? = null): ContestUnderAudit {
+    // TODO: only make one pass through the cvrs, and calcAssorterMargin for all assertions.
     open fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         // val useVotes = if (votes != null) votes else (contest as Contest).votes
-        val useVotes = (contest as Contest).votes
+        val useVotes = (contest as Contest).votes // // TODO assumes Contest ??
         val assertions = when (contest.info.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(useVotes)

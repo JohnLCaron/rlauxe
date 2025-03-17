@@ -21,7 +21,7 @@ data class RaireContest(
     override val ncandidates = info.candidateIds.size
     override val id = info.id
     override val choiceFunction = info.choiceFunction
-    override val undervotes: Int = -1  // TODO get this nballots not voted on?
+    override val undervotes: Int = -1  // TODO get this; nballots not voted on?
 
     init {
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }

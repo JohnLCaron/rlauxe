@@ -38,8 +38,8 @@ class PersistentWorkflow(
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun addMvrs(mvrs: List<CvrUnderAudit>) {
-        ballotCards.setMvrs(mvrs)
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+        ballotCards.setMvrsBySampleNumber(sampleNumbers)
     }
 
     override fun ballotCards() = ballotCards

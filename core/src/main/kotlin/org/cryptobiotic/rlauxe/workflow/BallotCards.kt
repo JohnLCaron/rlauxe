@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Prng
 
-private val debugWantSampleSize = true
+private val debugWantSampleSize = false
 
 interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean

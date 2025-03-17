@@ -1,6 +1,6 @@
 # OneAudit Notes
 
-last changed 02/04/2025
+last changed 03/16/2025
 
 ### Why you cant use BettingMart
 
@@ -243,12 +243,28 @@ Unclear about using nostyle with ONEAUDIT.
 
 ## Measured Sample Sizes
 
-Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 0%, 50% and 100% of ballots having CVRs),
+Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 5%, 50% and 95% of ballots having CVRs),
 when there are no errors in the CVRs:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrors Linear">![AuditsNoErrorsLinear](plots/workflows/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.html" rel="AuditsNoErrors Log">![AuditsNoErrorsLog](plots/workflows/AuditsNoErrors/AuditsNoErrorsLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrorsLinear">![AuditsNoErrorsLinear](plots/audits/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLogLinear.html" rel="AuditsNoErrorsLogLinear">![AuditsNoErrorsLogLinear](plots/audits/AuditsNoErrors/AuditsNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLogLog.html" rel="AuditsNoErrorsLogLog">![AuditsNoErrorsLogLog](plots/audits/AuditsNoErrors/AuditsNoErrorsLogLog.png)</a>
 
 * OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
 * OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
 * Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
+
+In order to deal with the possibility of errors, the above plots use the "default" ShrinkTrunc strategy, which is a conservative
+bet about the true margin of the assorter values. To match better the values that Philip uses in his papers, we also experiment
+with the "max99" strategy, of just always betting 99% of the maximum allowed value. This works well when there are no errors, as
+the following plots show.
+
+In these plots we only use OneAudit with 95% of ballots having CVRs, and compare the "max99" and "default" OneAudit strategies 
+as well as polling and clca audits.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.html" rel="OneAuditNoErrorsLinear Linear">![OneAuditNoErrorsLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear Log">![OneAuditNoErrorsLogLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.html" rel="OneAuditNoErrorsLogLog Log">![OneAuditNoErrorsLogLog](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.png)</a>
+
+TBD: show how much error can be tolerated by the max99 strategy.
+

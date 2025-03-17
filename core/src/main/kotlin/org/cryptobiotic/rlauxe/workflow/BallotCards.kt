@@ -60,7 +60,6 @@ class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : B
         setMvrs(sampledMvrs)
     }
 
-    // perhaps we want to set a limit on the sampler size ?
     override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA)

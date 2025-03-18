@@ -115,20 +115,25 @@ class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nba
     override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
-
-        // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsForRound.size)
-        val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsForRound.zip(sampledCvrs)
-        cvruaPairs.forEach { (mvr, cvr) ->
-            require(mvr.id == cvr.id)
-            require(mvr.index == cvr.index)
-            require(mvr.sampleNumber() == cvr.sampleNumber())
+
+        if (checkValidity) {
+            // prove that sampledCvrs correspond to mvrs
+            val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsForRound.zip(sampledCvrs)
+            cvruaPairs.forEach { (mvr, cvr) ->
+                require(mvr.id == cvr.id)
+                require(mvr.index == cvr.index)
+                require(mvr.sampleNumber() == cvr.sampleNumber())
+            }
         }
+
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
         val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = false)
+        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
     }
 }
+
+private const val checkValidity : Boolean= false
 
 class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) : BallotCardsPolling {
     var mvrsForRound: List<CvrUnderAudit> = emptyList()

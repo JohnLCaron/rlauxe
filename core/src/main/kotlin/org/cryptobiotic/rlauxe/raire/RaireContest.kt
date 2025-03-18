@@ -238,9 +238,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
         append(" votes=${rassertion.votes}")
     }
 
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (usePhantoms && mvr.phantom) return 0.5
-        val rcvr = RaireCvr(mvr)
+    override fun assort(rcvr: Cvr, usePhantoms: Boolean): Double {
+        if (usePhantoms && rcvr.phantom) return 0.5
         return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
         else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")
@@ -252,11 +251,11 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     //                    1 if v.get_vote_for(contest_id, winr) == 1 else 0
     //                )
     // aka NEB
-    fun assortWinnerOnly(rcvr: RaireCvr): Double {
+    fun assortWinnerOnly(rcvr: Cvr): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
-        val awinner = if (rcvr.get_vote_for(contestId, rassertion.winnerId) == 1) 1 else 0
+        val awinner = if (raire_get_vote_for(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = rcvr.rcv_lfunc_wo( contestId, rassertion.winnerId, rassertion.loserId)
+        val aloser = raire_rcv_lfunc_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
@@ -265,11 +264,11 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     //                            - v.rcv_votefor_cand(contest.id, loser, remn)
     //                            + 1 ) / 2
     // aka NEN
-    fun assortIrvElimination(rcvr: RaireCvr): Double {
+    fun assortIrvElimination(rcvr: Cvr): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
-        val awinner = rcvr.rcv_votefor_cand(contestId, rassertion.winnerId, remaining)
-        val aloser = rcvr.rcv_votefor_cand(contestId, rassertion.loserId, remaining)
+        val awinner = raire_rcv_votefor_cand(rcvr, contestId, rassertion.winnerId, remaining)
+        val aloser = raire_rcv_votefor_cand(rcvr, contestId, rassertion.loserId, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 }

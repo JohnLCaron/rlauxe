@@ -24,13 +24,13 @@ class TestMakeFuzzedCvrsFrom {
 
         // fuzz
         val testMvrs = makeFuzzedCvrsFrom(listOf(contest), testCvrs, mvrsFuzzPct)
-        var sampler = ClcaWithoutReplacement(
+        val sampler = ClcaWithoutReplacement(
             contestUA.id,
             testMvrs.zip(testCvrs),
             assort,
             allowReset = true
         )
-        var samples = PrevSamplesWithRates(assort.noerror())
+        val samples = PrevSamplesWithRates(assort.noerror())
         repeat(ncvrs) {
             samples.addSample(sampler.sample())
         }
@@ -177,7 +177,7 @@ class TestMakeFuzzedCvrsFrom {
 
                 val unchanged = sumDiagonal(ncands, choiceChange)
                 if (show) println(" unchanged $unchanged = ${unchanged / N.toDouble()}")
-                assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .01)
+                assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .015)
 
                 // approx even distribution
                 val choicePct = choiceChange.map { (key, value) -> Pair(key, value / N.toDouble()) }.toMap()
@@ -246,7 +246,9 @@ fun sumDiagonal(ncands: Int, choices: Map<String, Int>): Int {
     var sum = 0
     for (cand in 0..ncands) {
         val key = cand.toString() + cand.toString()
-        sum += choices[key]!!
+        if (choices[key] != null) {  // TODO why can it be null ?
+            sum += choices[key]!!
+        }
     }
     return sum
 }

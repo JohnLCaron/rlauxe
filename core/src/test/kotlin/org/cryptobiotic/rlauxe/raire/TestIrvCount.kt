@@ -57,8 +57,8 @@ class TestIrvCount {
         println("\nRound $round")
 
         val vc = VoteConsolidator()
-        testCvrs.forEach {
-            val votes = it.cvr.votes[testContest.info.id]
+        testCvrs.forEach { cvr ->
+            val votes = cvr.votes[testContest.info.id]
             if (votes != null) {
                 vc.addVote(votes)
             }

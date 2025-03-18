@@ -36,9 +36,9 @@ data class RaireContestTestData(
     val Nc = this.ncards
 
     // this whole thing depends on RaireCvr separate from Cvr ??
-    fun makeCvrs(): List<RaireCvr> {
+    fun makeCvrs(): List<Cvr> {
         var count = 0
-        val cvrs = mutableListOf<RaireCvr>()
+        val cvrs = mutableListOf<Cvr>()
 
         val excess = excessVotes ?: (this.ncards * minMargin).toInt()
         repeat(excess) {
@@ -50,14 +50,14 @@ data class RaireContestTestData(
         repeat(this.phantomCount) {
             val pcvr = Cvr("pcvr$count", mapOf(contestId to IntArray(0)), phantom=true)
             count++
-            cvrs.add(RaireCvr(pcvr))
+            cvrs.add(pcvr)
         }
         // println("makeCvrs: excess=$excess phantoms=${this.phantomCount}")
         cvrs.shuffle()
         return cvrs
     }
 
-    private fun makeCvrWithLeading0(cvrIdx: Int): RaireCvr {
+    private fun makeCvrWithLeading0(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
         val nprefs = 1 + Random.nextInt(ncands-1)
         val prefs = mutableListOf<Int>()
@@ -66,10 +66,10 @@ data class RaireContestTestData(
             val voteFor = Random.nextInt(ncands)
             if (!prefs.contains(voteFor)) prefs.add(voteFor)
         }
-        return RaireCvr(Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray())))
+        return Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray()))
     }
 
-    private fun makeCvr(cvrIdx: Int): RaireCvr {
+    private fun makeCvr(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
         val nprefs = Random.nextInt(ncands)
         val prefs = mutableListOf<Int>()
@@ -77,20 +77,20 @@ data class RaireContestTestData(
             val voteFor = Random.nextInt(ncands)
             if (!prefs.contains(voteFor)) prefs.add(voteFor)
         }
-        return RaireCvr(Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray())))
+        return Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray()))
     }
 
-    fun adjustRanks(testCvrs: List<RaireCvr>, margin: Int, winner: Int, loser: Int) {
+    fun adjustRanks(testCvrs: List<Cvr>, margin: Int, winner: Int, loser: Int) {
         var have = margin
         val want = this.minMargin * this.ncards
         var cvrIdx = 0
         // println("have=$have, want = $want")
         while (have < want && cvrIdx < testCvrs.size) {
-            val rcvr = testCvrs[cvrIdx]
-            val votes: IntArray = rcvr.cvr.votes[contestId]!!
+            val cvr = testCvrs[cvrIdx]
+            val votes: IntArray = cvr.votes[contestId]!!
             if (votes.contains(winner) && votes.contains(loser)) {
-                val rank_winner = rcvr.get_vote_for(contestId, winner)
-                val rank_loser = rcvr.get_vote_for(contestId, loser)
+                val rank_winner = raire_get_vote_for(cvr, contestId, winner)
+                val rank_loser = raire_get_vote_for(cvr, contestId, loser)
                 if (rank_winner > rank_loser) {
                     // switch winner and loser TODO Mutable votes!!
                     votes[rank_winner-1] = loser
@@ -169,8 +169,8 @@ fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
     }
 
     val vc = VoteConsolidator()
-    testCvrs.forEach {
-        val votes = it.cvr.votes[testContest.info.id]
+    testCvrs.forEach {cvr ->
+        val votes = cvr.votes[testContest.info.id]
         if (votes != null) {
             vc.addVote(votes)
         }
@@ -208,15 +208,15 @@ fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
         raireAssertions,
     )
 
-    return Pair(rcontestUA, testCvrs.map { it.cvr })
+    return Pair(rcontestUA, testCvrs)
 }
 
 // TODO using testCvrs.size as Nc I think
 // return Triple(winner, solution.solution.Ok, minAssertion)
-fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<RaireCvr>, quiet: Boolean): Triple<Int, RaireResult, AssertionAndDifficulty>? {
+fun findMinAssertion(testContest: RaireContestTestData, testCvrs: List<Cvr>, quiet: Boolean): Triple<Int, RaireResult, AssertionAndDifficulty>? {
     val vc = VoteConsolidator()
-    testCvrs.forEach {
-        val votes = it.cvr.votes[testContest.info.id]
+    testCvrs.forEach { cvr ->
+        val votes = cvr.votes[testContest.info.id]
         if (votes != null) {
             vc.addVote(votes)
         }

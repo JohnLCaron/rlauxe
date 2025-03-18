@@ -11,8 +11,8 @@ import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import org.cryptobiotic.rlauxe.cli.runChooseSamples
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -220,7 +220,7 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
         var usedOne = true
         while (usedOne) {
             usedOne = false
-            val cvb2 = CvrBuilder2("redacted${redacted.ballotType}$idx", false)
+            val cvb2 = CvrBuilder2("redacted$idx", false)
             contestVotes.entries.forEach { (contestId, candidateCount) ->
                 val remainingCandidates = candidateCount.filter{ (_, value) -> value > 0 }
                 if (remainingCandidates.isEmpty()) {
@@ -344,14 +344,14 @@ fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo
 
     val ballotCards = BallotCardsClcaStart(allCvrs, allCvrs, auditConfig.seed)
 
-    writeCvrsJsonFile(ballotCards.cvrsUA, publisher.cvrsFile())
-    println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
+    writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile())
+    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
 
     // replicated in RunRlaStartFuzz
-    val mvrFile = "$auditDir/private/testMvrs.json"
+    val mvrFile = "$auditDir/private/testMvrs.csv"
     publisher.validateOutputDirOfFile(mvrFile)
-    writeCvrsJsonFile(ballotCards.mvrsUA, mvrFile)
-    println("   writeMvrsJsonFile ${mvrFile}")
+    writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
+    println("   writeCvrsCsvFile ${mvrFile}")
 
     val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)
     writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())

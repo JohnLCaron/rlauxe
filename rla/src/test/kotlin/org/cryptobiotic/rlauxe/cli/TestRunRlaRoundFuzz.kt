@@ -4,13 +4,13 @@ import kotlin.test.Test
 
 class TestRunRlaRoundFuzz {
 
-    // @Test
+    @Test
     fun testRlaRoundClca() {
-        val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
+        val topdir = "/home/stormy/temp/persist/runBoulder24"
         RunRoundFuzz.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.json",
+                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }
@@ -21,7 +21,7 @@ class TestRunRlaRoundFuzz {
         RunRoundFuzz.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.json",
+                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }
@@ -32,7 +32,7 @@ class TestRunRlaRoundFuzz {
         RunRoundFuzz.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.json",
+                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }

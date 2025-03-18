@@ -11,11 +11,11 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.workflow.*
-import java.nio.file.Path
 import kotlin.math.min
 
 /** Create the starting election state, with fuzzed test data. */
@@ -138,12 +138,12 @@ object RunRlaStartFuzz {
         val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
 
         //// could be inside of BallotCardsClca
-        writeCvrsJsonFile(ballotCards.cvrsUA, publisher.cvrsFile()) // sorted in order of sample number
-        println("   writeCvrsJsonFile ${publisher.cvrsFile()}")
+        writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile()) // TODO wrap in Result ??
+        println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
 
         // save the sorted testMvrs
         publisher.validateOutputDirOfFile(mvrFile)
-        writeCvrsJsonFile(ballotCards.mvrsUA, mvrFile)
+        writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
         val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)
@@ -205,7 +205,7 @@ object RunRlaStartFuzz {
             CvrUnderAudit(mvr, ballotUA.index(), ballotUA.sampleNumber())
         }
         publisher.validateOutputDirOfFile(mvrFile)
-        writeCvrsJsonFile(mvruas, mvrFile)
+        writeCvrsCsvFile(mvruas, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
         // PollingWorkflow creates the assertions

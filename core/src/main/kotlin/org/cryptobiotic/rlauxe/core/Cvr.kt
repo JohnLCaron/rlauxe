@@ -9,6 +9,10 @@ data class Cvr(
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
 ) {
+    init {
+        require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas
+    }
+
     fun hasContest(contestId: Int): Boolean = votes[contestId] != null
 
     constructor(oldCvr: Cvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes, oldCvr.phantom)

@@ -30,7 +30,8 @@ class Publisher(val topdir: String) {
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
     fun contestsFile() = "$topdir/contests.json"
-    fun cvrsFile() = "$topdir/cvrs.json"
+    // fun cvrsFile() = "$topdir/cvrs.json"
+    fun cvrsCsvFile() = "$topdir/cvrs.csv"
     fun ballotManifestFile() = "$topdir/ballotManifest.json"
 
     fun sampleNumbersFile(round: Int): String {
@@ -42,7 +43,7 @@ class Publisher(val topdir: String) {
     fun sampleMvrsFile(round: Int): String {
         val dir = "$topdir/round$round"
         validateOutputDir(Path.of(dir), errs)
-        return "$dir/sampleMvrs.json"
+        return "$dir/sampleMvrs.csv"
     }
 
     fun auditRoundFile(round: Int): String {

@@ -180,7 +180,6 @@ data class AuditRoundResult(
     val nmvrs: Int,               // number of mvrs available for this contest for this round
     val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
     val pvalue: Double,       // last pvalue when testH0 terminates
-    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
     val measuredMean: Double, // measured population mean
@@ -188,5 +187,5 @@ data class AuditRoundResult(
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
     override fun toString() = "round=$roundIdx nmvrs=$nmvrs maxBallotIndexUsed=$maxBallotIndexUsed " +
-            " pvalue=${df(pvalue)} samplesNeeded=$samplesNeeded samplesUsed=$samplesUsed status=$status"
+            " pvalue=${df(pvalue)} samplesUsed=$samplesUsed status=$status"
 }

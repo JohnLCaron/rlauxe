@@ -164,5 +164,4 @@ the percent of false positives stays below the risk limit of 5%:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
 
 * The false positives stay below the risk limit of 5%.
-* The variations by strategy are probably statistical noise.
 

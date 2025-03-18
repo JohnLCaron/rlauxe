@@ -30,7 +30,7 @@ class TestCvrFlips {
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)
         var calcMargin = assorter.calcAssorterMargin(0, mvrs)
         println("flip p2o=$p2o: calcMargin = ${df(calcMargin)} diff = ${df(margin-calcMargin)}")
-        assertEquals(margin-calcMargin, 2 * p2o, doublePrecision)
+        assertEquals(2 * p2o, margin-calcMargin, doublePrecision)
 
         p2o = .02
         mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)
@@ -84,7 +84,7 @@ class TestCvrFlips {
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)
         var calcMargin = assorter.calcAssorterMargin(0, mvrs)
         println("flip p2o=$p2o: calcMargin = ${df(calcMargin)} diff = ${df(margin-calcMargin)}")
-        assertEquals(margin-calcMargin, 2 * p2o, doublePrecision)
+        assertEquals(2 * p2o, margin-calcMargin, doublePrecision)
 
         p2o = .02
         mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)

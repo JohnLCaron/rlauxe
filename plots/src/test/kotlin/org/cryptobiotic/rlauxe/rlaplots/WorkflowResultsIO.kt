@@ -8,14 +8,20 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
-// data class WorkflowResult(val N: Int,
-//                          val margin: Double,
-//                          val status: TestH0Status,
-//                          val nrounds: Double,
-//                          val samplesUsed: Double,
-//                          val samplesNeeded: Double,
-//                          val parameters: Map<String, Double>,
-//                          val failPct: Double = 0.0, // from avgWorkflowResult()
+// data class WorkflowResult(
+//    val name: String,
+//    val Nc: Int,
+//    val margin: Double,
+//    val status: TestH0Status,
+//    val nrounds: Double,
+//    val samplesUsed: Double,  // weighted
+//    val nmvrs: Double, // weighted
+//    val parameters: Map<String, Any>,
+//
+//    // from avgWorkflowResult()
+//    val failPct: Double = 100.0,
+//    val usedStddev: Double = 0.0, // success only
+//    val mvrMargin: Double = 0.0,
 //)
 
 // simple serialization to csv files
@@ -23,7 +29,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun writeResults(wrs: List<WorkflowResult>) {
         val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-        writer.write("parameters, N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, failPct, neededStddev, mvrMargin\n")
+        writer.write("parameters, N, margin, status, nrounds, samplesUsed, notUsed, nmvrs, failPct, usedStddev, mvrMargin\n")
         // "auditType=3.0 nruns=10.0 fuzzPct=0.02 ", 50000, 0.04002, StatRejectNull, 2.0, 293.5, 261.9, 0.0
         wrs.forEach {
             writer.write(toCSV(it))
@@ -33,7 +39,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun toCSV(wr: WorkflowResult) = buildString {
         append("${writeParameters(wr.parameters)}, ${wr.Nc}, ${wr.margin}, ${wr.status.name}, ${wr.nrounds}, ")
-        append("${wr.samplesUsed}, ${wr.samplesNeeded}, ${wr.nmvrs}, ${wr.failPct}, ${wr.neededStddev}, ${wr.mvrMargin}")
+        append("${wr.samplesUsed}, 0.0, ${wr.nmvrs}, ${wr.failPct}, ${wr.usedStddev}, ${wr.mvrMargin}")
         appendLine()
     }
 
@@ -76,7 +82,7 @@ class WorkflowResultsIO(val filename: String) {
         val mvrMargin = if (tokens.size > 10) ttokens[idx++].toDouble() else 0.0
 
         val status = enumValueOf(statusS, TestH0Status.entries) ?: TestH0Status.InProgress
-        return WorkflowResult("fromCSV", N, margin, status, nrounds, samplesUsed, samplesNeeded, nmvrs, readParameters(parameters), failPct, stddev, mvrMargin)
+        return WorkflowResult("fromCSV", N, margin, status, nrounds, samplesUsed, nmvrs, readParameters(parameters), failPct, stddev, mvrMargin)
     }
 
     fun readParameters(s: String): Map<String, String> {

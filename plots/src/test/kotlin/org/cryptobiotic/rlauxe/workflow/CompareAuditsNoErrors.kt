@@ -147,9 +147,9 @@ class CompareAuditsNoErrors {
             "legend",
             xfld = { it.margin },
             yfld = { cat: String, wr: WorkflowResult -> when (cat) {
-                "needed" -> wr.samplesNeeded
-                "plusStdev" -> wr.samplesNeeded + wr.neededStddev
-                "minusStdev" -> wr.samplesNeeded - wr.neededStddev
+                "needed" -> wr.samplesUsed
+                "plusStdev" -> wr.samplesUsed + wr.usedStddev
+                "minusStdev" -> wr.samplesUsed - wr.usedStddev
                 else -> 0.0
             }},
             catflds = listOf("needed", "plusStdev", "minusStdev"),
@@ -165,9 +165,9 @@ class CompareAuditsNoErrors {
             "legend",
             xfld = { it.margin },
             yfld = { cat: String, wr: WorkflowResult -> when (cat) {
-                "needed" -> log10(wr.samplesNeeded)
-                "plusStdev" -> log10(wr.samplesNeeded + wr.neededStddev)
-                "minusStdev" -> log10(wr.samplesNeeded - wr.neededStddev)
+                "needed" -> log10(wr.samplesUsed)
+                "plusStdev" -> log10(wr.samplesUsed + wr.usedStddev)
+                "minusStdev" -> log10(wr.samplesUsed - wr.usedStddev)
                 else -> 0.0
             }},
             catflds = listOf("needed", "plusStdev", "minusStdev"),
@@ -245,7 +245,7 @@ fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, ysc
         writeFile = "$dirName/${name}${yscale.name}",
         wrs = data,
         xname = "true margin", xfld = { it.margin },
-        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = "auditType", catfld = { category(it) },
         scaleType = yscale
     )

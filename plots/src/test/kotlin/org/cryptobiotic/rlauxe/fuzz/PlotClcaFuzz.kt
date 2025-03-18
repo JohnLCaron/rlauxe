@@ -57,7 +57,7 @@ fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scal
         writeFile = "$dirName/${name}${scaleType.name}",
         wrs = data,
         xname = "margin", xfld = { it.margin },
-        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = "mvrFuzzPct", catfld = { categoryFuzzPct(it) },
         scaleType = scaleType
     )

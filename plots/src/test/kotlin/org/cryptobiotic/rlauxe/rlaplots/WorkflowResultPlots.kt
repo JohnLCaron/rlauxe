@@ -200,7 +200,7 @@ fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, sca
         writeFile = "$dirName/${name}${scaleType.name}",
         wrs = data,
         xname = "fuzzPct", xfld = { it.Dparam("fuzzPct") },
-        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = catName, catfld = catfld,
         scaleType = scaleType
     )
@@ -215,7 +215,7 @@ fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scal
         writeFile = "$dirName/${name}${scaleType.name}",
         wrs = data,
         xname = "margin", xfld = { it.margin },
-        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = catName, catfld = { category(it) },
         scaleType = scaleType
     )

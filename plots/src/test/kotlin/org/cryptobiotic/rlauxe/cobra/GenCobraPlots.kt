@@ -64,7 +64,7 @@ class GenCobraPlots {
             writeFile = "$dirName/${writeto}",
             wrs = data,
             xname = "true margin", xfld = { it.mvrMargin },
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
             catName = "true p2 rate", catfld = { category(it) },
             scaleType = scaleType,
             // colorChoices = { colorChoices(it) },

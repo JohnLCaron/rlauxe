@@ -123,7 +123,7 @@ class PlotDistributions {
             val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false)
 
             AuditClcaAssertion().run(auditConfig, contestUA.contest, assertionRound, sampler, 1)
-            results.add(assertionRound.auditResult!!.samplesNeeded)
+            results.add(assertionRound.auditResult!!.samplesUsed)
         }
 
         // just want the sample estimation stuff

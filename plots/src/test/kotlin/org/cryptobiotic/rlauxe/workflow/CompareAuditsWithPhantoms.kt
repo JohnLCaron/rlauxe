@@ -72,7 +72,7 @@ class CompareAuditsWithPhantoms {
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
             xname = "phantomPct", xfld = { it.Dparam("phantom") },
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
             catName = catName, catfld = catfld,
             scaleType = scaleType
         )

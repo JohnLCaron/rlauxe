@@ -27,7 +27,7 @@ class OneAuditNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")

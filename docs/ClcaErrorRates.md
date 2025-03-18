@@ -1,5 +1,5 @@
 # CLCA error rates
-last updated Feb 20, 2025
+last updated Mar 18, 2025
 
 ## Estimating Error
 
@@ -132,37 +132,37 @@ Notes:
 * The noerror strategy is significantly worse in the presence of errors.
 * If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes, especially for low values of fuzzPct.
 
-### CLCA sample sizes by strategy vs true margin with phantoms 
+### Attack with phantoms 
 
-We will assume that the fuzz rate is not worse than 1%, and investigate different strategies in the presence of phantoms.
-In these workflows, we do everything in one round, and skip sample estimation. We create simulations at different margins
-and percentage of phantoms, and fuzz the MVRs at 1%. We measure the "true margin" of the MVRs, including phantoms, by applying
-the CVRC assorter, and use that at the x axis here.
+Here we investigate what happens when the percentage of phantoms is high enough to flip the election, but the reported margin
+does not reflect that. In other words an "attack" (or error) when the phantoms are not correctly reported. 
+
+We create simulations at different margins and percentage of phantoms, and fuzz the MVRs at 1%. 
+We measure the "true margin" of the MVRs, including phantoms, by applying the CVR assorter, and use that at the x axis.
 
 We also add the _phantoms_ strategy which uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of 
 the AdaptiveComparison betting function.
 
-Here are plots of sample size as a function of true margin, for phantomPct of 0, 1, and 2 percent, for various strategies:
+Here are plots of sample size as a function of true margin, for phantomPct of 0, 2, and 5 percent:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy0LogLinear">![clcaOneRoundByStrategy0LogLinear](plots/oneround/marginByStrategy0/clcaOneRoundByStrategyLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy1LogLinear">![clcaOneRoundByStrategy1LogLinear](plots/oneround/marginByStrategy1/clcaOneRoundByStrategyLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLinear.html" rel="clcaOneRoundByStrategy2LogLinear">![clcaOneRoundByStrategy2LogLinear](plots/oneround/marginByStrategy2/clcaOneRoundByStrategyLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.html" rel="marginWithPhantoms0LogLinear">![marginWithPhantoms0LogLinear](plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.html" rel="marginWithPhantoms2LogLinear">![marginWithPhantoms2LogLinear](plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.html" rel="marginWithPhantoms5LogLinear">![marginWithPhantoms5LogLinear](plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.png)</a>
 
-* The oracle strategy can't be used in production. 
-* The fuzzPct strategy does quite well, and is the best if one knows the error rates.
-* The phantom strategy does better than noerror at low margins as phantomPct increases.
+* The true margin is approximately the reported margin minus the phantom percentage.
+* Once the true margin falls below 0, the audit goes to a full count, as it should.
+* The fuzzPct strategy does a bit better when the phantom rate is not too high.
 
-### CLCA false positives by strategy
+### Attack with wrong reported winner
 
-These plots are a sanity check on false positive rates for the various strategies. We create simulations at the given margins,
-no fuzzing, no phantoms. Then in the MVRs we flip just enough votes to make the true margin < 50%. We want to be sure that
+Here we investigate an attack when the reported winner is different than the actual winner. 
+
+We create simulations at the given reported margins, with no fuzzing or phantoms. 
+Then in the MVRs we flip just enough votes to make the true margin < 50%. We want to be sure that
 the percent of false positives stays below the risk limit of 5%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneround/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/oneround/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
 
-* The excess over 5% of noerrors is probably a statistical fluke.
-* The oracle strategy never gets a false positive. I would have guessed that it might get more than it should, since  
-  it violates the conditions of the betting martingale. I guess it essentially "looks ahead" to see the margin > 50%
-  and bets in a way that always fails.
-* Generally things act as expected.
+* The false positives stay below the risk limit of 5%.
+* The variations by strategy are probably statistical noise.
 

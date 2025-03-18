@@ -80,7 +80,7 @@ class BallotCardsClcaStart(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : B
         return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
     }
 
-    // fust use the entire cvrs/mvrs
+    // just use the entire cvrs/mvrs
     fun makeOneRoundSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val cvrPairs = mvrsUA.map{ it.cvr }.zip(cvrsUA.map{ it.cvr })
         return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
@@ -119,8 +119,10 @@ class BallotCardsPollingStart(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: 
     }
 
     override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        // why not List<CvrUnderAudit> ??
-        return PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr } , assorter, allowReset=allowReset)
+        return if (mvrsForRound.isEmpty())
+            PollWithoutReplacement(contestId, mvrsUA.map { it.cvr } , assorter, allowReset=allowReset)
+        else
+            PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
     }
 }
 

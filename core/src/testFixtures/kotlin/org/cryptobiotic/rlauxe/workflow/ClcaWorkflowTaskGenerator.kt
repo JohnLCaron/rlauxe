@@ -74,11 +74,25 @@ class ClcaSingleRoundAuditTaskGenerator(
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        val testMvrs =  if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
+        val testMvrs =  if (p2flips != null || p1flips != null) {
+            makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
+        } else {
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        }
 
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
             BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+
+        // make sure margins are below 0
+        if (p2flips != null || p1flips != null) {
+            val contestUA = clcaWorkflow.contestsUA().first() //  theres only one
+            val minAssertion = contestUA.minClcaAssertion()!!
+            val assorter = minAssertion.assorter
+            val mvrMargin = assorter.calcAssorterMargin(contestUA.id, testMvrs, usePhantoms = true)
+            if (mvrMargin >= 0.0) {
+                println("ERROR: mvrMargin = $mvrMargin >= 0")
+            }
+        }
 
         return ClcaSingleRoundAuditTask(
             name(),

@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenCobraPlots {
-
     val dirName = "/home/stormy/temp/corba"
     val name = "corba"
 
@@ -43,14 +42,6 @@ class GenCobraPlots {
         writer.writeResults(results)
 
         regenPlots()
-
-        /*
-        val plotter = PlotCobraDetails(dirname, filename)
-        plotter.plotSuccessVsTheta()
-        plotter.plotSuccess20VsTheta()
-        plotter.plotSuccess20VsThetaNarrow()
-        plotter.plotFailuresVsTheta() */
-
     }
 
     @Test
@@ -97,48 +88,3 @@ class GenCobraPlots {
         )
     }
 }
-
-/*
-From PLotCobraDetails.kt:
-
-fun plotSuccess20VsThetaNarrow() {
-        val thetaFilter: ClosedFloatingPointRange<Double> = 0.5.. .52
-        val srts: List<SRT> = readAndFilter(pathname, thetaFilter)
-
-        val ntrials = srts[0].ntrials
-        val Nc = srts[0].Nc
-        val p2prior = srts[0].p2prior
-        val d2 = srts[0].d2
-
-        srtPlot(
-            "AdaptiveComparison: % success at 20% cutoff",
-            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
-            srts,
-            "$dir/${filename}.plotSuccess20VsThetaNarrow",
-            "theta", "pctSuccess", "p2oracle",
-            xfld = { it.theta },
-            yfld = { extractDecile(it, 20) },
-            catfld = { dd(it.p2oracle) },
-        )
-    }
-
-    fun plotFailuresVsTheta() {
-        val thetaFilter: ClosedFloatingPointRange<Double> = 0.0.. .5
-        val srts: List<SRT> = readAndFilter(pathname, thetaFilter)
-        val ntrials = srts[0].ntrials
-        val Nc = srts[0].Nc
-        val p2prior = srts[0].p2prior
-        val d2 = srts[0].d2
-
-        srtPlot(
-            "AdaptiveComparison: % false positives at 20% cutoff",
-            "for Nc=$Nc ntrials=$ntrials p2prior=$p2prior d2=$d2",
-            srts,
-            "$dir/${filename}.plotFailuresVsTheta",
-            "theta", "falsePositives%", "p2oracle",
-            xfld = { it.theta },
-            yfld = { extractDecile(it, 20) },
-            catfld = { dd(it.p2oracle) },
-        )
-    }
- */

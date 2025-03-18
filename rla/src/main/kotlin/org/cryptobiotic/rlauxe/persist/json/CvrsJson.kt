@@ -94,6 +94,7 @@ fun readCvrsJsonFile(filename: String): Result<List<CvrUnderAudit>, ErrorMessage
             if (errs.hasErrors()) Err(errs) else Ok(cvrs.import())
         }
     } catch (t: Throwable) {
+        t.printStackTrace()
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }
 }

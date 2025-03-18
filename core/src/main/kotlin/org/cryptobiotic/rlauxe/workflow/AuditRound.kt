@@ -130,6 +130,8 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var auditResult: AuditRoundResult? = null
     var status = TestH0Status.InProgress
     var round = 0           // round when set to proved or disproved
+
+    // TODO why override defaults?
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -4,8 +4,11 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.workflow.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 class AuditRecord(
     val location: String,
@@ -24,8 +27,7 @@ class AuditRecord(
 
     private val cvrsUA: List<CvrUnderAudit> by lazy {
         val publisher = Publisher(location)
-        val cvrResult = readCvrsJsonFile(publisher.cvrsFile())
-        if (cvrResult is Ok) cvrResult.unwrap() else emptyList()
+        readCvrsCsvFile(publisher.cvrsCsvFile()) // TODO wrap in Result ??
     }
 
     private val ballotsUA: List<BallotUnderAudit> by lazy {
@@ -49,10 +51,7 @@ class AuditRecord(
         }
 
         // the only place privy to private data
-        val resultMvrs = readCvrsJsonFile(mvrFile)
-        if (resultMvrs is Err) println(resultMvrs)
-        require(resultMvrs is Ok)
-        val testMvrs = resultMvrs.unwrap()
+        val testMvrs = readCvrsCsvFile(mvrFile)
 
         val sampledMvrs = findSamples(sampleIndices, testMvrs)
         require(sampledMvrs.size == sampleIndices.size)
@@ -88,9 +87,11 @@ class AuditRecord(
                 val auditRound = readAuditRoundJsonFile(contests, sampledNumbers, publisher.auditRoundFile(roundIdx)).unwrap()
 
                 // may not exist yet
-                val sampledMvrsResult = readCvrsJsonFile(publisher.sampleMvrsFile(roundIdx))
-                val sampledMvrs = if (sampledMvrsResult is Ok) sampledMvrsResult.unwrap() else emptyList()
-                mvrs.addAll(sampledMvrs) // cumulative
+                val sampleMvrsFile = Path.of(publisher.sampleMvrsFile(roundIdx))
+                if (Files.exists(sampleMvrsFile)) {
+                    val sampledMvrs = readCvrsCsvFile(publisher.sampleMvrsFile(roundIdx))
+                    mvrs.addAll(sampledMvrs) // cumulative
+                }
 
                 rounds.add(auditRound)
             }

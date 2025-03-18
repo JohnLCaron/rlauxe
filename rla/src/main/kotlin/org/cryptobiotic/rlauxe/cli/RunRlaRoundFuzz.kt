@@ -6,6 +6,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -96,7 +97,7 @@ fun runAuditStage(
     writeAuditRoundJsonFile(updatedState, publisher.auditRoundFile(roundIdx))
     println("    writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'")
 
-    writeCvrsJsonFile(sampledMvrs as List<CvrUnderAudit>, publisher.sampleMvrsFile(roundIdx)) // TODO
+    writeCvrsCsvFile(sampledMvrs , publisher.sampleMvrsFile(roundIdx)) // TODO
     println("    write sampledMvrs to '${publisher.sampleMvrsFile(roundIdx)}'")
     println()
     return allDone

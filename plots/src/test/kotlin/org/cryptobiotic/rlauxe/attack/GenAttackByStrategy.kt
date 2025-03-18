@@ -21,42 +21,29 @@ class GenAttackByStrategy {
         val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01)
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
-
         val config = AuditConfig(AuditType.CLCA, true)
+        val extra = 1.001 // to ensure margin goes below 0
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
-            /*
-            val clcaGenerator1 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
-                p1flips=margin,
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1)) */
-
             val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror)),
-                p1flips=margin,
+                p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
             val clcaGenerator3 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)),
-                p1flips=margin,
+                p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
-
-            /* val clcaGenerator4 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzPct),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4)) */
 
             val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)),
-                p1flips=margin,
+                p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
@@ -89,7 +76,7 @@ class GenAttackByStrategy {
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
             xname = "reportedMargin", xfld = { it.margin},
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
             catName = "strategy", catfld = { category(it) },
             scaleType = scaleType
         )

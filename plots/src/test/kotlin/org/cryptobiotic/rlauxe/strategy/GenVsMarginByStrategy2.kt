@@ -82,7 +82,7 @@ class GenVsMarginByStrategy2 {
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
             xname = "margin", xfld = { it.margin },
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
             catName = "strategy", catfld = { category(it) },
             scaleType = scaleType
         )

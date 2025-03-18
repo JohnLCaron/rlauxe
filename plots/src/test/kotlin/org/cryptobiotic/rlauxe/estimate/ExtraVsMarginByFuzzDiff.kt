@@ -66,7 +66,7 @@ class ExtraVsMarginByFuzzDiff {
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
             xname = "margin", xfld = { it.margin},
-            yname = "extraSamples", yfld = { it.nmvrs - it.samplesNeeded },
+            yname = "extraSamples", yfld = { it.nmvrs - it.samplesUsed },
             catName = catName, catfld = catfld,
             scaleType = scaleType
         )

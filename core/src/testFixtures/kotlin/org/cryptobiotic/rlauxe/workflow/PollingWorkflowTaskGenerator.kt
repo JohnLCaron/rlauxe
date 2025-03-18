@@ -121,7 +121,7 @@ class PollingSingleRoundAuditTask(
                 contest.Nc,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
-                0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
             )
@@ -134,7 +134,6 @@ class PollingSingleRoundAuditTask(
                 lastRound.status,
                 minAssertion.round.toDouble(),
                 lastRound.samplesUsed.toDouble(),
-                lastRound.samplesNeeded.toDouble(),
                 nmvrs.toDouble(),
                 otherParameters,
                 if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,

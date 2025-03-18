@@ -98,7 +98,7 @@ class ExtraVsMarginByStrategy {
             writeFile = "$dirName/${name}Extra${scaleType.name}",
             wrs = data,
             xname = "margin", xfld = { it.margin },
-            yname = "extraSamples", yfld = { it.nmvrs - it.samplesNeeded },
+            yname = "extraSamples", yfld = { it.nmvrs - it.samplesUsed },
             catName = "strategy", catfld = { category(it) },
             scaleType = scaleType
         )
@@ -150,7 +150,7 @@ class ExtraVsMarginByStrategy {
             val minAssertion = lastAuditRound.contestRounds.first().minAssertion()
             val lastAuditResult = minAssertion!!.auditResult!!
             println("lastAuditResult = $lastAuditResult")
-            println("extra = ${lastAuditResult.nmvrs - lastAuditResult.samplesNeeded}")
+            println("extra = ${lastAuditResult.nmvrs - lastAuditResult.samplesUsed}")
         }
     }
 

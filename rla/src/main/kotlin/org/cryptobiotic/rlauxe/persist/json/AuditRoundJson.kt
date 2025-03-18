@@ -278,7 +278,6 @@ data class AuditRoundResultJson(
     val nmvrs: Int,   // estimated sample size
     val maxBallotIndexUsed: Int,   // max index used
     val pvalue: Double,       // last pvalue when testH0 terminates
-    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
     val measuredMean: Double,     // measured population mean
@@ -292,7 +291,6 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.nmvrs,
     this.maxBallotIndexUsed,
     this.pvalue,
-    this.samplesNeeded,
     this.samplesUsed,
     this.status.name,
     this.measuredMean,
@@ -307,7 +305,6 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.nmvrs,
         this.maxBallotIndexUsed,
         this.pvalue,
-        this.samplesNeeded,
         this.samplesUsed,
         status,
         this.measuredMean,

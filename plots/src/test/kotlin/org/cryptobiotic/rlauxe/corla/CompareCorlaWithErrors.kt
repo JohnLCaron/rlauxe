@@ -138,7 +138,7 @@ fun showSampleSizesVsTheta(name:String, dirName: String, subtitle: String, scale
         writeFile = "$dirName/${name}${scaleType.name}",
         wrs = data,
         xname = "true margin", xfld = { it.mvrMargin},
-        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = "audit.phantomPct", catfld = { category(it) },
         scaleType = scaleType,
         colorChoices = { colorChoices(it) },

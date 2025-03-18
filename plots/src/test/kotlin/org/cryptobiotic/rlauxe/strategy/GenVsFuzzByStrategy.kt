@@ -86,7 +86,7 @@ class GenVsFuzzByStrategy {
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
             xname = "fuzzPct", xfld = { it.Dparam("fuzzPct") },
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
             catName = "strategy", catfld = { category(it) },
             scaleType = scaleType
         )

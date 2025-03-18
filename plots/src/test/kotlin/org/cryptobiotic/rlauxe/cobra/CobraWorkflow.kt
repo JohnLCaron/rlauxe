@@ -133,7 +133,6 @@ class AuditCobraAssertion(
             nmvrs = sampler.maxSamples(),
             maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
-            samplesNeeded = testH0Result.sampleFirstUnderLimit, // one based
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),

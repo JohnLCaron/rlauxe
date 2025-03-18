@@ -1,15 +1,61 @@
 # OneAudit Notes
 
-last changed 03/17/2025
+last changed 03/18/2025
+
+## Measured Sample Sizes
+
+Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 5%, 50% and 95% of ballots having CVRs),
+when there are no errors in the CVRs:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrorsLinear">![AuditsNoErrorsLinear](plots/audits/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLogLinear.html" rel="AuditsNoErrorsLogLinear">![AuditsNoErrorsLogLinear](plots/audits/AuditsNoErrors/AuditsNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLogLog.html" rel="AuditsNoErrorsLogLog">![AuditsNoErrorsLogLog](plots/audits/AuditsNoErrors/AuditsNoErrorsLogLog.png)</a>
+
+* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
+* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
+* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
+
+In order to deal with the possibility of errors, the above plots use the "default" ShrinkTrunc strategy, which is a conservative
+bet about the true margin of the assorter values. To match better the values that Philip uses in his papers, we also experiment
+with the "max99" strategy, of just always betting 99% of the maximum allowed value. This works well when there are no errors, as
+the following plots show.
+
+In these plots we only use OneAudit with 95% of ballots having CVRs, and compare the "max99" and "default" OneAudit strategies 
+as well as polling and clca audits.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.html" rel="OneAuditNoErrorsLinear">![OneAuditNoErrorsLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.html" rel="OneAuditNoErrorsLogLog">![OneAuditNoErrorsLogLog](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.png)</a>
+
+To get a sense for how much error can be tolerated by the max99 strategy, here are plots with the margin fixed at 2%, and
+the mvrs fuzzed at various percents. For OneAudit with 95% of ballots having CVRs:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95Linear.html" rel="OneAuditWithErrors95Linear">![OneAuditWithErrors95Linear](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLinear.html" rel="OneAuditWithErrors95LogLinear">![OneAuditWithErrors95LogLinear](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLog.html" rel="OneAuditWithErrors95LogLog">![OneAuditWithErrors95LogLog](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLog.png)</a>
+
+For OneAudit with 99% of ballots having CVRs:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99Linear.html" rel="OneAuditWithErrors99Linear">![OneAuditWithErrors99Linear](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLinear.html" rel="OneAuditWithErrors99LogLinear">![OneAuditWithErrors99LogLinear](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLog.html" rel="OneAuditWithErrors99LogLog">![OneAuditWithErrors99LogLog](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLog.png)</a>
+
+* At 99% of ballots having CVRs, max99 OneAudit does well when the Mvr fuzz is < .01, that is 1 in 100 ballots have errors. 
+  Its likely there are scenarios where this is quite useful.
+* At 95% of ballots having CVRs, max99 OneAudit does well up to Mvr fuzz < .003, that is 3 in 1000 ballots have errors. 
+* The problem is that outside of those ranges, max99 OneAudit quickly blows up and does worse than polling.
+
+The task then is to find a decent strategy that does as well as max99, but can tolerate errors better.
+
 
 ### Why you cant use BettingMart
 
-BettingMart bets as aggressively as possible, and is very sensitive to errors between the MVR and CVR. 
-It assumes that mostly the two agree, and manages the bet to deal with the expected rates of disagreement. 
-With OA, when you have a ballot from the non-CVR stratum, its like you always have a disagreement, so your test 
+BettingMart bets as aggressively as possible, and is very sensitive to errors between the MVR and CVR.
+It assumes that mostly the two agree, and manages the bet to deal with the expected rates of disagreement.
+With OA, when you have a ballot from the non-CVR stratum, its like you always have a disagreement, so your test
 is likely to fail. Below tries to explain that in detail:
 
-In a regular CLCA, the possible CLCA assort values (Bi) are 
+In a regular CLCA, the possible CLCA assort values (Bi) are
 
 ````
 Assort values:
@@ -85,7 +131,7 @@ So there an asymettry to the betting payoff.
 
 And we have (w - l) = v * N, tjs with the value (1 + betj*f), which will increase Tj.
 
-Assuming betj are constant = b, then 
+Assuming betj are constant = b, then
 
     (1 - (b*f)**2)^l * (1 + b*f)^(w-l) > 1/risk
     l * log(1-(b*f)**2) + (w-l) * log (1+b*f)  > -log(risk)
@@ -241,47 +287,3 @@ Unclear about using phantoms with ONEAUDIT non-cvr strata. Perhaps it only appea
 Unclear about using nostyle with ONEAUDIT.
 
 
-## Measured Sample Sizes
-
-Here are sample sizes for the three audit types: Polling, Comparison (CLCA) and OneAudit (with 5%, 50% and 95% of ballots having CVRs),
-when there are no errors in the CVRs:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLinear.html" rel="AuditsNoErrorsLinear">![AuditsNoErrorsLinear](plots/audits/AuditsNoErrors/AuditsNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLogLinear.html" rel="AuditsNoErrorsLogLinear">![AuditsNoErrorsLogLinear](plots/audits/AuditsNoErrors/AuditsNoErrorsLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsNoErrors/AuditsNoErrorsLogLog.html" rel="AuditsNoErrorsLogLog">![AuditsNoErrorsLogLog](plots/audits/AuditsNoErrors/AuditsNoErrorsLogLog.png)</a>
-
-* OneAudit results are about twice as high as polling. More tuning is possible but wont change the O(margin) shape.
-* OneAudit / Polling probably arent useable when margin < .02, whereas CLCA can be used for much smaller margins.
-* Its surprising that theres not more difference between the OneAudit results with different percents having CVRs.
-
-In order to deal with the possibility of errors, the above plots use the "default" ShrinkTrunc strategy, which is a conservative
-bet about the true margin of the assorter values. To match better the values that Philip uses in his papers, we also experiment
-with the "max99" strategy, of just always betting 99% of the maximum allowed value. This works well when there are no errors, as
-the following plots show.
-
-In these plots we only use OneAudit with 95% of ballots having CVRs, and compare the "max99" and "default" OneAudit strategies 
-as well as polling and clca audits.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.html" rel="OneAuditNoErrorsLinear">![OneAuditNoErrorsLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.html" rel="OneAuditNoErrorsLogLog">![OneAuditNoErrorsLogLog](plots/audits/OneAuditNoErrors/OneAuditNoErrorsLogLog.png)</a>
-
-To get a sense for how much error can be tolerated by the max99 strategy, here are plots with the margin fixed at 2%, and
-the mvrs fuzzed at various percents. For OneAudit with 95% of ballots having CVRs:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95Linear.html" rel="OneAuditWithErrors95Linear">![OneAuditWithErrors95Linear](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95Linear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLinear.html" rel="OneAuditWithErrors95LogLinear">![OneAuditWithErrors95LogLinear](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLog.html" rel="OneAuditWithErrors95LogLog">![OneAuditWithErrors95LogLog](plots/audits/OneAuditWithErrors95/OneAuditWithErrors95LogLog.png)</a>
-
-For OneAudit with 99% of ballots having CVRs:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99Linear.html" rel="OneAuditWithErrors99Linear">![OneAuditWithErrors99Linear](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99Linear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLinear.html" rel="OneAuditWithErrors99LogLinear">![OneAuditWithErrors99LogLinear](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLog.html" rel="OneAuditWithErrors99LogLog">![OneAuditWithErrors99LogLog](plots/audits/OneAuditWithErrors99/OneAuditWithErrors99LogLog.png)</a>
-
-* At 99% of ballots having CVRs, max99 OneAudit does well when the Mvr fuzz is < .01, that is 1 in 100 ballots have errors. 
-  Its likely there are scenarios where this is quite useful.
-* At 95% of ballots having CVRs, max99 OneAudit does well up to Mvr fuzz < .003, that is 3 in 1000 ballots have errors. 
-* The problem is that outside of those ranges, max99 OneAudit quickly blows up and does worse than polling.
-
-The task then is to find a decent strategy that does as well as max99, but can tolerate errors better.

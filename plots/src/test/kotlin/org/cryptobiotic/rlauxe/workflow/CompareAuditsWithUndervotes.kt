@@ -70,7 +70,7 @@ class CompareAuditsWithUndervotes {
             writeFile = "$dirName/${name}${scaleType.name}",
             wrs = data,
             xname = "underVotePct", xfld = { it.Dparam("undervote") },
-            yname = "samplesNeeded", yfld = { it.samplesNeeded },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
             catName = catName, catfld = catfld,
             scaleType = scaleType
         )

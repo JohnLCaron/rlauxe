@@ -86,7 +86,6 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
             nmvrs = sampler.maxSamples(),
             maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
-            samplesNeeded = samplesNeeded, // one based
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),

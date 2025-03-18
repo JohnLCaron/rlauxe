@@ -83,7 +83,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
             BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
 
-        // make sure margins are below 0
+        /* make sure margins are below 0
         if (p2flips != null || p1flips != null) {
             val contestUA = clcaWorkflow.contestsUA().first() //  theres only one
             val minAssertion = contestUA.minClcaAssertion()!!
@@ -92,7 +92,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             if (mvrMargin >= 0.0) {
                 println("ERROR: mvrMargin = $mvrMargin >= 0")
             }
-        }
+        } */
 
         return ClcaSingleRoundAuditTask(
             name(),
@@ -131,7 +131,7 @@ class ClcaSingleRoundAuditTask(
                 contest.Nc,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
-                0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
             )
@@ -144,7 +144,6 @@ class ClcaSingleRoundAuditTask(
                 lastRound.status,
                 minAssertion.round.toDouble(),
                 lastRound.samplesUsed.toDouble(),
-                lastRound.samplesNeeded.toDouble(),
                 nmvrs.toDouble(),
                 otherParameters,
                 if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,

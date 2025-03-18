@@ -87,7 +87,7 @@ fun showSampleSizesVsFuzzPct(name: String, dirName: String, subtitle: String, ys
         writeFile = "$dirName/${name}${yscale.name}",
         wrs=data,
         xname="mvrsFuzzPct", xfld = { it.Dparam("mvrsFuzzPct") },
-        yname = "samplesNeeded", yfld = { it.samplesNeeded },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = "auditType", catfld = { category(it) },
         scaleType = yscale,
     )

@@ -105,9 +105,9 @@ class CompareAuditVariance {
             yname = "samplesNeeded",
             yfld = { cat: String, wr: WorkflowResult ->
                 when (cat) {
-                    "needed" -> wr.samplesNeeded
-                    "plusStdev" -> wr.samplesNeeded + wr.neededStddev
-                    "minusStdev" -> wr.samplesNeeded - wr.neededStddev
+                    "needed" -> wr.samplesUsed
+                    "plusStdev" -> wr.samplesUsed + wr.usedStddev
+                    "minusStdev" -> wr.samplesUsed - wr.usedStddev
                     else -> 0.0
                 }
             },
@@ -146,7 +146,7 @@ class CompareAuditVariance {
             yfld = { cat: String, wr: WorkflowResult ->
                 when (cat) {
                     "nmvrs" -> wr.nmvrs
-                    "samplesNeeded" -> wr.samplesNeeded
+                    "samplesNeeded" -> wr.samplesUsed
                     else -> 0.0
                 }
             },

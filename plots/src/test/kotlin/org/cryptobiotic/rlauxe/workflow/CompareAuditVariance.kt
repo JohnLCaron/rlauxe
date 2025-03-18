@@ -21,7 +21,7 @@ class CompareAuditVariance {
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                  N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct, nsimEst = nsimEst,
                  parameters = mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "auditType" to "polling"),
                  auditConfig = pollConfig,
@@ -62,7 +62,7 @@ class CompareAuditVariance {
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-             val clcaGenerator = ClcaWorkflowTaskGenerator(
+             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct, nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "auditType" to "clca"),
                 auditConfig=clcaConfig

@@ -1,0 +1,138 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;gRUjke&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;clcaAttacksByStrategy successPct&quot;,
+&quot;subtitle&quot;:&quot;fuzzPct=0.0 phantomPct=0.0 Nc=100000 nruns=10000&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;successPct&quot;,
+&quot;color&quot;:&quot;strategy&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;],
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01],
+&quot;successPct&quot;:[2.9599999999999937,3.9000000000000057,3.6700000000000017,3.950000000000003,3.9799999999999898,3.8100000000000023,4.450000000000003,4.409999999999997,3.0799999999999983,3.6599999999999966,4.030000000000001,3.9799999999999898,4.239999999999995,4.299999999999997,4.409999999999997,4.390000000000001,2.8800000000000097,3.7900000000000063,4.219999999999999,4.049999999999997,4.310000000000002,4.280000000000001,4.36999999999999,4.590000000000003],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;strategy&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;successPct&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;successPct&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01],
+&quot;&amp;merged_groups&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;],
+&quot;successPct&quot;:[2.9599999999999937,3.9000000000000057,3.6700000000000017,3.950000000000003,3.9799999999999898,3.8100000000000023,4.450000000000003,4.409999999999997,3.0799999999999983,3.6599999999999966,4.030000000000001,3.9799999999999898,4.239999999999995,4.299999999999997,4.409999999999997,4.390000000000001,2.8800000000000097,3.7900000000000063,4.219999999999999,4.049999999999997,4.310000000000002,4.280000000000001,4.36999999999999,4.590000000000003],
+&quot;strategy&quot;:[&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;fuzzPct&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;,&quot;phantoms&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;strategy&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;successPct&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;successPct&quot;,&quot;strategy&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;12&quot;
+};
+       var containerDiv = document.getElementById(&quot;gRUjke&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

@@ -26,7 +26,7 @@ class OneAuditWithErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzPcts.forEach { fuzzPct ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
                 nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")

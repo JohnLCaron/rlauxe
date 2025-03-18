@@ -23,20 +23,20 @@ class CompareAuditsWithErrors {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
 
         fuzzPcts.forEach { fuzzPct ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(
+            val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditWorkflowTaskGenerator(
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, cvrPercent, fuzzPct, nsimEst=nsimEst,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )

@@ -6,7 +6,6 @@ import kotlin.math.ln
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.df
 
-
 // used in docs
 
 data class BettingPayoffData(

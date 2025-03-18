@@ -25,14 +25,14 @@ class CompareAuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(
+            val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 nsimEst = nsimEst,
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.noerror, 0.0),
@@ -41,7 +41,7 @@ class CompareAuditsNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditWorkflowTaskGenerator(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
@@ -96,7 +96,7 @@ class CompareAuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val clcaGenerator = ClcaWorkflowTaskGenerator(
+            val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 clcaConfigIn=ClcaConfig(ClcaStrategyType.oracle, 0.0),
                 parameters=mapOf("nruns" to nruns)
@@ -125,7 +125,7 @@ class CompareAuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val nsamplesGenerator = PollingWorkflowTaskGenerator(
+            val nsamplesGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 parameters=mapOf("nruns" to nruns)
             )
@@ -187,14 +187,14 @@ class CompareAuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val oneauditGenerator1 = OneAuditWorkflowTaskGenerator(
+            val oneauditGenerator1 = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "default"),
                 auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
                     oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator1))
-            val oneauditGenerator2 = OneAuditWorkflowTaskGenerator(
+            val oneauditGenerator2 = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "max99"),
                 auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,

@@ -51,51 +51,6 @@ interface WorkflowTaskGenerator {
     fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
 }
 
-class PollingWorkflowTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
-    val margin: Double,
-    val underVotePct: Double,
-    val phantomPct: Double,
-    val mvrsFuzzPct: Double,
-    val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
-    val Nb: Int = Nc,
-    val nsimEst: Int = 100,
-
-    ) : WorkflowTaskGenerator {
-    override fun name() = "PollingWorkflowTaskGenerator"
-
-    override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
-        val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = nsimEst,
-            pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
-        )
-
-        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-        var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
-
-        if (!useConfig.hasStyles && Nb > Nc) {
-            val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
-            testMvrs = testMvrs + otherCvrs
-
-            val otherBallots = List<Ballot>(Nb - Nc) { Ballot("other${Nc+it}", false, null) }
-            ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
-        }
-
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotCards)
-        return WorkflowTask(
-            name(),
-            pollingWorkflow,
-            // testMvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 2.0)
-        )
-    }
-}
-
 class RaireWorkflowTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,

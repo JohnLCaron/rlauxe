@@ -23,17 +23,17 @@ class CompareAuditsWithPhantoms {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
 
         phantoms.forEach { phantom ->
-            val pollingGenerator = PollingWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
                 auditConfig=AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
+            val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
                 auditConfig=AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditWorkflowTaskGenerator(N, margin, 0.0, phantom, cvrPercent, mvrFuzzPct,
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(N, margin, 0.0, phantom, cvrPercent, mvrFuzzPct,
                 auditConfigIn=AuditConfig(AuditType.ONEAUDIT, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit"))
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
@@ -91,12 +91,12 @@ class CompareAuditsWithPhantoms {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         phantoms.forEach { phantom ->
-            val clcaGenerator = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
+            val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
                 auditConfig=auditConfig,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "phantoms"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin-phantom, 0.0, phantomPct=0.0, mvrFuzzPct,
+            val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin-phantom, 0.0, phantomPct=0.0, mvrFuzzPct,
                 auditConfig=auditConfig,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "marginShift"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))

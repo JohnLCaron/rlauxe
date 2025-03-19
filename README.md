@@ -54,25 +54,24 @@ Click on plot images to get an interactive html plot. You can also read this doc
 
 # Audit Workflow
 
-An audit is performed in _Rounds_, as outlined here:
+An audit is performed in _rounds_, as outlined here:
 
 For each contest:
 - count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
 - determine the total number of valid ballots, including undervotes and overvotes.
 
-The purpose of the audit is to determine whether the reported winner(s) are probabilistically correct, to within the chosen risk limit.
+The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
 
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
 
-- decide on sample sizes for each contest, typically by estimating the samples needed, based on the contest margin and
-an estimate of the error rates
-
-- randomly choose ballots to sample based on the sample sizes
-- find the chosen paper ballots and do a manual audit of each
-- enter the results of the manual audits (as Manual Vote Records, MVRs) into the system
-- perform the audit to determine if the risk limit is satisfied
-- for each contest not satisfied, decide whether to continue to another round
-
+For each round:
+1. for each contest decide how many samples are needed, typically by estimating the samples needed to satisft the risk function, 
+   based on the contest margin and an estimate of the error rates
+1. randomly choose ballots to sample based on the sample sizes
+1. find the chosen paper ballots and do a manual audit of each
+1. enter the results of the manual audits (as Manual Vote Records, MVRs) into the system
+1. perform the audit to determine if the risk limit is satisfied
+1. for each contest not satisfied, decide whether to continue to another round
 
 # SHANGRLA framework
 
@@ -255,7 +254,7 @@ When the voting system can report CVRs for some but not all cards, a _OneAudit_ 
 "BPA (ballot-polling audits) and CLCA (card-level comparison audits) using OneAudit are generally much
 more efficient than BLCA (batch-level comparison RLAs) when batches are large. CLCA with OneAudit is
 more efficient than BPA when batches are more homogenous than the contest
-votes as a whole, i.e., when precincts are polarized in different direction"
+votes as a whole, i.e., when precincts are polarized in different directions." (OneAudit p 9)
 
 See [OneAudit Notes](docs/OneAudit.md).
 

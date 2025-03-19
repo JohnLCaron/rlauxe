@@ -109,7 +109,7 @@ class AuditCobraAssertion(
 
         // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
-        val adaptive = AdaptiveComparison(
+        val adaptive = AdaptiveBetting(
             Nc = contest.Nc,
             withoutReplacement = true,
             a = cassorter.noerror(),

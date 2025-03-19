@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.makeRaireContest
+import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -41,7 +41,7 @@ class TestFuzzedWithRaire {
             }
         }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = makeRaireContest(N/2, contestId=111, ncands=3, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestData(N/2, contestId=111, ncands=3, minMargin=.04, quiet = true)
         if (show) {
             println("\nraire cvrs")
             rcvrs.forEach {

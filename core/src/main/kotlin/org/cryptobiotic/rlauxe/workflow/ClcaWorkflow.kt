@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
 // what if the workflows use List, put PersistentWorkflow doesnt ??
@@ -136,7 +135,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         } else {
-            AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         }
 
         val testFn = BettingMart(

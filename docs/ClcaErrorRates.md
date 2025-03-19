@@ -1,10 +1,21 @@
 # CLCA error rates
-last updated Mar 18, 2025
+last updated Mar 19, 2025
+
+**Table of Contents**
+<!-- TOC -->
+* [CLCA error rates](#clca-error-rates)
+  * [Estimating Error](#estimating-error)
+  * [CLCA error rates](#clca-error-rates-1)
+  * [CLCA sample sizes with MVR fuzzing](#clca-sample-sizes-with-mvr-fuzzing)
+  * [CLCA error rate simulation with MVR fuzzing](#clca-error-rate-simulation-with-mvr-fuzzing)
+  * [Calculate Error Rates from actual MVRs (oracle strategy)](#calculate-error-rates-from-actual-mvrs-oracle-strategy)
+  * [CLCA sample sizes by strategy](#clca-sample-sizes-by-strategy)
+<!-- TOC -->
 
 ## Estimating Error
 
 The assumptions that one makes about the CLCA error rates greatly affect the sample size estimation.
-These rates should be empirically determined, and public tables for different voting machines should be published.
+In an ideal world, these rates would be empirically determined, and public tables for different voting machines would be published.
 While these do not affect the reliabilty of the audit, they have a strong impact on the estimated sample sizes.
 
 In a real-world measurement of a voting machine, one might measure:
@@ -13,12 +24,12 @@ In a real-world measurement of a voting machine, one might measure:
 2. percent time a mark is not seen when it is there
 3. percent time a mark is given to the wrong candidate
 
-If the errors are from random processes, its possible that margins remain approx the same, but also possible that some rates
-are more likely to be affected than others. Its worth noting that error rates combine machine errors with human errors of
+If the errors are from random processes, its possible that the 4 rates are approx the same, but also possible that some rates
+are more likely to be affected by errors than others. Its important to note that error rates combine machine errors with human errors of
 fetching and interpreting ballots.
 
-We currently have two ways of setting error rates in the mvrs. Following COBRA, the user can specify the "apriori" error rates for p1, p2, p3, p4.
-Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. 
+We currently have two ways of setting estimated error rates. Following COBRA, the user can specify the "apriori" error 
+rates for p1, p2, p3, p4. Otherwise, they can specify a "fuzz pct" (explained below), and the apriori error rates are derived from it. 
 
 In both cases, we use CORBRA's adaptive estimate of the error rates that does a weighted average of the apriori and the 
 actual error rate from previous samples. These estimates are used in COBRA's OptimalLambda algorithm, which finds the 
@@ -47,7 +58,7 @@ For IRV, the corresponding descriptions of the errror rates are:
     NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
     NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
 
-See [Ballot Comparison using Betting Martingales](Betting.md) for more details and plots of 2-way contests
+See [Ballot Comparison using Betting Martingales](AdaptiveBetting) for more details and plots of 2-way contests
 with varying p2error rates.
 
 
@@ -112,7 +123,7 @@ So we use this _oracle strategy_ only for testing, to show the best possible sam
 ## CLCA sample sizes by strategy
 
 These are plots of sample sizes for various error estimation strategies. In all cases, synthetic CVRs are generated with the given margin, 
-and MVRs are fuzzed at the given fuzzPct. Except for the oracle strategy, the AdaptiveComparison betting function is used.
+and MVRs are fuzzed at the given fuzzPct. Except for the oracle strategy, the AdaptiveBetting betting function is used.
 
 The error estimation strategies are:
 
@@ -131,37 +142,3 @@ Notes:
 * The oracle results generally show the lowest sample sizes, as expected.
 * The noerror strategy is significantly worse in the presence of errors.
 * If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes, especially for low values of fuzzPct.
-
-### Attack with phantoms 
-
-Here we investigate what happens when the percentage of phantoms is high enough to flip the election, but the reported margin
-does not reflect that. In other words an "attack" (or error) when the phantoms are not correctly reported. 
-
-We create simulations at different margins and percentage of phantoms, and fuzz the MVRs at 1%. 
-We measure the "true margin" of the MVRs, including phantoms, by applying the CVR assorter, and use that at the x axis.
-
-We also add the _phantoms_ strategy which uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of 
-the AdaptiveComparison betting function.
-
-Here are plots of sample size as a function of true margin, for phantomPct of 0, 2, and 5 percent:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.html" rel="marginWithPhantoms0LogLinear">![marginWithPhantoms0LogLinear](plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.html" rel="marginWithPhantoms2LogLinear">![marginWithPhantoms2LogLinear](plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.html" rel="marginWithPhantoms5LogLinear">![marginWithPhantoms5LogLinear](plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.png)</a>
-
-* The true margin is approximately the reported margin minus the phantom percentage.
-* Once the true margin falls below 0, the audit goes to a full count, as it should.
-* The fuzzPct strategy does a bit better when the phantom rate is not too high.
-
-### Attack with wrong reported winner
-
-Here we investigate an attack when the reported winner is different than the actual winner. 
-
-We create simulations at the given reported margins, with no fuzzing or phantoms. 
-Then in the MVRs we flip just enough votes to make the true margin < 50%. We want to be sure that
-the percent of false positives stays below the risk limit of 5%:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
-
-* The false positives stay below the risk limit of 5%.
-

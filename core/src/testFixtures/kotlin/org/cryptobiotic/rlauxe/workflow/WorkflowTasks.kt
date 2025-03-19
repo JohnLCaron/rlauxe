@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.raire.makeRaireContest
+import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
@@ -64,7 +64,7 @@ class RaireWorkflowTaskGenerator(
         AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
 
-        val (rcontest, testCvrs) = makeRaireContest(N=Nc, contestId=111, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
+        val (rcontest, testCvrs) = simulateRaireTestData(N=Nc, contestId=111, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
         val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest),

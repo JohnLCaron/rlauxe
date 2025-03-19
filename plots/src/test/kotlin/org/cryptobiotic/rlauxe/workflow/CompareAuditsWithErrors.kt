@@ -8,7 +8,7 @@ import kotlin.test.Test
 
 class CompareAuditsWithErrors {
     val nruns = 100
-    val nsimEst = 100
+    val nsimEst = 10
     val name = "auditsWithErrors"
     val dirName = "/home/stormy/temp/samples/$name"
     val N = 50000
@@ -16,8 +16,7 @@ class CompareAuditsWithErrors {
 
     @Test
     fun genAuditWithFuzzPlots() {
-        val cvrPercent = .50
-        val fuzzPcts = listOf(.00, .005, .01, .02, .03, .04, .05, .06, .07, .08, .09, .10)
+        val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01, .02, .03, .05)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -37,8 +36,10 @@ class CompareAuditsWithErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, cvrPercent, fuzzPct, nsimEst=nsimEst,
-                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+                N, margin, 0.0, 0.0, cvrPercent = .99, mvrsFuzzPct=fuzzPct,
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct),
+                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
+                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
 
@@ -65,12 +66,13 @@ class CompareAuditsWithErrors {
         val subtitle = "margin=${margin} Nc=${N} nruns=${nruns}"
         showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType", catfld= { compareCategories(it) })
         showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType", catfld= { compareCategories(it) })
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType", catfld= { compareCategories(it) })
     }
 }
 
 fun compareCategories(wr: WorkflowResult): String {
     return when (wr.Dparam("auditType")) {
-        1.0 -> "oneaudit"
+        1.0 -> "oneaudit99"
         2.0 -> "polling"
         3.0 -> "clca"
         4.0 -> "raire"

@@ -2,15 +2,19 @@
    &lt;head>
        &lt;meta charset=&quot;UTF-8&quot;>
        &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
-       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
    &lt;/head>
    &lt;body>
-          &lt;div id=&quot;Kt28rm&quot;>&lt;/div>
+          &lt;div id=&quot;EGpiBM&quot;>&lt;/div>
    &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
        var plotSpec={
 &quot;ggtitle&quot;:{
 &quot;text&quot;:&quot;auditsWithUndervotes samples needed&quot;,
-&quot;subtitle&quot;:&quot;margin=0.0400 N=50000 nruns=100&quot;
+&quot;subtitle&quot;:&quot;margin=0.04 Nc=50000 nruns=100  mvrFuzz=0.01&quot;
 },
 &quot;mapping&quot;:{
 },
@@ -42,14 +46,30 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;underVotePct&quot;:[0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5],
-&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
-&quot;samplesNeeded&quot;:[358.74000000000007,362.94999999999993,335.1999999999999,360.15000000000015,326.05,293.52,281.71000000000015,263.16,285.53000000000003,297.7700000000001,252.66999999999996,7439.050000000001,6547.670000000001,7445.890000000001,7628.550000000001,7186.100000000001,7298.1399999999985,7430.470000000002,7586.6900000000005,6894.0599999999995,7350.330000000002,7025.230000000001,4027.269999999999,4304.520000000001,4006.19,3885.040000000001,3685.730000000001,3440.5899999999997,3757.560000000001,3174.3700000000003,3159.6499999999996,3077.9499999999994,2654.059999999999],
-&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;]
+&quot;underVotePct&quot;:[0.0,0.1,0.2,0.3,0.4,0.5,0.0,0.1,0.2,0.3,0.4,0.5,0.0,0.1,0.2,0.3,0.4,0.5],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
+&quot;samplesNeeded&quot;:[327.53999999999996,330.02000000000004,313.6400000000001,284.0000000000001,268.7499999999999,262.6400000000001,375.13000000000005,298.4900000000001,314.9699999999999,288.90999999999974,262.01,209.95000000000002,4594.460000000002,3521.02,3753.709999999999,3651.9399999999996,2941.0199999999986,3168.8199999999997],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;]
 },
 &quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
 &quot;position&quot;:&quot;identity&quot;,
-&quot;geom&quot;:&quot;line&quot;
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;underVotePct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
 },{
 &quot;mapping&quot;:{
 &quot;x&quot;:&quot;underVotePct&quot;,
@@ -58,25 +78,61 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;underVotePct&quot;:[0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5],
-&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
-&quot;samplesNeeded&quot;:[358.74000000000007,362.94999999999993,335.1999999999999,360.15000000000015,326.05,293.52,281.71000000000015,263.16,285.53000000000003,297.7700000000001,252.66999999999996,7439.050000000001,6547.670000000001,7445.890000000001,7628.550000000001,7186.100000000001,7298.1399999999985,7430.470000000002,7586.6900000000005,6894.0599999999995,7350.330000000002,7025.230000000001,4027.269999999999,4304.520000000001,4006.19,3885.040000000001,3685.730000000001,3440.5899999999997,3757.560000000001,3174.3700000000003,3159.6499999999996,3077.9499999999994,2654.059999999999],
-&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;oneaudit&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;]
+&quot;underVotePct&quot;:[0.0,0.1,0.2,0.3,0.4,0.5,0.0,0.1,0.2,0.3,0.4,0.5,0.0,0.1,0.2,0.3,0.4,0.5],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;],
+&quot;samplesNeeded&quot;:[327.53999999999996,330.02000000000004,313.6400000000001,284.0000000000001,268.7499999999999,262.6400000000001,375.13000000000005,298.4900000000001,314.9699999999999,288.90999999999974,262.01,209.95000000000002,4594.460000000002,3521.02,3753.709999999999,3651.9399999999996,2941.0199999999986,3168.8199999999997],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;oneaudit99&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;]
 },
 &quot;size&quot;:1.0,
 &quot;shape&quot;:1.0,
 &quot;color&quot;:&quot;#5470c6&quot;,
 &quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
 &quot;position&quot;:&quot;identity&quot;,
 &quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;underVotePct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
 &quot;tooltips&quot;:{
 &quot;variables&quot;:[&quot;underVotePct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
 &quot;disable_splitting&quot;:true
 }
-}]
+}],
+&quot;spec_id&quot;:&quot;3&quot;
 };
-       var plotContainer = document.getElementById(&quot;Kt28rm&quot;);
-       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+       var containerDiv = document.getElementById(&quot;EGpiBM&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
    &lt;/script>
    &lt;/body>
 &lt;/html>"></iframe>    

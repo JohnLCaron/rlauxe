@@ -241,7 +241,7 @@ class ReproduceCobraResults {
                         println("testAdaptiveBets: p1=${p1o}  p2=${p2o} p1prior=${p1prior}  p2prior=${p2prior}")
 
                         // pass the prior rates to the betting function
-                        val adaptive = AdaptiveComparison(
+                        val adaptive = AdaptiveBetting(
                             Nc = N,
                             withoutReplacement = false,
                             a = compareAssorter.noerror,

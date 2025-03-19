@@ -8,6 +8,9 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 
 class CompareAuditsWithPhantoms {
+    val name = "auditsWithPhantoms"
+    val dirName = "/home/stormy/temp/samples/$name"
+
     val mvrFuzzPct = .01
     val nruns = 100  // number of times to run workflow
     val nsimEst = 100  // number of times to run workflow
@@ -16,7 +19,6 @@ class CompareAuditsWithPhantoms {
 
     @Test
     fun genAuditWithPhantomsPlots() {
-        val cvrPercent = .50
         val phantoms = listOf(.00, .005, .01, .02, .03, .04, .05)
         val stopwatch = Stopwatch()
 
@@ -33,18 +35,18 @@ class CompareAuditsWithPhantoms {
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(N, margin, 0.0, phantom, cvrPercent, mvrFuzzPct,
-                auditConfigIn=AuditConfig(AuditType.ONEAUDIT, true, nsimEst = nsimEst),
-                parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit"))
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantom, cvrPercent = .99, mvrsFuzzPct=mvrFuzzPct,
+                parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit99"),
+                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true,
+                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))
+            )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
 
         // run tasks concurrently and average the results
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
-
-        val name = "auditsWithPhantoms"
-        val dirName = "/home/stormy/temp/workflow/$name"
 
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
@@ -54,12 +56,10 @@ class CompareAuditsWithPhantoms {
 
     @Test
     fun regenPlots() {
-        val name = "auditsWithPhantoms"
-        val dirName = "/home/stormy/temp/workflow/$name"
-
         val subtitle = "margin=${df(margin)} Nc=${N} nruns=${nruns} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType")
     }
 
     fun showSampleSizesVsPhantomPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
@@ -80,7 +80,7 @@ class CompareAuditsWithPhantoms {
 
     @Test
     fun genAuditsWithPhantomsPlotsMarginShift() {
-        val nruns = 300  // number of times to run workflow
+        val nruns = 100  // number of times to run workflow
         val nsimEst = 100
         val margin = .045
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
@@ -107,7 +107,7 @@ class CompareAuditsWithPhantoms {
         println(stopwatch.took())
 
         val name = "phantomMarginShift"
-        val dirName = "/home/stormy/temp/workflow/$name"
+        val dirName = "/home/stormy/temp/samples/$name"
 
         val writer = WorkflowResultsIO("$dirName/${name}.cvs")
         writer.writeResults(results)
@@ -118,11 +118,12 @@ class CompareAuditsWithPhantoms {
     @Test
     fun regenMarginShiftPlots() {
         val name = "phantomMarginShift"
-        val dirName = "/home/stormy/temp/workflow/$name"
+        val dirName = "/home/stormy/temp/samples/$name"
 
         val subtitle = "margin=${df(.045)} Nc=${N} nruns=${300} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType")
     }
 
 }

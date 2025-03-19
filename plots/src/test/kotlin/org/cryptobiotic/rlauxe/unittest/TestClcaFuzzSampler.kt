@@ -63,7 +63,7 @@ fun runWithComparisonFuzzSampler(
 
     // TODO using fuzzPct as mvrsFuzz
     val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
-    val optimal = AdaptiveComparison(
+    val optimal = AdaptiveBetting(
         Nc = contestUA.Nc,
         withoutReplacement = true,
         a = assorter.noerror(),

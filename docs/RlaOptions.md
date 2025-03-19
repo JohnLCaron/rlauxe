@@ -34,8 +34,8 @@ The requirements for Comparison audits:
 1. Assign unique identifier to each physical ballot, and put on the CVR. This is used to find the physical ballot from the sampled CVR.
 2. Must have independent upper bound on the number of cast cards that contain the contest.
 
-For the risk function, use BettingMart with AdaptiveComparison. AdaptiveComparison needs estimates of the rates of 
-over(under)statements. If these estimates are correct, one gets optimal sample sizes. AdaptiveComparison use a variant of
+For the risk function, use BettingMart with AdaptiveBetting. AdaptiveBetting needs estimates of the rates of 
+over(under)statements. If these estimates are correct, one gets optimal sample sizes. AdaptiveBetting uses a variant of
 ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 
 TODO: quantify how things go when rate estimates are incorrect. A first pass is at 

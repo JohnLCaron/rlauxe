@@ -107,7 +107,7 @@ then
 
     payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
 
-Using AdaptiveComparison, λ_i depends only on the 4 estimated error rates (see next section) and the margin.
+Using AdaptiveBetting, λ_i depends only on the 4 estimated error rates (see next section) and the margin.
 
 ### Betting Payoff Plots
 

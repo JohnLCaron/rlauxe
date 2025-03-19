@@ -1,4 +1,4 @@
-# Development
+# Developer Notes
 last changed: 03/10/2026
 
 ![rlauxe core UML](images/rlauxeUML.svg)

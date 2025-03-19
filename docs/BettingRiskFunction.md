@@ -1,4 +1,4 @@
-# Betting Risk Functions
+# CLCA Betting Risk Functions
 
 ## Betting martingales
 
@@ -18,7 +18,7 @@ losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exc
 
 See Cobra section 4.2 and SHANGRLA Section 3.2.
 
-## Comparison Assorter
+## CLCA Assorter
 
 The overstatement error for the ith ballot is:
 ````
@@ -90,7 +90,7 @@ Notes
   {0, .5, 1, 1.5, 2} * noerror
 * When the CVRs  always equal the corresponding MVR, we always get bassort == noerror > .5, so eventually the null is rejected.
 
-## Comparison Betting Payoffs
+## CLCA Betting Payoffs
 
 For the ith sample with bet λ_i, the BettingMart payoff is
 

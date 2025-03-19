@@ -663,19 +663,7 @@ fun calc_sample_sizes(
 
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
 
-    // class AdaptiveComparison(
-    //    val N: Int,
-    //    val withoutReplacement: Boolean = true,
-    //    val upperBound: Double, // compareAssorter.upperBound
-    //    val a: Double, // noerror
-    //    val d1: Int,  // weight p1, p3 // TODO derive from p1-p4 ??
-    //    val d2: Int, // weight p2, p4
-    //    val p1: Double = 1.0e-2, // apriori rate of 1-vote overstatements; set to 0 to remove consideration
-    //    val p2: Double = 1.0e-4, // apriori rate of 2-vote overstatements; set to 0 to remove consideration
-    //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
-    //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
-    //    val eps: Double = .00001
-    val optimal = AdaptiveComparison(
+    val optimal = AdaptiveBetting(
         Nc = N,
         withoutReplacement = true,
         a = minAssorter.noerror(),

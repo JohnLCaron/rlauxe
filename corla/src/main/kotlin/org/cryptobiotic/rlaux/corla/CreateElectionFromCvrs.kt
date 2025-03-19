@@ -113,7 +113,6 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
     }
 
     // partial duplicate from RaireContestTestData
-    // TODO does not handle redacted
     fun makeRaireContest(contest: Contest): RaireContestUnderAudit {
         val vc = VoteConsolidator()
         cvrs.forEach {
@@ -338,9 +337,6 @@ fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo
     val allCvrs = electionFromCvrs.cvrs + redactedCvrs
 
     /////////////////
-    //val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-    // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-    //else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
 
     val ballotCards = BallotCardsClcaStart(allCvrs, allCvrs, auditConfig.seed)
 

@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 03/05/2026_
+_last changed: 03/19/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -12,7 +12,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
 
 **Table of Contents**
 <!-- TOC -->
-* [Reference Papers](#reference-papers)
+* [Audit Workflow](#audit-workflow)
 * [SHANGRLA framework](#shangrla-framework)
   * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
     * [Plurality](#plurality)
@@ -23,8 +23,8 @@ Click on plot images to get an interactive html plot. You can also read this doc
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
-  * [Stratified Audits using OneAudit (In Progress)](#stratified-audits-using-oneaudit-in-progress)
-* [Measuring Samples Needed](#measuring-samples-needed)
+  * [Hybrid Audits using OneAudit (In Progress)](#hybrid-audits-using-oneaudit-in-progress)
+* [Comparing Samples Needed by Audit type](#comparing-samples-needed-by-audit-type)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
@@ -38,46 +38,40 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Multiple Contest Auditing](#multiple-contest-auditing)
     * [Efficiency](#efficiency)
     * [Deterministic sampling order for each Contest](#deterministic-sampling-order-for-each-contest)
+  * [Attacks](#attacks)
+    * [Attack with phantoms](#attack-with-phantoms)
+    * [Attack with wrong reported winner](#attack-with-wrong-reported-winner)
 * [Appendices](#appendices)
+  * [Reference Papers](#reference-papers)
   * [Differences with SHANGRLA](#differences-with-shangrla)
     * [Limit audit to estimated samples](#limit-audit-to-estimated-samples)
     * [compute sample size](#compute-sample-size)
     * [generation of phantoms](#generation-of-phantoms)
     * [estimate CLCA error rates](#estimate-clca-error-rates)
     * [use of previous round's sampled_cvr_indices](#use-of-previous-rounds-sampled_cvr_indices)
-  * [Other Notes](#other-notes)
-  * [Development Notes](#development-notes)
+  * [Developer Notes](#developer-notes)
 <!-- TOC -->
 
-# Reference Papers
-````
-P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
+# Audit Workflow
 
-RAIRE       Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
-    https://arxiv.org/abs/1903.08804
+An audit is performed in _Rounds_, as outlined here:
 
-SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
-    https://github.com/pbstark/SHANGRLA
+For each contest:
+- count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
+- determine the total number of valid ballots, including undervotes and overvotes.
 
-MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. Glazer, Spertus, Stark; 6 Dec 2020
+The purpose of the audit is to determine whether the reported winner(s) are probabilistically correct, to within the chosen risk limit.
 
-ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
-    https://github.com/pbstark/alpha.
+- initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
 
-BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
-    https://github.com/WannabeSmith/betting-paper-simulations
+-- decide on sample sizes for each contest, typically by estimating the samples needed, based on the contest margin and
+an estimate of the error rates
+-- randomly choose ballots to sample based on the sample sizes
+-- find the chosen paper ballots and do a manual audit of each
+-- enter the results of the manual audits (as Manual Vote Records, MVRs) into the system
+-- perform the audit to determine if the risk limit is satisfied
+-- for each contest not satisfied, decide whether to continue to another round
 
-COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
-    https://github.com/spertus/comparison-RLA-betting/tree/main
-
-ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
-    https://github.com/pbstark/ONEAudit
-
-STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
-  https://github.com/pbstark/SHANGRLA
-
-VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
-````
 
 # SHANGRLA framework
 
@@ -220,17 +214,19 @@ results than other methods.
 
 The requirements for CLCA audits:
 
-* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot, which is compared to the MVR during the audit.
+* The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot.
 * Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
-For the risk function, Rlaux uses the BettingMart function with the AdaptiveComparison betting function. 
-AdaptiveComparison needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
-AdaptiveComparison uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
+For the _risk function_, rlaux uses the **BettingMart** function with the **AdaptiveBetting** _betting function_. 
+AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
+AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 
-See [CLCA Error Rates](docs/ClcaErrorRates.md) for estimating error rates and plots.
+See [CLCA Risk function](docs/BettingRiskFunction.md) for details on the BettingMart risk function.
 
-See [CLCA Betting function](docs/BettingRiskFunction.md) for more details on BettingMart.
+See [CLCA AdaptiveBetting function](docs/AdaptiveBetting) for details on the AdaptiveBetting function.
+
+See [CLCA Error Rates](docs/ClcaErrorRates.md) for estimating error rates.
 
 
 ## Polling Audits
@@ -243,31 +239,27 @@ The requirements for Polling audits:
 * There must be a BallotManifest defining the population of ballots, that contains a unique identifier that can be matched to the corresponding physical ballot.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
-For the risk function, Rlaux uses the AlphaMart function with ShrinkTrunkage, which estimates the true
-population mean (theta) using a weighted average of an initial estimate (eta0) with the actual sampled mean. 
-The average assort value is used as the initial estimate (eta0) when testing each assertion. These assort values
+For the risk function, Rlaux uses the **AlphaMart** (aka ALPHA) function with the **ShrinkTrunkage** estimation of the true
+population mean (theta). ShrinkTrunkage uses a weighted average of an initial estimate of the mean with the measured mean
+of the mvrs as they are sampled. The reported mean is used as the initial estimate of the mean. The assort values
 are specified in SHANGRLA, section 2. See Assorter.kt for our implementation.
 
-A few representative plots showing the effect of d are at [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629).
-* High values of d do significantly better when the reported mean is close to the true mean. 
-* When the true mean < reported mean, high d may force a full hand count unnecessarily.
-* Low values of d are much better when true mean < reported mean, at the cost of larger samples sizes.
-* Tentatively, we will use d = 100 as default, and allow the user to override.
-
-See [ALPHA testing statistic](docs/AlphaMart.md) for more details and plots.
+See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart risk function.
 
 
-## Stratified Audits using OneAudit (In Progress)
+## Hybrid Audits using OneAudit (In Progress)
 
-OneAudit is a CLCA audit that uses AlphaMart instead of BettingMart. 
+When the voting system can report CVRs for some but not all cards, a _OneAudit_ audit may be the best way to proceed.
 
-When there is a CVR, use the standard CLCA assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
-This is "overstatement-net-equivalent" (aka ONE).
+"BPA (ballot-polling audits) and CLCA (card-level comparison audits) using OneAudit are generally much
+more efficient than BLCA (batch-level comparison RLAs) when batches are large. CLCA with OneAudit is
+more efficient than BPA when batches are more homogenous than the contest
+votes as a whole, i.e., when precincts are polarized in different direction"
 
-See [OneAudit Notes](docs/OneAudit.md) for more details and plots.
+See [OneAudit Notes](docs/OneAudit.md).
 
 
-# Measuring Samples Needed
+# Comparing Samples Needed by Audit type
 
 Here we are looking at the actual number of sample sizes needed to reject or confirm the null hypotheses, called the 
 "samples needed". We ignore the need to estimate a batch size, as if we do "one sample at a time". This gives us a
@@ -283,7 +275,7 @@ When Card Style Data (CSD) is missing, the samplesNeeded have to be scaled by Nb
 that a contest might be on, and Nc is the number of ballots it is actually on. 
 See [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample), below.
 
-The following plots are simulated complete workflows, averaging the results from the given number of runs.
+The following plots are simulations, averaging the results from the stated number of runs.
 
 ## Samples needed with no errors
 
@@ -311,24 +303,24 @@ Here we show the average and standard deviation over 250 independent trials at e
 
 In these simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the ballots
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
-When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
+When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
 These are plots vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLinear.html" rel="auditsWithErrorsLinear">![auditsWithErrorsLinear](docs/plots/samples/auditsWithErrors/auditsWithErrorsLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.html" rel="auditsWithErrorsLogLinear">![auditsWithErrorsLogLinear](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLog.html" rel="auditsWithErrorsLogLog">![auditsWithErrorsLogLog](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLog.png)</a>
 
-* Sample sizes increase with fuzzPct similarly for all the audits.
-* CLCA as a percent of Nc is more sensitive to errors than polling or OneAudit.
-* Raire audits are CLCA audits using Raire assertions. These are less sensitive to random changes to the MVRs than CLCA 
-  plurality audits because the changes are less likely to change the assorter values. 
+* oneaudit has 99% of the ballots with CVRs, and 1% without
+* oneaudit does poorly when there are errors
+* CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
+* Raire audits are CLCA audits using Raire assertions. These are less sensitive sensitive to errors 
+  because the changes are less likely to change the assorter values. 
 
-Varying the percent of undervotes at margin of 4% and 2%, with errors generated with 1% fuzz:
+Varying the percent of undervotes at margin of 4%, with errors generated with 1% fuzz:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithUndervotes/auditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](docs/plots/samples/auditsWithUndervotes/auditsWithUndervotesLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithUndervotes/auditsWithUndervotes2Linear.html" rel="AuditsWithUndervotes2Linear">![AuditsWithUndervotes2Linear](docs/plots/samples/auditsWithUndervotes/auditsWithUndervotes2Linear.png)</a>
 
-* Note that undervote percentages are shown up to 50%, with modest effect.
+* Note that undervote percentages are shown up to 50%, with little effect.
 
 ## Effect of Phantoms on Samples needed
 
@@ -342,10 +334,10 @@ Varying phantom percent, up to and over the margin of 4.5%, with errors generate
 Having _phantomPct_ phantoms is similar to subtracting phantomPct from the margin. In this CLCA plot we show samples needed
 as a function of phantomPct, and also with no phantoms but the margin shifted by phantomPct:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLogLinear.html" rel="phantomMarginShiftLog">![phantomMarginShiftLog](docs/plots/samples/phantomMarginShift/phantomMarginShiftLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.html" rel="phantomMarginShiftLinear">![phantomMarginShiftLinear](docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.png)</a>
 
-* A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board.
-  TODO: investigate a more precise characterizarion of their effect.
+* A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board,
+* at least at phantomPCt < 3% or so.
 
 # Estimating Sample Batch sizes
 
@@ -456,7 +448,7 @@ The following plot shows nmvrs for Polling vs CLCA, with and without CSD at diff
 Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
 Over/under estimation is strongly influenced by over/under estimating error rates. 
 
-The following plots show approximate distribution of estimated and actual sample sizes, using our standard AdaptiveComparison
+The following plots show approximate distribution of estimated and actual sample sizes, using our standard AdaptiveBetting
 betting function with weight parameter d = 100, for margin=2% and errors in the MVRs generated with 2% fuzz.
 
 When the estimated error rates are equal to the actual error rates:
@@ -536,7 +528,79 @@ The set of contests to continue to the next round is not known, so the total set
 Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed. 
 
 
+## Attacks
+
+_Attacks_ are scenarios where the actual winner is not the reported winner. They may be untentional, due to malicious actors or
+unintentional due to mistakes in the process or bugs in the software.
+
+### Attack with phantoms
+
+Here we investigate what happens when the percentage of phantoms is high enough to flip the election, but the reported margin
+does not reflect that. In other words an attack (or error) when the phantoms are not correctly reported.
+
+We create simulations at different margins and percentage of phantoms, and fuzz the MVRs at 1%.
+We measure the "true margin" of the MVRs, including phantoms, by applying the CVR assorter, and use that for the x axis.
+
+In this plot we also add the _phantoms_ strategy which uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of
+the AdaptiveBetting betting function.
+
+Here are plots of sample size as a function of true margin, for phantomPct of 0, 2, and 5 percent:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.html" rel="marginWithPhantoms0LogLinear">![marginWithPhantoms0LogLinear](plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.html" rel="marginWithPhantoms2LogLinear">![marginWithPhantoms2LogLinear](plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.html" rel="marginWithPhantoms5LogLinear">![marginWithPhantoms5LogLinear](plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.png)</a>
+
+* The true margin is approximately the reported margin minus the phantom percentage.
+* Once the true margin falls below 0, the audit goes to a full count, as it should.
+* The fuzzPct strategy does a bit better when the phantom rate is not too high.
+
+### Attack with wrong reported winner
+
+Here we investigate an attack when the reported winner is different than the actual winner.
+
+We create simulations at the given reported margins, with no fuzzing or phantoms.
+Then in the MVRs we flip just enough votes to make the true margin < 50%. We want to be sure that
+the percent of false positives stays below the risk limit (here its 5%):
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
+
+* The false positives stay below the risk limit of 5%.
+
+
+
 # Appendices
+
+## Reference Papers
+````
+P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
+
+RAIRE       Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
+    https://arxiv.org/abs/1903.08804
+
+SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
+    https://github.com/pbstark/SHANGRLA
+
+MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. Glazer, Spertus, Stark; 6 Dec 2020
+
+ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
+    https://github.com/pbstark/alpha.
+
+BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
+    https://github.com/WannabeSmith/betting-paper-simulations
+
+COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
+    https://github.com/spertus/comparison-RLA-betting/tree/main
+
+ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
+    https://github.com/pbstark/ONEAudit
+
+STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
+  https://github.com/pbstark/SHANGRLA
+
+VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
+
+````
+
 ## Differences with SHANGRLA
 
 ### Limit audit to estimated samples
@@ -609,12 +673,8 @@ and so uses the same strategy as we do, namely  sampling without regards to the 
 Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt just use the 
 first n sorted samples, which the code seems to assume. But I think the question is moot.
 
-## Other Notes
+## Developer Notes
 
-* [ALPHA testing statistic](docs/AlphaMart.md)
+* [Developer Notes](docs/Development.md)
 * [Notes on Colorado RLA](docs/Corla.md)
-
-## Development Notes
-
 * [RLA Options](docs/RlaOptions.md)
-* [Development](docs/Development.md)

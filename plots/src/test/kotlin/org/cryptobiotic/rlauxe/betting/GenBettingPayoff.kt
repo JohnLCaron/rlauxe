@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.AdaptiveComparison
+import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.util.dfn
@@ -28,7 +28,7 @@ class GenBettingPayoff {
                 //    val p3: Double = 1.0e-2, // apriori rate of 1-vote understatements; set to 0 to remove consideration
                 //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
                 //    val eps: Double = .00001
-                val optimal = AdaptiveComparison(
+                val optimal = AdaptiveBetting(
                     Nc = N,
                     a = noerror,
                     d = 10000,
@@ -51,7 +51,7 @@ class GenBettingPayoff {
             for (margin in margins) {
                 val noerror = 1 / (2 - margin)
 
-                val bettingFn = AdaptiveComparison(
+                val bettingFn = AdaptiveBetting(
                     Nc = N,
                     a = noerror,
                     d = 10000,
@@ -89,7 +89,7 @@ class GenBettingPayoff {
             for (margin in margins) {
                 val noerror = 1 / (2 - margin)
 
-                val bettingFn = AdaptiveComparison(
+                val bettingFn = AdaptiveBetting(
                     Nc = N,
                     a = noerror,
                     d = 10000,

@@ -42,21 +42,6 @@ fun makeVotesCsv(votes: Map<Int, IntArray>) : List<VotesCsv> {
     return votes.entries.map { (contestId, candArray) -> VotesCsv(contestId, candArray) }
 }
 
-/*
-fun makeVotesCsv(votes: Map<Int, IntArray>) : List<VotesCsv> {
-    val isForm1 = votes.values.map { it.size < 2 }.reduce(Boolean::and)
-    return if (isForm1) {
-        votes.entries.map { (contestId, candArray) ->
-            val candidate = if (candArray.size == 0) null else candArray[0]
-            VotesCsv(contestId, candidate)
-        }
-    } else {
-        votes.entries.map { (contestId, candArray) ->
-            IrvVotesCsv(contestId, candArray)
-        }
-    }
-} */
-
 fun CvrUnderAudit.publishCsv() : CvrCsv {
     return CvrCsv(
         this.id,

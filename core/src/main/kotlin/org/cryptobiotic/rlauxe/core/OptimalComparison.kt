@@ -66,7 +66,7 @@ import kotlin.math.max
 // At each time i, the shrink-trunc estimated rate p̃_ki can be plugged into (2)
 // and set equal to 0 to obtain the bet λi .
 //
-class AdaptiveComparison(
+class AdaptiveBetting(
     val Nc: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror

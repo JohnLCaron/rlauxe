@@ -1,6 +1,10 @@
-# OneAudit Notes
+# OneAudit (overstatement net equivalent audit)
+_last changed 03/19/2025_
 
-last changed 03/18/2025
+**_Note: this is all in progress, as I dont completely understand where it should be used..._**
+
+When there is a CVR, use the standard CLCA assorter. When there is no CVR, compare the MVR with the "average CVR" of the batch.
+This is "overstatement-net-equivalent" (aka ONE).
 
 ## Measured Sample Sizes
 

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.simulateRaireContest
+import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -187,7 +187,7 @@ fun simulateSampleSizeClcaAssorter(
 
     // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
     val cvrs =  if (contest.isIRV()) {
-        simulateRaireContest(contest as RaireContest)
+        simulateRaireTestData(contest as RaireContest)
     } else {
         val contestSim = ContestSimulation(contest as Contest)
         contestSim.makeCvrs()
@@ -231,13 +231,13 @@ fun simulateSampleSizeClcaAssorter(
         Pair(
             if (irvFuzz) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter)
             else ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
-            AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )
     } else {
         // this is noerrors
         Pair(
             makeClcaNoErrorSampler(contest.id, cvrs, cassorter),
-            AdaptiveComparison(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
+            AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
         )
     }
 

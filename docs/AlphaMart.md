@@ -1,11 +1,27 @@
+# AlphaMart risk function for Polling Audits
+last updated Mar 19, 2025
 
-## ALPHA testing statistic
+**Table of Contents**
+<!-- TOC -->
+* [AlphaMart risk function for Polling Audits](#alphamart-risk-function-for-polling-audits)
+  * [AlphaMart](#alphamart)
+  * [BRAVO testing statistic](#bravo-testing-statistic)
+  * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
+  * [Sampling with or without replacement](#sampling-with-or-without-replacement)
+  * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
+  * [Using BettingMart to implement AlphaMart](#using-bettingmart-to-implement-alphamart)
+  * [Polling Simulations](#polling-simulations)
+    * [compare table 3 of ALPHA paper with our Polling Audit with replacement](#compare-table-3-of-alpha-paper-with-our-polling-audit-with-replacement)
+    * [how to set the parameter d?](#how-to-set-the-parameter-d)
+<!-- TOC -->
 
-ALPHA is a risk-measuring function that adapts to the drawn sample as it is made.
-ALPHA estimates the reported winner’s share of the vote before the jth card is drawn from the j-1 cards already in the sample.
+AlphaMart (aka ALPHA) is a risk-measuring function that adapts to the drawn sample as it is made.
+It estimates the reported winner’s share of the vote before the jth card is drawn from the j-1 cards already in the sample.
 The estimator can be any measurable function of the first j − 1 draws, for example a simple truncated shrinkage estimate, described below.
 ALPHA generalizes BRAVO to situations where the population {xj} is not necessarily binary, but merely nonnegative and bounded.
 ALPHA works for sampling with or without replacement, with or without weights, while BRAVO is specifically for IID sampling with replacement.
+
+## AlphaMart
 
 ````
 θ 	        true population mean
@@ -33,7 +49,7 @@ Tj          ALPHA nonnegative supermartingale (Tj)_j∈N  starting at 1
 	P{∃j : Tj ≥ α−1 } ≤ α, if θ < µ (9) (follows from Ville's inequality)
 ````
 
-### BRAVO testing statistic
+## BRAVO testing statistic
 
 BRAVO is based on Wald’s sequential probability ratio test (SPRT) of the simple hypothesis θ = µ against
 a simple alternative θ = η from IID Bernoulli(θ) observations.
@@ -51,7 +67,7 @@ BRAVO is ALPHA with the following restrictions:
   Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected.
 
 
-### AlphaMart formula as generalization of Wald SPRT:
+## AlphaMart formula as generalization of Wald SPRT:
 
 Bravo: Probability of drawing y if theta=n over probability of drawing y if theta=m:
 
@@ -106,7 +122,7 @@ Step 3: Use estimated nj instead of fixed n, and mj instead of fixed m = 1/2 whe
     (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
 
 
-### Sampling with or without replacement
+## Sampling with or without replacement
 
 We need E(Xj | X^j−1 ) computed with the null hypothosis that θ == µ == 1/2.
 
@@ -121,7 +137,7 @@ If this ever becomes less than zero, the null hypothesis is certainly false.
 When allowed to sample all N values without replacement, eventually this value becomes less than zero.
 
 
-### Truncated shrinkage estimate of the population mean
+## Truncated shrinkage estimate of the population mean
 
 The only settable parameter for the TruncShrink funcition function is d, which is the weighting between the initial guess
 at the population mean (eta0) and the running mean of the sampled data:
@@ -151,38 +167,6 @@ val weighted = ((d * eta0 + sampleSum) / (d + lastj - 1) + u * f / sdj3) / (1 + 
 val npmax = max( weighted, mean2 + c / sqrt((d + lastj - 1).toDouble()))  // 2.5.2 "choosing ǫi"
 return min(u * (1 - eps), npmax)
 ````
-
-### how to set the parameter d?
-
-From ALPHA (p 9)
-
-````
-Choosing d. As d → ∞, the sample size for ALPHA approaches that of BRAVO, for
-binary data. The larger d is, the more strongly anchored the estimate is to the reported vote
-shares, and the smaller the penalty ALPHA pays when the reported results are exactly correct.
-Using a small value of d is particularly helpful when the true population mean is far from the
-reported results. The smaller d is, the faster the method adapts to the true population mean,
-but the higher the variance is. Whatever d is, the relative weight of the reported vote shares
-decreases as the sample size increases.
-````
-
-See [output](DiffMeanOutput.txt) of DiffMeans.kt and PlotDiffMeans.kt. This is done for each value of N and theta.
-
-A few representative plots are at
-[meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
-
-Notes:
-
-* samples size when reported mean != theta (true mean)
-* show tables of mean difference = (reported mean - theta) columns vs values of d parameter (rows)
-* ntrials = 1000
-* For many values of N and theta, we cant help (margin too small; N too small); or it doesn't matter much (margin large, N large).
-* Ive chosen a few plots where values of N and theta have pct samples 10 - 30%, since thats where improvements might matter for having a successful RLA vs a full hand recount.
-* High values of d work well when reported mean ~= theta.
-* Low values of d work better as mean difference = (reported mean - theta) grows.
-* The question is, how much weight to give "outliers", at the expense of improving success rate for "common case" of reported mean ~= theta ?
-* See CreatePollingDiffMeans.kt
-
 
 ## Using BettingMart to implement AlphaMart
 
@@ -230,3 +214,34 @@ stddev samples vs theta
 * no use for the parameter d in this case. Likely useful only for when eta0 != theta
 * See PlotSampleSizes.kt
 
+### how to set the parameter d?
+
+From ALPHA (p 9)
+
+````
+Choosing d. As d → ∞, the sample size for ALPHA approaches that of BRAVO, for
+binary data. The larger d is, the more strongly anchored the estimate is to the reported vote
+shares, and the smaller the penalty ALPHA pays when the reported results are exactly correct.
+Using a small value of d is particularly helpful when the true population mean is far from the
+reported results. The smaller d is, the faster the method adapts to the true population mean,
+but the higher the variance is. Whatever d is, the relative weight of the reported vote shares
+decreases as the sample size increases.
+````
+
+See [output](DiffMeanOutput.txt) of DiffMeans.kt and PlotDiffMeans.kt. This is done for each value of N and theta.
+
+A few representative plots are at
+[meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
+
+Notes:
+
+* samples size when reported mean != theta (true mean)
+* show tables of mean difference = (reported mean - theta) columns vs values of d parameter (rows)
+* ntrials = 1000
+* For many values of N and theta, we cant help (margin too small; N too small); or it doesn't matter much (margin large, N large).
+* Ive chosen a few plots where values of N and theta have pct samples 10 - 30%, since thats where improvements might matter for having a successful RLA vs a full hand recount.
+* High values of d work well when reported mean ~= theta.
+* Low values of d work better as mean difference = (reported mean - theta) grows.
+* When the true mean < reported mean, high d may force a full hand count unnecessarily.
+* Tentatively, we will use d = 100 as default, and allow the user to override.
+* See CreatePollingDiffMeans.kt

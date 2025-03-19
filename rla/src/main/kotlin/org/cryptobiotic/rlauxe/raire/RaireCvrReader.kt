@@ -3,6 +3,23 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.Cvr
 import java.io.File
 
+data class RaireCvrs(
+    val contests: List<RaireCvrContest>,
+    val cvrs: List<Cvr>,
+    val filename: String,
+)
+
+data class RaireCvrContest(
+    val contestNumber: Int,
+    val candidates: List<Int>,
+    val ncvrs: Int,
+    val winner: Int = -1,
+) {
+    fun show() = buildString {
+        appendLine(" ncvrs=${ncvrs} RaireCvrContest $contestNumber candidates=$candidates} winner=$winner")
+    }
+}
+
 data class RaireContestInfo(val candidates: List<String>, val winner: String, val order: List<Int>)
 
 // Raire CVR file in csv .raire format.

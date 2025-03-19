@@ -1,4 +1,4 @@
-# Clca AdaptiveBetting betting function
+# Clca AdaptiveBetting function
 
 last changed: 03/10/25
 

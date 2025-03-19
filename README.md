@@ -64,13 +64,14 @@ The purpose of the audit is to determine whether the reported winner(s) are prob
 
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
 
--- decide on sample sizes for each contest, typically by estimating the samples needed, based on the contest margin and
+- decide on sample sizes for each contest, typically by estimating the samples needed, based on the contest margin and
 an estimate of the error rates
--- randomly choose ballots to sample based on the sample sizes
--- find the chosen paper ballots and do a manual audit of each
--- enter the results of the manual audits (as Manual Vote Records, MVRs) into the system
--- perform the audit to determine if the risk limit is satisfied
--- for each contest not satisfied, decide whether to continue to another round
+
+- randomly choose ballots to sample based on the sample sizes
+- find the chosen paper ballots and do a manual audit of each
+- enter the results of the manual audits (as Manual Vote Records, MVRs) into the system
+- perform the audit to determine if the risk limit is satisfied
+- for each contest not satisfied, decide whether to continue to another round
 
 
 # SHANGRLA framework
@@ -224,7 +225,7 @@ AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of
 
 See [CLCA Risk function](docs/BettingRiskFunction.md) for details on the BettingMart risk function.
 
-See [CLCA AdaptiveBetting function](docs/AdaptiveBetting) for details on the AdaptiveBetting function.
+See [CLCA AdaptiveBetting](docs/AdaptiveBetting.md) for details on the AdaptiveBetting function.
 
 See [CLCA Error Rates](docs/ClcaErrorRates.md) for estimating error rates.
 
@@ -305,7 +306,7 @@ In these simulations, errors are created between the CVRs and the MVRs, by takin
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-These are plots vs fuzzPct, with margin fixed at 4%:
+These are plots of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.html" rel="auditsWithErrorsLogLinear">![auditsWithErrorsLogLinear](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLog.html" rel="auditsWithErrorsLogLog">![auditsWithErrorsLogLog](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLog.png)</a>
@@ -337,7 +338,7 @@ as a function of phantomPct, and also with no phantoms but the margin shifted by
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.html" rel="phantomMarginShiftLinear">![phantomMarginShiftLinear](docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.png)</a>
 
 * A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board,
-* at least at phantomPCt < 3% or so.
+  at least at phantomPCt < 3% or so.
 
 # Estimating Sample Batch sizes
 
@@ -546,9 +547,9 @@ the AdaptiveBetting betting function.
 
 Here are plots of sample size as a function of true margin, for phantomPct of 0, 2, and 5 percent:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.html" rel="marginWithPhantoms0LogLinear">![marginWithPhantoms0LogLinear](plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.html" rel="marginWithPhantoms2LogLinear">![marginWithPhantoms2LogLinear](plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.html" rel="marginWithPhantoms5LogLinear">![marginWithPhantoms5LogLinear](plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.html" rel="marginWithPhantoms0LogLinear">![marginWithPhantoms0LogLinear](docs/plots/attack/marginWithPhantoms0/marginWithPhantoms0LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.html" rel="marginWithPhantoms2LogLinear">![marginWithPhantoms2LogLinear](docs/plots/attack/marginWithPhantoms2/marginWithPhantoms2LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.html" rel="marginWithPhantoms5LogLinear">![marginWithPhantoms5LogLinear](docs/plots/attack/marginWithPhantoms5/marginWithPhantoms5LogLinear.png)</a>
 
 * The true margin is approximately the reported margin minus the phantom percentage.
 * Once the true margin falls below 0, the audit goes to a full count, as it should.
@@ -562,11 +563,9 @@ We create simulations at the given reported margins, with no fuzzing or phantoms
 Then in the MVRs we flip just enough votes to make the true margin < 50%. We want to be sure that
 the percent of false positives stays below the risk limit (here its 5%):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.html" rel="clcaAttacksByStrategyFalsePositives">![clcaAttacksByStrategyFalsePositives](docs/plots/attack/attacksByStrategy/clcaAttacksByStrategyFalsePositives.png)</a>
 
 * The false positives stay below the risk limit of 5%.
-
-
 
 # Appendices
 

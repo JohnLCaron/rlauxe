@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.concur.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
@@ -30,7 +29,7 @@ class GenPollingNoStyles {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         Nbs.forEach { Nb ->
             margins.forEach { margin ->
-                val pollingGenerator = PollingWorkflowTaskGenerator(
+                val pollingGenerator = PollingContestAuditTaskGenerator(
                     Nc, margin, 0.0, 0.0, 0.0,
                     mapOf("nruns" to nruns, "Nb" to Nb, "cat" to Nb),
                     auditConfig = auditConfig,

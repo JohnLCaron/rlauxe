@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 class ExtraVsMarginByFuzzDiff {
     val Nc = 50000
@@ -36,7 +35,7 @@ class ExtraVsMarginByFuzzDiff {
             )
 
             margins.forEach { margin ->
-                val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
+                val clcaGenerator1 = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "1.0", "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
                     auditConfig=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))

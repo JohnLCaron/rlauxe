@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-class ClcaWorkflowTaskGenerator(
+class ClcaContestAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
@@ -19,10 +19,10 @@ class ClcaWorkflowTaskGenerator(
     val Nb: Int = Nc,
     val nsimEst: Int = 100,
     val p2flips: Double? = null,
-): WorkflowTaskGenerator {
+): ContestAuditTaskGenerator {
     override fun name() = "ClcaWorkflowTaskGenerator"
 
-    override fun generateNewTask(): WorkflowTask {
+    override fun generateNewTask(): ContestAuditTask {
         val useConfig = auditConfig ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
@@ -44,7 +44,7 @@ class ClcaWorkflowTaskGenerator(
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
             StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
 
-        return WorkflowTask(
+        return ContestAuditTask(
             name(),
             clcaWorkflow,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
@@ -66,7 +66,7 @@ class ClcaSingleRoundAuditTaskGenerator(
     val quiet: Boolean = true,
     val p2flips: Double? = null,
     val p1flips: Double? = null,
-): WorkflowTaskGenerator {
+): ContestAuditTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 

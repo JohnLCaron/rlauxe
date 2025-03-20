@@ -15,7 +15,7 @@ class CobraSingleRoundAuditTaskGenerator(
     val parameters: Map<String, Any>,
     val auditConfig: AuditConfig,
     val quiet: Boolean = true,
-) : WorkflowTaskGenerator {
+) : ContestAuditTaskGenerator {
     override fun name() = "CobraSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {

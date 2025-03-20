@@ -9,6 +9,7 @@ import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMa
 import au.org.democracydevelopers.raire.irv.IRVResult
 import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.runChooseSamples
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -17,7 +18,6 @@ import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.tabulateVotes
-import org.cryptobiotic.rlauxe.workflow.*
 import java.nio.file.Path
 
 class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes, val quiet: Boolean = true) {
@@ -348,7 +348,7 @@ fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo
     writeCvrsCsvFile(ballotCards.cvrsUA, mvrFile) // no errors
     println("   writeCvrsCsvFile ${mvrFile}")
 
-    val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)
+    val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
     writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 

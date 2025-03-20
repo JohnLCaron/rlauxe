@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
@@ -123,8 +124,8 @@ class TestAuditRoundJson {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
-        val lastRound = runWorkflow("testComparisonWorkflow", clcaWorkflow, quiet = true)
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        val lastRound = runAudit("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
 
         val target = AuditRound(
@@ -176,7 +177,7 @@ class TestAuditRoundJson {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, listOf(rcontest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, listOf(rcontest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
         val nextRound = clcaWorkflow.startNewRound()
         val done = clcaWorkflow.runAuditRound(nextRound)
 

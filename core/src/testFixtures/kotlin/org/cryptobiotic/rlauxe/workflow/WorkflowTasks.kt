@@ -1,9 +1,10 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
+import org.cryptobiotic.rlauxe.audit.runAudit
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.sqrt
 
@@ -17,13 +18,13 @@ interface WorkflowTaskGenerator {
 // A WorkflowTask is always for a single contest (unlike a Workflow which may be multi-contest)
 class WorkflowTask(
     val name: String,
-    val workflow: RlauxWorkflowIF,
+    val workflow: RlauxAuditIF,
     val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
 
     override fun name() = name
     override fun run(): WorkflowResult {
-        val lastRound = runWorkflow(name, workflow, quiet = quiet)
+        val lastRound = runAudit(name, workflow, quiet = quiet)
         if (lastRound == null) {
             return WorkflowResult(
                 name,

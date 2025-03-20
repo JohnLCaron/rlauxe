@@ -1,11 +1,13 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
+import org.cryptobiotic.rlauxe.workflow.runClcaSingleRoundAudit
 import kotlin.test.Test
 
-class TestOneRoundClcaWorkflow {
+class TestOneRoundClcaAudit {
     val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10)
 
     @Test
@@ -31,7 +33,7 @@ class TestOneRoundClcaWorkflow {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        val workflow = ClcaAudit(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         runClcaSingleRoundAudit(workflow, contestRounds, auditor = AuditClcaAssertion())
     }

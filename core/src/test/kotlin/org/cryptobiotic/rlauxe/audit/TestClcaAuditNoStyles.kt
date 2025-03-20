@@ -1,14 +1,15 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
 import kotlin.test.Test
 
-class TestClcaWorkflowNoStyles {
+class TestClcaAuditNoStyles {
 
     @Test
-    fun testComparisonOneContest() {
+    fun testClcaOneContest() {
         val N = 100000
         val ncontests = 1
         val nbs = 1
@@ -19,14 +20,16 @@ class TestClcaWorkflowNoStyles {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, seed=12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles=false, seed=12356667890L, nsimEst=10,
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
+        )
 
-        testComparisonWorkflow(auditConfig, testData)
+        testClcaWorkflow(auditConfig, testData)
     }
 
     @Test
-    fun testComparisonTwoContests() {
+    fun testClcaTwoContests() {
         val N = 100000
         val ncontests = 2
         val nbs = 1
@@ -37,10 +40,12 @@ class TestClcaWorkflowNoStyles {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, seed=12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles=false, seed=12356667890L, nsimEst=10,
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
+        )
 
-        testComparisonWorkflow(auditConfig, testData)
+        testClcaWorkflow(auditConfig, testData)
     }
 
     // @Test
@@ -60,7 +65,7 @@ class TestClcaWorkflowNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.00 .. 0.00
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
-        testComparisonWorkflow(auditConfig, testData)
+        testClcaWorkflow(auditConfig, testData)
     }
 
     @Test
@@ -73,7 +78,7 @@ class TestClcaWorkflowNoStyles {
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005 .. 0.005
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
-        testComparisonWorkflow(auditConfig, testData)
+        testClcaWorkflow(auditConfig, testData)
     }
 
     @Test
@@ -88,22 +93,26 @@ class TestClcaWorkflowNoStyles {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
-        testComparisonWorkflow(auditConfig, testData)
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles=true, nsimEst=10,
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
+        )
+        testClcaWorkflow(auditConfig, testData)
     }
 
     @Test
-    fun testComparisonWithFuzz() {
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = 0.01))
+    fun testClcaWithFuzz() {
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles=true, nsimEst=10,
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = 0.01)
+        )
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
-        testComparisonWorkflow(auditConfig, testData)
+        testClcaWorkflow(auditConfig, testData)
     }
 
-    fun testComparisonWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData) {
+    fun testClcaWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.contests
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
@@ -112,8 +121,8 @@ class TestClcaWorkflowNoStyles {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
-        runWorkflow("TestComparisonWorkflowNoStyles", workflow)
+        val workflow = ClcaAudit(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        runAudit("TestClcaWorkflowNoStyles", workflow)
     }
 
 }

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 data class BallotManifest(
     val ballots: List<Ballot>,

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -30,7 +31,7 @@ class CompareAuditsWithErrors {
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -38,14 +39,16 @@ class CompareAuditsWithErrors {
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, cvrPercent = .99, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))
+                auditConfigIn = AuditConfig(
+                    AuditType.ONEAUDIT, true, nsimEst = 100,
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
 
             val raireGenerator = RaireWorkflowTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
-                clcaConfigIn=ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
             tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))

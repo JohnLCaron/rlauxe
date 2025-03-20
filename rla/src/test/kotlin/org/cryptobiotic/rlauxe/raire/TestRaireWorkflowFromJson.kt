@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.raire
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaAudit
+import org.cryptobiotic.rlauxe.audit.findSamples
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
@@ -45,14 +49,14 @@ class TestRaireWorkflowFromJson {
         val nassertions = raireResults.contests.sumOf { it.rassertions.size }
 
         val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = ClcaWorkflow(auditConfig, emptyList(), raireResults.contests, ballotCards)
+        val workflow = ClcaAudit(auditConfig, emptyList(), raireResults.contests, ballotCards)
 
         runComparisonWorkflowR(workflow, ballotCards.cvrsUA, nassertions)
     }
 
 }
 
-fun runComparisonWorkflowR(workflow: ClcaWorkflow, sortedMvrs: Iterable<CvrUnderAudit>, nassertions: Int) {
+fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<CvrUnderAudit>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var done = false

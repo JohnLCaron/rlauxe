@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.*
@@ -33,7 +34,7 @@ class CorlaSingleRoundAuditTaskGenerator(
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
             StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
@@ -72,7 +73,7 @@ class CorlaWorkflowTaskGenerator(
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed), quiet = true)
+        val clca = CorlaAudit(auditConfig, listOf(sim.contest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed), quiet = true)
         return WorkflowTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
@@ -81,12 +82,12 @@ class CorlaWorkflowTaskGenerator(
     }
 }
 
-class CorlaWorkflow(
+class CorlaAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     val ballotCards: StartTestBallotCardsClca, // mutable
     val quiet: Boolean = false,
-): RlauxWorkflowIF {
+): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     // val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()

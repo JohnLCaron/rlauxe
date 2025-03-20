@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.unittest
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -32,7 +33,7 @@ class TestClcaEstimationFailure {
         )
 
         val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), ballotCards)
+        val workflow = ClcaAudit(auditConfig, test.contests, emptyList(), ballotCards)
 
         println("\nrunClcaSimulation")
         workflow.contestsUA().forEach { contestUA ->

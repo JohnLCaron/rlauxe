@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.roundToInt
-import org.cryptobiotic.rlauxe.workflow.*
 
 private val debug = false
 private val debugConsistent = false
@@ -12,7 +12,7 @@ private val debugSizeNudge = true
 /**
  * iterates on createSampleIndices, checking for pct <= auditConfig.samplePctCutoff,
  * removing contests until satisfied. */
-fun sample(workflow: RlauxWorkflowProxy, auditRound: AuditRound, previousSamples: Set<Long>, quiet: Boolean) {
+fun sample(workflow: RlauxAuditProxy, auditRound: AuditRound, previousSamples: Set<Long>, quiet: Boolean) {
     val auditConfig = workflow.auditConfig()
     // val sortedBorc = workflow.sortedBallotsOrCvrs()
 
@@ -50,7 +50,7 @@ fun sample(workflow: RlauxWorkflowProxy, auditRound: AuditRound, previousSamples
 
 /** must have contest.estSampleSize set. must have borc.sampleNumber assigned. */
 fun createSampleIndices(
-    workflow: RlauxWorkflowProxy,
+    workflow: RlauxAuditProxy,
     auditRound: AuditRound,
     previousSamples: Set<Long> = emptySet(),
     quiet: Boolean = true

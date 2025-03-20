@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
 
@@ -33,7 +34,7 @@ class RaireWorkflowTaskGenerator(
         )
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val clca = ClcaWorkflow(
+        val clca = ClcaAudit(
             useConfig, emptyList(), listOf(rcontest),
             StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed)
         )

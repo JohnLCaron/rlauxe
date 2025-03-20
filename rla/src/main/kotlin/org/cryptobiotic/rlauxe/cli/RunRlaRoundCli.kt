@@ -4,12 +4,13 @@ package org.cryptobiotic.rlauxe.cli
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
+import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.PersistentAudit
+import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
 import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.*
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -44,7 +45,7 @@ fun runRound(inputDir: String, mvrFile: String): AuditRound? {
         return null
     }
 
-    val workflow = PersistentWorkflow(inputDir)
+    val workflow = PersistentAudit(inputDir)
     val auditRound = workflow.getLastRound()
 
     val publisher = Publisher(inputDir)
@@ -76,7 +77,7 @@ fun runRound(inputDir: String, mvrFile: String): AuditRound? {
 
 fun runAuditStage(
     auditRound: AuditRound,
-    workflow: PersistentWorkflow,
+    workflow: PersistentAudit,
     mvrFile: String,
     publisher: Publisher,
 ): Boolean {
@@ -102,7 +103,7 @@ fun runAuditStage(
     return allDone
 }
 
-fun runChooseSamples(workflow: RlauxWorkflowIF, publish: Publisher): AuditRound {
+fun runChooseSamples(workflow: RlauxAuditIF, publish: Publisher): AuditRound {
     val round = workflow.startNewRound(quiet = false)
     if (round.sampleNumbers.isNotEmpty()) {
         writeSampleNumbersJsonFile(round.sampleNumbers, publish.sampleNumbersFile(round.roundIdx))

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.unittest
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData

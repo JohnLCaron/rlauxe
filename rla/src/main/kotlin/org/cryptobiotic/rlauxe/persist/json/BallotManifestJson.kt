@@ -9,6 +9,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
+import org.cryptobiotic.rlauxe.audit.Ballot
+import org.cryptobiotic.rlauxe.audit.BallotManifestUnderAudit
+import org.cryptobiotic.rlauxe.audit.BallotStyle
+import org.cryptobiotic.rlauxe.audit.BallotUnderAudit
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.workflow.*
 

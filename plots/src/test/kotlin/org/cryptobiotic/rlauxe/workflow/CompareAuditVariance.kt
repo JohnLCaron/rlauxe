@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -56,8 +60,10 @@ class CompareAuditVariance {
         val margins =
             listOf(.006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
-        val clcaConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig =ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
+        val clcaConfig = AuditConfig(
+            AuditType.CLCA, true, nsimEst = nsimEst,
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)
+        )
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

@@ -278,18 +278,19 @@ data class RaireContestTestData(
             )
             solutionResult.assertions.forEach {
                 val isMinAssertion = if (it == minAssertion) "*" else ""
-                println("   ${showAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
+                println("   ${showIrvAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
             }
         }
 
         return Triple(winner, solutionResult, minAssertion)
     }
+}
 
-    fun showAssertion(assertion: Assertion) = buildString {
-        if (assertion is NotEliminatedBefore) {
-            append("   NotEliminatedBefore winner=${assertion.winner} loser=${assertion.loser} ")
-        } else if (assertion is NotEliminatedNext) {
-            append("   NotEliminatedNext winner=${assertion.winner} loser=${assertion.loser} continuing=${assertion.continuing.contentToString()} ")
-        }
+fun showIrvAssertion(assertion: Assertion) = buildString {
+    if (assertion is NotEliminatedBefore) {
+        append("   NotEliminatedBefore winner=${assertion.winner} loser=${assertion.loser} ")
+    } else if (assertion is NotEliminatedNext) {
+        append("   NotEliminatedNext winner=${assertion.winner} loser=${assertion.loser} continuing=${assertion.continuing.contentToString()} ")
     }
 }
+

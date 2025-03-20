@@ -34,7 +34,7 @@ class CorlaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
-            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             clcaWorkflow,
@@ -72,7 +72,7 @@ class CorlaWorkflowTaskGenerator(
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed), quiet = true)
+        val clca = CorlaWorkflow(auditConfig, listOf(sim.contest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed), quiet = true)
         return WorkflowTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
@@ -84,7 +84,7 @@ class CorlaWorkflowTaskGenerator(
 class CorlaWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    val ballotCards: BallotCardsClcaStart, // mutable
+    val ballotCards: StartTestBallotCardsClca, // mutable
     val quiet: Boolean = false,
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -100,7 +100,7 @@ class CorlaWorkflow(
         }
     }
 
-    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
             auditor = AuditCorlaAssertion())
         auditRound.auditWasDone = true

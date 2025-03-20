@@ -28,7 +28,7 @@ fun estimateSampleSizes(
 ): List<RunTestRepeatedResult> {
 
     // create the estimation tasks
-    val tasks = mutableListOf<SimulateSampleSizeTask>()
+    val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
     }
@@ -80,8 +80,8 @@ fun makeEstimationTasks(
     contest: ContestRound,
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
-): List<SimulateSampleSizeTask> {
-    val tasks = mutableListOf<SimulateSampleSizeTask>()
+): List<EstimateSampleSizeTask> {
+    val tasks = mutableListOf<EstimateSampleSizeTask>()
 
     contest.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -101,7 +101,7 @@ fun makeEstimationTasks(
 
             if (!contest.done) {
                 tasks.add(
-                    SimulateSampleSizeTask(
+                    EstimateSampleSizeTask(
                         roundIdx,
                         auditConfig,
                         contest,
@@ -118,7 +118,7 @@ fun makeEstimationTasks(
 }
 
 // For one contest, for one assertion, a concurrent task
-class SimulateSampleSizeTask(
+class EstimateSampleSizeTask(
     val roundIdx: Int,
     val auditConfig: AuditConfig,
     val contest: ContestRound,
@@ -166,12 +166,14 @@ class SimulateSampleSizeTask(
 }
 
 data class EstimationResult(
-    val task: SimulateSampleSizeTask,
+    val task: EstimateSampleSizeTask,
     val repeatedResult: RunTestRepeatedResult,
 )
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //// Clca, including with IRV
+
+// TODO how does this differ from ClcaSingleRoundAuditTask ?
 
 fun simulateSampleSizeClcaAssorter(
     roundIdx: Int,

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.AuditRound
-import org.cryptobiotic.rlauxe.workflow.BallotCardsClcaStart
+import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
 import org.cryptobiotic.rlauxe.workflow.ContestRound
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -51,7 +51,7 @@ class TestConsistentSamplingFromShangrla {
 
         val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
 
-        val ballotCards = BallotCardsClcaStart(cvrs, cvrs, 12345678901L)
+        val ballotCards = StartTestBallotCardsClca(cvrs, cvrs, 12345678901L)
         consistentSampling(auditRound, ballotCards)
         assertEquals(5, auditRound.sampleNumbers.size)
 
@@ -99,7 +99,7 @@ class TestConsistentSamplingFromShangrla {
         assertEquals(9, cvrsUAP.size)
 
         val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
-        val ballotCards = BallotCardsClcaStart(cvrs, cvrs, 123456789012L)
+        val ballotCards = StartTestBallotCardsClca(cvrs, cvrs, 123456789012L)
         consistentSampling(auditRound, ballotCards)
         assertEquals(6, auditRound.sampleNumbers.size)
         // assertEquals(listOf(7, 2, 8, 3, 5, 1), auditRound.sampleNumbers)

@@ -4,11 +4,10 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
-// what if the workflows use List, put PersistentWorkflow doesnt ??
 class ClcaWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    raireContests: List<RaireContestUnderAudit>, // TODO or call raire from here ??
+    raireContests: List<RaireContestUnderAudit>,
     val ballotCards: BallotCardsClcaStart, // mutable
 ): RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -21,7 +20,7 @@ class ClcaWorkflow(
 
         contestsUA = regularContests + raireContests
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(ballotCards.cvrs)
+            contest.makeClcaAssertions(ballotCards.cvrs())
         }
 
         /* TODO only check regular contests ??
@@ -34,7 +33,7 @@ class ClcaWorkflow(
     }
 
     //  return complete
-    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
             auditor = AuditClcaAssertion(quiet))
         auditRound.auditWasDone = true
@@ -148,12 +147,6 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         )
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
-        /* TODO this is left over from when we ran testH0Result with terminateOnNullReject = false
-        //    I think we could probably just use testH0Result.sampleCount and ignore sampleFirstUnderLimit
-        val samplesNeeded = if (testH0Result.sampleFirstUnderLimit > 0) testH0Result.sampleFirstUnderLimit else testH0Result.sampleCount
-        if (testH0Result.sampleFirstUnderLimit > 0 && (testH0Result.sampleFirstUnderLimit != testH0Result.sampleCount + 1)) {
-            println("WARNING: sampleFirstUnderLimit = ${testH0Result.sampleFirstUnderLimit} != sampleCount = ${testH0Result.sampleCount}")
-        } */
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

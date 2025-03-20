@@ -16,13 +16,13 @@ class OneAuditWorkflow(
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(ballotCards.cvrs) }
+        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(ballotCards.cvrs()) }
 
         // check contests well formed etc
         // check(auditConfig, contests)
     }
 
-    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
             auditor = OneAuditClcaAssertion())
         auditRound.auditWasDone = true
@@ -79,7 +79,6 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         )
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
-        val samplesNeeded = if (testH0Result.sampleFirstUnderLimit > 0) testH0Result.sampleFirstUnderLimit else testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

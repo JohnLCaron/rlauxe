@@ -123,7 +123,7 @@ class TestIrvCount {
         val rassertions = mutableListOf<RaireAssertion>()
         solutionResult.assertions.forEach {
             val isMinAssertion = if (it == minAssertion) "*" else ""
-            println("${showAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
+            println("${showIrvAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
 
             val choices = if (it.assertion is NotEliminatedNext) {
                 val nen = (it.assertion as NotEliminatedNext)

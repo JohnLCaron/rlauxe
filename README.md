@@ -65,7 +65,7 @@ The purpose of the audit is to determine whether the reported winner(s) are corr
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
 
 For each round:
-1. for each contest decide how many samples are needed, typically by estimating the samples needed to satisft the risk function, 
+1. for each contest decide how many samples are needed, typically by estimating the samples needed to satisfy the risk function, 
    based on the contest margin and an estimate of the error rates
 1. randomly choose ballots to sample based on the sample sizes
 1. find the chosen paper ballots and do a manual audit of each
@@ -187,18 +187,15 @@ See the RAIRE guides for details:
 
 From Phantoms to Zombies (P2Z) paper:
 
-    A listing of the groups of ballots and the number of ballots in each group is called 
-    a ballot manifest.
-
-    What if the ballot manifest is not accurate?
-    It suffices to make worst-case assumptions about the individual randomly selected ballots 
-    that the audit cannot find. This ensures that the true risk limit remains smaller than 
-    the nominal risk limit.
-
-    The dead (not found, phantom) ballots are re-animated as evil zombies: 
-    We suppose that they reflect whatever would increase the P-value most: 
-    a 2-vote overstatement for a ballot-level comparison audit, 
-    or a valid vote for every loser in a ballot-polling audit.
+"A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
+What if the ballot manifest is not accurate?
+It suffices to make worst-case assumptions about the individual randomly selected ballots 
+that the audit cannot find. This ensures that the true risk limit remains smaller than 
+the nominal risk limit.
+The dead (not found, phantom) ballots are re-animated as evil zombies: 
+We suppose that they reflect whatever would increase the P-value most: 
+a 2-vote overstatement for a ballot-level comparison audit, 
+or a valid vote for every loser in a ballot-polling audit."
 
 See [Missing Ballots](docs/MissingBallots.md) for details.
 
@@ -339,6 +336,7 @@ as a function of phantomPct, and also with no phantoms but the margin shifted by
 * A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board,
   at least at phantomPCt < 3% or so.
 
+
 # Estimating Sample Batch sizes
 
 Sampling refers to choosing which ballots to hand review to create Manual Voting Records (MVRs). Once the MVRs
@@ -380,9 +378,10 @@ For Polling audits, the BallotManifest (may) contain BallotStyles which comprise
 If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
 
 Note that each round does its own sampling without regard to the previous round's results.
-However, since the seed remains the same, the ballot ordering is the same. We choose the lowest ordered ballots first,
-so previously audited MVRS are always used again in subsequent rounds for contests that continue to the next round. At
-each round we record both the total number of MVRs, and the number of "new samples" needed for that round.
+However, since the seed remains the same, the ballot ordering is the same throughout the audit. We choose the lowest ordered ballots first,
+so previously audited MVRS are always used again in subsequent rounds, for contests that continue to the next round. At
+each round we record both the total number of MVRs, and the number of "new samples" needed for that round, which are the
+ballots the auditors have to find and hand audit for that round.
 
 ### Consistent Sampling with Card Style Data
 
@@ -391,7 +390,7 @@ At the start of the audit:
 * Sort the ballots/cvrs by that number
 
 For each round:
-* For each contest, estimate the number of samples needed (contest.estSamples).
+* For each contest, choose the number of samples to audit (usually an estimate of samples needed) = contest.estSampleSize.
 * Select the first ballots/cvrs that use any contest that needs more samples, until all contests have
 at least contest.estSampleSize in the sample of selected ballots.
 
@@ -404,8 +403,8 @@ At the start of the audit:
   Then we assume that the probability of a ballot containing contest C is Nc / Nb.
 
 For each round:
-* For each contest, estimate the number of samples needed (contest.estSamples).
-* Over all contests, compute contest.estSamples * ( Nb / Nc) and set audit.estSamples to the maximum.
+* For each contest, choose the number of samples to audit (usually an estimate of samples needed) = contest.estSampleSize.
+* Over all contests, compute contest.estSamples * ( Nb / Nc) and set audit.estSamples to the maximum over contests.
 * Take the first audit.estSamples of the sorted ballots.
 
 We need Nc as a condition of the audit, but its straightforward to estimate a contests' sample size without Nc,
@@ -424,12 +423,17 @@ since it works out that Nc cancels out:
         where
           fullyDilutedMargin = (vw - vl)/ Nb
 
-The scale factor Nb/Nc depends on how many contests there are and how they are distributed across the ballots.
-In the following plot we show averages of the overall number of ballots sampled (nmvrs), for polling audits, 
+The scale factor Nb/Nc depends on how many contests there are and how they are distributed across the ballots, but its
+easy to see the effect of not having Card Style Data in any case.
+
+As an example, in the following plot we show averages of the overall number of ballots sampled (nmvrs), for polling audits, 
 no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.png)</a>
+
+* The increases number of nmvrs is simply Nc/Nb, and has a strong absolute effect as the margin gets smaller.
+
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/workflows/pollingNoStyle/pollingNoStylePct.png)</a>
 
 * The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
@@ -528,12 +532,12 @@ The set of contests to continue to the next round is not known, so the total set
 Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed. 
 
 
-## Attacks
+# Attacks
 
 _Attacks_ are scenarios where the actual winner is not the reported winner. They may be untentional, due to malicious actors or
 unintentional due to mistakes in the process or bugs in the software.
 
-### Attack with phantoms
+## Attack with phantoms
 
 Here we investigate what happens when the percentage of phantoms is high enough to flip the election, but the reported margin
 does not reflect that. In other words an attack (or error) when the phantoms are not correctly reported.
@@ -554,7 +558,7 @@ Here are plots of sample size as a function of true margin, for phantomPct of 0,
 * Once the true margin falls below 0, the audit goes to a full count, as it should.
 * The fuzzPct strategy does a bit better when the phantom rate is not too high.
 
-### Attack with wrong reported winner
+## Attack with wrong reported winner
 
 Here we investigate an attack when the reported winner is different than the actual winner.
 
@@ -595,7 +599,7 @@ ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
 STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
   https://github.com/pbstark/SHANGRLA
 
-VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague
+VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague (being written)
 
 ````
 
@@ -604,10 +608,10 @@ VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir,
 ### Limit audit to estimated samples
 
 SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample size. However, in multiple
-contest audits, additional ballots may be in the sample because they are needed by another contest. Since theres no 
+contest audits, additional ballots may be in the sample because they are needed by another contest. Since there is no 
 guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
 
-Note that as soon as an audit gets below the risk limit, the audit is considered a success (status StatRejectNull).
+Note that as soon as an audit gets below the risk limit, the audit is considered a success.
 This reflects the "anytime P-value" property of the Betting martingale (ALPHA eq 9).
 That is, one does not continue with the audit, which could go back above the risk limit with more samples.
 This does agree with how SHANGRLA works.
@@ -666,10 +670,10 @@ which strategy works best.
 
 At first glance, it appears that SHANGRLA Audit.py CVR.consistent_sampling() might make use of the previous round's
 selected ballots (sampled_cvr_indices). However, it looks like CVR.consistent_sampling() never uses sampled_cvr_indices, 
-and so uses the same strategy as we do, namely  sampling without regards to the previous rounds.
+and so uses the same strategy as we do, namely sampling without regards to the previous rounds.
 
-Its possible that the code is wrong when sampled_cvr_indices is passed in, since the sampling doesnt just use the 
-first n sorted samples, which the code seems to assume. But I think the question is moot.
+Of course, when the same ballots are selected as in previous rounds, which is the common case, the previous MVRs for those
+balllots are used.
 
 ## Developer Notes
 

@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import java.util.concurrent.TimeUnit
-import kotlin.test.Test
 
 class TestRaireWorkflowFromJson {
 
@@ -45,7 +44,7 @@ class TestRaireWorkflowFromJson {
 
         val nassertions = raireResults.contests.sumOf { it.rassertions.size }
 
-        val ballotCards = BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed)
         val workflow = ClcaWorkflow(auditConfig, emptyList(), raireResults.contests, ballotCards)
 
         runComparisonWorkflowR(workflow, ballotCards.cvrsUA, nassertions)
@@ -66,7 +65,7 @@ fun runComparisonWorkflowR(workflow: ClcaWorkflow, sortedMvrs: Iterable<CvrUnder
 
         // TODO addMvrs ?
         val sampledMvrus = findSamples(currRound.sampleNumbers, sortedMvrs)
-        done = workflow.runAudit(currRound)
+        done = workflow.runAuditRound(currRound)
         println("runAudit ${currRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
     }
 

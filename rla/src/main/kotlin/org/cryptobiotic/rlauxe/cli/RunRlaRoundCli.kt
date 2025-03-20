@@ -5,7 +5,6 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.json.Publisher
@@ -15,8 +14,8 @@ import java.nio.file.Files.notExists
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-/** Run one round of the RLA. */
-object RunRoundFuzz {
+/** Run one round of an RLA that has already been started. */
+object RunRliRoundCli {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -87,7 +86,7 @@ fun runAuditStage(
     val sampledMvrs = workflow.auditRecord.getMvrsForRound(workflow.ballotCards, roundIdx, mvrFile)
     println("  added ${sampledMvrs.size} mvrs to ballotCards")
 
-    val allDone = workflow.runAudit(auditRound)
+    val allDone = workflow.runAuditRound(auditRound)
     println("  allDone=$allDone took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
 
     // heres the changed state now that the audit has been run.
@@ -101,4 +100,15 @@ fun runAuditStage(
     println("    write sampledMvrs to '${publisher.sampleMvrsFile(roundIdx)}'")
     println()
     return allDone
+}
+
+fun runChooseSamples(workflow: RlauxWorkflowIF, publish: Publisher): AuditRound {
+    val round = workflow.startNewRound(quiet = false)
+    if (round.sampleNumbers.isNotEmpty()) {
+        writeSampleNumbersJsonFile(round.sampleNumbers, publish.sampleNumbersFile(round.roundIdx))
+        println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
+    } else {
+        println("*** FAILED TO GET ANY SAMPLES ***")
+    }
+    return round
 }

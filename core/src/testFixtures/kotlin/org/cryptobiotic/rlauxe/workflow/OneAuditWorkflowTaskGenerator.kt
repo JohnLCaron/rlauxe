@@ -27,7 +27,7 @@ class OneAuditWorkflowTaskGenerator(
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), BallotCardsClcaStart(oaCvrs, oaMvrs, auditConfig.seed))
+        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
         return WorkflowTask(
             name(),
             oneaudit,
@@ -65,7 +65,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), BallotCardsClcaStart(oaCvrs, oaMvrs, auditConfig.seed))
+        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             oneaudit,

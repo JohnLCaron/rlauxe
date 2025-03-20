@@ -29,7 +29,7 @@ class TestPersistentWorkflowPolling {
 
         val (testCvrs, ballotManifest) = testData.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
 
         val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotCards)
 

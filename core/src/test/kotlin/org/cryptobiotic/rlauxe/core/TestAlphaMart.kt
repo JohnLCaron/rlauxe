@@ -4,10 +4,10 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.workflow.Sampler
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.audit.Sampler
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals

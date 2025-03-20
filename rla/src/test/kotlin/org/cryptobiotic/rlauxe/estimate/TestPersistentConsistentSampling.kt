@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
-import org.cryptobiotic.rlauxe.workflow.previousSamples
+import org.cryptobiotic.rlauxe.audit.PersistentAudit
+import org.cryptobiotic.rlauxe.audit.previousSamples
 import kotlin.test.Test
 
 class TestPersistentConsistentSampling {
@@ -9,7 +9,7 @@ class TestPersistentConsistentSampling {
     @Test
     fun testPersistentConsistentSampling() {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
-        val workflow = PersistentWorkflow(topdir)
+        val workflow = PersistentAudit(topdir)
         val auditRecord = workflow.auditRecord
         val auditRound = workflow.getLastRound()
 

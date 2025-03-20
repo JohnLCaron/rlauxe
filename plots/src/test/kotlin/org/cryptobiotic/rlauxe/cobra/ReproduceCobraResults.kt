@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertTrue

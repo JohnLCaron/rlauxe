@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -143,7 +144,7 @@ class ExtraVsMarginByStrategy {
             )
             val task = clcaGenerator2.generateNewTask()
 
-            val lastAuditRound = runWorkflow(name, task.workflow, quiet = false)
+            val lastAuditRound = runAudit(name, task.workflow, quiet = false)
             assertNotNull(lastAuditRound)
             println("nmvrs = ${lastAuditRound.nmvrs}")
 

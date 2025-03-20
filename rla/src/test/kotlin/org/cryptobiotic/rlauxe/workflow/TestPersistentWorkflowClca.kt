@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -37,23 +37,23 @@ class TestPersistentWorkflowClca {
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
-        var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), ballotCards)
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards)
 
         writeCvrsCsvFile(ballotCards.cvrsUA, publish.cvrsCsvFile())
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publish.contestsFile())
 
         var round = 1
         var done = false
-        var workflow : RlauxWorkflowIF = clcaWorkflow
+        var workflow : RlauxAuditIF = clcaWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, ballotCards.mvrsUA, publish)
-            workflow = PersistentWorkflow(topdir)
+            workflow = PersistentAudit(topdir)
             round++
         }
     }
 }
 
-fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, mvrsUA: Iterable<CvrUnderAudit>, publish: Publisher): Boolean {
+fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxAuditIF, mvrsUA: Iterable<CvrUnderAudit>, publish: Publisher): Boolean {
     val roundStopwatch = Stopwatch()
     var done = false
 

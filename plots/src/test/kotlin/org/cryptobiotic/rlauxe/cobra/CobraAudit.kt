@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cobra
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.*
@@ -30,7 +31,7 @@ class CobraSingleRoundAuditTaskGenerator(
         val contest = makeContestFromCvrs(info, testCvrs)
 
         // TODO: chicken or the egg
-        val cobraWorkflow1 = CobraWorkflow(auditConfig, listOf(contest), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed), p2prior)
+        val cobraWorkflow1 = CobraAudit(auditConfig, listOf(contest), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed), p2prior)
         val contestUA: ContestUnderAudit = cobraWorkflow1.contestsUA().first()
         val cassorter = contestUA.clcaAssertions.first().cassorter
 
@@ -39,7 +40,7 @@ class CobraSingleRoundAuditTaskGenerator(
         val mvrs = sampler.mvrs
 
         // maybe bogus
-        val cobraWorkflow2 = CobraWorkflow(auditConfig, listOf(contest),
+        val cobraWorkflow2 = CobraAudit(auditConfig, listOf(contest),
             StartTestBallotCardsClca(testCvrs, sampler.mvrs, auditConfig.seed),
             p2prior)
 
@@ -54,12 +55,12 @@ class CobraSingleRoundAuditTaskGenerator(
     }
 }
 
-class CobraWorkflow(
+class CobraAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     val ballotCards: StartTestBallotCardsClca, // mutable
     val p2prior: Double,
-) : RlauxWorkflowIF {
+) : RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 

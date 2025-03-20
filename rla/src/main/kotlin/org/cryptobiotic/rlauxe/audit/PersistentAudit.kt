@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.workflow.*
 
 /** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
-class PersistentWorkflow(
+class PersistentAudit(
     inputDir: String,
-): RlauxWorkflowIF {
+): RlauxAuditIF {
 
     private val auditConfig: AuditConfig
     private val contestsUA: List<ContestUnderAudit>
@@ -45,7 +44,7 @@ class PersistentWorkflow(
     override fun ballotCards() = ballotCards
 }
 
-fun RlauxWorkflowIF.showResults(estSampleSize: Int) {
+fun RlauxAuditIF.showResults(estSampleSize: Int) {
     println("Audit results")
     /* this.getContestRounds().forEach{ contest ->
         val minAssertion = contest.minAssertion()

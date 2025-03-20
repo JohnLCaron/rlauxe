@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.Ballot
-import org.cryptobiotic.rlauxe.workflow.BallotManifest
-import org.cryptobiotic.rlauxe.workflow.BallotStyle
+import org.cryptobiotic.rlauxe.audit.Ballot
+import org.cryptobiotic.rlauxe.audit.BallotManifest
+import org.cryptobiotic.rlauxe.audit.BallotStyle
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -15,7 +15,6 @@ private const val debugAdjust = false
 /**
  * Creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
- * Could be in Test.
  */
 data class MultiContestTestData(
     val ncontest: Int,

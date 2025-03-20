@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.workflow.Sampler
+import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.audit.Sampler
 import kotlin.random.Random
 import kotlin.test.Test
 

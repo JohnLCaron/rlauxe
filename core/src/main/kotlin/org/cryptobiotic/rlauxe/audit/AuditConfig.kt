@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.secureRandom

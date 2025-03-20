@@ -4,6 +4,7 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
+import org.cryptobiotic.rlauxe.audit.*
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -20,7 +21,6 @@ import kotlin.math.min
 
 /**
  * Create a multicontest audit, with fuzzed test data.
- * Could be in Test.
  */
 object RunRlaStartFuzz {
 
@@ -101,7 +101,8 @@ object RunRlaStartFuzz {
         // clearDirectory(Path.of(topdir))
 
         val publisher = Publisher(topdir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 100,
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles = true, nsimEst = 100,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
@@ -149,7 +150,7 @@ object RunRlaStartFuzz {
         writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
-        val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)
+        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
@@ -212,7 +213,7 @@ object RunRlaStartFuzz {
         println("   writeMvrsJsonFile ${mvrFile}")
 
         // PollingWorkflow creates the assertions
-        val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotCards)
+        val pollingWorkflow = PollingAudit(auditConfig, contests, ballotCards)
 
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")

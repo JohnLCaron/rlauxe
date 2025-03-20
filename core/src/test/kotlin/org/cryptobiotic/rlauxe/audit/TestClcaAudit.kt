@@ -1,18 +1,21 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
 
-class TestClcaWorkflow {
-    val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10,
-        clcaConfig = ClcaConfig(ClcaStrategyType.previous))
+class TestClcaAudit {
+    val auditConfig = AuditConfig(
+        AuditType.CLCA, hasStyles=true, nsimEst=10,
+        clcaConfig = ClcaConfig(ClcaStrategyType.previous)
+    )
 
     @Test
-    fun testComparisonOneContest() {
+    fun testClcaOneContest() {
         val N = 100000
         val ncontests = 1
         val nbs = 1
@@ -26,7 +29,7 @@ class TestClcaWorkflow {
         // val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         // high fuzz rate to get multiple rounds
-        val finalRound = testComparisonWorkflow(auditConfig, testData, 0.05)
+        val finalRound = testClcaWorkflow(auditConfig, testData, 0.05)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
@@ -41,7 +44,7 @@ class TestClcaWorkflow {
         val phantomPct= 0.00 .. 0.00
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
 
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
         assertEquals(1, finalRound.roundIdx)
@@ -57,7 +60,7 @@ class TestClcaWorkflow {
         val phantomPct= 0.005 .. 0.005
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange=underVotePct, phantomPctRange=phantomPct)
 
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
@@ -76,63 +79,63 @@ class TestClcaWorkflow {
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
     @Test
-    fun testComparisonWithSimFuzz() {
+    fun testClcaWithSimFuzz() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=0.05))
         val N = 50000
         val testData = MultiContestTestData(11, 1, N)
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
     @Test
-    fun testComparisonWithMvrFuzz() {
+    fun testClcaWithMvrFuzz() {
         val N = 50000
         val testData = MultiContestTestData(11, 1, N)
-        val finalRound = testComparisonWorkflow(auditConfig, testData, .05)
+        val finalRound = testClcaWorkflow(auditConfig, testData, .05)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
     // @Test oracle disabled
-    fun testComparisonOracle() {
+    fun testClcaOracle() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
     @Test
-    fun testComparisonPhantoms() {
+    fun testClcaPhantoms() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
     @Test
-    fun testComparisonPhantomStrategy() {
+    fun testClcaPhantomStrategy() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
         val N = 50000
         val testData = MultiContestTestData(11, 4, N)
-        val finalRound = testComparisonWorkflow(auditConfig, testData)
+        val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
-    fun testComparisonWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRound? {
+    fun testClcaWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRound? {
         val contests: List<Contest> = testData.contests
-        println("Start testComparisonWorkflow $testData")
+        println("Start testClcaWorkflow $testData")
         contests.forEach{ println("  $it")}
         println()
 
@@ -142,7 +145,7 @@ class TestClcaWorkflow {
             else if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaWorkflow(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
-        return runWorkflow("testComparisonWorkflow", workflow)
+        val workflow = ClcaAudit(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        return runAudit("testClcaWorkflow", workflow)
     }
 }

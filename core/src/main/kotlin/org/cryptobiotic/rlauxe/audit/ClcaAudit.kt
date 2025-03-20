@@ -1,15 +1,15 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
-class ClcaWorkflow(
+class ClcaAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
     val ballotCards: BallotCardsClcaStart, // mutable
-): RlauxWorkflowIF {
+): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
@@ -35,7 +35,8 @@ class ClcaWorkflow(
     //  return complete
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
-            auditor = AuditClcaAssertion(quiet))
+            auditor = AuditClcaAssertion(quiet)
+        )
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
         return complete
@@ -54,7 +55,8 @@ fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
                  ballotCards: BallotCardsClca,
                  roundIdx: Int,
-                 auditor: ClcaAssertionAuditor): Boolean {
+                 auditor: ClcaAssertionAuditor
+): Boolean {
 
     val contestsNotDone = contests.filter{ !it.done }
 
@@ -106,7 +108,8 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         val clcaConfig = auditConfig.clcaConfig
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
             ClcaStrategyType.previous,
-            ClcaStrategyType.phantoms -> {
+            ClcaStrategyType.phantoms
+                -> {
                 // use phantomRate as apriori
                 ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
             }
@@ -117,7 +120,8 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             } */
 
             ClcaStrategyType.oracle, // TODO: disabled
-            ClcaStrategyType.noerror -> {
+            ClcaStrategyType.noerror
+                -> {
                 ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
             }
 

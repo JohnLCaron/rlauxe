@@ -1,11 +1,11 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
-// runs test workflow rounds until finished
+// runs audit rounds until finished
 // return last audit round
-fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=true): AuditRound? {
+fun runAudit(name: String, workflow: RlauxAuditIF, quiet: Boolean=true): AuditRound? {
     val stopwatch = Stopwatch()
 
     var nextRound: AuditRound? = null

@@ -135,7 +135,8 @@ class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nba
 
 private const val checkValidity : Boolean= false
 
-class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) : BallotCardsPolling {
+class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) :
+    BallotCardsPolling {
     var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
     override fun nballotCards() = nballotCards

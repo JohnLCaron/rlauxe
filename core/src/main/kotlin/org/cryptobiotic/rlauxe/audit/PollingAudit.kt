@@ -1,14 +1,14 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 
-class PollingWorkflow(
+class PollingAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     val ballotCards: BallotCardsPolling,
-): RlauxWorkflowIF {
+): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     private val auditRounds = mutableListOf<AuditRound>()
 

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.PersistentWorkflow
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -31,7 +31,7 @@ class TestPersistentWorkflowPolling {
         val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
         val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
 
-        val pollingWorkflow = PollingWorkflow(auditConfig, contests, ballotCards)
+        val pollingWorkflow = PollingAudit(auditConfig, contests, ballotCards)
 
         val ballotManifestUA = BallotManifestUnderAudit(ballotCards.ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publish.ballotManifestFile())
@@ -40,10 +40,10 @@ class TestPersistentWorkflowPolling {
 
         var round = 1
         var done = false
-        var workflow : RlauxWorkflowIF = pollingWorkflow
+        var workflow : RlauxAuditIF = pollingWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, ballotCards.mvrsUA, publish)
-            workflow = PersistentWorkflow(topdir)
+            workflow = PersistentAudit(topdir)
             round++
         }
     }

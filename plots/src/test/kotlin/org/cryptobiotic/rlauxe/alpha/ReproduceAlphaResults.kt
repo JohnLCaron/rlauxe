@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
-import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

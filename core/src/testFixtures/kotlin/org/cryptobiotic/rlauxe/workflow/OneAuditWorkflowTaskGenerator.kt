@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 
@@ -20,14 +21,14 @@ class OneAuditWorkflowTaskGenerator(
     override fun generateNewTask(): WorkflowTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
+        val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
         return WorkflowTask(
             name(),
             oneaudit,
@@ -58,14 +59,14 @@ class OneAuditSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAuditWorkflow(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
+        val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             oneaudit,

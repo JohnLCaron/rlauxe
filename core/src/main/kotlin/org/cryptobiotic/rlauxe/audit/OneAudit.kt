@@ -1,16 +1,15 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
-class OneAuditWorkflow(
+class OneAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val ballotCards: BallotCardsClcaStart, // mutable
-): RlauxWorkflowIF {
+): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
@@ -24,7 +23,8 @@ class OneAuditWorkflow(
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
-            auditor = OneAuditClcaAssertion())
+            auditor = OneAuditClcaAssertion()
+        )
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
         return complete

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -23,8 +24,10 @@ class ClcaWorkflowTaskGenerator(
 
     override fun generateNewTask(): WorkflowTask {
         val useConfig = auditConfig ?:
-        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
+        AuditConfig(
+            AuditType.CLCA, true, nsimEst = nsimEst,
+            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+        )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
@@ -38,7 +41,7 @@ class ClcaWorkflowTaskGenerator(
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
             StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
 
         return WorkflowTask(
@@ -69,8 +72,10 @@ class ClcaSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val useConfig = auditConfig ?:
-        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
+        AuditConfig(
+            AuditType.CLCA, true, nsimEst = nsimEst,
+            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+        )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
@@ -80,7 +85,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
         }
 
-        val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
             StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
 
         /* make sure margins are below 0
@@ -107,7 +112,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 
 class ClcaSingleRoundAuditTask(
     val name: String,
-    val workflow: RlauxWorkflowIF,
+    val workflow: RlauxAuditIF,
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
@@ -154,8 +159,9 @@ class ClcaSingleRoundAuditTask(
 }
 
 // keep this seperate function for testing
-fun runClcaSingleRoundAudit(workflow: RlauxWorkflowIF, contestRounds: List<ContestRound>, quiet: Boolean = true,
-                            auditor: ClcaAssertionAuditor): Int {
+fun runClcaSingleRoundAudit(workflow: RlauxAuditIF, contestRounds: List<ContestRound>, quiet: Boolean = true,
+                            auditor: ClcaAssertionAuditor
+): Int {
     val stopwatch = Stopwatch()
     runClcaAudit(workflow.auditConfig(), contestRounds, workflow.ballotCards() as BallotCardsClca, 1, auditor = auditor)
     if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")

@@ -1,13 +1,14 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsPolling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestPollingWorkflow {
+class TestPollingAudit {
 
    // @Test
     fun testPollingNoStyleRepeat() {
@@ -35,9 +36,10 @@ class TestPollingWorkflow {
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
 
-        val workflow = PollingWorkflow(auditConfig, contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed))
-        runWorkflow("testPollingNoStyle", workflow)
+        val workflow = PollingAudit(auditConfig, contests,
+            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed)
+        )
+        runAudit("testPollingNoStyle", workflow)
     }
 
     // @Test
@@ -75,15 +77,17 @@ class TestPollingWorkflow {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = testCvrs
 
-        val workflow = PollingWorkflow(auditConfig, contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed))
-        runWorkflow("testPollingWithStyle", workflow)
+        val workflow = PollingAudit(auditConfig, contests,
+            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        )
+        runAudit("testPollingWithStyle", workflow)
     }
 
     @Test
     fun testPollingWithFuzz() {
         val mvrFuzzPct = .0123
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10,
+        val auditConfig = AuditConfig(
+            AuditType.POLLING, hasStyles=true, nsimEst=10,
             pollingConfig = PollingConfig(simFuzzPct=mvrFuzzPct)
         )
 
@@ -102,9 +106,10 @@ class TestPollingWorkflow {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
 
-        val workflow = PollingWorkflow(auditConfig, contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed))
-        runWorkflow("testPollingWithStyle", workflow)
+        val workflow = PollingAudit(auditConfig, contests,
+            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        )
+        runAudit("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -130,9 +135,10 @@ class TestPollingWorkflow {
 
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
-        val workflow = PollingWorkflow(auditConfig, test.contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed))
+        val workflow = PollingAudit(auditConfig, test.contests,
+            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed)
+        )
 
-        runWorkflow("testPollingOneContest", workflow)
+        runAudit("testPollingOneContest", workflow)
     }
 }

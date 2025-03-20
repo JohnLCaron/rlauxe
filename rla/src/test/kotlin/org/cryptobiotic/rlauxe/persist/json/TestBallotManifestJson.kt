@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.workflow.BallotManifestUnderAudit
-import org.cryptobiotic.rlauxe.workflow.BallotUnderAudit
+import org.cryptobiotic.rlauxe.audit.BallotManifestUnderAudit
+import org.cryptobiotic.rlauxe.audit.BallotUnderAudit
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals

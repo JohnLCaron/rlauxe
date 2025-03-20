@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.workflow.Sampler
+import org.cryptobiotic.rlauxe.audit.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals

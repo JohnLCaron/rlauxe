@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.workflow.Sampler
+import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.audit.Sampler
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult

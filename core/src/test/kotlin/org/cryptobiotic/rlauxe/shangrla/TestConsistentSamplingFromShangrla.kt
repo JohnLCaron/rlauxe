@@ -4,9 +4,9 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
-import org.cryptobiotic.rlauxe.workflow.ContestRound
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -1,16 +1,16 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sample
 
 // used in ConsistentSampling
-interface RlauxWorkflowProxy {
+interface RlauxAuditProxy {
     fun auditConfig() : AuditConfig
     fun ballotCards() : BallotCards
 }
 
-interface RlauxWorkflowIF: RlauxWorkflowProxy {
+interface RlauxAuditIF: RlauxAuditProxy {
     fun auditRounds(): MutableList<AuditRound>
     fun contestsUA(): List<ContestUnderAudit>
 

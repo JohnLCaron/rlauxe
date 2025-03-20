@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.estimate.ClcaFlipErrorsSampler
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.workflow.Sampler
+import org.cryptobiotic.rlauxe.audit.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 import kotlin.math.abs

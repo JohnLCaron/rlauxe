@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -26,20 +27,22 @@ class CompareAuditsWithPhantoms {
 
         phantoms.forEach { phantom ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfig=AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
+                auditConfig= AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfig=AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
+                auditConfig= AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantom, cvrPercent = .99, mvrsFuzzPct=mvrFuzzPct,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit99"),
-                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))
+                auditConfigIn = AuditConfig(
+                    AuditType.ONEAUDIT, true,
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
@@ -86,8 +89,10 @@ class CompareAuditsWithPhantoms {
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
         val stopwatch = Stopwatch()
 
-        val auditConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, true, nsimEst = nsimEst,
+            clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
+        )
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         phantoms.forEach { phantom ->

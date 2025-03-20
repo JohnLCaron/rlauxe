@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -26,8 +30,10 @@ class ExtraVsMarginByFuzzDiff {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val auditConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-                clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct))
+            val auditConfig = AuditConfig(
+                AuditType.CLCA, true, nsimEst = nsimEst,
+                clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct)
+            )
 
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,

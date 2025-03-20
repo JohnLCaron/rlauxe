@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.OneAuditConfig
+import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -24,20 +28,22 @@ class CompareAuditsWithUndervotes {
 
         undervotes.forEach { undervote ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, undervote, phantomPct=0.0, mvrsFuzzPct=mvrFuzzPct,
-                auditConfig=AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
+                auditConfig= AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, undervote, 0.0, mvrFuzzPct,
-                auditConfig=AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
+                auditConfig= AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, undervote, 0.0, cvrPercent = .99, mvrsFuzzPct=mvrFuzzPct,
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit99"),
-                auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy=OneAuditStrategyType.max99))
+                auditConfigIn = AuditConfig(
+                    AuditType.ONEAUDIT, true,
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }

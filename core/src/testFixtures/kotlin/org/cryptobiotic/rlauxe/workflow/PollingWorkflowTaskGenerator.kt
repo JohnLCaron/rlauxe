@@ -1,20 +1,21 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.estimate.*
 import kotlin.math.max
 
 class PollingWorkflowTaskGenerator(
-        val Nc: Int, // including undervotes but not phantoms
-        val margin: Double,
-        val underVotePct: Double,
-        val phantomPct: Double,
-        val mvrsFuzzPct: Double,
-        val parameters : Map<String, Any>,
-        val auditConfig: AuditConfig? = null,
-        val Nb: Int = Nc,
-        val nsimEst: Int = 100,
+    val Nc: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val mvrsFuzzPct: Double,
+    val parameters : Map<String, Any>,
+    val auditConfig: AuditConfig? = null,
+    val Nb: Int = Nc,
+    val nsimEst: Int = 100,
     ) : WorkflowTaskGenerator {
     override fun name() = "PollingWorkflowTaskGenerator"
 
@@ -39,7 +40,7 @@ class PollingWorkflowTaskGenerator(
         }
 
         val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotCards)
+        val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
         return WorkflowTask(
             name(),
             pollingWorkflow,
@@ -50,16 +51,16 @@ class PollingWorkflowTaskGenerator(
 }
 // Do the audit in a single round, dont use estimateSampleSizes
 class PollingSingleRoundAuditTaskGenerator(
-        val Nc: Int, // including undervotes but not phantoms
-        val margin: Double,
-        val underVotePct: Double,
-        val phantomPct: Double,
-        val mvrsFuzzPct: Double,
-        val parameters : Map<String, Any>,
-        val auditConfig: AuditConfig? = null,
-        val Nb: Int = Nc,
-        val nsimEst: Int = 100,
-        val quiet: Boolean = true,
+    val Nc: Int, // including undervotes but not phantoms
+    val margin: Double,
+    val underVotePct: Double,
+    val phantomPct: Double,
+    val mvrsFuzzPct: Double,
+    val parameters : Map<String, Any>,
+    val auditConfig: AuditConfig? = null,
+    val Nb: Int = Nc,
+    val nsimEst: Int = 100,
+    val quiet: Boolean = true,
     ): WorkflowTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
@@ -76,7 +77,7 @@ class PollingSingleRoundAuditTaskGenerator(
         var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
 
         val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotCards)
+        val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(
             name(),
@@ -90,7 +91,7 @@ class PollingSingleRoundAuditTaskGenerator(
 
 class PollingSingleRoundAuditTask(
     val name: String,
-    val workflow: RlauxWorkflowIF,
+    val workflow: RlauxAuditIF,
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,

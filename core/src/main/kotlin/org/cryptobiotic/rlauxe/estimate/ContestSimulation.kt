@@ -6,9 +6,9 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToInt
-import org.cryptobiotic.rlauxe.workflow.Ballot
-import org.cryptobiotic.rlauxe.workflow.BallotManifest
-import org.cryptobiotic.rlauxe.workflow.BallotStyle
+import org.cryptobiotic.rlauxe.audit.Ballot
+import org.cryptobiotic.rlauxe.audit.BallotManifest
+import org.cryptobiotic.rlauxe.audit.BallotStyle
 import kotlin.math.round
 import kotlin.random.Random
 

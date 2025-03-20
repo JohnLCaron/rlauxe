@@ -17,9 +17,9 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.EstimationResult
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
-import org.cryptobiotic.rlauxe.workflow.AuditConfig
-import org.cryptobiotic.rlauxe.workflow.AuditType
-import org.cryptobiotic.rlauxe.workflow.ContestRound
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import kotlin.test.Test
 
 class MeasureEstimationTaskConcurrency {

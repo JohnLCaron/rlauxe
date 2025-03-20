@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -74,7 +75,7 @@ class PlotDistributions {
         println("oracle errorRates = ${ClcaErrorTable.getErrorRates(2, mvrsFuzzPct)}")
 
         val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
+        val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, sampleNumbers = emptyList())
@@ -105,7 +106,7 @@ class PlotDistributions {
             // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
             val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
-            val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
+            val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
             // heres the ConsistentSample permutation
             //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }

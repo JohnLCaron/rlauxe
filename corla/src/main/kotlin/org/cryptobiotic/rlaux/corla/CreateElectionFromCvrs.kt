@@ -338,15 +338,14 @@ fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo
 
     /////////////////
 
-    val ballotCards = BallotCardsClcaStart(allCvrs, allCvrs, auditConfig.seed)
+    val ballotCards = StartBallotCardsClca(allCvrs, auditConfig.seed)
 
     writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
 
-    // replicated in RunRlaStartFuzz
     val mvrFile = "$auditDir/private/testMvrs.csv"
     publisher.validateOutputDirOfFile(mvrFile)
-    writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
+    writeCvrsCsvFile(ballotCards.cvrsUA, mvrFile) // no errors
     println("   writeCvrsCsvFile ${mvrFile}")
 
     val clcaWorkflow = ClcaWorkflow(auditConfig, contests, raireContests, ballotCards)

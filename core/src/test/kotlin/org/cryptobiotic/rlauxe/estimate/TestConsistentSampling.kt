@@ -18,7 +18,7 @@ class TestConsistentSampling {
             ContestUnderAudit(it, isComparison = true)
         }
         val testCvrs = test.makeCvrsFromContests()
-        val ballotCards = BallotCardsClcaStart(testCvrs, testCvrs, Random.nextLong())
+        val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, Random.nextLong())
 
         contestsUAs.forEach { it.makeClcaAssertions(testCvrs) }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
@@ -65,7 +65,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
         val ballotManifest = test.makeBallotManifest(true)
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
+        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
 
         val prng = Prng(Random.nextLong())
         val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
@@ -103,7 +103,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
         val ballotManifest = test.makeBallotManifest(false)
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
+        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
 
         val prng = Prng(Random.nextLong())
         val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }

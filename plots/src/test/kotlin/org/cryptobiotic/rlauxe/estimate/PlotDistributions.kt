@@ -73,7 +73,7 @@ class PlotDistributions {
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         println("oracle errorRates = ${ClcaErrorTable.getErrorRates(2, mvrsFuzzPct)}")
 
-        val ballotCards = BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed)
         val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
@@ -104,7 +104,7 @@ class PlotDistributions {
             var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
             // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
-            val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
+            val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
             val workflow = ClcaWorkflow(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
             // heres the ConsistentSample permutation

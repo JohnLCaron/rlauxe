@@ -18,7 +18,10 @@ import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
-/** Create the starting election state, with fuzzed test data. */
+/**
+ * Create a multicontest audit, with fuzzed test data.
+ * Could be in Test.
+ */
 object RunRlaStartFuzz {
 
     @JvmStatic
@@ -135,7 +138,7 @@ object RunRlaStartFuzz {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
                     // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
-        val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
 
         //// could be inside of BallotCardsClca
         writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile()) // TODO wrap in Result ??
@@ -191,7 +194,7 @@ object RunRlaStartFuzz {
             require(mvr.id == cvr.id)
         }
 
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
         val ballotManifestUA = BallotManifestUnderAudit(ballotCards.ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publisher.ballotManifestFile())
         println("   writeBallotManifestJsonFile ${publisher.ballotManifestFile()}")
@@ -223,15 +226,4 @@ object RunRlaStartFuzz {
 
         return if (auditRound.sampleNumbers.isNotEmpty()) 0 else 1
     }
-}
-
-fun runChooseSamples(workflow: RlauxWorkflowIF, publish: Publisher): AuditRound {
-    val round = workflow.startNewRound(quiet = false)
-    if (round.sampleNumbers.isNotEmpty()) {
-        writeSampleNumbersJsonFile(round.sampleNumbers, publish.sampleNumbersFile(round.roundIdx))
-        println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
-    } else {
-        println("*** FAILED TO GET ANY SAMPLES ***")
-    }
-    return round
 }

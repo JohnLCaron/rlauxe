@@ -36,7 +36,7 @@ class TestPersistentWorkflowClca {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        val ballotCards = BallotCardsClcaStart(testCvrs, testMvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
         var clcaWorkflow = ClcaWorkflow(auditConfig, contests, emptyList(), ballotCards)
 
         writeCvrsCsvFile(ballotCards.cvrsUA, publish.cvrsCsvFile())
@@ -69,7 +69,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxWorkflowIF, mvrsUA:
         //val sampledMvrs = nextRound.sampleNumbers.map {
         //    testMvrs[it]
         //}
-        done = workflow.runAudit(nextRound)
+        done = workflow.runAuditRound(nextRound)
 
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         writeAuditRoundJsonFile(nextRound, publish.auditRoundFile(roundIdx))

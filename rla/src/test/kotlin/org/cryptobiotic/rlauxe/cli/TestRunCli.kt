@@ -21,7 +21,7 @@ class TestRunCli {
         )
 
         repeat(3) {
-            RunRoundFuzz.main(arrayOf("-in", topdir, "-mvrs", mvrs))
+            RunRliRoundCli.main(arrayOf("-in", topdir, "-mvrs", mvrs))
         }
 
         println("============================================================")
@@ -44,7 +44,7 @@ class TestRunCli {
         )
 
         repeat(3) {
-            RunRoundFuzz.main(arrayOf("-in", topdir, "-mvrs", mvrs))
+            RunRliRoundCli.main(arrayOf("-in", topdir, "-mvrs", mvrs))
         }
 
         RunVerifier.main(arrayOf("-in", topdir))

@@ -15,6 +15,7 @@ private const val debugAdjust = false
 /**
  * Creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
+ * Could be in Test.
  */
 data class MultiContestTestData(
     val ncontest: Int,

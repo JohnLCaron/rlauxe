@@ -1,12 +1,14 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.nostyles
 
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.math.log10
 import kotlin.test.Test
 
-class CompareAuditsByStyles {
+class CompareAuditsNoStyles {
     val nruns = 100
     val nsimEst = 100
     val Nc = 10000
@@ -40,8 +42,10 @@ class CompareAuditsByStyles {
                 Nb=Nc)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
-            val clcaConfigNS = AuditConfig(AuditType.CLCA, false, nsimEst = nsimEst,
-                clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+            val clcaConfigNS = AuditConfig(
+                AuditType.CLCA, false, nsimEst = nsimEst,
+                clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
+            )
             val clcaGeneratorNS = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaNoStyles"),
                 auditConfig = clcaConfigNS,
@@ -49,8 +53,10 @@ class CompareAuditsByStyles {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorNS))
 
-            val clcaConfig = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-                clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
+            val clcaConfig = AuditConfig(
+                AuditType.CLCA, true, nsimEst = nsimEst,
+                clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
+            )
             val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaWithStyles"),
                 auditConfig = clcaConfig,
@@ -72,23 +78,23 @@ class CompareAuditsByStyles {
     @Test
     fun regenPlots() {
         val subtitle = "Nb=${Nb} Nc=${Nc} nruns=${nruns}"
-        showNmvrsVsMargin(name, dirName, subtitle, ScaleType.LogLinear)
-        showNmvrsVsMargin(name, dirName, subtitle, ScaleType.LogLog)
+        showNmvrsByAuditType(name, dirName, subtitle, ScaleType.LogLinear)
+        showNmvrsByAuditType(name, dirName, subtitle, ScaleType.LogLog)
     }
+}
 
-    fun showNmvrsVsMargin(name: String, dirName: String, subtitle: String, scaleType: ScaleType) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val data = io.readResults()
+fun showNmvrsByAuditType(name: String, dirName: String, subtitle: String, scaleType: ScaleType) {
+    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val data = io.readResults()
 
-        wrsPlot(
-            titleS = "$name overall number of ballots sampled",
-            subtitleS = subtitle,
-            writeFile = "$dirName/${name}${scaleType.name}",
-            wrs = data,
-            xname = "margin", xfld = { it.margin },
-            yname = "nmvrs", yfld = { it.nmvrs },
-            catName = "auditType", catfld = { category(it) },
-            scaleType = scaleType
-        )
-    }
+    wrsPlot(
+        titleS = "$name overall number of ballots sampled",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "margin", xfld = { it.margin },
+        yname = "nmvrs", yfld = { it.nmvrs },
+        catName = "auditType", catfld = { category(it) },
+        scaleType = scaleType
+    )
 }

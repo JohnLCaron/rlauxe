@@ -1,6 +1,37 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.Stopwatch
+
+// runs test workflow rounds until finished
+// return last audit round
+fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=true): AuditRound? {
+    val stopwatch = Stopwatch()
+
+    var nextRound: AuditRound? = null
+    var done = false
+    while (!done) {
+        nextRound = workflow.startNewRound(quiet=quiet)
+        if (nextRound.sampleNumbers.isEmpty()) {
+            done = true
+
+        } else {
+            stopwatch.start()
+            workflow.setMvrsBySampleNumber(nextRound.sampleNumbers )
+            if (!quiet) println("\nrunAudit ${nextRound.roundIdx}")
+            done = workflow.runAuditRound(nextRound, quiet)
+            if (!quiet) println(" runAudit ${nextRound.roundIdx} done=$done samples=${nextRound.sampleNumbers.size}")
+        }
+    }
+
+    /*
+    if (!quiet && rounds.isNotEmpty()) {
+        rounds.forEach { println(it) }
+        workflow.showResults(rounds.last().sampledIndices.size)
+    } */
+
+    return nextRound
+}
 
 fun check(auditConfig: AuditConfig, contests: List<ContestRound>) {
 

@@ -39,7 +39,7 @@ class ClcaWorkflowTaskGenerator(
         }
 
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
-            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
 
         return WorkflowTask(
             name(),
@@ -81,7 +81,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         }
 
         val clcaWorkflow = ClcaWorkflow(useConfig, listOf(sim.contest), emptyList(),
-            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
+            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
 
         /* make sure margins are below 0
         if (p2flips != null || p1flips != null) {

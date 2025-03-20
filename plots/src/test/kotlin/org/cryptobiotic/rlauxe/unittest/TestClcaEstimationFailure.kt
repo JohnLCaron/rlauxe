@@ -31,7 +31,7 @@ class TestClcaEstimationFailure {
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms)
         )
 
-        val ballotCards = BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed)
+        val ballotCards = StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed)
         val workflow = ClcaWorkflow(auditConfig, test.contests, emptyList(), ballotCards)
 
         println("\nrunClcaSimulation")

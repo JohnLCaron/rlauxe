@@ -36,7 +36,7 @@ class TestPollingWorkflow {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
 
         val workflow = PollingWorkflow(auditConfig, contests,
-            BallotCardsPollingStart(ballotManifest.ballots, testCvrs, auditConfig.seed))
+            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed))
         runWorkflow("testPollingNoStyle", workflow)
     }
 
@@ -76,7 +76,7 @@ class TestPollingWorkflow {
         val testMvrs = testCvrs
 
         val workflow = PollingWorkflow(auditConfig, contests,
-            BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed))
+            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed))
         runWorkflow("testPollingWithStyle", workflow)
     }
 
@@ -103,7 +103,7 @@ class TestPollingWorkflow {
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
 
         val workflow = PollingWorkflow(auditConfig, contests,
-            BallotCardsPollingStart(ballotManifest.ballots, testMvrs, auditConfig.seed))
+            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed))
         runWorkflow("testPollingWithStyle", workflow)
     }
 
@@ -131,7 +131,7 @@ class TestPollingWorkflow {
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val workflow = PollingWorkflow(auditConfig, test.contests,
-            BallotCardsPollingStart(ballotManifest.ballots, testCvrs, auditConfig.seed))
+            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed))
 
         runWorkflow("testPollingOneContest", workflow)
     }

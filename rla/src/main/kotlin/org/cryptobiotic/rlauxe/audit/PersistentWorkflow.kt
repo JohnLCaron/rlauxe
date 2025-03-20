@@ -27,7 +27,7 @@ class PersistentWorkflow(
     fun getLastRound() = auditRounds.last()
 
     //  return allDone
-    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  { // return allDone
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return allDone
         return when (auditConfig.auditType) {
             AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards as BallotCardsClca, auditRound.roundIdx, auditor = AuditClcaAssertion())
             AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards as BallotCardsPolling, auditRound.roundIdx, quiet)

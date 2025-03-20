@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sample
 
@@ -41,5 +40,5 @@ interface RlauxWorkflowIF: RlauxWorkflowProxy {
 
     // you have to set the mvrs before you run the audit
     fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
-    fun runAudit(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return allDone
+    fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return allDone
 }

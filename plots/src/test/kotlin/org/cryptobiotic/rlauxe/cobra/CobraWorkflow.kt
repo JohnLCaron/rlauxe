@@ -30,7 +30,7 @@ class CobraSingleRoundAuditTaskGenerator(
         val contest = makeContestFromCvrs(info, testCvrs)
 
         // TODO: chicken or the egg
-        val cobraWorkflow1 = CobraWorkflow(auditConfig, listOf(contest), BallotCardsClcaStart(testCvrs, testCvrs, auditConfig.seed), p2prior)
+        val cobraWorkflow1 = CobraWorkflow(auditConfig, listOf(contest), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed), p2prior)
         val contestUA: ContestUnderAudit = cobraWorkflow1.contestsUA().first()
         val cassorter = contestUA.clcaAssertions.first().cassorter
 
@@ -40,7 +40,7 @@ class CobraSingleRoundAuditTaskGenerator(
 
         // maybe bogus
         val cobraWorkflow2 = CobraWorkflow(auditConfig, listOf(contest),
-            BallotCardsClcaStart(testCvrs, sampler.mvrs, auditConfig.seed),
+            StartTestBallotCardsClca(testCvrs, sampler.mvrs, auditConfig.seed),
             p2prior)
 
         return ClcaSingleRoundAuditTask(
@@ -57,7 +57,7 @@ class CobraSingleRoundAuditTaskGenerator(
 class CobraWorkflow(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    val ballotCards: BallotCardsClcaStart, // mutable
+    val ballotCards: StartTestBallotCardsClca, // mutable
     val p2prior: Double,
 ) : RlauxWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -72,7 +72,7 @@ class CobraWorkflow(
         }
     }
 
-    override fun runAudit(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
             auditor = AuditCobraAssertion(p2prior)
         )

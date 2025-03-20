@@ -3,86 +3,24 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.sqrt
 
 private val quiet = true
 
-// runs test workflow rounds until finished
-// return last audit round
-fun runWorkflow(name: String, workflow: RlauxWorkflowIF, quiet: Boolean=true): AuditRound? {
-    val stopwatch = Stopwatch()
-
-    var nextRound: AuditRound? = null
-    var done = false
-    while (!done) {
-        nextRound = workflow.startNewRound(quiet=quiet)
-        if (nextRound.sampleNumbers.isEmpty()) {
-            done = true
-
-        } else {
-            stopwatch.start()
-            workflow.setMvrsBySampleNumber(nextRound.sampleNumbers )
-            if (!quiet) println("\nrunAudit ${nextRound.roundIdx}")
-            done = workflow.runAudit(nextRound, quiet)
-            if (!quiet) println(" runAudit ${nextRound.roundIdx} done=$done samples=${nextRound.sampleNumbers.size}")
-        }
-    }
-
-    /*
-    if (!quiet && rounds.isNotEmpty()) {
-        rounds.forEach { println(it) }
-        workflow.showResults(rounds.last().sampledIndices.size)
-    } */
-
-    return nextRound
-}
-
 interface WorkflowTaskGenerator {
     fun name(): String
     fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
 }
 
-class RaireWorkflowTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
-    val margin: Double,
-    val underVotePct: Double,
-    val phantomPct: Double,
-    val mvrsFuzzPct: Double,
-    val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
-    val nsimEst: Int = 100,
-    ): WorkflowTaskGenerator {
-    override fun name() = "RaireWorkflowTaskGenerator"
-
-    override fun generateNewTask(): WorkflowTask {
-        val useConfig = auditConfig ?:
-        AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror))
-
-        val (rcontest, testCvrs) = simulateRaireTestData(N=Nc, contestId=111, ncands=4, minMargin=margin, undervotePct=underVotePct, phantomPct=phantomPct, quiet = true)
-        var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
-
-        val clca = ClcaWorkflow(useConfig, emptyList(), listOf(rcontest),
-            BallotCardsClcaStart(testCvrs, testMvrs, useConfig.seed))
-        return WorkflowTask(
-            name(),
-            clca,
-            // testMvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0)
-        )
-    }
-}
-
+// A WorkflowTask is always for a single contest (unlike a Workflow which may be multi-contest)
 class WorkflowTask(
     val name: String,
     val workflow: RlauxWorkflowIF,
     val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
+
     override fun name() = name
     override fun run(): WorkflowResult {
         val lastRound = runWorkflow(name, workflow, quiet = quiet)
@@ -98,6 +36,7 @@ class WorkflowTask(
             )
         }
 
+        // since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
         val nmvrs = lastRound.sampleNumbers.size // LOOK ??
         val contest = lastRound.contestRounds.first() // theres only one
 

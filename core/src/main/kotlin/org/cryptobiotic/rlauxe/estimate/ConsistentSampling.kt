@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.workflow.*
 
 private val debug = false
 private val debugConsistent = false
-private val debugUniform = true
+private val debugUniform = false
 private val debugSizeNudge = true
 
 /**

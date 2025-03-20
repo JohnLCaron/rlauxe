@@ -38,7 +38,7 @@ class PollingWorkflowTaskGenerator(
             ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
         }
 
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, useConfig.seed)
+        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, useConfig.seed)
         val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotCards)
         return WorkflowTask(
             name(),
@@ -75,7 +75,7 @@ class PollingSingleRoundAuditTaskGenerator(
         var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
         var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
 
-        val ballotCards = BallotCardsPollingStart(ballotManifest.ballots, testMvrs, useConfig.seed)
+        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, useConfig.seed)
         val pollingWorkflow = PollingWorkflow(useConfig, listOf(sim.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(

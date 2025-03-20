@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.estimate.EstimationResult
-import org.cryptobiotic.rlauxe.estimate.SimulateSampleSizeTask
+import org.cryptobiotic.rlauxe.estimate.EstimateSampleSizeTask
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.*
 import java.io.BufferedReader
@@ -106,7 +106,7 @@ fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double
 
 // TODO Nc in parameters, or in EstimationResult
 fun EstimationResult.makeSRTnostyle(Nc: Int): SRT {
-    val task = this.task as SimulateSampleSizeTask
+    val task = this.task as EstimateSampleSizeTask
     val parameters = task.moreParameters
     val N = parameters["N"]!! // double
     return SRT(

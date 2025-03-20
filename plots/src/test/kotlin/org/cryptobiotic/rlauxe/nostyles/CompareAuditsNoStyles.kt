@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.math.log10
 import kotlin.test.Test
 
 class CompareAuditsNoStyles {
@@ -31,7 +30,7 @@ class CompareAuditsNoStyles {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val pollingConfigNS = AuditConfig(AuditType.POLLING, false, nsimEst = nsimEst)
-            val pollingGeneratorNS = PollingWorkflowTaskGenerator(
+            val pollingGeneratorNS = PollingContestAuditTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to "pollingNoStyles"),
                 auditConfig = pollingConfigNS,
@@ -39,7 +38,7 @@ class CompareAuditsNoStyles {
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGeneratorNS))
 
             val pollingConfig = AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst)
-            val pollingGenerator = PollingWorkflowTaskGenerator(
+            val pollingGenerator = PollingContestAuditTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to "pollingWithStyles"),
                 auditConfig = pollingConfig,
@@ -50,7 +49,7 @@ class CompareAuditsNoStyles {
                 AuditType.CLCA, false, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
             )
-            val clcaGeneratorNS = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
+            val clcaGeneratorNS = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaNoStyles"),
                 auditConfig = clcaConfigNS,
                 Nb=Nb
@@ -61,7 +60,7 @@ class CompareAuditsNoStyles {
                 AuditType.CLCA, true, nsimEst = nsimEst,
                 clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
             )
-            val clcaGenerator = ClcaWorkflowTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
+            val clcaGenerator = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaWithStyles"),
                 auditConfig = clcaConfig,
                 Nb=Nc

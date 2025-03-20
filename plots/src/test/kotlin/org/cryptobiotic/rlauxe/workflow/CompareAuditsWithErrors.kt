@@ -46,7 +46,8 @@ class CompareAuditsWithErrors {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
 
-            val raireGenerator = RaireWorkflowTaskGenerator(
+            // TODO single round
+            val raireGenerator = RaireContestAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)

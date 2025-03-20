@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.estimate.*
 import kotlin.math.max
 
-class PollingWorkflowTaskGenerator(
+class PollingContestAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
@@ -16,7 +16,7 @@ class PollingWorkflowTaskGenerator(
     val auditConfig: AuditConfig? = null,
     val Nb: Int = Nc,
     val nsimEst: Int = 100,
-    ) : WorkflowTaskGenerator {
+    ) : ContestAuditTaskGenerator {
     override fun name() = "PollingWorkflowTaskGenerator"
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
@@ -41,7 +41,7 @@ class PollingWorkflowTaskGenerator(
 
         val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, useConfig.seed)
         val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
-        return WorkflowTask(
+        return ContestAuditTask(
             name(),
             pollingWorkflow,
             // testMvrs,
@@ -61,7 +61,7 @@ class PollingSingleRoundAuditTaskGenerator(
     val Nb: Int = Nc,
     val nsimEst: Int = 100,
     val quiet: Boolean = true,
-    ): WorkflowTaskGenerator {
+    ): ContestAuditTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 

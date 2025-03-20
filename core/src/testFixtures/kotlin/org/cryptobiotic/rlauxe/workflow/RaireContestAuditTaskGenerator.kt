@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
 
-class RaireWorkflowTaskGenerator(
+class RaireContestAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
@@ -14,10 +14,10 @@ class RaireWorkflowTaskGenerator(
     val auditConfig: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val nsimEst: Int = 100,
-    ): WorkflowTaskGenerator {
+    ): ContestAuditTaskGenerator {
     override fun name() = "RaireWorkflowTaskGenerator"
 
-    override fun generateNewTask(): WorkflowTask {
+    override fun generateNewTask(): ContestAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
@@ -38,7 +38,7 @@ class RaireWorkflowTaskGenerator(
             useConfig, emptyList(), listOf(rcontest),
             StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed)
         )
-        return WorkflowTask(
+        return ContestAuditTask(
             name(),
             clca,
             // testMvrs,

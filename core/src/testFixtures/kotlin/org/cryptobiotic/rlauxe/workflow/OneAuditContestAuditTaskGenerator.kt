@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 
 // mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
-class OneAuditWorkflowTaskGenerator(
+class OneAuditContestAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
     val margin: Double,
     val underVotePct: Double,
@@ -15,10 +15,10 @@ class OneAuditWorkflowTaskGenerator(
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
     val nsimEst: Int = 100,
-) : WorkflowTaskGenerator {
+) : ContestAuditTaskGenerator {
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
-    override fun generateNewTask(): WorkflowTask {
+    override fun generateNewTask(): ContestAuditTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
@@ -29,7 +29,7 @@ class OneAuditWorkflowTaskGenerator(
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2), StartTestBallotCardsClca(oaCvrs, oaMvrs, auditConfig.seed))
-        return WorkflowTask(
+        return ContestAuditTask(
             name(),
             oneaudit,
             // oaMvrs,
@@ -52,7 +52,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
     val quiet: Boolean = true,
     val p2flips: Double? = null,
     val p1flips: Double? = null,
-): WorkflowTaskGenerator {
+): ContestAuditTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 

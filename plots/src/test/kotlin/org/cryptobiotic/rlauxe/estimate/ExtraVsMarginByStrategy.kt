@@ -26,30 +26,30 @@ class ExtraVsMarginByStrategy {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+            val clcaGenerator1 = ClcaContestAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
                 parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzMvrs),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
-            val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+            val clcaGenerator2 = ClcaContestAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzMvrs),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
-            val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+            val clcaGenerator3 = ClcaContestAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzMvrs),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzMvrs))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
-            val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+            val clcaGenerator4 = ClcaContestAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
                 parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzMvrs),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
-            val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
+            val clcaGenerator5 = ClcaContestAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzMvrs,
                 parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzMvrs),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
@@ -137,7 +137,7 @@ class ExtraVsMarginByStrategy {
                 clcaConfig = clcaConfig
             )
 
-            val clcaGenerator2 = ClcaWorkflowTaskGenerator(
+            val clcaGenerator2 = ClcaContestAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct,
                 parameters = mapOf("nruns" to nruns.toDouble(), "strat" to 3.0, "fuzzPct" to fuzzPct),
                 auditConfig = auditConfig

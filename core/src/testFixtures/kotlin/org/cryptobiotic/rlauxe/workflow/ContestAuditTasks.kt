@@ -10,13 +10,13 @@ import kotlin.math.sqrt
 
 private val quiet = true
 
-interface WorkflowTaskGenerator {
+interface ContestAuditTaskGenerator {
     fun name(): String
     fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
 }
 
-// A WorkflowTask is always for a single contest (unlike a Workflow which may be multi-contest)
-class WorkflowTask(
+// A ContestAuditTask is always for a single contest (unlike a Workflow which may be multi-contest)
+class ContestAuditTask(
     val name: String,
     val workflow: RlauxAuditIF,
     val otherParameters: Map<String, Any>,
@@ -24,7 +24,9 @@ class WorkflowTask(
 
     override fun name() = name
     override fun run(): WorkflowResult {
+
         val lastRound = runAudit(name, workflow, quiet = quiet)
+
         if (lastRound == null) {
             return WorkflowResult(
                 name,
@@ -37,7 +39,7 @@ class WorkflowTask(
             )
         }
 
-        // since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
+        // TODO since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
         val nmvrs = lastRound.sampleNumbers.size // LOOK ??
         val contest = lastRound.contestRounds.first() // theres only one
 

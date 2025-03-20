@@ -28,14 +28,14 @@ class GenRaireNoErrorsPlots {
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val raireGenerator = RaireWorkflowTaskGenerator(
+            val raireGenerator = RaireContestAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0, nsimEst=nsimEst,
                 auditConfig=config,
                 parameters=mapOf("nruns" to nruns, "cat" to "raire")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))
 
-            val noerrorGenerator = ClcaWorkflowTaskGenerator(
+            val noerrorGenerator = ClcaContestAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0, nsimEst=nsimEst,
                 auditConfig=config,
                 parameters=mapOf("nruns" to nruns, "cat" to "clcaNoerror")

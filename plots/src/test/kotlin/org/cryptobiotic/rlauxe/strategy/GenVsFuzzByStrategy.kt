@@ -30,32 +30,32 @@ class GenVsFuzzByStrategy {
         val config = AuditConfig(AuditType.CLCA, true, nsimEst = 100)
 
         fuzzPcts.forEach { fuzzPct ->
-            val clcaGenerator1 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator1 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
 
-            val clcaGenerator2 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator2 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
-            val clcaGenerator3 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator3 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
-            val clcaGenerator4 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator4 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "2*fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorTable.getErrorRates(2, 2*fuzzPct)))
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
-            val clcaGenerator5 = ClcaWorkflowTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator5 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct/2", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorTable.getErrorRates(2, fuzzPct/2)))
             )

@@ -442,6 +442,7 @@ no style information, no errors, for Nb/Nc = 1, 2, 5 and 10.
 * The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
 * We need to sample more than 50% of Nb when the margin < 5%
 
+
 ### Polling Vs CLCA with/out CSD total mvrs
 
 The following plot shows nmvrs for Polling vs CLCA, with and without CSD at different margins, no errors, where Nb/Nc = 2.

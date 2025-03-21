@@ -22,7 +22,7 @@ class TestAlphaMartComparison {
         val calcMargin = (compareAssorter as ClcaAssorter).calcAssorterMargin(cvrs.zip(cvrs))
         val calcMean = margin2mean(calcMargin)
 
-        val sampler = makeClcaNoErrorSampler(contest.id, cvrs, compareAssorter)
+        val sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, compareAssorter)
         val theta = compareAssorter.meanAssort()
         val expected = 1.0 / (3 - 2 * cvrMean)
         assertEquals(expected, theta, 3.0/N)

@@ -6,7 +6,6 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.workflow.*
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -112,7 +111,7 @@ class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nba
         TODO("Unimplemented")
     }
 
-    override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+    override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
         require(sampledCvrs.size == mvrsForRound.size)
@@ -129,7 +128,7 @@ class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nba
 
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
         val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
+        return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, allowReset = allowReset)
     }
 }
 
@@ -148,8 +147,8 @@ class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>
         TODO("Unimplemented")
     }
 
-    override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {
+    override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
         // // TODO why not CvrUnderAudit ?
-        return PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr } , assorter, allowReset=allowReset)
+        return PollWithoutReplacement(contestId, hasStyles, mvrsForRound.map { it.cvr } , assorter, allowReset=allowReset)
     }
 }

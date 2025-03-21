@@ -11,12 +11,14 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
+// candidate for removal
+
 class GenRaireNoErrorsPlots {
     val nruns = 100
     val nsimEst = 100
     val N = 20000
     val name = "raireNoErrors"
-    val dirName = "/home/stormy/temp/workflow/$name"
+    val dirName = "/home/stormy/temp/$name"
 
     @Test
     fun raireNoErrorsPlots() {

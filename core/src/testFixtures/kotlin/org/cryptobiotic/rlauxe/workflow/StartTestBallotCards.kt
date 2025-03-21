@@ -41,8 +41,8 @@ class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         setMvrs(sampledMvrs)
     }
 
-    override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
-        if (mvrsForRound.isEmpty()) return makeOneRoundSampler(contestId, cassorter, allowReset)
+    override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+        if (mvrsForRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset)
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
 
@@ -56,13 +56,13 @@ class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         }
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
         val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
+        return ClcaWithoutReplacement(contestId, hasStyles,cvrPairs, cassorter, allowReset = allowReset)
     }
 
     // just use the entire cvrs/mvrs
-    fun makeOneRoundSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+    fun makeOneRoundSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val cvrPairs = mvrsUA.map{ it.cvr }.zip(cvrsUA.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
+        return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, allowReset = allowReset)
     }
 }
 
@@ -98,10 +98,10 @@ class StartTestBallotCardsPolling(val ballots: List<Ballot>, mvrs: List<Cvr>, se
         setMvrs(sampledMvrs)
     }
 
-    override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {
+    override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
         return if (mvrsForRound.isEmpty())
-            PollWithoutReplacement(contestId, mvrsUA.map { it.cvr } , assorter, allowReset=allowReset)
+            PollWithoutReplacement(contestId, hasStyles, mvrsUA.map { it.cvr } , assorter, allowReset=allowReset)
         else
-            PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
+            PollWithoutReplacement(contestId, hasStyles, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
     }
 }

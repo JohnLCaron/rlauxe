@@ -20,7 +20,7 @@ class CompareAlphaPaper {
 
     // using values from alpha.ipynb, compare polling and comparison audit
     @Test
-    fun plotCmpareAlphaPaper() {
+    fun plotCompareAlphaPaper() {
         val d = 100
         val N = 10000
         val reps = 100
@@ -46,7 +46,7 @@ class CompareAlphaPaper {
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
-                    drawSample = makeClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
+                    drawSample = makeClcaNoErrorSampler(contest.id, true, cvrs, compareAssertion.cassorter),
                     // maxSamples = N,
                     eta0 = eta,
                     d = d,
@@ -56,7 +56,7 @@ class CompareAlphaPaper {
                 compareSrs.add(compareResult.makeSRT(theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
-                    drawSample = PollWithoutReplacement(contestUA.id, cvrs, pollingAssertion.assorter),
+                    drawSample = PollWithoutReplacement(contestUA.id, true, cvrs, pollingAssertion.assorter),
                     // maxSamples = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

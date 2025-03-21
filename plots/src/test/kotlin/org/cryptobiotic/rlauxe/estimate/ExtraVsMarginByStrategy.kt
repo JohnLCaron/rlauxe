@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
+// not used
+
 class ExtraVsMarginByStrategy {
     val N = 50000
     val nruns = 10

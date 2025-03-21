@@ -164,6 +164,12 @@ fun uniformSampling(
     // scale by proportion of ballots that have this contest
     val Nb = ballotCards.nballotCards()
     contestsNotDone.forEach { contestUA ->
+
+        if (Nb == 100000) {
+            val assert = contestUA.minAssertion()
+            println("contestUA")
+        }
+
         val fac = Nb / contestUA.Nc.toDouble()
         val estWithFactor = roundToInt((contestUA.estSampleSize * fac))
         contestUA.estSampleSizeNoStyles = estWithFactor

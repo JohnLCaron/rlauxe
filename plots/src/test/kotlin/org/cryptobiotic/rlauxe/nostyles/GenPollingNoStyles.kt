@@ -14,16 +14,16 @@ class GenPollingNoStyles {
     val dirName = "/home/stormy/temp/nostyle/$name"
 
     val Nc = 10000
-    val nruns = 10
+    val nruns = 100
+    val nsimEst = 100
 
     // Used in docs
 
     @Test
     fun plotPollingNoStyle() {
-
         val Nbs = listOf(10000, 20000, 50000, 100000)
         val margins = listOf(.01, .02, .03, .04, .05, .06, .08, .10, .15, .20)
-        val auditConfig = AuditConfig(AuditType.POLLING, false, samplePctCutoff=0.5, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.POLLING, false, nsimEst = nsimEst)
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

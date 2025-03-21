@@ -17,7 +17,7 @@ class CompareAuditsNoStyles {
     val Nc = 10000
     val Nb = 20000
 
-    val dirName = "/home/stormy/temp/workflow/compareWithStyle"
+    val dirName = "/home/stormy/temp/nostyle/compareWithStyle"
     val name = "compareWithStyle"
 
     // Used in Polling Vs CLCA with/out CSD Estimated Sample sizes

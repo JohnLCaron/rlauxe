@@ -127,7 +127,6 @@ and MVRs are fuzzed at the given fuzzPct. Except for the oracle strategy, the Ad
 
 The error estimation strategies are:
 
-* oracle : The true error rate for the sample is computed. This violates the "predictable sequence requirement", so cant be used in a real audit.
 * noerror : The apriori error rates are 0.
 * fuzzPct: The apriori error rates are calculated from the true fuzzPct. 
 * 2*fuzzPct: The fuzzPct is overestimated by a factor of 2.
@@ -135,10 +134,9 @@ The error estimation strategies are:
 
 Here are plots of sample size as a function of fuzzPct, with a fixed margins of .02 and .04:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy2LogLog.html" rel="clcaVsFuzzByStrategy2LogLog">![clcaVsFuzzByStrategy2LogLog](plots/strategy/clcaVsFuzzByStrategy2LogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy4LogLog.html" rel="clcaVsFuzzByStrategy4LogLog">![clcaVsFuzzByStrategy4LogLog](plots/strategy/clcaVsFuzzByStrategy4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy2LogLinear.html" rel="clcaVsFuzzByStrategy2LogLinear">![clcaVsFuzzByStrategy2LogLinear](plots/strategy/clcaVsFuzzByStrategy2LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/strategy/clcaVsFuzzByStrategy4LogLinear.html" rel="clcaVsFuzzByStrategy4LogLinear">![clcaVsFuzzByStrategy4LogLinear](plots/strategy/clcaVsFuzzByStrategy4LogLinear.png)</a>
 
 Notes:
-* The oracle results generally show the lowest sample sizes, as expected.
 * The noerror strategy is significantly worse in the presence of errors.
-* If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes, especially for low values of fuzzPct.
+* If you can guess the fuzzPct to within a factor of 2, theres not much difference in sample sizes.

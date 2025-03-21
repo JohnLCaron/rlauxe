@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
 private val debug = false
@@ -239,7 +238,7 @@ fun simulateSampleSizeClcaAssorter(
     } else {
         // this is noerrors
         Pair(
-            makeClcaNoErrorSampler(contest.id, cvrs, cassorter),
+            makeClcaNoErrorSampler(contest.id, auditConfig.hasStyles, cvrs, cassorter),
             AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
         )
     }
@@ -329,7 +328,7 @@ fun simulateSampleSizePollingAssorter(
     var fuzzPct = 0.0
     val pollingConfig = auditConfig.pollingConfig
     val sampler = if (pollingConfig.simFuzzPct == null || pollingConfig.simFuzzPct == 0.0) {
-        PollWithoutReplacement(contest.id, cvrs, assorter, allowReset=true)
+        PollWithoutReplacement(contest.id, auditConfig.hasStyles, cvrs, assorter, allowReset=true)
     } else {
         fuzzPct = pollingConfig.simFuzzPct
         PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest, assorter) // TODO cant use Raire
@@ -414,7 +413,7 @@ fun simulateSampleSizeOneAuditAssorter(
 
     // TODO is this right, no special processing for the "hasCvr" strata?
     val sampler = if (oaConfig.simFuzzPct == null) {
-        ClcaWithoutReplacement(contestUA.id, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
+        ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyles, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
     } else {
         fuzzPct = oaConfig.simFuzzPct
         OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire

@@ -108,9 +108,7 @@ class CompareAlphaPaperUsingMasses {
 
         println()
     }
-
 }
-
 
 class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampler {
     val maxSamples = assortValues.size
@@ -139,6 +137,7 @@ class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampler
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()

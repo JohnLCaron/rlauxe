@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 03/19/2026_
+_last changed: 03/20/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -30,7 +30,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Estimation](#estimation)
-  * [Choosing which ballots/cards to sample](#choosing-which-ballotscards-to-sample)
+  * [Card Style Data](#card-style-data)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
     * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
@@ -365,23 +365,26 @@ and the contest's estimated sample size is the maximum of the contest's assertio
 If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time (default 80%). 
 Since we dont know the actual error rates, or the order that the errors will be sampled, these simulation results are just estimates.
 
-## Choosing which ballots/cards to sample
-
-Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
-This step depends whether you have Card Style Data (CSD, see MoreStyle, p.2), which tells us which ballots
-have which contests. 
-
-For CLCA audits, the generated Cast Vote Records (CVR) comprise the CSD, as long as the CVR has the information which contests are
-on it, even when a contest recieves no votes.
-For Polling audits, the BallotManifest (may) contain BallotStyles which comprise the CSD.
-
-If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
-
 Note that each round does its own sampling without regard to the previous round's results.
 However, since the seed remains the same, the ballot ordering is the same throughout the audit. We choose the lowest ordered ballots first,
 so previously audited MVRS are always used again in subsequent rounds, for contests that continue to the next round. At
 each round we record both the total number of MVRs, and the number of "new samples" needed for that round, which are the
 ballots the auditors have to find and hand audit for that round.
+
+## Card Style Data
+
+Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample. 
+This step depends whether the audit has Card Style Data (CSD, see MoreStyle, p.2), which tells which ballots
+have which contests. 
+
+For CLCA audits, the generated Cast Vote Records (CVRs) comprise the CSD, as long as the CVR has the information which contests are
+on it, even when a contest recieves no votes. For Polling audits, the BallotManifest (may) contain BallotStyles which comprise the CSD.
+
+If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
+
+Its critical in all cases (with or without CSD), that when the MVRs are created, the auditors record all the contests on the ballot, 
+whether or not there are any votes for a contest or not. In other words, an MVR always knows if a contest is contained on a ballot or not. 
+This information is necessary in order to correctly do random sampling, which the risk limiting statistics depend on.
 
 ### Consistent Sampling with Card Style Data
 
@@ -429,21 +432,21 @@ easy to see the effect of not having Card Style Data in any case.
 As an example, in the following plot we show averages of the overall number of ballots sampled (nmvrs), for polling audits, 
 no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/workflows/pollingNoStyle/pollingNoStyleLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLog.png)</a>
 
 * The increases number of nmvrs is simply Nc/Nb, and has a strong absolute effect as the margin gets smaller.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/workflows/pollingNoStyle/pollingNoStylePct.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/nostyle/pollingNoStyle/pollingNoStylePct.png)</a>
 
 * The percent nmvrs / Nb depends only on margin, independent of the ratio Nc/Nb
 * We need to sample more than 50% of Nb when the margin < 5%
 
-### Polling Vs CLCA with/out CSD Estimated Sample sizes
+### Polling Vs CLCA with/out CSD total mvrs
 
 The following plot shows nmvrs for Polling vs CLCA, with and without CSD at different margins, no errors, where Nb/Nc = 2.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/workflows/compareWithStyle/compareWithStyleLogLinear.html" rel="compareWithStyleLogLinear">![compareWithStyleLogLinear](./docs/plots/workflows/compareWithStyle/compareWithStyleLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/compareWithStyle/compareWithStyleLogLinear.html" rel="compareWithStyleLogLinear">![compareWithStyleLogLinear](docs/plots/nostyle/compareWithStyle/compareWithStyleLogLinear.png)</a>
 
 * For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data.
 

@@ -21,7 +21,7 @@ interface BallotCards {
 
 interface BallotCardsClca : BallotCards {
     // this is used for audit, not estimation
-    fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean = false): Sampler
+    fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean = false): Sampler
 }
 
 interface BallotCardsClcaStart : BallotCardsClca {
@@ -49,7 +49,7 @@ class StartBallotCardsClca(val cvrs: List<Cvr>, seed: Long) : BallotCardsClcaSta
         TODO("Unimplemented")
     }
 
-    override fun makeSampler(contestId: Int, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+    override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
 
@@ -63,13 +63,13 @@ class StartBallotCardsClca(val cvrs: List<Cvr>, seed: Long) : BallotCardsClcaSta
         }
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
         val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, allowReset = allowReset)
+        return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, allowReset = allowReset)
     }
 }
 
 interface BallotCardsPolling : BallotCards {
     // this is used for audit, not estimation
-    fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler
+    fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler
 }
 
 interface BallotCardsPollingStart : BallotCardsPolling {
@@ -96,8 +96,8 @@ class StartBallotCardsPolling(val ballots: List<Ballot>, seed: Long) : BallotCar
         TODO("Unimplemented")
     }
 
-    override fun makeSampler(contestId: Int, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        return PollWithoutReplacement(contestId, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
+    override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
+        return PollWithoutReplacement(contestId, hasStyles, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
     }
 }
 

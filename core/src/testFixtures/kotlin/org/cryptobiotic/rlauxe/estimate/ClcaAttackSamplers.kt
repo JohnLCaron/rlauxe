@@ -64,6 +64,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorterIF
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
@@ -124,6 +125,7 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
     fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()

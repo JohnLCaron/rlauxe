@@ -56,7 +56,7 @@ class TestSampleGenerator {
             contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = PollWithoutReplacement(contestUA.id, cvrs, it.assorter)
+                val cvrSampler = PollWithoutReplacement(contestUA.id, true, cvrs, it.assorter)
             }
         }
     }

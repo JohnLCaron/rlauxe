@@ -52,6 +52,7 @@ class ClcaFuzzSampler(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
@@ -100,6 +101,7 @@ class PollingFuzzSampler(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
@@ -152,6 +154,7 @@ class OneAuditFuzzSampler(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()

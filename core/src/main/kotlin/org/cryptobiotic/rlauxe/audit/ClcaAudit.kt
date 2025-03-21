@@ -67,7 +67,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = ballotCards.makeSampler(contest.id, cassorter, allowReset = false)
+                val sampler = ballotCards.makeSampler(contest.id, auditConfig.hasStyles, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
@@ -154,7 +154,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampler.maxSamples(),
+            nmvrs = sampler.nmvrs(),
             maxBallotIndexUsed = sampler.maxSampleIndexUsed(), // TODO only for audit, not estimation I think
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,

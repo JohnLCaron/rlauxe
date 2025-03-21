@@ -121,7 +121,7 @@ class PlotDistributions {
 
             val cassertion = assertionRound.assertion as ClcaAssertion
             val cassorter = cassertion.cassorter
-            val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false)
+            val sampler = ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyles, sortedPairs, cassorter, allowReset = false)
 
             AuditClcaAssertion().run(auditConfig, contestUA.contest, assertionRound, sampler, 1)
             results.add(assertionRound.auditResult!!.samplesUsed)

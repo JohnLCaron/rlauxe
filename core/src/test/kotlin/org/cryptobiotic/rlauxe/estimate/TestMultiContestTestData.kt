@@ -162,7 +162,7 @@ class TestMultiContestTestData {
             val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
-            val sampler = ClcaWithoutReplacement(contest.id, cvrs.zip(cvrs), cassorter, true)
+            val sampler = ClcaWithoutReplacement(contest.id, true, cvrs.zip(cvrs), cassorter, true)
             val tracker = PrevSamplesWithRates(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")

@@ -63,6 +63,7 @@ class ClcaSimulation(
     fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = idx // TODO
 
     override fun reset() {
         permutedIndex.shuffle(Random)

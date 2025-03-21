@@ -22,7 +22,7 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,      // number of samples used in testH0
-    val sampleFirstUnderLimit: Int, // first sample index with pvalue with risk < limit, one based
+    val sampleFirstUnderLimit: Int, // first sample index with pvalue with risk < limit, one based TODO not needed
     val pvalueMin: Double,    // smallest pvalue in the sequence
     val pvalueLast: Double,    // last pvalue
     val tracker: SampleTracker,

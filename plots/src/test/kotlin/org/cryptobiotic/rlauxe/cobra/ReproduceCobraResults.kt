@@ -33,7 +33,7 @@ class ReproduceCobraResults {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val compareAssorter = makeStandardComparisonAssorter(theta, N)
-                val sampler = makeClcaNoErrorSampler(compareAssorter.info.id, cvrs, compareAssorter)
+                val sampler = makeClcaNoErrorSampler(compareAssorter.info.id, true, cvrs, compareAssorter)
                 val upperBound = compareAssorter.upperBound
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${compareAssorter.noerror}")
 

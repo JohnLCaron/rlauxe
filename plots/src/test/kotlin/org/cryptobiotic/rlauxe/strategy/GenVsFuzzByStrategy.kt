@@ -12,11 +12,11 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenVsFuzzByStrategy {
-    val name = "clcaVsFuzzByStrategy4"
+    val name = "clcaVsFuzzByStrategy2"
     val dirName = "/home/stormy/temp/strategy"
 
     val N = 50000
-    val margin = .04
+    val margin = .02
     val nruns = 100  // number of times to run workflow
 
     @Test
@@ -30,32 +30,32 @@ class GenVsFuzzByStrategy {
         val config = AuditConfig(AuditType.CLCA, true, nsimEst = 100)
 
         fuzzPcts.forEach { fuzzPct ->
-            val clcaGenerator1 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            /* val clcaGenerator1 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters=mapOf("nruns" to nruns, "cat" to "oracle", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle, fuzzPct))
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
+            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1)) */
 
-            val clcaGenerator2 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
-            val clcaGenerator3 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator3 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
 
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
-            val clcaGenerator4 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator4 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "2*fuzzPct", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorTable.getErrorRates(2, 2*fuzzPct)))
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
-            val clcaGenerator5 = ClcaContestAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
+            val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct/2", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorTable.getErrorRates(2, fuzzPct/2)))
             )
@@ -75,9 +75,9 @@ class GenVsFuzzByStrategy {
     @Test
     fun regenPlots() {
         val subtitle = "margin=${margin} Nc=${N} nruns=${nruns}"
-        //showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear)
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear)
         showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLog)
-        //showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear)
         // showFailuresVsFuzzPct(dirName, name, subtitle)
     }
 

@@ -11,7 +11,7 @@ class TestPersistentConsistentSampling {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
         val workflow = PersistentAudit(topdir)
         val auditRecord = workflow.auditRecord
-        val auditRound = workflow.getLastRound()
+        val auditRound = workflow.auditRounds().last()
 
         println()
         println("auditRound = ${auditRound.roundIdx}")

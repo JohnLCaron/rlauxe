@@ -9,14 +9,17 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.text.appendLine
 
+// parses Boulder County "statement of votes" cvs files, eg from
 // Colorado Election Results
 // https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Statement-of-Votes.xlsx
 
+// variations
 //        "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
 //(2023R) "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
 // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
 // (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
 
+// lines look like
 //100,2181207100,Presidential Electors,Kamala D. Harris / Tim Walz,"1,569","1,325",900,24,0
 //100,2181207100,Presidential Electors,Donald J. Trump / JD Vance,"1,569","1,325",354,24,0
 //100,2181207100,Presidential Electors,Blake Huber / Andrea Denault,"1,569","1,325",1,24,0
@@ -188,7 +191,7 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
         throw ex
     }
 
-    // first group by precinct
+    // first, group by precinct
     val precincts = mutableMapOf<String, BoulderContestPrecinctVotes>()
     lines.forEach {
         val key = "${it.contestTitle}#${it.precinctCode}#${it.precinctNumber}"

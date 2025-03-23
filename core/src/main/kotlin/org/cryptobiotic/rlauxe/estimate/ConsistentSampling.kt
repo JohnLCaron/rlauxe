@@ -10,46 +10,37 @@ private val debugUniform = false
 private val debugSizeNudge = true
 
 /**
- * iterates on createSampleIndices, checking for pct <= auditConfig.samplePctCutoff,
- * removing contests until satisfied. */
-fun sample(workflow: RlauxAuditProxy, auditRound: AuditRound, previousSamples: Set<Long>, quiet: Boolean) {
+ * 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
+ * 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
+ * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= auditConfig.sampleLimit, removing contests until satisfied.
+ * Also called from rlauxe_viewer
+ */
+fun sampleCheckLimits(workflow: RlauxAuditProxy, auditRound: AuditRound, previousSamples: Set<Long>, quiet: Boolean) {
     val auditConfig = workflow.auditConfig()
-    // val sortedBorc = workflow.sortedBallotsOrCvrs()
-
-    // count the number of cvrs that have at least one contest under audit.
-    // TODO this is wrong for samplePctCutoff, except maybe the first round ??
-    //val NN = if (!auditConfig.hasStyles) sortedBorc.size
-    //              else sortedBorc.filter { it.hasOneOrMoreContest(auditRound.contestRounds) }.count()
-
-    var sampleIndices: List<BallotOrCvr> = emptyList()
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
-    val Nb = workflow.ballotCards().nballotCards()
     while (contestsNotDone.isNotEmpty()) {
-        createSampleIndices(workflow, auditRound, previousSamples, quiet = quiet)
+        sample(workflow, auditRound, previousSamples, quiet = quiet)
 
-        // the rest of this implements samplePctCutoff TODO refactor this
-        val pct = sampleIndices.size / Nb.toDouble()
-        if (debug) println(" createSampleIndices size = ${sampleIndices.size} Nb=$Nb pct= $pct max=${auditConfig.samplePctCutoff}")
-        if (pct <= auditConfig.samplePctCutoff) {
+        //// the rest of this implements sampleLimit
+        if (auditConfig.sampleLimit < 0 || auditRound.sampleNumbers.size <= auditConfig.sampleLimit) {
             break
         }
-         // find the contest with the largest estimation size, remove it
-        val maxEstimation = contestsNotDone.maxOf { it.estSampleSize }
-        val maxContest = contestsNotDone.first { it.estSampleSize == maxEstimation }
-        println(" ***too many samples, remove contest ${maxContest} with status FailMaxSamplesAllowed")
+        // find the contest with the largest estimation size eligible for removal, remove it
+        val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
+        val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
+        println(" ***too many samples, remove contest ${maxContest.id} with status FailMaxSamplesAllowed")
 
         // information we want in the persisted record
         maxContest.done = true
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
 
         contestsNotDone.remove(maxContest)
-        sampleIndices = emptyList() // if theres no more contests, this says were done
     }
 }
 
-/** must have contest.estSampleSize set. must have borc.sampleNumber assigned. */
-fun createSampleIndices(
+/** Choose what ballots to sample */
+fun sample(
     workflow: RlauxAuditProxy,
     auditRound: AuditRound,
     previousSamples: Set<Long> = emptySet(),
@@ -62,12 +53,12 @@ fun createSampleIndices(
         if (!quiet) println(" consistentSamplingSize= ${auditRound.sampleNumbers.size}")
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
-        uniformSampling(auditRound, workflow.ballotCards(), previousSamples.size, auditConfig.samplePctCutoff, auditRound.roundIdx)
+        uniformSampling(auditRound, workflow.ballotCards(), previousSamples.size, auditConfig.sampleLimit, auditRound.roundIdx)
         if (!quiet) println(" uniformSamplingSize= ${auditRound.sampleNumbers.size}")
     }
 }
 
-// for audits with hasStyles
+// for audits with hasStyles = true
 fun consistentSampling(
     auditRound: AuditRound,
     ballotCards: BallotCards,
@@ -90,14 +81,10 @@ fun consistentSampling(
     val contestsIncluded = contestsNotDone.filter { it.included }
     val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
 
-    // get list of cvr indexes sorted by sampleNum TODO these should already be sorted
-    // val sortedBocIndices = ballotOrCvrs.indices.sortedBy { ballotOrCvrs[it].sampleNumber() }
-
     var newMvrs = 0
     val sampledCards = mutableListOf<BallotOrCvr>()
 
     // while we need more samples
-    // var inx = 0
     val sortedBorcIter = ballotCards.ballotCards().iterator()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
@@ -150,12 +137,12 @@ fun consistentSampling(
     auditRound.sampledBorc = sampledCards
 }
 
-// for audits with !hasStyles
+// for audits with hasStyles = false
 fun uniformSampling(
     auditRound: AuditRound,
     ballotCards: BallotCards,
     prevSampleSize: Int,
-    samplePctCutoff: Double,  // TODO
+    sampleLimit: Int,
     roundIdx: Int,
 ) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
@@ -164,18 +151,12 @@ fun uniformSampling(
     // scale by proportion of ballots that have this contest
     val Nb = ballotCards.nballotCards()
     contestsNotDone.forEach { contestUA ->
-
-        if (Nb == 100000) {
-            val assert = contestUA.minAssertion()
-            println("contestUA")
-        }
-
         val fac = Nb / contestUA.Nc.toDouble()
         val estWithFactor = roundToInt((contestUA.estSampleSize * fac))
         contestUA.estSampleSizeNoStyles = estWithFactor
-        val estPct = estWithFactor / Nb.toDouble()
-        if (estPct > samplePctCutoff) {
-            if (debugUniform) println("uniformSampling samplePctCutoff: $contestUA estPct $estPct > $samplePctCutoff round $roundIdx")
+        // val estPct = estWithFactor / Nb.toDouble()
+        if (sampleLimit > 0 && estWithFactor > sampleLimit) { // might as well test it here, since it will happen a lot
+            if (debugUniform) println("uniformSampling samplePctCutoff: $contestUA estWithFactor $estWithFactor > $sampleLimit round $roundIdx")
             contestUA.done = true // TODO dont do this here?
             contestUA.status = TestH0Status.FailMaxSamplesAllowed
         }

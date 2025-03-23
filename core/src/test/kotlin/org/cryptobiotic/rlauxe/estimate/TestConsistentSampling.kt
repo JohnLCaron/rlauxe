@@ -108,18 +108,12 @@ class TestConsistentSampling {
         val ballotManifest = test.makeBallotManifest(false)
         val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
 
-        val prng = Prng(Random.nextLong())
-        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
-
-        //    contests: List<ContestUnderAudit>,
-        //    ballots: List<BallotUnderAudit>, // all the ballots available to sample
-        //    samplePctCutoff: Double,
-        //    N: Int,
-        //    roundIdx: Int,
-        val estPctCutoff = .50
+        //val prng = Prng(Random.nextLong())
+        //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
+        val sampleLimit = 10000
 
         val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
-        val sampleIndices = uniformSampling(auditRound, ballotCards, 0, estPctCutoff, 0)
+        uniformSampling(auditRound, ballotCards, 0, sampleLimit=sampleLimit, 0)
         println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
 
         // must be ordered
@@ -136,12 +130,11 @@ class TestConsistentSampling {
         // double check the number of cvrs == sampleSize
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
-            assertTrue(contest.estSampleSize <= auditRound.sampleNumbers.size)
+            assertTrue(contest.estSampleSizeEligibleForRemoval() <= auditRound.sampleNumbers.size)
             assertTrue(contest.done || contest.estSampleSizeNoStyles <= auditRound.sampleNumbers.size)
 
-            val estPct = contest.estSampleSize / contest.Nc.toDouble()
-            println("contest ${contest.id} estPct=$estPct done=${contest.done}")
-            if (estPct > estPctCutoff)
+            println("contest ${contest.id} estSampleSize=${contest.estSampleSizeEligibleForRemoval()} done=${contest.done}")
+            if (contest.estSampleSizeEligibleForRemoval() > sampleLimit)
                 assertTrue(contest.done)
         }
     }

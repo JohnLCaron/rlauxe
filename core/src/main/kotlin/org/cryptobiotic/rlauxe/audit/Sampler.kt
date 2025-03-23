@@ -65,6 +65,7 @@ class ClcaWithoutReplacement(
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit
 ): Sampler, Iterator<Double> {
+    // TODO TIMING init taking 8%
     val maxSamples = cvrPairs.count { it.first.hasContest(contestId) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0

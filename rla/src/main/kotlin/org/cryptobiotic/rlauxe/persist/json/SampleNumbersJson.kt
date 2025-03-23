@@ -17,15 +17,15 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 @Serializable
-data class SampleIndicesJson(
+data class SampleNumbersJson(
     val sampleNumbers: List<Long>,
 )
 
-fun List<Long>.publishJson() = SampleIndicesJson(
+fun List<Long>.publishJson() = SampleNumbersJson(
     this.map { it },
 )
 
-fun SampleIndicesJson.import(): List<Long> {
+fun SampleNumbersJson.import(): List<Long> {
     return this.sampleNumbers
 }
 
@@ -39,7 +39,7 @@ fun writeSampleNumbersJsonFile(sampleNumbers: List<Long>, filename: String) {
 }
 
 fun readSampleNumbersJsonFile(filename: String): Result<List<Long>, ErrorMessages> {
-    val errs = ErrorMessages("readSampleIndicesJsonFile '${filename}'")
+    val errs = ErrorMessages("readSampleNumbersJsonFile '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {
         return errs.add("file does not exist")
@@ -48,7 +48,7 @@ fun readSampleNumbersJsonFile(filename: String): Result<List<Long>, ErrorMessage
 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-            val cvrs = jsonReader.decodeFromStream<SampleIndicesJson>(inp)
+            val cvrs = jsonReader.decodeFromStream<SampleNumbersJson>(inp)
             if (errs.hasErrors()) Err(errs) else Ok(cvrs.import())
         }
     } catch (t: Throwable) {

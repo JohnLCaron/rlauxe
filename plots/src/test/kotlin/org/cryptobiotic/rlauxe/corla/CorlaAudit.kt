@@ -35,7 +35,7 @@ class CorlaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
-            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed), testCvrs)
         return ClcaSingleRoundAuditTask(
             name(),
             clcaWorkflow,
@@ -73,7 +73,7 @@ class CorlaContestAuditTaskGenerator(
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaAudit(auditConfig, listOf(sim.contest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed), quiet = true)
+        val clca = CorlaAudit(auditConfig, listOf(sim.contest), MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
         return ContestAuditTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
@@ -85,7 +85,7 @@ class CorlaContestAuditTaskGenerator(
 class CorlaAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    val ballotCards: StartTestBallotCardsClca, // mutable
+    val ballotCards: MvrManagerClcaForTesting, // mutable
     val quiet: Boolean = false,
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -112,11 +112,11 @@ class CorlaAudit(
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        ballotCards.setMvrsBySampleNumber(sampleNumbers)
-    }
+    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    //    ballotCards.setMvrsBySampleNumber(sampleNumbers)
+    //}
 
-    override fun ballotCards() = ballotCards
+    override fun mvrManager() = ballotCards
 }
 
 /////////////////////////////////////////////////////////////////////////////////

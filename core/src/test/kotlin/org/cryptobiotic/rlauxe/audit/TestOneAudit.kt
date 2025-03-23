@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
+import org.cryptobiotic.rlauxe.workflow.MvrManagerClcaForTesting
 import org.cryptobiotic.rlauxe.workflow.runClcaSingleRoundAudit
 import kotlin.test.Test
 
@@ -15,7 +15,8 @@ class TestOneAudit {
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
-        val workflow = OneAudit(auditConfig, listOf(contestOA), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed))
+        val workflow = OneAudit(auditConfig, listOf(contestOA),
+            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), testCvrs)
 
         runAudit("testOneAuditContestSmall", workflow)
     }
@@ -27,7 +28,8 @@ class TestOneAudit {
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
-        val workflow = OneAudit(auditConfig, listOf(contestOA), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed))
+        val workflow = OneAudit(auditConfig, listOf(contestOA),
+            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), testCvrs)
 
         runAudit("testOneAuditContest", workflow)
     }
@@ -44,7 +46,8 @@ class TestOneAudit {
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val testMvrs = makeFuzzedCvrsFrom(listOf(contestOA.makeContest()), testCvrs, mvrFuzzPct)
-        val workflow = OneAudit(auditConfig, listOf(contestOA), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        val workflow = OneAudit(auditConfig, listOf(contestOA),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
 
         runAudit("testOneAuditContest", workflow)
     }
@@ -60,7 +63,8 @@ class TestOneAudit {
             oaConfig = OneAuditConfig(OneAuditStrategyType.max99)
         )
 
-        val workflow = OneAudit(auditConfig, listOf(contestOA), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed))
+        val workflow = OneAudit(auditConfig, listOf(contestOA),
+            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), testCvrs)
         runAudit("testOneAuditContestSmall", workflow)
     }
 
@@ -75,7 +79,8 @@ class TestOneAudit {
         val testMvrs = if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = OneAudit(auditConfig, contests, StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        val workflow = OneAudit(auditConfig, contests,
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         runClcaSingleRoundAudit(workflow, contestRounds, auditor = OneAuditClcaAssertion())
     }

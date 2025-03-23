@@ -124,7 +124,8 @@ class TestAuditRoundJson {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
         val lastRound = runAudit("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
 
@@ -177,7 +178,8 @@ class TestAuditRoundJson {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = ClcaAudit(auditConfig, contests, listOf(rcontest), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, listOf(rcontest),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
         val nextRound = clcaWorkflow.startNewRound()
         val done = clcaWorkflow.runAuditRound(nextRound)
 

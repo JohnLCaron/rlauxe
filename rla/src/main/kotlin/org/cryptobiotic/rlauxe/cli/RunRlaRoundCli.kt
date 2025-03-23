@@ -58,12 +58,9 @@ fun runRound(inputDir: String, mvrFile: String): AuditRound? {
             println("Run audit round ${auditRound.roundIdx}")
             val roundStopwatch = Stopwatch()
 
-            // 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
             // TODO the mvrFile might be the mvrs that were just audited. here we are assuming the auditRecord has testMvrs
-            val sampledMvrs = workflow.auditRecord.getMvrsForRound(workflow.ballotCards(), roundIdx, mvrFile)
-            println("  added ${sampledMvrs.size} mvrs to ballotCards")
+            val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
 
-            // 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
             complete = workflow.runAuditRound(auditRound)
             println("  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
         } else {

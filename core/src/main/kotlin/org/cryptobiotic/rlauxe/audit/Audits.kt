@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // runs audit rounds until finished. return last audit round
+// Can only use this if the MvrManager implements MvrManagerTest
 fun runAudit(name: String, workflow: RlauxAuditIF, quiet: Boolean=true): AuditRound? {
     val stopwatch = Stopwatch()
 
@@ -16,7 +17,10 @@ fun runAudit(name: String, workflow: RlauxAuditIF, quiet: Boolean=true): AuditRo
 
         } else {
             stopwatch.start()
-            workflow.setMvrsBySampleNumber(nextRound.sampleNumbers)
+
+            // workflow MvrManager must implement MvrManagerTest, else Exception
+            (workflow.mvrManager() as MvrManagerTest).setMvrsBySampleNumber(nextRound.sampleNumbers)
+
             if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")
             complete = workflow.runAuditRound(nextRound, quiet)
             nextRound.auditWasDone = true

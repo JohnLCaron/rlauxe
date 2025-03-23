@@ -1,0 +1,56 @@
+package org.cryptobiotic.rlauxe.cli
+
+
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.required
+import org.cryptobiotic.rlauxe.audit.AuditRecord
+import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.PersistentAudit
+import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
+import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.nio.file.Files.notExists
+import java.nio.file.Path
+import java.util.concurrent.TimeUnit
+
+/** Run one round of an RLA that has already been started. */
+object EnterMvrsCli {
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val parser = ArgParser("EnterMvrsCli")
+        val inputDir by parser.option(
+            ArgType.String,
+            shortName = "in",
+            description = "Directory containing input election record"
+        ).required()
+        val mvrFile by parser.option(
+            ArgType.String,
+            shortName = "mvrs",
+            description = "File containing new Mvrs for latest round"
+        ).required()
+
+        parser.parse(args)
+        println("RunRound on $inputDir mvrFile=$mvrFile")
+        enterMvrs(inputDir, mvrFile)
+        // println("  retval $retval")
+    }
+}
+
+
+// Also called from rlaux-viewer
+fun enterMvrs(inputDir: String, mvrFile: String): Boolean {
+    if (notExists(Path.of(inputDir))) {
+        println("EnterMvrsCli Audit Directory $inputDir does not exist")
+        return false
+    }
+    if (notExists(Path.of(mvrFile))) {
+        println("EnterMvrsCli Mvrs file $mvrFile does not exist")
+        return false
+    }
+
+    val auditRecord: AuditRecord = AuditRecord.readFrom(inputDir)
+    return auditRecord.enterMvrs(mvrFile)
+}

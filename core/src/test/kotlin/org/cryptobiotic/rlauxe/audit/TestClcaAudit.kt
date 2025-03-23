@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsClca
+import org.cryptobiotic.rlauxe.workflow.MvrManagerClcaForTesting
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
@@ -145,7 +145,8 @@ class TestClcaAudit {
             else if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaAudit(auditConfig, contests, emptyList(), StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed))
+        val workflow = ClcaAudit(auditConfig, contests, emptyList(),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
         return runAudit("testClcaWorkflow", workflow)
     }
 }

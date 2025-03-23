@@ -354,7 +354,7 @@ fun createElectionFromDominionCvrs(
 
     /////////////////
 
-    val ballotCards = StartBallotCardsClca(allCvrs, auditConfig.seed)
+    val ballotCards = MvrManagerClcaForStarting(allCvrs, auditConfig.seed)
 
     writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
@@ -364,7 +364,7 @@ fun createElectionFromDominionCvrs(
     writeCvrsCsvFile(ballotCards.cvrsUA, mvrFile) // no errors
     println("   writeCvrsCsvFile ${mvrFile}")
 
-    val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
+    val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards, allCvrs)
     writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 

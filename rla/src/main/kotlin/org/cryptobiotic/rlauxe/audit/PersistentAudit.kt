@@ -45,13 +45,13 @@ class PersistentAudit(
 
         // this is getting done twice, see RunRliRoundCli.runRound()
         // val sampledMvrs = auditRecord.getMvrsForRound(ballotCards(), roundIdx, mvrFile)
-        val sampledMvrs = auditRecord.getMvrsForRound(ballotCards(), roundIdx, null)
+        val sampledMvrs = auditRecord.getMvrsForRound(mvrManager(), roundIdx, null)
         if (!quiet) println("  added ${sampledMvrs.size} mvrs to ballotCards")
 
         val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards() as BallotCardsClca, auditRound.roundIdx, auditor = AuditClcaAssertion())
-            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards() as BallotCardsPolling, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards() as BallotCardsClca, auditRound.roundIdx, auditor = OneAuditClcaAssertion())
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = AuditClcaAssertion())
+            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerPolling, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = OneAuditClcaAssertion())
         }
 
         auditRound.auditWasDone = true
@@ -73,9 +73,9 @@ class PersistentAudit(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
 
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        ballotCards().setMvrsBySampleNumber(sampleNumbers)
-    }
+    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    //    (auditRecord.mvrManager as MvrManagerTest).setMvrsBySampleNumber(sampleNumbers)
+    //}
 
-    override fun ballotCards() = auditRecord.ballotCards // lazy
+    override fun mvrManager() = auditRecord.mvrManager // lazy
 }

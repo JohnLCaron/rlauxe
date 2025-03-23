@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 
 //// in memory, simulated mvrs for testing
 
-class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : BallotCardsClcaStart {
+class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClca, MvrManagerTest {
     val cvrsUA: List<CvrUnderAudit>
     val mvrsUA: List<CvrUnderAudit>
     private var mvrsForRound: List<CvrUnderAudit> = emptyList()
@@ -21,7 +21,7 @@ class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         mvrsUA = cvrsUA.map { CvrUnderAudit(mvrs[it.index()], it.index(), it.sampleNumber()) }
     }
 
-    override fun cvrs() = cvrs
+    fun cvrs() = cvrs
     override fun nballotCards() = cvrs.size
     override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {
@@ -66,7 +66,7 @@ class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     }
 }
 
-class StartTestBallotCardsPolling(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: Long) : BallotCardsPollingStart {
+class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: Long) : MvrManagerPolling, MvrManagerTest {
     val ballotsUA: List<BallotUnderAudit>
     val mvrsUA: List<CvrUnderAudit>
     var mvrsForRound: List<CvrUnderAudit> = emptyList()
@@ -78,7 +78,7 @@ class StartTestBallotCardsPolling(val ballots: List<Ballot>, mvrs: List<Cvr>, se
         mvrsUA = ballotsUA.map { CvrUnderAudit(mvrs[it.index()], it.index(), it.sampleNumber()) }
     }
 
-    override fun ballots() = ballots
+    fun ballots() = ballots
     override fun nballotCards() = ballots.size
     override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {

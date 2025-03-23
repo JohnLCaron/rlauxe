@@ -26,7 +26,7 @@ class TestPersistentConsistentSampling {
 
         val previousSamples = auditRecord.rounds.previousSamples(auditRound.roundIdx)
 
-        consistentSampling(auditRound, workflow.ballotCards(), previousSamples)
+        consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
         val actualNewMvrs = auditRound.contestRounds.map { it.actualNewMvrs}
         println("actualNewMvrs = $actualNewMvrs")
     }

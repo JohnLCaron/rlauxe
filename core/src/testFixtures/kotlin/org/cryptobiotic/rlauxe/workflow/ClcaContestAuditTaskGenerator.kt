@@ -42,7 +42,7 @@ class ClcaContestAuditTaskGenerator(
         }
 
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
-            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed), testCvrs)
 
         return ContestAuditTask(
             name(),
@@ -86,7 +86,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         }
 
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
-            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed))
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed), testCvrs)
 
         /* make sure margins are below 0
         if (p2flips != null || p1flips != null) {
@@ -163,7 +163,7 @@ fun runClcaSingleRoundAudit(workflow: RlauxAuditIF, contestRounds: List<ContestR
                             auditor: ClcaAssertionAuditor
 ): Int {
     val stopwatch = Stopwatch()
-    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.ballotCards() as BallotCardsClca, 1, auditor = auditor)
+    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClca, 1, auditor = auditor)
     if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
 
     var maxSamples = 0

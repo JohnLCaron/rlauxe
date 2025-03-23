@@ -13,7 +13,7 @@ data class BallotManifestUnderAudit(
 data class Ballot(
     val id: String,
     val phantom: Boolean = false,
-    val ballotStyle: BallotStyle?, // if hasStyles
+    val ballotStyle: BallotStyle?, // if hasStyles (or)
     val contestIds: List<Int>? = null, // if hasStyles, instead of BallotStyles
 ) {
     fun hasContest(contestId: Int): Boolean {

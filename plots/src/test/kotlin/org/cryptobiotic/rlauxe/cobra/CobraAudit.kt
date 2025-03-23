@@ -31,7 +31,7 @@ class CobraSingleRoundAuditTaskGenerator(
         val contest = makeContestFromCvrs(info, testCvrs)
 
         // TODO: chicken or the egg
-        val cobraWorkflow1 = CobraAudit(auditConfig, listOf(contest), StartTestBallotCardsClca(testCvrs, testCvrs, auditConfig.seed), p2prior)
+        val cobraWorkflow1 = CobraAudit(auditConfig, listOf(contest), MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), p2prior)
         val contestUA: ContestUnderAudit = cobraWorkflow1.contestsUA().first()
         val cassorter = contestUA.clcaAssertions.first().cassorter
 
@@ -41,7 +41,7 @@ class CobraSingleRoundAuditTaskGenerator(
 
         // maybe bogus
         val cobraWorkflow2 = CobraAudit(auditConfig, listOf(contest),
-            StartTestBallotCardsClca(testCvrs, sampler.mvrs, auditConfig.seed),
+            MvrManagerClcaForTesting(testCvrs, sampler.mvrs, auditConfig.seed),
             p2prior)
 
         return ClcaSingleRoundAuditTask(
@@ -58,7 +58,7 @@ class CobraSingleRoundAuditTaskGenerator(
 class CobraAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    val ballotCards: StartTestBallotCardsClca, // mutable
+    val mvrManagerForTesting: MvrManagerClcaForTesting, // mutable
     val p2prior: Double,
 ) : RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -69,12 +69,12 @@ class CobraAudit(
 
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison = true, auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(ballotCards.cvrs)
+            contest.makeClcaAssertions(mvrManagerForTesting.cvrs)
         }
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCobraAssertion(p2prior)
         )
         auditRound.auditWasDone = true
@@ -85,10 +85,10 @@ class CobraAudit(
     override fun auditConfig() = this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        ballotCards.setMvrsBySampleNumber(sampleNumbers)
-    }
-    override fun ballotCards() = ballotCards
+    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    //    mvrManagerForTesting.setMvrsBySampleNumber(sampleNumbers)
+    //}
+    override fun mvrManager() = mvrManagerForTesting
 }
 
 /////////////////////////////////////////////////////////////////////////////////

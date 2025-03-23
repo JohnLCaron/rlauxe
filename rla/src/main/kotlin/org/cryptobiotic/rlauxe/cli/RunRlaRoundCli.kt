@@ -7,7 +7,6 @@ import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.PersistentAudit
 import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -39,68 +38,48 @@ object RunRliRoundCli {
     }
 }
 
+
+// Also called from rlaux-viewer
 fun runRound(inputDir: String, mvrFile: String): AuditRound? {
     if (notExists(Path.of(inputDir))) {
-        println("RunRoundFuzz Audit Directory $inputDir does not exist")
+        println("RunRliRoundCli Audit Directory $inputDir does not exist")
         return null
     }
 
+    var complete = false
+    var roundIdx = 0
     val workflow = PersistentAudit(inputDir)
-    val auditRound = workflow.getLastRound()
 
-    val publisher = Publisher(inputDir)
+    if (!workflow.auditRounds().isEmpty()) {
+        val auditRound = workflow.auditRounds().last()
+        roundIdx = auditRound.roundIdx
 
-    println("Run audit round ${auditRound.roundIdx}")
-    val allDone = runAuditStage(auditRound, workflow, mvrFile, publisher)
+        if (!auditRound.auditWasDone) {
+            println("Run audit round ${auditRound.roundIdx}")
+            val roundStopwatch = Stopwatch()
 
-    if (!allDone) {
-        // start next round and estimate sample sizes
-        println("Start audit round ${auditRound.roundIdx + 1}")
-        val nextRound = workflow.startNewRound(quiet = false)
+            // 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
+            // TODO the mvrFile might be the mvrs that were just audited. here we are assuming the auditRecord has testMvrs
+            val sampledMvrs = workflow.auditRecord.getMvrsForRound(workflow.ballotCards(), roundIdx, mvrFile)
+            println("  added ${sampledMvrs.size} mvrs to ballotCards")
 
-        if (nextRound.sampleNumbers.isEmpty()) {
-            println("*** FAILED TO GET ANY SAMPLES ***")
-            nextRound.auditIsComplete = true
+            // 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
+            complete = workflow.runAuditRound(auditRound)
+            println("  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
         } else {
-            // write the partial election state to round+1
-            writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
-            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}")
-
-            writeSampleNumbersJsonFile(nextRound.sampleNumbers, publisher.sampleNumbersFile(nextRound.roundIdx))
-            println("   writeSampleIndicesJsonFile ${publisher.sampleNumbersFile(nextRound.roundIdx)}")
+            complete = auditRound.auditIsComplete
         }
-
-        return if (nextRound.auditIsComplete) null else nextRound
     }
+
+    if (!complete) {
+        roundIdx++
+        // start next round and estimate sample sizes
+        println("Start audit round $roundIdx")
+        val nextRound = workflow.startNewRound(quiet = false)
+        return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
+    }
+
     return null
-}
-
-fun runAuditStage(
-    auditRound: AuditRound,
-    workflow: PersistentAudit,
-    mvrFile: String,
-    publisher: Publisher,
-): Boolean {
-    val roundStopwatch = Stopwatch()
-    val roundIdx = auditRound.roundIdx
-
-    val sampledMvrs = workflow.auditRecord.getMvrsForRound(workflow.ballotCards, roundIdx, mvrFile)
-    println("  added ${sampledMvrs.size} mvrs to ballotCards")
-
-    val allDone = workflow.runAuditRound(auditRound)
-    println("  allDone=$allDone took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
-
-    // heres the changed state now that the audit has been run.
-    val updatedState = auditRound.copy(auditWasDone = true, auditIsComplete = allDone)
-
-    // overwriting it with audit info, a bit messy TODO separate estimation and audit?
-    writeAuditRoundJsonFile(updatedState, publisher.auditRoundFile(roundIdx))
-    println("    writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'")
-
-    writeCvrsCsvFile(sampledMvrs , publisher.sampleMvrsFile(roundIdx)) // TODO
-    println("    write sampledMvrs to '${publisher.sampleMvrsFile(roundIdx)}'")
-    println()
-    return allDone
 }
 
 fun runChooseSamples(workflow: RlauxAuditIF, publish: Publisher): AuditRound {

@@ -68,7 +68,7 @@ fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<CvrUnderAud
                 "took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
         // TODO addMvrs ?
-        val sampledMvrus = findSamples(currRound.sampleNumbers, sortedMvrs)
+        val sampledMvrus = findSamples(currRound.sampleNumbers, sortedMvrs.iterator()) // TODO use IteratorCvrsCsvFile?
         done = workflow.runAuditRound(currRound)
         println("runAudit ${currRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
     }

@@ -51,7 +51,7 @@ class StartBallotCardsClca(val cvrs: List<Cvr>, seed: Long) : BallotCardsClcaSta
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
-        val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
+        val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsForRound.size)
@@ -101,26 +101,32 @@ class StartBallotCardsPolling(val ballots: List<Ballot>, seed: Long) : BallotCar
     }
 }
 
-fun findSamples(sampleNumbers: List<Long>, sortedMvrs: Iterable<CvrUnderAudit>): List<CvrUnderAudit> {
+// Iterate through sortedCvrUAs to find the cvrUAs that match the sampleNumbers
+// sampleNumbers must in same order as sortedCvrUAs
+// Note this iterates through sortedCvrUAs only until all sampleNumbers have been found
+fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<CvrUnderAudit>): List<CvrUnderAudit> {
     val result = mutableListOf<CvrUnderAudit>()
-    val sortedIter = sortedMvrs.iterator()
     sampleNumbers.forEach { sampleNum ->
-        while (sortedIter.hasNext()) {
-            val boc = sortedIter.next() // sampleIndices must in same order as sortedMvrs
+        while (sortedCvrUAs.hasNext()) {
+            val boc = sortedCvrUAs.next()
             if (boc.sampleNumber() == sampleNum) {
                 result.add(boc)
                 break
             }
         }
     }
+    require(result.size == sampleNumbers.size)
     return result
 }
 
+//// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
+// for each contest, return map contestId -> wantSampleSize
 fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedBorc : Iterable<BallotOrCvr>): Map<Int, Int> {
-    // count how many samples each contest already has
+    //// count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }
 
+    // Note this iterates through sortedBorc only until all previousSamples have been found and counted
     val sortedBorcIter = sortedBorc.iterator()
     previousSamples.forEach { prevNumber ->
         while (sortedBorcIter.hasNext()) {
@@ -140,9 +146,9 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
         println("**wantSampleSize prevContestCountsById = ${prevContestCountsById}")
     }
 
-    // we need that in order to calculate wantedSampleSizes
-    val wantSampleSize = prevContestCounts.entries.map { it.key.id to it.key.sampleSize(it.value) }.toMap()
-    if (debugWantSampleSize) println("**wantSampleSize = $wantSampleSize")
+    // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
+    val wantSampleSizeMap = prevContestCounts.entries.map { it.key.id to it.key.wantSampleSize(it.value) }.toMap()
+    if (debugWantSampleSize) println("**wantSampleSize = $wantSampleSizeMap")
 
-    return wantSampleSize
+    return wantSampleSizeMap
 }

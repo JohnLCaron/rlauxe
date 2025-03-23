@@ -65,9 +65,16 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
     constructor(contestUA: ContestUnderAudit, roundIdx: Int) :
             this(contestUA, contestUA.assertions().map{ AssertionRound(it, roundIdx, null) }, roundIdx)
 
-    fun sampleSize(prevCount: Int): Int {
+    fun wantSampleSize(prevCount: Int): Int {
         return if (auditorWantNewMvrs > 0) (auditorWantNewMvrs + prevCount)
-                else estSampleSize
+                else if (contestUA.hasStyle) estSampleSize
+                else estSampleSizeNoStyles
+    }
+
+    fun estSampleSizeEligibleForRemoval(): Int {
+        return if (!included || auditorWantNewMvrs >= 0 ) 0 // auditor excluded or set explicitly, not eligible
+               else if (contestUA.hasStyle) estSampleSize
+               else estSampleSizeNoStyles
     }
 
     fun minAssertion(): AssertionRound? {

@@ -74,7 +74,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxAuditIF, mvrsUA: It
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         writeAuditRoundJsonFile(nextRound, publish.auditRoundFile(roundIdx))
 
-        val sampledMvrus = findSamples(nextRound.sampleNumbers, mvrsUA)
+        val sampledMvrus = findSamples(nextRound.sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         writeCvrsCsvFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
 
         println(nextRound)

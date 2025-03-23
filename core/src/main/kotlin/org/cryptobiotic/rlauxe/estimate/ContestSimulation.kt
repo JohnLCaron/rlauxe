@@ -36,7 +36,7 @@ class ContestSimulation(val contest: Contest) {
     val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
     val phantomCount = contest.Np //  - underCount - voteCount // Np_c
-    val underCount = contest.Nc - contest.Np - voteCount // U_c
+    val underCount = contest.Nc * info.nwinners - contest.Np - voteCount // U_c
 
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0
@@ -45,7 +45,9 @@ class ContestSimulation(val contest: Contest) {
         resetTracker()
     }
 
-    fun show() = "ContestSimulation ${contest.id} voteCount=$voteCount underCount=$underCount phantomCount=$phantomCount "
+    fun show(): String {
+        return "ContestSimulation ${contest.id} voteCount=$voteCount underCount=$underCount phantomCount=$phantomCount "
+    }
 
     fun resetTracker() {
         trackVotesRemaining = mutableListOf()
@@ -134,6 +136,28 @@ class ContestSimulation(val contest: Contest) {
                 mapOf(0 to winner, 1 to loser),
                 Nc = Nc,
                 Np=Np,
+            )
+            return ContestSimulation(contest)
+        }
+
+        fun makeContestWithLimits(contest: Contest, sampleLimit: Int): ContestSimulation {
+            if (sampleLimit < 0 || contest.Nc <= sampleLimit) return ContestSimulation(contest)
+            // otherwise scale everything
+            val sNc = sampleLimit / contest.Nc.toDouble()
+            val sNp = roundToInt(sNc * contest.Np)
+            val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
+            val svotes = contest.votes.map { (id, nvotes) -> id to roundToInt(sNc * nvotes) }.toMap()
+            val voteCount = svotes.map { it.value }.sum() // V_c
+
+            if (voteCount > sampleLimit) {
+                println("*** org = ${orgVoteCount} voteCount = ${voteCount}")
+            }
+
+            val contest = Contest(
+                contest.info,
+                svotes,
+                Nc=sampleLimit,
+                Np=sNp,
             )
             return ContestSimulation(contest)
         }

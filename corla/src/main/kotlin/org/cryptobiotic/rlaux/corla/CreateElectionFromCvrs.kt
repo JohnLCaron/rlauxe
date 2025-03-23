@@ -307,33 +307,49 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
 }
 
 // use sov to define what contests are in the audit (?)
-fun createElectionFromDominionCvrs(exportFile: String, auditDir: String, sovoFile: String, riskLimit: Double = 0.03) {
+fun createElectionFromDominionCvrs(
+    cvrExportFile: String,
+    auditDir: String,
+    sovoFile: String,
+    riskLimit: Double = 0.03,
+    auditConfigIn: AuditConfig? = null,
+    runEstimation: Boolean = true) {
+
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
 
-    createElectionFromDominionCvrs(exportFile, auditDir, sovo, riskLimit)
+    createElectionFromDominionCvrs(cvrExportFile, auditDir, sovo, riskLimit, auditConfigIn, runEstimation)
 }
 
 // use sov to define what contests are in the audit
-fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo: BoulderStatementOfVotes, riskLimit: Double = 0.03) {
+fun createElectionFromDominionCvrs(
+    cvrExportFile: String,
+    auditDir: String,
+    sovo: BoulderStatementOfVotes,
+    riskLimit: Double = 0.03,
+    auditConfigIn: AuditConfig? = null,
+    runEstimation: Boolean = true) {
+
     clearDirectory(Path.of(auditDir))
 
     val stopwatch = Stopwatch()
     val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")
-
     val electionFromCvrs = CreateElectionFromCvrs(export, sovo)
-    val (contests, raireContests) = electionFromCvrs.makeContests()
 
+    val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(electionFromCvrs.cvrs)
+    println("added ${electionFromCvrs.cvrs.size} cvrs with ${cvrVotes.values.sumOf { it.values.sum() }} total votes")
+
+    val (contests, raireContests) = electionFromCvrs.makeContests()
     val publisher = Publisher(auditDir)
-    val auditConfig = AuditConfig(
+    val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.CLCA, hasStyles = true, riskLimit = riskLimit,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
     val redactedCvrs = electionFromCvrs.makeRedactedCvrs()
-    val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs)
-    println("added ${redactedCvrs.size} redacted cvrs with ${cvrVotes.values.sumOf { it.values.sum() }} total votes")
+    val rcvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs)
+    println("added ${redactedCvrs.size} redacted cvrs with ${rcvrVotes.values.sumOf { it.values.sum() }} total votes")
     val allCvrs = electionFromCvrs.cvrs + redactedCvrs
 
     /////////////////
@@ -352,12 +368,14 @@ fun createElectionFromDominionCvrs(cvrExportFile: String, auditDir: String, sovo
     writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
-    // get the first round of samples wanted, write them to round1 subdir
-    val auditRound = runChooseSamples(clcaWorkflow, publisher)
+    if (runEstimation) {
+        // get the first round of samples wanted, write them to round1 subdir
+        val auditRound = runChooseSamples(clcaWorkflow, publisher)
 
-    // write the partial audit state to round1
-    writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-    println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
+        // write the partial audit state to round1
+        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
+        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
+    }
 
     println("took = $stopwatch")
 }

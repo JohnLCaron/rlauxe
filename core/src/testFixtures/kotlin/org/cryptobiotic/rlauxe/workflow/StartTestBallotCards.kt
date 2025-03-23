@@ -28,7 +28,7 @@ class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         mvrsForRound = mvrs
     }
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        val sampledMvrs = findSamples(sampleNumbers, mvrsUA)
+        val sampledMvrs = findSamples(sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         require(sampledMvrs.size == sampleNumbers.size)
 
         // debugging sanity check
@@ -44,7 +44,7 @@ class StartTestBallotCardsClca(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         if (mvrsForRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset)
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
-        val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
+        val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsForRound.size)
@@ -85,7 +85,7 @@ class StartTestBallotCardsPolling(val ballots: List<Ballot>, mvrs: List<Cvr>, se
         mvrsForRound = mvrs
     }
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        val sampledMvrs = findSamples(sampleNumbers, mvrsUA)
+        val sampledMvrs = findSamples(sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         require(sampledMvrs.size == sampleNumbers.size)
 
         // debugging sanity check

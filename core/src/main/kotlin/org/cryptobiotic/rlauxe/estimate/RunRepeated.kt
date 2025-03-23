@@ -9,7 +9,7 @@ import kotlin.math.sqrt
 private const val showH0Result = false
 
 // single threaded, used for estimating sample size
-// runs RiskTestingFn repeatedly, drawSample.reset() called for each trial.
+// runs RiskTestingFn repeatedly, drawSample.reset() gives different permutation for each trial.
 fun runTestRepeated(
     drawSample: Sampler,
     ntrials: Int,
@@ -29,6 +29,7 @@ fun runTestRepeated(
     val sampleCounts = mutableListOf<Int>()
 
     repeat(ntrials) {
+        // TODO TIMING reset taking 12% of audit round, already have the sample Limit on it....
         drawSample.reset()
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),

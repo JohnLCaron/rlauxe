@@ -16,10 +16,12 @@ private val debug = false
 private val debugErrorRates = false
 private val debugSampleDist = false
 private val debugSizeNudge = true
+private val debugSampleSmall = false
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
 
+// 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
@@ -45,8 +47,8 @@ fun estimateSampleSizes(
         task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
 
         if (debug) println(result.showSampleDist(estResult.task.contest.id))
-        if (result.avgSamplesNeeded() < 10) {
-            println(" ** avgSamplesNeeded ${result.avgSamplesNeeded()} task=${task.name()}")
+        if (debugSampleSmall && result.avgSamplesNeeded() < 10) {
+            println(" ** avgSamplesNeeded ${result.avgSamplesNeeded()} < 10; task=${task.name()}")
         }
         if (debugSampleDist) {
             println(
@@ -83,6 +85,7 @@ fun makeEstimationTasks(
 ): List<EstimateSampleSizeTask> {
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
+    // TODO generate simulated contest once, and use across all assertions for that contest.
     contest.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
             var prevSampleSize = 0
@@ -117,6 +120,7 @@ fun makeEstimationTasks(
     return tasks
 }
 
+// TODO how does this differ from ContestAuditTask ?
 // For one contest, for one assertion, a concurrent task
 class EstimateSampleSizeTask(
     val roundIdx: Int,
@@ -173,7 +177,7 @@ data class EstimationResult(
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //// Clca, including with IRV
 
-// TODO how does this differ from ClcaSingleRoundAuditTask ?
+// TODO how does this differ from ClcaSingleRoundAuditTask ? Can they be merged ?
 
 fun simulateSampleSizeClcaAssorter(
     roundIdx: Int,
@@ -188,10 +192,13 @@ fun simulateSampleSizeClcaAssorter(
     val cassorter = cassertion.cassorter
 
     // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+    // TODO TIMING make same contestSim for all the assertions in the contest: takes 20% of time of audit
     val cvrs =  if (contest.isIRV()) {
         simulateRaireTestData(contest as RaireContest)
     } else {
-        val contestSim = ContestSimulation(contest as Contest)
+        val contestSim = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit)
+        //val voteCount = contest.votes.map { it.value }.sum() // V_c
+        // println("${contest.id} voteCount=${voteCount} under=${contest.undervotes}\n${contestSim.show()}\n")
         contestSim.makeCvrs()
     }
 
@@ -227,6 +234,7 @@ fun simulateSampleSizeClcaAssorter(
     }
 
     // optional fuzzing of the cvrs
+    // TODO without Optimal strategy, the bettingFn is the same
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
         val irvFuzz = (contest.isIRV() && clcaConfig.simFuzzPct != null)
         if (irvFuzz) fuzzPct = clcaConfig.simFuzzPct!! // TODO
@@ -246,7 +254,7 @@ fun simulateSampleSizeClcaAssorter(
     // we need a permutation to get uniform distribution of errors, since some simulations puts all the errors at the beginning
     sampler.reset()
 
-    // run the simulation ntrials (auditConfig.nsimEst) times
+    // run the simulation ntrials (=auditConfig.nsimEst) times
     val result: RunTestRepeatedResult = simulateSampleSizeBetaMart(
         auditConfig,
         sampler,
@@ -258,6 +266,7 @@ fun simulateSampleSizeClcaAssorter(
         startingTestStatistic,
         moreParameters
     )
+
     // The result is a distribution of ntrials sampleSizes
     assertionRound.estimationResult = EstimationRoundResult(roundIdx,
         clcaConfig.strategy.name,
@@ -319,9 +328,9 @@ fun simulateSampleSizePollingAssorter(
     val margin = assorter.reportedMargin()
 
     // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
-    // TODO maximum cvrs for estimation
     // TODO what about supermajority?
-    val simContest = /* if (contest.isIRV()) ContestIrvSimulation(contest as Contest) else */ ContestSimulation(contest as Contest)
+    /* val simContest = /* if (contest.isIRV()) ContestIrvSimulation(contest as Contest) else */ ContestSimulation(contest as Contest) */
+    val simContest = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit)
     val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin,
 
     // optional fuzzing of the cvrs

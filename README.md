@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 03/20/2026_
+_last changed: 03/22/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -33,7 +33,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Card Style Data](#card-style-data)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
-    * [Polling Vs CLCA with/out CSD Estimated Sample sizes](#polling-vs-clca-without-csd-estimated-sample-sizes)
+    * [Polling Vs CLCA with/out CSD](#polling-vs-clca-without-csd)
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
   * [Multiple Contest Auditing](#multiple-contest-auditing)
     * [Efficiency](#efficiency)
@@ -57,21 +57,26 @@ Click on plot images to get an interactive html plot. You can also read this doc
 An audit is performed in _rounds_, as outlined here:
 
 For each contest:
-- count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
-- determine the total number of valid ballots, including undervotes and overvotes.
+- Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
+- Determine the total number of valid ballots, including undervotes and overvotes.
+- For a Card Level Comparison Audit (CLCA), extract the Cast Vote Records (CVRs) from the vote tabulation system.
 
 The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
 
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
 
-For each round:
-1. for each contest decide how many samples are needed, typically by estimating the samples needed to satisfy the risk function, 
-   based on the contest margin and an estimate of the error rates
-1. randomly choose ballots to sample based on the sample sizes
-1. find the chosen paper ballots and do a manual audit of each
-1. enter the results of the manual audits (as Manual Vote Records, MVRs) into the system
-1. perform the audit to determine if the risk limit is satisfied
-1. for each contest not satisfied, decide whether to continue to another round
+For each audit round:
+1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function, 
+   by running simulations of the contest with its votes and margins, and an estimate of the error rates.
+2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited. 
+This may be done with an automated algorithm, or the Auditor may make individual contest choices.
+3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
+4. _Manual Audit_: find the chosen paper ballots that were selected and do a manual audit of each.
+5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
+6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
+7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
+
+## Estimation
 
 # SHANGRLA framework
 
@@ -443,7 +448,7 @@ no style information, no errors, for Nb/Nc = 1, 2, 5 and 10.
 * We need to sample more than 50% of Nb when the margin < 5%
 
 
-### Polling Vs CLCA with/out CSD total mvrs
+### Polling Vs CLCA with/out CSD
 
 The following plot shows nmvrs for Polling vs CLCA, with and without CSD at different margins, no errors, where Nb/Nc = 2.
 
@@ -499,7 +504,7 @@ The number of rounds needed reflects the default value of auditConfig.quantile =
 
 ## Multiple Contest Auditing
 
-An election often consists of several or many contests, and it can be more efficient to audit all of the contests at once.
+An election often consists of several or many contests, and it is likely to be more efficient to audit all of the contests at once.
 We have several mechanisms for choosing contests to remove from the audit to keep the sample sizes resonable.
 
 Before the audit begins:
@@ -514,7 +519,9 @@ For each Estimation round:
 
 These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
 auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the estimation stage,
-and try out different scenarios before committing to which contests continue on to the next round.
+and try out different scenarios before committing to which contests continue on to the next round. 
+See the prototype [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
+
 
 ### Efficiency
 

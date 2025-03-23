@@ -4,6 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import java.nio.file.Files
@@ -12,15 +13,17 @@ import java.nio.file.Path
 class AuditRecord(
     val location: String,
     val auditConfig: AuditConfig,
+    val contests: List<ContestUnderAudit>,
     val rounds: List<AuditRound>,
     val mvrs: Set<CvrUnderAudit>,
 ) {
 
-    fun ballotCards(): BallotCards {
-        return if (auditConfig.isClca) {
-            BallotCardsClcaRecord(cvrsUA, cvrsUA.size)
+    // TODO TIMING taking 15%
+    val ballotCards: BallotCards by lazy {
+        if (auditConfig.isClca) {
+            BallotCardsClcaRecord(this, cvrsUA, cvrsUA.size)
         } else {
-            BallotCardsPollingRecord(ballotsUA, ballotsUA.size)
+            BallotCardsPollingRecord(this, ballotsUA, ballotsUA.size)
         }
     }
 
@@ -37,32 +40,41 @@ class AuditRecord(
 
     // read the sampleNumbers for this round and fetch the corresponding mvrs from the private file, add to ballotCards
     // TODO in a real audit, these are added by the audit process, not from a private file
-    fun getMvrsForRound(ballotCards: BallotCards, roundIdx: Int, mvrFile: String): List<CvrUnderAudit> {
+    fun getMvrsForRound(ballotCards: BallotCards, roundIdx: Int, mvrFile: String?): List<CvrUnderAudit> {
         val publisher = Publisher(location)
-        val resultIndices = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx))
-        if (resultIndices is Err) println(resultIndices)
-        require(resultIndices is Ok)
-        val sampleIndices = resultIndices.unwrap() // these are the samples we are going to audit.
+        val resultSamples = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx))
+        if (resultSamples is Err) println(resultSamples)
+        require(resultSamples is Ok)
+        val sampleNumbers = resultSamples.unwrap() // these are the samples we are going to audit.
 
-        if (sampleIndices.isEmpty()) {
+        if (sampleNumbers.isEmpty()) {
             println("***Error sampled Indices are empty for round $roundIdx")
             return emptyList()
         }
 
-        // the only place privy to private data
-        val testMvrs = readCvrsCsvFile(mvrFile)
+        val sampledMvrs = getMvrsBySampleNumber(sampleNumbers, mvrFile)
+        ballotCards.setMvrs(sampledMvrs)
+        return sampledMvrs
+    }
 
-        val sampledMvrs = findSamples(sampleIndices, testMvrs)
-        require(sampledMvrs.size == sampleIndices.size)
+    // TODO TIMING taking 8% of sample record
+    fun getMvrsBySampleNumber(sampleNumbers: List<Long>, mvrFile: String?): List<CvrUnderAudit>  {
+        val useMvrFile = mvrFile?: "$location/private/testMvrs.csv"
+
+        //val testMvrs = readCvrsCsvFile(useMvrFile)
+        //val sampledMvrs = findSamples(sampleNumbers, testMvrs.iterator())
+
+        val mvrIterator = IteratorCvrsCsvFile(useMvrFile) // TODO should we cache these ?
+        val sampledMvrs = findSamples(sampleNumbers, mvrIterator)
+        mvrIterator.close()
 
         // debugging sanity check
+        require(sampledMvrs.size == sampleNumbers.size)
         var lastRN = 0L
         sampledMvrs.forEach { mvr ->
             require(mvr.sampleNumber() > lastRN)
             lastRN = mvr.sampleNumber()
         }
-
-        ballotCards.setMvrs(sampledMvrs)
         return sampledMvrs
     }
 
@@ -94,12 +106,12 @@ class AuditRecord(
 
                 rounds.add(auditRound)
             }
-            return AuditRecord(location, auditConfig, rounds, mvrs)
+            return AuditRecord(location, auditConfig, contests, rounds, mvrs)
         }
     }
 }
 
-class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nballotCards: Int) : BallotCardsClca {
+class BallotCardsClcaRecord(val auditRecord: AuditRecord, private val cvrsUA: Iterable<CvrUnderAudit>, val nballotCards: Int) : BallotCardsClca {
     private var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
     override fun nballotCards() = nballotCards
@@ -108,12 +120,14 @@ class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nba
         mvrsForRound = mvrs
     }
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        TODO("Unimplemented")
+        val sampleMvrs = auditRecord.getMvrsBySampleNumber(sampleNumbers, null)
+        setMvrs(sampleMvrs)
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
         val sampleNumbers = mvrsForRound.map { it.sampleNum }
-        val sampledCvrs = findSamples(sampleNumbers, cvrsUA)
+
+        val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         require(sampledCvrs.size == mvrsForRound.size)
 
         if (checkValidity) {
@@ -134,7 +148,7 @@ class BallotCardsClcaRecord(private val cvrsUA: Iterable<CvrUnderAudit>, val nba
 
 private const val checkValidity : Boolean= false
 
-class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) :
+class BallotCardsPollingRecord(val auditRecord: AuditRecord, private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) :
     BallotCardsPolling {
     var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
@@ -144,7 +158,8 @@ class BallotCardsPollingRecord(private val ballotsUA: Iterable<BallotUnderAudit>
         mvrsForRound = mvrs
     }
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        TODO("Unimplemented")
+        val sampleMvrs = auditRecord.getMvrsBySampleNumber(sampleNumbers, null)
+        setMvrs(sampleMvrs)
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {

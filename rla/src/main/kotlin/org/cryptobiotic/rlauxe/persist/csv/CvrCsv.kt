@@ -86,9 +86,31 @@ fun readCvrsCsvFile(filename: String): List<CvrUnderAudit> {
     return cvrs
 }
 
+class IteratorCvrsCsvFile(filename: String): Iterator<CvrUnderAudit> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    var nextLine: String = reader.readLine() // get rid of header line
+
+    var countLines  = 0
+    override fun hasNext() : Boolean {
+        countLines++
+        nextLine = reader.readLine()
+        return nextLine != null
+    }
+
+    override fun next(): CvrUnderAudit {
+        return readCvrCvs(nextLine)
+    }
+
+    fun close() {
+        println("read $countLines lines")
+        reader.close()
+    }
+}
+
 fun readCvrCvs(line: String): CvrUnderAudit {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
+
     var idx = 0
     val id = ttokens[idx++]
     val phantom = ttokens[idx++] == "true"

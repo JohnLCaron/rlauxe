@@ -36,7 +36,8 @@ class RaireContestAuditTaskGenerator(
 
         val clca = ClcaAudit(
             useConfig, emptyList(), listOf(rcontest),
-            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed)
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
+            testCvrs
         )
         return ContestAuditTask(
             name(),
@@ -82,7 +83,8 @@ class RaireSingleRoundAuditTaskGenerator(
 
         val raireAudit = ClcaAudit(
             useConfig, emptyList(), listOf(rcontest),
-            StartTestBallotCardsClca(testCvrs, testMvrs, useConfig.seed)
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
+            testCvrs
         )
 
         return ClcaSingleRoundAuditTask(

@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
 // used in ConsistentSampling
 interface RlauxAuditProxy {
     fun auditConfig() : AuditConfig
-    fun ballotCards() : BallotCards
+    fun mvrManager() : MvrManager
 }
 
 interface RlauxAuditIF: RlauxAuditProxy {
@@ -36,14 +36,15 @@ interface RlauxAuditIF: RlauxAuditProxy {
         )
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
-        // This may be done with an automated algorithm, or the Auditor may make individual contest choices.
         // 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
         sampleCheckLimits(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
         return auditRound
     }
 
-    // you have to set the mvrs before you run the audit
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
+    // 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
+    // fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
+
+    // 6. _Run the audit_5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
     fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
 }
 

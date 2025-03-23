@@ -8,21 +8,22 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 class OneAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
-    val ballotCards: BallotCardsClcaStart, // mutable
+    val mvrManager: MvrManagerClca,
+    val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(ballotCards.cvrs()) }
+        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
 
         // check contests well formed etc
         // check(auditConfig, contests)
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = OneAuditClcaAssertion()
         )
         auditRound.auditWasDone = true
@@ -33,11 +34,11 @@ class OneAudit(
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        ballotCards.setMvrsBySampleNumber(sampleNumbers)
-    }
+    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    //    (mvrManager as MvrManagerTest).setMvrsBySampleNumber(sampleNumbers)
+    //}
 
-    override fun ballotCards() = ballotCards
+    override fun mvrManager() = mvrManager
 }
 
 class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
@@ -46,7 +47,6 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         auditConfig: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
-        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {

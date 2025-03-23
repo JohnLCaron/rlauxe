@@ -9,17 +9,14 @@ import java.nio.file.Path
     topdir/
       auditConfig.json      // AuditConfigJson
       contests.json         // ContestsUnderAuditJson
-      cvrs.json             // CvrsJson (or)
+      cvrs.csv              // CvrsCsv (or)
       ballotManifest.json   // BallotManifestJson
+
       roundX/
         auditState.json     // AuditRoundJson
-        sampleIndices.json  // SampleIndicesJson // choose the sample indices to be audited
-        sampleMvrs.json     // CvrsJson // get the mvrs needed for the audit
+        sampleNumbers.json  // SampleNumbersJson // the sample numbers to be audited
+        sampleMvrs.csv      // CvrsCsv  // the mvrs used for the audit; matches sampleNumbers.json
 
-      altRoundX/
-        estRound.json       // EstimationRoundJson, includes SampleIndices ??
-        sampleMvrs.json     // CvrsJson // get the mvrs needed for the audit  // check agree with SampleIndices
-        auditResult.json     // AuditResultJson
  */
 
 class Publisher(val topdir: String) {
@@ -30,7 +27,6 @@ class Publisher(val topdir: String) {
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
     fun contestsFile() = "$topdir/contests.json"
-    // fun cvrsFile() = "$topdir/cvrs.json"
     fun cvrsCsvFile() = "$topdir/cvrs.csv"
     fun ballotManifestFile() = "$topdir/ballotManifest.json"
 

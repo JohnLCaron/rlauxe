@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
 
-class TestSampleIndicesJson {
+class TestSampleNumbersJson {
     val filename = "/home/stormy/temp/persist/test/TestSampleIndices.json"
 
     @Test

@@ -11,24 +11,23 @@ interface BallotOrCvr {
     fun index(): Int
 }
 
-interface BallotCards {
+interface MvrManager {
     fun nballotCards(): Int
     fun ballotCards() : Iterable<BallotOrCvr>
     fun setMvrs(mvrs: List<CvrUnderAudit>)
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
     fun takeFirst(nmvrs: Int): List<BallotOrCvr> = ballotCards().take(nmvrs).toList()
 }
 
-interface BallotCardsClca : BallotCards {
+interface MvrManagerTest : MvrManager {
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
+}
+
+interface MvrManagerClca : MvrManager {
     // this is used for audit, not estimation
     fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean = false): Sampler
 }
 
-interface BallotCardsClcaStart : BallotCardsClca {
-    fun cvrs() : List<Cvr>
-}
-
-class StartBallotCardsClca(val cvrs: List<Cvr>, seed: Long) : BallotCardsClcaStart {
+class MvrManagerClcaForStarting(val cvrs: List<Cvr>, seed: Long) : MvrManagerClca {
     val cvrsUA: List<CvrUnderAudit>
     private var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
@@ -38,15 +37,11 @@ class StartBallotCardsClca(val cvrs: List<Cvr>, seed: Long) : BallotCardsClcaSta
         cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
     }
 
-    override fun cvrs() = cvrs
+    fun cvrs() = cvrs
     override fun nballotCards() = cvrs.size
     override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {
         mvrsForRound = mvrs
-    }
-
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        TODO("Unimplemented")
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
@@ -67,16 +62,12 @@ class StartBallotCardsClca(val cvrs: List<Cvr>, seed: Long) : BallotCardsClcaSta
     }
 }
 
-interface BallotCardsPolling : BallotCards {
+interface MvrManagerPolling : MvrManager {
     // this is used for audit, not estimation
     fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler
 }
 
-interface BallotCardsPollingStart : BallotCardsPolling {
-    fun ballots(): List<Ballot>
-}
-
-class StartBallotCardsPolling(val ballots: List<Ballot>, seed: Long) : BallotCardsPollingStart {
+class MvrManagerPollingForStarting(val ballots: List<Ballot>, seed: Long) : MvrManagerPolling {
     val ballotsUA: List<BallotUnderAudit>
     var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
@@ -86,14 +77,11 @@ class StartBallotCardsPolling(val ballots: List<Ballot>, seed: Long) : BallotCar
             .sortedBy { it.sampleNumber() }
     }
 
-    override fun ballots() = ballots
+    fun ballots() = ballots
     override fun nballotCards() = ballots.size
     override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {
         mvrsForRound = mvrs
-    }
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        TODO("Unimplemented")
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {

@@ -8,7 +8,8 @@ class ClcaAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
-    val ballotCards: BallotCardsClcaStart, // mutable
+    val mvrManager: MvrManagerClca,
+    val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
@@ -20,7 +21,7 @@ class ClcaAudit(
 
         contestsUA = regularContests + raireContests
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(ballotCards.cvrs())
+            contest.makeClcaAssertions(cvrs)
         }
 
         /* TODO only check regular contests ??
@@ -28,13 +29,13 @@ class ClcaAudit(
         // TODO filter out contests that are done... */
     }
 
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        ballotCards.setMvrsBySampleNumber(sampleNumbers)
-    }
+    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    //    (mvrManager as MvrManagerTest).setMvrsBySampleNumber(sampleNumbers)
+    //}
 
     //  return complete
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = AuditClcaAssertion(quiet)
         )
         auditRound.auditWasDone = true
@@ -45,7 +46,7 @@ class ClcaAudit(
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun ballotCards() = ballotCards
+    override fun mvrManager() = mvrManager
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +54,7 @@ class ClcaAudit(
 // run all contests and assertion - TODO parellelize?
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
-                 ballotCards: BallotCardsClca,
+                 mvrManager: MvrManagerClca,
                  roundIdx: Int,
                  auditor: ClcaAssertionAuditor
 ): Boolean {
@@ -67,7 +68,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = ballotCards.makeSampler(contest.id, auditConfig.hasStyles, cassorter, allowReset = false)
+                val sampler = mvrManager.makeSampler(contest.id, auditConfig.hasStyles, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status

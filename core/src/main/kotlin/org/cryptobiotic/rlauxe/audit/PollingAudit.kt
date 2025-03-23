@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 class PollingAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
-    val ballotCards: BallotCardsPolling,
+    val mvrManager: MvrManagerPolling,
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     private val auditRounds = mutableListOf<AuditRound>()
@@ -32,7 +32,7 @@ class PollingAudit(
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runPollingAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx, quiet)
+        val complete = runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx, quiet)
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
         return complete
@@ -41,16 +41,16 @@ class PollingAudit(
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        ballotCards.setMvrsBySampleNumber(sampleNumbers)
-    }
-    override fun ballotCards() = ballotCards
+    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    //    (mvrManager as MvrManagerTest).setMvrsBySampleNumber(sampleNumbers)
+    //}
+    override fun mvrManager() = mvrManager
 }
 
 fun runPollingAudit(
     auditConfig: AuditConfig,
     contests: List<ContestRound>,
-    ballotCards: BallotCardsPolling,
+    mvrManager: MvrManagerPolling,
     roundIdx: Int,
     quiet: Boolean = true
 ): Boolean {
@@ -67,7 +67,7 @@ fun runPollingAudit(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = ballotCards.makeSampler(contest.id, auditConfig.hasStyles, assorter, allowReset=false)
+                val sampler = mvrManager.makeSampler(contest.id, auditConfig.hasStyles, assorter, allowReset=false)
 
                 val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

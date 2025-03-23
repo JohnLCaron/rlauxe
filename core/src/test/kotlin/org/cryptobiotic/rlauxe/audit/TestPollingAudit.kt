@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.StartTestBallotCardsPolling
+import org.cryptobiotic.rlauxe.workflow.MvrManagerPollingForTesting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -37,7 +37,7 @@ class TestPollingAudit {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
 
         val workflow = PollingAudit(auditConfig, contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed)
+            MvrManagerPollingForTesting(ballotManifest.ballots, testCvrs, auditConfig.seed)
         )
         runAudit("testPollingNoStyle", workflow)
     }
@@ -78,7 +78,7 @@ class TestPollingAudit {
         val testMvrs = testCvrs
 
         val workflow = PollingAudit(auditConfig, contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
+            MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, auditConfig.seed)
         )
         runAudit("testPollingWithStyle", workflow)
     }
@@ -107,7 +107,7 @@ class TestPollingAudit {
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
 
         val workflow = PollingAudit(auditConfig, contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
+            MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, auditConfig.seed)
         )
         runAudit("testPollingWithStyle", workflow)
     }
@@ -136,7 +136,7 @@ class TestPollingAudit {
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(auditConfig.hasStyles)
         val workflow = PollingAudit(auditConfig, test.contests,
-            StartTestBallotCardsPolling(ballotManifest.ballots, testCvrs, auditConfig.seed)
+            MvrManagerPollingForTesting(ballotManifest.ballots, testCvrs, auditConfig.seed)
         )
 
         runAudit("testPollingOneContest", workflow)

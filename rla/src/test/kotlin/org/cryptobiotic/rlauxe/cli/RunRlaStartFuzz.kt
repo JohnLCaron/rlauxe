@@ -139,7 +139,7 @@ object RunRlaStartFuzz {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
                     // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
-        val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
+        val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
 
         //// could be inside of BallotCardsClca
         writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile()) // TODO wrap in Result ??
@@ -150,7 +150,7 @@ object RunRlaStartFuzz {
         writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
-        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
+        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards, testCvrs)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
@@ -195,7 +195,7 @@ object RunRlaStartFuzz {
             require(mvr.id == cvr.id)
         }
 
-        val ballotCards = StartTestBallotCardsPolling(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, auditConfig.seed)
         val ballotManifestUA = BallotManifestUnderAudit(ballotCards.ballotsUA, ballotManifest.ballotStyles)
         writeBallotManifestJsonFile(ballotManifestUA, publisher.ballotManifestFile())
         println("   writeBallotManifestJsonFile ${publisher.ballotManifestFile()}")

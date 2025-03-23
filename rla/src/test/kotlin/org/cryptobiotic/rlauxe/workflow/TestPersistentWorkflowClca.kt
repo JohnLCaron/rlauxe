@@ -36,8 +36,8 @@ class TestPersistentWorkflowClca {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        val ballotCards = StartTestBallotCardsClca(testCvrs, testMvrs, auditConfig.seed)
-        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards)
+        val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards, testCvrs)
 
         writeCvrsCsvFile(ballotCards.cvrsUA, publish.cvrsCsvFile())
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publish.contestsFile())

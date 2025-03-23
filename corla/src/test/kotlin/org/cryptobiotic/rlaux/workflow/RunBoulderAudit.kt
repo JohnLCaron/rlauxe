@@ -10,7 +10,7 @@ object RunBoulderAudit {
     val topdir = "/home/stormy/dev/github/rla/rlauxe/corla"
 
     @JvmStatic
-    fun main2(args: Array<String>) {
+    fun main1(args: Array<String>) {
         val auditConfig = AuditConfig(
             AuditType.CLCA, hasStyles = true, riskLimit = .03, sampleLimit = 20000,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)

@@ -19,7 +19,7 @@ class TestAlphaMartComparison {
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
-        val calcMargin = (compareAssorter as ClcaAssorter).calcAssorterMargin(cvrs.zip(cvrs))
+        val calcMargin = (compareAssorter as ClcaAssorter).calcClcaAssorterMargin(cvrs.zip(cvrs))
         val calcMean = margin2mean(calcMargin)
 
         val sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, compareAssorter)

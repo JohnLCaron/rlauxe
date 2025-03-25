@@ -16,7 +16,7 @@ class AuditRecord(
     val auditConfig: AuditConfig,
     val contests: List<ContestUnderAudit>,
     val rounds: List<AuditRound>,
-    val mvrs: List<CvrUnderAudit> // mvrs already sampled
+    mvrs: List<CvrUnderAudit> // mvrs already sampled
 ) {
     val previousMvrs = mutableMapOf<Long, CvrUnderAudit>()
 

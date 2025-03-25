@@ -61,14 +61,6 @@ class CompareCorlaWithAttack {
         showFailuresVsTheta(name, dirName, "${name}FailuresOver", "Nc=${N} nruns=${nruns}") { it.Dparam("theta") in 0.5..0.52 }
     }
 
-    fun showSampleSizesVsTheta(name: String, dirName: String, subtitle: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsTheta(results, subtitle, yscale, "p2rate", ) { category(it) }
-    }
-
     fun showFailuresVsTheta(name: String, dir: String, write: String, subtitle: String, filter: (WorkflowResult) -> Boolean) {
         val io = WorkflowResultsIO("$dirName/${name}.cvs")
         val data = io.readResults().filter(filter)

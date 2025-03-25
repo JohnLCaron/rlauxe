@@ -85,9 +85,6 @@ class CobraAudit(
     override fun auditConfig() = this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-    //    mvrManagerForTesting.setMvrsBySampleNumber(sampleNumbers)
-    //}
     override fun mvrManager() = mvrManagerForTesting
 }
 

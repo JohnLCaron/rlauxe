@@ -124,12 +124,12 @@ interface ClcaAssorterIF {
 data class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
     val hasStyle: Boolean = true,
     val check: Boolean = true, // TODO get rid of
 ) : ClcaAssorterIF {
-    val margin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
-    val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
+    val assorterMargin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
+    val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
 
     init {
@@ -146,9 +146,9 @@ data class ClcaAssorter(
     override fun upperBound() = upperBound
     override fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
     override fun assorter() = assorter
-    override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$margin noerror=$noerror upperBound=$upperBound"
+    override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$assorterMargin noerror=$noerror upperBound=$upperBound"
 
-    fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
+    fun calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
         val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
             .map { bassort(it.first, it.second) }.average()
         return mean2margin(mean)

@@ -29,10 +29,6 @@ class ClcaAudit(
         // TODO filter out contests that are done... */
     }
 
-    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-    //    (mvrManager as MvrManagerTest).setMvrsBySampleNumber(sampleNumbers)
-    //}
-
     //  return complete
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
@@ -150,6 +146,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             riskLimit = auditConfig.riskLimit,
             withoutReplacement = true
         )
+        // testFn.setDebuggingSequences()
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
 
@@ -164,6 +161,9 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             startingRates = errorRates,
             measuredRates = testH0Result.tracker.errorRates(),
         )
+
+        // temp debug
+        // val (bet, payoff, samples) = betPayoffSamples(contest.Nc, risk=auditConfig.riskLimit, (cassorter as ClcaAssorter).assorterMargin, 0.0)
 
         if (!quiet) println(" ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
         return testH0Result

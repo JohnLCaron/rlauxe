@@ -1,10 +1,13 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
+import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
+import org.jetbrains.kotlinx.kandy.ir.scale.Scale
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
+import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
@@ -21,8 +24,9 @@ fun <T> genericPlotter(
     xfld: (T) -> Double,
     yfld: (T) -> Double,
     catfld: (T) -> String,
-    addPoints: Boolean = true
-) {
+    addPoints: Boolean = true,
+    scaleType: ScaleType = ScaleType.Linear,
+    ) {
 
     val groups = makeGGroups(data, catfld)
 
@@ -49,18 +53,21 @@ fun <T> genericPlotter(
         catName to category,
     )
 
+    val xScale = if (scaleType == ScaleType.LogLog) Scale.continuousPos<Int>(transform = Transformation.LOG10) else Scale.continuousPos<Int>()
+    val yScale = if (scaleType == ScaleType.Linear) Scale.continuousPos<Int>() else Scale.continuousPos<Int>(transform = Transformation.LOG10)
+
     val plot = multipleDataset.plot {
         groupBy(catName) {
             line {
-                x(xname)
-                y(yname)
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
                 color(catName)
             }
 
             if (addPoints) {
                 points {
-                    x(xname)
-                    y(yname)
+                    x(xname) { scale = xScale }
+                    y(yname) { scale = yScale }
                     size = 1.0
                     symbol = Symbol.CIRCLE_OPEN
                     color = Color.BLUE

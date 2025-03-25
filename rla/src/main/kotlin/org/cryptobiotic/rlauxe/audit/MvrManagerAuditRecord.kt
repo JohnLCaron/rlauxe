@@ -40,7 +40,7 @@ class MvrManagerClcaRecord(val auditRecord: AuditRecord, private val cvrsUA: Ite
 private const val checkValidity : Boolean= false
 
 class MvrManagerPollingRecord(val auditRecord: AuditRecord, private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) :
-    MvrManagerPolling {
+    MvrManagerPolling, MvrManagerTest {
     var mvrsForRound: List<CvrUnderAudit> = emptyList()
 
     override fun nballotCards() = nballotCards
@@ -48,7 +48,7 @@ class MvrManagerPollingRecord(val auditRecord: AuditRecord, private val ballotsU
     override fun setMvrs(mvrs: List<CvrUnderAudit>) {
         mvrsForRound = mvrs
     }
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
         val sampleMvrs = auditRecord.getMvrsBySampleNumber(sampleNumbers, null)
         setMvrs(sampleMvrs)
     }

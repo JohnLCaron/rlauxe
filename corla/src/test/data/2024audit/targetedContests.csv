@@ -1,0 +1,69 @@
+"Targeted Contests",,,,,,,,,,,,,,,,,,,,,,,,,,
+"County","Contest","Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,
+"Colorado","Presidential Electors",1,"1,374,175","1,084,812","289,363",8.15%,3%,89,"2,554,611","Audited in all 64 counties",,,,,,,,,,,,,,,,1
+"Colorado","Regent of the University of Colorado - At Large",1,"1,178,343","1,090,844","87,499",2.47%,3%,295,"2,554,611","Audited in all 64 counties",,,,,,,,,,,,,,,,1
+"Adams","Adams County Commissioner - District 5",1,"88,099","74,153","13,946",3.94%,3%,184,"176,893","2 ballot cards per ballot*",,,,,,,,,,,,,,,,2
+"Alamosa","Alamosa County Commissioner - District 1",1,"4,475","2,751","1,724",11.37%,3%,64,"7,579","2 ballot cards per ballot*",,,,,,,,,,,,,,,,3
+"Arapahoe","District Attorney - 18th Judicial District",1,"120,697","87,750","32,947",14.83%,3%,49,"222,213",,,,,,,,,,,,,,,,,4
+"Archuleta","Archuleta County Commissioner - District 1",1,"4,605","2,760","1,845",19.68%,3%,37,"9,374",,,,,,,,,,,,,,,,,5
+"Baca","Town of Springfield Ballot Issue 2A",1,428,256,172,8.57%,3%,84,"1,028",,,,,,,,,,,,,,,,,6
+"Bent","Bent County Commissioner - District 1",1,"1,314",778,536,24.55%,3%,29,"2,183",,,,,,,,,,,,,,,,,7
+"Boulder","State Representative - District 10",1,"23,460","3,720","19,740",6.99%,3%,104,"29,261","2 ballot cards per ballot*",,,,,,,,,,,,,,,,8
+"Broomfield","City and County of Broomfield Ballot Question 2G",1,"23,893","17,219","6,674",14.30%,3%,50,"46,676",,,,,,,,,,,,,,,,,9
+"Chaffee","Chaffee County Commissioner - District 2",1,"7,482","6,270","1,212",8.37%,3%,87,"14,480",,,,,,,,,,,,,,,,,10
+"Cheyenne","Cheyenne County Court Judge - Eiring",1,686,266,420,40.58%,3%,17,"1,035",,,,,,,,,,,,,,,,,11
+"Clear Creek","Clear Creek County Commissioner - District 3",1,"2,841","2,200",641,10.64%,3%,68,"6,023",,,,,,,,,,,,,,,,,12
+"Conejos","Conejos County Commissioner - District 3",1,"2,184","1,767",417,10.06%,3%,72,"4,147",,,,,,,,,,,,,,,,,13
+"Costilla","Costilla County Commissioner - District 3",1,"1,137",796,341,16.37%,3%,44,"2,083",,,,,,,,,,,,,,,,,14
+"Crowley","Crowley County Commissioner - District 3",1,"1,305",345,960,56.14%,3%,12,"1,710",,,,,,,,,,,,,,,,,15
+"Custer","Custer County Commissioner - District 2",1,"2,053","1,205",848,21.81%,3%,33,"3,889",,,,,,,,,,,,,,,,,16
+"Delta","Delta County Court Judge - Zeerip",1,"8,713","6,874","1,839",9.51%,3%,76,"19,338",,,,,,,,,,,,,,,,,17
+"Denver","City and County of Denver Ballot Issue 2Q",1,"187,470","149,202","38,268",3.46%,3%,210,"368,220","3 ballot cards per ballot*",,,,,,,,,,,,,,,,18
+"Dolores","Dove Creek Ambulance District Ballot Issue 6A",1,660,458,202,14.53%,3%,50,"1,402",,,,,,,,,,,,,,,,,19
+"Douglas","Douglas County Commissioner - District 2",1,"120,771","94,494","26,277",11.32%,3%,64,"232,190",,,,,,,,,,,,,,,,,20
+"Eagle","Eagle County Commissioner - District 1",1,"14,949","10,432","4,517",16.41%,3%,44,"27,528",,,,,,,,,,,,,,,,,21
+"El Paso","City of Colorado Springs Ballot Question 300",1,"130,671","108,300","2,735",5.78%,3%,126,"387,297",,,,,,,,,,,,,,,,,22
+"Elbert","Elbert County Question 1A",1,"11,395","4,117","7,278",44.51%,3%,16,"16,350",,,,,,,,,,,,,,,,,23
+"Fremont","Fremont County Commissioner - District 3",1,"16,911","7,223","9,688",38.21%,3%,19,"25,357",,,,,,,,,,,,,,,,,24
+"Garfield","Garfield County Commissioner - District 2",1,"14,595","12,842","1,753",6.17%,3%,118,"28,400",,,,,,,,,,,,,,,,,25
+"Gilpin","Gilpin County Commissioner - District 1",1,"1,834","1,619",215,5.27%,3%,138,"4,081",,,,,,,,,,,,,,,,,26
+"Grand","Grand County Commissioner - District 2",1,"5,378","4,023","1,355",13.67%,3%,53,"9,915",,,,,,,,,,,,,,,,,27
+"Gunnison","Gunnison County Library District Ballot Issue 6A",1,"6,066","4,375","1,691",15.33%,3%,47,"11,028",,,,,,,,,,,,,,,,,28
+"Hinsdale","Hinsdale County Commissioner - District 1",1,343,245,98,16.12%,3%,45,608,,,,,,,,,,,,,,,,,29
+"Huerfano","Huerfano County Commissioner - District 1",1,"2,207","1,582",625,13.96%,3%,52,"4,476",,,,,,,,,,,,,,,,,30
+"Jackson","North Park School District R-1 Ballot Issue 4A",1,454,345,109,13.12%,3%,55,831,,,,,,,,,,,,,,,,,31
+"Jefferson","Jefferson County Commissioner - District 2",1,"183,798","142,879","40,919",11.48%,3%,63,298,,,,,,,,,,,,,,,,,32
+"Kiowa","Kiowa County Hospital District Ballot Question 6A",1,579,445,134,15.53%,3%,46,"1,045",,,,,,,,,,,,,,,,,33
+"Kit Carson","Proposition 130 (STATUTORY)",1,"1,870","1,599",271,7.35%,3%,99,"3,685","Single county audit",,,,,,,,,,,,,,,,34
+"La Plata","La Plata County Commissioner - District 3",1,"18,987","14,832","4,155",11.61%,3%,62,"35,800",,,,,,,,,,,,,,,,,35
+"Lake","Lake County School District R-1 Ballot Issue 4A",1,"1,994","1,749",245,6.25%,3%,116,"3,919",,,,,,,,,,,,,,,,,36
+"Larimer","Larimer County Clerk and Recorder",1,"99,324","74,197","25,127",6.80%,3%,107,"184,676","2 ballot cards per ballot*",,,,,,,,,,,,,,,,37
+"Las Animas","Las Animas County Commissioner - District 2",1,"3,027","2,199",828,15.19%,3%,47,"5,450",,,,,,,,,,,,,,,,,38
+"Lincoln","Lincoln County Commissioner - District 3",1,"1,623",826,797,31.10%,3%,23,"2,563",,,,,,,,,,,,,,,,,39
+"Logan","Logan County Court Judge - Brammer",1,"4,991","3,833","1,158",11.40%,3%,63,"10,157",,,,,,,,,,,,,,,,,40
+"Mesa","Mesa County Ballot Issue 1A",1,"44,985","34,382","10,603",12.51%,3%,58,"84,775",,,,,,,,,,,,,,,,,41
+"Mineral","Mineral County Commissioner - District 3",1,493,161,332,43.46%,3%,16,764,,,,,,,,,,,,,,,,,42
+"Moffat","City of Craig Ballot Question 2A",1,"1,360",716,644,16.40%,3%,44,"3,589",,,,,,,,,,,,,,,,,43
+"Montezuma","Montezuma County Ballot Issue 1A",1,"6,933","5,472","1,461",11.17%,3%,65,"13,075",,,,,,,,,,,,,,,,,44
+"Montrose","Montrose County Commissioner - District 3",1,"12,335","7,713","4,622",21.35%,3%,34,"21,650",,,,,,,,,,,,,,,,,45
+"Morgan","City of Fort Morgan Ballot Question 2A",1,"3,217",546,"2,671",19.86%,3%,36,"6,061",,,,,,,,,,,,,,,,,46
+"Otero","Otero County Ballot Question 1A",1,"5,557","2,263","3,294",40.53%,3%,17,"8,128",,,,,,,,,,,,,,,,,47
+"Ouray","Ouray County Commissioner - District 1",1,"2,171","1,762",409,10.04%,3%,72,"4,075",,,,,,,,,,,,,,,,,48
+"Park","Park County Commissioner - District 1",1,"6,622","4,845","1,777",14.95%,3%,48,"11,883",,,,,,,,,,,,,,,,,49
+"Phillips","City of Holyoke Mayor",1,575,315,260,11.06%,3%,65,"1,343",,,,,,,,,,,,,,,,,50
+"Pitkin","Pitkin County Ballot Issue 1A",1,"4,741","3,249","1,492",17.37%,3%,41,"8,590",,,,,,,,,,,,,,,,,51
+"Prowers","Prowers County Ballot Issue 1A",1,"3,087","1,140","1,947",44.26%,3%,16,"4,399",,,,,,,,,,,,,,,,,52
+"Pueblo","Pueblo County Commissioner - District 2",1,"42,770","39,476","3,294",1.91%,3%,381,"86,126","2 ballot cards per ballot*",,,,,,,,,,,,,,,,53
+"Rio Blanco","Amendment 80 (CONSTITUTIONAL)",1,"1,859","1,437",422,12.26%,3%,59,"3,443","Single county audit",,,,,,,,,,,,,,,,54
+"Rio Grande","Rio Grande County Court Judge - Stenger",1,"3,317","1,944","1,373",22.03%,3%,33,"6,233",,,,,,,,,,,,,,,,,55
+"Routt","Routt County Commissioner - District 1",1,"8,298","6,664","1,634",5.29%,3%,137,"15,454","2 ballot cards per ballot*",,,,,,,,,,,,,,,,56
+"Saguache","Saguache County Commissioner - District 1",1,"1,708","1,507",201,5.93%,3%,122,"3,388",,,,,,,,,,,,,,,,,57
+"San Miguel","San Miguel County Ballot Measure 1A",1,"2,653","1,692",961,20.18%,3%,36,"4,763",,,,,,,,,,,,,,,,,58
+"Sedgwick","Sedgwick County Commissioner - District 3",1,702,586,116,8.50%,3%,85,"1,364",,,,,,,,,,,,,,,,,59
+"Summit","Summit School District RE-1 Ballot Issue 4A",1,"9,163","6,893","2,270",12.87%,3%,56,"17,640",,,,,,,,,,,,,,,,,60
+"Teller","Teller County Ballot Question 1A",1,"6,901","5,593","1,308",9.72%,3%,74,"13,450",,,,,,,,,,,,,,,,,61
+"Washington","Washington County Commissioner - District 2",1,"1,657",964,693,24.79%,3%,29,"2,796",,,,,,,,,,,,,,,,,62
+"Weld","District Court Judge - 19th Judicial District - Crowther",1,"51,150","40,167","10,983",9.24%,3%,78,"118,853",,,,,,,,,,,,,,,,,63
+"Yuma","Yuma County Court Judge - Jones",1,"2,973",924,"2,049",45.53%,3%,16,"4,500",,,,,,,,,,,,,,,,,64
+"The assumption has been made in the ""Estimated # of CVRs to audit"" value that all ballot cards were returned for each ballot. Therefore, the number of CVRs is the ballots cast total multiplied by the number of cards. As the average number of cards per ballot decreases the number of ballots to audit will also decrease.",,,,,,,,,,,,,,,,,,,,,,,,,,
+"End of worksheet",,,,,,,,,,,,,,,,,,,,,,,,,,

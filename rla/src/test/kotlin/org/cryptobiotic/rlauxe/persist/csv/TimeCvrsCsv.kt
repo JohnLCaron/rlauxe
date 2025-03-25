@@ -8,7 +8,7 @@ import kotlin.test.Test
 
 class TimeCvrsCsv {
 
-    @Test
+    // @Test
     fun timeJsonVsCsv() {
         val filenameIn = "/home/stormy/temp/persist/testCvrs/runBoulder24.json"
         val filenameOut = "/home/stormy/temp/persist/testCvrs/runBoulder24.csv"
@@ -42,5 +42,4 @@ class TimeCvrsCsv {
     // read Json = 7.676 s
     // read Csv = 4.335 s
     // json/csv time = 1.770892724458079
-
 }

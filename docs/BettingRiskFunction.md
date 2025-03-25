@@ -1,4 +1,5 @@
 # CLCA Betting Risk Functions
+_last changed 3/25/25_
 
 ## Betting martingales
 
@@ -108,6 +109,7 @@ then
     payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
 
 Using AdaptiveBetting, λ_i depends only on the 4 estimated error rates (see next section) and the margin.
+Also note that AdaptiveBetting wil use a "floor" (default 1.0e-5) for the estimated error rates, to prevent betting everything.
 
 ### Betting Payoff Plots
 
@@ -123,13 +125,13 @@ Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (a
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffAssort1.0.html" rel="BettingPayoffAssort1">![BettingPayoffAssort1](plots/betting/BettingPayoffAssort1.0.png)</a>
 
-Plot 7 translates the payoff into a sample size, when there are no errors, using (payoff)^sampleSize = 1 / riskLimit and
-solving for sampleSize = -ln(riskLimit) / ln(payoff).
+Plot 7 translates the payoff into a sample size, using (payoff)^sampleSize = 1 / riskLimit and
+solving for sampleSize = -ln(riskLimit) / ln(payoff), for the various values of the error rates, as above.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffSampleSize.html" rel="BettingPayoffSampleSize">![BettingPayoffSampleSize](plots/betting/BettingPayoffSampleSize.png)</a>
 
 The plot "error=0.0" is the equivilent to COBRA Fig 1, p. 6 for risk=.05. This is the best that can be done,
-this is the minimum sampling size for the RLA.
+the minimum sampling size for the RLA.
 Note that this value is independent of N, the number of ballots.
 
 See GenBettingPayoff.kt for the generation of these plots.

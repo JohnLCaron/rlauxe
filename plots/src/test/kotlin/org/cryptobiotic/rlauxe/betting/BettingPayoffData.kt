@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import kotlin.math.log10
 import kotlin.math.ln
 
@@ -68,18 +69,16 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
         val useData = data.filter { it.assort == wantAssort }
 
         genericPlotter(
-            "BettingPayoff",
-            "riskLimit=$risk, assortValue=$wantAssort",
+            "SampleSize",
+            "N=100000, riskLimit=$risk",
             "$dir/BettingPayoffSampleSize",
             useData,
-            "margin", "log10(sampleSize)", "error",
-            xfld = { it.margin },
-            yfld = { log10(sampleSize(it.payoff)) },
-            catfld = { df(it.error) },
+            xname = "margin", xfld = { it.margin },
+            yname="sampleSize", yfld = { org.cryptobiotic.rlauxe.core.sampleSize(risk, it.payoff) },
+            catName="error", catfld = { df(it.error) },
+            scaleType = ScaleType.LogLog,
         )
     }
 }
 
 val risk = .05
-val logRisk = -ln(.05)
-fun sampleSize(payoff:Double) = logRisk / ln(payoff)

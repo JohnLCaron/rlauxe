@@ -68,7 +68,7 @@ class GenBettingPayoff {
                     // 1 + λ_i (X_i − µ_i)
                     1.0 + bet * (noerror * x - .5)
                 }
-                payoff.forEach{ print("${dfn(it, 6)}, ")}
+                payoff.forEach { print("${dfn(it, 6)}, ") }
                 println()
             }
         }
@@ -79,10 +79,10 @@ class GenBettingPayoff {
     fun genBettingPayoffPlot() {
         val results = mutableListOf<BettingPayoffData>()
         val assortValue = listOf(0.0, 0.5, 1.0, 1.5, 2.0)
-        val errorRates = listOf(0.0, 0.0001, .001, .005, .01)
+        val errorRates = listOf(0.0, 0.0005, .001, .005, .01)
 
-        val N = 10000
-        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val N = 100000
+        val margins = listOf(.002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         errorRates.forEach { error ->
             println("errors = $error")
@@ -108,7 +108,7 @@ class GenBettingPayoff {
                     results.add(BettingPayoffData(N, margin, error, bet, payoff, x))
                     payoff
                 }
-                payoffs.forEach{ print("${dfn(it, 6)}, ")}
+                payoffs.forEach { print("${dfn(it, 6)}, ") }
                 println()
             }
         }
@@ -120,4 +120,28 @@ class GenBettingPayoff {
         plotter.plotOneAssortValue(results, 1.0)
         plotter.plotSampleSize(results, 1.0)
     }
+
+    @Test
+    fun showPayoffs() {
+        val N = 100000
+        val error = 0.0
+        val risk = .03
+        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        for (margin in margins) {
+            val noerror = 1 / (2 - margin)
+            val bettingFn = AdaptiveBetting(
+                Nc = N,
+                a = noerror,
+                d = 10000,
+                errorRates = ClcaErrorRates(error, error, error, error),
+            )
+            val samples = PrevSamplesWithRates(noerror)
+            repeat(10) { samples.addSample(noerror) }
+            val bet = bettingFn.bet(samples)
+            val payoff = 1.0 + bet * (noerror - .5)
+            val sampleSize = org.cryptobiotic.rlauxe.core.sampleSize(risk, payoff)
+            println("margin=$margin, noerror=$noerror bet = $bet payoff=$payoff sampleSize=$sampleSize")
+        }
+    }
+
 }

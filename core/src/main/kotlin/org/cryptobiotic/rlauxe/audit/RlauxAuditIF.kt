@@ -48,11 +48,11 @@ interface RlauxAuditIF: RlauxAuditProxy {
     fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
 }
 
+/*
 fun RlauxAuditIF.showResults() {
     println("Audit Rounds")
     auditRounds().forEach { println(it) }
 
-    /*
     println("Audit results")
     this.contestsUA().forEach{ contest ->
         val minAssertion = contest.minAssertion()
@@ -77,5 +77,6 @@ fun RlauxAuditIF.showResults() {
             maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotIndexUsed)
         }
     }
-    println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n") */
+    println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
 }
+ */

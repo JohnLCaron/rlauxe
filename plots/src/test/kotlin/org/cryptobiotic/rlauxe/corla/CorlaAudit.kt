@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlaux.corla.Corla
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -85,7 +86,7 @@ class CorlaContestAuditTaskGenerator(
 class CorlaAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    val ballotCards: MvrManagerClcaForTesting, // mutable
+    val mvrManagerForTesting: MvrManagerClcaForTesting, // mutable
     val quiet: Boolean = false,
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -97,13 +98,14 @@ class CorlaAudit(
 
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(ballotCards.cvrs)
+            contest.makeClcaAssertions(mvrManagerForTesting.cvrs)
         }
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, ballotCards, auditRound.roundIdx,
-            auditor = AuditCorlaAssertion())
+        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
+            auditor = AuditCorlaAssertion()
+        )
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
         return complete
@@ -112,11 +114,7 @@ class CorlaAudit(
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-    //    ballotCards.setMvrsBySampleNumber(sampleNumbers)
-    //}
-
-    override fun mvrManager() = ballotCards
+    override fun mvrManager() = mvrManagerForTesting
 }
 
 /////////////////////////////////////////////////////////////////////////////////

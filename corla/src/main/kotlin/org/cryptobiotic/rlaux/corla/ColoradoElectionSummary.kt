@@ -2,30 +2,29 @@ package org.cryptobiotic.rlaux.corla
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
-import java.io.Reader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.io.File
+import java.nio.charset.Charset
 import kotlin.collections.reversed
 import kotlin.text.appendLine
 
 // Colorado Election Results
 // https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
-// "/home/stormy/dev/github/rla/data/coloradoRLA/summary.csv"
+// "corla/src/test/data/2024election/summary.csv"
 
 // "line number","contest name","choice name","party name","total votes","percent of votes","registered voters","ballots cast","num Area total","num Area rptg","over votes","under votes"
 //1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM",1728159,54.16,0,0,64,0,"607","2801"
 //2,"Presidential Electors (Vote For 1)","Donald J. Trump / JD Vance","REP",1377441,43.17,0,0,64,0,"607","2801"
 //3,"Presidential Electors (Vote For 1)","Blake Huber / Andrea Denault","APV",2196,0.07,0,0,64,0,"607","2801"
 
-class ContestSummary(
+class ColoradoElectionContestSummary(
     val contestName: String,
     val overVotes: Int,
     val underVotes: Int,
 ) {
-    val candidates = mutableListOf<CandidateLine>()
+    val candidates = mutableListOf<ColoradoElectionCandidateLine>()
 
     fun complete() {
         shortName = contestName.replace("(Vote For 1)", "").trim()
@@ -66,7 +65,7 @@ class ContestSummary(
 // 1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM",1728159,54.16,0,0,64,0,"607","2801"
 // 139,"State Representative - District 19 (Vote For 1)","Jillaire McMillan","DEM",28310,49.90,0,0,2,0,"0","0"
 // 140,"State Representative - District 20 (Vote For 1)","Jarvis Caldwell","REP",39949,71.94,0,0,1,0,"3","4103"
-data class CandidateLine(
+data class ColoradoElectionCandidateLine(
     val lineNumber: Int,
     val contestName: String,
     val choiceName: String,
@@ -83,10 +82,12 @@ data class CandidateLine(
     val name = if (choiceName.length > 20) choiceName.substring(20) else choiceName
 }
 
-fun readColoradoElectionSummaryCsv(filename: String): List<ContestSummary> {
-    val path: Path = Paths.get(filename)
-    val reader: Reader = Files.newBufferedReader(path)
-    val parser = CSVParser(reader, CSVFormat.RFC4180)
+fun readColoradoElectionSummaryCsv(filename: String): List<ColoradoElectionContestSummary> {
+    //val path: Path = Paths.get(filename)
+    //val reader: Reader = Files.newBufferedReader(path)
+
+    val file = File(filename)
+    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.RFC4180)
 
     val records = parser.iterator()
 
@@ -96,15 +97,16 @@ fun readColoradoElectionSummaryCsv(filename: String): List<ContestSummary> {
     println(header)
 
     // subsequent lines contain ballot manifest info
-    val lines = mutableListOf<CandidateLine>()
-    val contests = mutableListOf<ContestSummary>()
-    var currContest: ContestSummary? = null
+    val lines = mutableListOf<ColoradoElectionCandidateLine>()
+    val contests = mutableListOf<ColoradoElectionContestSummary>()
+    var currContest: ColoradoElectionContestSummary? = null
 
+    var line: CSVRecord? = null
     try {
         while (records.hasNext()) {
-            val line = records.next()
+            line = records.next()!!
             var idx = 0
-            val bmi = CandidateLine(
+            val bmi = ColoradoElectionCandidateLine(
                 line.get(idx++).toInt(),
                 line.get(idx++),
                 line.get(idx++),
@@ -122,12 +124,13 @@ fun readColoradoElectionSummaryCsv(filename: String): List<ContestSummary> {
             println(bmi)
 
             if (currContest == null || bmi.contestName != currContest.contestName) {
-                currContest = ContestSummary(bmi.contestName, bmi.overVotes, bmi.underVotes)
+                currContest = ColoradoElectionContestSummary(bmi.contestName, bmi.overVotes, bmi.underVotes)
                 contests.add(currContest)
             }
             currContest.candidates.add(bmi)
         }
     } catch (ex: Exception) {
+        println(line)
         ex.printStackTrace()
     }
 

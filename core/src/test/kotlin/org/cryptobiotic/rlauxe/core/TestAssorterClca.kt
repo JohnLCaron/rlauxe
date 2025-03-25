@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -451,7 +450,7 @@ class TestAssorterClca {
         val expected = 1.0 / (3 - 2 * cvrMean)
         assertEquals(expected, theta, doublePrecision)
 
-        val calcMargin = bassorter.calcAssorterMargin(cvrs.zip(cvrs))
+        val calcMargin = bassorter.calcClcaAssorterMargin(cvrs.zip(cvrs))
         val calcMean = margin2mean(calcMargin)
         assertEquals(expected, calcMean, doublePrecision)
     }

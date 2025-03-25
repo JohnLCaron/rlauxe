@@ -1,5 +1,5 @@
 # CORLA
-03/09/2025
+_last changed 03/25/2025_
 
 The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) (2018) suggest the following
 issues should be addressed:
@@ -25,7 +25,8 @@ that our port does not accurately reflect what CORLA does.
 The following plots compare our Corla implementation with the Rlauxe algorithm based on Philip Stark's SHANGRLA framework. 
 They differ in that CORLA uses the Kaplan-Markov bound (eq 10 of SuperSimple)
 for the risk estimation function, while CLCA uses the BettingMart supermartingale and Adaptive / Optimal betting as described in
-the COBRA paper. 
+the COBRA paper. Also note that Rlauxe AdaptiveBetting uses a "floor" (default 1.0e-5) for the estimated error rates, to prevent betting
+(and losing) everything.
 
 These are "one-round" plots, so we dont limit the number of samples, or use the estimation algorithms.
 
@@ -33,9 +34,10 @@ These are "one-round" plots, so we dont limit the number of samples, or use the 
 
 Comparison when there are no errors found in the MVRs, so they always agree with the CVRs:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrorsLinear.html" rel="corlaNoErrorsLinear">![corlaNoErrorsLinear](plots/corla/corlaNoErrors/corlaNoErrorsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrors2LogLog.html" rel="corlaNoErrors2LogLog">![corlaNoErrors2LogLog](plots/corla/corlaNoErrors/corlaNoErrors2LogLog.png)</a>
 
-* The algorithms give essentially the same results. One needs about 2000 ballots to successfully audit a margin of .003 when there are no errors.
+* The algorithms give essentially the same results. One needs about 700 ballots to successfully audit a contest with a margin of 1%, 
+  when the risk limit is 3% and there are no errors.
 
 ## Compare CORLA and Rlauxe with errors
 

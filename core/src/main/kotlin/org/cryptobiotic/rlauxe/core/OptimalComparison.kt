@@ -8,7 +8,8 @@ import org.apache.commons.math3.optim.univariate.BrentOptimizer
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
-import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
 import kotlin.math.max
 
@@ -103,6 +104,31 @@ class AdaptiveBetting(
     }
 }
 
+fun sampleSize(risk: Double, payoff:Double) = -ln(risk) / ln(payoff)
+
+// this assumes you get the same bet each time, which is not true because mui is changing.
+// Also eps (lower bound on the estimated rate) turns out to be important.
+fun betPayoffSamples(Nc: Int, risk: Double, assorterMargin: Double, error: Double): Triple<Double, Double, Int> {
+    val avgCvrAssortValue = margin2mean(assorterMargin)
+    val assorterMargin2 = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
+    // val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
+    val noerror = 1 / (2 - assorterMargin2) // assumes upperBound = 1.0
+    val bettingFn = AdaptiveBetting(
+        Nc = Nc,
+        a = noerror,
+        d = 100,
+        errorRates = ClcaErrorRates(error, error, error, error),
+    )
+    val samples = PrevSamplesWithRates(noerror)
+    repeat(10) { samples.addSample(noerror) }
+    val bet = bettingFn.bet(samples)
+    val mj = populationMeanIfH0(Nc, true, samples)
+
+    val payoff = 1.0 + bet * (noerror - mj)
+    val samplesSize = sampleSize(risk, payoff)
+    return Triple(bet, payoff, roundUp(samplesSize))
+}
+
 // We know the true rate of all errors
 class OracleComparison(
     val a: Double, // noerror
@@ -144,7 +170,6 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
     val debug = false
 
     fun solve(): Double {
-        val stopwatch = Stopwatch()
         val function = UnivariateFunction { lam -> expectedValueLogt(lam) }  // The function to be optimized
 
         // BrentOptimizer: For a function defined on some interval (lo, hi),
@@ -166,7 +191,7 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
             GoalType.MAXIMIZE,
             MaxEval(1000)
         )
-        if (debug) println( "Kelly: p2o=${p2o}  p1o=${p1o}  p1u=${p1u}  p2u=${p2u} point=${result.point} took=$stopwatch")
+        if (debug) println( "Kelly: p2o=${p2o}  p1o=${p1o}  p1u=${p1u}  p2u=${p2u} point=${result.point}")
         return result.point
     }
 

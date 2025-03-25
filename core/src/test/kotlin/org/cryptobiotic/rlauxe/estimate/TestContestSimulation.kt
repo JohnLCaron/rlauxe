@@ -132,7 +132,7 @@ class TestContestSimulation {
                 val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(testCvrs)
                 val cassertion: ClcaAssertion = contestUA.minClcaAssertion()!!
                 val cassorter = cassertion.cassorter as ClcaAssorter
-                val orgMargin = cassorter.calcAssorterMargin(testPairs)
+                val orgMargin = cassorter.calcClcaAssorterMargin(testPairs)
                 // println("testPairs calcAssorterMargin= ${cassorter.calcAssorterMargin(testPairs)}")
                 val errorRates = ClcaErrorTable.getErrorRates(contest.ncandidates, mvrsFuzzPct)
 
@@ -146,7 +146,7 @@ class TestContestSimulation {
                 // then in the sim, use the actuals cvrs
                 val samplerOrg = ClcaSimulation(testCvrs, contest, cassorter, errorRates)
                 val pairsOrg = samplerOrg.mvrs.zip(samplerOrg.cvrs)
-                val marginOrg = cassorter.calcAssorterMargin(pairsOrg)
+                val marginOrg = cassorter.calcClcaAssorterMargin(pairsOrg)
 
                 //// what are we doing now
 
@@ -155,7 +155,7 @@ class TestContestSimulation {
                 val cvrsNow = contestSimNow.makeCvrs()
                 val samplerNow = ClcaSimulation(cvrsNow, contest, cassorter, errorRates)
                 val pairsNow = samplerNow.mvrs.zip(samplerNow.cvrs)
-                val marginNow = cassorter.calcAssorterMargin(pairsNow)
+                val marginNow = cassorter.calcClcaAssorterMargin(pairsNow)
 
                 //println("org margin= $marginOrg now margin= $marginNow")
                 // println("orgMargin margin= $orgMargin - errorRates margin= $marginNow = ${orgMargin - marginNow} ")

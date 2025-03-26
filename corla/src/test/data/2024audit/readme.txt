@@ -1,6 +1,7 @@
 AuditCenter
-Mar 24, 2025
+Mar 25, 2025
 
+---------------------
 Files downloaded from:
 
 https://www.coloradosos.gov/pubs/elections/auditCenter.html
@@ -33,6 +34,46 @@ https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/ActivityRepor
 https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contestComparison.csv    (CVR to audit board interpretation comparison)
 https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/ResultsReport.xlsx       (Audit results report)
 
+-------------------------
+ColoradoAuditRoundContest
+these have the margins and the estimated samples from
+
+round1/contest.csv and round2/contest.csv are identical,
+round3/contest.csv has random_audit_status changed to "ended" and "risk_limit_achieved", same number of lines.
+
+contest_name,audit_reason,random_audit_status,winners_allowed,          ballot_card_count, contest_ballot_card_count, winners, min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+
+State Representative - District 10,county_wide_contest,in_progress,1,   396121, 44675,"""Junie Joseph""",27538,0.03000000,0,0,0,0,0,0,0,1.03905000,0,105,105
+State Representative - District 10	county_wide_contest	in_progress	1	396121	44675	"Junie Joseph"	27538	0.03	0	0	0	0	0	0	0	1.03905	0	105	105
+
+ballot card count = 396121
+contest_ballot_card_count = 44675
+min_margin = 27538
+all errors are 0
+gamma = 1.03905
+optimistic_samples_to_audit = 105
+estimated_samples_to_audit = 105
+
+estimated cvrs is optimistic function in corla (see OptimisticTest class).
+TODO: For some reason they use ballot_card_count instead of contest_ballot_card_count. Something to do with cards vs ballots?
+
+// min_margin / contest_ballot_card_count
+1. dilutedMargin = 27538.0 / 44675.0 = 0.6164073866815892 estSamples = 12.0
+
+// min_margin / ballot_card_count
+2. dilutedMargin = 27538.0 / 396121.0 = 0.0695191620742147 estSamples = 105.0
+
+// from targetedContests.xlsx below:
+3. dilutedMargin = 0.0699 estSamples = 105.0
+
+The estimations agree closely with rlauxe simulations using AdaptiveComparision and assume no errors.
+
+-----------------------------
+round2/contestComparison.csv has lines added reletive to round1/contestComparison.csv,
+
+-----------------------------
+not sure what roundX/contestSelection.csv are; some kind of working documents.
+
 ===================
 targetedContests.xlsx
 
@@ -55,36 +96,6 @@ Therefore, the number of CVRs is the ballots cast total multiplied by the number
 As the average number of cards per ballot decreases the number of ballots to audit will also decrease."
 
 "So number of CVRs" has to do with the cards vs the ballots ?
-
--------------------
-round1/contest.csv
-
-contest_name,audit_reason,random_audit_status,winners_allowed,          ballot_card_count, contest_ballot_card_count, winners, min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
-
-State Representative - District 10,county_wide_contest,in_progress,1,   396121, 44675,"""Junie Joseph""",27538,0.03000000,0,0,0,0,0,0,0,1.03905000,0,105,105
-State Representative - District 10	county_wide_contest	in_progress	1	396121	44675	"Junie Joseph"	27538	0.03	0	0	0	0	0	0	0	1.03905	0	105	105
-
-ballot card count = 396121
-contest_ballot_card_count = 44675
-min_margin = 27538
-all errors are 0
-gamma = 1.03905
-optimistic_samples_to_audit = 105
-estimated_samples_to_audit = 105
-
-estimated cvrs is optimistic function in corla (see OptimisticTest class):
-
-// min_margin / contest_ballot_card_count
-1. dilutedMargin = 27538.0 / 44675.0 = 0.6164073866815892 estSamples = 12.0
-
-// min_margin / ballot_card_count
-2. dilutedMargin = 27538.0 / 396121.0 = 0.0695191620742147 estSamples = 105.0
-
-// from targetedContests.xlsx above:
-3. dilutedMargin = 0.0699 estSamples = 105.0
-
-==========================================
-
 
 
 

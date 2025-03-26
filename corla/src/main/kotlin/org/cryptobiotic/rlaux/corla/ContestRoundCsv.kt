@@ -4,12 +4,8 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.betPayoffSamples
-import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.sfn
 import java.io.File
 import java.nio.charset.Charset
-import kotlin.collections.reversed
-import kotlin.text.appendLine
 
 // Colorado Audit Round Contest
 // https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
@@ -28,7 +24,7 @@ import kotlin.text.appendLine
 // 0.03000000,0,0,0,0,0,0,0,
 // 1.03905000,0,772,772
 
-data class ColoradoAuditRoundContest(
+data class ContestRoundCsv(
     val contestName: String,
     val nwinners: Int,
     val ballotCardCount: Int,
@@ -54,7 +50,7 @@ data class ColoradoAuditRoundContest(
     }
 }
 
-fun readColoradoContestRoundCsv(filename: String): List<ColoradoAuditRoundContest> {
+fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.RFC4180)
     val records = parser.iterator()
@@ -65,13 +61,13 @@ fun readColoradoContestRoundCsv(filename: String): List<ColoradoAuditRoundContes
     println(header)
 
     // subsequent lines contain ballot manifest info
-    val contests = mutableListOf<ColoradoAuditRoundContest>()
+    val contests = mutableListOf<ContestRoundCsv>()
 
     var line: CSVRecord? = null
     try {
         while (records.hasNext()) {
             line = records.next()!!
-            val bmi = ColoradoAuditRoundContest(
+            val bmi = ContestRoundCsv(
                 line.get(0),         // contest_name,audit_reason,random_audit_status,winners_allowed,
                 line.get(3).toInt(),
                 line.get(4).toInt(), // // ballot_card_count,contest_ballot_card_count,winners,min_margin,

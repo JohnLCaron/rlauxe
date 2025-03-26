@@ -14,6 +14,8 @@ import kotlin.text.appendLine
 // https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
 // "corla/src/test/data/2024election/summary.csv"
 
+// A Line for every contest and candidate
+
 // "line number","contest name","choice name","party name","total votes","percent of votes","registered voters","ballots cast","num Area total","num Area rptg","over votes","under votes"
 //1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM",1728159,54.16,0,0,64,0,"607","2801"
 //2,"Presidential Electors (Vote For 1)","Donald J. Trump / JD Vance","REP",1377441,43.17,0,0,64,0,"607","2801"
@@ -94,7 +96,7 @@ fun readColoradoElectionSummaryCsv(filename: String): List<ColoradoElectionConte
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
 
     // subsequent lines contain ballot manifest info
     val lines = mutableListOf<ColoradoElectionCandidateLine>()
@@ -121,7 +123,7 @@ fun readColoradoElectionSummaryCsv(filename: String): List<ColoradoElectionConte
                 line.get(idx++).toInt(),
             )
             lines.add(bmi)
-            println(bmi)
+            // println(bmi)
 
             if (currContest == null || bmi.contestName != currContest.contestName) {
                 currContest = ColoradoElectionContestSummary(bmi.contestName, bmi.overVotes, bmi.underVotes)

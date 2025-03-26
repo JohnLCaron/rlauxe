@@ -21,7 +21,7 @@ kotlinx-coroutines = "1.8.1"
 # coroutines-version = "1.9.0" // kobweb not using
 kotest-version = "5.9.1"
 ktor-version = "3.0.3"
-xmlutil-version = "0.90.0-RC3"
+xmlutil-version = "0.91.0-RC1"
 
 [libraries]
 # Kotlinx libraries
@@ -41,7 +41,9 @@ lets-plot-awt = { group = "org.jetbrains.lets-plot", name = "platf-awt-jvm", ver
 
 # Libraries
 bull-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.18" }
-pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvm", version.ref = "xmlutil-version" }
+
+# implementation("io.github.pdvrieze.xmlutil:core-jvmcommon:0.91.0-RC1")
+pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvmcommon", version.ref = "xmlutil-version" }
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
 oshai-logging = { module = "io.github.oshai:kotlin-logging", version = "7.0.0" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

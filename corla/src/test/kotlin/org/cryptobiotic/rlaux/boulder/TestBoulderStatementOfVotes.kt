@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlaux.corla
+package org.cryptobiotic.rlaux.boulder
 
 import kotlin.test.Test
 

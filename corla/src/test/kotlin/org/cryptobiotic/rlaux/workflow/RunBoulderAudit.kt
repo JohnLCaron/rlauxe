@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlaux.workflow
 
-import org.cryptobiotic.rlaux.corla.createElectionFromDominionCvrs
+import org.cryptobiotic.rlaux.boulder.createElectionFromDominionCvrs
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.junit.jupiter.api.Test

@@ -9,14 +9,14 @@ class OneAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val mvrManager: MvrManagerClca,
-    val cvrs: List<Cvr>
+    // val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-        contestsUA = contestsToAudit.map { it.makeContestUnderAudit(cvrs) }
+        contestsUA = contestsToAudit.map { it.makeContestUnderAudit() }
 
         // check contests well formed etc
         // check(auditConfig, contests)

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlaux.corla.Corla
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -36,7 +35,7 @@ class CorlaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed), testCvrs)
+                                 MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             clcaWorkflow,
@@ -98,7 +97,7 @@ class CorlaAudit(
 
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(mvrManagerForTesting.cvrs)
+            contest.makeClcaAssertions()
         }
     }
 

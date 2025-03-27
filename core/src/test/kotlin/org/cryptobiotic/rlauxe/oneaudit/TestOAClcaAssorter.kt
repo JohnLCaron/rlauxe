@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PluralityAssorter
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.*
@@ -48,7 +45,7 @@ class TestOAClcaAssorter {
         val phantomPercent = 0.03
         val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
         val testCvrs = contestOA.makeTestCvrs()
-        val contestUA = contestOA.makeContestUnderAudit(testCvrs)
+        val contestUA = contestOA.makeContestUnderAudit()
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OAClcaAssorter
         val awinnerAvg = margin2mean(bassorter.assorter.reportedMargin())
 
@@ -132,7 +129,7 @@ class TestOAClcaAssorter {
     fun testMakeContestUnderAudit() {
         val contest = makeContestOA(2000, 1800, cvrPercent = .66, 0.05, undervotePercent = .0, phantomPercent = .0)
         val testCvrs = contest.makeTestCvrs()
-        val contestUA = contest.makeContestUnderAudit(testCvrs)
+        val contestUA = contest.makeContestUnderAudit()
         println(contestUA)
 
         val winnerCvr = makeCvr(0, "noCvr")
@@ -175,7 +172,7 @@ class TestOAClcaAssorter {
         println(contest)
 
         val testCvrs = contest.makeTestCvrs()
-        val contestOA = contest.makeContestUnderAudit(testCvrs)
+        val contestOA = contest.makeContestUnderAudit()
         println(contestOA)
 
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter

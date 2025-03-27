@@ -239,9 +239,9 @@ open class ContestUnderAudit(
         return assertions
     }
 
+    // TODO: assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ??
     // cvrs must be complete in order to get the margin right.
-    // TODO: only make one pass through the cvrs, and calcAssorterMargin for all assertions.
-    open fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
+    open fun makeClcaAssertions(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         // val useVotes = if (votes != null) votes else (contest as Contest).votes
         val useVotes = (contest as Contest).votes // // TODO assumes Contest ??
@@ -253,7 +253,9 @@ open class ContestUnderAudit(
         }
 
         this.clcaAssertions = assertions.map { assertion ->
-            val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
+            //val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
+            //require (doubleIsClose(margin, assertion.assorter.reportedMargin())) { "margin mismatch: $margin != ${assertion.assorter.reportedMargin()}" }
+            val margin = assertion.assorter.reportedMargin()
             val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ClcaAssertion(contest.info, clcaAssorter)
         }

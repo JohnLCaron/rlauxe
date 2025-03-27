@@ -159,7 +159,7 @@ class TestMultiContestTestData {
             println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")
             if (nphantom > 1) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc) // TODO seems like should be 2 at the most, maybe 1
 
-            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
             val sampler = ClcaWithoutReplacement(contest.id, true, cvrs.zip(cvrs), cassorter, true)

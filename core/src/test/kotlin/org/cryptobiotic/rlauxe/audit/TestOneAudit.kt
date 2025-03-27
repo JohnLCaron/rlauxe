@@ -16,7 +16,7 @@ class TestOneAudit {
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
         val workflow = OneAudit(auditConfig, listOf(contestOA),
-            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed))
 
         runAudit("testOneAuditContestSmall", workflow)
     }
@@ -29,7 +29,7 @@ class TestOneAudit {
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
         val workflow = OneAudit(auditConfig, listOf(contestOA),
-            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed))
 
         runAudit("testOneAuditContest", workflow)
     }
@@ -47,7 +47,7 @@ class TestOneAudit {
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
         val testMvrs = makeFuzzedCvrsFrom(listOf(contestOA.makeContest()), testCvrs, mvrFuzzPct)
         val workflow = OneAudit(auditConfig, listOf(contestOA),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
 
         runAudit("testOneAuditContest", workflow)
     }
@@ -64,7 +64,7 @@ class TestOneAudit {
         )
 
         val workflow = OneAudit(auditConfig, listOf(contestOA),
-            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed))
         runAudit("testOneAuditContestSmall", workflow)
     }
 
@@ -80,7 +80,7 @@ class TestOneAudit {
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
         val workflow = OneAudit(auditConfig, contests,
-            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         runClcaSingleRoundAudit(workflow, contestRounds, auditor = OneAuditClcaAssertion())
     }

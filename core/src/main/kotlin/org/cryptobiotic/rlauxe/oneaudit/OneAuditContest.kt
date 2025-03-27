@@ -66,9 +66,9 @@ data class OneAuditContest (
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
-    fun makeContestUnderAudit(cvrs: List<Cvr>):OAContestUnderAudit {
+    fun makeContestUnderAudit():OAContestUnderAudit {
         val contestUA = OAContestUnderAudit(this)
-        contestUA.makeClcaAssertions(cvrs)
+        contestUA.makeClcaAssertions()
         return contestUA
     }
 
@@ -160,7 +160,7 @@ class OAContestUnderAudit(
     hasStyle: Boolean = true
 ): ContestUnderAudit(contestOA.makeContest(), isComparison=isComparison, hasStyle=hasStyle) {
 
-    override fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
+    override fun makeClcaAssertions(): ContestUnderAudit {
         // TODO assume its plurality for now
         val assertions = mutableListOf<Assertion>()
         contest.winners.forEach { winner ->
@@ -171,7 +171,8 @@ class OAContestUnderAudit(
         }
         // turn into comparison assertions
         this.clcaAssertions = assertions.map { assertion ->
-            val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
+            // val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
+            val margin = assertion.assorter.reportedMargin()
             ClcaAssertion(contest.info, OAClcaAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
         }
         return this

@@ -139,12 +139,12 @@ class TestContest {
 
         val contestUAp = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
         val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
 
         assertNotEquals(contestUAp, contestUAc)
         assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
 
-        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
         assertEquals(contestUAc2, contestUAc)
         assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
         assertEquals(contestUAc2.toString(), contestUAc.toString())
@@ -163,7 +163,7 @@ class TestContest {
         assertEquals("choice function IRV is not supported", mess1)
 
         val mess2 = assertFailsWith<RuntimeException> {
-            contestUAp.makeClcaAssertions(emptyList())
+            contestUAp.makeClcaAssertions()
         }.message
         assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess2)
 
@@ -174,7 +174,7 @@ class TestContest {
         assertEquals("makePollingAssertions() can be called only on polling contest", mess3)
 
         val mess4 = assertFailsWith<RuntimeException> {
-            contestUAc.makeClcaAssertions(emptyList())
+            contestUAc.makeClcaAssertions()
         }.message
         assertEquals("choice function IRV is not supported", mess4)
 

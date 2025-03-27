@@ -9,7 +9,7 @@ class ClcaAudit(
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
     val mvrManager: MvrManagerClca,
-    val cvrs: List<Cvr>
+    // val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
@@ -18,10 +18,10 @@ class ClcaAudit(
         require (auditConfig.auditType == AuditType.CLCA)
 
         val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-
         contestsUA = regularContests + raireContests
+
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(cvrs)
+            contest.makeClcaAssertions()
         }
 
         /* TODO only check regular contests ??

@@ -67,7 +67,7 @@ class TestOneAuditJson {
     fun makeTestContestOA(): OAContestUnderAudit {
         val contest = makeContestOA(23000, 21000, cvrPercent = .70, 0.0, undervotePercent=.01, phantomPercent=.01)
         val testCvrs = contest.makeTestCvrs()
-        val contestOA = contest.makeContestUnderAudit(testCvrs)
+        val contestOA = contest.makeContestUnderAudit()
         val minAllAsserter = contestOA.minClcaAssertion()
         assertNotNull(minAllAsserter)
 

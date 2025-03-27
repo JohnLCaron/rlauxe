@@ -51,12 +51,13 @@ class RaireContestUnderAudit(
     }
 
     // override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
-    override fun makeClcaAssertions(cvrs: Iterable<Cvr>): ContestUnderAudit {
+    override fun makeClcaAssertions(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         this.clcaAssertions = rassertions.map { rassertion ->
             val assorter = RaireAssorter(contest.info, rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
-            val calcMargin = assorter.calcAssorterMargin(id, cvrs)
-            val clcaAssorter = ClcaAssorter(contest.info, assorter, margin2mean(calcMargin), hasStyle=hasStyle)
+            // val calcMargin = assorter.calcAssorterMargin(id, cvrs)
+            val margin = assorter.reportedMargin()
+            val clcaAssorter = ClcaAssorter(contest.info, assorter, margin2mean(margin), hasStyle=hasStyle)
             ClcaAssertion(contest.info, clcaAssorter)
         }
         return this

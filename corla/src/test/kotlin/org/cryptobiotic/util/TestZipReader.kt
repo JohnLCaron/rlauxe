@@ -1,6 +1,6 @@
 package org.cryptobiotic.util
 
-import org.cryptobiotic.rlaux.util.ZipReader
+import org.cryptobiotic.rlauxe.util.ZipReader
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

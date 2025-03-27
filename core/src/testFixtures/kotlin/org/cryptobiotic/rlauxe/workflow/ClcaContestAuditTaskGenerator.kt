@@ -42,7 +42,7 @@ class ClcaContestAuditTaskGenerator(
         }
 
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
 
         return ContestAuditTask(
             name(),
@@ -86,7 +86,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         }
 
         val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed), testCvrs)
+            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
 
         /* make sure margins are below 0
         if (p2flips != null || p1flips != null) {

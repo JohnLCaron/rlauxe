@@ -107,7 +107,7 @@ class TestOneAuditKalamazoo {
 
         // do the same thing using real assorters
         val testCvrs = contest.makeTestCvrs()
-        val contestUA = contest.makeContestUnderAudit(testCvrs)
+        val contestUA = contest.makeContestUnderAudit()
         val minAllAsserter = contestUA.minAssertion()
         assertNotNull(minAllAsserter)
         val minAllAssorter = minAllAsserter!!.assorter

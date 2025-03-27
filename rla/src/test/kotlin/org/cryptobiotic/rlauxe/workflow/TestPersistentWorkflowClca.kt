@@ -37,7 +37,7 @@ class TestPersistentWorkflowClca {
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
-        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards, testCvrs)
+        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards)
 
         writeCvrsCsvFile(ballotCards.cvrsUA, publish.cvrsCsvFile())
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publish.contestsFile())

@@ -150,7 +150,7 @@ object RunRlaStartFuzz {
         writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
-        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards, testCvrs)
+        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 

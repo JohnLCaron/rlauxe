@@ -49,7 +49,7 @@ class TestRaireWorkflowFromJson {
         val nassertions = raireResults.contests.sumOf { it.rassertions.size }
 
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = ClcaAudit(auditConfig, emptyList(), raireResults.contests, ballotCards, testCvrs)
+        val workflow = ClcaAudit(auditConfig, emptyList(), raireResults.contests, ballotCards)
 
         runComparisonWorkflowR(workflow, ballotCards.cvrsUA, nassertions)
     }

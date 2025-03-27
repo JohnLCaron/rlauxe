@@ -81,7 +81,7 @@ class TestMakeOneAudit {
 
     fun checkAgainstCvrs(contest: OneAuditContest, margin: Double, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
         val testCvrs = contest.makeTestCvrs()
-        val contestOA = contest.makeContestUnderAudit(testCvrs)
+        val contestOA = contest.makeContestUnderAudit()
 
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter
         println(bassorter)

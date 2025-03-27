@@ -75,7 +75,7 @@ class PlotDistributions {
         println("oracle errorRates = ${ClcaErrorTable.getErrorRates(2, mvrsFuzzPct)}")
 
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards, testCvrs)
+        val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, sampleNumbers = emptyList())
@@ -106,7 +106,7 @@ class PlotDistributions {
             // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
             val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
-            val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards, testCvrs)
+            val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
             // heres the ConsistentSample permutation
             //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }

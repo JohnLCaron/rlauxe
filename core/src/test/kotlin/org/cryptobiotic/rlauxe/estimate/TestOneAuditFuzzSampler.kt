@@ -24,7 +24,7 @@ class TestOneAuditFuzzSampler {
                 val contest = makeContestOA(margin, N, cvrPercent = .70, 0.0, undervotePercent = .01, phantomPercent = .01)
                 val cvrs = contest.makeTestCvrs()
                 val ncands = contest.ncandidates
-                val contestUA: OAContestUnderAudit = contest.makeContestUnderAudit(cvrs)
+                val contestUA: OAContestUnderAudit = contest.makeContestUnderAudit()
                 val assertion = contestUA.minClcaAssertion()!!
                 val cassorter = assertion.cassorter as OAClcaAssorter // TODO why so complicated?
                 val fuzzer = OneAuditFuzzSampler(fuzzPct, cvrs, contestUA, cassorter)

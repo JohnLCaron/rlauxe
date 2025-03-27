@@ -29,7 +29,7 @@ class OneAuditContestAuditTaskGenerator(
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2),
-            MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed), oaCvrs)
+            MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed))
         return ContestAuditTask(
             name(),
             oneaudit,
@@ -68,7 +68,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2),
-            MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed), oaCvrs)
+            MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             oneaudit,

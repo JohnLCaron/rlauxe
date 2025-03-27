@@ -36,7 +36,7 @@ class TestCorlaEstimateSampleSize {
 
         contestsUAs.forEach { contest ->
             println("contest = ${contest}")
-            contest.makeClcaAssertions(cvrs)
+            contest.makeClcaAssertions()
             contest.clcaAssertions.forEach {
                 println("  comparison assertion = ${it}")
             }

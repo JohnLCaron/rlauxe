@@ -17,10 +17,9 @@ class TestAlphaMartComparison {
         val cvrMean = .52
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
         val calcMargin = (compareAssorter as ClcaAssorter).calcClcaAssorterMargin(cvrs.zip(cvrs))
-        val calcMean = margin2mean(calcMargin)
 
         val sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, compareAssorter)
         val theta = compareAssorter.meanAssort()

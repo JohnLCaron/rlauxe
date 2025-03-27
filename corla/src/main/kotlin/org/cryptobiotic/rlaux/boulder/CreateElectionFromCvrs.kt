@@ -185,7 +185,7 @@ class CreateElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSta
             Np = contest.Np,
             raireAssertions,
         )
-        rcontestUA.makeClcaAssertions(cvrs)
+        rcontestUA.makeClcaAssertions()
 
         return rcontestUA
     }

@@ -23,7 +23,7 @@ class TestConsistentSampling {
         val testCvrs = test.makeCvrsFromContests()
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
 
-        contestsUAs.forEach { it.makeClcaAssertions(testCvrs) }
+        contestsUAs.forEach { it.makeClcaAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 

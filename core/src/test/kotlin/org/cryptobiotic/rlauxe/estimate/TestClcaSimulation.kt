@@ -18,7 +18,7 @@ class TestClcaSimulation {
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
 
             val sampler = ClcaSimulation(cvrs,
@@ -53,7 +53,7 @@ class TestClcaSimulation {
             val theta = margin2mean(margin)
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
             runClcaSimulation(cvrs, contestUA, compareAssorter as ClcaAssorter)

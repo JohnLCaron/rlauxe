@@ -24,7 +24,7 @@ class TestRaireContestTestData {
         val makeRaireContestResult = simulateRaireTestData(N=N, contestId=111, ncands=4, minMargin=minMargin, phantomPct=phantomPct, quiet=false)
         rcontest = makeRaireContestResult.first
         cvrs = makeRaireContestResult.second
-        rcontest.makeClcaAssertions(cvrs)
+        rcontest.makeClcaAssertions()
     }
 
     @Test

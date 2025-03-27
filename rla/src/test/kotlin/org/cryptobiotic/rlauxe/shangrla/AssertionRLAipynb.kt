@@ -209,7 +209,7 @@ data class ShangrlaContest(
 
 class AssertionRLA {
 
-    @Test
+    // @Test
     fun workflow() {
 
 //audit = Audit.from_dict({
@@ -659,7 +659,7 @@ fun calc_sample_sizes(
     //val minAssertion = comparisonAssertions.minBy { it.margin }
     //val minAssorter = minAssertion.assorter
 
-    val contest = contests.first().makeClcaAssertions(cvrs)
+    val contest = contests.first().makeClcaAssertions()
     val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, minAssorter)

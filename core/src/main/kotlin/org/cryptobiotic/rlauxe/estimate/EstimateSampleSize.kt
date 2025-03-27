@@ -18,6 +18,8 @@ private val debugSampleDist = false
 private val debugSizeNudge = true
 private val debugSampleSmall = false
 
+// TODO: always one contest, always the minimum-margin assertion (?)
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
 

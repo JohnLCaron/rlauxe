@@ -1,5 +1,19 @@
 AuditCenter
-Mar 25, 2025
+Mar 26, 2025
+
+------------
+Create simulated cvrs for Colorado 2024 election from precinct data.
+   precincts = 3199
+   contests = 726
+   total cvrs = 3,193,034
+   took = 31.49 s
+
+Each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
+We create number of cvrs for each precinct equal to maximum vote across contests.
+So underestimating the undervotes. Not using phantoms.
+
+Compare to official "Ballots Cast" = 3,241,120
+
 
 ---------------------
 Files downloaded from:

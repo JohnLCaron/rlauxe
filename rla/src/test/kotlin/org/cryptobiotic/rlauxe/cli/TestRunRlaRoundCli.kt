@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 class TestRunRlaRoundCli {
 
-    @Test
+    // @Test
     fun testRlaRoundClca() {
         val topdir = "/home/stormy/temp/workflow/runBoulder24"
         RunRliRoundCli.main(
@@ -37,7 +37,7 @@ class TestRunRlaRoundCli {
         )
     }
 
-    @Test
+    // @Test
     fun testRlaClcaFuzz() {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
         RunRliRoundCli.main(

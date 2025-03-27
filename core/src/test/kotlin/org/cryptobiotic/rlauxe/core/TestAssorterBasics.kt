@@ -50,6 +50,7 @@ class TestAssorterBasics {
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
+            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
         }
     }
 
@@ -88,13 +89,14 @@ class TestAssorterBasics {
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
 
-            val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
+            val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
             val mean = margin2mean(it.assorter.reportedMargin())
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
+            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
 
             val Ncd = contest.Nc.toDouble()
             val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd

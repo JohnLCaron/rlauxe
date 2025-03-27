@@ -18,10 +18,11 @@ class ClcaAudit(
         require (auditConfig.auditType == AuditType.CLCA)
 
         val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-
         contestsUA = regularContests + raireContests
+
+        // TODO: only make one pass through the cvrs, and calcAssorterMargin for all assertions.
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions(cvrs)
+            contest.makeClcaAssertions()
         }
 
         /* TODO only check regular contests ??

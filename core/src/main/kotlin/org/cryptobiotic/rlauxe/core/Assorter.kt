@@ -17,7 +17,10 @@ interface AssorterIF {
     // It is not necessary to adjust the margins to account for those omissions. Rather, it is
     //    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
     //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
-    // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
+
+    // TODO: This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms. ??
+    // TODO: assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ??
+
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }
                         .map { assort(it, usePhantoms = usePhantoms) }.average()
@@ -46,6 +49,7 @@ interface AssorterIF {
 
 /** See SHANGRLA, section 2.1, p.4 */
 data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterIF {
+
     // If a ballot cannot be found (because the manifest is wrong—either because it lists a ballot that is not there, or
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means

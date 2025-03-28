@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.ZipReader
 import java.nio.file.Files
 import java.nio.file.Path
 
-private val checkValidity = true
+private val checkValidity = false
 
 class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
     private var mvrsRound: List<CvrUnderAudit> = emptyList()
@@ -72,10 +72,10 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         }
     }
 
-    override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+    override fun makeCvrPairs(contestId: Int, hasStyles: Boolean): List<Pair<Cvr, Cvr>> {
         val sampleNumbers = mvrsRound.map { it.sampleNum }
 
-        val sampledCvrs = findSamples(sampleNumbers, cvrsUA()) // TODO use IteratorCvrsCsvFile?
+        val sampledCvrs = findSamples(sampleNumbers, cvrsUA())
         require(sampledCvrs.size == mvrsRound.size)
 
         if (checkValidity) {
@@ -88,9 +88,8 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
             }
         }
 
-        // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ?? TODO the cvrPairs can be shared amongst assertions for the same contest
-        val cvrPairs = mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, allowReset = allowReset)
+        // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
+        return mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
     }
 
     private fun cvrsUA(): Iterator<CvrUnderAudit> {

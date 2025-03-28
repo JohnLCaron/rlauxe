@@ -25,9 +25,11 @@ class TestCreateElectionFromAudit {
         createElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
     }
 
+    // zip cvrs directory to cvrs.zip
+
     @Test
     fun sortCvrs() {
-        val auditDir = "/home/stormy/temp/corla/electio"
+        val auditDir = "/home/stormy/temp/corla/election"
         sortCvrs(auditDir, "$auditDir/cvrs.zip", "$auditDir/sortChunks")
     }
 
@@ -36,6 +38,8 @@ class TestCreateElectionFromAudit {
         val auditDir = "/home/stormy/temp/corla/election"
         mergeCvrs(auditDir, "$auditDir/sortChunks")
     }
+
+    // zip sortedCvs.csv directory to sortedCvs.zip
 
     @Test
     fun testMergedCvrs() {

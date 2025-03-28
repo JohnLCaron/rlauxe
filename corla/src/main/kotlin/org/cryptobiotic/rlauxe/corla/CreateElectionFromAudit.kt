@@ -60,7 +60,7 @@ fun createElectionFromAudit(
     println("   total cvrs = $count")
 
     ////
-    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 

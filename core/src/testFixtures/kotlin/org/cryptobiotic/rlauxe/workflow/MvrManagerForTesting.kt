@@ -46,8 +46,7 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         TODO("Not yet implemented")
     }
 
-    override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
-        if (mvrsRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset)
+    override fun makeCvrPairs(contestId: Int, hasStyles: Boolean): List<Pair<Cvr, Cvr>>  {
         val sampleNumbers = mvrsRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
 
@@ -60,7 +59,12 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
             require(mvr.sampleNumber() == cvr.sampleNumber())
         }
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
-        val cvrPairs = mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
+        return mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
+    }
+
+    fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler  {
+        if (mvrsRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset) // TODO ???
+        val cvrPairs = makeCvrPairs(contestId, hasStyles)
         return ClcaWithoutReplacement(contestId, hasStyles,cvrPairs, cassorter, allowReset = allowReset)
     }
 

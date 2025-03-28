@@ -24,7 +24,7 @@ class PersistentAudit(
         val nextRound = super.startNewRound(quiet)
 
         if (nextRound.sampleNumbers.isEmpty()) {
-            println("*** FAILED TO GET ANY SAMPLES ***")
+            println("*** FAILED TO GET ANY SAMPLES (PersistentAudit)")
             nextRound.auditIsComplete = true
         } else {
             val publisher = Publisher(inputDir)

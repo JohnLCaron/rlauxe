@@ -26,7 +26,7 @@ interface MvrManager {
 
 interface MvrManagerClcaIF : MvrManager {
     // this is used for audit, not estimation
-    fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean = false): Sampler
+    fun makeCvrPairs(contestId: Int, hasStyles: Boolean): List<Pair<Cvr, Cvr>>
 }
 
 interface MvrManagerPollingIF : MvrManager {

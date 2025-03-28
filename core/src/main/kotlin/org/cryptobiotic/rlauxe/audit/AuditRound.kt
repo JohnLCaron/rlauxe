@@ -209,6 +209,5 @@ data class AuditRoundResult(
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
-    override fun toString() = "round=$roundIdx nmvrs=$nmvrs maxBallotIndexUsed=$maxBallotIndexUsed " +
-            " pvalue=${df(pvalue)} samplesUsed=$samplesUsed status=$status"
+    override fun toString() = "round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status"
 }

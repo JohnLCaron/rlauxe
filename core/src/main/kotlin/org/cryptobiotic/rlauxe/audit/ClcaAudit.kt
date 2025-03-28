@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
 class ClcaAudit(
@@ -47,26 +49,46 @@ class ClcaAudit(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-// run all contests and assertion - TODO parellelize YES
+// run all contests and assertion
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
                  mvrManager: MvrManagerClcaIF,
                  roundIdx: Int,
                  auditor: ClcaAssertionAuditor,
 ): Boolean {
-
+    // parellelize over contests
     val contestsNotDone = contests.filter{ !it.done }
-
-    var allDone = true
+    val auditContestTasks = mutableListOf<RunContestTask>()
     contestsNotDone.forEach { contest ->
+        auditContestTasks.add(RunContestTask(auditConfig, contest, mvrManager, auditor, roundIdx))
+    }
+
+    val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
+    return complete.reduce { acc, b -> acc && b }
+}
+
+class RunContestTask(
+    val config: AuditConfig,
+    val contest: ContestRound,
+    val mvrManager: MvrManagerClcaIF,
+    val auditor: ClcaAssertionAuditor,
+    val roundIdx: Int): ConcurrentTaskG<Boolean> {
+
+    override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx massertions ${contest.assertionRounds.size}"
+
+    override fun run(): Boolean {
+        println(name())
+        val cvrPairs = mvrManager.makeCvrPairs(contest.id, config.hasStyles)
+
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = mvrManager.makeSampler(contest.id, auditConfig.hasStyles, cassorter, allowReset = false)
+                val sampler =  ClcaWithoutReplacement(contest.id, config.hasStyles, cvrPairs, cassorter, allowReset = false)
 
-                val testH0Result = auditor.run(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx)
+                val testH0Result =
+                    auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -74,9 +96,8 @@ fun runClcaAudit(auditConfig: AuditConfig,
         }
         contest.done = contestAssertionStatus.all { it.complete }
         contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contest.done
+        return contest.done
     }
-    return allDone
 }
 
 fun interface ClcaAssertionAuditor {
@@ -165,7 +186,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         // temp debug
         // val (bet, payoff, samples) = betPayoffSamples(contest.Nc, risk=auditConfig.riskLimit, (cassorter as ClcaAssorter).assorterMargin, 0.0)
 
-        if (!quiet) println(" AuditClcaAssertion ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
+        if (!quiet) println(" (${contest.info.id}) ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
         return testH0Result
     }
 }

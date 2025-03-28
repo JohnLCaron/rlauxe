@@ -72,7 +72,8 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         }
     }
 
-    override fun makeCvrPairs(contestId: Int, hasStyles: Boolean): List<Pair<Cvr, Cvr>> {
+    // same over all contests (!)
+    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
         val sampleNumbers = mvrsRound.map { it.sampleNum }
 
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA())

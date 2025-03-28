@@ -165,10 +165,8 @@ fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): L
     var usedOne = true
     while (usedOne) {
         usedOne = false
-        val cvb2 = CvrBuilder2("${precinct.precinct}$idx", false)
+        val cvb2 = CvrBuilder2("${precinct.precinct}-$idx", false)
         contestVotes.entries.forEach { (contestId, candidateCount) ->
-            if (contestId> 260)
-                print("")
             val remainingCandidates = candidateCount.filter { (_, value) -> value > 0 }
             if (remainingCandidates.isEmpty()) {
                 cvb2.addContest(contestId, IntArray(0)) // undervote I guess

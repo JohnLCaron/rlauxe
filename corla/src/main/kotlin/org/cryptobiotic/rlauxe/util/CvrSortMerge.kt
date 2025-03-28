@@ -261,3 +261,36 @@ class TreeReader(val cvrDir: String) {
         return count
     }
 }
+
+class TreeReaderTour(val cvrDir: String, val silent: Boolean = true, val visitor: (Path) -> Unit) {
+    var count = 0
+
+    // depth first tour of all files in the directory tree
+    fun tourFiles() {
+        readDirectory(Indent(0), Path.of(cvrDir))
+        if (!silent) println("count = $count")
+    }
+
+    fun readDirectory(indent: Indent, dirPath: Path): Int {
+        val paths = mutableListOf<Path>()
+        Files.newDirectoryStream(dirPath).use { stream ->
+            for (path in stream) {
+                paths.add(path)
+            }
+        }
+        paths.sort()
+        var count = 0
+        paths.forEach { path ->
+            if (Files.isDirectory(path)) {
+                if (!silent) println("$indent ${path.fileName}")
+                val nfiles = readDirectory(indent.incr(), path)
+                if (!silent) println("$indent ${path.fileName} has $nfiles files")
+                count += nfiles
+            } else {
+                visitor(path)
+                count++
+            }
+        }
+        return count
+    }
+}

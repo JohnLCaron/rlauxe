@@ -3,11 +3,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
+import java.io.*
 
 
 // data class Cvr(
@@ -73,6 +69,26 @@ fun writeCvrsCsvFile(cvrs: List<CvrUnderAudit>, filename: String) {
     writer.close()
 }
 
+class CvrsCsvWriter(filename: String) {
+    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
+    var countCvrs = 0
+    init {
+        writer.write(header)
+    }
+
+    fun write(cvrs: List<CvrUnderAudit>) {
+        cvrs.forEach {
+            writer.write(writeCSV(it.publishCsv()))
+        }
+        countCvrs += cvrs.size
+    }
+
+    fun close() {
+        println("wrote $countCvrs cvrs")
+        writer.close()
+    }
+}
+
 fun readCvrsCsvFile(filename: String): List<CvrUnderAudit> {
     val reader: BufferedReader = File(filename).bufferedReader()
     val header = reader.readLine() // get rid of header line
@@ -86,9 +102,22 @@ fun readCvrsCsvFile(filename: String): List<CvrUnderAudit> {
     return cvrs
 }
 
-class IteratorCvrsCsvFile(filename: String): Iterator<CvrUnderAudit> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    var nextLine: String = reader.readLine() // get rid of header line
+fun readCvrsCsvFile(input: InputStream): List<CvrUnderAudit> {
+    val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1"))
+    val header = reader.readLine() // get rid of header line
+
+    val cvrs = mutableListOf<CvrUnderAudit>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        cvrs.add(readCvrCvs(line))
+    }
+    reader.close()
+    return cvrs
+}
+
+class IteratorCvrsCsvStream(input: InputStream): Iterator<CvrUnderAudit> {
+    val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1"))
+    var nextLine: String? = reader.readLine() // get rid of header line
 
     var countLines  = 0
     override fun hasNext() : Boolean {
@@ -98,7 +127,28 @@ class IteratorCvrsCsvFile(filename: String): Iterator<CvrUnderAudit> {
     }
 
     override fun next(): CvrUnderAudit {
-        return readCvrCvs(nextLine)
+        return readCvrCvs(nextLine!!)
+    }
+
+    fun close() {
+        println("read $countLines lines")
+        reader.close()
+    }
+}
+
+class IteratorCvrsCsvFile(filename: String): Iterator<CvrUnderAudit> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    var nextLine: String? = reader.readLine() // get rid of header line
+
+    var countLines  = 0
+    override fun hasNext() : Boolean {
+        countLines++
+        nextLine = reader.readLine()
+        return nextLine != null
+    }
+
+    override fun next(): CvrUnderAudit {
+        return readCvrCvs(nextLine!!)
     }
 
     fun close() {

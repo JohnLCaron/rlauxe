@@ -178,6 +178,6 @@ fun readColoradoElectionDetail(filename : String ) : ElectionDetailXml {
     val xml = XML { indent = 2 }
 
     val result : ElectionDetailXml = xml.decodeFromString(serializer, text)
-    println("$result")
+    // println("$result")
     return result
 }

@@ -8,7 +8,7 @@ class ClcaAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
-    val mvrManager: MvrManagerClca,
+    val mvrManager: MvrManagerClcaIF,
     // val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
@@ -47,12 +47,12 @@ class ClcaAudit(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-// run all contests and assertion - TODO parellelize?
+// run all contests and assertion - TODO parellelize YES
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
-                 mvrManager: MvrManagerClca,
+                 mvrManager: MvrManagerClcaIF,
                  roundIdx: Int,
-                 auditor: ClcaAssertionAuditor
+                 auditor: ClcaAssertionAuditor,
 ): Boolean {
 
     val contestsNotDone = contests.filter{ !it.done }
@@ -152,7 +152,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampler.nmvrs(),
+            nmvrs = sampler.maxSamples(),
             maxBallotIndexUsed = sampler.maxSampleIndexUsed(), // TODO only for audit, not estimation I think
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
@@ -165,7 +165,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         // temp debug
         // val (bet, payoff, samples) = betPayoffSamples(contest.Nc, risk=auditConfig.riskLimit, (cassorter as ClcaAssorter).assorterMargin, 0.0)
 
-        if (!quiet) println(" ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
+        if (!quiet) println(" AuditClcaAssertion ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
         return testH0Result
     }
 }

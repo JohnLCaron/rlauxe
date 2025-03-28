@@ -12,81 +12,28 @@ interface BallotOrCvr {
 }
 
 interface MvrManager {
-    fun nballotCards(): Int
-    fun ballotCards() : Iterable<BallotOrCvr>
-    fun setMvrs(mvrs: List<CvrUnderAudit>)
-    fun takeFirst(nmvrs: Int): List<BallotOrCvr> = ballotCards().take(nmvrs).toList()
+    fun ballotCards() : Iterator<BallotOrCvr>
+    fun setMvrsForRound(mvrs: List<CvrUnderAudit>)
+    fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit>
+    fun takeFirst(nmvrs: Int): List<BallotOrCvr> {
+        val result = mutableListOf<BallotOrCvr>()
+        while (ballotCards().hasNext() && result.size < nmvrs) {
+            result.add(ballotCards().next())
+        }
+        return result
+    }
 }
 
-interface MvrManagerTest : MvrManager {
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
-}
-
-interface MvrManagerClca : MvrManager {
+interface MvrManagerClcaIF : MvrManager {
     // this is used for audit, not estimation
     fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean = false): Sampler
 }
 
-class MvrManagerClcaForStarting(val cvrs: List<Cvr>, seed: Long) : MvrManagerClca {
-    val cvrsUA: List<CvrUnderAudit>
-    private var mvrsForRound: List<CvrUnderAudit> = emptyList()
-
-    init {
-        // the order of the cvrs cannot be changed.
-        val prng = Prng(seed)
-        cvrsUA = cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
-    }
-
-    fun cvrs() = cvrs
-    override fun nballotCards() = cvrs.size
-    override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
-    override fun setMvrs(mvrs: List<CvrUnderAudit>) {
-        mvrsForRound = mvrs
-    }
-
-    override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
-        val sampleNumbers = mvrsForRound.map { it.sampleNum }
-        val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
-
-        // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrsForRound.size)
-        val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsForRound.zip(sampledCvrs)
-        cvruaPairs.forEach { (mvr, cvr) ->
-            require(mvr.id == cvr.id)
-            require(mvr.index == cvr.index)
-            require(mvr.sampleNumber() == cvr.sampleNumber())
-        }
-        // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
-        val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
-        return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, allowReset = allowReset)
-    }
-}
-
-interface MvrManagerPolling : MvrManager {
+interface MvrManagerPollingIF : MvrManager {
+    // used in uniformSampling TODO bogus i think
+    fun Nballots(): Int
     // this is used for audit, not estimation
     fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler
-}
-
-class MvrManagerPollingForStarting(val ballots: List<Ballot>, seed: Long) : MvrManagerPolling {
-    val ballotsUA: List<BallotUnderAudit>
-    var mvrsForRound: List<CvrUnderAudit> = emptyList()
-
-    init {
-        val prng = Prng(seed)
-        ballotsUA = ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, prng.next()) }
-            .sortedBy { it.sampleNumber() }
-    }
-
-    fun ballots() = ballots
-    override fun nballotCards() = ballots.size
-    override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
-    override fun setMvrs(mvrs: List<CvrUnderAudit>) {
-        mvrsForRound = mvrs
-    }
-
-    override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        return PollWithoutReplacement(contestId, hasStyles, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
-    }
 }
 
 // Iterate through sortedCvrUAs to find the cvrUAs that match the sampleNumbers
@@ -107,15 +54,24 @@ fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<CvrUnderAudit>
     return result
 }
 
+interface MvrManagerTest : MvrManager {
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit>
+}
+
+fun createSortedCvrs(cvrs: List<Cvr>, seed: Long) : List<CvrUnderAudit> {
+    val prng = Prng(seed)
+    return cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
+}
+
 //// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize
-fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedBorc : Iterable<BallotOrCvr>): Map<Int, Int> {
+fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedBorc : Iterator<BallotOrCvr>): Map<Int, Int> {
     //// count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }
 
     // Note this iterates through sortedBorc only until all previousSamples have been found and counted
-    val sortedBorcIter = sortedBorc.iterator()
+    val sortedBorcIter = sortedBorc
     previousSamples.forEach { prevNumber ->
         while (sortedBorcIter.hasNext()) {
             val boc = sortedBorcIter.next() // previousSamples must be in same order as sortedBorc

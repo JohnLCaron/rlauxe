@@ -2,7 +2,9 @@ package org.cryptobiotic.rlauxe.corla
 
 
 import org.cryptobiotic.rlauxe.util.ZipReader
-import org.cryptobiotic.rlauxe.util.nameCleanup
+import org.cryptobiotic.rlauxe.util.candidateNameCleanup
+import org.cryptobiotic.rlauxe.util.contestNameCleanup
+import org.cryptobiotic.rlauxe.util.mutatisMutandi
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
@@ -12,54 +14,39 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Path
 
+private val showMissingCandidates = false
+
 fun createElectionFromAudit(
     auditDir: String,
-    tabulateFile: String,
+    detailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     auditConfigIn: AuditConfig? = null
 ) {
-
     clearDirectory(Path.of(auditDir))
 
     val stopwatch = Stopwatch()
 
-    val tabulatedContests: Map<String, TabulateContestCsv> = readTabulateCsv(tabulateFile)
+    // val tabulatedContests: Map<String, TabulateContestCsv> = readTabulateCsv(tabulateFile)
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
+    val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
 
-    val contests = makeContests(tabulatedContests, roundContests)
-    //  val name: String,
-    //    val id: Int,
-    //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    //    val choiceFunction: SocialChoiceFunction,
-    //    val nwinners: Int = 1
-    // contests.forEach { println(it) }
+    val contests = makeContests(electionDetailXml, roundContests)
     println("contests = ${contests.size}")
 
+    // auditConfig
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.CLCA, hasStyles = true,
+        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    /// cvrs
-    val allCvrs = mutableListOf<Cvr>()
-
+    //// cvrs
     val reader = ZipReader(precinctFile)
     val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
     val precincts: List<ColoradoPrecinctLevelResults> = readColoradoPrecinctLevelResults(input)
     println("precincts = ${precincts.size}")
-
-    /*
-    val precinctCvrs = makeCvrs(precincts[0], contests)
-    allCvrs.addAll(precinctCvrs)
-    val precinctCvrsUA = precinctCvrs.map{ CvrUnderAudit(it, 0, 0L)}
-    val outputDir = "$auditDir/cvrs/${precincts[0].county}"
-    validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrsUA"))
-    writeCvrsCsvFile(precinctCvrsUA, "$outputDir/${precincts[0].precinct}.csv")
-
-     */
 
     var count = 0
     precincts.forEach { precinct ->
@@ -68,72 +55,72 @@ fun createElectionFromAudit(
         validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrsUA"))
         val precinctCvrsUA = precinctCvrs.map{ CvrUnderAudit(it, 0, 0L)}
         writeCvrsCsvFile(precinctCvrsUA, "$outputDir/${precinct.precinct}.csv")
-        //allCvrs.addAll(precinctCvrs)
         count += precinctCvrs.size
     }
     println("   total cvrs = $count")
 
-    /*
-    val ballotCards = MvrManagerClcaForStarting(allCvrs, auditConfig.seed)
-    val clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards, allCvrs)
-    writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
+    ////
+    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+    writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
-
-     */
-
-    /*
-
-    val ballotCards = MvrManagerClcaForStarting(allCvrs, auditConfig.seed)
-
-    writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile())
-    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
-
-    val mvrFile = "$auditDir/private/testMvrs.csv"
-    publisher.validateOutputDirOfFile(mvrFile)
-    writeCvrsCsvFile(ballotCards.cvrsUA, mvrFile) // no errors
-    println("   writeCvrsCsvFile ${mvrFile}")
-
-    val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards, allCvrs)
-    writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
-    println("   writeContestsJsonFile ${publisher.contestsFile()}")
-
-    if (runEstimation) {
-        // get the first round of samples wanted, write them to round1 subdir
-        val auditRound = runChooseSamples(clcaWorkflow, publisher)
-
-        // write the partial audit state to round1
-        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
-    }
-
-     */
 
     println("took = $stopwatch")
-
-    //    total cvrs = 3193034
-    //took = 31.49 s
 }
 
 val quiet = false
 
-fun makeContests(tabulatedContests: Map<String, TabulateContestCsv>, roundContests: List<ContestRoundCsv>): List<Contest> {
-    val contests = roundContests.map { roundContest ->
-        val tabContest = tabulatedContests[roundContest.contestName]!!
-        val candidates = tabContest.choices.sortedBy { it.idx }
-        val candidateNames = candidates.map { choice -> Pair(nameCleanup(choice.choiceName), choice.idx) }.toMap()
-        val candidateVotes = candidates.map { choice -> Pair(choice.idx, choice.totalVotes) }.toMap()
-        val info = ContestInfo(nameCleanup(tabContest.contestName), tabContest.idx, candidateNames, SocialChoiceFunction.PLURALITY, roundContest.nwinners)
-        Contest( info, candidateVotes, roundContest.contestBallotCardCount, 0) // TODO or Nc = roundContest.ballotCardCount?
+fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<Contest> {
+    val roundContestMap = roundContests.associateBy { contestNameCleanup(it.contestName) }
+    val contests = mutableListOf<Contest>()
+
+    electionDetailXml.contests.forEachIndexed { detailIdx, detailContest ->
+        var contestName = contestNameCleanup(detailContest.text)
+        var roundContest = roundContestMap[contestName]
+        if (roundContest == null) {
+            roundContest = roundContestMap[mutatisMutandi(contestName)]
+            if (roundContest == null) {
+                val mname = mutatisMutandi(contestName)
+                println("*** Cant find ContestRoundCsv $mname")
+            }
+        }
+
+        val candidates = detailContest.choices
+        val candidateNames = candidates.mapIndexed { idx, choice -> Pair(candidateNameCleanup(choice.text), idx) }.toMap()
+        val candidateVotes = candidates.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
+
+        // all we need ContestRoundCsv is for Nc; TODO or Nc = roundContest.ballotCardCount?
+        val totalVotes = candidateVotes.map { it.value }.sum()
+        var useNc = roundContest?.contestBallotCardCount ?: candidateVotes.map { it.value }.sum()
+        if (useNc < totalVotes ) {
+            println("*** Contest $contestName has $totalVotes total votes, but contestBallotCardCount is ${roundContest!!.contestBallotCardCount} - using ballotCardCount = ${roundContest!!.ballotCardCount}")
+            useNc = roundContest!!.ballotCardCount
+        } // buggers
+
+        val info = ContestInfo(
+            contestName,
+            detailIdx,
+            candidateNames,
+            SocialChoiceFunction.PLURALITY,
+            detailContest.voteFor
+        )
+        val contest = Contest(
+            info,
+            candidateVotes,
+            useNc,
+            0
+        )
+        contests.add(contest)
     }
 
+    // TODO
     // "line number","contest name","choice name","party name","total votes","percent of votes", "registered voters","ballots cast","num Area total","num Area rptg","over votes","under votes"
     // 497,"San Juan County Court Judge - Edwards (Vote For 1)","Yes","Y",471,87.38, 734,562,1,0,"0","0"
     // 498,"San Juan County Court Judge - Edwards (Vote For 1)","No","N",68,12.62, 734,562,1,0,"0","0"
-    val info = ContestInfo("San Juan County Court Judge Edwards", tabulatedContests.size,
-        mapOf("Yes" to 0, "No" to 1), SocialChoiceFunction.PLURALITY, 1)
-    val leftout = Contest( info, mapOf(0 to 471, 1 to 68), 562, 0)
+    //val info = ContestInfo("San Juan County Court Judge Edwards", contests.size,
+    //    mapOf("Yes" to 0, "No" to 1), SocialChoiceFunction.PLURALITY, 1)
+    //val leftout = Contest( info, mapOf(0 to 471, 1 to 68), 562, 0)
 
-    return contests + leftout
+    return contests
 }
 
 // each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
@@ -144,7 +131,7 @@ fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): L
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()
     precinct.contestChoices.forEach { orgContestName: String, choices: List<ContestChoice> ->
         val votes = mutableMapOf<Int, Int>()
-        val contestName = nameCleanup(orgContestName)
+        val contestName = contestNameCleanup(orgContestName)
         var contest = contestsByName[contestName]
         if (contest == null) {
             contest = contestsByName[mutatisMutandi(contestName)]
@@ -154,17 +141,19 @@ fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): L
         } else {
             // ContestChoice(val choice: String, val totalVotes: Int)
             choices.forEach {
-                val candName = nameCleanup(it.choice)
+                val candName = candidateNameCleanup(it.choice)
                 var candidateId = contest.info.candidateNames[candName]
                 if (candidateId == null) {
                     candidateId = contest.info.candidateNames[mutatisMutandi(candName)]
                 }
                 if (candidateId == null) {
-                    println("*** Cant find candidateId '$candName' in contest '$contestName' - skipping")
+                    if (showMissingCandidates) println("*** Cant find candidateId '$candName' in contest '$contestName' - skipping")
                 } else {
                     votes[candidateId] = it.totalVotes
                 }
             }
+            if (contest.id > 260)
+                print("")
             contestVotes[contest.id] = votes
         }
     }
@@ -178,6 +167,8 @@ fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): L
         usedOne = false
         val cvb2 = CvrBuilder2("${precinct.precinct}$idx", false)
         contestVotes.entries.forEach { (contestId, candidateCount) ->
+            if (contestId> 260)
+                print("")
             val remainingCandidates = candidateCount.filter { (_, value) -> value > 0 }
             if (remainingCandidates.isEmpty()) {
                 cvb2.addContest(contestId, IntArray(0)) // undervote I guess
@@ -208,34 +199,9 @@ fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): L
     val maxVotes = precinct.contestChoices.map {
         it.value.map { it.totalVotes } .sum()
     }.max()
-    require(rcvrs.size == maxVotes)
+    // require(rcvrs.size == maxVotes)
     // println(" made ${rcvrs.size} cvrs for precinct ${precinct.precinct}")
     return rcvrs
-}
-
-fun mutatisMutandi(choiceName: String): String {
-    return when (choiceName) {
-        "Randall Terry / Stephen E. Broden" -> "Randall Terry / Stephen E Broden"
-        "Claudia De la Cruz / Karina García" -> "Claudia De la Cruz / Karina Garcia"
-        "Colorado Supreme Court Justice Márquez" -> "Colorado Supreme Court Justice Marquez"
-        "Colorado Court of Appeals Judge Román" -> "Colorado Court of Appeals Judge Roman"
-        "Daniel Campaña" -> "Daniel Campana"
-        "Yes/For" -> "Yes"
-        "No/Against" -> "No"
-        "Yes" -> "Yes/For"
-        "No" -> "No/Against"
-        //"Arapahoe County Court Judge - Hernandez" -> "Arapahoe County Court - Hernandez"
-        //"Arapahoe County Court Judge - Williford" -> "Arapahoe County Court - Williford"
-        //"Bent County Court Judge - Clark" -> "Bent County Court - Clark"
-        //"Boulder County Court Judge - Martin" -> "Boulder County Court - Martin"
-        else -> {
-            if (choiceName.contains("Judge ")) choiceName.replace("Judge ", "")
-            else {
-                // println("HEY $choiceName")
-                choiceName
-            }
-        }
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////

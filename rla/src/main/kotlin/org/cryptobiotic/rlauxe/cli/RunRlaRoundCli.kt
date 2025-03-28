@@ -4,6 +4,7 @@ package org.cryptobiotic.rlauxe.cli
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
+import kotlinx.cli.default
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.PersistentAudit
 import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
@@ -25,22 +26,22 @@ object RunRliRoundCli {
             shortName = "in",
             description = "Directory containing input election record"
         ).required()
-        val mvrFile by parser.option(
-            ArgType.String,
-            shortName = "mvrs",
-            description = "File containing sampled Mvrs"
-        ).required()
+        val quiet by parser.option(
+            ArgType.Boolean,
+            shortName = "quiet",
+            description = "dont show progress messages"
+        ).default(false)
 
         parser.parse(args)
-        println("RunRound on $inputDir mvrFile=$mvrFile")
-        runRound(inputDir, mvrFile)
+        println("RunRound on $inputDir quiet=$quiet")
+        runRound(inputDir, quiet)
         // println("  retval $retval")
     }
 }
 
 
 // Also called from rlaux-viewer
-fun runRound(inputDir: String, mvrFile: String): AuditRound? {
+fun runRound(inputDir: String, quiet: Boolean): AuditRound? {
     if (notExists(Path.of(inputDir))) {
         println("RunRliRoundCli Audit Directory $inputDir does not exist")
         return null
@@ -59,9 +60,9 @@ fun runRound(inputDir: String, mvrFile: String): AuditRound? {
             val roundStopwatch = Stopwatch()
 
             // TODO the mvrFile might be the mvrs that were just audited. here we are assuming the auditRecord has testMvrs
-            val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
+            // val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
 
-            complete = workflow.runAuditRound(auditRound)
+            complete = workflow.runAuditRound(auditRound, quiet)
             println("  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
         } else {
             complete = auditRound.auditIsComplete

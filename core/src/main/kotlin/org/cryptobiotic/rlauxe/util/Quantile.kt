@@ -20,6 +20,7 @@ fun quantile(data: List<Int>, quantile: Double): Int {
 
 // 10*(idx+1) percent of distribution is less than decile[idx]
 fun makeDeciles(data: List<Int>): List<Int> {
+    if (data.isEmpty()) return emptyList()
     val sortedData = data.sorted()
     val deciles = mutableListOf<Int>()
     val n = sortedData.size
@@ -47,7 +48,8 @@ fun showDeciles(data: List<Int>) = buildString {
  * @return probability of that sample as percent
  */
 fun probability(deciles: List<Int>, sample: Int): Int {
-    require(deciles.size == 10)
+    if (deciles.size < 10) return 0
+
     if (sample >= deciles.last()) return 100
     if (sample <= deciles[0]) {
         val topSample = deciles[0]

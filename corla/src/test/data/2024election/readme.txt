@@ -51,6 +51,7 @@ TODO: Put together a simulation using the info from detailxml.zip. We dont have 
 
 
 PrecinctLevelResults
+https://www.sos.state.co.us/pubs/elections/resultsData.html
 https://www.sos.state.co.us/pubs/elections/Results/2024/2024GeneralPrecinctLevelResults.xlsx
 convert to cvs and zip to corla/src/test/data/2024election/2024GeneralPrecinctLevelResults.zip
 

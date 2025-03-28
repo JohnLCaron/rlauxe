@@ -9,10 +9,10 @@ import org.cryptobiotic.rlauxe.util.Prng
 
 //// in memory, simulated mvrs for testing
 
-class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClca, MvrManagerTest {
+class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTest {
     val cvrsUA: List<CvrUnderAudit>
     val mvrsUA: List<CvrUnderAudit>
-    private var mvrsForRound: List<CvrUnderAudit> = emptyList()
+    private var mvrsRound: List<CvrUnderAudit> = emptyList()
 
     init {
         // the order of the cvrs cannot be changed.
@@ -22,12 +22,12 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     }
 
     fun cvrs() = cvrs
-    override fun nballotCards() = cvrs.size
-    override fun ballotCards() : Iterable<BallotOrCvr> = cvrsUA
-    override fun setMvrs(mvrs: List<CvrUnderAudit>) {
-        mvrsForRound = mvrs
+    override fun ballotCards() : Iterator<BallotOrCvr> = cvrsUA.iterator()
+    override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
+        mvrsRound = mvrs.toList()
     }
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit> {
         val sampledMvrs = findSamples(sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         require(sampledMvrs.size == sampleNumbers.size)
 
@@ -38,24 +38,29 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
             lastRN = mvr.sampleNumber()
         }
 
-        setMvrs(sampledMvrs)
+        setMvrsForRound(sampledMvrs)
+        return sampledMvrs
+    }
+
+    override fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit> {
+        TODO("Not yet implemented")
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
-        if (mvrsForRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset)
-        val sampleNumbers = mvrsForRound.map { it.sampleNum }
+        if (mvrsRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset)
+        val sampleNumbers = mvrsRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
 
         // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrsForRound.size)
-        val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsForRound.zip(sampledCvrs)
+        require(sampledCvrs.size == mvrsRound.size)
+        val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsRound.zip(sampledCvrs)
         cvruaPairs.forEach { (mvr, cvr) ->
             require(mvr.id == cvr.id)
             require(mvr.index == cvr.index)
             require(mvr.sampleNumber() == cvr.sampleNumber())
         }
         // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
-        val cvrPairs = mvrsForRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
+        val cvrPairs = mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
         return ClcaWithoutReplacement(contestId, hasStyles,cvrPairs, cassorter, allowReset = allowReset)
     }
 
@@ -66,10 +71,10 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     }
 }
 
-class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: Long) : MvrManagerPolling, MvrManagerTest {
+class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
     val ballotsUA: List<BallotUnderAudit>
     val mvrsUA: List<CvrUnderAudit>
-    var mvrsForRound: List<CvrUnderAudit> = emptyList()
+    var mvrsRound: List<CvrUnderAudit> = emptyList()
 
     init {
         val prng = Prng(seed)
@@ -79,12 +84,13 @@ class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, se
     }
 
     fun ballots() = ballots
-    override fun nballotCards() = ballots.size
-    override fun ballotCards() : Iterable<BallotOrCvr> = ballotsUA
-    override fun setMvrs(mvrs: List<CvrUnderAudit>) {
-        mvrsForRound = mvrs
+    override fun Nballots() = ballots.size
+    override fun ballotCards() : Iterator<BallotOrCvr> = ballotsUA.iterator()
+    override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
+        mvrsRound = mvrs.toList()
     }
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
+
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit> {
         val sampledMvrs = findSamples(sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         require(sampledMvrs.size == sampleNumbers.size)
 
@@ -95,13 +101,18 @@ class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, se
             lastRN = mvr.sampleNumber()
         }
 
-        setMvrs(sampledMvrs)
+        setMvrsForRound(sampledMvrs)
+        return sampledMvrs
+    }
+
+    override fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit> {
+        TODO("Not yet implemented")
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        return if (mvrsForRound.isEmpty())
+        return if (mvrsRound.isEmpty())
             PollWithoutReplacement(contestId, hasStyles, mvrsUA.map { it.cvr } , assorter, allowReset=allowReset)
         else
-            PollWithoutReplacement(contestId, hasStyles, mvrsForRound.map { it.cvr }, assorter, allowReset=allowReset)
+            PollWithoutReplacement(contestId, hasStyles, mvrsRound.map { it.cvr }, assorter, allowReset=allowReset)
     }
 }

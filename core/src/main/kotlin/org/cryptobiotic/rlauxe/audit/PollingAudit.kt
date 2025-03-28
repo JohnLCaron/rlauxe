@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 class PollingAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
-    val mvrManager: MvrManagerPolling,
+    val mvrManager: MvrManagerPollingIF,
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     private val auditRounds = mutableListOf<AuditRound>()
@@ -47,7 +47,7 @@ class PollingAudit(
 fun runPollingAudit(
     auditConfig: AuditConfig,
     contests: List<ContestRound>,
-    mvrManager: MvrManagerPolling,
+    mvrManager: MvrManagerPollingIF,
     roundIdx: Int,
     quiet: Boolean = true
 ): Boolean {

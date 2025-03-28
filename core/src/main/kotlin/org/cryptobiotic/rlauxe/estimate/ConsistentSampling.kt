@@ -49,11 +49,11 @@ fun sample(
     val auditConfig = workflow.auditConfig()
     if (auditConfig.hasStyles) {
         if (!quiet) println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
-        consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
+        consistentSampling(auditRound, workflow.mvrManager() as MvrManagerClcaIF, previousSamples)
         if (!quiet) println(" consistentSamplingSize= ${auditRound.sampleNumbers.size}")
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
-        uniformSampling(auditRound, workflow.mvrManager(), previousSamples.size, auditConfig.sampleLimit, auditRound.roundIdx)
+        uniformSampling(auditRound, workflow.mvrManager() as MvrManagerPollingIF, previousSamples.size, auditConfig.sampleLimit, auditRound.roundIdx)
         if (!quiet) println(" uniformSamplingSize= ${auditRound.sampleNumbers.size}")
     }
 }
@@ -77,6 +77,9 @@ fun consistentSampling(
         if (c.auditorWantNewMvrs > 0 && (haveNewSamples[c.id] ?: 0) >= c.auditorWantNewMvrs) return false
         return (haveSampleSize[c.id] ?: 0) < (wantSampleSize[c.id] ?: 0)
     }
+    fun contestWants(c: ContestRound): Int {
+        return (wantSampleSize[c.id] ?: 0) - (haveSampleSize[c.id] ?: 0)
+    }
 
     val contestsIncluded = contestsNotDone.filter { it.included }
     val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
@@ -85,6 +88,7 @@ fun consistentSampling(
     val sampledCards = mutableListOf<BallotOrCvr>()
 
     // while we need more samples
+    var countSamples = 0
     val sortedBorcIter = mvrManager.ballotCards().iterator()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
@@ -116,7 +120,12 @@ fun consistentSampling(
                 }
             }
         }
-        // inx++
+        countSamples++
+        if (countSamples % 10000 == 0) print("$countSamples ")
+        if (countSamples % 100000 == 0) {
+            val wants = contestsIncluded.filter { contestWantsMoreSamples(it) }.map { "${it.id}:${contestWants(it)}" }
+            println("\nsampledCards = ${sampledCards.size} newMvrs=$newMvrs wants = $wants")
+        }
     }
 
     if (debugConsistent) println("**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs")
@@ -140,7 +149,7 @@ fun consistentSampling(
 // for audits with hasStyles = false
 fun uniformSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManager,
+    mvrManager: MvrManagerPollingIF,
     prevSampleSize: Int,
     sampleLimit: Int,
     roundIdx: Int,
@@ -149,7 +158,7 @@ fun uniformSampling(
     if (contestsNotDone.isEmpty()) return
 
     // scale by proportion of ballots that have this contest
-    val Nb = mvrManager.nballotCards()
+    val Nb = mvrManager.Nballots()
     contestsNotDone.forEach { contestUA ->
         val fac = Nb / contestUA.Nc.toDouble()
         val estWithFactor = roundToInt((contestUA.estSampleSize * fac))

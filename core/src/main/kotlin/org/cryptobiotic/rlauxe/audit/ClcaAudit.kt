@@ -56,11 +56,13 @@ fun runClcaAudit(auditConfig: AuditConfig,
                  roundIdx: Int,
                  auditor: ClcaAssertionAuditor,
 ): Boolean {
+    val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
+
     // parellelize over contests
     val contestsNotDone = contests.filter{ !it.done }
     val auditContestTasks = mutableListOf<RunContestTask>()
     contestsNotDone.forEach { contest ->
-        auditContestTasks.add(RunContestTask(auditConfig, contest, mvrManager, auditor, roundIdx))
+        auditContestTasks.add(RunContestTask(auditConfig, contest, cvrPairs, auditor, roundIdx))
     }
 
     val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
@@ -70,7 +72,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
 class RunContestTask(
     val config: AuditConfig,
     val contest: ContestRound,
-    val mvrManager: MvrManagerClcaIF,
+    val cvrPairs: List<Pair<Cvr, Cvr>>,
     val auditor: ClcaAssertionAuditor,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
@@ -78,7 +80,6 @@ class RunContestTask(
 
     override fun run(): Boolean {
         println(name())
-        val cvrPairs = mvrManager.makeCvrPairs(contest.id, config.hasStyles)
 
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
@@ -87,8 +88,7 @@ class RunContestTask(
                 val cassorter = cassertion.cassorter
                 val sampler =  ClcaWithoutReplacement(contest.id, config.hasStyles, cvrPairs, cassorter, allowReset = false)
 
-                val testH0Result =
-                    auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
+                val testH0Result = auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }

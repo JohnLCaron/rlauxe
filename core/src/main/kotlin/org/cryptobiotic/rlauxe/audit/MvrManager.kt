@@ -26,7 +26,7 @@ interface MvrManager {
 
 interface MvrManagerClcaIF : MvrManager {
     // this is used for audit, not estimation
-    fun makeCvrPairs(contestId: Int, hasStyles: Boolean): List<Pair<Cvr, Cvr>>
+    fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>
 }
 
 interface MvrManagerPollingIF : MvrManager {

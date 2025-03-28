@@ -4,13 +4,12 @@ import kotlin.test.Test
 
 class TestRunRlaRoundCli {
 
-    // @Test
-    fun testRlaRoundClca() {
-        val topdir = "/home/stormy/temp/workflow/runBoulder24"
+    @Test
+    fun testRlaRoundCorla() {
+        val topdir = "/home/stormy/temp/corla/election"
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }
@@ -21,7 +20,6 @@ class TestRunRlaRoundCli {
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }
@@ -32,7 +30,6 @@ class TestRunRlaRoundCli {
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }
@@ -43,7 +40,6 @@ class TestRunRlaRoundCli {
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }

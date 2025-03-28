@@ -163,7 +163,7 @@ fun runClcaSingleRoundAudit(workflow: RlauxAuditIF, contestRounds: List<ContestR
                             auditor: ClcaAssertionAuditor
 ): Int {
     val stopwatch = Stopwatch()
-    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClca, 1, auditor = auditor)
+    runClcaAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClcaIF, 1, auditor = auditor)
     if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
 
     var maxSamples = 0

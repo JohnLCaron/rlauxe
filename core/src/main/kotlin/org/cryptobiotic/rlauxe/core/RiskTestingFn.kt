@@ -10,6 +10,7 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
     TooManyPhantoms(3,true, false), // too many phantoms, makes margin < 0
     FailMaxSamplesAllowed(4,true, false),  // estimated samples greater than maximum samples allowed
     AuditorRemoved(5,true, false),  // auditor decide to remove it
+    NoLosers(6,true, true),  // no losers, ie ncandidates = nwinners
 
     // possible returns from RiskTestingFn
     LimitReached(10,false, false),  // cant tell from the number of samples available

@@ -62,6 +62,20 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
     var included = true
     var status = TestH0Status.InProgress
 
+    init {
+        if (contestUA.contest.losers.size == 0) {
+            status = TestH0Status.NoLosers
+            included = false
+            done = true
+        }
+        // kludge for corla; didnt include cvrs for contests > 260 in the precinct level totals.
+        if (contestUA.id >= 260) {
+            status = TestH0Status.ContestMisformed
+            included = false
+            done = true
+        }
+    }
+
     constructor(contestUA: ContestUnderAudit, roundIdx: Int) :
             this(contestUA, contestUA.assertions().map{ AssertionRound(it, roundIdx, null) }, roundIdx)
 
@@ -191,7 +205,7 @@ data class AuditRoundResult(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
-    val measuredMean: Double, // measured population mean
+    val measuredMean: Double, // measured population mean TODO used?
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {

@@ -1,6 +1,5 @@
-package org.cryptobiotic.util
+package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.util.ZipReader
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -8,7 +7,7 @@ class TestZipReader {
 
     @Test
     fun testRead() {
-        val filename = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
+        val filename = ".../corla/src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
         val reader = ZipReader(filename)
         val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
         val ba = ByteArray(1000)

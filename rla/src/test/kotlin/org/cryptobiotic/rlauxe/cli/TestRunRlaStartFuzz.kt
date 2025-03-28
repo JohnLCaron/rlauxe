@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 class TestRunRlaStartFuzz {
 
-    // @Test
+    @Test
     fun testRlaStartClca() {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
         RunRlaStartFuzz.main(

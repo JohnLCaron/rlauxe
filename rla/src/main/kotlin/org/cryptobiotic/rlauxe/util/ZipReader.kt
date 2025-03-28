@@ -4,6 +4,7 @@ import java.io.InputStream
 import java.nio.file.*
 import java.nio.file.spi.FileSystemProvider
 
+// this could be in core
 class ZipReader(zipFilename: String) {
     val fileSystem : FileSystem
     val fileSystemProvider : FileSystemProvider

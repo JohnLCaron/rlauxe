@@ -38,7 +38,7 @@ data class ContestInfo(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) candidates=${candidateNames}")
+        append("'$name' ($id) candidates=${candidateNames}")
     }
 }
 
@@ -291,7 +291,7 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votes else emptyMap()
-        appendLine("$name ($id) votes=${votes}")
+        appendLine("'$name' ($id) votes=${votes}")
         appendLine(" minMargin=${df(minMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners})")
         contest.info.candidateNames.forEach { (name, id) ->

@@ -2,11 +2,21 @@ AuditCenter
 Mar 26, 2025
 
 ------------
-Create simulated cvrs for Colorado 2024 election from precinct data.
-   precincts = 3199
-   contests = 726
-   total cvrs = 3,193,034
-   took = 31.49 s
+*** Contest State Representative District 9 has 39638 total votes, but contestBallotCardCount is 32425 - using ballotCardCount = 1104271
+*** Cant find ContestRoundCsv San Juan County Court Edwards
+*** Contest Town of Erie Council Member District 2 has 11179 total votes, but contestBallotCardCount is 8394 - using ballotCardCount = 578518
+*** Contest Calhan School District RJ1 Question 5B has 2039 total votes, but contestBallotCardCount is 118 - using ballotCardCount = 20652
+
+contests = 295
+County, Precinct, Contest, Choice, Party, Total Votes
+precincts = 3199
+   total cvrs = 3191197
+   writeContestsJsonFile /home/stormy/temp/corla/election2/contests.json
+took = 32.32 s
+
+ cvrs has 3191197 cvrs
+wrote 3191197 cvrs
+mergeSortedChunk took 60.91 s
 
 Each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
 We create number of cvrs for each precinct equal to maximum vote across contests.

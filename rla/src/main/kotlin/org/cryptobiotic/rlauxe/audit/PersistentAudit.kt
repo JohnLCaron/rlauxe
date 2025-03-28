@@ -14,6 +14,7 @@ class PersistentAudit(
     private val auditConfig: AuditConfig = auditRecord.auditConfig
     private val contestsUA: List<ContestUnderAudit> = auditRecord.contests
     private val auditRounds = mutableListOf<AuditRound>()
+    private val mvrManager = makeMvrManager(auditRecord.location, auditConfig)
 
     init {
         auditRounds.addAll(auditRecord.rounds)
@@ -45,13 +46,13 @@ class PersistentAudit(
 
         // this is getting done twice, see RunRliRoundCli.runRound()
         // val sampledMvrs = auditRecord.getMvrsForRound(ballotCards(), roundIdx, mvrFile)
-        val sampledMvrs = auditRecord.getMvrsForRound(mvrManager(), roundIdx, null)
-        if (!quiet) println("  added ${sampledMvrs.size} mvrs to ballotCards")
+        val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)
+        if (!quiet) println("  added ${sampledMvrs.size} mvrs to mvrManager")
 
         val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = AuditClcaAssertion())
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
             AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerPolling, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = OneAuditClcaAssertion())
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = OneAuditClcaAssertion(quiet))
         }
 
         auditRound.auditWasDone = true
@@ -70,12 +71,7 @@ class PersistentAudit(
     }
 
     override fun auditConfig() =  this.auditConfig
+    override fun mvrManager() = mvrManager
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-
-    //override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-    //    (auditRecord.mvrManager as MvrManagerTest).setMvrsBySampleNumber(sampleNumbers)
-    //}
-
-    override fun mvrManager() = auditRecord.mvrManager // lazy
 }

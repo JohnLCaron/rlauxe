@@ -316,13 +316,12 @@ fun createElectionFromDominionCvrs(
     auditDir: String,
     sovoFile: String,
     riskLimit: Double = 0.03,
-    auditConfigIn: AuditConfig? = null,
-    runEstimation: Boolean = true) {
+    auditConfigIn: AuditConfig? = null) {
 
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
 
-    createElectionFromDominionCvrs(cvrExportFile, auditDir, sovo, riskLimit, auditConfigIn, runEstimation)
+    createElectionFromDominionCvrs(cvrExportFile, auditDir, sovo, riskLimit, auditConfigIn)
 }
 
 // use sov to define what contests are in the audit
@@ -332,8 +331,7 @@ fun createElectionFromDominionCvrs(
     sovo: BoulderStatementOfVotes,
     riskLimit: Double = 0.03,
     auditConfigIn: AuditConfig? = null,
-    runEstimation: Boolean = true) {
-
+) {
     clearDirectory(Path.of(auditDir))
 
     val stopwatch = Stopwatch()
@@ -357,29 +355,13 @@ fun createElectionFromDominionCvrs(
     val allCvrs = electionFromCvrs.cvrs + redactedCvrs
 
     /////////////////
-
-    val ballotCards = MvrManagerClcaForStarting(allCvrs, auditConfig.seed)
-
-    writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile())
-    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
-
-    val mvrFile = "$auditDir/private/testMvrs.csv"
-    publisher.validateOutputDirOfFile(mvrFile)
-    writeCvrsCsvFile(ballotCards.cvrsUA, mvrFile) // no errors
-    println("   writeCvrsCsvFile ${mvrFile}")
-
-    val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
-    writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
+    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+    writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
-    if (runEstimation) {
-        // get the first round of samples wanted, write them to round1 subdir
-        val auditRound = runChooseSamples(clcaWorkflow, publisher)
-
-        // write the partial audit state to round1
-        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
-    }
+    val cvrsUA = createSortedCvrs(allCvrs, auditConfig.seed)
+    writeCvrsCsvFile(cvrsUA, publisher.cvrsCsvFile())
+    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
 
     println("took = $stopwatch")
 }

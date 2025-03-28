@@ -21,7 +21,7 @@ class TestConsistentSampling {
             ContestUnderAudit(it, isComparison = true)
         }
         val testCvrs = test.makeCvrsFromContests()
-        val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
+        val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
 
         contestsUAs.forEach { it.makeClcaAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
@@ -35,7 +35,7 @@ class TestConsistentSampling {
         //    auditRound: AuditRound,
         //    ballotCards: BallotCards,
         //    previousSamples: Set<Int> = emptySet(),
-        consistentSampling(auditRound, ballotCards)
+        consistentSampling(auditRound, mvrManager)
         println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
         assertEquals(auditRound.sampleNumbers.size, auditRound.nmvrs)
         assertEquals(auditRound.nmvrs, auditRound.newmvrs)

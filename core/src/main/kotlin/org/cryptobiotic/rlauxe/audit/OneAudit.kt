@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 class OneAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
-    val mvrManager: MvrManagerClca,
+    val mvrManager: MvrManagerClcaIF,
     // val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>

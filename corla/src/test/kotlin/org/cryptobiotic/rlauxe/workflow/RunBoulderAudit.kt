@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 
 object RunBoulderAudit {
     val auditDirectory = "/home/stormy/temp/workflow/runBoulder24"
-    val mvrFile = "/home/stormy/temp/workflow/runBoulder24/private/testMvrs.csv" // TODO store in record ??
     val topdir = "/home/stormy/dev/github/rla/rlauxe/corla"
 
     @Test
@@ -23,8 +22,7 @@ object RunBoulderAudit {
             "$topdir/src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv",
             auditDir = auditDirectory,
             "$topdir/src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditConfigIn = auditConfig ,
-            runEstimation = false
+            auditConfigIn = auditConfig,
         )
         println("that took $stopwatch")
     }

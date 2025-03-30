@@ -10,7 +10,7 @@ import java.nio.file.Path
 
 private val showMissingCandidates = false
 
-fun createElectionFromAudit(
+fun coloradoElectionFromAudit(
     auditDir: String,
     detailXmlFile: String,
     contestRoundFile: String,
@@ -31,7 +31,7 @@ fun createElectionFromAudit(
     // auditConfig
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03,
+        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03, minMargin = .0025,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())

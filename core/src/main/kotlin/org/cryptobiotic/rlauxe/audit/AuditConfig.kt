@@ -15,7 +15,7 @@ data class AuditConfig(
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val sampleLimit: Int = -1, // dont sample more than this, -1 means dont use
-    val minMargin: Double = 0.0, // do not audit contests less than this reported margin
+    val minMargin: Double = 0.001, // do not audit contests less than this reported margin
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 
     val pollingConfig: PollingConfig = PollingConfig(),

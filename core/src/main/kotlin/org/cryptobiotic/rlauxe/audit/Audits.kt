@@ -45,19 +45,18 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
             if (minAssertion == null) {
                 println("*** no assertions for contest ${contestUA}")
                 contestUA.status = TestH0Status.ContestMisformed
-
             } else {
                 val minMargin = minAssertion.assorter.reportedMargin()
                 if (minMargin <= auditConfig.minMargin) {
-                    println("***MinMargin contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
+                    println("*** MinMargin contest ${contestUA} margin ${minMargin} <= ${auditConfig.minMargin}")
                     contestUA.status = TestH0Status.MinMargin
-                }
-
-                // see if too many phantoms
-                val adjustedMargin = minMargin - contestUA.contest.phantomRate()
-                if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
-                    println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
-                    contestUA.status = TestH0Status.TooManyPhantoms
+                } else {
+                    // see if too many phantoms
+                    val adjustedMargin = minMargin - contestUA.contest.phantomRate()
+                    if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
+                        println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
+                        contestUA.status = TestH0Status.TooManyPhantoms
+                    }
                 }
             }
         }

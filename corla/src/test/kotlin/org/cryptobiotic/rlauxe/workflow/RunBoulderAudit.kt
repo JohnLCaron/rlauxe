@@ -19,7 +19,7 @@ object RunBoulderAudit {
         // this sets the sampleNumbers and sorts.
         val stopwatch = Stopwatch()
         createElectionFromDominionCvrs(
-            "$topdir/src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv",
+            "$topdir/src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             auditDir = auditDirectory,
             "$topdir/src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditConfigIn = auditConfig,

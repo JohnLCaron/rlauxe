@@ -179,7 +179,7 @@ class TestClcaAttackSamplers {
 }
 
 fun showMargin(what: String, cvrs: List<Cvr>): Double {
-    val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
+    val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator())
     assertEquals(1, votes.size )
     val contest0 =  votes[0]!!.toSortedMap()
     assertEquals(2, contest0.size )

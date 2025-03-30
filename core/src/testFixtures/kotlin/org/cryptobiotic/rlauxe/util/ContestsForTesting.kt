@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.random.Random
 
@@ -7,7 +8,7 @@ fun makeContestFromCvrs(
     info: ContestInfo,
     cvrs: List<Cvr>,
 ): Contest {
-    val votes = tabulateVotes(cvrs)
+    val votes = tabulateVotes(cvrs.iterator())
     val ncards = cardsPerContest(cvrs)
     return Contest(
         info,
@@ -27,22 +28,6 @@ fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
         }
     }
     return d
-}
-
-// candidate for removal
-fun makeVotesPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
-    val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes
-    contests.forEach { allVotes[it.id] = mutableMapOf() } // make sure map is complete
-    for (cvr in cvrs) {
-        for ((conId, conVotes) in cvr.votes) {
-            val accumVotes = allVotes.getOrPut(conId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return allVotes
 }
 
 // tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
@@ -70,7 +55,7 @@ fun makeContestsFromCvrs(
     cvrs: List<Cvr>,
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
 ): List<Contest> {
-    val votes = tabulateVotes(cvrs)
+    val votes = tabulateVotes(cvrs.iterator())
     val ncards = cardsPerContest(cvrs)
     return makeContestsFromCvrs(votes, ncards, choiceFunction)
 }
@@ -143,12 +128,4 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }
-}
-
-// ok if one has zero votes and the other doesnt
-fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {
-    if (votes1 == votes2) return true
-    val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
-    val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
-    return votes1z == votes2z
 }

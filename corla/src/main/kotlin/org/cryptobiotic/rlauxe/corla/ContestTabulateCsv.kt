@@ -39,7 +39,7 @@ data class TabulateLine(
 
 fun readCountyTabulateCsv(filename: String): Map<String, CountyTabulateCsv> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.RFC4180)
+    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
 
     // we expect the first line to be the headers
@@ -100,7 +100,7 @@ data class TabulateContestChoice(
 
 fun readTabulateCsv(filename: String): Map<String, TabulateContestCsv> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.RFC4180)
+    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
 
     // we expect the first line to be the headers

@@ -200,6 +200,13 @@ open class ContestUnderAudit(
 
     var pollingAssertions: List<Assertion> = emptyList()
     var clcaAssertions: List<ClcaAssertion> = emptyList()
+    var status = TestH0Status.InProgress
+
+    init {
+        if (contest.losers.size == 0) {
+            status = TestH0Status.NoLosers
+        }
+    }
 
     // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
     open fun makePollingAssertions(): ContestUnderAudit {
@@ -299,7 +306,7 @@ open class ContestUnderAudit(
         appendLine("    Total=${votes.values.sum()}")
     }
 
-    open fun show(roundIdx: Int?) = buildString {
+    open fun showShort() = buildString {
         val votes = if (contest is Contest) contest.votes.toString() else "N/A"
         appendLine("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
     }

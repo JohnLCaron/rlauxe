@@ -148,7 +148,7 @@ class TestContest {
         assertEquals(contestUAc2, contestUAc)
         assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
         assertEquals(contestUAc2.toString(), contestUAc.toString())
-        assertEquals(contestUAc2.show(1), contestUAc.show(1))
+        assertEquals(contestUAc2.showShort(), contestUAc.showShort())
     }
 
     @Test

@@ -24,10 +24,12 @@ class CreateBoulderElectionFromCvrs {
         assertEquals(Pair("Number of positions=", 1), parseIrvContestName("Number of positions=    "))
     }
 
+    // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding.
+    // hand corrected "Claudia De la Cruz / Karina García"
     @Test
     fun createBoulder24() {
         createElectionFromDominionCvrs(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv",
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "/home/stormy/temp/persist/runBoulder24",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
         )

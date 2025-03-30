@@ -60,7 +60,7 @@ data class ColoradoPrecinctLevelResult(
 
 fun readColoradoPrecinctLevelResults(inputStream: InputStream): List<ColoradoPrecinctLevelResults> {
     val reader: Reader = InputStreamReader(inputStream, "ISO-8859-1")
-    val parser = CSVParser(reader, CSVFormat.RFC4180)
+    val parser = CSVParser(reader, CSVFormat.DEFAULT)
     val records = parser.iterator()
 
     // we expect the first line to be the headers

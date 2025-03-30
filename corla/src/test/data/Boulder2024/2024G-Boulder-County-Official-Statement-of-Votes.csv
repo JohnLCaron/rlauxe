@@ -1,4 +1,13 @@
-"Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+"Precinct 
+Code","Precinct 
+Number","Contest 
+Title","Choice 
+Name","Active 
+Voters","Total 
+Ballots","Total 
+Votes","Total 
+Undervotes","Total 
+Overvotes"
 "100","2181207100","Presidential Electors","Kamala D. Harris / Tim Walz","1,569","1,325",900,24,0
 "100","2181207100","Presidential Electors","Donald J. Trump / JD Vance","1,569","1,325",354,24,0
 "100","2181207100","Presidential Electors","Blake Huber / Andrea Denault","1,569","1,325",1,24,0

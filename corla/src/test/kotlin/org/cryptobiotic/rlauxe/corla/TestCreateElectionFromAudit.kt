@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.audit.checkContestsWithCvrs
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
@@ -16,7 +17,8 @@ class TestCreateElectionFromAudit {
         val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
     }
 
-    // use tabulate.csv for contests and votes, and round1/contests.csv (Nc)
+    // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)
+    // and precinctFile for cvrs
     @Test
     fun createElectionFromAudit() {
         val auditDir = "/home/stormy/temp/corla/election"
@@ -28,23 +30,30 @@ class TestCreateElectionFromAudit {
         createElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
     }
 
-    // zip cvrs directory to cvrs.zip
+    //// zip cvrs directory to cvrs.zip
 
+    // out of memory sort by sampleNum()
     @Test
-    fun sortCvrs() {
+    fun sortMergeCvrs() {
         val auditDir = "/home/stormy/temp/corla/election"
         sortCvrs(auditDir, "$auditDir/cvrs.zip", "$auditDir/sortChunks")
-    }
-
-    @Test
-    fun mergeCvrs() {
-        val auditDir = "/home/stormy/temp/corla/election"
         mergeCvrs(auditDir, "$auditDir/sortChunks")
     }
 
-    // zip sortedCvs.csv directory to sortedCvs.zip
+    //// zip sortedCvs.csv directory to sortedCvs.zip
 
-
+    @Test
+    fun testPrecintReader() {
+        val stopwatch = Stopwatch()
+        val auditDir = "/home/stormy/temp/corla/election"
+        val precinctReader = PrecinctReader("$auditDir/cvrs/")
+        var count = 0
+        while (precinctReader.hasNext()) {
+            count++
+            precinctReader.next()
+        }
+        println("count = $count took = $stopwatch")
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // looking for where we lose contests > 260

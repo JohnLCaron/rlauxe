@@ -90,7 +90,7 @@ class TestAuditPolling {
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 
         // count actual votes
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator()) // contest -> candidate -> count
         if (!silent && showContests) {
             votes.forEach { key, cands ->
                 println("contest ${key} ")

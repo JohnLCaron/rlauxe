@@ -294,3 +294,94 @@ class TreeReaderTour(val cvrDir: String, val silent: Boolean = true, val visitor
         return count
     }
 }
+
+class PrecinctReader(cvrDir: String): Iterator<CvrUnderAudit> {
+    var count = 0
+    var precinct: PrecinctIterator? = null
+    var county: CountyIterator? = null
+
+    val paths: Iterator<Path>
+    init {
+        val pass = mutableListOf<Path>()
+        Files.newDirectoryStream(Path.of(cvrDir)).use { stream ->
+            for (path in stream) {
+                if (Files.isDirectory(path)) {
+                    pass.add(path)
+                }
+            }
+        }
+        paths = pass.iterator()
+    }
+
+    override fun hasNext(): Boolean {
+        if (precinct == null) precinct = getNextPrecinctIterator()
+        if (precinct == null) return false
+        while (!precinct!!.hasNext()) {
+            precinct = getNextPrecinctIterator()
+            if (precinct == null) return false
+        }
+        return true
+    }
+
+    override fun next(): CvrUnderAudit {
+        count++
+        return precinct!!.next()
+    }
+
+    fun getNextPrecinctIterator() : PrecinctIterator? {
+        if (county == null) county = getNextCountyIterator()
+        if (county == null) return null
+        while (!county!!.hasNext()) {
+            county = getNextCountyIterator()
+            if (county == null) return null
+        }
+        return county!!.next()
+    }
+
+    fun getNextCountyIterator() : CountyIterator? {
+        if (paths.hasNext()) {
+            return CountyIterator(paths.next())
+        }
+        return null
+    }
+
+    // has only files
+    inner class CountyIterator(dirPath: Path) : Iterator<PrecinctIterator> {
+        val pathIterator: Iterator<Path>
+
+        init {
+            val paths = mutableListOf<Path>()
+            Files.newDirectoryStream(dirPath).use { stream ->
+                for (path in stream) paths.add(path)
+            }
+            pathIterator = paths.iterator()
+        }
+        override fun hasNext(): Boolean {
+            return pathIterator.hasNext()
+        }
+        override fun next(): PrecinctIterator {
+            if (!pathIterator.hasNext())
+                println("why")
+            return PrecinctIterator(pathIterator.next())
+        }
+    }
+
+    inner class PrecinctIterator(val path: Path) : Iterator<CvrUnderAudit> {
+        val cvrsUA: List<CvrUnderAudit>
+        val cvrsIterator: Iterator<CvrUnderAudit>
+        init {
+            cvrsUA = readCvrsCsvFile(path.toString())
+            cvrsIterator = cvrsUA.iterator()
+        }
+        override fun hasNext(): Boolean {
+            return cvrsIterator.hasNext()
+        }
+        override fun next(): CvrUnderAudit {
+            if (!cvrsIterator.hasNext())
+                println("why")
+            return cvrsIterator.next()
+        }
+    }
+
+}
+

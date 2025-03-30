@@ -2,10 +2,8 @@ package org.cryptobiotic.rlauxe.dominion
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
-import java.io.Reader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.io.File
+import java.nio.charset.Charset
 
 data class DominionBallotManifest(
     val countyId: Long,
@@ -28,9 +26,14 @@ data class DominionBallotBatch(
 )
 
 fun readDominionBallotManifest(filename: String, countyId: Long): DominionBallotManifest {
+    val parser = CSVParser.parse(File(filename), Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
+
+    /*
     val path: Path = Paths.get(filename)
     val reader: Reader = Files.newBufferedReader(path)
     val parser = CSVParser(reader, CSVFormat.DEFAULT)
+
+     */
 
     val records = parser.iterator()
 

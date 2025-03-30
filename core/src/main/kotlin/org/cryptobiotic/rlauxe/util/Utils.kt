@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import java.security.SecureRandom
 import kotlin.enums.EnumEntries
 import kotlin.math.abs
@@ -68,7 +69,7 @@ fun <T : Enum<T>> enumValueOf(name: String, entries: EnumEntries<T>): T? {
 }
 
 // Number of votes in each contest, return contestId -> candidateId -> nvotes
-fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
+fun tabulateVotes(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     val r = mutableMapOf<Int, MutableMap<Int, Int>>()
     for (cvr in cvrs) {
         for ((con, conVotes) in cvr.votes) {
@@ -80,5 +81,19 @@ fun tabulateVotes(cvrs: List<Cvr>): Map<Int, Map<Int, Int>> {
         }
     }
     return r
+}
+
+fun tabulateVotesFromCvrsUA(cvrsUA: Iterator<CvrUnderAudit>): Map<Int, Map<Int, Int>> {
+    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
+    for (cvr in cvrsUA) {
+        for ((con, conVotes) in cvr.votes) {
+            val accumVotes = votes.getOrPut(con) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
+        }
+    }
+    return votes
 }
 

@@ -47,7 +47,7 @@ class TestCvrs {
         val cvrs = makeCvrsByExactMean(N, theta)
         println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs) // contest -> candidate -> count
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator()) // contest -> candidate -> count
         val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
 
         val contestsUA = makeContestUAFromCvrs(contests, cvrs, true) // contest -> candidate -> count

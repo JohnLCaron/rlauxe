@@ -1,17 +1,11 @@
 package org.cryptobiotic.rlauxe.corla
 
 
-import org.cryptobiotic.rlauxe.util.ZipReader
-import org.cryptobiotic.rlauxe.util.candidateNameCleanup
-import org.cryptobiotic.rlauxe.util.contestNameCleanup
-import org.cryptobiotic.rlauxe.util.mutatisMutandi
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 
 private val showMissingCandidates = false
@@ -59,8 +53,13 @@ fun createElectionFromAudit(
     }
     println("   total cvrs = $count")
 
-    ////
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
+    // these checks may modify the contest status
+    checkContestsCorrectlyFormed(auditConfig, contestsUA)
+
+    val precinctReader = PrecinctReader("$auditDir/cvrs/")
+    checkContestsWithCvrs(contestsUA, precinctReader)
+
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 

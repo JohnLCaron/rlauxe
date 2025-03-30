@@ -85,12 +85,7 @@ data class ColoradoElectionCandidateLine(
 }
 
 fun readColoradoElectionSummaryCsv(filename: String): List<ColoradoElectionContestSummary> {
-    //val path: Path = Paths.get(filename)
-    //val reader: Reader = Files.newBufferedReader(path)
-
-    val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.RFC4180)
-
+    val parser = CSVParser.parse(File(filename), Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
 
     // we expect the first line to be the headers

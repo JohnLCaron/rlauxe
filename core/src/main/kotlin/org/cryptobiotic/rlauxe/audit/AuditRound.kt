@@ -60,11 +60,10 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
 
     var done = false
     var included = true
-    var status = TestH0Status.InProgress
+    var status = contestUA.status
 
     init {
-        if (contestUA.contest.losers.size == 0) {
-            status = TestH0Status.NoLosers
+        if (status.complete) {
             included = false
             done = true
         }

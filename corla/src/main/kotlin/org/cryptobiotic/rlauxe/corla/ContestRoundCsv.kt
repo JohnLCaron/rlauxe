@@ -52,7 +52,7 @@ data class ContestRoundCsv(
 
 fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.RFC4180)
+    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
 
     // we expect the first line to be the headers

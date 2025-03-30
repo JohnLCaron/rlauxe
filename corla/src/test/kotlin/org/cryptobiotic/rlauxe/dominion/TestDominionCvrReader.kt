@@ -371,14 +371,14 @@ class TestDominionCvrReader {
     fun parseBoulder24() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv"
+        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
         assertEquals("Boulder", export.countyId)
         assertEquals(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv",
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             export.filename
         )
         assertEquals("2024 Boulder County General Election", export.electionName)
@@ -390,7 +390,7 @@ class TestDominionCvrReader {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = CreateElectionFromCvrs(export, sovo)
+        val maker = BoulderElectionFromCvrs(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -448,14 +448,14 @@ class TestDominionCvrReader {
     fun testMakeRedactedCvrs() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv"
+        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = CreateElectionFromCvrs(export, sovo)
+        val maker = BoulderElectionFromCvrs(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -464,7 +464,7 @@ class TestDominionCvrReader {
         println("took = $stopwatch")
 
         // TODO check that vote tallies agree...
-        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs)
+        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs.iterator())
 
         val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
         export.redacted.forEach { redacted ->
@@ -502,7 +502,7 @@ class TestDominionCvrReader {
 
         val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
 
-        val electionFromCvrs = CreateElectionFromCvrs(export, combined)
+        val electionFromCvrs = BoulderElectionFromCvrs(export, combined)
         val (contests, raireContests) = electionFromCvrs.makeContests()
         val irvId = raireContests.first().id
 

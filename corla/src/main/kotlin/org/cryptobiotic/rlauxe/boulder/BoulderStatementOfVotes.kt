@@ -3,18 +3,15 @@ package org.cryptobiotic.rlauxe.boulder
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import java.io.Reader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.io.File
+import java.nio.charset.Charset
 import kotlin.text.appendLine
 
-// parses Boulder County "statement of votes" cvs files, eg from
+// parses Boulder County "statement of votes" csv files, eg from
 // Colorado Election Results
 // https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Statement-of-Votes.xlsx
 
 // variations
-//        "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
 //(2023R) "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
 // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
 // (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
@@ -161,9 +158,8 @@ data class BoulderStatementLine(
 }
 
 fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderStatementOfVotes {
-    val path: Path = Paths.get(filename)
-    val reader: Reader = Files.newBufferedReader(path)
-    val parser = CSVParser(reader, CSVFormat.RFC4180)
+    val parser = CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+    // val parser = CSVParser.parse(File(filename), Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
 
     val records = parser.iterator()
 

@@ -68,7 +68,7 @@ class TestMultiContestTestData {
         val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(true)
 
         val votes: Map<Int, Map<Int, Int>> =
-            org.cryptobiotic.rlauxe.util.tabulateVotes(testCvrs).toSortedMap() // contestId -> candidateId -> nvotes
+            org.cryptobiotic.rlauxe.util.tabulateVotes(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
         votes.forEach { vcontest ->
             println("  tabulate contest $vcontest")
             votes.forEach { vcontest ->

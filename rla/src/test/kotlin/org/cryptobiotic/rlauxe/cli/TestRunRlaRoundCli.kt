@@ -14,9 +14,10 @@ class TestRunRlaRoundCli {
         )
     }
 
-    // @Test
-    fun testRlaRoundRaireClca() {
-        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+    @Test
+    fun testRrunBoulder24() {
+        val topdir = "/home/stormy/temp/persist/runBoulder24"
+
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,

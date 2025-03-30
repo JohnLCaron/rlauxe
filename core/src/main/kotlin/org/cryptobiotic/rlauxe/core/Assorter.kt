@@ -21,6 +21,7 @@ interface AssorterIF {
     // TODO: This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms. ??
     // TODO: assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ??
 
+    // TODO candidate for removal
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }
                         .map { assort(it, usePhantoms = usePhantoms) }.average()

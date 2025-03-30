@@ -3,11 +3,12 @@ package org.cryptobiotic.rlauxe.dominion
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.util.ZipReader
+import java.io.File
+import java.io.InputStreamReader
 import java.io.Reader
 import java.lang.StrictMath.sqrt
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.charset.Charset
 
 // rewrite of us.freeandfair.corla.csv.DominionCVRExportParser
 
@@ -58,7 +59,7 @@ data class DominionCvrExport(
         appendLine(" ncvrs = ${cvrs.size}")
         val ccount = mutableMapOf<Int, Int>()
         cvrs.forEach { cvr ->
-            cvr.votes.forEach { contestVote ->
+            cvr.contestVotes.forEach { contestVote ->
                 ccount.getOrPut(contestVote.contestId, {0})
                 ccount[contestVote.contestId] = ccount[contestVote.contestId]!! + 1
             }
@@ -79,7 +80,7 @@ data class CastVoteRecord(
     val ballotType: String, // whats the meaning of this ?
 ) {
     var precinctPortion: String? = null  // whats the mening of this ?
-    var votes =  mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
+    var contestVotes =  mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
     fun addVotes(schema: Schema, line: CSVRecord): CastVoteRecord {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
@@ -89,7 +90,7 @@ data class CastVoteRecord(
                 val useContest = schema.contests[useContestIdx]
                 if (useContest.isIRV) {
                     // cvr.raw = makeRaw(line, useContest.startCol, useContest.ncols)
-                    val irvVotes =
+                    val candVotes =
                         makeIrvVotes(
                             line,
                             useContest.startCol,
@@ -97,10 +98,10 @@ data class CastVoteRecord(
                             useContest.nchoices,
                             useContestIdx
                         )
-                    votes.add(ContestVotes(useContestIdx, irvVotes))
+                    contestVotes.add(ContestVotes(useContestIdx, candVotes))
                 } else {
-                    val regularVotes = makeRegularVotes(line, useContest.startCol, useContest.ncols, useContestIdx)
-                    votes.add(ContestVotes(useContestIdx, regularVotes))
+                    val candVotes  = makeRegularVotes(schema, line, useContest)
+                    contestVotes.add( ContestVotes(useContestIdx, candVotes))
                 }
                 colidx += useContest.ncols
             } else {
@@ -110,7 +111,7 @@ data class CastVoteRecord(
         return this
     }
 
-    fun voteFor(contest: Int): ContestVotes? = votes.find { it.contestId == contest}
+    fun voteFor(contest: Int): ContestVotes? = contestVotes.find { it.contestId == contest}
 
     fun show() = buildString {
         append("$cvrNumber, ")
@@ -120,12 +121,14 @@ data class CastVoteRecord(
         append("$imprintedId, ")
         append("$precinctPortion, ")
         appendLine("$ballotType")
-        votes.forEach {
-            appendLine("    ${it.contestId} ${it.votes.joinToString(",")}")
+        contestVotes.forEach {
+            appendLine("    ${it.contestId} ${it.candVotes.joinToString(",")}")
         }
     }
 }
-data class ContestVotes(val contestId: Int, val votes: List<Int>)
+
+// use colIdx to eliminate write-ins.
+data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
 data class RedactedVotes(val ballotType: String) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
@@ -158,9 +161,18 @@ data class RedactedVotes(val ballotType: String) {
 }
 
 fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport {
-    val path: Path = Paths.get(filename)
-    val reader: Reader = Files.newBufferedReader(path)
-    val parser = CSVParser(reader, CSVFormat.DEFAULT)
+    val parser = if (filename.endsWith(".zip")) {
+        val zipReader = ZipReader(filename)
+        // by convention, the file inside is the filename with zip replaced by csv
+        val lastPart = filename.substringAfterLast("/")
+        val innerFilename = lastPart.replace(".zip", ".csv")
+        val inputStream = zipReader.inputStream(innerFilename)
+        val reader: Reader = InputStreamReader(inputStream, "UTF-8")
+        CSVParser(reader, CSVFormat.DEFAULT)
+
+    } else {
+        CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+    }
 
     var my_record_count = 0
     val records: Iterator<CSVRecord> = parser.iterator()
@@ -259,36 +271,33 @@ fun makeIrvVotes(line: CSVRecord, start: Int, count: Int, ncands: Int, contest:I
     val cands = mutableListOf<IntArray>()
     for (cand in 0 until ncands) {
         val candArray = IntArray(ncands) { i -> raw[cand + ncands*i] }
-        //if (candArray.sum() > 1)
-        //    println(" LOOK raw $raw")
         cands.add(candArray)
     }
-
     val ranked = mutableListOf<Int>()
     for (rank in 0 until ncands) {
         for (cand in 0 until ncands) {
             if (cands[cand][rank] == 1) ranked.add(cand)
         }
     }
-    if (showRaw) println("$contest: raw=${raw}, ranked= $ranked")
     return ranked
 }
 
-fun makeRegularVotes(line: CSVRecord, start: Int, count: Int, contest:Int): List<Int> {
-    val raw = mutableListOf<Int>()
+fun makeRegularVotes(schema: Schema, line: CSVRecord, exportContest: ExportContestInfo): List<Int> {
     val votes = mutableListOf<Int>()
-    for (i in 0 until count) {
-        val col = line.get(start + i).toInt()
-        raw.add(col)
-        if (col > 0) votes.add( i)
+    for (i in 0 until exportContest.ncols) {
+        val colno = exportContest.startCol + i
+        if (!schema.writeIns.contains(colno)) { // dont record write-ins
+            val colValue = line.get(colno).toInt()
+            if (colValue > 0) votes.add(i)
+        }
     }
-    if (showRaw) println("$contest: raw=${raw}, votes= $votes")
     return votes
 }
 
 /////////////////////////////////////////////////////////////////////////
 
 class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: List<ExportContestInfo> ) {
+    val writeIns : Set<Int> = columns.filter{ it.choice == "Write-in" }.map { it.colno }.toSet()
 
     fun choices(contestId: Int): List<String> {
         val contest = contests.find{ it.contestIdx == contestId }
@@ -305,7 +314,7 @@ class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: Lis
         val choices = choices(contestId)
         val contestVotes = cvr.voteFor(contestId)
         val result = mutableListOf<String>()
-        contestVotes?.votes?.forEach { result.add( choices[it]) } // could barf if malformed
+        contestVotes?.candVotes?.forEach { result.add( choices[it]) } // could barf if malformed
         return result
     }
 

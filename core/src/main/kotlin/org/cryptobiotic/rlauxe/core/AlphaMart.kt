@@ -18,6 +18,7 @@ class FixedEstimFn(
     override fun eta(prevSampleTracker: SampleTracker) = eta0
 }
 
+// TODO see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
 class TruncShrinkage(
     val N: Int,
     val withoutReplacement: Boolean = true,

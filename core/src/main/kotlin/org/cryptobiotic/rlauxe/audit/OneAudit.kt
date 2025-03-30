@@ -53,6 +53,7 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         val eta0 = assorter.meanAssort()
         val c = (eta0 - 0.5) / 2
 
+        // TODO see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
         // TODO is this right, no special processing for the "hasCvr" strata?
         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.max99) {
             FixedEstimFn(.99 * assorter.upperBound())

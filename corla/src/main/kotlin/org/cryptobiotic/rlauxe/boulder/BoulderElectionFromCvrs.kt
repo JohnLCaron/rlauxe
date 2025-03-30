@@ -355,7 +355,7 @@ fun createElectionFromDominionCvrs(
     val (contests, raireContests) = electionFromCvrs.makeContests()
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.CLCA, hasStyles = true, riskLimit = riskLimit,
+        AuditType.CLCA, hasStyles = true, riskLimit = riskLimit, minMargin = .0025,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())

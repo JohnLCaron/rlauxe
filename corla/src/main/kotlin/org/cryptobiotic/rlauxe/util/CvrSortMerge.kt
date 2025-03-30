@@ -9,10 +9,7 @@ import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.validateOutputDir
-import java.nio.file.FileSystem
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
+import java.nio.file.*
 import java.nio.file.spi.FileSystemProvider
 
 val maxChunk = 100000
@@ -20,7 +17,7 @@ val maxChunk = 100000
 // out of memory sorting
 fun sortCvrs(
     auditDir: String,
-    cvrZipFile: String,
+    cvrZipFile: String?,
     workingDirectory: String,
 ) {
     val stopwatch = Stopwatch()
@@ -32,10 +29,21 @@ fun sortCvrs(
     val cvrSorter = CvrSorter(workingDirectory, prng, maxChunk)
 
     //// the reading and sorted chunks
-    val provider: FileSystemProvider = ZipReader(cvrZipFile).fileSystemProvider
-    val fileSystem: FileSystem = ZipReader(cvrZipFile).fileSystem
-    fileSystem.rootDirectories.forEach { root: Path ->
-        readDirectory(Indent(0), provider, root, cvrSorter)
+    if (cvrZipFile != null) {
+        val provider: FileSystemProvider = ZipReader(cvrZipFile).fileSystemProvider
+        val fileSystem: FileSystem = ZipReader(cvrZipFile).fileSystem
+        fileSystem.rootDirectories.forEach { root: Path ->
+            readDirectory(Indent(0), provider, root, cvrSorter)
+        }
+    } else {
+        val cvrDir = "$auditDir/cvrs/"
+        val fileSystem: FileSystem = FileSystems.getDefault()
+        val provider : FileSystemProvider = fileSystem.provider()
+        Files.newDirectoryStream(Path.of(cvrDir)).use { stream ->
+            for (path in stream) {
+                readDirectory(Indent(0), provider, path, cvrSorter)
+            }
+        }
     }
     cvrSorter.writeSortedChunk()
     println("writeSortedChunk took $stopwatch")

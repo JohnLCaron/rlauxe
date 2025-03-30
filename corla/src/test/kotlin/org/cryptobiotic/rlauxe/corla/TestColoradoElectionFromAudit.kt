@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.audit.checkContestsWithCvrs
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
@@ -9,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
 
-class TestCreateElectionFromAudit {
+class TestColoradoElectionFromAudit {
 
     @Test
     fun testReadColoradoElectionDetail() {
@@ -27,7 +26,13 @@ class TestCreateElectionFromAudit {
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
+        coloradoElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
+
+        // out of memory sort by sampleNum()
+        sortCvrs(auditDir, null, "$auditDir/sortChunks")
+        mergeCvrs(auditDir, "$auditDir/sortChunks")
+
+        // TODO zip sortedCvs.csv directory to sortedCvs.zip
     }
 
     //// zip cvrs directory to cvrs.zip
@@ -36,7 +41,8 @@ class TestCreateElectionFromAudit {
     @Test
     fun sortMergeCvrs() {
         val auditDir = "/home/stormy/temp/corla/election"
-        sortCvrs(auditDir, "$auditDir/cvrs.zip", "$auditDir/sortChunks")
+        // sortCvrs(auditDir, "$auditDir/cvrs.zip", "$auditDir/sortChunks")
+        sortCvrs(auditDir, null, "$auditDir/sortChunks")
         mergeCvrs(auditDir, "$auditDir/sortChunks")
     }
 

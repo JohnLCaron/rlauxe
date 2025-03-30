@@ -148,6 +148,7 @@ data class ContestUnderAuditJson(
     val hasStyle: Boolean,
     var pollingAssertions: List<AssertionJson>,
     var clcaAssertions: List<ClcaAssertionJson>,
+    val status: TestH0Status,
 )
 
 fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
@@ -158,6 +159,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
         this.hasStyle,
         this.pollingAssertions.map { it.publishJson() },
         this.clcaAssertions.map { it.publishJson() },
+        this.status
     )
 }
 
@@ -170,6 +172,7 @@ fun ContestUnderAuditJson.import(): ContestUnderAudit {
     )
     contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
+    contestUA.status = this.status
     return contestUA
 }
 

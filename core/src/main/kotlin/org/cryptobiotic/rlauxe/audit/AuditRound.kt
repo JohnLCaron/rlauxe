@@ -67,12 +67,6 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
             included = false
             done = true
         }
-        // kludge for corla; didnt include cvrs for contests > 260 in the precinct level totals.
-        if (contestUA.id >= 260) {
-            status = TestH0Status.ContestMisformed
-            included = false
-            done = true
-        }
     }
 
     constructor(contestUA: ContestUnderAudit, roundIdx: Int) :

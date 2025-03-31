@@ -5,7 +5,7 @@ import java.nio.file.*
 import java.nio.file.spi.FileSystemProvider
 
 // this could be in core
-class ZipReader(zipFilename: String) {
+class ZipReader(val zipFilename: String) {
     val fileSystem : FileSystem
     val fileSystemProvider : FileSystemProvider
 
@@ -27,4 +27,48 @@ class ZipReader(zipFilename: String) {
         return fileSystemProvider.newInputStream(path, StandardOpenOption.READ)
     }
 
+    fun inputStream() : InputStream {
+        val lastPart = zipFilename.substringAfterLast("/")
+        val innerFilename = lastPart.replace(".zip", ".csv")
+        return inputStream(innerFilename)
+    }
+
+}
+
+// depth first tour of all files in the directory tree
+class ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
+                    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit) {
+    var count = 0
+    val zipReader = ZipReader(zipFile)
+    val provider: FileSystemProvider = zipReader.fileSystemProvider
+    val fileSystem: FileSystem = zipReader.fileSystem
+
+    fun tourFiles() {
+        fileSystem.rootDirectories.forEach { root: Path ->
+            readDirectory(Indent(0), provider, root)
+        }
+    }
+
+    fun readDirectory(indent: Indent, provider: FileSystemProvider, dirPath: Path): Int {
+        val paths = mutableListOf<Path>()
+        Files.newDirectoryStream(dirPath).use { stream ->
+            for (path in stream) {
+                paths.add(path)
+            }
+        }
+        if (sort) paths.sort()
+        paths.forEach { path ->
+            if (Files.isDirectory(path)) {
+                readDirectory(indent.incr(), provider, path)
+            } else {
+                if (filter(path)) {
+                    if (!silent) println("$indent ${path.fileName}")
+                    val input = provider.newInputStream(path, StandardOpenOption.READ)
+                    visitor(input)
+                    count++
+                }
+            }
+        }
+        return count
+    }
 }

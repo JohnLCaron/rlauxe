@@ -193,7 +193,7 @@ fun simulateSampleSizeClcaAssorter(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 
-    println("simulateSampleSizeClcaAssorter ${contest.info.name}")
+    println("simulateSampleSizeClcaAssorter ${contest.info.name} ${cassorter.assorter().desc()}")
     // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
     // TODO TIMING make same contestSim for all the assertions in the contest: takes 20% of time of audit
     val cvrs =  if (contest.isIRV()) {

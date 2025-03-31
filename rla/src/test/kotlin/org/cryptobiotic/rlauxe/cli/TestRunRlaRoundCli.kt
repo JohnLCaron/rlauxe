@@ -5,6 +5,16 @@ import kotlin.test.Test
 class TestRunRlaRoundCli {
 
     @Test
+    fun testRlaRoundSF() {
+        val topdir = "/home/stormy/temp/sf2024"
+        RunRliRoundCli.main(
+            arrayOf(
+                "-in", topdir,
+            )
+        )
+    }
+
+    @Test
     fun testRlaRoundCorla() {
         val topdir = "/home/stormy/temp/corla/election"
         RunRliRoundCli.main(
@@ -15,8 +25,8 @@ class TestRunRlaRoundCli {
     }
 
     @Test
-    fun testRrunBoulder24() {
-        val topdir = "/home/stormy/temp/persist/runBoulder24"
+    fun testRrunBoulder() {
+        val topdir = "/home/stormy/temp/persist/runBoulder23"
 
         RunRliRoundCli.main(
             arrayOf(

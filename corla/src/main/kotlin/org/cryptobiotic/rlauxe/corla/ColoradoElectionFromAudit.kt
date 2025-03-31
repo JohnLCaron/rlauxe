@@ -31,7 +31,7 @@ fun coloradoElectionFromAudit(
     // auditConfig
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03, minMargin = .0025,
+        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
@@ -199,59 +199,4 @@ fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): L
     // require(rcvrs.size == maxVotes)
     // println(" made ${rcvrs.size} cvrs for precinct ${precinct.precinct}")
     return rcvrs
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-fun makeContests(electionDetail: ElectionDetailXml): List<Contest>{
-    // data class ContestInfo(
-    //    val name: String,
-    //    val id: Int,
-    //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    //    val choiceFunction: SocialChoiceFunction,
-    //    val nwinners: Int = 1,
-    //    val minFraction: Double? = null, // supermajority only.
-    val infos = electionDetail.contests.map {
-        val candidateNames = it.choices.mapIndexed { idx, choice -> Pair(choice.text, idx) }.toMap()
-        val candidateVotes = it.choices.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
-        val info = ContestInfo(it.text, it.key, candidateNames, SocialChoiceFunction.PLURALITY, it.voteFor)
-        Contest( info, candidateVotes, 0, 0)
-    }
-    if (!quiet) println("ncontests with info = ${infos.size}")
-
-    /*
-    val countVotes = countVotes()
-    val allContests = infos.map { info ->
-        val contestCount = countVotes.find { it.contestId == info.id }!!
-        val sovContest = sovo.contests.find {
-            it.contestTitle == info.name
-        }
-        if (sovContest == null) {
-            println("HEY cant find '${info.name}' in BoulderStatementOfVotes")
-        }
-        val Nc = if (sovContest == null) contestCount.Nc else sovContest.totalBallots
-        // TODO undervotes
-        Contest(info, contestCount.candidateCounts, Nc, 0)
-    }
-    // TODO no losers - leave in and mark "done? "
-    val contests = allContests.filter { it.info.choiceFunction != SocialChoiceFunction.IRV && it.losers.size > 0 }
-    if (!quiet) {
-        println("ncontests with votes = ${contests.size}")
-        contests.forEach { contest ->
-            println(contest.show2())
-        }
-    }
-    val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
-    val raireContests = if (irvContests.isEmpty()) emptyList() else {
-        irvContests.map { contest ->
-            makeRaireContest(contest)
-        }
-    }
-    if (!quiet) {
-        println("ncontests with IRV = ${raireContests.size}")
-        raireContests.forEach { contest ->
-            println(contest.show2())
-        }
-    }
-    return Pair(contests, raireContests) */
-    return emptyList()
 }

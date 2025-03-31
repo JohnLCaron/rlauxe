@@ -87,16 +87,14 @@ data class CastVoteRecord(
         while (colidx < line.size()) {
             if (line.get(colidx).isNotEmpty()) {
                 val useContestIdx = schema.columns[colidx].contestIdx
-                val useContest = schema.contests[useContestIdx]
+                val useContest: ExportContestInfo = schema.contests[useContestIdx]
                 if (useContest.isIRV) {
                     // cvr.raw = makeRaw(line, useContest.startCol, useContest.ncols)
                     val candVotes =
                         makeIrvVotes(
+                            schema,
                             line,
-                            useContest.startCol,
-                            useContest.ncols,
-                            useContest.nchoices,
-                            useContestIdx
+                            useContest,
                         )
                     contestVotes.add(ContestVotes(useContestIdx, candVotes))
                 } else {
@@ -263,19 +261,22 @@ fun makeRaw(line: CSVRecord, start: Int, count: Int): List<Int> {
     return raw
 }
 
-fun makeIrvVotes(line: CSVRecord, start: Int, count: Int, ncands: Int, contest:Int): List<Int> {
+//                             exportContest.startCol, start
+//                            exportContest.ncols, count
+//                            exportContest.nchoices, ncands
+fun makeIrvVotes(schema: Schema, line: CSVRecord, exportContest: ExportContestInfo): List<Int> {
     val raw = mutableListOf<Int>()
-    for (i in 0 until count) {
-        raw.add( line.get(start + i).toInt() )
+    for (i in 0 until exportContest.ncols) {
+        raw.add( line.get(exportContest.startCol + i).toInt() )
     }
     val cands = mutableListOf<IntArray>()
-    for (cand in 0 until ncands) {
-        val candArray = IntArray(ncands) { i -> raw[cand + ncands*i] }
+    for (cand in 0 until exportContest.nchoices) {
+        val candArray = IntArray(exportContest.nchoices) { i -> raw[cand + exportContest.nchoices*i] }
         cands.add(candArray)
     }
     val ranked = mutableListOf<Int>()
-    for (rank in 0 until ncands) {
-        for (cand in 0 until ncands) {
+    for (rank in 0 until exportContest.nchoices) {
+        for (cand in 0 until exportContest.nchoices) {
             if (cands[cand][rank] == 1) ranked.add(cand)
         }
     }

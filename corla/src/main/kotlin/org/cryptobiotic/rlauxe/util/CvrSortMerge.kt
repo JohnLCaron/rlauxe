@@ -14,6 +14,17 @@ import java.nio.file.spi.FileSystemProvider
 
 val maxChunk = 100000
 
+fun sortMergeCvrs(
+    auditDir: String,
+    cvrZipFile: String?,
+) {
+    // out of memory sort by sampleNum()
+    sortCvrs(auditDir, cvrZipFile, "$auditDir/sortChunks")
+    mergeCvrs(auditDir, "$auditDir/sortChunks")
+    // TODO zip sortedCvs.csv directory to sortedCvs.zip
+}
+
+
 // out of memory sorting
 fun sortCvrs(
     auditDir: String,
@@ -270,12 +281,12 @@ class TreeReader(val cvrDir: String) {
     }
 }
 
-class TreeReaderTour(val cvrDir: String, val silent: Boolean = true, val visitor: (Path) -> Unit) {
+class TreeReaderTour(val topDir: String, val silent: Boolean = true, val visitor: (Path) -> Unit) {
     var count = 0
 
     // depth first tour of all files in the directory tree
     fun tourFiles() {
-        readDirectory(Indent(0), Path.of(cvrDir))
+        readDirectory(Indent(0), Path.of(topDir))
         if (!silent) println("count = $count")
     }
 

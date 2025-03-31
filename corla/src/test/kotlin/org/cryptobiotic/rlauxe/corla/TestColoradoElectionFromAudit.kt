@@ -29,17 +29,14 @@ class TestColoradoElectionFromAudit {
         coloradoElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
 
         // out of memory sort by sampleNum()
-        sortCvrs(auditDir, null, "$auditDir/sortChunks")
-        mergeCvrs(auditDir, "$auditDir/sortChunks")
-
-        // TODO zip sortedCvs.csv directory to sortedCvs.zip
+        sortMergeCvrs(auditDir, null)
     }
 
     //// zip cvrs directory to cvrs.zip
 
     // out of memory sort by sampleNum()
     @Test
-    fun sortMergeCvrs() {
+    fun testSortMergeCvrs() {
         val auditDir = "/home/stormy/temp/corla/election"
         // sortCvrs(auditDir, "$auditDir/cvrs.zip", "$auditDir/sortChunks")
         sortCvrs(auditDir, null, "$auditDir/sortChunks")

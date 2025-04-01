@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
+import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
@@ -128,7 +128,7 @@ object RunRlaStartFuzz {
 
         val raireContests = mutableListOf<RaireContestUnderAudit>()
         if (addRaire) {
-            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestData(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
+            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
             raireContests.add(rcontest)
             // TODO merge(testCvrs + rcvrs)
             testCvrs = testCvrs + rcvrs

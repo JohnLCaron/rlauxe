@@ -41,6 +41,7 @@ class CreateBoulderElectionFromCvrs {
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
             "/home/stormy/temp/persist/runBoulder24recount",
             "src/test/data/Boulder2024/2024G-Boulder-County-Amended-Statement-of-Votes.csv",
+            minRecountMargin = 0.0,
             )
     }
 
@@ -67,6 +68,7 @@ class CreateBoulderElectionFromCvrs {
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
             "/home/stormy/temp/persist/runBoulder23recount",
             sovo,
-        )
+            minRecountMargin = 0.0,
+            )
     }
 }

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
+import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -169,7 +169,7 @@ class TestAuditRoundJson {
         println("Start testComparisonWorkflow $testData")
         contests.forEach { println("  $it") }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestData(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
         println(rcontest)
         println()
 

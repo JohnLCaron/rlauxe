@@ -5,9 +5,9 @@ import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToInt
-import org.cryptobiotic.rlauxe.util.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals

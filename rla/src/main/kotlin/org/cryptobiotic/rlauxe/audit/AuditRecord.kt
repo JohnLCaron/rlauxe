@@ -63,7 +63,7 @@ class AuditRecord(
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
             val contests = if (contestsResults is Ok) contestsResults.unwrap()
-                else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()}")
+                else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
 
             val sampledMvrsAll = mutableListOf<CvrUnderAudit>()
 

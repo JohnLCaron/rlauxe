@@ -14,6 +14,7 @@ import kotlin.collections.getOrPut
  * It is also (optionally) capable of converting a preference list of
  * strings into the array of integer preferences used by Raire.
  */
+// TODO the candidate Ids go from 0 ... ncandidates-1
 class VoteConsolidator {
     private val votes = mutableMapOf<HashableIntArray, Int>()
 
@@ -33,6 +34,7 @@ class VoteConsolidator {
 }
 
 // Used to calculate the margin and assertion-specific votes
+// TODO the candidate Ids go from 0 ... ncandidates-1
 data class VoteList(val n: Int, val candRanks: List<Int>)
 data class VoteSequences(val votes: List<VoteList>) {
 

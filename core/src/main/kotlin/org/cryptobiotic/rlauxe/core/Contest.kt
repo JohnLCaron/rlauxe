@@ -254,7 +254,8 @@ open class ContestUnderAudit(
         val useVotes = (contest as Contest).votes // // TODO assumes Contest ??
         val assertions = when (contest.info.choiceFunction) {
             SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(useVotes)
+            SocialChoiceFunction.PLURALITY,
+                -> makePluralityAssertions(useVotes)
             SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
             else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
         }
@@ -294,12 +295,24 @@ open class ContestUnderAudit(
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
+    fun recountMargin(): Double {
+        var pct = 1.0
+        val minAssertion: Assertion = minAssertion() ?: return pct
+        if (contest is Contest) {
+            val votes = contest.votes
+            val winner = votes[minAssertion.assorter.winner()]!!
+            val loser = votes[minAssertion.assorter.loser()]!!
+            pct = (winner - loser) / (winner.toDouble())
+        }
+        return pct
+    }
+
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votes else emptyMap()
         appendLine("'$name' ($id) votes=${votes}")
-        appendLine(" minMargin=${df(minMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
+        appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners})")
         contest.info.candidateNames.forEach { (name, id) ->
             appendLine("   $id '$name': votes=${votes[id]}") }

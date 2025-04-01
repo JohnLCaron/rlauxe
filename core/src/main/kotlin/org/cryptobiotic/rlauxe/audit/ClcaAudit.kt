@@ -76,7 +76,7 @@ class RunContestTask(
     val auditor: ClcaAssertionAuditor,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
-    override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx massertions ${contest.assertionRounds.size}"
+    override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx nassertions ${contest.assertionRounds.size}"
 
     override fun run(): Boolean {
         println(name())

@@ -19,8 +19,11 @@ data class CvrCsv(
     val index: Int,
     val sampleNumber: Long,
     val votes: List<VotesCsv>,
-)
-val header = "id, phantom, index, sampleNumber, contest : candidate, ...\n"
+) {
+    companion object {
+        val header = "id, phantom, index, sampleNumber, contest : candidate, ...\n"
+    }
+}
 
 fun writeCSV(wr: CvrCsv) = buildString {
     val id = wr.id.replace(",", "") // nasty commas: could remove when reading
@@ -62,7 +65,7 @@ fun CvrCsv.import() : CvrUnderAudit {
 
 fun writeCvrsCsvFile(cvrs: List<CvrUnderAudit>, filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-    writer.write(header)
+    writer.write(CvrCsv.header)
     cvrs.forEach {
         writer.write(writeCSV(it.publishCsv()))
     }
@@ -73,7 +76,7 @@ class CvrsCsvWriter(filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
     var countCvrs = 0
     init {
-        writer.write(header)
+        writer.write(CvrCsv.header)
     }
 
     fun write(cvrs: List<CvrUnderAudit>) {

@@ -6,17 +6,44 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
+import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCvr
+import org.cryptobiotic.rlauxe.persist.csv.CvrCsv
+import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.raire.makeRaireContest // org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.*
+import java.io.FileOutputStream
+
+fun createSfElectionCvrs(topDir: String, castVoteRecordZip: String, manifestFile: String) {
+    val stopwatch = Stopwatch()
+    val outputFilename = "$topDir/cvrs.csv"
+    val outputStream = FileOutputStream(outputFilename)
+    outputStream.write(CvrCsv.header.toByteArray())
+
+    val irvIds = readContestManifestForIRV(manifestFile)
+
+    var countFiles = 0
+    var countCvrs = 0
+    val zipReader = ZipReaderTour(
+        castVoteRecordZip, silent = true, sort = true,
+        filter = { path -> path.toString().contains("CvrExport_") },
+        visitor = { inputStream ->
+            countCvrs += convertCvrExportToCvr(inputStream, outputStream, irvIds)
+            countFiles++
+        },
+    )
+    zipReader.tourFiles()
+    outputStream.close()
+    println("read $countCvrs cvrs $countFiles files took $stopwatch")
+    // read 1,641,744 cvrs 27,554 files took 58.67 s
+}
 
 fun createSfElectionFromCvrs(
     auditDir: String,
     contestManifestFile: String,
     candidateManifestFile: String,
-    cvrsZipFile: String,
+    cvrFile: String,
     auditConfigIn: AuditConfig? = null
 ) {
     // clearDirectory(Path.of(auditDir))
@@ -34,11 +61,11 @@ fun createSfElectionFromCvrs(
     val contestInfos = makeContestInfos(contestManifest, candidateManifest)
     println("contests = ${contestInfos.size}")
 
-    val regularVoteMap = makeRegularContestVotes(cvrsZipFile)
+    val regularVoteMap = makeRegularContestVotes(cvrFile)
     val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap)
 
     val irvInfos = contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
-    val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id} , cvrsZipFile)
+    val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id} , cvrFile)
     val irvContests = makeIrvContests(irvInfos, irvVoteMap)
 
     val auditConfig = auditConfigIn ?: AuditConfig(
@@ -79,13 +106,11 @@ fun makeContestInfos(contestManifest: ContestManifestJson, candidateManifest: Ca
 }
 
 // sum all of the cvrs
-fun makeRegularContestVotes(cvrsZipFile: String): Map<Int, ContestVotes> {
+fun makeRegularContestVotes(cvrFile: String): Map<Int, ContestVotes> {
     val contestVotes = mutableMapOf<Int, ContestVotes>()
 
     var count = 0
-    val reader = ZipReader(cvrsZipFile)
-    val input = reader.inputStream()
-    val cvrIter = IteratorCvrsCsvStream(input)
+    val cvrIter = readCvrsCsvIterator(cvrFile)
 
     while (cvrIter.hasNext()) {
         val cvr: Cvr = cvrIter.next().cvr
@@ -135,13 +160,11 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
     }
 }
 
-fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrsZipFile: String): Map<Int, IrvContestVotes> {
+fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrFile: String): Map<Int, IrvContestVotes> {
     val contestVotes = mutableMapOf<Int, IrvContestVotes>()
 
     var count = 0
-    val reader = ZipReader(cvrsZipFile)
-    val input = reader.inputStream()
-    val cvrIter = IteratorCvrsCsvStream(input)
+    val cvrIter = readCvrsCsvIterator(cvrFile)
 
     println("makeIrvContestVotes")
     while (cvrIter.hasNext()) {

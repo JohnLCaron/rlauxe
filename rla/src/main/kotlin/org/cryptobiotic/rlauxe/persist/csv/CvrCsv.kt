@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 
 
@@ -116,6 +117,16 @@ fun readCvrsCsvFile(input: InputStream): List<CvrUnderAudit> {
     }
     reader.close()
     return cvrs
+}
+
+fun readCvrsCsvIterator(filename: String): Iterator<CvrUnderAudit> {
+    return if (filename.endsWith("zip")) {
+        val reader = ZipReader(filename)
+        val input = reader.inputStream()
+        IteratorCvrsCsvStream(input)
+    } else {
+        IteratorCvrsCsvFile(filename)
+    }
 }
 
 class IteratorCvrsCsvStream(input: InputStream): Iterator<CvrUnderAudit> {

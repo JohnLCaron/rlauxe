@@ -133,13 +133,13 @@ fun DominionCvrExportJson.import(irvContests:Set<Int>) : List<Cvr> {
 }
 
 fun convertCvrExportToCvr(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>): Int {
-    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(inputStream)
+    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result is Ok) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")
     // println(dominionCvrs)
 
     val cvrs = dominionCvrs.import(irvIds)
-    println("ncvrs = ${cvrs.size}")
+    // println("ncvrs = ${cvrs.size}")
     // cvrs.forEach { println(it) }
 
     //println("==================================================")
@@ -171,7 +171,7 @@ fun readDominionCvrJsonFile(filename: String): Result<DominionCvrExportJson, Err
     }
 }
 
-fun readDominionCvrJsonFile(inputStream: InputStream): Result<DominionCvrExportJson, ErrorMessages> {
+fun readDominionCvrJsonStream(inputStream: InputStream): Result<DominionCvrExportJson, ErrorMessages> {
     val errs = ErrorMessages("readDominionCvrJsonFile from inputStream")
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
 

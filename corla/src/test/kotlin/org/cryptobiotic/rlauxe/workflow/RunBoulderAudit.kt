@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.junit.jupiter.api.Test
 
-object RunBoulderAudit {
+class RunBoulderAudit {
     val auditDirectory = "/home/stormy/temp/workflow/runBoulder24"
     val topdir = "/home/stormy/dev/github/rla/rlauxe/corla"
 

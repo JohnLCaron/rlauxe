@@ -4,11 +4,10 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readSampleNumbersJsonFile
-import org.cryptobiotic.rlauxe.util.ZipReader
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -29,6 +28,7 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         }
     }
 
+    override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
     override fun ballotCards() : Iterator<BallotOrCvr> = cvrsUA()
     override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
         mvrsRound = mvrs.toList()
@@ -93,13 +93,5 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         return mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
     }
 
-    private fun cvrsUA(): Iterator<CvrUnderAudit> {
-        if (cvrFile.endsWith(".zip")) {
-            val reader = ZipReader(cvrFile)
-            val input = reader.inputStream("sortedCvrs.csv")
-            return IteratorCvrsCsvStream(input)
-        } else {
-            return IteratorCvrsCsvFile(cvrFile)
-        }
-    }
+    private fun cvrsUA(): Iterator<CvrUnderAudit> = readCvrsCsvIterator(cvrFile)
 }

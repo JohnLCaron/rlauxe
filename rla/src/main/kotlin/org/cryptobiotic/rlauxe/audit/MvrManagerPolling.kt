@@ -14,7 +14,7 @@ class MvrManagerPolling(val ballots: List<Ballot>, seed: Long) : MvrManagerPolli
     }
 
     fun ballots() = ballots
-    override fun Nballots() = ballots.size
+    override fun Nballots(contestUA: ContestUnderAudit) = ballots.size
     override fun ballotCards() : Iterator<BallotOrCvr> = ballotsUA.iterator()
     override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
         mvrsRound = mvrs.toList()

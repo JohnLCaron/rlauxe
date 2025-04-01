@@ -12,13 +12,15 @@ interface BallotOrCvr {
 }
 
 interface MvrManager {
+    fun Nballots(contestUA: ContestUnderAudit): Int
     fun ballotCards() : Iterator<BallotOrCvr>
     fun setMvrsForRound(mvrs: List<CvrUnderAudit>)
     fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit>
     fun takeFirst(nmvrs: Int): List<BallotOrCvr> {
         val result = mutableListOf<BallotOrCvr>()
-        while (ballotCards().hasNext() && result.size < nmvrs) {
-            result.add(ballotCards().next())
+        val ballotCardsIter = ballotCards()
+        while (ballotCardsIter.hasNext() && result.size < nmvrs) {
+            result.add(ballotCardsIter.next())
         }
         return result
     }
@@ -30,8 +32,6 @@ interface MvrManagerClcaIF : MvrManager {
 }
 
 interface MvrManagerPollingIF : MvrManager {
-    // used in uniformSampling TODO bogus i think
-    fun Nballots(): Int
     // this is used for audit, not estimation
     fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler
 }
@@ -50,6 +50,8 @@ fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<CvrUnderAudit>
             }
         }
     }
+    if (result.size != sampleNumbers.size)
+        print("")
     require(result.size == sampleNumbers.size)
     return result
 }

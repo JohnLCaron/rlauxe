@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.AssorterIF
-import org.cryptobiotic.rlauxe.core.ClcaAssorterIF
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Prng
 
 //// in memory, simulated mvrs for testing
@@ -22,6 +19,7 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     }
 
     fun cvrs() = cvrs
+    override fun Nballots(contestUA: ContestUnderAudit) = cvrs.size
     override fun ballotCards() : Iterator<BallotOrCvr> = cvrsUA.iterator()
     override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
         mvrsRound = mvrs.toList()
@@ -88,7 +86,7 @@ class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, se
     }
 
     fun ballots() = ballots
-    override fun Nballots() = ballots.size
+    override fun Nballots(contestUA: ContestUnderAudit) = ballots.size
     override fun ballotCards() : Iterator<BallotOrCvr> = ballotsUA.iterator()
     override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
         mvrsRound = mvrs.toList()

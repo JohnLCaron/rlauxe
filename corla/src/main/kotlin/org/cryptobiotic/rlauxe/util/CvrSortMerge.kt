@@ -16,19 +16,18 @@ val maxChunk = 100000
 
 fun sortMergeCvrs(
     auditDir: String,
-    cvrZipFile: String?,
+    cvrFile: String?,
 ) {
     // out of memory sort by sampleNum()
-    sortCvrs(auditDir, cvrZipFile, "$auditDir/sortChunks")
+    sortCvrs(auditDir, cvrFile, "$auditDir/sortChunks")
     mergeCvrs(auditDir, "$auditDir/sortChunks")
     // TODO zip sortedCvs.csv directory to sortedCvs.zip
 }
 
-
 // out of memory sorting
 fun sortCvrs(
     auditDir: String,
-    cvrZipFile: String?,
+    cvrFile: String?, // may be xipped or not; if null use files in "$auditDir/cvrs/"
     workingDirectory: String,
 ) {
     val stopwatch = Stopwatch()
@@ -40,11 +39,18 @@ fun sortCvrs(
     val cvrSorter = CvrSorter(workingDirectory, prng, maxChunk)
 
     //// the reading and sorted chunks
-    if (cvrZipFile != null) {
-        val provider: FileSystemProvider = ZipReader(cvrZipFile).fileSystemProvider
-        val fileSystem: FileSystem = ZipReader(cvrZipFile).fileSystem
-        fileSystem.rootDirectories.forEach { root: Path ->
-            readDirectory(Indent(0), provider, root, cvrSorter)
+    if (cvrFile != null) {
+        if (cvrFile.endsWith(".zip")) {
+            val provider: FileSystemProvider = ZipReader(cvrFile).fileSystemProvider
+            val fileSystem: FileSystem = ZipReader(cvrFile).fileSystem
+            fileSystem.rootDirectories.forEach { root: Path ->
+                readDirectory(Indent(0), provider, root, cvrSorter)
+            }
+        } else {
+            val cvrIter = IteratorCvrsCsvFile(cvrFile)
+            while (cvrIter.hasNext()) {
+                cvrSorter.add(cvrIter.next())
+            }
         }
     } else {
         val cvrDir = "$auditDir/cvrs/"
@@ -118,6 +124,16 @@ class CvrSorter(val workingDirectory: String, val prng: Prng, val max: Int) {
             index++
             count++
         }
+
+        if (count > max) {
+            writeSortedChunk()
+        }
+    }
+
+    fun add(rawCvr: CvrUnderAudit) {
+        cvrs.add(CvrUnderAudit(rawCvr.cvr, index, prng.next()))
+        index++
+        count++
 
         if (count > max) {
             writeSortedChunk()

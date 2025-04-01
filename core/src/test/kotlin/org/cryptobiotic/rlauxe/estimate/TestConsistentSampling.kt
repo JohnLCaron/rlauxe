@@ -106,14 +106,14 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
         val ballotManifest = test.makeBallotManifest(false)
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
+        val mvrManager = MvrManagerPollingForTesting(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
 
         //val prng = Prng(Random.nextLong())
         //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
         val sampleLimit = 10000
 
         val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
-        uniformSampling(auditRound, ballotCards, 0, sampleLimit=sampleLimit, 0)
+        uniformSampling(auditRound, mvrManager, 0, sampleLimit=sampleLimit, 0)
         println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
 
         // must be ordered

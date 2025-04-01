@@ -1,6 +1,5 @@
 AuditCenter
 Mar 26, 2025
-
 ------------
 *** Contest State Representative District 9 has 39638 total votes, but contestBallotCardCount is 32425 - using ballotCardCount = 1104271
 *** Cant find ContestRoundCsv San Juan County Court Edwards

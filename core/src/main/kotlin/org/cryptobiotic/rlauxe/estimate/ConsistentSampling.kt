@@ -49,11 +49,11 @@ fun sample(
     val auditConfig = workflow.auditConfig()
     if (auditConfig.hasStyles) {
         if (!quiet) println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
-        consistentSampling(auditRound, workflow.mvrManager() as MvrManagerClcaIF, previousSamples)
+        consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
         if (!quiet) println(" consistentSamplingSize= ${auditRound.sampleNumbers.size}")
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
-        uniformSampling(auditRound, workflow.mvrManager() as MvrManagerPollingIF, previousSamples.size, auditConfig.sampleLimit, auditRound.roundIdx)
+        uniformSampling(auditRound, workflow.mvrManager(), previousSamples.size, auditConfig.sampleLimit, auditRound.roundIdx)
         if (!quiet) println(" uniformSamplingSize= ${auditRound.sampleNumbers.size}")
     }
 }
@@ -89,7 +89,7 @@ fun consistentSampling(
 
     // while we need more samples
     var countSamples = 0
-    val sortedBorcIter = mvrManager.ballotCards().iterator()
+    val sortedBorcIter = mvrManager.ballotCards()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
         contestsIncluded.any { contestWantsMoreSamples(it) } &&
@@ -149,7 +149,7 @@ fun consistentSampling(
 // for audits with hasStyles = false
 fun uniformSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManagerPollingIF,
+    mvrManager: MvrManager,
     prevSampleSize: Int,
     sampleLimit: Int,
     roundIdx: Int,
@@ -158,16 +158,16 @@ fun uniformSampling(
     if (contestsNotDone.isEmpty()) return
 
     // scale by proportion of ballots that have this contest
-    val Nb = mvrManager.Nballots()
-    contestsNotDone.forEach { contestUA ->
-        val fac = Nb / contestUA.Nc.toDouble()
-        val estWithFactor = roundToInt((contestUA.estSampleSize * fac))
-        contestUA.estSampleSizeNoStyles = estWithFactor
+    contestsNotDone.forEach { contestRound ->
+        val Nb = mvrManager.Nballots(contestRound.contestUA)
+        val fac = Nb / contestRound.Nc.toDouble()
+        val estWithFactor = roundToInt((contestRound.estSampleSize * fac))
+        contestRound.estSampleSizeNoStyles = estWithFactor
         // val estPct = estWithFactor / Nb.toDouble()
         if (sampleLimit > 0 && estWithFactor > sampleLimit) { // might as well test it here, since it will happen a lot
-            if (debugUniform) println("uniformSampling samplePctCutoff: $contestUA estWithFactor $estWithFactor > $sampleLimit round $roundIdx")
-            contestUA.done = true // TODO dont do this here?
-            contestUA.status = TestH0Status.FailMaxSamplesAllowed
+            if (debugUniform) println("uniformSampling sampleLimit for ${contestRound.id} estWithFactor $estWithFactor > $sampleLimit round $roundIdx")
+            contestRound.done = true // TODO dont do this here?
+            contestRound.status = TestH0Status.FailMaxSamplesAllowed
         }
     }
     val estTotalSampleSizes = contestsNotDone.filter { !it.done }.map { it.estSampleSizeNoStyles }

@@ -107,7 +107,7 @@ class Contest(
                 voteBuilder[it] = 0
             }
         }
-        votes = voteBuilder.toMap()
+        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
         val nvotes = votes.values.sum()
         // only true when nwinners = 1
         /* if (info.nwinners == 1 && info.choiceFunction != SocialChoiceFunction.IRV) {
@@ -120,7 +120,7 @@ class Contest(
         val useMin = info.minFraction ?: 0.0
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
-        val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()
+        val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }
         val useNwinners = min(overTheMin.size, info.nwinners)
         winners = overTheMin.subList(0, useNwinners).map { it.first } // TODO deal with when there are no winners
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map

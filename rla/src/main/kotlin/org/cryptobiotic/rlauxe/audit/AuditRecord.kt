@@ -87,7 +87,6 @@ class AuditRecord(
     }
 }
 
-
 // TODO fix this; used by viewer
 fun makeMvrManager(auditDir: String, auditConfig: AuditConfig): MvrManager {
     // TODO TIMING taking 15%

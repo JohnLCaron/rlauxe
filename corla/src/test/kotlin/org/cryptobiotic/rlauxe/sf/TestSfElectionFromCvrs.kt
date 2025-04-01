@@ -2,47 +2,48 @@ package org.cryptobiotic.rlauxe.sf
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCvr
-import org.cryptobiotic.rlauxe.persist.csv.CvrCsv
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import org.cryptobiotic.rlauxe.util.mergeCvrs
 import org.cryptobiotic.rlauxe.util.sortCvrs
 import java.io.File
-import java.io.FileOutputStream
 import kotlin.test.Test
 
 class TestSfElectionFromCvrs {
 
     // write sf2024 cvrs
     @Test
-    fun convertCvrExportToCvr() {
+    fun createSF2024Pcvrs() {
         val stopwatch = Stopwatch()
-        val zipFilename = "/home/stormy/Downloads/CVR_Export_20241202143051.zip"
+        val topDir = "/home/stormy/temp/sf2024P"
+        val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
+        val manifestFile = "$topDir/CVR_Export_20240322103409/ContestManifest.json"
+        createSfElectionCvrs(topDir, zipFilename, manifestFile) // write to "$topDir/cvrs.csv"
 
-        val auditDir = "/home/stormy/temp/sf2024"
-        val outputFilename = "$auditDir/CVR_Export_20241202143051.csv"
-        val outputStream = FileOutputStream(outputFilename)
-        outputStream.write(CvrCsv.header.toByteArray())
-
-        val irvIds = readContestManifestForIRV("src/test/data/SF2024/ContestManifest.json")
-
-        var countFiles = 0
-        var countCvrs = 0
-        val zipReader = ZipReaderTour(
-            zipFilename, silent = false, sort = true,
-            filter = { path -> path.toString().contains("CvrExport_") },
-            visitor = { inputStream ->
-                countCvrs += convertCvrExportToCvr(inputStream, outputStream, irvIds)
-                countFiles++
-            },
+        val auditDir = "$topDir/audit"
+        createSfElectionFromCvrs(
+            auditDir,
+            "$topDir/CVR_Export_20240322103409/ContestManifest.json",
+            "$topDir/CVR_Export_20240322103409/CandidateManifest.json",
+            "$topDir/cvrs.csv",
         )
-        zipReader.tourFiles()
-        outputStream.close()
-        println("read $countCvrs cvrs $countFiles files took $stopwatch")
-        // read 1,641,744 cvrs 27,554 files took 58.67 s
+
+        sortCvrs(auditDir, "$topDir/cvrs.csv", "$topDir/sortChunks")
+        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "$topDir/sortedCvrs.csv"
+        // manually zip (TODO)
+        println("that took $stopwatch")
+    }
+
+    @Test
+    fun createSF2024PElectionFromCvrs() {
+        val topDir = "/home/stormy/temp/sf2024P"
+        createSfElectionFromCvrs(
+            "$topDir/audit",
+            "$topDir/CVR_Export_20240322103409/ContestManifest.json",
+            "$topDir/CVR_Export_20240322103409/CandidateManifest.json",
+            "$topDir/sortedCvrs.zip",
+        )
     }
 
     // out of memory sort by sampleNum()

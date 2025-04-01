@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
+import org.cryptobiotic.rlauxe.raire.SimulateRaireTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -37,7 +37,7 @@ fun estimateSampleSizes(
         tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
     }
     // run tasks concurrently
-    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads)
+    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=1)
 
     // put results into assertionRounds
     estResults.forEach { estResult ->
@@ -144,7 +144,7 @@ class EstimateSampleSizeTask(
                 simulateSampleSizeClcaAssorter(
                     roundIdx,
                     auditConfig,
-                    contest.contestUA.contest,
+                    contest.contestUA,
                     assertionRound,
                     startingTestStatistic
                 )
@@ -184,7 +184,7 @@ data class EstimationResult(
 fun simulateSampleSizeClcaAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
-    contest: ContestIF,
+    contestUA: ContestUnderAudit,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -192,12 +192,15 @@ fun simulateSampleSizeClcaAssorter(
     val clcaConfig = auditConfig.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
+    val contest = contestUA.contest
 
     println("simulateSampleSizeClcaAssorter ${contest.info.name} ${cassorter.assorter().desc()}")
+    if (contest.isIRV())
+        println("  contest is IRV ${contest.info.name}")
     // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
     // TODO TIMING make same contestSim for all the assertions in the contest: takes 20% of time of audit
     val cvrs =  if (contest.isIRV()) {
-        simulateRaireTestData(contest as RaireContest)
+        SimulateRaireTestData(contest as RaireContest, contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
     } else {
         val contestSim = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit)
         //val voteCount = contest.votes.map { it.value }.sum() // V_c

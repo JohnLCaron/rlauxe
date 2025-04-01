@@ -60,7 +60,7 @@ class TestCorlaEstimateSampleSize {
             val cn = contest.Nc
             val estSizes = mutableListOf<Int>()
             val sampleSizes = contest.assertionRounds.map { assertRound ->
-                val result = simulateSampleSizeClcaAssorter(1, auditConfig, contest.contestUA.contest as Contest, assertRound)
+                val result = simulateSampleSizeClcaAssorter(1, auditConfig, contest.contestUA, assertRound)
                 val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assertRound.assertion.assorter.reportedMargin(), gamma,
                     oneOver = roundUp(cn*p1), // p1

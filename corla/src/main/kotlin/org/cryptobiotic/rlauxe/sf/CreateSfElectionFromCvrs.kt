@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
+import org.cryptobiotic.rlauxe.raire.makeRaireContest // org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.*
 
 fun createSfElectionFromCvrs(
@@ -170,7 +171,7 @@ fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvC
         if (irvContestVotes == null) {
             println("*** Cant find contest '${info.id}' in irvContestVotes")
         } else {
-            val rcontest = org.cryptobiotic.rlauxe.raire.makeRaireContest(
+            val rcontest = makeRaireContest(
                 info,
                 irvContestVotes.vc,
                 Nc = irvContestVotes.countBallots,

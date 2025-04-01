@@ -12,8 +12,6 @@ import org.cryptobiotic.rlauxe.util.mergeCvrs
 import org.cryptobiotic.rlauxe.util.sortCvrs
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.test.Test
 
 class TestSfElectionFromCvrs {

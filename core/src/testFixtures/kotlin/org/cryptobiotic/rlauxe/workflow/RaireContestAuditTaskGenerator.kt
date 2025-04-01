@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestData
+import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 
 class RaireContestAuditTaskGenerator(
     val Nc: Int, // including undervotes but not phantoms
@@ -23,7 +23,7 @@ class RaireContestAuditTaskGenerator(
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
         )
 
-        val (rcontest, testCvrs) = simulateRaireTestData(
+        val (rcontest, testCvrs) = simulateRaireTestContest(
             N = Nc,
             contestId = 111,
             ncands = 4,
@@ -69,7 +69,7 @@ class RaireSingleRoundAuditTaskGenerator(
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
         )
 
-        val (rcontest, testCvrs) = simulateRaireTestData(
+        val (rcontest, testCvrs) = simulateRaireTestContest(
             N = Nc,
             contestId = 111,
             ncands = 4,

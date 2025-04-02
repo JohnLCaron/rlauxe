@@ -14,15 +14,16 @@ import kotlin.test.Test
 
 class TestSfElectionFromCvrs {
 
-    // write sf2024 cvrs
     @Test
     fun createSF2024P() {
+        // write sf2024 cvr
         val stopwatch = Stopwatch()
         val topDir = "/home/stormy/temp/sf2024P"
         val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
         val manifestFile = "$topDir/CVR_Export_20240322103409/ContestManifest.json"
         createSfElectionCvrs(topDir, zipFilename, manifestFile) // write to "$topDir/cvrs.csv"
 
+        // create sf2024 election audit
         val auditDir = "$topDir/audit"
         createSfElectionFromCvrs(
             auditDir,
@@ -31,6 +32,7 @@ class TestSfElectionFromCvrs {
             "$topDir/cvrs.csv",
         )
 
+        // create sorted cvrs
         sortCvrs(auditDir, "$topDir/cvrs.csv", "$topDir/sortChunks")
         mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "$topDir/sortedCvrs.csv"
         // manually zip (TODO)
@@ -136,27 +138,7 @@ data class IrvCounter(val rcontest: RaireContest) {
 }
 
 fun showIrvCount(rcontest: RaireContest, irvCount: IrvCount) {
-    var roundWinner = RoundWinner()
-    while (!roundWinner.done) {
-        roundWinner = irvCount.nextRoundCount()
-    }
-    val mult = if (roundWinner.winners.size > 1) "multipleWinenrs" else ""
-    println("winner=$roundWinner} $mult")
-
-    irvCount.rounds.forEachIndexed { idx, round -> println("round=$idx $round") }
-
-    print(sfn("round", 30))
-    repeat(irvCount.rounds.size) { print("${nfn(it,8)} ") }
-    println()
-
-    rcontest.info.candidateNames.forEach { (name, candId) ->
-        print(sfn(name, 30))
-        irvCount.rounds.forEachIndexed { idx, round ->
-            print("${nfn(round.countFor(candId),8)} ")
-        }
-        if (roundWinner.winners.contains(candId)) { print(" (winner)")}
-        println()
-    }
-
+    val roundResult = irvCount.runRounds()
+    println(showIrvCountResult(roundResult, rcontest.info))
     println("================================================================================================\n")
 }

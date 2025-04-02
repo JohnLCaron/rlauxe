@@ -79,7 +79,7 @@ data class ContestIFJson(
     val winners: List<Int>?,
     val Nc: Int,
     val Np: Int,
-    val irvRounds: List<IrvRoundJson>? = null,
+    val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -100,7 +100,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.winners,
                 this.Nc,
                 this.Np,
-                this.rounds.map { it.publishJson() },
+                this.roundsPaths.map { it.publishJson() },
             )
         else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
     }
@@ -122,8 +122,8 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.Nc,
                 this.Np,
             )
-            if (this.irvRounds != null) {
-                rcontest.rounds.addAll(this.irvRounds.map { it.import() })
+            if (this.irvRoundsPaths != null) {
+                rcontest.roundsPaths.addAll(this.irvRoundsPaths.map { it.import() })
             }
             rcontest
         }
@@ -131,19 +131,26 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
     }
 }
 
-
+// TODO multiple paths
 @Serializable
-data class IrvRoundJson(
-    val count: Map<Int, Int>
+data class IrvRoundsPathJson(
+    val rounds: List<Map<Int, Int>>,
+    val done: Boolean,
+    val winners: Set<Int>,
 )
 
-// val elim: List<Int>, val count: Map<Int, Int>
-fun IrvRound.publishJson() = IrvRoundJson(
-    this.count,
+// IrvRoundsPath(val rounds: List<IrvRound>, val irvWinner: IrvWinners)
+// IrvRound(val count: Map<Int, Int>)
+// IrvWinners(val done:Boolean = false, val winners: Set<Int> = emptySet())
+fun IrvRoundsPath.publishJson() = IrvRoundsPathJson(
+    this.rounds.map { round -> round.count }, // List<Map<Int, Int>>
+    this.irvWinner.done,
+    this.irvWinner.winners,
 )
 
-fun IrvRoundJson.import() = IrvRound(
-    this.count,
+fun IrvRoundsPathJson.import() = IrvRoundsPath(
+    this.rounds.map { count -> IrvRound(count) },
+    IrvWinners(this.done, this.winners),
 )
 
 // open class ContestUnderAudit(

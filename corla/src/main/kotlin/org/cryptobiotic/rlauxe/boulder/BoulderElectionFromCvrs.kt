@@ -34,7 +34,7 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
                 }
                 candidateMap1
 
-            } else { // there are ncand c ncand columns, so need something different here
+            } else { // there are ncand x ncand columns, so need something different here
                 val candidates = mutableListOf<String>()
                 for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
                     candidates.add(columns[col].choice)
@@ -103,36 +103,20 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
                 println(contest.show2())
             }
         }
-        val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
-        val raireContests = if (irvContests.isEmpty()) emptyList() else {
-            irvContests.map { contest ->
-                makeRaireContest(contest)
-            }
+        // val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
+        val irvInfos = allContests.filter { it.choiceFunction == SocialChoiceFunction.IRV }.map { it.info }
+        val irvContests = if (irvInfos.isEmpty()) emptyList() else {
+            val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrs.iterator())
+            makeIrvContests(irvInfos, irvVoteMap)
         }
+
         if (!quiet) {
-            println("ncontests with IRV = ${raireContests.size}")
-            raireContests.forEach { contest ->
+            println("ncontests with IRV = ${irvContests.size}")
+            irvContests.forEach { contest ->
                 println(contest.show2())
             }
         }
-        return Pair(contests, raireContests)
-    }
-
-    fun makeRaireContest(contest: Contest): RaireContestUnderAudit {
-        val voteConsolidator = VoteConsolidator()
-        cvrs.forEach {
-            val votes = it.votes[contest.info.id]
-            if (votes != null) {
-                voteConsolidator.addVote(votes)  // TODO count ballots
-            }
-        }
-
-        return makeRaireContest(
-            contest.info,
-            voteConsolidator,
-            Nc=cvrs.size,
-            Np=0,
-        )
+        return Pair(contests, irvContests)
     }
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
@@ -288,7 +272,7 @@ fun createElectionFromDominionCvrs(
     // val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(electionFromCvrs.cvrs.iterator())
     // println("added ${electionFromCvrs.cvrs.size} cvrs with ${cvrVotes.values.sumOf { it.values.sum() }} total votes")
 
-    val (contests, raireContests) = electionFromCvrs.makeContests()
+    val (contests, irvContests) = electionFromCvrs.makeContests()
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.CLCA, hasStyles = true, riskLimit = riskLimit, minRecountMargin = minRecountMargin,
@@ -312,7 +296,7 @@ fun createElectionFromDominionCvrs(
     checkContestsWithCvrs(contestsUA, cvrsUA.iterator())
     checkCvrsVsSovo(contests, sovo)
 
-    writeContestsJsonFile(contestsUA, publisher.contestsFile())
+    writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
     println("took = $stopwatch")

@@ -81,3 +81,8 @@ data class CvrUnderAudit (val cvr: Cvr, val index: Int, val sampleNum: Long): Ba
         votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 }
+
+class CvrIteratorAdapter(val cvrIterator: Iterator<CvrUnderAudit>) : Iterator<Cvr> {
+    override fun hasNext() = cvrIterator.hasNext()
+    override fun next() = cvrIterator.next().cvr
+}

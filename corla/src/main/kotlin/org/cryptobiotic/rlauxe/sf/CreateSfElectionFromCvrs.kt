@@ -64,8 +64,11 @@ fun createSfElectionFromCvrs(
     val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap)
 
     val irvInfos = contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
-    val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id} , cvrFile)
-    val irvContests = makeIrvContests(irvInfos, irvVoteMap)
+    val irvContests = if (irvInfos.isEmpty()) emptyList() else {
+        val cvrIter = CvrIteratorAdapter(readCvrsCsvIterator(cvrFile))
+        val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrIter)
+        makeIrvContests(irvInfos, irvVoteMap)
+    }
 
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
@@ -146,79 +149,3 @@ fun makeRegularContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, 
     }
     return contests
 }
-
-// The candidate Ids go from 0 ... ncandidates-1, use the ordering from ContestInfo.candidateIds
-data class IrvContestVotes(val irvContestInfo: ContestInfo) {
-    val candidateIdMap = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()
-    val vc = VoteConsolidator()
-    var countBallots = 0
-
-    fun addVote(votes: IntArray) {
-        val mappedVotes = votes.map { candidateIdMap[it]!! }
-        vc.addVote(mappedVotes.toIntArray())
-    }
-}
-
-fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrFile: String): Map<Int, IrvContestVotes> {
-    val contestVotes = mutableMapOf<Int, IrvContestVotes>()
-
-    var count = 0
-    val cvrIter = readCvrsCsvIterator(cvrFile)
-
-    println("makeIrvContestVotes")
-    while (cvrIter.hasNext()) {
-        val cvr: Cvr = cvrIter.next().cvr
-        cvr.votes.forEach { (contestId, choiceIds) ->
-            if (irvContests.contains(contestId)) {
-                val irvContest = irvContests[contestId]!!
-                val contestVote = contestVotes.getOrPut(contestId) { IrvContestVotes(irvContest) }
-                contestVote.countBallots++
-                if (!choiceIds.isEmpty()) {
-                    contestVote.addVote(choiceIds)
-                }
-                count++
-                if (count % 10000 == 0) print("$count ")
-                if (count % 100000 == 0) println()
-            }
-        }
-    }
-    println(" read ${count} cvrs")
-    return contestVotes
-}
-
-fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvContestVotes>): List<ContestUnderAudit> {
-    val contests = mutableListOf<ContestUnderAudit>()
-    contestInfos.forEach { info: ContestInfo ->
-        val irvContestVotes = contestVotes[info.id]
-        if (irvContestVotes == null) {
-            println("*** Cant find contest '${info.id}' in irvContestVotes")
-        } else {
-            val rcontestUA = makeRaireContest(
-                info,
-                irvContestVotes.vc,
-                Nc = irvContestVotes.countBallots,
-                Np = 0,
-            )
-            contests.add(rcontestUA)
-
-            //// annotate RaireContest with IrvRounds
-
-            // The candidate Ids go from 0 ... ncandidates-1 because of Raire; use the ordering from ContestInfo.candidateIds
-            // this just makes the candidateIds the sequential indexes (0..ncandidates-1)
-            val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx }
-            val cvotes = irvContestVotes.vc.makeVotes()
-            val irvCount = IrvCount(cvotes, candidateIdxs)
-            val roundsByIdx = irvCount.runRounds()
-
-            // not convert them back to Ids:
-            val candidateIndexMap = info.candidateIds.mapIndexed { idx, candidateId -> Pair(idx, candidateId) }.toMap()
-            val roundsById = roundsByIdx.map { round ->
-                val mapById = round.count.map { Pair(candidateIndexMap[it.key]!!, it.value) }.toMap()
-                IrvRound( mapById)
-            }
-            (rcontestUA.contest as RaireContest).rounds.addAll(roundsById)
-        }
-    }
-    return contests
-}
-

@@ -26,7 +26,7 @@ class TestRunRlaRoundCli {
 
     @Test
     fun testRrunBoulder() {
-        val topdir = "/home/stormy/temp/persist/runBoulder24"
+        val topdir = "/home/stormy/temp/persist/runBoulder23"
 
         RunRliRoundCli.main(
             arrayOf(

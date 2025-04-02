@@ -1,60 +1,100 @@
 package org.cryptobiotic.rlauxe.raire
 
 import au.org.democracydevelopers.raire.irv.Vote
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.collections.getOrPut
 
-data class IrvRound(val count: Map<Int, Int>) {
+private val quiet = true
+
+fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString {
+    val multipleRounds = result.ivrRoundsPaths.size > 1
+
+    result.ivrRoundsPaths.forEachIndexed { idx, roundsPath ->
+        if (multipleRounds) appendLine("   Alternative IrvCountResult ${'A' + idx} --------------------")
+
+        val rounds = roundsPath.rounds
+        append(sfn("round", 30))
+        repeat(rounds.size) { append("${nfn(it, 8)} ") }
+        appendLine()
+
+        info.candidateNames.forEach { (name, candId) ->
+            append(sfn(name, 30))
+            rounds.forEachIndexed { idx, round ->
+                append("${nfn(round.countFor(candId), 8)} ")
+            }
+            if (roundsPath.irvWinner.winners.contains(candId)) {
+                append(" (winner)")
+            }
+            appendLine()
+        }
+    }
+}
+
+// one for each round, in order
+data class IrvRoundsPath(val rounds: List<IrvRound>, val irvWinner: IrvWinners)
+
+data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes for one round
     fun countFor(cand: Int): Int {
         return count.getOrDefault(cand, 0)
+    }
+    fun convert(candidateIndexToId: Map<Int, Int>): IrvRound {
+        val mapById = count.map { Pair(candidateIndexToId[it.key]!!, it.value) }.toMap()
+        return IrvRound(mapById)
+    }
+}
+
+data class IrvCountResult(val ivrRoundsPaths: List<IrvRoundsPath>)
+
+data class IrvWinners(val done:Boolean = false, val winners: Set<Int> = emptySet()) {
+    fun convert(candidateIndexToId: Map<Int, Int>): IrvWinners {
+        val mapById = winners.map { candidateIndexToId[it]!!}.toSet()
+        return IrvWinners(done, mapById)
     }
 }
 
 /** The IRV elimination algorithm. */
 class IrvCount(val votes: Array<Vote>, val candidates: List<Int>) {
-    var round = 1
-    val rounds = mutableListOf<IrvRound>()
-    val rootPath = EliminationPath(round, emptyList(), candidates.toSet(), votes)
+    val rootPath = EliminationPath(1, emptyList(), candidates.toSet(), votes)
 
     init {
-        rounds.add(rootPath.currCount)
         rootPath.removeZeros()
     }
 
-    fun runRounds(): List<IrvRound> {
-        var roundWinner = RoundWinner()
-        while (!roundWinner.done) {
-            roundWinner = nextRoundCount()
+    fun runRounds(): IrvCountResult {
+        var done = false
+        while (!done) {
+            done = rootPath.nextRoundCount()
         }
-        return rounds.toList()
+        return IrvCountResult(rootPath.paths(emptyList()))
     }
 
-    fun nextRoundCount(): RoundWinner {
+    /* alternate, lower level API for testing
+    fun runRound(): IrvCountWinners {
         if (rootPath.roundWinner.done) return rootPath.roundWinner
-
-        round++
-        val rw =  rootPath.nextRoundCount()
-        rounds.add(rootPath.currCount)
-        return rw
-    }
+        return rootPath.nextRoundCount()
+    } */
 }
 
 class EliminationPath(startingRound: Int, startingElimination: List<Int>, startingViable: Set<Int>, val votes: Array<Vote>) {
     var round = startingRound
     val elimination = MutableList(startingElimination.size) { startingElimination[it] }
     val viable: MutableSet<Int> = startingViable.toMutableSet()
+    val rounds = mutableListOf<IrvRound>()
 
-    var currCount = IrvRound(emptyMap())
-    var candVotes = count(votes)
+    var candVotes: MutableMap<Int, Int>
     val isRoot = startingElimination.isEmpty()
 
     var subpaths: List<EliminationPath> = emptyList()
-    var roundWinner = RoundWinner()
+    var roundWinners = IrvWinners()
 
     init {
-        // immediate check if theres 2 or less candidates
-        val down2two = viable.size <= 2
-        if (down2two) {
-            this.roundWinner = RoundWinner(true, findWinningCandidates())
+        candVotes = count(votes)
+
+        // check if theres 2 or less candidates
+        if (viable.size <= 2) {
+            this.roundWinners = IrvWinners(true, findWinningCandidates())
         }
     }
 
@@ -71,9 +111,11 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
             }
         }
         val sworking = working.toList().sortedBy { (_, v) -> v }.reversed().toMap()
-        println(" ${name()} round $round count: ${sworking}")
-        println("   viable: ${viable}")
-        currCount = IrvRound(sworking)
+        if (!quiet) {
+            println(" ${name()} round $round count: ${sworking}")
+            println("   viable: ${viable}")
+        }
+        rounds.add(IrvRound(sworking))
         return working
     }
 
@@ -86,32 +128,41 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
         zeros.forEach { elimination.add(it) }
     }
 
+    fun paths(preceeding : List<IrvRound>): List<IrvRoundsPath> {
+        if (subpaths.isEmpty()) return listOf(IrvRoundsPath(preceeding + rounds, roundWinners))
+
+        val paths = mutableListOf<IrvRoundsPath>()
+        subpaths.forEach { subpath ->
+            val subrounds = subpath.paths(preceeding + rounds)
+            paths.addAll(subrounds)
+        }
+
+        return paths
+    }
+
     // return winning candidate when done
-    fun nextRoundCount(): RoundWinner {
-        if (this.roundWinner.done) return this.roundWinner
+    fun nextRoundCount(): Boolean {
+        if (this.roundWinners.done) return true
         round++
 
         if (subpaths.isEmpty()) {
             removeLeastCandidate()
-            return checkForWinner()
+            return checkForWinner().done
         } else {
             val roundWinners = subpaths.map { subpath ->
                 subpath.nextRoundCount()
+                subpath.roundWinners
             }
             val done = roundWinners.map { it.done }.reduce { acc: Boolean, isn -> acc && isn }
             if (done) {
-                val winnerSet = mutableSetOf<Int>()
-                roundWinners.forEach { winnerSet.addAll(it.winners) }
-                return RoundWinner(true, winnerSet)
+                this.roundWinners = IrvWinners(true, emptySet())
             }
-            return RoundWinner()
+            return done
         }
     }
 
     // return true if theres a tie
     fun removeLeastCandidate(): Boolean {
-        if (candVotes.isEmpty())
-            print("")
         val minValue = candVotes.map { it.value }.min()
         val minKeys = candVotes.filter { it.value == minValue }.keys
         if (minKeys.size == 1) {
@@ -124,17 +175,20 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
         }
         // otherwise create a path for each
         println("*** tie score: $minKeys isRoot=$isRoot")
+        if (!isRoot) {
+            println("hey two ties")
+        }
         subpaths = minKeys.map { EliminationPath(round, elimination.addNew(it), viable.removeNew(it), votes) }
         return true
     }
 
-    fun checkForWinner(): RoundWinner {
+    fun checkForWinner(): IrvWinners {
         if (subpaths.isEmpty()) {
             val down2two = viable.size == 2
             if (down2two) {
-                this.roundWinner = RoundWinner(true, findWinningCandidates())
+                this.roundWinners = IrvWinners(true, findWinningCandidates())
             }
-            return this.roundWinner
+            return this.roundWinners
 
         } else {
             val roundWinners = subpaths.map { subpath ->
@@ -142,11 +196,9 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
             }
             val done = roundWinners.map { it.done }.reduce { acc: Boolean, isn -> acc && isn }
             if (done) {
-                val winnerSet = mutableSetOf<Int>()
-                roundWinners.forEach { winnerSet.addAll(it.winners) }
-                this.roundWinner = RoundWinner(true, winnerSet)
+                this.roundWinners = IrvWinners(true, emptySet())
             }
-            return this.roundWinner
+            return this.roundWinners
         }
     }
 
@@ -155,9 +207,6 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
         return candVotes.filter { it.value == maxValue }.keys
     }
 }
-
-
-data class RoundWinner(val done:Boolean = false, val winners: Set<Int> = emptySet())
 
 fun List<Int>.addNew( eliminate: Int): List<Int> {
     val result = mutableListOf<Int>()

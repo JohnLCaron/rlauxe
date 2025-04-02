@@ -296,7 +296,7 @@ open class ContestUnderAudit(
     }
 
     open fun recountMargin(): Double {
-        var pct = 1.0
+        var pct = -1.0
         val minAssertion: Assertion = minAssertion() ?: return pct
         if (contest is Contest) {
             val votes = contest.votes

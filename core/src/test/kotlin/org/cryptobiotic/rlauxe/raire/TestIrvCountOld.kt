@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestIrvCount {
+class TestIrvCountOld {
 
     // Need a lot of tries to be sure to get some ties
     // @Test
@@ -66,7 +66,7 @@ class TestIrvCount {
         val cvotes = vc.makeVotes()
         val votes = Votes(cvotes, testContest.ncands)
 
-        val irvCount = IrvCount(cvotes, candidateIds)
+        val irvCount = IrvCountOld(cvotes, candidateIds)
         val rootPath = irvCount.rootPath
 
         val raireCount = candidateIds.map { votes.firstPreferenceOnlyTally(it) }
@@ -88,7 +88,7 @@ class TestIrvCount {
                 }
             }
         }
-         val mult = if (roundWinner.winners.size > 1) "multipleWinenrs" else ""
+        val mult = if (roundWinner.winners.size > 1) "multipleWinenrs" else ""
         println("winner=$roundWinner} $mult")
         println("================================\n")
 
@@ -148,6 +148,5 @@ class TestIrvCount {
             println("    rassertion=${rassertion}")
             rassertions.add(rassertion)
         }
-
      }
 }

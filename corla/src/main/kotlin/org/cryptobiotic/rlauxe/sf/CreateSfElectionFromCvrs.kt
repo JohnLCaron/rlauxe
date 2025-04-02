@@ -10,8 +10,7 @@ import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCvr
 import org.cryptobiotic.rlauxe.persist.csv.CvrCsv
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
-import org.cryptobiotic.rlauxe.raire.makeRaireContest // org.cryptobiotic.rlauxe.raire.makeRaireContest
+import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
 import java.io.FileOutputStream
 
@@ -194,13 +193,30 @@ fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvC
         if (irvContestVotes == null) {
             println("*** Cant find contest '${info.id}' in irvContestVotes")
         } else {
-            val rcontest = makeRaireContest(
+            val rcontestUA = makeRaireContest(
                 info,
                 irvContestVotes.vc,
                 Nc = irvContestVotes.countBallots,
                 Np = 0,
             )
-            contests.add(rcontest)
+            contests.add(rcontestUA)
+
+            //// annotate RaireContest with IrvRounds
+
+            // The candidate Ids go from 0 ... ncandidates-1 because of Raire; use the ordering from ContestInfo.candidateIds
+            // this just makes the candidateIds the sequential indexes (0..ncandidates-1)
+            val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx }
+            val cvotes = irvContestVotes.vc.makeVotes()
+            val irvCount = IrvCount(cvotes, candidateIdxs)
+            val roundsByIdx = irvCount.runRounds()
+
+            // not convert them back to Ids:
+            val candidateIndexMap = info.candidateIds.mapIndexed { idx, candidateId -> Pair(idx, candidateId) }.toMap()
+            val roundsById = roundsByIdx.map { round ->
+                val mapById = round.count.map { Pair(candidateIndexMap[it.key]!!, it.value) }.toMap()
+                IrvRound( mapById)
+            }
+            (rcontestUA.contest as RaireContest).rounds.addAll(roundsById)
         }
     }
     return contests

@@ -27,7 +27,8 @@ class Publisher(val topdir: String) {
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
     fun contestsFile() = "$topdir/contests.json"
-    fun cvrsCsvFile() = "$topdir/sortedCvrs.csv"
+    fun cvrsCsvFile() = "$topdir/sortedCvrs.csv" // TODO should be zip ??
+    fun cvrsCsvZipFile() = "$topdir/sortedCvrs.zip"
     fun ballotManifestFile() = "$topdir/ballotManifest.json"
 
     fun sampleNumbersFile(round: Int): String {

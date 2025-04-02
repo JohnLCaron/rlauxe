@@ -295,7 +295,7 @@ open class ContestUnderAudit(
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
-    fun recountMargin(): Double {
+    open fun recountMargin(): Double {
         var pct = 1.0
         val minAssertion: Assertion = minAssertion() ?: return pct
         if (contest is Contest) {
@@ -313,7 +313,12 @@ open class ContestUnderAudit(
         val votes = if (contest is Contest) contest.votes else emptyMap()
         appendLine("'$name' ($id) votes=${votes}")
         appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
-        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners})")
+        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners}")
+        append(showCandidates())
+    }
+
+    open fun showCandidates() = buildString {
+        val votes = if (contest is Contest) contest.votes else emptyMap()
         contest.info.candidateNames.forEach { (name, id) ->
             appendLine("   $id '$name': votes=${votes[id]}") }
         appendLine("    Total=${votes.values.sum()}")

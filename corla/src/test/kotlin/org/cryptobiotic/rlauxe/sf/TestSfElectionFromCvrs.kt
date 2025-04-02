@@ -2,11 +2,13 @@ package org.cryptobiotic.rlauxe.sf
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.mergeCvrs
-import org.cryptobiotic.rlauxe.util.sortCvrs
+import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.util.*
 import java.io.File
 import kotlin.test.Test
 
@@ -14,7 +16,7 @@ class TestSfElectionFromCvrs {
 
     // write sf2024 cvrs
     @Test
-    fun createSF2024Pcvrs() {
+    fun createSF2024P() {
         val stopwatch = Stopwatch()
         val topDir = "/home/stormy/temp/sf2024P"
         val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
@@ -35,17 +37,6 @@ class TestSfElectionFromCvrs {
         println("that took $stopwatch")
     }
 
-    @Test
-    fun createSF2024PElectionFromCvrs() {
-        val topDir = "/home/stormy/temp/sf2024P"
-        createSfElectionFromCvrs(
-            "$topDir/audit",
-            "$topDir/CVR_Export_20240322103409/ContestManifest.json",
-            "$topDir/CVR_Export_20240322103409/CandidateManifest.json",
-            "$topDir/sortedCvrs.zip",
-        )
-    }
-
     // out of memory sort by sampleNum()
     @Test
     fun testSortMergeCvrs() {
@@ -64,20 +55,32 @@ class TestSfElectionFromCvrs {
         fromFile.copyTo(targetFile)
     }
 
+    // write sf2024 cvrs
     @Test
-    fun testCreateSfElectionFromCvrs() {
-        val auditDir = "/home/stormy/temp/sf2024"
+    fun createSF2024() {
+        val stopwatch = Stopwatch()
+        val topDir = "/home/stormy/temp/sf2024"
+        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
+        val manifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
+        createSfElectionCvrs(topDir, zipFilename, manifestFile) // write to "$topDir/cvrs.csv"
+
+        val auditDir = "$topDir/audit"
         createSfElectionFromCvrs(
-            "/home/stormy/temp/sf2024",
-            "src/test/data/SF2024/ContestManifest.json",
-            "src/test/data/SF2024/CandidateManifest.json",
-            "$auditDir/sortedCvrs.zip",
+            auditDir,
+            "$topDir/CVR_Export_20241202143051/ContestManifest.json",
+            "$topDir/CVR_Export_20241202143051/CandidateManifest.json",
+            "$topDir/cvrs.csv",
         )
+
+        sortCvrs(auditDir, "$topDir/cvrs.csv", "$topDir/sortChunks")
+        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "$topDir/sortedCvrs.csv"
+        // manually zip (TODO)
+        println("that took $stopwatch")
     }
 
     @Test
-    fun showSfElectionFromCvrs() {
-        val publisher = Publisher("/home/stormy/temp/sf2024")
+    fun showSfElectionContests() {
+        val publisher = Publisher("/home/stormy/temp/sf2024/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
@@ -88,4 +91,72 @@ class TestSfElectionFromCvrs {
         }
     }
 
+    @Test
+    fun showIrvCounts() {
+        val publisher = Publisher("/home/stormy/temp/sf2024/audit")
+        val contestsResults = readContestsJsonFile(publisher.contestsFile())
+        val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
+        else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
+
+        val irvCounters = mutableListOf<IrvCounter>()
+        contestsUA.filter { it.choiceFunction == SocialChoiceFunction.IRV}.forEach { contestUA ->
+            println("$contestUA")
+            println("   winners=${contestUA.contest.winnerNames}")
+            irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
+        }
+
+        val cvrIter = readCvrsCsvIterator(publisher.cvrsCsvZipFile())
+        var count = 0
+        while (cvrIter.hasNext()) {
+            val cvrUA = cvrIter.next()
+            irvCounters.forEach { it.addCvr(cvrUA.cvr)}
+            count++
+        }
+        println("processed $count cvrs")
+
+        irvCounters.forEach { counter ->
+            println("${counter.rcontest}")
+            val cvotes = counter.vc.makeVotes()
+            val irvCount = IrvCount(cvotes, counter.rcontest.info.candidateIds)
+            showIrvCount(counter.rcontest, irvCount)
+        }
+    }
+}
+
+data class IrvCounter(val rcontest: RaireContest) {
+    val vc = VoteConsolidator()
+    val contestId = rcontest.id
+
+    fun addCvr( cvr: Cvr) {
+        val votes = cvr.votes[contestId]
+        if (votes != null) {
+            vc.addVote(votes)
+        }
+    }
+}
+
+fun showIrvCount(rcontest: RaireContest, irvCount: IrvCount) {
+    var roundWinner = RoundWinner()
+    while (!roundWinner.done) {
+        roundWinner = irvCount.nextRoundCount()
+    }
+    val mult = if (roundWinner.winners.size > 1) "multipleWinenrs" else ""
+    println("winner=$roundWinner} $mult")
+
+    irvCount.rounds.forEachIndexed { idx, round -> println("round=$idx $round") }
+
+    print(sfn("round", 30))
+    repeat(irvCount.rounds.size) { print("${nfn(it,8)} ") }
+    println()
+
+    rcontest.info.candidateNames.forEach { (name, candId) ->
+        print(sfn(name, 30))
+        irvCount.rounds.forEachIndexed { idx, round ->
+            print("${nfn(round.countFor(candId),8)} ")
+        }
+        if (roundWinner.winners.contains(candId)) { print(" (winner)")}
+        println()
+    }
+
+    println("================================================================================================\n")
 }

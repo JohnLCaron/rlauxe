@@ -5,9 +5,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.*
 
 // a Contest that does not have votes: Map<Int, Int>,   // candidateId -> nvotes
 data class RaireContest(
@@ -22,6 +20,8 @@ data class RaireContest(
     override val id = info.id
     override val choiceFunction = info.choiceFunction
     override val undervotes: Int = -1  // TODO get this; nballots not voted on?
+
+    val rounds = mutableListOf<IrvRound>()
 
     init {
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }
@@ -61,6 +61,38 @@ class RaireContestUnderAudit(
             ClcaAssertion(contest.info, clcaAssorter)
         }
         return this
+    }
+
+    override fun recountMargin(): Double {
+        var pct = 1.0
+        val minAssertion: Assertion = minAssertion() ?: return pct
+        val rounds = (contest as RaireContest).rounds
+        if (!rounds.isEmpty()) {
+            val round = rounds.last()
+            val winnerId = contest.info.candidateIds[minAssertion.assorter.winner()] // TODO
+            val winner = round.countFor(winnerId)
+            val loserId = contest.info.candidateIds[minAssertion.assorter.loser()]
+            val loser = round.countFor(loserId)
+            pct = (winner - loser) / (winner.toDouble())
+        }
+        return pct
+    }
+
+    override fun showCandidates() = buildString {
+        val rounds = (contest as RaireContest).rounds
+
+        append(sfn("round", 30))
+        repeat(rounds.size) { append("${nfn(it,8)} ") }
+        appendLine()
+
+        contest.info.candidateNames.forEach { (name, candId) ->
+            append(sfn(name, 30))
+            rounds.forEachIndexed { idx, round ->
+                append("${nfn(round.countFor(candId),8)} ")
+            }
+            if (contest.winners.contains(candId)) { append(" (winner)")}
+            appendLine()
+        }
     }
 
     override fun showShort() = buildString {
@@ -184,7 +216,7 @@ enum class RaireAssertionType(val aname:String) {
 }
 
 data class RaireAssertion(
-    val winnerId: Int,
+    val winnerId: Int, // TODO this is index
     val loserId: Int,
     var marginInVotes: Int,
     val assertionType: RaireAssertionType,
@@ -227,7 +259,7 @@ data class RaireAssertion(
 // This a primitive assorter.
 data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, val reportedMargin: Double): AssorterIF {
     val contestId = info.id
-    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) }
+    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) } // // TODO this is index ??
 
     override fun upperBound() = 1.0
     override fun winner() = rassertion.winnerId

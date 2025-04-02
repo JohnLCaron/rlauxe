@@ -6,7 +6,7 @@ class TestRunRlaRoundCli {
 
     @Test
     fun testRlaRoundSF() {
-        val topdir = "/home/stormy/temp/sf2024P/audit"
+        val topdir = "/home/stormy/temp/sf2024/audit"
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,

@@ -75,11 +75,11 @@ fun ContestInfoJson.import(): ContestInfo {
 @Serializable
 data class ContestIFJson(
     val className: String,
-    // val info: ContestInfoJson,
     val votes: Map<Int, Int>?, // candidate name -> candidate id
     val winners: List<Int>?,
     val Nc: Int,
     val Np: Int,
+    val irvRounds: List<IrvRoundJson>? = null,
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -96,11 +96,11 @@ fun ContestIF.publishJson() : ContestIFJson {
         is RaireContest ->
             ContestIFJson(
                 "RaireContest",
-                // this.info.publishJson(),
                 null,
                 this.winners,
                 this.Nc,
                 this.Np,
+                this.rounds.map { it.publishJson() },
             )
         else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
     }
@@ -115,16 +115,36 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.Nc,
                 this.Np,
             )
-        "RaireContest" ->
-            RaireContest(
+        "RaireContest" -> {
+            val rcontest = RaireContest(
                 info,
                 this.winners!!,
                 this.Nc,
                 this.Np,
             )
+            if (this.irvRounds != null) {
+                rcontest.rounds.addAll(this.irvRounds.map { it.import() })
+            }
+            rcontest
+        }
         else -> throw RuntimeException()
     }
 }
+
+
+@Serializable
+data class IrvRoundJson(
+    val count: Map<Int, Int>
+)
+
+// val elim: List<Int>, val count: Map<Int, Int>
+fun IrvRound.publishJson() = IrvRoundJson(
+    this.count,
+)
+
+fun IrvRoundJson.import() = IrvRound(
+    this.count,
+)
 
 // open class ContestUnderAudit(
 //    val contest: ContestIF,

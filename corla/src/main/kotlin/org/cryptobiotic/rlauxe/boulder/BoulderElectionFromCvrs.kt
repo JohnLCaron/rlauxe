@@ -263,7 +263,7 @@ fun createElectionFromDominionCvrs(
     minRecountMargin: Double = .01,
     auditConfigIn: AuditConfig? = null,
 ) {
-    clearDirectory(Path.of(auditDir))
+    // clearDirectory(Path.of(auditDir))
 
     val stopwatch = Stopwatch()
     val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")
@@ -291,7 +291,7 @@ fun createElectionFromDominionCvrs(
 
     val cvrsUA = createSortedCvrs(allCvrs, auditConfig.seed)
     writeCvrsCsvFile(cvrsUA, publisher.cvrsCsvFile())
-    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
+    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()} cvrs = ${allCvrs.size}")
 
     checkContestsWithCvrs(contestsUA, cvrsUA.iterator())
     checkCvrsVsSovo(contests, sovo)

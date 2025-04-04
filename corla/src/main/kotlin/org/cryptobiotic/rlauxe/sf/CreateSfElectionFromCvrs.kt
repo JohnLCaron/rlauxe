@@ -14,6 +14,8 @@ import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
 import java.io.FileOutputStream
 
+private val quiet = false
+
 fun createSfElectionCvrs(topDir: String, castVoteRecordZip: String, manifestFile: String) {
     val stopwatch = Stopwatch()
     val outputFilename = "$topDir/cvrs.csv"
@@ -35,7 +37,7 @@ fun createSfElectionCvrs(topDir: String, castVoteRecordZip: String, manifestFile
     zipReader.tourFiles()
     outputStream.close()
     println("read $countCvrs cvrs $countFiles files took $stopwatch")
-    // read 1,641,744 cvrs 27,554 files took 58.67 s
+    println("took = $stopwatch")
 }
 
 fun createSfElectionFromCvrs(
@@ -88,8 +90,6 @@ fun createSfElectionFromCvrs(
 
     println("took = $stopwatch")
 }
-
-val quiet = false
 
 fun makeContestInfos(contestManifest: ContestManifestJson, candidateManifest: CandidateManifestJson): List<ContestInfo> {
     return contestManifest.List.map { contestM: ContestM ->

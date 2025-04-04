@@ -14,13 +14,84 @@ import kotlin.test.Test
 
 class TestSfElectionFromCvrs {
 
+    // make a OneAudit from Dominion exprted CVRs, using CountingGroupId=1 as the pooled votes
+    @Test
+    fun createSF2024PoaCvrs() {
+        // write sf2024P cvr
+        val stopwatch = Stopwatch()
+        val sfDir = "/home/stormy/temp/sf2024P"
+        val zipFilename = "$sfDir/CVR_Export_20240322103409.zip"
+        val manifestFile = "$sfDir/CVR_Export_20240322103409/ContestManifest.json"
+        val topDir = "/home/stormy/temp/sf2024Poa"
+        createSfElectionCvrsOA(topDir, zipFilename, manifestFile) // write to "$topDir/cvrs.csv"
+
+        //  createSfElectionCvrsOA 8957 files totalCards=467063 group1=55810 group2=411253
+        // countingContests
+        //   1 total=176637, groupCount={2=155705, 1=20932}
+        //   2 total=19175, groupCount={2=15932, 1=3243}
+        //   3 total=4064, groupCount={2=3300, 1=764}
+        //   4 total=1314, groupCount={2=1112, 1=202}
+        //   5 total=919, groupCount={2=647, 1=272}
+        //   6 total=1092, groupCount={2=889, 1=203}
+        //   8 total=94083, groupCount={2=83709, 1=10374}
+        //   9 total=72733, groupCount={2=64285, 1=8448}
+        //   10 total=8818, groupCount={2=7304, 1=1514}
+        //   11 total=10357, groupCount={2=8628, 1=1729}
+        //   12 total=233465, groupCount={2=205536, 1=27929}
+        //   13 total=233465, groupCount={2=205536, 1=27929}
+        //   15 total=211793, groupCount={2=186075, 1=25718}
+        //   17 total=21672, groupCount={2=19461, 1=2211}
+        //   19 total=233598, groupCount={2=205717, 1=27881}
+        //   21 total=127791, groupCount={2=112879, 1=14912}
+        //   23 total=105807, groupCount={2=92838, 1=12969}
+        //   24 total=233598, groupCount={2=205717, 1=27881}
+        //   25 total=233598, groupCount={2=205717, 1=27881}
+        //   26 total=233598, groupCount={2=205717, 1=27881}
+        //   27 total=233598, groupCount={2=205717, 1=27881}
+        //   28 total=233598, groupCount={2=205717, 1=27881}
+        //   29 total=233598, groupCount={2=205717, 1=27881}
+        //   30 total=233598, groupCount={2=205717, 1=27881}
+        //   31 total=233598, groupCount={2=205717, 1=27881}
+        //   32 total=233598, groupCount={2=205717, 1=27881}
+        //   33 total=233598, groupCount={2=205717, 1=27881}
+        // writing to /home/stormy/temp/sf2024Poa/ballotManifest.csv with 8957 batches
+        // total ballotManifest = 467063
+        // writing to /home/stormy/temp/sf2024Poa/ballotManifest.csv with 2086 pools
+        // total cards in pools = 55810
+    }
+
+    @Test
+    fun createSF2024Poa() {
+        // write sf2024P cvr
+        val stopwatch = Stopwatch()
+        val sfDir = "/home/stormy/temp/sf2024P"
+        val topDir = "/home/stormy/temp/sf2024Poa"
+
+        // create sf2024 election audit
+        val auditDir = "$topDir/audit"
+        createSfElectionFromCvrsOA(
+            auditDir,
+            "$sfDir/CVR_Export_20240322103409/ContestManifest.json",
+            "$sfDir/CVR_Export_20240322103409/CandidateManifest.json",
+            "$topDir/cvrs.csv",
+            listOf(1, 2)
+        )
+
+        // create sorted cvrs
+        sortCvrs(auditDir, "$topDir/cvrs.csv", "$topDir/sortChunks")
+        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCvrs.csv"
+        // manually zip (TODO)
+        println("that took $stopwatch")
+    }
+
     @Test
     fun createSF2024P() {
-        // write sf2024 cvr
+        // write sf2024P cvr
         val stopwatch = Stopwatch()
+        val sfDir = "/home/stormy/temp/sf2024P"
+        val zipFilename = "$sfDir/CVR_Export_20240322103409.zip"
+        val manifestFile = "$sfDir/CVR_Export_20240322103409/ContestManifest.json"
         val topDir = "/home/stormy/temp/sf2024P"
-        val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
-        val manifestFile = "$topDir/CVR_Export_20240322103409/ContestManifest.json"
         createSfElectionCvrs(topDir, zipFilename, manifestFile) // write to "$topDir/cvrs.csv"
 
         // create sf2024 election audit
@@ -34,7 +105,7 @@ class TestSfElectionFromCvrs {
 
         // create sorted cvrs
         sortCvrs(auditDir, "$topDir/cvrs.csv", "$topDir/sortChunks")
-        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "$topDir/sortedCvrs.csv"
+        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "auditDir/sortedCvrs.csv"
         // manually zip (TODO)
         println("that took $stopwatch")
     }
@@ -75,7 +146,7 @@ class TestSfElectionFromCvrs {
         )
 
         sortCvrs(auditDir, "$topDir/cvrs.csv", "$topDir/sortChunks")
-        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "$topDir/sortedCvrs.csv"
+        mergeCvrs(auditDir, "$topDir/sortChunks") // merge to "auditDir/sortedCvrs.csv"
         // manually zip (TODO)
         println("that took $stopwatch")
     }

@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 
 private val quiet = true
 
-fun makeRaireContest(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Np: Int): RaireContestUnderAudit {
+fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Np: Int): RaireContestUnderAudit {
     val startingVotes = voteConsolidator.makeVoteList()
     val cvotes = voteConsolidator.makeVotes()
     val votes = Votes(cvotes, info.candidateIds.size)

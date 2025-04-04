@@ -13,7 +13,7 @@ data class SimulateRaireTestData(
     val quiet: Boolean = true
 ) {
     val ncands = contest.ncandidates
-    val ncards = min(contest.Nc, sampleLimits)
+    val ncards = if (sampleLimits > 0) min(contest.Nc, sampleLimits) else contest.Nc
 
     fun makeCvrs(): List<Cvr> {
         var count = 0

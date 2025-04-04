@@ -9,7 +9,7 @@ class IrvCountOld(val votes: Array<Vote>, val candidates: List<Int>) {
     val rootPath = EliminationPathOld(round, emptyList(), candidates.toSet(), votes)
 
     // return winner?
-    fun nextRoundCount(): RoundWinner {
+    fun nextRoundCount(): IrvWinners {
         round++
         return rootPath.nextRoundCount()
     }
@@ -23,7 +23,7 @@ class EliminationPathOld(startingRound: Int, startingElimination: List<Int>, sta
     val isRoot = startingElimination.isEmpty()
 
     var subpaths: List<EliminationPathOld> = emptyList()
-    var roundWinner = RoundWinner()
+    var roundWinner = IrvWinners()
 
     fun name() = if (elimination.isEmpty()) "root" else "elimPath=${elimination}"
 
@@ -65,7 +65,7 @@ class EliminationPathOld(startingRound: Int, startingElimination: List<Int>, sta
     }
 
     // return winning candidate when done
-    fun nextRoundCount(): RoundWinner {
+    fun nextRoundCount(): IrvWinners {
         if (this.roundWinner.done) return this.roundWinner
         round++
 
@@ -80,17 +80,17 @@ class EliminationPathOld(startingRound: Int, startingElimination: List<Int>, sta
             if (done) {
                 val winnerSet = mutableSetOf<Int>()
                 roundWinners.forEach { winnerSet.addAll(it.winners) }
-                return RoundWinner(true, winnerSet)
+                return IrvWinners(true, winnerSet)
             }
-            return RoundWinner()
+            return IrvWinners()
         }
     }
 
-    fun checkForWinner(): RoundWinner {
+    fun checkForWinner(): IrvWinners {
         if (subpaths.isEmpty()) {
             val down2two = viable.size == 2
             if (down2two) {
-                this.roundWinner = RoundWinner(true, findWinningCandidates())
+                this.roundWinner = IrvWinners(true, findWinningCandidates())
             }
             return this.roundWinner
 
@@ -102,7 +102,7 @@ class EliminationPathOld(startingRound: Int, startingElimination: List<Int>, sta
             if (done) {
                 val winnerSet = mutableSetOf<Int>()
                 roundWinners.forEach { winnerSet.addAll(it.winners) }
-                this.roundWinner = RoundWinner(true, winnerSet)
+                this.roundWinner = IrvWinners(true, winnerSet)
             }
             return this.roundWinner
         }

@@ -132,6 +132,31 @@ fun DominionCvrExportJson.import(irvContests:Set<Int>) : List<Cvr> {
     return result
 }
 
+fun Session.import(irvContests: Set<Int>): List<Cvr> {
+    val result = mutableListOf<Cvr>()
+    this.Original.Cards.forEach { card ->
+        val votes = mutableMapOf<Int, IntArray>()
+        card.Contests.forEach { contest ->
+            if (irvContests.contains(contest.Id)) {
+                val contestVoteAndRank = mutableListOf<Pair<Int, Int>>()
+                contest.Marks.forEach { mark ->
+                    contestVoteAndRank.add(Pair(mark.Rank, mark.CandidateId))
+                }
+                val sortedVotes = contestVoteAndRank.sortedBy { it.first }.map { it.second }
+                votes[contest.Id] = sortedVotes.toIntArray()
+            } else {
+                val contestVotes = mutableListOf<Int>()
+                contest.Marks.forEach { mark ->
+                    contestVotes.add(mark.CandidateId)
+                }
+                votes[contest.Id] = contestVotes.toIntArray()
+            }
+        }
+        result.add(Cvr("${this.TabulatorId}-${this.BatchId}-${card.Id}", votes, false))
+    }
+    return result
+}
+
 fun convertCvrExportToCvr(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>): Int {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result is Ok) result.unwrap()

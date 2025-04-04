@@ -21,7 +21,7 @@ data class RaireContest(
     override val choiceFunction = info.choiceFunction
     override val undervotes: Int = -1  // TODO get this; nballots not voted on?
 
-    val rounds = mutableListOf<IrvRound>()
+    val roundsPaths = mutableListOf<IrvRoundsPath>()
 
     init {
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }
@@ -64,42 +64,25 @@ class RaireContestUnderAudit(
     }
 
     override fun recountMargin(): Double {
-        var pct = 1.0
-        val minAssertion: Assertion = minAssertion() ?: return pct
-        val rounds = (contest as RaireContest).rounds
-        if (!rounds.isEmpty()) {
-            val round = rounds.last()
-            val winnerId = contest.info.candidateIds[minAssertion.assorter.winner()] // TODO
-            val winner = round.countFor(winnerId)
-            val loserId = contest.info.candidateIds[minAssertion.assorter.loser()]
-            val loser = round.countFor(loserId)
-            pct = (winner - loser) / (winner.toDouble())
-        }
-        return pct
+        val pctDefault = -1.0
+        val rcontest = (contest as RaireContest)
+        if (rcontest.roundsPaths.isEmpty()) return pctDefault
+        val rounds = rcontest.roundsPaths.first().rounds // common case is only one
+        if (rounds.isEmpty()) return pctDefault
+
+        val count = rounds.last().count // the last round should have two nonzero candidates
+        val winner = count.filter { it.value > 0.0 }.maxBy { it.value }
+        val loser = count.filter { it.value > 0.0 && it.key != winner.key }.maxBy { it.value }
+        return (winner.value - loser.value) / (winner.value.toDouble())
     }
 
     override fun showCandidates() = buildString {
-        val rounds = (contest as RaireContest).rounds
-
-        append(sfn("round", 30))
-        repeat(rounds.size) { append("${nfn(it,8)} ") }
-        appendLine()
-
-        contest.info.candidateNames.forEach { (name, candId) ->
-            append(sfn(name, 30))
-            rounds.forEachIndexed { idx, round ->
-                append("${nfn(round.countFor(candId),8)} ")
-            }
-            if (contest.winners.contains(candId)) { append(" (winner)")}
-            appendLine()
-        }
+        val roundsPaths = (contest as RaireContest).roundsPaths
+        append(showIrvCountResult(IrvCountResult(roundsPaths), contest.info))
     }
 
     override fun showShort() = buildString {
         appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
-        /* assertions().filter { roundIdx == null || it.round == roundIdx} .forEach {
-            append(" ${it.show()}")
-        } */
     }
 
     override fun equals(other: Any?): Boolean {
@@ -271,10 +254,10 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
         append(" votes=${rassertion.votes}")
     }
 
-    override fun assort(rcvr: Cvr, usePhantoms: Boolean): Double {
-        if (usePhantoms && rcvr.phantom) return 0.5
-        return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(rcvr)
-        else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(rcvr)
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+        if (usePhantoms && mvr.phantom) return 0.5
+        return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(mvr)
+        else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(mvr)
         else throw RuntimeException("unknown assertionType = $(this.assertionType")
     }
 

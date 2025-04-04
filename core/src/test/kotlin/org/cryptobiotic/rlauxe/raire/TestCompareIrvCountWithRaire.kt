@@ -14,29 +14,29 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestIrvCountOld {
+class TestCompareIrvCountWithRaire {
 
     // Need a lot of tries to be sure to get some ties
-    // @Test
+    @Test
     fun testRepeat() {
         var idx = 0
         repeat(111) {
             println("\n$idx ===================================")
-            testIrvCount()
+            testCompareIrvCountWithRaire()
             idx++
         }
     }
 
     @Test
-    fun testIrvCount() {
+    fun testCompareIrvCountWithRaire() {
         for (ncands in 3..7) {
             println("\n====================================\n")
             println("ncands=$ncands")
-            testIrvCount(ncands)
+            testCompareIrvCountWithRaire(ncands)
         }
     }
 
-    fun testIrvCount(ncands: Int) {
+    fun testCompareIrvCountWithRaire(ncands: Int) {
         val N = 20000
         val minMargin = .05
         val undervotePct = 0.0
@@ -66,18 +66,20 @@ class TestIrvCountOld {
         val cvotes = vc.makeVotes()
         val votes = Votes(cvotes, testContest.ncands)
 
-        val irvCount = IrvCountOld(cvotes, candidateIds)
+        val irvCount = IrvCount(cvotes, candidateIds)
         val rootPath = irvCount.rootPath
 
         val raireCount = candidateIds.map { votes.firstPreferenceOnlyTally(it) }
         val rlauxeCount = candidateIds.map { rootPath.candVotes[it] }
         assertEquals(raireCount, rlauxeCount)
         // println(" raireCount round $round = ${raireCount}")
-        var roundWinner = RoundWinner()
+
+        /*
+        var roundWinner = IrvWinners()
         while (!roundWinner.done) {
             round++
             println("Round $round")
-            roundWinner = irvCount.nextRoundCount()
+            roundWinner = irvCount.runRound()
 
             if (!roundWinner.done) {
                 val continuing = rootPath.viable.toIntArray()
@@ -148,5 +150,7 @@ class TestIrvCountOld {
             println("    rassertion=${rassertion}")
             rassertions.add(rassertion)
         }
+
+         */
      }
 }

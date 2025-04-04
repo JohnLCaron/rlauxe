@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.persist.csv.writeCSV
 import org.cryptobiotic.rlauxe.sf.readContestManifestForIRV
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
+import java.io.FileOutputStream
 import kotlin.test.Test
 
 class TestDominionCvrExportJson {
@@ -18,7 +19,8 @@ class TestDominionCvrExportJson {
 
     @Test
     fun testReadDominionCvrJsonFile() {
-        val filename = "/home/stormy/Downloads/CVR_Export_20241202143051/CvrExport_15.json"
+        val filename1 = "src/test/data/SF2024/CvrExport_15.json"
+        val filename = "/home/stormy/temp/sf2024P/CVR_Export_20240322103409/CvrExport_0.json"
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
         val dominionCvrs = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
@@ -40,7 +42,9 @@ class TestDominionCvrExportJson {
 
     @Test
     fun testReadCountingGroupId() {
-        val zipFilename = "/home/stormy/Downloads/CVR_Export_20241202143051.zip"
+        val zipFilename1 = "/home/stormy/Downloads/CVR_Export_20241202143051.zip"
+        val topDir = "/home/stormy/temp/sf2024P"
+        val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
 
         val countIds = mutableMapOf<Int, Int>()
 
@@ -64,13 +68,76 @@ class TestDominionCvrExportJson {
         zipReader.tourFiles()
         println("testReadCountingGroupId $countFiles files")
         countIds.forEach { (key, value) -> println("  $key $value") }
-        // testReadCountingGroupId 27554 files
-        //  2 1387622
-        //  1 216286
-        // SHANGRLA SF primary i think SF_CVR_Export_20240311150227
-        //     cvr_list.extend(Dominion.read_cvrs(_fname, use_current=True, enforce_rules=True, include_groups=[1,2],
-        //                                      pool_groups=[1]))
-        // cvrs: 443578 unique IDs: 443578
     }
 
+    // use the cvrs to write a fake SF ballot manifest, following ballotManifest-dummy.xlsx format
+    @Test
+    fun testWriteSfBallotManifest() {
+        val topDir = "/home/stormy/temp/sf2024P"
+        val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
+
+        val countingContests = mutableMapOf<Int, SfContestCount>()
+        val batches = mutableMapOf<String, SfBallotManifest>()
+
+        var countFiles = 0
+        val zipReader = ZipReaderTour(
+            zipFilename,
+            silent = true,
+            filter = { path -> path.toString().contains("CvrExport_") },
+            visitor = { inputStream ->
+                val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
+                val dominionCvrs = if (result is Ok) result.unwrap()
+                else throw RuntimeException("Cannot read DominionCvrJson from stream err = $result")
+                countFiles++
+                dominionCvrs.Sessions.forEach { session ->
+
+                    val key = "${session.TabulatorId}-${session.BatchId}"
+                    val batch = batches.getOrPut(key) { SfBallotManifest(session.TabulatorId, session.BatchId, 0) }
+                    batch.count += session.Original.Cards.size
+
+                    session.Original.Cards.forEach { card ->
+                        card.Contests.forEach { contest ->
+                            val contestCount = countingContests.getOrPut(contest.Id) { SfContestCount(0) }
+                            contestCount.total++
+                            val groupCount = contestCount.groupCount.getOrPut(session.CountingGroupId) { 0}
+                            contestCount.groupCount[session.CountingGroupId] = groupCount + 1
+                        }
+                    }
+                }
+            },
+        )
+        zipReader.tourFiles()
+        println("testReadCountingGroupId $countFiles files")
+        println("countingContests")
+        countingContests.toSortedMap().forEach { (key, value) -> println("  $key $value") }
+
+        val header = "    ,Tray #,Tabulator Number,Batch Number,Total Ballots,VBMCart.Cart number\n"
+        val outputFilename = "$topDir/sfBallotManifest.csv"
+        println("writing to $outputFilename with ${batches.size} batches")
+        val outputStream = FileOutputStream(outputFilename)
+        outputStream.write(header.toByteArray()) // UTF-8
+
+        var total = 0
+        var lineNo = 0
+        val sbatches = batches.toSortedMap()
+        sbatches.values.forEach {
+            val line = "${lineNo},${lineNo+1},${it.tab},${it.batch},${it.count},${lineNo+1}\n"
+            outputStream.write(line.toByteArray())
+            lineNo++
+            total += it.count
+        }
+        outputStream.close()
+        println("total ballots = $total")
+    }
+    //  1 total=176637, groupCount={2=155705, 1=20932}
+    //  2 total=19175, groupCount={2=15932, 1=3243}
+
+    class SfBallotManifest(val tab: Int, val batch: Int, var count: Int)
+    class SfContestCount(var total: Int) {
+        val groupCount = mutableMapOf<Int, Int>()
+        override fun toString(): String {
+            return "total=$total, groupCount=$groupCount"
+        }
+
+    }
 }

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class CreateBoulderElectionFromCvrs {
+class TestBoulderElectionFromCvrs {
 
     @Test
     fun testParseContestName() {

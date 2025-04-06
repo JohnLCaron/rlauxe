@@ -14,7 +14,7 @@ class PersistentAudit(
     private val auditConfig: AuditConfig = auditRecord.auditConfig
     private val contestsUA: List<ContestUnderAudit> = auditRecord.contests
     private val auditRounds = mutableListOf<AuditRound>()
-    private val mvrManager = makeMvrManager(auditRecord.location, auditConfig)
+    private val mvrManager: MvrManager by lazy { makeMvrManager(auditRecord.location, auditConfig) }
 
     init {
         auditRounds.addAll(auditRecord.rounds)

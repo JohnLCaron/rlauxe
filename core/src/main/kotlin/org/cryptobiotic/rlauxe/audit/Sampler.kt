@@ -70,6 +70,7 @@ class ClcaWithoutReplacement(
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
     private var count = 0
+    private var poolCount = 0
 
     init {
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id)  }
@@ -81,6 +82,7 @@ class ClcaWithoutReplacement(
             idx++
             if (mvr.hasContest(contestId)) {
                 val result = cassorter.bassort(mvr, cvr)
+                if (cvr.poolId != null) poolCount++
                 if (trackStratum) print("${sfn(cvr.id, 8)} ")
                 count++
                 return result
@@ -102,6 +104,8 @@ class ClcaWithoutReplacement(
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
+
+    fun poolCount() = poolCount
 }
 
 fun makeClcaNoErrorSampler(contestId: Int, hasStyles: Boolean, cvrs : List<Cvr>, cassorter: ClcaAssorterIF): Sampler {

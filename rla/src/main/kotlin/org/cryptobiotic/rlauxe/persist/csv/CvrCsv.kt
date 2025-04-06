@@ -26,7 +26,7 @@ data class CvrCsv(
     }
 }
 
-fun writeCSV(wr: CvrCsv) = buildString {
+fun writeCvrCSV(wr: CvrCsv) = buildString {
     val id = wr.id.replace(",", "") // nasty commas: could remove when reading
     append("$id, ${wr.phantom}, ${wr.index}, ${wr.sampleNumber}, ")
     wr.votes.forEach { v -> append("${v.contest}: ${v.candidate.joinToString(" ")}, ") }
@@ -68,7 +68,7 @@ fun writeCvrsCsvFile(cvrs: List<CvrUnderAudit>, filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
     writer.write(CvrCsv.header)
     cvrs.forEach {
-        writer.write(writeCSV(it.publishCsv()))
+        writer.write(writeCvrCSV(it.publishCsv()))
     }
     writer.close()
 }
@@ -82,7 +82,7 @@ class CvrsCsvWriter(filename: String) {
 
     fun write(cvrs: List<CvrUnderAudit>) {
         cvrs.forEach {
-            writer.write(writeCSV(it.publishCsv()))
+            writer.write(writeCvrCSV(it.publishCsv()))
         }
         countCvrs += cvrs.size
     }

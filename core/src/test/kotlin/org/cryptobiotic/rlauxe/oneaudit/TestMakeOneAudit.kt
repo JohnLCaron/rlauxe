@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.roundToInt
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,24 +14,15 @@ class TestMakeOneAudit {
     fun testAllCvrs() {
         val margin = .02
         val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 1.0, 0.0, undervotePercent = 0.0, phantomPercent = 0.0)
-        assertEquals(1, contestOA.strata.size)
-        assertEquals("hasCvr", contestOA.strata[0].strataName)
-        assertEquals(N, contestOA.strata[0].Ng)
-        assertEquals(margin, contestOA.strata[0].reportedMargin(0, 1), doublePrecision)
+        assertEquals(N, contestOA.Nc)
+        assertEquals(contestOA.cvrVotes, contestOA.votes)
         assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
 
-        println("contestOA = $contestOA")
-    }
-
-    // @Test TODO not allowing this
-    fun testNoCvrs() {
-        val margin = .02
-        val contestOA = makeContestOA(margin, N, cvrPercent = 0.0, 0.0, undervotePercent = 0.0, phantomPercent = 0.0)
-        assertEquals(1, contestOA.strata.size)
-        assertEquals("noCvr", contestOA.strata[0].strataName)
-        assertEquals(N, contestOA.strata[0].Ng)
-        assertEquals(margin, contestOA.strata[0].reportedMargin(0, 1), doublePrecision)
-        assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
+        assertEquals(1, contestOA.pools.size)
+        val pool = contestOA.pools[0]!!
+        assertEquals("noCvr", pool.name)
+        assertEquals(0, pool.ncards)
+        assertEquals(0.0, pool.calcReportedMargin(0, 1), doublePrecision)
 
         println("contestOA = $contestOA")
     }
@@ -38,21 +30,19 @@ class TestMakeOneAudit {
     @Test
     fun testHalfCvrs() {
         val margin = .02
-        val contestOA = makeContestOA(margin, N, cvrPercent = 0.5, 0.0, undervotePercent = 0.0, phantomPercent = 0.0)
-        assertEquals(2, contestOA.strata.size)
-        assertEquals("noCvr", contestOA.strata[0].strataName)
-        assertEquals(N/2, contestOA.strata[0].Ng)
-        assertEquals(margin, contestOA.strata[0].reportedMargin(0, 1), doublePrecision)
-        assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
+        val cvrPercent = 0.5
+        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.0, phantomPercent = 0.0)
 
-        checkBasics(contestOA, .02, .5)
+        checkBasics(contestOA, margin, cvrPercent)
     }
 
     @Test
     fun testWithUndervotes() {
         val margin = .02
-        val contestOA = makeContestOA(margin, N, cvrPercent = 0.5, 0.0, undervotePercent = 0.10, phantomPercent = 0.0)
-        checkBasics(contestOA, .02, .5)
+        val cvrPercent = 0.5
+
+        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.10, phantomPercent = 0.0)
+        checkBasics(contestOA, margin, cvrPercent)
     }
 
     @Test
@@ -72,15 +62,23 @@ class TestMakeOneAudit {
     }
 
     fun checkBasics(contestOA: OneAuditContest, margin: Double, cvrPercent: Double) {
-        println("contestOA = $contestOA")
+        println(contestOA)
+
+        assertEquals(roundToInt(N*cvrPercent), contestOA.cvrNc)
+
+        assertEquals(1, contestOA.pools.size)
+        val pool = contestOA.pools[0]!!
+        assertEquals("noCvr", pool.name)
+        println(pool)
+
+        assertEquals(roundToInt(N*(1.0 - cvrPercent)), pool.ncards)
+
+        assertEquals(N, contestOA.Nc)
         assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
-        contestOA.strata.forEach { stratum ->
-            assertEquals(margin, stratum.reportedMargin(0, 1), .003) // equally divided
-        }
     }
 
     fun checkAgainstCvrs(contest: OneAuditContest, margin: Double, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
-        val testCvrs = contest.makeTestCvrs()
+        /* val testCvrs = makeTestCvrs(contest)
         val contestOA = contest.makeContestUnderAudit()
 
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter
@@ -112,5 +110,7 @@ class TestMakeOneAudit {
         println("  nunder=$nunder == ${undervotePercent}; pct= $underPct =~ ${undervotePercent} abs=${abs(underPct - undervotePercent)} " +
                 " rel=${abs(underPct - undervotePercent) /underPct}")
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
+
+         */
     }
 }

@@ -6,7 +6,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.CvrCsv
 import org.cryptobiotic.rlauxe.persist.csv.publishCsv
-import org.cryptobiotic.rlauxe.persist.csv.writeCSV
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrCSV
 import org.cryptobiotic.rlauxe.sf.readContestManifestForIRV
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
@@ -36,7 +36,7 @@ class TestDominionCvrExportJson {
         print(CvrCsv.header)
         cvrs.forEach {
             val cvrUA = CvrUnderAudit(it, 0, 0)
-            print(writeCSV(cvrUA.publishCsv()))
+            print(writeCvrCSV(cvrUA.publishCsv()))
         }
     }
 

@@ -3,66 +3,61 @@ package org.cryptobiotic.rlauxe.persist.json
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditStratum
+import org.cryptobiotic.rlauxe.oneaudit.*
 
 // class OneAuditContest (
 //    override val info: ContestInfo,
-//    val strata: List<OneAuditStratum>,
-//) : ContestIF {
+//    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+//    cvrNc: Int,
+//    val pools: Map<Int, OneAuditPool>, // pool id -> pool
+//)
 @Serializable
 data class OAContestJson(
-    // val info: ContestInfoJson,
-    val strata: List<OAStratumJson>,
+    val cvrVotes: Map<Int, Int>,
+    val cvrNc: Int,
+    val pools: List<BallotPoolJson>,
 )
 
 fun OneAuditContest.publishOAJson() = OAContestJson(
-        // this.info.publishJson(),
-        this.strata.map { it.publishJson()},
+        this.cvrVotes,
+        this.cvrNc,
+        this.pools.values.map { it.publishJson()},
     )
 
 fun OAContestJson.import(info: ContestInfo): OneAuditContest {
-    // val info = this.info.import()
+    val pools = this.pools.map { it.import() }
     return OneAuditContest(
         info,
-        this.strata.map { it.import(info) },
+        this.cvrVotes,
+        this.cvrNc,
+        pools.associateBy { it.id },
     )
 }
 
-// class OneAuditStratum (
-//    val strataName: String,
-//    val hasCvrs: Boolean,
-//    val info: ContestInfo,
-//    val votes: Map<Int, Int>,   // candidateId -> nvotes
-//    val Ng: Int,  // upper limit on number of ballots in this strata for this contest
-//    val Np: Int,  // number of phantom ballots in this strata for this contest
-//)
+// data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
 @Serializable
-data class OAStratumJson(
-    val strataName: String,
-    val hasCvrs: Boolean,
+data class BallotPoolJson(
+    val name: String,
+    val id: Int,
+    val contest: Int,
+    val ncards: Int,
     val votes: Map<Int, Int>,
-    val Ng: Int,
-    val Np: Int,
 )
 
-fun OneAuditStratum.publishJson() = OAStratumJson(
-    this.strataName,
-    this.hasCvrs,
+fun BallotPool.publishJson() = BallotPoolJson(
+    this.name,
+    this.id,
+    this.contest,
+    this.ncards,
     this.votes,
-    this.Ng,
-    this.Np
 )
 
-fun OAStratumJson.import(info: ContestInfo) = OneAuditStratum(
-    this.strataName,
-    this.hasCvrs,
-    info,
+fun BallotPoolJson.import() = BallotPool(
+    this.name,
+    this.id,
+    this.contest,
+    this.ncards,
     this.votes,
-    this.Ng,
-    this.Np
 )
 
 // class OAContestUnderAudit(

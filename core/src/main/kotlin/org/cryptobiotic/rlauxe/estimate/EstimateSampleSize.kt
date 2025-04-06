@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateRaireTestData
 import org.cryptobiotic.rlauxe.util.df
@@ -424,7 +425,7 @@ fun simulateSampleSizeOneAuditAssorter(
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 
-    val cvrs = contestUA.contestOA.makeTestCvrs()
+    val cvrs = contestUA.contestOA.makeTestCvrs() // TODO
 
     // TODO is this right, no special processing for the "hasCvr" strata?
     val sampler = if (oaConfig.simFuzzPct == null) {

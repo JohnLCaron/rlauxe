@@ -119,7 +119,7 @@ interface ClcaAssorterIF {
     fun id(): Int
     fun noerror(): Double
     fun upperBound(): Double
-    fun meanAssort(): Double
+    fun meanAssort(): Double  // wtf ?
 
     fun assorter(): AssorterIF
     fun bassort(mvr: Cvr, cvr:Cvr): Double
@@ -159,7 +159,10 @@ data class ClcaAssorter(
         return mean2margin(mean)
     }
 
-    // B(bi, ci)
+    // B(bi, ci) = (1-o/u)/(2-v/u), where
+    //                o is the overstatement
+    //                u is the upper bound on the value the assorter assigns to any ballot
+    //                v is the assorter margin
     override fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value

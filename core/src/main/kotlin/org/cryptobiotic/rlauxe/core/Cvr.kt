@@ -8,6 +8,7 @@ data class Cvr(
     val id: String,
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
+    val poolId: Int? = null,
 ) {
     init {
         require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas
@@ -86,3 +87,4 @@ class CvrIteratorAdapter(val cvrIterator: Iterator<CvrUnderAudit>) : Iterator<Cv
     override fun hasNext() = cvrIterator.hasNext()
     override fun next() = cvrIterator.next().cvr
 }
+

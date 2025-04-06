@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.roundToInt
 import kotlin.math.round
 
@@ -20,7 +22,7 @@ fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent:
 // two contest, specified total votes
 // divide into two stratum based on cvrPercent
 // skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
-fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
+fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
     require(cvrPercent > 0.0)
 
     // the candidates
@@ -34,7 +36,7 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent:
         nwinners = 1,
     )
 
-    val nvotes = winner + loser
+    val nvotes = winnerVotes + loserVotes
     // Nc = nvotes + (undervotePercent + phantomPercent) * Nc
     // Nc - (undervotePercent + phantomPercent) * Nc = nvotes
     // Nc (1 - undervotePercent - phantomPercent) = nvotes
@@ -43,41 +45,120 @@ fun makeContestOA(winner: Int, loser: Int, cvrPercent: Double, skewVotesPercent:
     val noCvrPercent = (1.0 - cvrPercent)
     val skewVotes = skewVotesPercent * Nc
 
-    val stratumNames = when {
-        (cvrPercent == 0.0) -> listOf("noCvr")
-        (cvrPercent == 1.0) -> listOf("hasCvr")
-        else -> listOf("noCvr", "hasCvr")
-    }
-    val stratumSizes = when {
-        (cvrPercent == 0.0) -> listOf(roundToInt(Nc * noCvrPercent))
-        (cvrPercent == 1.0) -> listOf(roundToInt(Nc * cvrPercent))
-        else -> listOf(roundToInt(Nc * noCvrPercent), roundToInt(Nc * cvrPercent))
-    }
-    val cvrIdx = if (cvrPercent == 1.0) 0 else 1
+    val cvrSize = Nc * cvrPercent
+    val noCvrSize = Nc * noCvrPercent
 
     // reported results for the two strata
-    val votes = when {
-        (cvrPercent == 0.0 || cvrPercent == 1.0) -> mapOf(
-            "winner" to listOf(roundToInt(winner + skewVotes)),
-            "loser" to listOf(roundToInt(loser - skewVotes)),
-        ) else -> mapOf(
-            "winner" to listOf(roundToInt(winner * noCvrPercent - skewVotes), roundToInt(winner * cvrPercent + skewVotes)),
-            "loser" to listOf(roundToInt(loser * noCvrPercent + skewVotes), roundToInt(loser * cvrPercent - skewVotes)),
-        )
-    }
+    val votesCvr = mapOf(0 to roundToInt(winnerVotes * cvrPercent + skewVotes), 1 to roundToInt(loserVotes * cvrPercent))
+    val votesNoCvr = mapOf(0 to roundToInt(winnerVotes * noCvrPercent - skewVotes), 1 to roundToInt(loserVotes * noCvrPercent))
 
-    val strata = mutableListOf<OneAuditStratum>()
-    repeat(stratumNames.size) { idx ->
-        strata.add(
-            OneAuditStratum(
-                stratumNames[idx],
-                hasCvrs = (idx == cvrIdx),
-                info,
-                votes = votes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
-                Ng = stratumSizes[idx],
-                Np = roundToInt(phantomPercent * stratumSizes[idx])
-            )
+    val pools = mutableListOf<BallotPool>()
+    pools.add(
+        // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
+        BallotPool(
+            "noCvr",
+            1, // poolId
+            0, // contestId
+            roundToInt(noCvrSize),
+            votes = votesNoCvr,
         )
+    )
+
+    //    override val info: ContestInfo,
+    //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    //    cvrNc: Int,
+    //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
+    return OneAuditContest(info, votesCvr, roundToInt(cvrSize), pools.associateBy { it.id })
+}
+
+fun makeContestOA(Nc: Int, margin: Double, poolPct: Double, poolMargin: Double) : OneAuditContest {
+    // the candidates
+    val info = ContestInfo(
+        "makeContestOA", 0,
+        mapOf(
+            "winner" to 0,
+            "loser" to 1,
+        ),
+        SocialChoiceFunction.PLURALITY,
+        nwinners = 1,
+    )
+
+    val winnerTotal = roundToInt(Nc * ((margin + 1) / 2))
+    val loserTotal = Nc - winnerTotal
+
+    val poolSize = roundToInt(poolPct * Nc)
+    val poolWinner = roundToInt(poolSize * ((poolMargin + 1) / 2))
+    val poolLoser = poolSize - poolWinner
+    val votesPool = mapOf(0 to poolWinner, 1 to poolLoser)
+
+    val cvrSize = Nc - poolSize
+    val cvrWinner = winnerTotal - poolWinner
+    val cvrLoser = loserTotal - poolLoser
+    val votesCvr = mapOf(0 to cvrWinner, 1 to cvrLoser)
+
+    val pools = mutableListOf<BallotPool>()
+    pools.add(
+        // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
+        BallotPool(
+            "noCvr",
+            1, // poolId
+            0, // contestId
+            poolSize,
+            votes = votesPool,
+        )
+    )
+
+    //    override val info: ContestInfo,
+    //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    //    cvrNc: Int,
+    //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
+    return OneAuditContest(info, votesCvr, cvrSize, pools.associateBy { it.id })
+}
+
+// used by simulateSampleSizeOneAuditAssorter()
+fun OneAuditContest.makeTestCvrs(): List<Cvr> {
+    val cvrs = mutableListOf<Cvr>()
+    /* add the regular cvrs
+    if (stratum.hasCvrs) {
+        val sim = ContestSimulation(stratum.contest)
+        cvrs.addAll(sim.makeCvrs()) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
+    } */
+
+    this.pools.values.forEach { pool ->
+        pool.votes.forEach { (candId, nvotes) ->
+            repeat(nvotes) { cvrs.add(makeCvr(info.id, candId, false, pool.id)) }
+        }
     }
-    return OneAuditContest(info, strata)
+    cvrs.shuffle()
+    return cvrs
+}
+
+// data class BallotPool(
+//    val name: String,
+//    val id: Int,
+//    val contest:Int,
+//    val ncards: Int,
+//    val votes: Map<Int, Int>, // candid-> nvotes
+//)
+/* fun makePoolCvrs(pool: BallotPool): List<Cvr> {
+    val cvrs = mutableListOf<Cvr>()
+    pool.votes.forEach { (candId, nvotes) ->
+        repeat(nvotes) { cvrs.add(makeCvr(info.id, candId)) }
+    }
+    // undervotes
+    repeat(contest.undervotes) {
+        cvrs.add(makeCvr(info.id))
+    }
+    // phantoms
+    // TODO if dont know Np, assume Np = Nc = nvotes ??
+    repeat(this.Np) {
+        cvrs.add(Cvr(strataName, mapOf(info.id to IntArray(0)), phantom = true))
+    }
+    return cvrs
+} */
+
+fun makeCvr(contestId: Int, winner: Int?, phantom: Boolean, poolId: Int?): Cvr {
+    val votes = mutableMapOf<Int, IntArray>()
+    votes[contestId] = if (winner != null) intArrayOf(winner) else IntArray(0)
+    return Cvr("pool $poolId", votes, phantom, poolId)
 }

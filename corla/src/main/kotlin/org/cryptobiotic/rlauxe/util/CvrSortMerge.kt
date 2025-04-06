@@ -12,7 +12,9 @@ import org.cryptobiotic.rlauxe.persist.json.validateOutputDir
 import java.nio.file.*
 import java.nio.file.spi.FileSystemProvider
 
-val maxChunk = 100000
+// candidate for removal
+
+private val maxChunk = 100000
 
 fun sortMergeCvrs(
     auditDir: String,

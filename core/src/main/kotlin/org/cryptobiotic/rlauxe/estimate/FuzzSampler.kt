@@ -123,7 +123,7 @@ class OneAuditFuzzSampler(
     var idx = 0
 
     init {
-        stratumNames = contestUA.contestOA.strata.map { it.strataName }.toSet()
+        stratumNames = contestUA.contestOA.pools.values.map { it.name }.toSet() // TODO
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(cvrs)
     }

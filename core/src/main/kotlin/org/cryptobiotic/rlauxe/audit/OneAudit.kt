@@ -48,20 +48,22 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         roundIdx: Int,
     ): TestH0Result {
         val cassertion = assertionRound.assertion as ClcaAssertion
-        val assorter = cassertion.cassorter as OAClcaAssorter
+        val oaClcaAssorter = cassertion.cassorter as OAClcaAssorter
 
-        val eta0 = assorter.meanAssort()
+        // val eta0 = oaClcaAssorter.meanAssort()
+        // TODO TODO TODO
+        val eta0 = .99 * oaClcaAssorter.upperBound() //     val eps: Double = .00001
         val c = (eta0 - 0.5) / 2
 
         // TODO see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
         // TODO is this right, no special processing for the "hasCvr" strata?
         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.max99) {
-            FixedEstimFn(.99 * assorter.upperBound())
+            FixedEstimFn(.99 * oaClcaAssorter.upperBound())
         } else {
             TruncShrinkage(
                 N = contest.Nc,
                 withoutReplacement = true,
-                upperBound = assorter.upperBound(),
+                upperBound = oaClcaAssorter.upperBound(),
                 d = auditConfig.pollingConfig.d,
                 eta0 = eta0,
                 c = c,
@@ -73,8 +75,9 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
             N = contest.Nc,
             withoutReplacement = true,
             riskLimit = auditConfig.riskLimit,
-            upperBound = assorter.upperBound(),
+            upperBound = oaClcaAssorter.upperBound(),
         )
+        val seq: DebuggingSequences = testFn.setDebuggingSequences()
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
 

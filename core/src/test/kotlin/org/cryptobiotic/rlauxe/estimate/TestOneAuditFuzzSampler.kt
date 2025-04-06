@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
+import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.cryptobiotic.rlauxe.util.mergeReduceS
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

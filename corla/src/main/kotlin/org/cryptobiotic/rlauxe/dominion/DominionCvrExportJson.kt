@@ -10,7 +10,7 @@ import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.publishCsv
-import org.cryptobiotic.rlauxe.persist.csv.writeCSV
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrCSV
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
 import java.io.OutputStream
@@ -171,7 +171,7 @@ fun convertCvrExportToCvr(inputStream: InputStream, outputStream: OutputStream, 
     // print(CvrCsv.header)
     cvrs.forEach {
         val cvrUA = CvrUnderAudit(it, 0, 0)
-        outputStream.write(writeCSV(cvrUA.publishCsv()).toByteArray()) // UTF-8
+        outputStream.write(writeCvrCSV(cvrUA.publishCsv()).toByteArray()) // UTF-8
     }
     return cvrs.size
 }

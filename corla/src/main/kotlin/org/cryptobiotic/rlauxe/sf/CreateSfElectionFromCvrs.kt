@@ -135,6 +135,11 @@ fun makeRegularContestVotes(cvrFile: String): Map<Int, ContestVotes> {
 data class ContestVotes(val contestId: Int) {
     val votes = mutableMapOf<Int, Int>()
     var countBallots = 0
+
+    override fun toString(): String {
+        val nvotes = votes.values.sum()
+        return "ContestVotes(contestId=$contestId, countBallots=$countBallots, votes=$votes, nvotes=$nvotes, underVotes=${countBallots-nvotes})"
+    }
 }
 
 fun makeRegularContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, ContestVotes>): List<Contest> {

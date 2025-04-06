@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

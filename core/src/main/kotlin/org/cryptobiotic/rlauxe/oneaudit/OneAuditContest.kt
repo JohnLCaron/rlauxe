@@ -1,16 +1,14 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.mergeReduce
+import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.min
 
-data class OneAuditContest (
+class OneAuditContest (
     override val info: ContestInfo,
-    val strata: List<OneAuditStratum>,
+    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    val cvrNc: Int,
+    val pools: Map<Int, BallotPool>, // pool id -> pool
 ) : ContestIF {
     override val id = info.id
     val name = info.name
@@ -29,10 +27,23 @@ data class OneAuditContest (
     val minMargin: Double
 
     init {
-        // construct votes, adding 0 votes if needed
-        val svotes = strata.map { it.votes }
+        val poolNc = pools.values.sumOf { it.ncards }
+        Nc = poolNc + cvrNc
+        Np = 0 // TODO
+
+        //// construct total votes, adding 0 votes if needed
         val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
-        voteBuilder.mergeReduce(svotes)
+        cvrVotes.forEach { cand, votes ->
+            val tvote = voteBuilder[cand] ?: 0
+            voteBuilder[cand] = tvote + votes
+        }
+        pools.values.forEach { pool ->
+            require(pool.contest == info.id)
+            pool.votes.forEach { cand, votes ->
+                val tvote = voteBuilder[cand] ?: 0
+                voteBuilder[cand] = tvote + votes
+            }
+        }
         info.candidateIds.forEach {
             if (!voteBuilder.contains(it)) {
                 voteBuilder[it] = 0
@@ -41,7 +52,7 @@ data class OneAuditContest (
         votes = voteBuilder.toMap()
 
         //// find winners, check that the minimum value is satisfied
-        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
+        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV not supported I think
         val useMin = info.minFraction ?: 0.0
         val nvotes = votes.values.sum()
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()
@@ -56,37 +67,19 @@ data class OneAuditContest (
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
-
-        Nc = strata.sumOf { it.Ng }
-        Np = strata.sumOf { it.Np }
-//        require(nvotes <= Nc) { "Nc $Nc must be >= totalVotes ${nvotes}"}
         undervotes = Nc * info.nwinners - nvotes - Np
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
     }
 
-    fun makeContestUnderAudit():OAContestUnderAudit {
+    fun makeContestUnderAudit() : OAContestUnderAudit {
         val contestUA = OAContestUnderAudit(this)
         contestUA.makeClcaAssertions()
         return contestUA
     }
 
     fun makeContest() = Contest(info, votes, Nc, Np)
-
-    fun makeTestCvrs(): List<Cvr> {
-        val cvrs = mutableListOf<Cvr>()
-        strata.forEach { stratum ->
-            if (stratum.hasCvrs) {
-                val sim = ContestSimulation(stratum.contest)
-                cvrs.addAll(sim.makeCvrs()) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
-            } else {
-                cvrs.addAll(stratum.makeFakeCvrs())
-            }
-        }
-        cvrs.shuffle()
-        return cvrs
-    }
 
     fun reportedMargin(winner: Int, loser:Int): Double {
         val winnerVotes = votes[winner] ?: 0
@@ -96,59 +89,6 @@ data class OneAuditContest (
 
     override fun toString() = buildString {
         appendLine("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
-        strata.forEach {
-            appendLine("$it")
-        }
-    }
-}
-
-data class OneAuditStratum (
-    val strataName: String,
-    val hasCvrs: Boolean,
-    val info: ContestInfo,
-    val votes: Map<Int, Int>,   // candidateId -> nvotes
-    val Ng: Int,  // upper limit on number of ballots in this strata for this contest
-    val Np: Int,  // number of phantom ballots in this strata for this contest
-) {
-    val contest = Contest(info.copy(name=strataName), votes, Ng, Np)
-
-    init {
-        votes.forEach {
-            require(info.candidateIds.contains(it.key)) { "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"}
-        }
-    }
-
-    fun reportedMargin(winner: Int, loser:Int): Double {
-        val winnerVotes = votes[winner] ?: 0
-        val loserVotes = votes[loser] ?: 0
-        return (winnerVotes - loserVotes) / Ng.toDouble()
-    }
-
-    fun makeFakeCvrs(): List<Cvr> {
-        val cvrs = mutableListOf<Cvr>()
-        votes.forEach { (candId, nvotes) ->
-            repeat(nvotes) { cvrs.add(makeCvr(info.id, candId)) }
-        }
-        // undervotes
-        repeat(contest.undervotes) {
-            cvrs.add(makeCvr(info.id))
-        }
-        // phantoms
-        // TODO if dont know Np, assume Np = Nc = nvotes ??
-        repeat(this.Np) {
-            cvrs.add(Cvr(strataName, mapOf(info.id to IntArray(0)), phantom = true))
-        }
-        return cvrs
-    }
-
-    fun makeCvr(contestId: Int, winner: Int? = null): Cvr {
-        val votes = mutableMapOf<Int, IntArray>()
-        votes[contestId] = if (winner != null) intArrayOf(winner) else IntArray(0)
-        return Cvr(strataName, votes) // TODO ok to glom onto cvr.id to indicate statum ??
-    }
-
-    override fun toString() = buildString {
-        append("  strata $strataName hasCvrs=$hasCvrs Nc=$Ng Np=$Np votes=${votes}")
     }
 }
 
@@ -171,9 +111,37 @@ class OAContestUnderAudit(
         }
         // turn into comparison assertions
         this.clcaAssertions = assertions.map { assertion ->
-            // val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
             val margin = assertion.assorter.reportedMargin()
             ClcaAssertion(contest.info, OAClcaAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
+        }
+        return this
+    }
+
+    // not used
+    fun makeClcaAssertionsFromCvrs(cvrs: Iterator<Cvr>): ContestUnderAudit {
+        // TODO assume its plurality for now
+        val assertions = mutableListOf<Assertion>()
+        contest.winners.forEach { winner ->
+            contest.losers.forEach { loser ->
+                val baseAssorter = PluralityAssorter.makeWithVotes(this.contest, winner, loser, contestOA.votes)
+                assertions.add( Assertion( this.contest.info, baseAssorter))
+            }
+        }
+
+        // calculate the assorter means all at once
+        val asnWelford = assertions.map { Pair(it, Welford())}.toMap()
+        while (cvrs.hasNext()) {
+            val cvr = cvrs.next()
+            asnWelford.forEach { (asn, welford) ->
+                welford.update(asn.assorter.assort(cvr))
+            }
+        }
+
+        // turn into comparison assertions
+        this.clcaAssertions = asnWelford.map { (asn, welford) ->
+            val cvrMean = if (welford.count == 0) mean2margin(asn.assorter.reportedMargin()) else welford.mean
+            println("  margin for ${asn.assorter.desc()} reportedMargin ${asn.assorter.reportedMargin()}, cvrMargin = ${ mean2margin(cvrMean) }")
+            ClcaAssertion(contest.info, OAClcaAssorter(this.contestOA, asn.assorter, cvrMean))
         }
         return this
     }
@@ -210,69 +178,35 @@ class OAContestUnderAudit(
 data class OAClcaAssorter(
     val contestOA: OneAuditContest,
     val assorter: AssorterIF,   // A(mvr)
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value TODO why?
+    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
 ) : ClcaAssorterIF {
-    val stratumInfos: Map<String, StratumInfo>   // strataName -> average batch assorter value
-    val clcaMean: Double // estimated assorter margin, if all cards agree; used for alphaMart
-    var cvrStrata: StratumInfo
+    val cassorter = ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue) // TODO subclass and override bassort ??
 
-    // TODO fix failing tests
-    override fun noerror() = cvrStrata.cassorter!!.noerror
-    override fun upperBound() = cvrStrata.cassorter!!.upperBound
-    override fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
+    override fun noerror() = cassorter.noerror
+    override fun upperBound() = cassorter.upperBound
+    override fun meanAssort() = cassorter.meanAssort()
     override fun assorter() = assorter
     override fun id() = contestOA.id
 
-    init {
-        var weightedMeanAssortValue = 0.0
-        stratumInfos = contestOA.strata.map { stratum ->
-            val stratumMargin = stratum.reportedMargin(assorter.winner(), assorter.loser())
-            val avgBatchAssortValue = margin2mean(stratumMargin)
-
-            if (stratum.hasCvrs) {
-                val cassorter = ClcaAssorter(contestOA.makeContest().info, assorter, avgBatchAssortValue)
-                weightedMeanAssortValue += cassorter.noerror * stratum.Ng
-                Pair(stratum.strataName, StratumInfo(avgBatchAssortValue, cassorter))
-            } else {
-                val stratumNoError = 1.0 / (2.0 - stratumMargin / assorter.upperBound())
-                weightedMeanAssortValue += stratumNoError * stratum.Ng
-                Pair(stratum.strataName, StratumInfo(avgBatchAssortValue, null))
-            }
-        }.toMap()
-        clcaMean = weightedMeanAssortValue / contestOA.Nc
-        cvrStrata = stratumInfos.values.find { it.cassorter != null }!!
-    }
-
-    fun calcAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
-        val mean = cvrPairs.filter{ it.first.hasContest(contestOA.id) }
-            .map { bassort(it.first, it.second) }.average()
-        return mean2margin(mean)
-    }
-
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
-        val stratumInfo = stratumInfos[cvr.id] // TODO cant rely on cvr ids
-        if (stratumInfo == null) {
-            if (cvrStrata != null) {
-                return cvrStrata!!.cassorter!!.bassort(mvr, cvr)
-            } else {
-                throw IllegalStateException()
-            }
+        if (cvr.poolId == null) {
+            return cassorter.bassort(mvr, cvr)
         }
-        if (stratumInfo.cassorter != null) {
-            return stratumInfo.cassorter.bassort(mvr, cvr)
-        }
+        val pool = contestOA.pools[cvr.poolId]
+        if (pool == null) { throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}") }
 
-        val avgBatchAssortValue = stratumInfo.avgBatchAssortValue
-        val overstatement = overstatementError(mvr, cvr, avgBatchAssortValue) // ωi
+        val avgBatchAssortValue = margin2mean(pool.calcReportedMargin(assorter.winner(), assorter.loser()))
+        val overstatement = overstatementPoolError(mvr, cvr, avgBatchAssortValue) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
-        val margin = 2.0 * avgBatchAssortValue - 1.0 // reported assorter margin
-        val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
-        val result =  tau * noerror
+        // had error using the pool margin instead of the assorter margin
+        //val margin = 2.0 * avgBatchAssortValue - 1.0 // reported assorter margin
+        //val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
+        val result =  tau * cassorter.noerror
         return result
     }
 
-    fun overstatementError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
+    fun overstatementPoolError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
         if (hasStyle and !cvr.hasContest(contestOA.id)) {
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contestOA.name} (${contestOA.id})")
         }
@@ -287,9 +221,6 @@ data class OAClcaAssorter(
         appendLine("OneAuditComparisonAssorter for contest ${contestOA.name} (${contestOA.id})")
         appendLine("  assorter=${assorter.desc()}")
         appendLine("  avgCvrAssortValue=$avgCvrAssortValue")
-        appendLine("  batchAvgValues=${stratumInfos.map { (key, value) -> "$key = ${value.avgBatchAssortValue}" }}")
     }
 }
-
-data class StratumInfo(val avgBatchAssortValue: Double, val cassorter: ClcaAssorter?)
 

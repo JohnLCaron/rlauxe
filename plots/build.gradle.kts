@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     api(project(":core"))
-    api(project(":corla"))
+    api(project(":cases"))
 
     implementation(kotlin("stdlib"))
     implementation(libs.kotlinx.coroutines.core)

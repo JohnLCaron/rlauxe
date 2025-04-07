@@ -1,0 +1,138 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;phIrT6&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;auditsWithErrors samples needed&quot;,
+&quot;subtitle&quot;:&quot;margin=0.04 Nc=50000 nruns=200&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;],
+&quot;samplesNeeded&quot;:[149.0,157.36499999999992,188.0,200.45,217.66,242.62,340.1600000000001,456.72499999999997,698.885,508.54499999999985,554.8900000000004,564.25,634.5649999999999,671.6649999999997,749.8149999999999,1000.2899999999998,1310.25,2044.9099999999992,4297.325000000002,4614.655000000001,4609.83,4625.230000000004,4690.644999999993,4502.894999999999,4229.065000000002,4718.53,4923.634999999999,144.51500000000001,147.48999999999987,151.69,151.18499999999997,161.93499999999997,166.45499999999996,186.34999999999982,196.34000000000003,248.88000000000008],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;],
+&quot;samplesNeeded&quot;:[149.0,157.36499999999992,188.0,200.45,217.66,242.62,340.1600000000001,456.72499999999997,698.885,508.54499999999985,554.8900000000004,564.25,634.5649999999999,671.6649999999997,749.8149999999999,1000.2899999999998,1310.25,2044.9099999999992,4297.325000000002,4614.655000000001,4609.83,4625.230000000004,4690.644999999993,4502.894999999999,4229.065000000002,4718.53,4923.634999999999,144.51500000000001,147.48999999999987,151.69,151.18499999999997,161.93499999999997,166.45499999999996,186.34999999999982,196.34000000000003,248.88000000000008],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;oneAuditEps&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;fuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+       var containerDiv = document.getElementById(&quot;phIrT6&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

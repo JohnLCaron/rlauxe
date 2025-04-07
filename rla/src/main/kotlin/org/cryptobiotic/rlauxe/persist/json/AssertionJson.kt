@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.*
 @Serializable
 data class AssertionIFJson(
     val className: String,
-    val cassorter: ClcaAssorterIFJson?,
+    val cassorter: ClcaAssorterJson?,
     val assorter: AssorterIFJson?,
 )
 
@@ -43,14 +43,9 @@ fun AssertionIFJson.import(info: ContestInfo): Assertion {
     }
 }
 
-// open class ClcaAssertion(
-//    contest: ContestIF,
-//    val cassorter: ClcaAssorterIF,
-//): Assertion(contest, cassorter.assorter()) {
-
 @Serializable
 data class ClcaAssertionJson(
-    val cassorter: ClcaAssorterIFJson,
+    val cassorter: ClcaAssorterJson,
 )
 
 fun ClcaAssertion.publishJson() = ClcaAssertionJson(
@@ -64,12 +59,6 @@ fun ClcaAssertionJson.import(info: ContestInfo): ClcaAssertion {
     )
     return result
 }
-
-// open class Assertion(
-//    val contest: ContestIF,
-//    val assorter: AssorterIF,
-//)
-
 @Serializable
 data class AssertionJson(
     //val contest: ContestIFJson,

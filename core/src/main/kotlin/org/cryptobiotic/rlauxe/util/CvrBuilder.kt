@@ -120,9 +120,9 @@ class CvrBuilder(
 
     fun done() = builders
 
-    fun build() : Cvr {
+    fun build(poolId: Int?=null) : Cvr {
         val votes: Map<Int, IntArray> = contests.values.map { it.build() }.toMap()
-        return Cvr(id, votes, phantom)
+        return Cvr(id, votes, phantom, poolId = poolId)
     }
 
     companion object {

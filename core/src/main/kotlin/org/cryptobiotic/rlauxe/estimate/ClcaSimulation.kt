@@ -15,7 +15,7 @@ private val show = true
 class ClcaSimulation(
     rcvrs: List<Cvr>, // may have phantoms
     val contest: ContestIF,
-    val cassorter: ClcaAssorterIF,
+    val cassorter: ClcaAssorter,
     val errorRates: ClcaErrorRates,
 ): Sampler {
     val Ncvrs = rcvrs.size

@@ -5,8 +5,6 @@ import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.dfn
-import kotlin.math.log10
 import kotlin.test.Test
 
 class OneAuditNoErrors {
@@ -15,7 +13,7 @@ class OneAuditNoErrors {
 
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10
-    val N = 10000
+    val N = 50000
     val cvrPercent = 0.95
 
     @Test
@@ -43,7 +41,7 @@ class OneAuditNoErrors {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator1 = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGeneratorDefault = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "default"),
                 auditConfigIn = AuditConfig(
@@ -51,17 +49,27 @@ class OneAuditNoErrors {
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default)
                 )
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator1))
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorDefault))
 
-            val oneauditGenerator2 = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
-                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "max99"),
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "bet99"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator2))
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorBet99))
+
+            val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGenerator(
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "eta0Eps"),
+                auditConfigIn = AuditConfig(
+                    AuditType.ONEAUDIT, true, nsimEst = 100,
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
+                )
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorEta0Eps))
         }
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=40)
         println(stopwatch.took())

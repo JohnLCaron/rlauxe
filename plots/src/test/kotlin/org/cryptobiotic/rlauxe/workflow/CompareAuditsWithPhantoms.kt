@@ -41,7 +41,7 @@ class CompareAuditsWithPhantoms {
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit99"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))

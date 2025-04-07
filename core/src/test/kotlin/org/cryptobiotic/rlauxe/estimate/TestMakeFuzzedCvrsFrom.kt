@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 
 class TestMakeFuzzedCvrsFrom {
     val show = false
+    val showOA = true
 
     @Test
     fun testFuzzTwoPersonContest() {
@@ -199,34 +200,35 @@ class TestMakeFuzzedCvrsFrom {
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val contestId = 0
 
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-                val contest =
+                val contestOA =
                     makeContestOA(margin, N, cvrPercent = .70, 0.0, undervotePercent = .01, phantomPercent = .01)
-                val cvrs = contest.makeTestCvrs()
-                val ncands = contest.ncandidates
+                val cvrs = contestOA.makeTestCvrs()
+                val ncands = contestOA.ncandidates
 
-                if (show) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
-                val fuzzed = makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct)
-                val choiceChange = mutableMapOf<String, Int>()
+                if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contestOA.votes}")
+                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA), cvrs, fuzzPct)
+                val choiceChange = mutableMapOf<String, Int>() // org-fuzz -> count
                 cvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
-                    val orgChoice = cvr.votes[0]!!.firstOrNull() ?: ncands
-                    val fuzzChoice = fuzzedCvr.votes[0]!!.firstOrNull() ?: ncands
-                    val change = (orgChoice).toString() + fuzzChoice.toString()
-                    val count = choiceChange[change] ?: 0
-                    choiceChange[change] = count + 1
+                    val orgChoice = cvr.votes[contestId]!!.firstOrNull() ?: ncands
+                    val fuzzChoice = fuzzedCvr.votes[contestId]!!.firstOrNull() ?: ncands
+                    val changeKey = (orgChoice).toString() + fuzzChoice.toString()
+                    val count = choiceChange[changeKey] ?: 0
+                    choiceChange[changeKey] = count + 1
                 }
-                if (show) {
+                if (showOA) {
                     println(" choiceChange")
                     choiceChange.toSortedMap().forEach { println("  $it") }
                 }
                 choiceChanges.add(choiceChange)
 
                 val unchanged = sumDiagonal(ncands, choiceChange)
-                if (show) println(" unchanged $unchanged = ${unchanged / N.toDouble()}")
+                if (showOA) println(" unchanged $unchanged = ${unchanged / N.toDouble()}")
                 assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .01)
 
                 // approx even distribution

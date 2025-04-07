@@ -61,7 +61,7 @@ class TestOneAudit {
         val testCvrs = contestOA.makeTestCvrs()  // one for each ballot, with and without CVRS
         val auditConfig = AuditConfig(
             AuditType.ONEAUDIT, hasStyles=true, nsimEst=10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.max99)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.bet99)
         )
 
         val workflow = OneAudit(auditConfig, listOf(contestOA),

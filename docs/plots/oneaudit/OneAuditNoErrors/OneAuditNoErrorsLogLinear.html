@@ -1,0 +1,140 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;MeJxFr&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAuditNoErrors samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100 cvrPercent=0.95&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;true margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;true margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;samplesNeeded&quot;:[46531.96000000001,47976.340000000004,44551.450000000004,42627.88000000002,38525.38999999998,36828.36999999998,26298.960000000003,14449.499999999998,7810.710000000001,1910.9499999999998,999.7200000000004,416.62,249.84999999999997,167.96000000000004,138.83999999999997,109.37,96.96000000000005,69.74000000000002,5748.0,2934.0,1969.0,1482.0,1188.0,991.0,744.0,596.0,497.0,373.0,298.0,198.0,149.0,119.0,99.0,85.0,74.0,59.0,49797.10999999999,49168.899999999994,48221.45,46879.210000000014,45250.54,43462.490000000005,39529.69999999999,35144.30999999999,31329.240000000005,24331.12,18518.150000000005,10740.179999999998,6469.49,4350.710000000001,3162.17,2339.2099999999996,1826.23,1172.5800000000006,49744.51000000002,49000.87000000003,47056.46,42841.500000000015,39916.73999999999,34284.32000000001,27281.929999999993,17265.700000000008,14404.44,6773.35,3201.2499999999995,1117.59,563.9300000000001,323.6,197.98000000000002,171.98,124.17999999999998,90.45000000000005,48073.85999999999,44947.63000000001,43108.14000000002,42370.50999999999,38789.899999999994,35897.57,34270.25999999997,28286.739999999994,25783.26,16102.320000000002,12587.119999999997,7657.449999999998,4652.249999999999,2810.1899999999996,2063.430000000001,1557.9599999999994,1216.0300000000004,742.7000000000002],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;true margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;true margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;true margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;samplesNeeded&quot;:[46531.96000000001,47976.340000000004,44551.450000000004,42627.88000000002,38525.38999999998,36828.36999999998,26298.960000000003,14449.499999999998,7810.710000000001,1910.9499999999998,999.7200000000004,416.62,249.84999999999997,167.96000000000004,138.83999999999997,109.37,96.96000000000005,69.74000000000002,5748.0,2934.0,1969.0,1482.0,1188.0,991.0,744.0,596.0,497.0,373.0,298.0,198.0,149.0,119.0,99.0,85.0,74.0,59.0,49797.10999999999,49168.899999999994,48221.45,46879.210000000014,45250.54,43462.490000000005,39529.69999999999,35144.30999999999,31329.240000000005,24331.12,18518.150000000005,10740.179999999998,6469.49,4350.710000000001,3162.17,2339.2099999999996,1826.23,1172.5800000000006,49744.51000000002,49000.87000000003,47056.46,42841.500000000015,39916.73999999999,34284.32000000001,27281.929999999993,17265.700000000008,14404.44,6773.35,3201.2499999999995,1117.59,563.9300000000001,323.6,197.98000000000002,171.98,124.17999999999998,90.45000000000005,48073.85999999999,44947.63000000001,43108.14000000002,42370.50999999999,38789.899999999994,35897.57,34270.25999999997,28286.739999999994,25783.26,16102.320000000002,12587.119999999997,7657.449999999998,4652.249999999999,2810.1899999999996,2063.430000000001,1557.9599999999994,1216.0300000000004,742.7000000000002],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;true margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;true margin&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;6&quot;
+};
+       var containerDiv = document.getElementById(&quot;MeJxFr&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

@@ -15,13 +15,13 @@ class CompareAuditsNoErrors {
 
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10
-    val N = 10000
+    val N = 50000
 
     @Test
     fun genAuditsNoErrorsPlots() {
-        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
+        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10, .20)
 
-        val cvrPercents = listOf(0.05, 0.5, .95)
+        val cvrPercents = listOf(0.05, 0.5, .80, .95, .99)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -46,9 +46,9 @@ class CompareAuditsNoErrors {
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-                        oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default)
+                        oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                     ),
-                    parameters=mapOf("nruns" to nruns, "cat" to "oneudit-${(100 * cvrPercent).toInt()}%"),
+                    parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
             }
@@ -203,7 +203,7 @@ class CompareAuditsNoErrors {
                 mapOf("nruns" to nruns.toDouble(), "cat" to "max99"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator2))

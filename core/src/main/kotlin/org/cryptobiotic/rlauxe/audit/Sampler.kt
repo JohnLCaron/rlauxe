@@ -61,7 +61,7 @@ class ClcaWithoutReplacement(
     val contestId: Int,
     val hasStyles: Boolean,
     val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr) why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
-    val cassorter: ClcaAssorterIF,
+    val cassorter: ClcaAssorter,
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit
 ): Sampler, Iterator<Double> {
@@ -108,7 +108,7 @@ class ClcaWithoutReplacement(
     fun poolCount() = poolCount
 }
 
-fun makeClcaNoErrorSampler(contestId: Int, hasStyles: Boolean, cvrs : List<Cvr>, cassorter: ClcaAssorterIF): Sampler {
+fun makeClcaNoErrorSampler(contestId: Int, hasStyles: Boolean, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampler {
     val cvrPairs = cvrs.zip(cvrs)
     return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, true, false)
 }

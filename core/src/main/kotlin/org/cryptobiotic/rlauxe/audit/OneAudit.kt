@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 class OneAudit(
@@ -48,22 +47,29 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         roundIdx: Int,
     ): TestH0Result {
         val cassertion = assertionRound.assertion as ClcaAssertion
-        val oaClcaAssorter = cassertion.cassorter as OAClcaAssorter
+        val cassorter = cassertion.cassorter // as OAClcaAssorter
+
+        // // default: eta0 = reportedMean, shrinkTrunk
+        //// bet99: eta0 = reportedMean, 99% max bet
+        //// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
+        //// maximal: eta0 = upper*(1 - eps), 99% max bet
 
         // val eta0 = oaClcaAssorter.meanAssort()
-        // TODO TODO TODO
-        val eta0 = .99 * oaClcaAssorter.upperBound() //     val eps: Double = .00001
+        val strategy = auditConfig.oaConfig.strategy
+        val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
+            cassorter.upperBound() * (1.0 - eps)
+        else
+            cassorter.meanAssort()
+
         val c = (eta0 - 0.5) / 2
 
-        // TODO see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
-        // TODO is this right, no special processing for the "hasCvr" strata?
-        val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.max99) {
-            FixedEstimFn(.99 * oaClcaAssorter.upperBound())
+        val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
+            FixedEstimFn(.99 * cassorter.upperBound())
         } else {
             TruncShrinkage(
                 N = contest.Nc,
                 withoutReplacement = true,
-                upperBound = oaClcaAssorter.upperBound(),
+                upperBound = cassorter.upperBound(),
                 d = auditConfig.pollingConfig.d,
                 eta0 = eta0,
                 c = c,
@@ -75,7 +81,7 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
             N = contest.Nc,
             withoutReplacement = true,
             riskLimit = auditConfig.riskLimit,
-            upperBound = oaClcaAssorter.upperBound(),
+            upperBound = cassorter.upperBound(),
         )
         val seq: DebuggingSequences = testFn.setDebuggingSequences()
 

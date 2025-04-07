@@ -68,7 +68,9 @@ class ClcaSingleRoundAuditTaskGenerator(
     val p1flips: Double? = null,
 ): ContestAuditTaskGenerator {
 
-    override fun name() = "ClcaSingleRoundAuditTaskGenerator"
+    override fun name(): String {
+        return "ClcaSingleRoundAuditTaskGenerator"
+    }
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val useConfig = auditConfig ?:

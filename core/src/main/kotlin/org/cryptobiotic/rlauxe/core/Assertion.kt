@@ -37,7 +37,7 @@ open class Assertion(
 
 class ClcaAssertion(
     info: ContestInfo,
-    val cassorter: ClcaAssorterIF,
+    val cassorter: ClcaAssorter,
 ): Assertion(info, cassorter.assorter()) {
 
     override fun toString() = "${cassorter.assorter().desc()}"

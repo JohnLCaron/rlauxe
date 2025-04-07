@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 03/22/2026_
+_last changed: 04/07/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -258,7 +258,9 @@ more efficient than BLCA (batch-level comparison RLAs) when batches are large. C
 more efficient than BPA when batches are more homogenous than the contest
 votes as a whole, i.e., when precincts are polarized in different directions." (OneAudit p 9)
 
-See [OneAudit Notes](docs/OneAudit.md).
+See [OneAudit version 2](docs/OneAudit2.md).
+
+Oder version: [OneAudit version 1](docs/OneAudit.md).
 
 
 # Comparing Samples Needed by Audit type

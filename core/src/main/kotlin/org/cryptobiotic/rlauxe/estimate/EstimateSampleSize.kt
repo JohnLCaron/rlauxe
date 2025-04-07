@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.cryptobiotic.rlauxe.raire.RaireContest
@@ -421,7 +420,7 @@ fun simulateSampleSizeOneAuditAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val cassorter = cassertion.cassorter as OAClcaAssorter
+    val cassorter = cassertion.cassorter // as OAClcaAssorter
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 

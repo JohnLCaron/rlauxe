@@ -175,23 +175,16 @@ class OAContestUnderAudit(
 //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
 //    otherwise = 1/2
 
-data class OAClcaAssorter(
+class OAClcaAssorter(
     val contestOA: OneAuditContest,
-    val assorter: AssorterIF,   // A(mvr)
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
-) : ClcaAssorterIF {
-    val cassorter = ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue) // TODO subclass and override bassort ??
-
-    override fun noerror() = cassorter.noerror
-    override fun upperBound() = cassorter.upperBound
-    override fun meanAssort() = cassorter.meanAssort()
-    override fun assorter() = assorter
-    override fun id() = contestOA.id
+    assorter: AssorterIF,   // A(mvr)
+    avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
+) : ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue) {
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
         if (cvr.poolId == null) {
-            return cassorter.bassort(mvr, cvr)
+            return super.bassort(mvr, cvr)
         }
         val pool = contestOA.pools[cvr.poolId]
         if (pool == null) { throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}") }
@@ -202,7 +195,7 @@ data class OAClcaAssorter(
         // had error using the pool margin instead of the assorter margin
         //val margin = 2.0 * avgBatchAssortValue - 1.0 // reported assorter margin
         //val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
-        val result =  tau * cassorter.noerror
+        val result =  tau * noerror
         return result
     }
 
@@ -222,5 +215,23 @@ data class OAClcaAssorter(
         appendLine("  assorter=${assorter.desc()}")
         appendLine("  avgCvrAssortValue=$avgCvrAssortValue")
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as OAClcaAssorter
+
+        return contestOA == other.contestOA
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + contestOA.hashCode()
+        return result
+    }
+
+
 }
 

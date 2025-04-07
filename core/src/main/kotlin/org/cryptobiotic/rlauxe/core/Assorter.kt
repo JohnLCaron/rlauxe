@@ -115,24 +115,14 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
 
 ////////////////////////////////////////////////////////////////////////////
 
-interface ClcaAssorterIF {
-    fun id(): Int
-    fun noerror(): Double
-    fun upperBound(): Double
-    fun meanAssort(): Double  // wtf ?
-
-    fun assorter(): AssorterIF
-    fun bassort(mvr: Cvr, cvr:Cvr): Double
-}
-
 /** See SHANGRLA Section 3.2 */
-data class ClcaAssorter(
+open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
     val hasStyle: Boolean = true,
     val check: Boolean = true, // TODO get rid of
-) : ClcaAssorterIF {
+) {
     val assorterMargin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
     val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())  // assort value when there's no error
     val upperBound = 2.0 * noerror  // maximum assort value
@@ -146,11 +136,11 @@ data class ClcaAssorter(
         }
     }
 
-    override fun id() = info.id
-    override fun noerror() = noerror
-    override fun upperBound() = upperBound
-    override fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
-    override fun assorter() = assorter
+    fun id() = info.id
+    fun noerror() = noerror
+    fun upperBound() = upperBound
+    fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
+    fun assorter() = assorter
     override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$assorterMargin noerror=$noerror upperBound=$upperBound"
 
     fun calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
@@ -163,7 +153,7 @@ data class ClcaAssorter(
     //                o is the overstatement
     //                u is the upper bound on the value the assorter assigns to any ballot
     //                v is the assorter margin
-    override fun bassort(mvr: Cvr, cvr:Cvr): Double {
+    open fun bassort(mvr: Cvr, cvr:Cvr): Double {
         // Let
         //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
         //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
@@ -226,4 +216,27 @@ data class ClcaAssorter(
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ClcaAssorter
+
+        if (avgCvrAssortValue != other.avgCvrAssortValue) return false
+        if (hasStyle != other.hasStyle) return false
+        if (info != other.info) return false
+        if (assorter != other.assorter) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = avgCvrAssortValue.hashCode()
+        result = 31 * result + hasStyle.hashCode()
+        result = 31 * result + info.hashCode()
+        result = 31 * result + assorter.hashCode()
+        return result
+    }
+
 }

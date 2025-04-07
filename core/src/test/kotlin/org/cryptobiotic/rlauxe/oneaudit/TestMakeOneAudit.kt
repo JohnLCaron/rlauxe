@@ -19,7 +19,7 @@ class TestMakeOneAudit {
         assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
 
         assertEquals(1, contestOA.pools.size)
-        val pool = contestOA.pools[0]!!
+        val pool = contestOA.pools[1]!!
         assertEquals("noCvr", pool.name)
         assertEquals(0, pool.ncards)
         assertEquals(0.0, pool.calcReportedMargin(0, 1), doublePrecision)
@@ -67,7 +67,7 @@ class TestMakeOneAudit {
         assertEquals(roundToInt(N*cvrPercent), contestOA.cvrNc)
 
         assertEquals(1, contestOA.pools.size)
-        val pool = contestOA.pools[0]!!
+        val pool = contestOA.pools[1]!!
         assertEquals("noCvr", pool.name)
         println(pool)
 

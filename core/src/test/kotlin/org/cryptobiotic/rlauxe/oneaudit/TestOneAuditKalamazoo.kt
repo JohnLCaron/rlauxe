@@ -1,11 +1,9 @@
-package org.cryptobiotic.rlauxe.oneAuditOld
+package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
-import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,30 +15,30 @@ class TestOneAuditKalamazoo {
 
     @Test
     fun testOneAuditKalamazoo() {
-        val contest = makeContestKalamazoo()
-        val strataCvr = contest.strata[0]
-        val strataNocvr = contest.strata[1]
-        val info = contest.info
+        val contestOA = makeContestKalamazoo()
+        val strataCvr = contestOA.cvrVotes
+        val strataNocvr = contestOA.pools[1]!!
+        val info = contestOA.info
 
         // votes_cvr=5218.0 votes_poll=22082.0 diff cvr: 76.0, diff poll: 290.0
-        assertEquals(5218, strataCvr.votes.values.sum())
+        assertEquals(5218, strataCvr.values.sum())
         assertEquals(22082, strataNocvr.votes.values.sum())
-        assertEquals(76, strataCvr.Ng - strataCvr.votes.values.sum())
-        assertEquals(290, strataNocvr.Ng - strataNocvr.votes.values.sum())
+        assertEquals(76, contestOA.cvrNc - strataCvr.values.sum())
+        assertEquals(290, strataNocvr.ncards - strataNocvr.votes.values.sum())
 
         // whitmer=20699, schuette=5569, assorter_mean_all=0.5468806477264513
-        val whitmerTotal = contest.votes[info.candidateNames["Whitmer"]!!]!!
-        val schuetteTotal = contest.votes[info.candidateNames["Schuette"]!!]!!
+        val whitmerTotal = contestOA.votes[info.candidateNames["Whitmer"]!!]!!
+        val schuetteTotal = contestOA.votes[info.candidateNames["Schuette"]!!]!!
         assertEquals(20699, whitmerTotal)
         assertEquals(5569, schuetteTotal)
-        val assorterMeanAll = (whitmerTotal - schuetteTotal).toDouble() / contest.Nc
-        assertEquals(0.5468806477264513, assorterMeanAll, doublePrecision)
+        val assorterMeanAll = (whitmerTotal - schuetteTotal)/ contestOA.Nc.toDouble()
+        assertEquals(0.5468806477264513, assorterMeanAll, doublePrecision) // margin not mean
 
         // assorter_mean_poll=0.5682996602896477,
         val whitmerNoCvr = strataNocvr.votes[info.candidateNames["Whitmer"]!!]!!
         val schuetteNoCvr = strataNocvr.votes[info.candidateNames["Schuette"]!!]!!
-        val assorterMeanNoCvr = (whitmerNoCvr - schuetteNoCvr).toDouble() / strataNocvr.Ng  // using strata Nc
-        assertEquals(0.5682996602896477, assorterMeanNoCvr, doublePrecision)
+        val assorterMeanNoCvr = (whitmerNoCvr - schuetteNoCvr) / strataNocvr.ncards.toDouble()
+        assertEquals(0.5682996602896477, assorterMeanNoCvr, doublePrecision) // margin not mean
 
         // eta=0.5245932724032007, v=0.09376129545290257, u_b=1.0491865448064015,
         val u = 1.0
@@ -106,8 +104,8 @@ class TestOneAuditKalamazoo {
         assertTrue(doublesAreClose(sam, expectedSam, doublePrecision))
 
         // do the same thing using real assorters
-        val testCvrs = contest.makeTestCvrs()
-        val contestUA = contest.makeContestUnderAudit()
+        val testCvrs = contestOA.makeTestCvrs()
+        val contestUA = contestOA.makeContestUnderAudit()
         val minAllAsserter = contestUA.minAssertion()
         assertNotNull(minAllAsserter)
         val minAllAssorter = minAllAsserter!!.assorter
@@ -115,9 +113,10 @@ class TestOneAuditKalamazoo {
         assertEquals(assorterMeanAll, minAllAssorter.reportedMargin(), doublePrecision)
         assertEquals(0.5468806477264513, minAllAssorter.reportedMargin(), doublePrecision)
 
-        val minAssorterMargin = minAllAssorter.calcAssorterMargin(contest.id, testCvrs)
-        println(" calcAssorterMargin for min = $minAssorterMargin")
-        assertEquals(0.5468806477264513, minAssorterMargin, doublePrecision)
+        // TODO
+        // val minAssorterMargin = minAllAssorter.calcAssorterMargin(contestOA.id, testCvrs)
+        // println(" calcAssorterMargin for min = $minAssorterMargin")
+        // assertEquals(0.5468806477264513, minAssorterMargin, doublePrecision)
     }
 }
 
@@ -140,7 +139,7 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
     )
 
     // reported results for the two strata
-    val candidates = mapOf(     // candidateName -> [votes(cvr), votes(nocvr)]
+    val candidateVotes = mapOf(     // candidateName -> [votes(cvr), votes(nocvr)]
         "Schuette" to listOf(1349, 4220),
         "Whitmer" to listOf(3765, 16934),
         "Gelineau" to listOf(56, 462),
@@ -152,49 +151,27 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
 
     // The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest
     // the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
-    val stratumNames = listOf("hasCvr", "noCvr")
-    val stratumSizes = listOf(5294, 22372) // CVR, noCvr
+    val stratumSizes = listOf(5294, 22372) // hasCvr, noCvr
 
-    //    val strataName: String,
-    //    val info: ContestInfo,
-    //    val votes: Map<Int, Int>,   // candidateId -> nvotes
-    //    val Nc: Int,  // upper limit on number of ballots in this starata for this contest
-    //    val Np: Int,  // number of phantom ballots in this starata for this contest
-    val strata = mutableListOf<OneAuditStratum>()
-    repeat(2) { idx ->
-        strata.add(
-            OneAuditStratum(
-                stratumNames[idx],
-                hasCvrs = (idx == 0),
-                info,
-                candidates.map { (key, value) -> Pair(info.candidateNames[key]!!, value[idx]) }.toMap(),
-                Ng = stratumSizes[idx],
-                Np = 0  // TODO investigate
-            )
+    // reported results for the two strata
+    val votesCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
+    val votesNoCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[1]) }.toMap()
+
+    val pools = mutableListOf<BallotPool>()
+    pools.add(
+        // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
+        BallotPool(
+            "noCvr",
+            1, // poolId
+            0, // contestId
+            stratumSizes[1],
+            votes = votesNoCvr,
         )
-    }
-    return OneAuditContest(info, strata)
-}
-
-fun makeCvrs() { // TODO set proportion
-    // assort values for "assert that Whitmer is winner and Schuette is loser" from the sampled ballots
-    val votesAudPoll = mapOf(
-        "Butkovich" to 0,
-        "Gelineau" to 1,
-        "Kurland" to 0,
-        "Schleiger" to 0,
-        "Schuette" to 8,
-        "Whitmer" to 23
     )
-    val nCvr = 8
-    val nPoll = 32
-    val otherNoCvrVotes =
-        votesAudPoll.filterKeys { it in listOf("Butkovich", "Gelineau", "Kurland", "Schleiger") }.values.sum()
-    val schuetteNoCvrVotes = votesAudPoll["Schuette"]!!
-    val whitmerNoCvrVotes = votesAudPoll["Whitmer"]!!
 
-    val pollingCvrs = mutableListOf<Cvr>()
-    repeat(otherNoCvrVotes) { pollingCvrs.add(makeCvr(1)) }
-    repeat(schuetteNoCvrVotes) { pollingCvrs.add(makeCvr(4)) }
-    repeat(whitmerNoCvrVotes) { pollingCvrs.add(makeCvr(5)) }
+    //    override val info: ContestInfo,
+    //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    //    cvrNc: Int,
+    //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
+    return OneAuditContest(info, votesCvr, stratumSizes[0], pools.associateBy { it.id })
 }

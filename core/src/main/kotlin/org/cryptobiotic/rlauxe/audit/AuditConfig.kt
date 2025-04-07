@@ -62,7 +62,10 @@ data class ClcaConfig(
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
-enum class OneAuditStrategyType { default, max99 }
+// default: eta0 = reportedMean, shrinkTrunk
+// bet99: eta0 = reportedMean, 99% max bet
+// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
+enum class OneAuditStrategyType { default, bet99, eta0Eps }
 data class OneAuditConfig(
     val strategy: OneAuditStrategyType = OneAuditStrategyType.default,
     val simFuzzPct: Double? = null, // for the estimation

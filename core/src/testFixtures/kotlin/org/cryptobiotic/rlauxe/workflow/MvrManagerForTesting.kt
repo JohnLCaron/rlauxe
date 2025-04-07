@@ -45,6 +45,10 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     }
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
+        if (mvrsRound.isEmpty()) {
+            return mvrsUA.map { it.cvr }.zip(cvrsUA.map { it.cvr }) // all of em, for SingleRoundAudit
+        }
+
         val sampleNumbers = mvrsRound.map { it.sampleNum }
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA.iterator())
 
@@ -60,14 +64,14 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         return mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
     }
 
-    fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler  {
+    fun makeSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorter, allowReset: Boolean): Sampler  {
         if (mvrsRound.isEmpty()) return makeOneRoundSampler(contestId, hasStyles, cassorter, allowReset) // TODO ???
         val cvrPairs = makeCvrPairsForRound()
         return ClcaWithoutReplacement(contestId, hasStyles,cvrPairs, cassorter, allowReset = allowReset)
     }
 
     // just use the entire cvrs/mvrs
-    fun makeOneRoundSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorterIF, allowReset: Boolean): Sampler {
+    fun makeOneRoundSampler(contestId: Int, hasStyles: Boolean, cassorter: ClcaAssorter, allowReset: Boolean): Sampler {
         val cvrPairs = mvrsUA.map{ it.cvr }.zip(cvrsUA.map{ it.cvr })
         return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, allowReset = allowReset)
     }

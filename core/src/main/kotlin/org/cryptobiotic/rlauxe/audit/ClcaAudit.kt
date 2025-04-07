@@ -11,7 +11,6 @@ class ClcaAudit(
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
     val mvrManager: MvrManagerClcaIF,
-    // val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
@@ -79,8 +78,6 @@ class RunContestTask(
     override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx nassertions ${contest.assertionRounds.size}"
 
     override fun run(): Boolean {
-        println(name())
-
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contest.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {

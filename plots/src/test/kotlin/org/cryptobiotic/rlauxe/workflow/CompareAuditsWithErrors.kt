@@ -8,12 +8,13 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class CompareAuditsWithErrors {
-    val nruns = 100
+    val nruns = 200
     val nsimEst = 10
     val name = "auditsWithErrors"
     val dirName = "/home/stormy/temp/samples/$name"
     val N = 50000
     val margin = .04
+    val cvrPercent = .95
 
     @Test
     fun genAuditWithFuzzPlots() {
@@ -37,11 +38,11 @@ class CompareAuditsWithErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, cvrPercent = .99, mvrsFuzzPct=fuzzPct,
+                N, margin, 0.0, 0.0, cvrPercent = cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
@@ -75,7 +76,7 @@ class CompareAuditsWithErrors {
 
 fun compareCategories(wr: WorkflowResult): String {
     return when (wr.Dparam("auditType")) {
-        1.0 -> "oneaudit99"
+        1.0 -> "oneAuditEps"
         2.0 -> "polling"
         3.0 -> "clca"
         4.0 -> "raire"

@@ -130,7 +130,6 @@ class TestSfElectionFromCvrsOA {
         //val contestUA = workflow.contestsUA().first()
         //val contestRound = ContestRound(contestUA, 1)
         //val assertionRound = contestRound.assertionRounds.first()
-        // java.lang.ClassCastException: class org.cryptobiotic.rlauxe.core.ClcaAssertion cannot be cast to class org.cryptobiotic.rlauxe.core.ClcaAssorterIF (org.cryptobiotic.rlauxe.core.ClcaAssertion and org.cryptobiotic.rlauxe.core.ClcaAssorterIF are in unnamed module of loader 'app')
         //val cassorter = (assertionRound.assertion as ClcaAssertion).cassorter
 
         val mvrManager = MvrManagerSingleRound("/home/stormy/temp/sf2024Poa/audit/sortedCvrs.csv")

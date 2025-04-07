@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.raire.publishJson
 //)
 
 @Serializable
-data class ClcaAssorterIFJson(
+data class ClcaAssorterJson(
     val className: String,
     val contestOA: OAContestJson?, // duplicate storage, argghh
     val assorter: AssorterIFJson,
@@ -29,31 +29,28 @@ data class ClcaAssorterIFJson(
     val hasStyle: Boolean,
 )
 
-fun ClcaAssorterIF.publishJson() : ClcaAssorterIFJson {
-    return when (this) {
-        is ClcaAssorter ->
-            ClcaAssorterIFJson(
-                "ClcaAssorter",
-                null,
-                this.assorter.publishJson(),
-                this.avgCvrAssortValue,
-                this.hasStyle,
-            )
+fun ClcaAssorter.publishJson() : ClcaAssorterJson {
+    return if (this is OAClcaAssorter) {
+        ClcaAssorterJson(
+            "OAClcaAssorter",
+            this.contestOA.publishOAJson(),
+            this.assorter.publishJson(),
+            this.avgCvrAssortValue,
+            true, // TODO
+        )
 
-        is OAClcaAssorter ->
-            ClcaAssorterIFJson(
-                "OAClcaAssorter",
-                this.contestOA.publishOAJson(),
-                this.assorter.publishJson(),
-                this.avgCvrAssortValue,
-                true, // TODO
-            )
-
-        else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
+    } else {
+        ClcaAssorterJson(
+            "ClcaAssorter",
+            null,
+            this.assorter.publishJson(),
+            this.avgCvrAssortValue,
+            this.hasStyle,
+        )
     }
 }
 
-fun ClcaAssorterIFJson.import(info: ContestInfo): ClcaAssorterIF {
+fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
     return when (this.className) {
         "ClcaAssorter" ->
             return ClcaAssorter(

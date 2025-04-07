@@ -48,7 +48,7 @@ object ClcaErrorTable {
     }
 
     fun calcErrorRates(contestId: Int,
-                       cassorter: ClcaAssorterIF,
+                       cassorter: ClcaAssorter,
                        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
     ) : ClcaErrorRates {
         require(cvrPairs.size > 0)

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.oneaudit.OAClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
@@ -12,7 +11,7 @@ class TestOneAuditFuzzSampler {
 
     @Test
     fun testMakeFuzzedCvrsFromContestOA() {
-        val show = false
+        val show = true
         val N = 10000
         val fuzzPcts = listOf(.01) // (0.0, 0.001, .005, .01, .02, .05)
         val margins =
@@ -27,8 +26,7 @@ class TestOneAuditFuzzSampler {
                 val ncands = contest.ncandidates
                 val contestUA: OAContestUnderAudit = contest.makeContestUnderAudit()
                 val assertion = contestUA.minClcaAssertion()!!
-                val cassorter = assertion.cassorter as OAClcaAssorter // TODO why so complicated?
-                val fuzzer = OneAuditFuzzSampler(fuzzPct, cvrs, contestUA, cassorter)
+                val fuzzer = OneAuditFuzzSampler(fuzzPct, cvrs, contestUA, assertion.cassorter)
                 val cvrPairs = fuzzer.cvrPairs
 
                 if (show) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")

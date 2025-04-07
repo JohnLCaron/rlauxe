@@ -4,7 +4,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
-import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -38,7 +37,7 @@ class TestAuditConfigJson {
             AuditConfig(
                 AuditType.ONEAUDIT, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
                 sampleLimit=10000,  version=2.0,
-            oaConfig= OneAuditConfig(OneAuditStrategyType.max99, simFuzzPct=.111, d = 99)
+            oaConfig= OneAuditConfig(OneAuditStrategyType.bet99, simFuzzPct=.111, d = 99)
         )
         )
     }

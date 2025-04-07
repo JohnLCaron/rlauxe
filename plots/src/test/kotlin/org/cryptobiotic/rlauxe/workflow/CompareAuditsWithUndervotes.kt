@@ -42,7 +42,7 @@ class CompareAuditsWithUndervotes {
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit99"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.max99)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))

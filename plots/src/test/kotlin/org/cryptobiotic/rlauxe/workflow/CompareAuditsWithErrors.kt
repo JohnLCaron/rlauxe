@@ -10,10 +10,10 @@ import kotlin.test.Test
 class CompareAuditsWithErrors {
     val nruns = 200
     val nsimEst = 10
-    val name = "auditsWithErrors"
-    val dirName = "/home/stormy/temp/samples/$name"
+    val name = "AuditsWithErrors"
+    val dirName = "/home/stormy/temp/audits/$name"
     val N = 50000
-    val margin = .04
+    val margin = .02
     val cvrPercent = .95
 
     @Test

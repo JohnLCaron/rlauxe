@@ -32,7 +32,7 @@ When there are no errors in the CVRs, as a function of margin:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit/AuditsNoErrors/AuditsNoErrorsLogLinear.html" rel="AuditsNoErrorsLogLinear">![AuditsNoErrorsLogLinear](plots/oneaudit/AuditsNoErrors/AuditsNoErrorsLogLinear.png)</a>
 
 * OneAudit results are much better in version 2. When percent of ballots having CVRs is around 50%, OneAudit does about the same as Polling. 
-  For higher cvrPervcent, it does correspondingly better.
+  For higher cvrPercent, it does correspondingly better.
 
 When there are errors (again parameterized by fuzzPct, the percent of ballots randomly changed), for fixed margin of 2% and 4%:
 
@@ -42,9 +42,11 @@ When there are errors (again parameterized by fuzzPct, the percent of ballots ra
 * At these parameters, OneAudit is intermediate between Polling and CLCA.
 * OneAudit results have similar sensitities to errors as CLCA.
 * IRV audits (which are also CLCA audits) are less likely to have their outcomes altered due to random changes in the ballots.
+* Polling audit sample sizes are all but impervious to errors.
 
 ## Notes
 
 * I dont think you can use IRV with OneAudit??
 * Seems like you might have some contests that need OneAudit and some not. So you want to make that contest specific. Or
-  just run seperaet audits for each type? Same with no styles ??
+  just run separate audits for each type? Same with no styles ??
+* TODO: effect of having many small pools.

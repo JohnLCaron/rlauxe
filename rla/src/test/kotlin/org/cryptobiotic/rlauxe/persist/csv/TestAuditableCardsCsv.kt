@@ -64,8 +64,8 @@ class TestAuditableCardsCsv {
     }
 
     @Test
-    fun testSf2024Pcards() {
-        val filenameIn = "/home/stormy/temp/sf2024Pcards/cards.csv"
+    fun testSf2024Poa() {
+        val filenameIn = "/home/stormy/temp/sf2024Poa/cards.csv"
         val original = readAuditableCardCsvFile(filenameIn)
         val filenameOut = "/home/stormy/temp/tests/sfCards.csv"
 

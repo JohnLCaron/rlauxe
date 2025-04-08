@@ -10,6 +10,8 @@ import java.io.Reader
 import java.lang.StrictMath.sqrt
 import java.nio.charset.Charset
 
+//// candidate for removal: can we use DominionCvrExportJson instead ??
+
 // rewrite of us.freeandfair.corla.csv.DominionCVRExportParser
 
 // 2024 Boulder County GE Recounts,5.17.17.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

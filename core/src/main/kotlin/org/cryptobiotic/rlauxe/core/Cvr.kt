@@ -83,8 +83,3 @@ data class CvrUnderAudit (val cvr: Cvr, val index: Int, val sampleNum: Long): Ba
     }
 }
 
-class CvrIteratorAdapter(val cvrIterator: Iterator<CvrUnderAudit>) : Iterator<Cvr> {
-    override fun hasNext() = cvrIterator.hasNext()
-    override fun next() = cvrIterator.next().cvr
-}
-

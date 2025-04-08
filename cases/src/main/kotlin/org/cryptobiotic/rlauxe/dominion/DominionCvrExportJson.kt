@@ -7,10 +7,11 @@ import com.github.michaelbull.result.unwrap
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.persist.csv.publishCsv
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrCSV
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
 import java.io.OutputStream
@@ -157,21 +158,43 @@ fun Session.import(irvContests: Set<Int>): List<Cvr> {
     return result
 }
 
-fun convertCvrExportToCvr(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>): Int {
+fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>): Int {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result is Ok) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")
     // println(dominionCvrs)
 
     val cvrs = dominionCvrs.import(irvIds)
-    // println("ncvrs = ${cvrs.size}")
-    // cvrs.forEach { println(it) }
-
-    //println("==================================================")
-    // print(CvrCsv.header)
     cvrs.forEach {
-        val cvrUA = CvrUnderAudit(it, 0, 0)
-        outputStream.write(writeCvrCSV(cvrUA.publishCsv()).toByteArray()) // UTF-8
+        val card = AuditableCard.fromCvr(it, 0, 0)
+        outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
+    }
+    return cvrs.size
+}
+
+fun convertCvrExportToCardDebug(inputStream: InputStream, outputStream: OutputStream, contestInfos: List<ContestInfo>): Int {
+    val irvIds = mutableSetOf<Int>()
+    contestInfos.forEach {
+        if (it.choiceFunction == SocialChoiceFunction.IRV) irvIds.add(it.id)
+    }
+    val contestMap = contestInfos.associateBy { it.id }
+
+    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
+    val dominionCvrs = if (result is Ok) result.unwrap()
+    else throw RuntimeException("Cannot read DominionCvrJson err = $result")
+
+    val cvrs = dominionCvrs.import(irvIds)
+    cvrs.forEach { cvr ->
+        cvr.votes.forEach { (contestId, votes) ->
+            val contest = contestMap[contestId]!!
+            votes.forEach { cand ->
+                if (!contest.candidateIds.contains(cand)) {
+                    println("why?")
+                }
+            }
+        }
+        val card = AuditableCard.fromCvr(cvr, 0, 0)
+        outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
     }
     return cvrs.size
 }

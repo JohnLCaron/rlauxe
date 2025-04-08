@@ -7,14 +7,21 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
     val candidateIdMap = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()
     val vc = VoteConsolidator()
     var countBallots = 0
+    val notfound = mutableMapOf<Int, Int>()
 
     init {
         require(irvContestInfo.choiceFunction == SocialChoiceFunction.IRV)
     }
 
     fun addVote(votes: IntArray) {
-        val mappedVotes = votes.map { candidateIdMap[it]!! }
-        vc.addVote(mappedVotes.toIntArray())
+        votes.forEach {
+            if (candidateIdMap[it] == null) {
+                // println("*** Cant find candidate '${it}' in irvContestVotes ${irvContestInfo}") // TODO why ?
+                notfound[it] = notfound.getOrDefault(it, 0) + 1
+            }
+        }
+        val mappedVotes = votes.map { candidateIdMap[it] }
+        vc.addVote(mappedVotes.filterNotNull().toIntArray())
     }
 }
 

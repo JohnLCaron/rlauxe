@@ -7,7 +7,7 @@ class TestBallotPoolCsv {
 
     @Test
     fun testRoundtrip() {
-        val topDir = "/home/stormy/temp/sf2024Pcards"
+        val topDir = "/home/stormy/temp/sf2024Poa"
         val poolFile = "$topDir/ballotPools.csv"
         val poolFileOut = "/home/stormy/temp/tests/ballotPoolsTest.csv"
 

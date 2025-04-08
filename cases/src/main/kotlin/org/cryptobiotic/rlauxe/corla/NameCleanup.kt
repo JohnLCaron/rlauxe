@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.rlauxe.corla
 
 fun contestNameCleanup(name: String): String {
     var working = name

@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.*
@@ -20,7 +22,7 @@ class TestColoradoElectionFromAudit {
     // and precinctFile for cvrs
     @Test
     fun createElectionFromAudit() {
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         val tabulateFile = "src/test/data/2024audit/tabulate.csv"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
@@ -29,7 +31,8 @@ class TestColoradoElectionFromAudit {
         coloradoElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
 
         // out of memory sort by sampleNum()
-        sortMergeCvrs(auditDir, null)
+        sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
+        mergeCards(auditDir, "$auditDir/sortChunks")
     }
 
     //// zip cvrs directory to cvrs.zip
@@ -37,19 +40,28 @@ class TestColoradoElectionFromAudit {
     // out of memory sort by sampleNum()
     @Test
     fun testSortMergeCvrs() {
-        val auditDir = "/home/stormy/temp/corla/election"
-        // sortCvrs(auditDir, "$auditDir/cvrs.zip", "$auditDir/sortChunks")
-        sortCvrs(auditDir, null, "$auditDir/sortChunks")
-        mergeCvrs(auditDir, "$auditDir/sortChunks")
+        val auditDir = "/home/stormy/temp/cases/corla"
+        // out of memory sort by sampleNum()
+        sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
+        mergeCards(auditDir, "$auditDir/sortChunks")
+
     }
 
-    //// zip sortedCvs.csv directory to sortedCvs.zip
-
+    // class TreeReaderIterator <T> (
+    //    topDir: String,
+    //    val fileFilter: (Path) -> Boolean,
+    //    val reader: (Path) -> Iterator<T>
+    //)
     @Test
-    fun testPrecintReader() {
+    fun testTreeReader() {
         val stopwatch = Stopwatch()
-        val auditDir = "/home/stormy/temp/corla/election"
-        val precinctReader = PrecinctReader("$auditDir/cvrs/")
+        val auditDir = "/home/stormy/temp/cases/corla"
+        val precinctReader = TreeReaderIterator(
+            "$auditDir/cards/",
+            fileFilter = { true },
+            reader = { path -> readCardsCsvIterator(path.toString()) }
+        )
+
         var count = 0
         while (precinctReader.hasNext()) {
             count++
@@ -62,11 +74,11 @@ class TestColoradoElectionFromAudit {
     // looking for where we lose contests > 260
     @Test
     fun testMergedCvrs() {
-        val auditDir = "/home/stormy/temp/corla/election"
-        val cvrZipFile = "$auditDir/sortedCvrs.zip"
+        val auditDir = "/home/stormy/temp/cases/corla"
+        val cvrZipFile = "$auditDir/sortedCards.zip"
 
         val reader = ZipReader(cvrZipFile)
-        val input = reader.inputStream("sortedCvrs.csv")
+        val input = reader.inputStream("sortedCards.csv")
         val iter = IteratorCvrsCsvStream(input)
         var lastCvr : CvrUnderAudit? = null
         var count = 0
@@ -94,26 +106,24 @@ class TestColoradoElectionFromAudit {
 
     @Test
     fun testCvrsSortedZip() {
-        val auditDir = "/home/stormy/temp/corla/election"
-        val cvrZipFile = "$auditDir/sortedCvrs.zip"
+        val auditDir = "/home/stormy/temp/cases/corla"
+        val cvrZipFile = "$auditDir/sortedCards.zip"
 
-        val reader = ZipReader(cvrZipFile)
-        val input = reader.inputStream("sortedCvrs.csv")
-        val iter = IteratorCvrsCsvStream(input)
-        var lastCvr : CvrUnderAudit? = null
+        val cardIter = readCardsCsvIterator(cvrZipFile)
+        var lastCard : AuditableCard? = null
         var count = 0
 
         val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-        while (iter.hasNext()) {
-            val cvr = iter.next()
-            cvr.votes.forEach { (key, value) ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            card.cvr().votes.forEach { (key, value) ->
                 haveSampleSize[key] = haveSampleSize[key]?.plus(1) ?: 1
             }
 
-            if (lastCvr != null) {
-                require(cvr.sampleNum > lastCvr.sampleNum)
+            if (lastCard != null) {
+                require(card.prn > lastCard.prn)
             }
-            lastCvr = cvr
+            lastCard = card
             count++
             if (count % 100000 == 0) println("$count ")
         }
@@ -125,23 +135,8 @@ class TestColoradoElectionFromAudit {
     }
 
     @Test
-    fun testCvrsZip() {
-        val auditDir = "/home/stormy/temp/corla/election"
-        val cvrZipFile = "$auditDir/cvrs.zip"
-        val process = TreeReaderZip(cvrZipFile)
-        process.processCvrs()
-    }
-
-    @Test
-    fun testCvrsTree() {
-        val cvrsDir = "/home/stormy/temp/corla/election/cvrs"
-        val process = TreeReader(cvrsDir)
-        process.processCvrs()
-    }
-
-    @Test
     fun makePrecinctTree() {
-        val cvrsDir = "/home/stormy/temp/corla/election/cvrs"
+        val cvrsDir = "/home/stormy/temp/cases/corla/cards"
         val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }
         println("county, precinct")
         tour.tourFiles()
@@ -159,8 +154,15 @@ class TestColoradoElectionFromAudit {
     @Test
     fun makeCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
-        val auditDir = "/home/stormy/temp/corla/election"
-        val tour = TreeReaderTour("$auditDir/cvrs") { path -> countyPrecincts.add(precinctLine(path)) }
+
+        val auditDir = "/home/stormy/temp/cases/corla"
+        val precinctReader = TreeReaderIterator(
+            "$auditDir/cards/",
+            fileFilter = { true },
+            reader = { path -> readCardsCsvIterator(path.toString()) }
+        )
+
+        val tour = TreeReaderTour("$auditDir/cards") { path -> countyPrecincts.add(precinctLine(path)) }
         tour.tourFiles()
 
         val precinctMap = countyPrecincts.associate { it.precinct to it.county }

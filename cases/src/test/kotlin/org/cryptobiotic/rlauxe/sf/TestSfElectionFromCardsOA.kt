@@ -17,10 +17,10 @@ class TestSfElectionFromCards {
     @Test
     fun createSF2024PoaCards() {
         val stopwatch = Stopwatch()
-        val sfDir = "/home/stormy/temp/sf2024P"
+        val sfDir = "/home/stormy/temp/cases/sf2024P"
         val zipFilename = "$sfDir/CVR_Export_20240322103409.zip"
         val manifestFile = "$sfDir/CVR_Export_20240322103409/ContestManifest.json"
-        val topDir = "/home/stormy/temp/sf2024Poa"
+        val topDir = "/home/stormy/temp/cases/sf2024Poa"
         createAuditableCardsWithPools(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
         println("that took $stopwatch")
         //   createAuditableCards 8957 files totalCards=467063 group1=55810 + group2=411253 = 467063
@@ -35,8 +35,8 @@ class TestSfElectionFromCards {
     @Test
     fun createSF2024PoaElectionFromCards() {
         val stopwatch = Stopwatch()
-        val sfDir = "/home/stormy/temp/sf2024P"
-        val topDir = "/home/stormy/temp/sf2024Poa"
+        val sfDir = "/home/stormy/temp/cases/sf2024P"
+        val topDir = "/home/stormy/temp/cases/sf2024Poa"
 
         // create sf2024 election audit
         val auditDir = "$topDir/audit"
@@ -60,7 +60,7 @@ class TestSfElectionFromCards {
 
     @Test
     fun testCardContests() {
-        val topDir = "/home/stormy/temp/sf2024Poa"
+        val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
 
         val countingContestsFromCards = mutableMapOf<Int, ContestCount>()
@@ -100,7 +100,7 @@ class TestSfElectionFromCards {
 
     @Test
     fun testCardVotes() {
-        val topDir = "/home/stormy/temp/sf2024Poa"
+        val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
 
         val countingVotesFromCards = mutableMapOf<Int, ContestCount>()
@@ -146,7 +146,7 @@ class TestSfElectionFromCards {
 
     @Test
     fun testCardAssertions() {
-        val topDir = "/home/stormy/temp/sf2024Poa"
+        val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
 
         // data class ContestInfo(
@@ -232,7 +232,7 @@ class TestSfElectionFromCards {
 
     @Test
     fun auditSf2024Poa() {
-        val auditDir = "/home/stormy/temp/sf2024Poa/audit"
+        val auditDir = "/home/stormy/temp/cases/sf2024Poa/audit"
 
         val workflow = PersistentAudit(auditDir)
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }

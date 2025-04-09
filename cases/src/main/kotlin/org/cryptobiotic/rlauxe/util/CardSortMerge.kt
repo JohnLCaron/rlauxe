@@ -19,6 +19,33 @@ fun sortMergeCards(
     mergeCards(auditDir, "$auditDir/sortChunks")
 }
 
+// out of memory sorting from directory
+fun sortCardsInDirectoryTree(
+    auditDir: String,
+    cardDirectory: String,
+    workingDirectory: String,
+) {
+    val stopwatch = Stopwatch()
+    val publisher = Publisher(auditDir)
+    val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+    validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
+
+    val prng = Prng(auditConfig.seed)
+    val cardSorter = CardSorter(workingDirectory, prng, maxChunk)
+
+    //// the reading and sorted chunks
+    val cardIter: Iterator<AuditableCard> = TreeReaderIterator(
+        cardDirectory,
+        fileFilter = { true },
+        reader = { path -> readCardsCsvIterator(path.toString()) }
+    )
+    while (cardIter.hasNext()) {
+        cardSorter.add(cardIter.next())
+    }
+    cardSorter.writeSortedChunk()
+    println("writeSortedChunk took $stopwatch")
+}
+
 // out of memory sorting
 fun sortCards(
     auditDir: String,

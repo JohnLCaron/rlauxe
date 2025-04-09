@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestContestJson {
-    val filename = "/home/stormy/temp/persist/runBoulder23/contests.json"
+    val filename = "/home/stormy/temp/cases/boulder23/contests.json"
 
     @Test
     fun testReadContest() {

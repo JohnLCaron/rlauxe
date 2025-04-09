@@ -3,7 +3,8 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
@@ -36,7 +37,7 @@ fun coloradoElectionFromAudit(
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    //// cvrs
+    //// cards
     val reader = ZipReader(precinctFile)
     val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
     val precincts: List<ColoradoPrecinctLevelResults> = readColoradoPrecinctLevelResults(input)
@@ -45,20 +46,25 @@ fun coloradoElectionFromAudit(
     var count = 0
     precincts.forEach { precinct ->
         val precinctCvrs = makeCvrs(precinct, contests)
-        val outputDir = "$auditDir/cvrs/${precinct.county}"
-        validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrsUA"))
-        val precinctCvrsUA = precinctCvrs.map{ CvrUnderAudit(it, 0, 0L)}
-        writeCvrsCsvFile(precinctCvrsUA, "$outputDir/${precinct.precinct}.csv")
+        val outputDir = "$auditDir/cards/${precinct.county}"
+        validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrs"))
+        val precinctCvrsUA = precinctCvrs.map{ AuditableCard.fromCvr(it, 0, 0L)}
+        writeAuditableCardCsvFile(precinctCvrsUA, "$outputDir/${precinct.precinct}.csv")
         count += precinctCvrs.size
     }
-    println("   total cvrs = $count")
+    println("   total cards = $count")
 
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
     // these checks may modify the contest status
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
-    val precinctReader = PrecinctReader("$auditDir/cvrs/")
-    checkContestsWithCvrs(contestsUA, precinctReader)
+    val precinctReader = TreeReaderIterator(
+        "$auditDir/cards/",
+        fileFilter = { true },
+        reader = { path -> readCardsCsvIterator(path.toString()) }
+    )
+    // val precinctReader = PrecinctReader("$auditDir/cards/")
+    checkContestsWithCards(contestsUA, precinctReader)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")

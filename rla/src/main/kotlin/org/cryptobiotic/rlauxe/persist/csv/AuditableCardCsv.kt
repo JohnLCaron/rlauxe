@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 
@@ -28,6 +27,37 @@ fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     }
     appendLine()
 }
+
+fun writeAuditableCardCsvFile(pools: List<AuditableCard>, filename: String) {
+    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
+    writer.write(AuditableCardHeader)
+    pools.forEach {
+        writer.write(writeAuditableCardCsv(it))
+    }
+    writer.close()
+}
+
+class AuditableCardCsvWriter(filename: String) {
+    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
+    var countCards = 0
+    init {
+        writer.write(AuditableCardHeader)
+    }
+
+    fun write(cards: List<AuditableCard>) {
+        cards.forEach {
+            writer.write(writeAuditableCardCsv(it))
+        }
+        countCards += cards.size
+    }
+
+    fun close() {
+        println("wrote $countCards cards")
+        writer.close()
+    }
+}
+
+/////////////////////////////////////////////////////////
 
 fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
@@ -74,37 +104,6 @@ fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
     reader.close()
     return pools
 }
-
-fun writeAuditableCardCsvFile(pools: List<AuditableCard>, filename: String) {
-    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-    writer.write(BallotPoolCsvHeader)
-    pools.forEach {
-        writer.write(writeAuditableCardCsv(it))
-    }
-    writer.close()
-}
-
-class AuditableCardCsvWriter(filename: String) {
-    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-    var countCards = 0
-    init {
-        writer.write(AuditableCardHeader)
-    }
-
-    fun write(cards: List<AuditableCard>) {
-        cards.forEach {
-            writer.write(writeAuditableCardCsv(it))
-        }
-        countCards += cards.size
-    }
-
-    fun close() {
-        println("wrote $countCards cards")
-        writer.close()
-    }
-}
-
-/////////////////////////////////////////////////////////
 
 fun readCardsCsvIterator(filename: String): Iterator<AuditableCard> {
     return if (filename.endsWith("zip")) {

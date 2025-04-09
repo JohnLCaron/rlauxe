@@ -6,12 +6,12 @@ import org.cryptobiotic.rlauxe.dominion.readDominionCvrExport
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
+import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import java.nio.file.Path
 
 class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes, val quiet: Boolean = true) {
     val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
@@ -289,12 +289,12 @@ fun createElectionFromDominionCvrs(
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
-    val cvrsUA = createSortedCvrs(allCvrs, auditConfig.seed)
-    writeCvrsCsvFile(cvrsUA, publisher.cvrsCsvFile())
+    val cards = createSortedCards(allCvrs, auditConfig.seed)
+    writeAuditableCardCsvFile(cards, publisher.cvrsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()} cvrs = ${allCvrs.size}")
 
-    checkContestsWithCvrs(contestsUA, cvrsUA.iterator())
-    checkCvrsVsSovo(contests, sovo)
+    checkContestsWithCards(contestsUA, cards.iterator())
+    checkVotesVsSovo(contests, sovo)
 
     writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
@@ -302,7 +302,12 @@ fun createElectionFromDominionCvrs(
     println("took = $stopwatch")
 }
 
-fun checkCvrsVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes) {
+fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
+    val prng = Prng(seed)
+    return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
+}
+
+fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes) {
     // we are making the contest votes from the cvrs. how does it compare with official tally ??
     contests.forEach { contest ->
         val sovoContest: BoulderContestVotes? = sovo.contests.find { it.contestTitle == contest.name }

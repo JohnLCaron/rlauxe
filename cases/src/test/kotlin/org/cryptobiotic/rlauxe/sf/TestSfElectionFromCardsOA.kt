@@ -289,10 +289,6 @@ class MvrManagerCardsSingleRound(val sortedCardFile: String, val maxSamples: Int
         TODO("Not yet implemented")
     }
 
-    override fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit> {
-        TODO("Not yet implemented")
-    }
-
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
         val cvrs = mutableListOf<Cvr>()
         val cardIter = cardIter()

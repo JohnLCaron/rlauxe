@@ -21,9 +21,11 @@ interface RlauxAuditIF: RlauxAuditProxy {
         val roundIdx = auditRounds.size + 1
 
         val auditRound = if (previousRound == null) {
+            // first time, create the rounds
             val contestRounds = contestsUA().map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
         } else {
+            // next time, create from previous round
             previousRound.createNextRound()
         }
         auditRounds.add(auditRound)
@@ -37,14 +39,19 @@ interface RlauxAuditIF: RlauxAuditProxy {
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
         // 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
-        sampleCheckLimits(this, auditRound, auditRounds.previousSamples(roundIdx), quiet)
+        sampleCheckLimits(this,
+            auditRound,
+            auditRounds.previousSamples(roundIdx),
+            quiet)
         return auditRound
     }
 
     // 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
     // fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
+    // fun setMvrsForRound(mvrs: List<CvrUnderAudit>)
+    // AuditRecord.enterMvrs(mvrFile: String)
 
-    // 6. _Run the audit_5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
+    // 6. _Run the audit_
     fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
 }
 

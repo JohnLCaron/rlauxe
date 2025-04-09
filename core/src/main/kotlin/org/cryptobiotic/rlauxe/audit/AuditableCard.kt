@@ -16,7 +16,7 @@ data class AuditableCard (
     val contests: IntArray, // aka ballot style.
     val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
     val poolId: Int?, // for OneAudit
-) {
+): BallotOrCvr {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
         val votePairs = contests.mapIndexed { idx, contestId ->
@@ -29,6 +29,15 @@ data class AuditableCard (
         appendLine("AuditableCard(desc='$desc', index=$index, sampleNum=$prn, phantom=$phantom, contests=${contests.contentToString()}, poolId=$poolId)")
         votes?.forEachIndexed { idx, vote -> appendLine("   contest $idx: ${vote.contentToString()}")}
     }
+
+    override fun hasContest(contestId: Int): Boolean {
+         // TODO shit cant tell if we have styles or not.
+        return contests.contains(contestId)
+    }
+
+    override fun sampleNumber() = prn
+
+    override fun index() = index
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {

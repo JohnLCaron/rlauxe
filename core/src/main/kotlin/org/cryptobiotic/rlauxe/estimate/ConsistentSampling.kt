@@ -10,6 +10,7 @@ private val debugUniform = false
 private val debugSizeNudge = true
 
 /**
+ * Select the samples to audit.
  * 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
  * 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
  * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= auditConfig.sampleLimit, removing contests until satisfied.
@@ -53,7 +54,7 @@ fun sample(
         if (!quiet) println(" consistentSamplingSize= ${auditRound.sampleNumbers.size}")
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
-        uniformSampling(auditRound, workflow.mvrManager(), previousSamples.size, auditConfig.sampleLimit, auditRound.roundIdx)
+        uniformSampling(auditRound, workflow.mvrManager(), previousSamples, auditConfig.sampleLimit, auditRound.roundIdx)
         if (!quiet) println(" uniformSamplingSize= ${auditRound.sampleNumbers.size}")
     }
 }
@@ -140,6 +141,7 @@ fun consistentSampling(
     haveNewSamples.forEach { (contestId, nnmvrs) ->
         contestIdMap[contestId]?.actualNewMvrs = nnmvrs
     }
+    // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
     auditRound.sampleNumbers = sampledCards.map { it.sampleNumber() }
@@ -149,8 +151,8 @@ fun consistentSampling(
 // for audits with hasStyles = false
 fun uniformSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManager,
-    prevSampleSize: Int,
+    mvrManager: MvrManager, // mvrManager.Nballots(contestUA), mvrManager.takeFirst(nmvrs)
+    previousSamples: Set<Long>,
     sampleLimit: Int,
     roundIdx: Int,
 ) {
@@ -174,7 +176,8 @@ fun uniformSampling(
     if (estTotalSampleSizes.isEmpty()) return
     var nmvrs = estTotalSampleSizes.max()
 
-    if (auditRound.roundIdx > 2) {
+    if (auditRound.roundIdx > 2) { // TODO check this
+        val prevSampleSize = previousSamples.size
         val prevNudged = (1.25 * prevSampleSize).toInt()
         if (prevNudged > nmvrs) {
             if (debugSizeNudge) println(" ** uniformSampling prevNudged $prevNudged > $nmvrs; round=${auditRound.roundIdx}")
@@ -184,7 +187,11 @@ fun uniformSampling(
 
     // take the first nmvrs of the sorted ballots
     val sampledCards = mvrManager.takeFirst(nmvrs)
+    val newMvrs = sampledCards.filter { !previousSamples.contains(it.sampleNumber()) }.count()
 
+    // set the results into the auditRound directly
+    auditRound.nmvrs = nmvrs
+    auditRound.newmvrs = newMvrs
     auditRound.sampleNumbers = sampledCards.map { it.sampleNumber() } // list of ballot indexes sorted by sampleNum
     auditRound.sampledBorc = sampledCards
 }

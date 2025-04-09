@@ -12,6 +12,7 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 
@@ -22,14 +23,16 @@ import java.nio.file.StandardOpenOption
 
 // data class AuditRound(
 //    val roundIdx: Int,
-//    val contests: List<ContestRound>,
-//    val auditWasDone: Boolean = false,
+//    val contestRounds: List<ContestRound>,
+//
+//    var auditWasDone: Boolean = false,
 //    var auditIsComplete: Boolean = false,
-//    var sampledIndices: List<Int>,
+//    var sampleNumbers: List<Long>, // ballot indices to sample for this round
+//    var sampledBorc: List<BallotOrCvr> = emptyList(), // ballots to sample for this round TODO not used ?
 //    var nmvrs: Int = 0,
 //    var newmvrs: Int = 0,
-//    var auditorSetNewMvrs: Int = -1,
-//) {
+//    var auditorWantNewMvrs: Int = -1,
+//)
 
 // one in each roundXX subdirectory
 @Serializable
@@ -57,7 +60,7 @@ fun AuditRound.publishJson() : AuditRoundJson {
     )
 }
 
-fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: List<Long>): AuditRound {
+fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: List<Long>, sampledBorc: List<BallotOrCvr>): AuditRound {
     val contestUAmap = contestUAs.associateBy { it.id }
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!! )
@@ -68,7 +71,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: Li
         this.auditWasDone,
         this.auditIsComplete,
         sampleNumbers,
-        emptyList(),
+        sampledBorc,
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
@@ -324,7 +327,12 @@ fun writeAuditRoundJsonFile(AuditRound: AuditRound, filename: String) {
     }
 }
 
-fun readAuditRoundJsonFile(contestsFile: String, samplesFile: String, auditRoundFile: String): Result<AuditRound, ErrorMessages> {
+fun readAuditRoundJsonFile(
+    auditRoundFile: String,
+    contestsFile: String,
+    samplesFile: String,
+    mvrsForRoundFile: String?,
+): Result<AuditRound, ErrorMessages> {
     val contestsResult = readContestsJsonFile(contestsFile)
     if (contestsResult is Err) return contestsResult
     val contests = contestsResult.unwrap()
@@ -333,10 +341,18 @@ fun readAuditRoundJsonFile(contestsFile: String, samplesFile: String, auditRound
     if (sampleResult is Err) return sampleResult
     val samples = sampleResult.unwrap()
 
-    return readAuditRoundJsonFile(contests, samples, auditRoundFile)
+    val sampledBorc = if (mvrsForRoundFile != null) readCvrsCsvFile(mvrsForRoundFile) else emptyList()
+
+    return readAuditRoundJsonFile(auditRoundFile, contests, samples, sampledBorc)
 }
 
-fun readAuditRoundJsonFile(contests: List<ContestUnderAudit>, sampledIndices: List<Long>, auditRoundFile: String): Result<AuditRound, ErrorMessages> {
+fun readAuditRoundJsonFile(
+    auditRoundFile: String,
+    contests: List<ContestUnderAudit>,
+    sampledIndices: List<Long>,
+    sampledBorc: List<BallotOrCvr>,
+): Result<AuditRound, ErrorMessages> {
+
     val errs = ErrorMessages("readAuditConfigJsonFile '${auditRoundFile}'")
     val filepath = Path.of(auditRoundFile)
     if (!Files.exists(filepath)) {
@@ -347,7 +363,7 @@ fun readAuditRoundJsonFile(contests: List<ContestUnderAudit>, sampledIndices: Li
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
             val json = jsonReader.decodeFromStream<AuditRoundJson>(inp)
-            val AuditRound = json.import(contests, sampledIndices)
+            val AuditRound = json.import(contests, sampledIndices, sampledBorc)
             if (errs.hasErrors()) Err(errs) else Ok(AuditRound)
         }
     } catch (t: Throwable) {

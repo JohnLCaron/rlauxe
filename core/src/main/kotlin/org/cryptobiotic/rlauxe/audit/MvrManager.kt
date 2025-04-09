@@ -1,21 +1,24 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.Prng
 
 private val debugWantSampleSize = false
 
+// TODO can we get rid of this in favor of AuditableCard?
 interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
     fun index(): Int
 }
 
+// TODO switch to AuditableCard
 interface MvrManager {
     fun Nballots(contestUA: ContestUnderAudit): Int
     fun ballotCards() : Iterator<BallotOrCvr>
+
+    // this is where you would add the real mvrs
     fun setMvrsForRound(mvrs: List<CvrUnderAudit>)
-    fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit>
+
     fun takeFirst(nmvrs: Int): List<BallotOrCvr> {
         val result = mutableListOf<BallotOrCvr>()
         val ballotCardsIter = ballotCards()
@@ -36,6 +39,13 @@ interface MvrManagerPollingIF : MvrManager {
     fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler
 }
 
+interface MvrManagerTest : MvrManager {
+    fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit>
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit>
+}
+
+////////////////////////////////////////////////////////////
+
 // Iterate through sortedCvrUAs to find the cvrUAs that match the sampleNumbers
 // sampleNumbers must in same order as sortedCvrUAs
 // Note this iterates through sortedCvrUAs only until all sampleNumbers have been found
@@ -54,10 +64,6 @@ fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<CvrUnderAudit>
         print("")
     require(result.size == sampleNumbers.size)
     return result
-}
-
-interface MvrManagerTest : MvrManager {
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit>
 }
 
 //// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set

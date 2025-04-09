@@ -113,7 +113,7 @@ class TestConsistentSampling {
         val sampleLimit = 10000
 
         val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
-        uniformSampling(auditRound, mvrManager, 0, sampleLimit=sampleLimit, 0)
+        uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), sampleLimit=sampleLimit, 0)
         println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
 
         // must be ordered

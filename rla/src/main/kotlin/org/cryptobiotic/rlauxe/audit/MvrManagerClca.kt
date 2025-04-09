@@ -30,10 +30,13 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
     override fun ballotCards() : Iterator<BallotOrCvr> = cvrsUA()
+
+    // this is where you would add the real mvrs
     override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
         mvrsRound = mvrs.toList()
     }
 
+    // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit> {
         val mvrFile = "$auditDir/private/testMvrs.csv"
         val sampledMvrs = if (Files.exists(Path.of(mvrFile))) {
@@ -55,8 +58,7 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         return sampledMvrs
     }
 
-    // this is all for mvrManager.setMvrs(sampledMvrs)
-    // val sampledMvrs = auditRecord.getMvrsForRound(mvrManager(), roundIdx, null)
+    // this is all to implement mvrManager.setMvrsBySampleNumber(sampledMvrs)
     override fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit> {
         val publisher = Publisher(auditDir)
         val resultSamples = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx))
@@ -72,7 +74,7 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         }
     }
 
-    // same over all contests (!)
+    // same pairs over all contests (!)
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
         val sampleNumbers = mvrsRound.map { it.sampleNum }
 

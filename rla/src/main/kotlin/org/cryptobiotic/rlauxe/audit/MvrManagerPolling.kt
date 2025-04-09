@@ -20,10 +20,6 @@ class MvrManagerPolling(val ballots: List<Ballot>, seed: Long) : MvrManagerPolli
         mvrsRound = mvrs.toList()
     }
 
-    override fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit> {
-        TODO("Not yet implemented")
-    }
-
     override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
         return PollWithoutReplacement(contestId, hasStyles, mvrsRound.map { it.cvr }, assorter, allowReset=allowReset)
     }

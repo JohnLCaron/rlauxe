@@ -5,17 +5,10 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.AuditRecord
-import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.PersistentAudit
-import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
-import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.persist.json.Publisher
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Files.notExists
 import java.nio.file.Path
-import java.util.concurrent.TimeUnit
 
-/** Run one round of an RLA that has already been started. */
+/** Enter real Mvrs from a file. */
 object EnterMvrsCli {
 
     @JvmStatic
@@ -33,14 +26,12 @@ object EnterMvrsCli {
         ).required()
 
         parser.parse(args)
-        println("RunRound on $inputDir mvrFile=$mvrFile")
+        println("EnterMvrs from audit in $inputDir with mvrFile=$mvrFile")
         enterMvrs(inputDir, mvrFile)
-        // println("  retval $retval")
     }
 }
 
 
-// Also called from rlaux-viewer
 fun enterMvrs(inputDir: String, mvrFile: String): Boolean {
     if (notExists(Path.of(inputDir))) {
         println("EnterMvrsCli Audit Directory $inputDir does not exist")

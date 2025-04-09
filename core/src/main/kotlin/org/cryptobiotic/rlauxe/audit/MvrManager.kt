@@ -60,11 +60,6 @@ interface MvrManagerTest : MvrManager {
     fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit>
 }
 
-fun createSortedCvrs(cvrs: List<Cvr>, seed: Long) : List<CvrUnderAudit> {
-    val prng = Prng(seed)
-    return cvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
-}
-
 //// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize
 fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedBorc : Iterator<BallotOrCvr>): Map<Int, Int> {

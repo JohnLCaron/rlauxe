@@ -19,10 +19,10 @@ class TestSfElectionFromCvrs {
     fun createSF2024P() {
         // write sf2024P cvr
         val stopwatch = Stopwatch()
-        val sfDir = "/home/stormy/temp/sf2024P"
+        val sfDir = "/home/stormy/temp/cases/sf2024P"
         val zipFilename = "$sfDir/CVR_Export_20240322103409.zip"
         val manifestFile = "$sfDir/CVR_Export_20240322103409/ContestManifest.json"
-        val topDir = "/home/stormy/temp/sf2024P"
+        val topDir = "/home/stormy/temp/cases/sf2024P"
         createAuditableCards(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
 
         // create sf2024 election audit
@@ -42,7 +42,7 @@ class TestSfElectionFromCvrs {
     // out of memory sort by sampleNum()
     @Test
     fun testSortMergeCvrs() {
-        val topDir = "/home/stormy/temp/sf2024P"
+        val topDir = "/home/stormy/temp/cases/sf2024P"
         val auditDir = "$topDir/audit"
         // val zipFilename = "$auditDir/CVR_Export_20241202143051.zip"
 
@@ -52,7 +52,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun testCopyFile() {
-        val auditDir = "/home/stormy/temp/sf2024"
+        val auditDir = "/home/stormy/temp/cases/sf2024"
         val fromFile = File("src/test/data/SF2024/sortedCvrs.zip")
         val targetFile = File("$auditDir/sortedCvrs.zip")
         fromFile.copyTo(targetFile)
@@ -61,7 +61,7 @@ class TestSfElectionFromCvrs {
     // write sf2024 cvrs
     @Test
     fun createSF2024cards() {
-        val topDir = "/home/stormy/temp/sf2024"
+        val topDir = "/home/stormy/temp/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
         createAuditableCards(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
@@ -69,7 +69,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun createSF2024cardsDebug() {
-        val topDir = "/home/stormy/temp/sf2024"
+        val topDir = "/home/stormy/temp/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val contestManifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
         val candidateManifestFile = "$topDir/CVR_Export_20241202143051/CandidateManifest.json"
@@ -78,7 +78,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun checkSF2024cardsDebug() {
-        val topDir = "/home/stormy/temp/sf2024"
+        val topDir = "/home/stormy/temp/cases/sf2024"
         val contestManifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
         val candidateManifestFile = "$topDir/CVR_Export_20241202143051/CandidateManifest.json"
         checkAuditableCardsDebug("$topDir/cards.csv", contestManifestFile, candidateManifestFile)
@@ -86,7 +86,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun createSF2024() {
-        val topDir = "/home/stormy/temp/sf2024"
+        val topDir = "/home/stormy/temp/cases/sf2024"
         val auditDir = "$topDir/audit"
         createSfElectionFromCards(
             auditDir,
@@ -99,7 +99,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun sortSF2024() {
-        val topDir = "/home/stormy/temp/sf2024"
+        val topDir = "/home/stormy/temp/cases/sf2024"
         val auditDir = "$topDir/audit"
         sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
         mergeCards(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCards.csv"
@@ -108,7 +108,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun showSfElectionContests() {
-        val publisher = Publisher("/home/stormy/temp/sf2024/audit")
+        val publisher = Publisher("/home/stormy/temp/cases/sf2024/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
@@ -121,7 +121,7 @@ class TestSfElectionFromCvrs {
 
     @Test
     fun showIrvCounts() {
-        val publisher = Publisher("/home/stormy/temp/sf2024/audit")
+        val publisher = Publisher("/home/stormy/temp/cases/sf2024/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")

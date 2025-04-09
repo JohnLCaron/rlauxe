@@ -3,10 +3,8 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.persist.csv.CvrCsv
-import org.cryptobiotic.rlauxe.persist.csv.publishCsv
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrCSV
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.sf.readContestManifestForIRV
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
@@ -20,7 +18,7 @@ class TestDominionCvrExportJson {
     @Test
     fun testReadDominionCvrJsonFile() {
         val filename1 = "src/test/data/SF2024/CvrExport_15.json"
-        val filename = "/home/stormy/temp/sf2024P/CVR_Export_20240322103409/CvrExport_0.json"
+        val filename = "/home/stormy/temp/cases/sf2024P/CVR_Export_20240322103409/CvrExport_0.json"
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
         val dominionCvrs = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
@@ -33,17 +31,17 @@ class TestDominionCvrExportJson {
         cvrs.forEach { println(it) }
 
         println("==================================================")
-        print(CvrCsv.header)
+        print(AuditableCardHeader)
         cvrs.forEach {
-            val cvrUA = CvrUnderAudit(it, 0, 0)
-            print(writeCvrCSV(cvrUA.publishCsv()))
+            val card = AuditableCard.fromCvr(it, 0, 0L)
+            print(writeAuditableCardCsv(card))
         }
     }
 
     @Test
     fun testReadCountingGroupId() {
         val zipFilename1 = "/home/stormy/Downloads/CVR_Export_20241202143051.zip"
-        val topDir = "/home/stormy/temp/sf2024P"
+        val topDir = "/home/stormy/temp/cases/sf2024P"
         val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
 
         val countIds = mutableMapOf<Int, Int>()
@@ -73,7 +71,7 @@ class TestDominionCvrExportJson {
     // use the cvrs to write a fake SF ballot manifest, following ballotManifest-dummy.xlsx format
     @Test
     fun testWriteSfBallotManifest() {
-        val topDir = "/home/stormy/temp/sf2024P"
+        val topDir = "/home/stormy/temp/cases/sf2024P"
         val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
 
         val countingContests = mutableMapOf<Int, SfContestCount>()

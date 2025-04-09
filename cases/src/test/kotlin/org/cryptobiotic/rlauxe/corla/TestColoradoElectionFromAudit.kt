@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
@@ -23,7 +22,7 @@ class TestColoradoElectionFromAudit {
     // and precinctFile for cvrs
     @Test
     fun createElectionFromAudit() {
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         val tabulateFile = "src/test/data/2024audit/tabulate.csv"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
@@ -41,7 +40,7 @@ class TestColoradoElectionFromAudit {
     // out of memory sort by sampleNum()
     @Test
     fun testSortMergeCvrs() {
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         // out of memory sort by sampleNum()
         sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
         mergeCards(auditDir, "$auditDir/sortChunks")
@@ -56,7 +55,7 @@ class TestColoradoElectionFromAudit {
     @Test
     fun testTreeReader() {
         val stopwatch = Stopwatch()
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         val precinctReader = TreeReaderIterator(
             "$auditDir/cards/",
             fileFilter = { true },
@@ -75,7 +74,7 @@ class TestColoradoElectionFromAudit {
     // looking for where we lose contests > 260
     @Test
     fun testMergedCvrs() {
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         val cvrZipFile = "$auditDir/sortedCards.zip"
 
         val reader = ZipReader(cvrZipFile)
@@ -107,7 +106,7 @@ class TestColoradoElectionFromAudit {
 
     @Test
     fun testCvrsSortedZip() {
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         val cvrZipFile = "$auditDir/sortedCards.zip"
 
         val cardIter = readCardsCsvIterator(cvrZipFile)
@@ -137,7 +136,7 @@ class TestColoradoElectionFromAudit {
 
     @Test
     fun makePrecinctTree() {
-        val cvrsDir = "/home/stormy/temp/corla/election/cards"
+        val cvrsDir = "/home/stormy/temp/cases/corla/cards"
         val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }
         println("county, precinct")
         tour.tourFiles()
@@ -156,7 +155,7 @@ class TestColoradoElectionFromAudit {
     fun makeCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
-        val auditDir = "/home/stormy/temp/corla/election"
+        val auditDir = "/home/stormy/temp/cases/corla"
         val precinctReader = TreeReaderIterator(
             "$auditDir/cards/",
             fileFilter = { true },

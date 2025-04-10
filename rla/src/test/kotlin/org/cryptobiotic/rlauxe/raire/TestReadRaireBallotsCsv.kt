@@ -26,10 +26,6 @@ class TestReadRaireBallotsCsv {
         val contestsUA = raireResults.contests // TODO incorporate into reading ??
         tabulateRaireMargins(contestsUA, cvrs)
 
-        val prng = Prng(123456789011L)
-        // val phantomCVRs = makePhantomCvrs(contestsUA, "phantom-", prng)
-        // val cvrsUA = cvrs.map { CvrUnderAudit(it, prng.next()) } // + phantomCVRs
-
         contestsUA.forEach { contestUA ->
             contestUA.makeClcaAssertions()
         }

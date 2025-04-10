@@ -48,7 +48,7 @@ interface RlauxAuditIF: RlauxAuditProxy {
 
     // 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
     // fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
-    // fun setMvrsForRound(mvrs: List<CvrUnderAudit>)
+    // fun setMvrsForRound(mvrs: List<AuditableCard>)
     // AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_

@@ -32,7 +32,6 @@ class TestCorlaEstimateSampleSize {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it, isComparison = true, hasStyle = true ) }
         val cvrs = test.makeCvrsFromContests()
-        // val cvrsUAP = cvrs.map { CvrUnderAudit( it) }
 
         contestsUAs.forEach { contest ->
             println("contest = ${contest}")

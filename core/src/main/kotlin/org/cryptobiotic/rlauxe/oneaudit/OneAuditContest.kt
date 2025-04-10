@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.min
 
-class OneAuditContest (
+data class OneAuditContest (
     override val info: ContestInfo,
     val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     val cvrNc: Int,
@@ -117,34 +117,23 @@ class OAContestUnderAudit(
         return this
     }
 
-    // not used
-    fun makeClcaAssertionsFromCvrs(cvrs: Iterator<Cvr>): ContestUnderAudit {
-        // TODO assume its plurality for now
-        val assertions = mutableListOf<Assertion>()
-        contest.winners.forEach { winner ->
-            contest.losers.forEach { loser ->
-                val baseAssorter = PluralityAssorter.makeWithVotes(this.contest, winner, loser, contestOA.votes)
-                assertions.add( Assertion( this.contest.info, baseAssorter))
-            }
-        }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
 
-        // calculate the assorter means all at once
-        val asnWelford = assertions.map { Pair(it, Welford())}.toMap()
-        while (cvrs.hasNext()) {
-            val cvr = cvrs.next()
-            asnWelford.forEach { (asn, welford) ->
-                welford.update(asn.assorter.assort(cvr))
-            }
-        }
+        other as OAContestUnderAudit
 
-        // turn into comparison assertions
-        this.clcaAssertions = asnWelford.map { (asn, welford) ->
-            val cvrMean = if (welford.count == 0) mean2margin(asn.assorter.reportedMargin()) else welford.mean
-            println("  margin for ${asn.assorter.desc()} reportedMargin ${asn.assorter.reportedMargin()}, cvrMargin = ${ mean2margin(cvrMean) }")
-            ClcaAssertion(contest.info, OAClcaAssorter(this.contestOA, asn.assorter, cvrMean))
-        }
-        return this
+        return contestOA == other.contestOA
     }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + contestOA.hashCode()
+        return result
+    }
+
+
 }
 
 // "assorter" here is the plurality assorter

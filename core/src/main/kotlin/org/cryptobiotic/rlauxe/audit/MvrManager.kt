@@ -17,7 +17,7 @@ interface MvrManager {
     fun ballotCards() : Iterator<BallotOrCvr>
 
     // this is where you would add the real mvrs
-    fun setMvrsForRound(mvrs: List<CvrUnderAudit>)
+    fun setMvrsForRound(mvrs: List<AuditableCard>)
 
     fun takeFirst(nmvrs: Int): List<BallotOrCvr> {
         val result = mutableListOf<BallotOrCvr>()
@@ -40,8 +40,8 @@ interface MvrManagerPollingIF : MvrManager {
 }
 
 interface MvrManagerTest : MvrManager {
-    fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit>
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit>
+    fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard>
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard>
 }
 
 ////////////////////////////////////////////////////////////
@@ -49,8 +49,8 @@ interface MvrManagerTest : MvrManager {
 // Iterate through sortedCvrUAs to find the cvrUAs that match the sampleNumbers
 // sampleNumbers must in same order as sortedCvrUAs
 // Note this iterates through sortedCvrUAs only until all sampleNumbers have been found
-fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<CvrUnderAudit>): List<CvrUnderAudit> {
-    val result = mutableListOf<CvrUnderAudit>()
+fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<AuditableCard>): List<AuditableCard> {
+    val result = mutableListOf<AuditableCard>()
     sampleNumbers.forEach { sampleNum ->
         while (sortedCvrUAs.hasNext()) {
             val boc = sortedCvrUAs.next()
@@ -60,8 +60,6 @@ fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<CvrUnderAudit>
             }
         }
     }
-    if (result.size != sampleNumbers.size)
-        print("")
     require(result.size == sampleNumbers.size)
     return result
 }

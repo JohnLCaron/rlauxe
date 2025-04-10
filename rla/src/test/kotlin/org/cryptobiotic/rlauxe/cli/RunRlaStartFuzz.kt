@@ -8,11 +8,10 @@ import org.cryptobiotic.rlauxe.audit.*
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
@@ -142,12 +141,12 @@ object RunRlaStartFuzz {
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
 
         //// could be inside of BallotCardsClca
-        writeCvrsCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile()) // TODO wrap in Result ??
+        writeAuditableCardCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile()) // TODO wrap in Result ??
         println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
 
         // save the sorted testMvrs
         publisher.validateOutputDirOfFile(mvrFile)
-        writeCvrsCsvFile(ballotCards.mvrsUA, mvrFile)
+        writeAuditableCardCsvFile(ballotCards.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
         val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
@@ -206,10 +205,10 @@ object RunRlaStartFuzz {
             require(ballotUA.sampleNumber() > lastRN)
             lastRN = ballotUA.sampleNumber()
             val mvr = testMvrs[idx]
-            CvrUnderAudit(mvr, ballotUA.index(), ballotUA.sampleNumber())
+            AuditableCard.fromCvr(mvr, ballotUA.index(), ballotUA.sampleNumber())
         }
         publisher.validateOutputDirOfFile(mvrFile)
-        writeCvrsCsvFile(mvruas, mvrFile)
+        writeAuditableCardCsvFile(mvruas, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
         // PollingWorkflow creates the assertions

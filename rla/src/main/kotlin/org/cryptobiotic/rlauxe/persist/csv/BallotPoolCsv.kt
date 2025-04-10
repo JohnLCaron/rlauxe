@@ -3,14 +3,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import java.io.*
 
-
-// data class Cvr(
-//    val id: String,
-//    val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
-//    val phantom: Boolean = false,
-//)
-// CvrUnderAudit (val cvr: Cvr, val index: Int, val sampleNum: Long)
-
 // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
 
 val BallotPoolCsvHeader = "Pool, Id, Contest, ncards, candidate:nvotes, ...\n"

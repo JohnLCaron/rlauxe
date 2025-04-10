@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.BallotUnderAudit
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.*
@@ -28,7 +29,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
         val prng = Prng(Random.nextLong())
-        val cvrsUAP = test.makeCvrsFromContests().mapIndexed { idx, it -> CvrUnderAudit( it, idx, prng.next()) }
+        val cards = testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
         // fun consistentSampling(
@@ -54,7 +55,7 @@ class TestConsistentSampling {
         // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
-            val cvrs = cvrsUAP.filter { it.hasContest(contest.id) }
+            val cvrs = cards.filter { it.hasContest(contest.id) }
             assertTrue(contest.estSampleSize <= cvrs.size)
             // TODO what else can we check ??
         }

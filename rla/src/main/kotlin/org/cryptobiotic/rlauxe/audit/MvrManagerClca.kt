@@ -4,8 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readSampleNumbersJsonFile
 import java.nio.file.Files
@@ -14,7 +13,7 @@ import java.nio.file.Path
 private val checkValidity = false
 
 class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
-    private var mvrsRound: List<CvrUnderAudit> = emptyList()
+    private var mvrsRound: List<AuditableCard> = emptyList()
     private val cvrFile: String
 
     init {
@@ -32,15 +31,15 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
     override fun ballotCards() : Iterator<BallotOrCvr> = cvrsUA()
 
     // this is where you would add the real mvrs
-    override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
+    override fun setMvrsForRound(mvrs: List<AuditableCard>) {
         mvrsRound = mvrs.toList()
     }
 
     // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<CvrUnderAudit> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
         val mvrFile = "$auditDir/private/testMvrs.csv"
         val sampledMvrs = if (Files.exists(Path.of(mvrFile))) {
-            val mvrIterator = IteratorCvrsCsvFile(mvrFile)
+            val mvrIterator = readCardsCsvIterator(mvrFile)
             findSamples(sampleNumbers, mvrIterator)
         } else {
             findSamples(sampleNumbers, cvrsUA()) // use the cvrs - ie, no errors
@@ -59,7 +58,7 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
     }
 
     // this is all to implement mvrManager.setMvrsBySampleNumber(sampledMvrs)
-    override fun setMvrsForRoundIdx(roundIdx: Int): List<CvrUnderAudit> {
+    override fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard> {
         val publisher = Publisher(auditDir)
         val resultSamples = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx))
         if (resultSamples is Err) println(resultSamples)
@@ -76,24 +75,24 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
 
     // same pairs over all contests (!)
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
-        val sampleNumbers = mvrsRound.map { it.sampleNum }
+        val sampleNumbers = mvrsRound.map { it.prn }
 
         val sampledCvrs = findSamples(sampleNumbers, cvrsUA())
         require(sampledCvrs.size == mvrsRound.size)
 
         if (checkValidity) {
             // prove that sampledCvrs correspond to mvrs
-            val cvruaPairs: List<Pair<CvrUnderAudit, CvrUnderAudit>> = mvrsRound.zip(sampledCvrs)
+            val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
             cvruaPairs.forEach { (mvr, cvr) ->
-                require(mvr.id == cvr.id)
+                require(mvr.desc == cvr.desc)
                 require(mvr.index == cvr.index)
                 require(mvr.sampleNumber() == cvr.sampleNumber())
             }
         }
 
-        // why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
-        return mvrsRound.map{ it.cvr }.zip(sampledCvrs.map{ it.cvr })
+        // why not List<Pair<AuditableCard, AuditableCard>> ??
+        return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
     }
 
-    private fun cvrsUA(): Iterator<CvrUnderAudit> = readCvrsCsvIterator(cvrFile)
+    private fun cvrsUA(): Iterator<AuditableCard> = readCardsCsvIterator(cvrFile)
 }

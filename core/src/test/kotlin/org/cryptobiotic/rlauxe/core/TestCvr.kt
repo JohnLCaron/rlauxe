@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -15,13 +14,5 @@ class TestCvr {
         assertNotEquals(cvrs[0], cvrs[1])
         assertEquals(cvrs[0], cvrs[0])
         assertEquals(cvrs[0].hashCode(), cvrs[0].hashCode())
-    }
-
-    @Test
-    fun testCvrUnderAudit() {
-        val cvrUA = CvrUnderAudit(makeCvr(1), 99, 12345L)
-        assertEquals("card 99 (false) 0: [1]", cvrUA.toString())
-        assertEquals(0, cvrUA.cvr.hasMarkFor(0, 0))
-        assertEquals(1, cvrUA.cvr.hasMarkFor(0, 1))
     }
 }

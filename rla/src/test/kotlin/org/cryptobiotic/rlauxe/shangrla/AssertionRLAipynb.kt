@@ -418,19 +418,6 @@ class AssertionRLA {
         println("calc_sample_sizes = $results")
         val sampleSize = results.sampleCount[0] // TODO
 
-        /*
-                val ccontest2: Contest = rrContest.toContest()
-                val cvras: List<CvrUnderAudit> = makeCvras(rcvrs, Random)
-                // contests: List<Contest>, cvrs : Iterable<Cvr>, riskLimit: Double=0.05
-                val caudit2: AuditComparison = makeComparisonAudit(listOf(ccontest), rcvrs)
-                // val N: Int, val alpha: Double, val error_rate_1: Double, val error_rate_2: Double, val reps: Int, val quantile: Double
-                val findSampleSize = FindSampleSize(N, scontest.risk_limit, audit.errorRate1, audit.errorRate2, audit.reps, audit.quantile)
-                // audit: AuditComparison, contests: List<ContestUnderAudit>, cvrs: List<CvrUnderAudit>,
-                val cua = ContestUnderAudit(ccontest, N)
-                val ss = findSampleSize.find_sample_size(caudit, listOf(cua), cvras)
-                println("sampleSize = $ss")
-         */
-
 
         ///// consistent sampling
 //## Draw the first sample
@@ -439,7 +426,7 @@ class AssertionRLA {
 //prng = SHA256(audit.seed)
 //CVR.assign_sample_nums(cvr_list, prng)
         // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
-        val cvras = rcvrs.mapIndexed { idx, it -> CvrUnderAudit(it, idx, Random.nextLong())}
+        val cvras = rcvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, Random.nextLong())}
 
         println("calc_sample_sizes = $results")
 

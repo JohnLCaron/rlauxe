@@ -17,7 +17,7 @@ interface Sampler: Iterator<Double> {
 class PollWithoutReplacement(
     val contestId: Int,
     val hasStyles: Boolean,
-    val mvrs : List<Cvr>, // TODO why not CvrUnderAudit ?
+    val mvrs : List<Cvr>,
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
 ): Sampler {
@@ -60,7 +60,7 @@ class PollWithoutReplacement(
 class ClcaWithoutReplacement(
     val contestId: Int,
     val hasStyles: Boolean,
-    val cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr) why not List<Pair<CvrUnderAudit, CvrUnderAudit>> ??
+    val cvrPairs: List<Pair<Cvr, Cvr>>,
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit

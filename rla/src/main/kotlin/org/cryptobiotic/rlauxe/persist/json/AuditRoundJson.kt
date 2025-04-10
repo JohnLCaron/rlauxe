@@ -12,7 +12,7 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 
@@ -341,7 +341,7 @@ fun readAuditRoundJsonFile(
     if (sampleResult is Err) return sampleResult
     val samples = sampleResult.unwrap()
 
-    val sampledBorc = if (mvrsForRoundFile != null) readCvrsCsvFile(mvrsForRoundFile) else emptyList()
+    val sampledBorc = if (mvrsForRoundFile != null) readAuditableCardCsvFile(mvrsForRoundFile) else emptyList()
 
     return readAuditRoundJsonFile(auditRoundFile, contests, samples, sampledBorc)
 }

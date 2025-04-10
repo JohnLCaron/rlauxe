@@ -126,41 +126,6 @@ fun tabulateVotesFromCards(cards: Iterator<AuditableCard>): Map<Int, Map<Int, In
     return votes
 }
 
-
-//// candidate for removal
-
-fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<CvrUnderAudit>) {
-    val votes = tabulateVotesFromCvrsUA(cvrs)
-    contestsUA.filter { it.status == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
-        val contestVotes = (contestUA.contest as Contest).votes
-        val cvrVotes = votes[contestUA.id]
-        if (cvrVotes == null) {
-            println("*** contest ${contestUA.contest} not found in tabulatedVotesFromCvrsUA")
-            contestUA.status = TestH0Status.ContestMisformed
-        } else {
-            if (!checkEquivilentVotes(contestVotes, cvrVotes)) {
-                println("*** contest ${contestUA.contest} votes ${contestVotes} cvrVotes = $cvrVotes")
-                contestUA.status = TestH0Status.ContestMisformed
-            }
-            require(checkEquivilentVotes((contestUA.contest as Contest).votes, contestVotes))
-        }
-    }
-}
-
-fun tabulateVotesFromCvrsUA(cvrsUA: Iterator<CvrUnderAudit>): Map<Int, Map<Int, Int>> {
-    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    for (cvr in cvrsUA) {
-        for ((con, conVotes) in cvr.votes) {
-            val accumVotes = votes.getOrPut(con) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return votes
-}
-
 // ok if one has zero votes and the other doesnt
 fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {
     if (votes1 == votes2) return true

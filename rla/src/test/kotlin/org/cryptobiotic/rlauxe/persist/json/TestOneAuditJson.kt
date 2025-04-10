@@ -55,7 +55,7 @@ class TestOneAuditJson {
     //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     @Test
     fun testContestUARoundtrip() {
-        val target = makeTestContestOA()
+        val target: OAContestUnderAudit = makeTestContestOA()
 
         val json = target.publishOAJson()
         val roundtrip = json.import()

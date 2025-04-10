@@ -20,8 +20,8 @@ class MvrManagerClca(val auditDir: String) : MvrManagerClcaIF, MvrManagerTest {
         val publisher = Publisher(auditDir)
         cvrFile = if (Files.exists(Path.of("$auditDir/sortedCvrs.zip"))) {
             "$auditDir/sortedCvrs.zip"
-        } else if (Files.exists(Path.of(publisher.cvrsCsvFile()))) {
-            publisher.cvrsCsvFile()
+        } else if (Files.exists(Path.of(publisher.cardsCsvFile()))) {
+            publisher.cardsCsvFile()
         } else {
             throw IllegalArgumentException("No cvr file found in $auditDir")
         }

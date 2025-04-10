@@ -11,14 +11,13 @@ interface BallotOrCvr {
     fun index(): Int
 }
 
-// TODO switch to AuditableCard
 interface MvrManager {
-    fun Nballots(contestUA: ContestUnderAudit): Int
     fun ballotCards() : Iterator<BallotOrCvr>
 
     // this is where you would add the real mvrs
     fun setMvrsForRound(mvrs: List<AuditableCard>)
 
+    //// for uniformSampling
     fun takeFirst(nmvrs: Int): List<BallotOrCvr> {
         val result = mutableListOf<BallotOrCvr>()
         val ballotCardsIter = ballotCards()
@@ -27,6 +26,7 @@ interface MvrManager {
         }
         return result
     }
+    fun Nballots(contestUA: ContestUnderAudit): Int // TODO where does this come from ?
 }
 
 interface MvrManagerClcaIF : MvrManager {

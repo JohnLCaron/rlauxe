@@ -290,8 +290,8 @@ fun createElectionFromDominionCvrs(
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
     val cards = createSortedCards(allCvrs, auditConfig.seed)
-    writeAuditableCardCsvFile(cards, publisher.cvrsCsvFile())
-    println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()} cvrs = ${allCvrs.size}")
+    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
+    println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${allCvrs.size}")
 
     checkContestsWithCards(contestsUA, cards.iterator())
     checkVotesVsSovo(contests, sovo)

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
@@ -103,15 +103,15 @@ class TestColoradoElectionFromAudit {
 
         // fake: reading the mvrs instead of the cvrs
         val publisher = Publisher(auditDir)
-        val sampledMvrs = readCvrsCsvFile(publisher.sampleMvrsFile(1))
+        val sampledMvrs = readAuditableCardCsvFile(publisher.sampleMvrsFile(1))
         println("number of samples = ${sampledMvrs.size}")
 
         sampledMvrs.forEach{ mvr ->
-            val precinct = mvr.id.split("-").first()
+            val precinct = mvr.desc.split("-").first()
             val county = precinctMap[precinct] ?: error("no county for precinct $precinct")
             val countySampleMap = countySamples[county]!!
             val precinctSamples = countySampleMap.getOrPut(precinct) { PrecinctSamples(precinct) }
-            precinctSamples.sampleIds.add(mvr.id)
+            precinctSamples.sampleIds.add(mvr.desc)
         }
 
         println("============================================================")

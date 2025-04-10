@@ -9,8 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/cases" />
             <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/corla" />
             <option value="$PROJECT_DIR$/plots" />
             <option value="$PROJECT_DIR$/rla" />
           </set>

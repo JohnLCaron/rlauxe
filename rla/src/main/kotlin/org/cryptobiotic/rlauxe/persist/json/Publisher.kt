@@ -9,13 +9,14 @@ import java.nio.file.Path
     topdir/
       auditConfig.json      // AuditConfigJson
       contests.json         // ContestsUnderAuditJson
-      cvrs.csv              // CvrsCsv (or)
+      sortedCards.csv       // AuditableCardCsv (or)
+      sortedCards.zip       // AuditableCardCsv (or)
       ballotManifest.json   // BallotManifestJson
 
       roundX/
         auditState.json     // AuditRoundJson
         sampleNumbers.json  // SampleNumbersJson // the sample numbers to be audited
-        sampleMvrs.csv      // CvrsCsv  // the mvrs used for the audit; matches sampleNumbers.json
+        sampleMvrs.csv      // AuditableCardCsv  // the mvrs used for the audit; matches sampleNumbers.json
 
  */
 
@@ -27,8 +28,7 @@ class Publisher(val topdir: String) {
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
     fun contestsFile() = "$topdir/contests.json"
-    fun cvrsCsvFile() = "$topdir/sortedCvrs.csv" // TODO should be zip ??
-    fun cvrsCsvZipFile() = "$topdir/sortedCvrs.zip"
+    fun cardsCsvFile() = "$topdir/sortedCards.csv"
     fun cardsCsvZipFile() = "$topdir/sortedCards.zip"
     fun ballotManifestFile() = "$topdir/ballotManifest.json"
 

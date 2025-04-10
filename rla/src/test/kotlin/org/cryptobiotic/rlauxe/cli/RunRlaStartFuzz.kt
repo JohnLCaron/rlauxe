@@ -141,8 +141,8 @@ object RunRlaStartFuzz {
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
 
         //// could be inside of BallotCardsClca
-        writeAuditableCardCsvFile(ballotCards.cvrsUA, publisher.cvrsCsvFile()) // TODO wrap in Result ??
-        println("   writeCvrsCvsFile ${publisher.cvrsCsvFile()}")
+        writeAuditableCardCsvFile(ballotCards.cvrsUA, publisher.cardsCsvFile()) // TODO wrap in Result ??
+        println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
 
         // save the sorted testMvrs
         publisher.validateOutputDirOfFile(mvrFile)

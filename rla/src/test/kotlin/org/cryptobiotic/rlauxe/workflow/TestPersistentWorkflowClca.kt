@@ -39,7 +39,7 @@ class TestPersistentWorkflowClca {
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
         var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), ballotCards)
 
-        writeAuditableCardCsvFile(ballotCards.cvrsUA, publish.cvrsCsvFile())
+        writeAuditableCardCsvFile(ballotCards.cvrsUA, publish.cardsCsvFile())
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publish.contestsFile())
 
         var round = 1

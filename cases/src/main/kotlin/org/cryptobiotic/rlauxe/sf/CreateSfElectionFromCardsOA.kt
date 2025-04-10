@@ -82,7 +82,7 @@ fun createAuditableCardsWithPools(
                 if (session.CountingGroupId == 2) {
                     val cvrs = session.import(irvIds)
                     cvrs.forEach {
-                        val card = AuditableCard.fromCvr(it, 0, 0)
+                        val card = AuditableCard.fromCvrWithZeros(it)
                         cardsOutputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
                         countCvrs2++
                     }

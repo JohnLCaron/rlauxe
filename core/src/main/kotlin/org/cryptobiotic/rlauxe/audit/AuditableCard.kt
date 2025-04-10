@@ -73,12 +73,21 @@ data class AuditableCard (
     }
 
     companion object {
+        // dont use this, except testing and initialization. sampleNum should be set.
+        fun fromCvrWithZeros(cvr: Cvr): AuditableCard {
+            // store the contest separate from the candidates
+            val sortedVotes = cvr.votes.toSortedMap()
+            val contests = sortedVotes.keys.toList()
+            return AuditableCard(cvr.id, 0, 0L, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
+        }
+
         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
             // store the contest separate from the candidates
             val sortedVotes = cvr.votes.toSortedMap()
             val contests = sortedVotes.keys.toList()
             return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
         }
+
         // there are no votes
         fun fromCvrWithPool(cvr: Cvr, index: Int, sampleNum: Long, poolId: Int): AuditableCard {
             val contests = cvr.votes.keys.toSortedSet().toList()

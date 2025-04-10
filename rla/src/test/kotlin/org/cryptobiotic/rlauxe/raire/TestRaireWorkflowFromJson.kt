@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaAudit
-import org.cryptobiotic.rlauxe.audit.findSamples
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import java.util.concurrent.TimeUnit
@@ -56,7 +52,7 @@ class TestRaireWorkflowFromJson {
 
 }
 
-fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<CvrUnderAudit>, nassertions: Int) {
+fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<AuditableCard>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var done = false

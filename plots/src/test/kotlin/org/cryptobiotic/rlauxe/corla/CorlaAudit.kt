@@ -89,7 +89,6 @@ class CorlaAudit(
     val quiet: Boolean = false,
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
-    // val cvrsUA: List<CvrUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {

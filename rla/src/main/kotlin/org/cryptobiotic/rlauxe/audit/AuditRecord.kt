@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.audit
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -14,18 +14,18 @@ class AuditRecord(
     val auditConfig: AuditConfig,
     val contests: List<ContestUnderAudit>,
     val rounds: List<AuditRound>,
-    mvrs: List<CvrUnderAudit> // mvrs already sampled
+    mvrs: List<AuditableCard> // mvrs already sampled
 ) {
-    val previousMvrs = mutableMapOf<Long, CvrUnderAudit>()
+    val previousMvrs = mutableMapOf<Long, AuditableCard>()
 
     init {
-        mvrs.forEach { previousMvrs[it.sampleNum] = it } // cumulative
+        mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
     }
 
     // TODO new mvrs vs mvrs. Build interface to manage this process
     fun enterMvrs(mvrFile: String): Boolean {
-        val mvrs = readCvrsCsvFile(mvrFile)
-        val mvrMap = mvrs.associateBy { it.sampleNum }.toMap()
+        val mvrs = readAuditableCardCsvFile(mvrFile)
+        val mvrMap = mvrs.associateBy { it.prn }.toMap()
 
         val publisher = Publisher(location)
         val lastRound = rounds.last()
@@ -49,7 +49,7 @@ class AuditRecord(
         if (missing) return false
 
         val sampledMvrs = sampledNumbers.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
-        writeCvrsCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
+        writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
         println("    write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx")
 
         // TODO
@@ -68,7 +68,7 @@ class AuditRecord(
             val contests = if (contestsResults is Ok) contestsResults.unwrap()
                 else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
 
-            val sampledMvrsAll = mutableListOf<CvrUnderAudit>()
+            val sampledMvrsAll = mutableListOf<AuditableCard>()
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.rounds()) {
@@ -77,7 +77,7 @@ class AuditRecord(
                 // may not exist yet
                 val mvrsForRoundFile = Path.of(publisher.sampleMvrsFile(roundIdx))
                 val sampledMvrs = if (Files.exists(mvrsForRoundFile)) {
-                    readCvrsCsvFile(publisher.sampleMvrsFile(roundIdx))
+                    readAuditableCardCsvFile(publisher.sampleMvrsFile(roundIdx))
                 } else {
                     emptyList()
                 }

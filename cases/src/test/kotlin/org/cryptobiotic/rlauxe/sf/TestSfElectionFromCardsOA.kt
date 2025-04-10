@@ -13,7 +13,6 @@ import kotlin.test.assertEquals
 class TestSfElectionFromCards {
 
     // make a OneAudit from Dominion expurted CVRs, using CountingGroupId=1 as the pooled votes
-    // write Auditable cards instead of CvrUnderAudit
     @Test
     fun createSF2024PoaCards() {
         val stopwatch = Stopwatch()
@@ -285,7 +284,7 @@ class MvrManagerCardsSingleRound(val sortedCardFile: String, val maxSamples: Int
         TODO("Not yet implemented")
     }
 
-    override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
+    override fun setMvrsForRound(mvrs: List<AuditableCard>) {
         TODO("Not yet implemented")
     }
 

@@ -6,7 +6,7 @@ class TestRunRlaRoundCli {
 
     @Test
     fun testRlaRoundSF() {
-        val topdir = "/home/stormy/temp/sf2024Poa/audit"
+        val topdir = "/home/stormy/temp/cases/sf2024Poa/audit"
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,
@@ -16,7 +16,7 @@ class TestRunRlaRoundCli {
 
     @Test
     fun testRlaRoundCorla() {
-        val topdir = "/home/stormy/temp/corla/election"
+        val topdir = "/home/stormy/temp/cases/corla"
         RunRliRoundCli.main(
             arrayOf(
                 "-in", topdir,
@@ -26,7 +26,7 @@ class TestRunRlaRoundCli {
 
     @Test
     fun testRrunBoulder() {
-        val topdir = "/home/stormy/temp/persist/runBoulder23"
+        val topdir = "/home/stormy/temp/cases/boulder23"
 
         RunRliRoundCli.main(
             arrayOf(
@@ -35,7 +35,7 @@ class TestRunRlaRoundCli {
         )
     }
 
-    // @Test
+    @Test
     fun testRlaRoundPolling() {
         val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
         RunRliRoundCli.main(
@@ -45,7 +45,7 @@ class TestRunRlaRoundCli {
         )
     }
 
-    // @Test
+    @Test
     fun testRlaClcaFuzz() {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
         RunRliRoundCli.main(

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrsCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSampleNumbersJsonFile
@@ -66,7 +66,7 @@ class PersistentAudit(
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(roundIdx))
         if (!quiet) println("    writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'")
 
-        writeCvrsCsvFile(sampledMvrs , publisher.sampleMvrsFile(roundIdx)) // TODO
+        writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(roundIdx)) // TODO
         if (!quiet) println("    write sampledMvrs to '${publisher.sampleMvrsFile(roundIdx)}'")
 
         return complete

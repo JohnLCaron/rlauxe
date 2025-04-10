@@ -66,20 +66,3 @@ data class Cvr(
         fun makePhantom(cvrId: String, contestId: Int) = Cvr(cvrId, mapOf(contestId to IntArray(0)), phantom=true)
     }
 }
-
-/** Cvr that has been assigned a sampleNum. */
-data class CvrUnderAudit (val cvr: Cvr, val index: Int, val sampleNum: Long): BallotOrCvr {
-    val id = cvr.id
-    val votes = cvr.votes
-    val phantom = cvr.phantom
-
-    override fun hasContest(contestId: Int) = cvr.hasContest(contestId)
-    override fun sampleNumber() = sampleNum
-    override fun index() = index
-
-    override fun toString() = buildString {
-        append("$id $index ($phantom)")
-        votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
-    }
-}
-

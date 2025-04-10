@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 // in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in
 // the contest appropriately. That's in the SHANGRLA codebase.
 
-/** Generalization of CvrUnderAudit. */
 data class AuditableCard (
     val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
     val index: Int,  // index into the original, canonical (committed-to) list of cards

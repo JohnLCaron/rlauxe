@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 
 class MvrManagerPolling(val ballots: List<Ballot>, seed: Long) : MvrManagerPollingIF {
     val ballotsUA: List<BallotUnderAudit>
-    var mvrsRound: List<CvrUnderAudit> = emptyList()
+    var mvrsRound: List<AuditableCard> = emptyList()
 
     init {
         val prng = Prng(seed)
@@ -16,32 +16,11 @@ class MvrManagerPolling(val ballots: List<Ballot>, seed: Long) : MvrManagerPolli
     fun ballots() = ballots
     override fun Nballots(contestUA: ContestUnderAudit) = ballots.size
     override fun ballotCards() : Iterator<BallotOrCvr> = ballotsUA.iterator()
-    override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
+    override fun setMvrsForRound(mvrs: List<AuditableCard>) {
         mvrsRound = mvrs.toList()
     }
 
     override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        return PollWithoutReplacement(contestId, hasStyles, mvrsRound.map { it.cvr }, assorter, allowReset=allowReset)
+        return PollWithoutReplacement(contestId, hasStyles, mvrsRound.map { it.cvr() }, assorter, allowReset=allowReset)
     }
 }
-
-/*
-class MvrManagerPollingRecord(val auditRecord: AuditRecord, private val ballotsUA: Iterable<BallotUnderAudit>, val nballotCards: Int) :
-    MvrManagerPollingIF, MvrManagerTest {
-    var mvrsForRound: List<CvrUnderAudit> = emptyList()
-
-    override fun Nballots() = nballotCards
-    override fun ballotCards() : Iterator<BallotOrCvr> = ballotsUA.iterator()
-    override fun setMvrsForRound(mvrs: List<CvrUnderAudit>) {
-        mvrsForRound = mvrs
-    }
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>) {
-        val sampleMvrs = auditRecord.getMvrsBySampleNumber(sampleNumbers, null)
-        setMvrsForRound(sampleMvrs)
-    }
-
-    override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        // // TODO why not CvrUnderAudit ?
-        return PollWithoutReplacement(contestId, hasStyles, mvrsForRound.map { it.cvr } , assorter, allowReset=allowReset)
-    }
-} */

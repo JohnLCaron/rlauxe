@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.CvrUnderAudit
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrsCsvStream
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCvrsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
@@ -68,70 +65,6 @@ class TestColoradoElectionFromAudit {
             precinctReader.next()
         }
         println("count = $count took = $stopwatch")
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // looking for where we lose contests > 260
-    @Test
-    fun testMergedCvrs() {
-        val auditDir = "/home/stormy/temp/cases/corla"
-        val cvrZipFile = "$auditDir/sortedCards.zip"
-
-        val reader = ZipReader(cvrZipFile)
-        val input = reader.inputStream("sortedCards.csv")
-        val iter = IteratorCvrsCsvStream(input)
-        var lastCvr : CvrUnderAudit? = null
-        var count = 0
-
-        val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-        while (iter.hasNext()) {
-            val cvr = iter.next()
-            cvr.votes.forEach { (key, value) ->
-                haveSampleSize[key] = haveSampleSize[key]?.plus(1) ?: 1
-            }
-
-            if (lastCvr != null) {
-                require(cvr.sampleNum > lastCvr.sampleNum)
-            }
-            lastCvr = cvr
-            count++
-            if (count % 100000 == 0) println("$count ")
-        }
-
-        println("count = $count")
-        haveSampleSize.toSortedMap().forEach {
-            println("${it.key} : ${it.value}")
-        }
-    }
-
-    @Test
-    fun testCvrsSortedZip() {
-        val auditDir = "/home/stormy/temp/cases/corla"
-        val cvrZipFile = "$auditDir/sortedCards.zip"
-
-        val cardIter = readCardsCsvIterator(cvrZipFile)
-        var lastCard : AuditableCard? = null
-        var count = 0
-
-        val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-        while (cardIter.hasNext()) {
-            val card = cardIter.next()
-            card.cvr().votes.forEach { (key, value) ->
-                haveSampleSize[key] = haveSampleSize[key]?.plus(1) ?: 1
-            }
-
-            if (lastCard != null) {
-                require(card.prn > lastCard.prn)
-            }
-            lastCard = card
-            count++
-            if (count % 100000 == 0) println("$count ")
-        }
-
-        println("count = $count")
-        haveSampleSize.toSortedMap().forEach {
-            println("${it.key} : ${it.value}")
-        }
     }
 
     @Test

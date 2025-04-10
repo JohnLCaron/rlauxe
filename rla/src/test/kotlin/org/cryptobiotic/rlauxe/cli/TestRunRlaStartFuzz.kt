@@ -53,7 +53,7 @@ class TestRunRlaStartFuzz {
         )
     }
 
-    // @Test
+    @Test
     fun testRunAuditPolling() {
         val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
 

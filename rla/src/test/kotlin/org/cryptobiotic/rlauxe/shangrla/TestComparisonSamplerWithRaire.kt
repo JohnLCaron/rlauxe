@@ -18,7 +18,6 @@ class TestComparisonSamplerWithRaire {
             "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallotsCsv(cvrFile)
         val cvrs = raireCvrs.cvrs
-        // val cvrsUA = cvrs.map { CvrUnderAudit(it) }
 
         val ncs = raireCvrs.contests.map { Pair(it.contestNumber.toString(), it.ncvrs + 2)}.toMap()
         val nps = raireCvrs.contests.map { Pair(it.contestNumber.toString(), 2)}.toMap()

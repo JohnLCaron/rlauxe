@@ -11,7 +11,7 @@ data class AuditRound(
     var auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
     var sampleNumbers: List<Long>, // ballot indices to sample for this round
-    var sampledBorc: List<BallotOrCvr> = emptyList(), // ballots to sample for this round
+    var sampledBorc: List<BallotOrCvr> = emptyList(), // ballots to sample for this round TODO not used ?
     var nmvrs: Int = 0,
     var newmvrs: Int = 0,
     var auditorWantNewMvrs: Int = -1,

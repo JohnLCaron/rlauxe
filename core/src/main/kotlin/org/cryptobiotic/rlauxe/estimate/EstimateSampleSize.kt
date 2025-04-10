@@ -37,7 +37,7 @@ fun estimateSampleSizes(
         tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
     }
     // run tasks concurrently
-    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=1)
+    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=nthreads)
 
     // put results into assertionRounds
     estResults.forEach { estResult ->

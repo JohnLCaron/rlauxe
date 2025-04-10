@@ -44,9 +44,11 @@ class PersistentAudit(
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
-        // this is getting done twice, see RunRliRoundCli.runRound()
-        // val sampledMvrs = auditRecord.getMvrsForRound(ballotCards(), roundIdx, mvrFile)
-        val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)
+        // TODO
+        //   in a real audit, we need to set the real mvrs
+        //   val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
+        //   instead, we assume its a test for now
+        val sampledMvrs = (mvrManager as MvrManagerTest).setMvrsForRoundIdx(roundIdx)
         if (!quiet) println("  added ${sampledMvrs.size} mvrs to mvrManager")
 
         val complete =  when (auditConfig.auditType) {

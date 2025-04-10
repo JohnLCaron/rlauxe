@@ -59,9 +59,6 @@ fun runRound(inputDir: String, quiet: Boolean): AuditRound? {
             println("Run audit round ${auditRound.roundIdx}")
             val roundStopwatch = Stopwatch()
 
-            // TODO the mvrFile might be the mvrs that were just audited. here we are assuming the auditRecord has testMvrs
-            // val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
-
             complete = workflow.runAuditRound(auditRound, quiet)
             println("  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
         } else {

@@ -22,7 +22,7 @@ class AuditRecord(
         mvrs.forEach { previousMvrs[it.sampleNum] = it } // cumulative
     }
 
-    // TODO new mvrs vs mvrs. Build interfacce to manage this process
+    // TODO new mvrs vs mvrs. Build interface to manage this process
     fun enterMvrs(mvrFile: String): Boolean {
         val mvrs = readCvrsCsvFile(mvrFile)
         val mvrMap = mvrs.associateBy { it.sampleNum }.toMap()
@@ -51,6 +51,9 @@ class AuditRecord(
         val sampledMvrs = sampledNumbers.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
         writeCvrsCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
         println("    write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx")
+
+        // TODO
+        //   mvrManager.setMvrsForRound(sampledMvrs)
         return true
     }
 
@@ -71,15 +74,16 @@ class AuditRecord(
             for (roundIdx in 1..publisher.rounds()) {
                 val sampledNumbers = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx)).unwrap()
 
-                val auditRound = readAuditRoundJsonFile(contests, sampledNumbers, publisher.auditRoundFile(roundIdx)).unwrap()
-
                 // may not exist yet
                 val mvrsForRoundFile = Path.of(publisher.sampleMvrsFile(roundIdx))
-                if (Files.exists(mvrsForRoundFile)) {
-                    val sampledMvrs = readCvrsCsvFile(publisher.sampleMvrsFile(roundIdx))
-                    sampledMvrsAll.addAll(sampledMvrs) // cumulative
+                val sampledMvrs = if (Files.exists(mvrsForRoundFile)) {
+                    readCvrsCsvFile(publisher.sampleMvrsFile(roundIdx))
+                } else {
+                    emptyList()
                 }
+                sampledMvrsAll.addAll(sampledMvrs) // cumulative
 
+                val auditRound = readAuditRoundJsonFile(publisher.auditRoundFile(roundIdx), contests, sampledNumbers, sampledMvrs).unwrap()
                 rounds.add(auditRound)
             }
             return AuditRecord(location, auditConfig, contests, rounds, sampledMvrsAll)

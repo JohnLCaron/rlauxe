@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestBallotPoolCsv {
+class TestCardLocationPoolCsv {
 
     @Test
     fun testRoundtrip() {

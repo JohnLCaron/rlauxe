@@ -60,11 +60,11 @@ fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<AuditableCa
         val roundStopwatch = Stopwatch()
         println("---------------------------")
         val currRound = workflow.startNewRound()
-        println("${currRound.roundIdx} choose ${currRound.sampleNumbers.size} samples, new=${currRound.newmvrs} " +
+        println("${currRound.roundIdx} choose ${currRound.samplePrns.size} samples, new=${currRound.newmvrs} " +
                 "took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
         // TODO addMvrs ?
-        val sampledMvrus = findSamples(currRound.sampleNumbers, sortedMvrs.iterator()) // TODO use IteratorCvrsCsvFile?
+        val sampledMvrus = findSamples(currRound.samplePrns, sortedMvrs.iterator()) // TODO use IteratorCvrsCsvFile?
         done = workflow.runAuditRound(currRound)
         println("runAudit ${currRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
     }

@@ -79,8 +79,8 @@ fun runRound(inputDir: String, quiet: Boolean): AuditRound? {
 
 fun runChooseSamples(workflow: RlauxAuditIF, publish: Publisher): AuditRound {
     val round = workflow.startNewRound(quiet = false)
-    if (round.sampleNumbers.isNotEmpty()) {
-        writeSampleNumbersJsonFile(round.sampleNumbers, publish.sampleNumbersFile(round.roundIdx))
+    if (round.samplePrns.isNotEmpty()) {
+        writeSampleNumbersJsonFile(round.samplePrns, publish.sampleNumbersFile(round.roundIdx))
         println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
     } else {
         println("*** FAILED TO GET ANY SAMPLES ***")

@@ -23,7 +23,7 @@ class PersistentAudit(
     override fun startNewRound(quiet: Boolean): AuditRound {
         val nextRound = super.startNewRound(quiet)
 
-        if (nextRound.sampleNumbers.isEmpty()) {
+        if (nextRound.samplePrns.isEmpty()) {
             println("*** FAILED TO GET ANY SAMPLES (PersistentAudit)")
             nextRound.auditIsComplete = true
         } else {
@@ -32,7 +32,7 @@ class PersistentAudit(
             writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
             println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}")
 
-            writeSampleNumbersJsonFile(nextRound.sampleNumbers, publisher.sampleNumbersFile(nextRound.roundIdx))
+            writeSampleNumbersJsonFile(nextRound.samplePrns, publisher.sampleNumbersFile(nextRound.roundIdx))
             println("   writeSampleIndicesJsonFile ${publisher.sampleNumbersFile(nextRound.roundIdx)}")
         }
 
@@ -47,7 +47,7 @@ class PersistentAudit(
         // TODO
         //   in a real audit, we need to set the real mvrs
         //   val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
-        //   instead, we assume its a test for now
+        //   instead, we assume its a test (for now)
         val sampledMvrs = (mvrManager as MvrManagerTest).setMvrsForRoundIdx(roundIdx)
         if (!quiet) println("  added ${sampledMvrs.size} mvrs to mvrManager")
 

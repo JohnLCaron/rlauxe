@@ -138,18 +138,18 @@ object RunRlaStartFuzz {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
                     // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
-        val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
+        val mvrManager = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
 
-        //// could be inside of BallotCardsClca
-        writeAuditableCardCsvFile(ballotCards.cvrsUA, publisher.cardsCsvFile()) // TODO wrap in Result ??
+        // save the sorted cards
+        writeAuditableCardCsvFile(mvrManager.cvrsUA, publisher.cardsCsvFile()) // TODO wrap in Result ??
         println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
 
         // save the sorted testMvrs
         publisher.validateOutputDirOfFile(mvrFile)
-        writeAuditableCardCsvFile(ballotCards.mvrsUA, mvrFile)
+        writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
-        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, ballotCards)
+        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, mvrManager)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
@@ -160,7 +160,7 @@ object RunRlaStartFuzz {
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
 
-        return if (auditRound.sampleNumbers.isNotEmpty()) 0 else 1
+        return if (auditRound.samplePrns.isNotEmpty()) 0 else 1
     }
 
     fun startTestElectionPolling(
@@ -187,32 +187,26 @@ object RunRlaStartFuzz {
         contests.forEach { println("  $it") }
         println()
 
-        val (testCvrs, ballotManifest) = testData.makeCvrsAndBallotManifest(auditConfig.hasStyles)
+        val (testCvrs, ballots) = testData.makeCvrsAndBallots(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct)
         val pairs = testMvrs.zip(testCvrs)
         pairs.forEach { (mvr, cvr) ->
             require(mvr.id == cvr.id)
         }
 
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, auditConfig.seed)
-        val ballotManifestUA = BallotManifestUnderAudit(ballotCards.ballotsUA, ballotManifest.ballotStyles)
-        writeBallotManifestJsonFile(ballotManifestUA, publisher.ballotManifestFile())
-        println("   writeBallotManifestJsonFile ${publisher.ballotManifestFile()}")
+        val mvrManager = MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
+
+        // save the sorted cards
+        writeAuditableCardCsvFile(mvrManager.ballotsUA, publisher.cardsCsvFile())
+        println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
 
         // save the sorted testMvrs
-        var lastRN = 0L
-        val mvruas = ballotCards.ballotsUA.mapIndexed { idx, ballotUA ->
-            require(ballotUA.sampleNumber() > lastRN)
-            lastRN = ballotUA.sampleNumber()
-            val mvr = testMvrs[idx]
-            AuditableCard.fromCvr(mvr, ballotUA.index(), ballotUA.sampleNumber())
-        }
         publisher.validateOutputDirOfFile(mvrFile)
-        writeAuditableCardCsvFile(mvruas, mvrFile)
+        writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
         // PollingWorkflow creates the assertions
-        val pollingWorkflow = PollingAudit(auditConfig, contests, ballotCards)
+        val pollingWorkflow = PollingAudit(auditConfig, contests, mvrManager)
 
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
@@ -224,6 +218,6 @@ object RunRlaStartFuzz {
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
         println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
 
-        return if (auditRound.sampleNumbers.isNotEmpty()) 0 else 1
+        return if (auditRound.samplePrns.isNotEmpty()) 0 else 1
     }
 }

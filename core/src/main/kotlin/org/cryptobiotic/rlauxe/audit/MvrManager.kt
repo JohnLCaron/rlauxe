@@ -1,25 +1,27 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 private val debugWantSampleSize = false
 
-// TODO can we get rid of this in favor of AuditableCard?
+/* TODO can we get rid of this in favor of AuditableCard?
 interface BallotOrCvr {
     fun hasContest(contestId: Int): Boolean
     fun sampleNumber(): Long
     fun index(): Int
-}
+} */
 
 interface MvrManager {
-    fun ballotCards() : Iterator<BallotOrCvr>
+    fun ballotCards() : Iterator<AuditableCard>
 
     // this is where you would add the real mvrs
     fun setMvrsForRound(mvrs: List<AuditableCard>)
 
     //// for uniformSampling
-    fun takeFirst(nmvrs: Int): List<BallotOrCvr> {
-        val result = mutableListOf<BallotOrCvr>()
+    fun takeFirst(nmvrs: Int): List<AuditableCard> {
+        val result = mutableListOf<AuditableCard>()
         val ballotCardsIter = ballotCards()
         while (ballotCardsIter.hasNext() && result.size < nmvrs) {
             result.add(ballotCardsIter.next())
@@ -36,7 +38,7 @@ interface MvrManagerClcaIF : MvrManager {
 
 interface MvrManagerPollingIF : MvrManager {
     // this is used for audit, not estimation
-    fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler
+    fun makeMvrsForRound(): List<Cvr>
 }
 
 interface MvrManagerTest : MvrManager {
@@ -54,7 +56,7 @@ fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<AuditableCard>
     sampleNumbers.forEach { sampleNum ->
         while (sortedCvrUAs.hasNext()) {
             val boc = sortedCvrUAs.next()
-            if (boc.sampleNumber() == sampleNum) {
+            if (boc.prn == sampleNum) {
                 result.add(boc)
                 break
             }
@@ -66,7 +68,7 @@ fun findSamples(sampleNumbers: List<Long>, sortedCvrUAs: Iterator<AuditableCard>
 
 //// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize
-fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedBorc : Iterator<BallotOrCvr>): Map<Int, Int> {
+fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedBorc : Iterator<AuditableCard>): Map<Int, Int> {
     //// count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }
@@ -76,7 +78,7 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
     previousSamples.forEach { prevNumber ->
         while (sortedBorcIter.hasNext()) {
             val boc = sortedBorcIter.next() // previousSamples must be in same order as sortedBorc
-            if (boc.sampleNumber() == prevNumber) {
+            if (boc.prn == prevNumber) {
                 contestsNotDone.forEach { contest ->
                     if (boc.hasContest(contest.id)) {
                         prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1

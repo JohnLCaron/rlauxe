@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.Ballot
-import org.cryptobiotic.rlauxe.audit.BallotManifest
-import org.cryptobiotic.rlauxe.audit.BallotStyle
+import org.cryptobiotic.rlauxe.audit.CardLocation
+import org.cryptobiotic.rlauxe.audit.CardLocationManifest
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -29,7 +29,7 @@ data class MultiContestTestData(
 
     val fcontests: List<ContestTestData>
     val contests: List<Contest>
-    val ballotStyles: List<BallotStyle>
+    val ballotStyles: List<CardStyle>
     var countBallots = 0
 
     init {
@@ -68,7 +68,7 @@ data class MultiContestTestData(
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[it]!!
             countBallots += ncards
-            BallotStyle.make(it, contestList, contestIds, ncards)
+            CardStyle.make(it, contestList, contestIds, ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -97,30 +97,28 @@ data class MultiContestTestData(
     }
 
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeBallotManifest(hasStyle: Boolean): BallotManifest {
-        val ballots = mutableListOf<Ballot>()
+    fun makeBallotManifest(hasStyle: Boolean): CardLocationManifest {
+        val cardLocations = mutableListOf<CardLocation>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->
             repeat(ballotStyle.ncards) {
-                val ballot = Ballot("ballot$ballotId", false, if (hasStyle) ballotStyle else null)
-                ballots.add(ballot)
+                val cardLocation = CardLocation("ballot$ballotId", false, if (hasStyle) ballotStyle else null)
+                cardLocations.add(cardLocation)
                 ballotId++
             }
         }
         // add phantoms
         val ncardsByContest = fcontests.associate { Pair(it.contestId, it.ncards) }
         val phantoms = makePhantomBallots(contests, ncardsByContest)
-        return BallotManifest(ballots + phantoms, ballotStyles)
+        return CardLocationManifest(cardLocations + phantoms, ballotStyles)
     }
 
-    fun makeCvrsAndBallotManifest(hasStyle: Boolean): Pair<List<Cvr>, BallotManifest> {
+    fun makeCvrsAndBallots(hasStyle: Boolean): Pair<List<Cvr>, List<CardLocation>> {
         val cvrs = makeCvrsFromContests()
-        val ballots = mutableListOf<Ballot>()
-        cvrs.forEach { cvr ->
-            val ballot = Ballot(cvr.id, cvr.phantom, null, if (hasStyle) cvr.votes.keys.toList() else emptyList())
-            ballots.add(ballot)
+        val cardLocations = cvrs.map { cvr ->
+            CardLocation(cvr.id, cvr.phantom, null, if (hasStyle) cvr.votes.keys.toList() else emptyList())
         }
-        return Pair( cvrs, BallotManifest(ballots, ballotStyles))
+        return Pair(cvrs, cardLocations)
     }
 
     // create new partitions each time this is called

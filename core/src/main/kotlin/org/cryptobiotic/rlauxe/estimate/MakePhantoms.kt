@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.Ballot
+import org.cryptobiotic.rlauxe.audit.CardLocation
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 
@@ -127,7 +127,7 @@ fun makePhantomBallots(
     contests: List<Contest>,
     ncvrs: Map<Int, Int>,  // contest id -> ncards in contest
     prefix: String = "phantom-",
-): List<Ballot> {
+): List<CardLocation> {
 
     val phantombs = mutableListOf<PhantomBuilder>()
 
@@ -150,7 +150,7 @@ class PhantomBuilder(val id: String) {
         val votes = contests.associateWith { IntArray(0) }
         return Cvr(id, votes, phantom = true)
     }
-    fun buildBallot(): Ballot {
-        return Ballot(id, phantom = true, null, contests)
+    fun buildBallot(): CardLocation {
+        return CardLocation(id, phantom = true, null, contests)
     }
 }

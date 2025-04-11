@@ -24,7 +24,7 @@ fun sampleCheckLimits(workflow: RlauxAuditProxy, auditRound: AuditRound, previou
         sample(workflow, auditRound, previousSamples, quiet = quiet)
 
         //// the rest of this implements sampleLimit
-        if (auditConfig.sampleLimit < 0 || auditRound.sampleNumbers.size <= auditConfig.sampleLimit) {
+        if (auditConfig.sampleLimit < 0 || auditRound.samplePrns.size <= auditConfig.sampleLimit) {
             break
         }
         // find the contest with the largest estimation size eligible for removal, remove it
@@ -51,11 +51,11 @@ fun sample(
     if (auditConfig.hasStyles) {
         if (!quiet) println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
         consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
-        if (!quiet) println(" consistentSamplingSize= ${auditRound.sampleNumbers.size}")
+        if (!quiet) println(" consistentSamplingSize= ${auditRound.samplePrns.size}")
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
         uniformSampling(auditRound, workflow.mvrManager(), previousSamples, auditConfig.sampleLimit, auditRound.roundIdx)
-        if (!quiet) println(" uniformSamplingSize= ${auditRound.sampleNumbers.size}")
+        if (!quiet) println(" uniformSamplingSize= ${auditRound.samplePrns.size}")
     }
 }
 
@@ -86,7 +86,7 @@ fun consistentSampling(
     val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
 
     var newMvrs = 0
-    val sampledCards = mutableListOf<BallotOrCvr>()
+    val sampledCards = mutableListOf<AuditableCard>()
 
     // while we need more samples
     var countSamples = 0
@@ -98,12 +98,11 @@ fun consistentSampling(
 
         // get the next sorted cvr
         val boc = sortedBorcIter.next()
-        val sampleNumber = boc.sampleNumber()
         // does this contribute to one or more contests that need more samples?
         if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && boc.hasContest(contestRound.id) }) {
             // then use it
             sampledCards.add(boc)
-            if (!previousSamples.contains(sampleNumber)) {
+            if (!previousSamples.contains(boc.prn)) {
                 newMvrs++
             }
             // count only if included
@@ -116,7 +115,7 @@ fun consistentSampling(
             contestsNotDone.forEach { contest ->
                 if (boc.hasContest(contest.id)) {
                     haveActualMvrs[contest.id] = haveActualMvrs[contest.id]?.plus(1) ?: 1
-                    if (!previousSamples.contains(sampleNumber))
+                    if (!previousSamples.contains(boc.prn))
                         haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
                 }
             }
@@ -144,7 +143,7 @@ fun consistentSampling(
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
-    auditRound.sampleNumbers = sampledCards.map { it.sampleNumber() }
+    auditRound.samplePrns = sampledCards.map { it.sampleNumber() }
     auditRound.sampledBorc = sampledCards
 }
 
@@ -187,12 +186,12 @@ fun uniformSampling(
 
     // take the first nmvrs of the sorted ballots
     val sampledCards = mvrManager.takeFirst(nmvrs)
-    val newMvrs = sampledCards.filter { !previousSamples.contains(it.sampleNumber()) }.count()
+    val newMvrs = sampledCards.filter { !previousSamples.contains(it.prn) }.count()
 
     // set the results into the auditRound directly
     auditRound.nmvrs = nmvrs
     auditRound.newmvrs = newMvrs
-    auditRound.sampleNumbers = sampledCards.map { it.sampleNumber() } // list of ballot indexes sorted by sampleNum
+    auditRound.samplePrns = sampledCards.map { it.prn }
     auditRound.sampledBorc = sampledCards
 }
 

@@ -23,7 +23,7 @@ interface RlauxAuditIF: RlauxAuditProxy {
         val auditRound = if (previousRound == null) {
             // first time, create the rounds
             val contestRounds = contestsUA().map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
         } else {
             // next time, create from previous round
             previousRound.createNextRound()

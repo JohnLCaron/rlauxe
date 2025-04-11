@@ -97,6 +97,6 @@ fun makeMvrManager(auditDir: String, auditConfig: AuditConfig): MvrManager {
     return if (auditConfig.isClca) {
         MvrManagerClca(auditDir)
     } else {
-        MvrManagerPolling(emptyList(), auditConfig.seed) // TODO
+        MvrManagerPolling(auditDir)
     }
 }

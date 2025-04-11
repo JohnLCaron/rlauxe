@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.Publisher
 import kotlin.test.Test
 
@@ -27,22 +28,22 @@ class TestPersistentWorkflowPolling {
         contests.forEach{ println("  $it")}
         println()
 
-        val (testCvrs, ballotManifest) = testData.makeCvrsAndBallotManifest(auditConfig.hasStyles)
+        val (testCvrs, ballots) = testData.makeCvrsAndBallots(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, auditConfig.seed)
+        val mvrManager = MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
 
-        val pollingWorkflow = PollingAudit(auditConfig, contests, ballotCards)
+        // save the sorted testMvrs
+        writeAuditableCardCsvFile(mvrManager.ballotsUA, publish.cardsCsvFile())
+        println("   writeAuditableCardCsvFile ${publish.cardsCsvFile()}")
 
-        val ballotManifestUA = BallotManifestUnderAudit(ballotCards.ballotsUA, ballotManifest.ballotStyles)
-        writeBallotManifestJsonFile(ballotManifestUA, publish.ballotManifestFile())
-
+        val pollingWorkflow = PollingAudit(auditConfig, contests, mvrManager)
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publish.contestsFile())
 
         var round = 1
         var done = false
         var workflow : RlauxAuditIF = pollingWorkflow
         while (!done) {
-            done = runPersistentWorkflowStage(round, workflow, ballotCards.mvrsUA, publish)
+            done = runPersistentWorkflowStage(round, workflow, mvrManager.mvrsUA, publish)
             workflow = PersistentAudit(topdir)
             round++
         }

@@ -53,14 +53,14 @@ fun AuditRound.publishJson() : AuditRoundJson {
         contestRounds.map { it.publishJson() },
         this.auditWasDone,
         this.auditIsComplete,
-        this.sampleNumbers,
+        this.samplePrns,
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
     )
 }
 
-fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: List<Long>, sampledBorc: List<BallotOrCvr>): AuditRound {
+fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: List<Long>, sampledBorc: List<AuditableCard>): AuditRound {
     val contestUAmap = contestUAs.associateBy { it.id }
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!! )
@@ -146,9 +146,6 @@ fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     val assertionMap = contestUA.assertions().associateBy { it.assorter.desc() }
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
-        if (ref == null) {
-            println("wtf") // intermittent bug maybe
-        }
         it.import( ref!! )
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
@@ -350,7 +347,7 @@ fun readAuditRoundJsonFile(
     auditRoundFile: String,
     contests: List<ContestUnderAudit>,
     sampledIndices: List<Long>,
-    sampledBorc: List<BallotOrCvr>,
+    sampledBorc: List<AuditableCard>,
 ): Result<AuditRound, ErrorMessages> {
 
     val errs = ErrorMessages("readAuditConfigJsonFile '${auditRoundFile}'")

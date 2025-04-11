@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.BallotOrCvr
-
 // TODO immutable except for the IntArray (!)
 // assumes that a vote is 0 or 1. compact form might be List<Pair<contestId, candidateId>>
 data class Cvr(

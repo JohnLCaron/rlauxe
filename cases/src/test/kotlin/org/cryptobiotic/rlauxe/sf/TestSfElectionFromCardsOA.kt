@@ -280,7 +280,7 @@ class MvrManagerCardsSingleRound(val sortedCardFile: String, val maxSamples: Int
         TODO("Not yet implemented")
     }
 
-    override fun ballotCards(): Iterator<BallotOrCvr> {
+    override fun ballotCards(): Iterator<AuditableCard> {
         TODO("Not yet implemented")
     }
 

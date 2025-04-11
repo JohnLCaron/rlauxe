@@ -10,8 +10,7 @@ import java.nio.file.Path
       auditConfig.json      // AuditConfigJson
       contests.json         // ContestsUnderAuditJson
       sortedCards.csv       // AuditableCardCsv (or)
-      sortedCards.zip       // AuditableCardCsv (or)
-      ballotManifest.json   // BallotManifestJson
+      sortedCards.zip       // AuditableCardCsv
 
       roundX/
         auditState.json     // AuditRoundJson
@@ -30,7 +29,6 @@ class Publisher(val topdir: String) {
     fun contestsFile() = "$topdir/contests.json"
     fun cardsCsvFile() = "$topdir/sortedCards.csv"
     fun cardsCsvZipFile() = "$topdir/sortedCards.zip"
-    fun ballotManifestFile() = "$topdir/ballotManifest.json"
 
     fun sampleNumbersFile(round: Int): String {
         val dir = "$topdir/round$round"

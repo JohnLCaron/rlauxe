@@ -13,20 +13,20 @@ fun runAudit(name: String, workflow: RlauxAuditIF, quiet: Boolean=true): AuditRo
     var complete = false
     while (!complete) {
         nextRound = workflow.startNewRound(quiet=quiet)
-        if (nextRound.sampleNumbers.isEmpty()) {
+        if (nextRound.samplePrns.isEmpty()) {
             complete = true
 
         } else {
             stopwatch.start()
 
             // workflow MvrManager must implement MvrManagerTest, else Exception
-            (workflow.mvrManager() as MvrManagerTest).setMvrsBySampleNumber(nextRound.sampleNumbers)
+            (workflow.mvrManager() as MvrManagerTest).setMvrsBySampleNumber(nextRound.samplePrns)
 
             if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")
             complete = workflow.runAuditRound(nextRound, quiet)
             nextRound.auditWasDone = true
             nextRound.auditIsComplete = complete
-            if (!quiet) println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.sampleNumbers.size}")
+            if (!quiet) println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
         }
     }
 

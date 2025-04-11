@@ -14,13 +14,13 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     init {
         // the order of the cvrs cannot be changed.
         val prng = Prng(seed)
-        cvrsUA = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.sampleNumber() }
-        mvrsUA = cvrsUA.map { AuditableCard.fromCvr(mvrs[it.index()], it.index(), it.sampleNumber()) }
+        cvrsUA = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
+        mvrsUA = cvrsUA.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
     fun cvrs() = cvrs
     override fun Nballots(contestUA: ContestUnderAudit) = cvrs.size
-    override fun ballotCards() : Iterator<BallotOrCvr> = cvrsUA.iterator()
+    override fun ballotCards() : Iterator<AuditableCard> = cvrsUA.iterator()
     override fun setMvrsForRound(mvrs: List<AuditableCard>) {
         mvrsRound = mvrs.toList()
     }
@@ -32,8 +32,8 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         // debugging sanity check
         var lastRN = 0L
         sampledMvrs.forEach { mvr ->
-            require(mvr.sampleNumber() > lastRN)
-            lastRN = mvr.sampleNumber()
+            require(mvr.prn > lastRN)
+            lastRN = mvr.prn
         }
 
         setMvrsForRound(sampledMvrs)
@@ -58,7 +58,7 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         cvruaPairs.forEach { (mvr, cvr) ->
             require(mvr.desc == cvr.desc)
             require(mvr.index == cvr.index)
-            require(mvr.sampleNumber() == cvr.sampleNumber())
+            require(mvr.prn== cvr.sampleNumber())
         }
         return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
     }
@@ -76,21 +76,20 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
     }
 }
 
-class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
-    val ballotsUA: List<BallotUnderAudit>
+class MvrManagerPollingForTesting(val cardLocations: List<CardLocation>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
+    val ballotsUA: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     var mvrsRound: List<AuditableCard> = emptyList()
 
     init {
         val prng = Prng(seed)
-        ballotsUA = ballots.mapIndexed { idx, it -> BallotUnderAudit(it, idx, prng.next()) }
-            .sortedBy { it.sampleNumber() }
-        mvrsUA = ballotsUA.map { AuditableCard.fromCvr(mvrs[it.index()], it.index(), it.sampleNumber()) }
+        ballotsUA = cardLocations.mapIndexed { idx, it -> AuditableCard.fromBallot(it, idx, prng.next()) }
+            .sortedBy { it.prn}
+        mvrsUA = ballotsUA.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    fun ballots() = ballots
-    override fun Nballots(contestUA: ContestUnderAudit) = ballots.size
-    override fun ballotCards() : Iterator<BallotOrCvr> = ballotsUA.iterator()
+    override fun Nballots(contestUA: ContestUnderAudit) = cardLocations.size
+    override fun ballotCards() : Iterator<AuditableCard> = ballotsUA.iterator()
     override fun setMvrsForRound(mvrs: List<AuditableCard>) {
         mvrsRound = mvrs.toList()
     }
@@ -102,8 +101,8 @@ class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, se
         // debugging sanity check
         var lastRN = 0L
         sampledMvrs.forEach { mvr ->
-            require(mvr.sampleNumber() > lastRN)
-            lastRN = mvr.sampleNumber()
+            require(mvr.prn > lastRN)
+            lastRN = mvr.prn
         }
 
         setMvrsForRound(sampledMvrs)
@@ -114,10 +113,12 @@ class MvrManagerPollingForTesting(val ballots: List<Ballot>, mvrs: List<Cvr>, se
         TODO("Not yet implemented")
     }
 
-    override fun makeSampler(contestId: Int, hasStyles: Boolean, assorter: AssorterIF, allowReset: Boolean): Sampler {
-        return if (mvrsRound.isEmpty())
-            PollWithoutReplacement(contestId, hasStyles, mvrsUA.map { it.cvr() } , assorter, allowReset=allowReset)
+    override fun makeMvrsForRound(): List<Cvr> {
+        val sampledCvrs = if (mvrsRound.isEmpty())
+            mvrsUA.map { it.cvr() }
         else
-            PollWithoutReplacement(contestId, hasStyles, mvrsRound.map { it.cvr() }, assorter, allowReset=allowReset)
+            mvrsRound.map { it.cvr() }
+
+        return sampledCvrs
     }
 }

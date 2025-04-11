@@ -14,7 +14,7 @@ class PersistentAudit(
     private val auditConfig: AuditConfig = auditRecord.auditConfig
     private val contestsUA: List<ContestUnderAudit> = auditRecord.contests
     private val auditRounds = mutableListOf<AuditRound>()
-    private val mvrManager: MvrManager by lazy { makeMvrManager(auditRecord.location, auditConfig) }
+    private val mvrManager: MvrManager by lazy { makeMvrManager(auditRecord.location) }
 
     init {
         auditRounds.addAll(auditRecord.rounds)
@@ -52,9 +52,9 @@ class PersistentAudit(
         if (!quiet) println("  added ${sampledMvrs.size} mvrs to mvrManager")
 
         val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
-            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerPolling, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClca, auditRound.roundIdx, auditor = OneAuditClcaAssertion(quiet))
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClcaIF, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
+            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerPollingIF, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditClcaAssertion(quiet))
         }
 
         auditRound.auditWasDone = true

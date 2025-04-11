@@ -321,7 +321,7 @@ open class ContestUnderAudit(
         val votes = if (contest is Contest) contest.votes else emptyMap()
         contest.info.candidateNames.forEach { (name, id) ->
             appendLine("   $id '$name': votes=${votes[id]}") }
-        appendLine("    Total=${votes.values.sum()}")
+        append("    Total=${votes.values.sum()}")
     }
 
     open fun showShort() = buildString {

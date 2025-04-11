@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
@@ -126,6 +127,16 @@ class TestAssertions {
         assertNotEquals(firstAssertion, lastAssertion)
         assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
         assertEquals(" winner=4 loser=0 reportedMargin=0.2492", firstAssertion.toString())
+
+        assertTrue(firstAssertion.checkEquals(firstAssertion).isEmpty())
+        assertEquals(" assorter not equal cassorter not equal", firstAssertion.checkEquals(lastAssertion))
+
+        val expectedShow =
+""" contestInfo: 'AvB' (0) candidates={A=0, B=1, C=2, D=3, E=4}
+ assorter:  winner=4 loser=0 reportedMargin=0.2492
+ cassorter: avgCvrAssortValue=0.6245797534553604 margin=0.24915950691072086 noerror=0.5711542564540217 upperBound=1.1423085129080435
+"""
+        assertEquals(expectedShow, firstAssertion.show())
     }
 
     @Test

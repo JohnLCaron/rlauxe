@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test
@@ -139,11 +140,13 @@ class TestPopulationMeanWithoutReplacement {
         x.forEach {
             means.add(populationMeanIfH0(N, true, assortValues))
             assortValues.addSample(it)
-
         }
         println("populationMeanIfH0=$means")
         println()
         doublesAreClose(expected, means)
+        assertEquals(0.5714285714285714, assortValues.mean(), doublePrecision)
+        assertEquals(0.2448979591836735, assortValues.variance(), doublePrecision)
+        assertEquals(ClcaErrorRates(0.0, 0.0, 0.0, 0.0, ), assortValues.errorRates())
 
         // compare directly to ALPHA
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta, c = c)

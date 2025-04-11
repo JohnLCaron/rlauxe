@@ -3,7 +3,9 @@ package org.cryptobiotic.rlauxe.corla
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.core.betPayoffSamples
+import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.roundUp
 import java.io.File
 import java.nio.charset.Charset
 
@@ -49,6 +51,30 @@ data class ContestRoundCsv(
         }
     }
 }
+
+// this assumes you get the same bet each time, which is not true because mui is changing.
+// Also eps (lower bound on the estimated rate) turns out to be important.
+fun betPayoffSamples(Nc: Int, risk: Double, assorterMargin: Double, error: Double): Triple<Double, Double, Int> {
+    val avgCvrAssortValue = margin2mean(assorterMargin)
+    val assorterMargin2 = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
+    // val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
+    val noerror = 1 / (2 - assorterMargin2) // assumes upperBound = 1.0
+    val bettingFn = AdaptiveBetting(
+        Nc = Nc,
+        a = noerror,
+        d = 100,
+        errorRates = ClcaErrorRates(error, error, error, error),
+    )
+    val samples = PrevSamplesWithRates(noerror)
+    repeat(10) { samples.addSample(noerror) }
+    val bet = bettingFn.bet(samples)
+    val mj = populationMeanIfH0(Nc, true, samples)
+
+    val payoff = 1.0 + bet * (noerror - mj)
+    val samplesSize = sampleSize(risk, payoff)
+    return Triple(bet, payoff, roundUp(samplesSize))
+}
+
 
 fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
     val file = File(filename)

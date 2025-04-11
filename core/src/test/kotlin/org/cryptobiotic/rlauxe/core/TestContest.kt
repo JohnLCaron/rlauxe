@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -98,7 +99,7 @@ class TestContest {
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
             SocialChoiceFunction.PLURALITY
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=1)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -108,7 +109,7 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=211 Np=0 votes={1=108, 0=100, 2=0}",
+            "testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0}",
             contest.toString()
         )
 
@@ -123,13 +124,17 @@ class TestContest {
         }.message
         assertEquals("Nc 111 must be > totalVotes 208", mess2) */
 
-        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=1)
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
-        assertEquals("testContestInfo (0) Nc=211 Np=0 votes={1=108, 0=100, 2=0}", contest.toString())
-        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2}, Nc=211, Np=0, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votes={1=108, 0=100, 2=0}, winnerNames=[cand1], winners=[1], losers=[0, 2], undervotes=3)",
+        assertEquals("testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0}", contest.toString())
+        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2}, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votes={1=108, 0=100, 2=0}, winnerNames=[cand1], winners=[1], losers=[0, 2], undervotes=2)",
             contest.show())
+
+
+        assertEquals((211-208-1)/211.toDouble(), contest.undervoteRate())
+        assertEquals(1/211.toDouble(), contest.phantomRate())
     }
 
     @Test
@@ -149,6 +154,25 @@ class TestContest {
         assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
         assertEquals(contestUAc2.toString(), contestUAc.toString())
         assertEquals(contestUAc2.showShort(), contestUAc.showShort())
+
+        val expectedShowCandidates = """
+               0 'cand0': votes=100
+               1 'cand1': votes=108
+               2 'cand2': votes=0
+                Total=208
+        """.replaceIndent("   ")
+        assertEquals(expectedShowCandidates, contestUAc.showCandidates())
+
+        val expectedShow = """'testContestInfo' (0) votes={1=108, 0=100, 2=0}
+ margin=0.0379 recount=0.0741 Nc=211 Np=0 Nu=3
+ choiceFunction=PLURALITY nwinners=1, winners=[1]
+   0 'cand0': votes=100
+   1 'cand1': votes=108
+   2 'cand2': votes=0
+    Total=208"""
+        assertEquals(expectedShow, contestUAc.show())
+
+        assertEquals(0.07407407407407407, contestUAc.recountMargin(), doublePrecision)
     }
 
     @Test

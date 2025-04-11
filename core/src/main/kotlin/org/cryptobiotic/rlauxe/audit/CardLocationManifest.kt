@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+// used for polling audits
 data class CardLocationManifest(
     val cardLocations: List<CardLocation>,
     val cardStyles: List<CardStyle> // empty if style info not available

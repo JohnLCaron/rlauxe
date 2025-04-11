@@ -10,7 +10,9 @@ import org.cryptobiotic.rlauxe.persist.json.readSampleNumbersJsonFile
 import java.nio.file.Files
 import java.nio.file.Path
 
-class MvrManagerPolling(val auditDir: String) : MvrManagerPollingIF, MvrManagerTest {
+private val checkValidity = false
+
+class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF, MvrManagerTest {
     private var mvrsRound: List<AuditableCard> = emptyList()
     private val cardFile: String
 
@@ -26,12 +28,30 @@ class MvrManagerPolling(val auditDir: String) : MvrManagerPollingIF, MvrManagerT
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
-
     override fun ballotCards() : Iterator<AuditableCard> = auditableCards()
 
     // this is where you would add the real mvrs
     override fun setMvrsForRound(mvrs: List<AuditableCard>) {
         mvrsRound = mvrs.toList()
+    }
+
+    // same pairs over all contests (!)
+    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
+        val sampleNumbers = mvrsRound.map { it.prn }
+
+        val sampledCvrs = findSamples(sampleNumbers, auditableCards())
+        require(sampledCvrs.size == mvrsRound.size)
+
+        if (checkValidity) {
+            // prove that sampledCvrs correspond to mvrs
+            val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
+            cvruaPairs.forEach { (mvr, cvr) ->
+                require(mvr.desc == cvr.desc)
+                require(mvr.index == cvr.index)
+                require(mvr.prn == cvr.prn)
+            }
+        }
+        return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
     }
 
     override fun makeMvrsForRound(): List<Cvr> {

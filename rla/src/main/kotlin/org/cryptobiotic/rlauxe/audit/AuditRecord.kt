@@ -91,12 +91,4 @@ class AuditRecord(
     }
 }
 
-// TODO fix this; used by viewer
-fun makeMvrManager(auditDir: String, auditConfig: AuditConfig): MvrManager {
-    // TODO TIMING taking 15%
-    return if (auditConfig.isClca) {
-        MvrManagerClca(auditDir)
-    } else {
-        MvrManagerPolling(auditDir)
-    }
-}
+fun makeMvrManager(auditDir: String) = MvrManagerFromRecord(auditDir)

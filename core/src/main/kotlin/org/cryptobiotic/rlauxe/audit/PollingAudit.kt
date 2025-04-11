@@ -51,6 +51,8 @@ fun runPollingAudit(
     roundIdx: Int,
     quiet: Boolean = true
 ): Boolean {
+    val mvrs = mvrManager.makeMvrsForRound() // same over all contests!
+
     val contestsNotDone = contests.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
         return true
@@ -64,7 +66,7 @@ fun runPollingAudit(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = mvrManager.makeSampler(contest.id, auditConfig.hasStyles, assorter, allowReset=false)
+                val sampler = PollWithoutReplacement(contest.id, auditConfig.hasStyles, mvrs, assorter, allowReset=false)
 
                 val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

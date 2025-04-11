@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.BallotUnderAudit
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -31,19 +30,19 @@ class TestConsistentSampling {
         val prng = Prng(Random.nextLong())
         val cards = testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
 
-        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
         // fun consistentSampling(
         //    auditRound: AuditRound,
         //    ballotCards: BallotCards,
         //    previousSamples: Set<Int> = emptySet(),
         consistentSampling(auditRound, mvrManager)
-        println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
-        assertEquals(auditRound.sampleNumbers.size, auditRound.nmvrs)
+        println("nsamples needed = ${auditRound.samplePrns.size}\n")
+        assertEquals(auditRound.samplePrns.size, auditRound.nmvrs)
         assertEquals(auditRound.nmvrs, auditRound.newmvrs)
 
         // must be ordered
         var lastRN = 0L
-        auditRound.sampleNumbers.forEach { it ->
+        auditRound.samplePrns.forEach { it ->
             require(it > lastRN)
             lastRN = it
         }
@@ -69,18 +68,18 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
         val ballotManifest = test.makeBallotManifest(true)
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
+        val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
 
-        val prng = Prng(Random.nextLong())
-        val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
+        //val prng = Prng(Random.nextLong())
+        //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
 
-        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
-        consistentSampling(auditRound, ballotCards)
-        println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        consistentSampling(auditRound, mvrManager)
+        println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
         // must be ordered
         var lastRN = 0L
-        auditRound.sampleNumbers.forEach { it ->
+        auditRound.samplePrns.forEach { it ->
             require(it > lastRN)
             lastRN = it
         }
@@ -91,8 +90,8 @@ class TestConsistentSampling {
         // double check the number of cvrs == sampleSize
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
-            val ballotsForContest = ballotsUA.filter {
-                it.ballot.hasContest(contest.id)
+            val ballotsForContest = mvrManager.mvrsUA.filter {
+                it.hasContest(contest.id)
             }.count()
             assertTrue(contest.estSampleSize <= ballotsForContest)
         }
@@ -107,19 +106,19 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
         val ballotManifest = test.makeBallotManifest(false)
-        val mvrManager = MvrManagerPollingForTesting(ballotManifest.ballots, test.makeCvrsFromContests(), Random.nextLong())
+        val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
 
         //val prng = Prng(Random.nextLong())
         //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
         val sampleLimit = 10000
 
-        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
         uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), sampleLimit=sampleLimit, 0)
-        println("nsamples needed = ${auditRound.sampleNumbers.size}\n")
+        println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
         // must be ordered
         var lastRN = 0L
-        auditRound.sampleNumbers.forEach { it ->
+        auditRound.samplePrns.forEach { it ->
             require(it > lastRN)
             lastRN = it
         }
@@ -131,8 +130,8 @@ class TestConsistentSampling {
         // double check the number of cvrs == sampleSize
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
-            assertTrue(contest.estSampleSizeEligibleForRemoval() <= auditRound.sampleNumbers.size)
-            assertTrue(contest.done || contest.estSampleSizeNoStyles <= auditRound.sampleNumbers.size)
+            assertTrue(contest.estSampleSizeEligibleForRemoval() <= auditRound.samplePrns.size)
+            assertTrue(contest.done || contest.estSampleSizeNoStyles <= auditRound.samplePrns.size)
 
             println("contest ${contest.id} estSampleSize=${contest.estSampleSizeEligibleForRemoval()} done=${contest.done}")
             if (contest.estSampleSizeEligibleForRemoval() > sampleLimit)

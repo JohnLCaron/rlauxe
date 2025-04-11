@@ -78,7 +78,7 @@ class PlotDistributions {
         val workflow = ClcaAudit(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
 
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        val auditRound = AuditRound(1, contestRounds = contestRounds, sampleNumbers = emptyList())
+        val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
         // just want the sample estimation stuff
         return estimateSampleSizes(
@@ -110,7 +110,7 @@ class PlotDistributions {
 
             // heres the ConsistentSample permutation
             //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
-            val sortedIndices = ballotCards.cvrsUA.indices.sortedBy { ballotCards.cvrsUA[it].sampleNumber() } // TODO
+            val sortedIndices = ballotCards.cvrsUA.indices.sortedBy { ballotCards.cvrsUA[it].prn } // TODO?
             val sortedCvrs = sortedIndices.map { testCvrs[it] }
             val sortedMvrs = sortedIndices.map { testMvrs[it] }
             val sortedPairs: List<Pair<Cvr, Cvr>> = sortedMvrs.zip(sortedCvrs)

@@ -5,7 +5,7 @@ import kotlin.test.Test
 // Not used, not sure its needed
 // so far, only tested on "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/N19-manifest.csv"
 
-class TestDominionBallotManifest {
+class TestDominionCardLocationManifest {
 
     @Test
     fun testDominionBallotManifest() {

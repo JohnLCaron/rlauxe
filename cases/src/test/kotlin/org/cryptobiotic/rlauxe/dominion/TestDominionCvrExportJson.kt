@@ -33,7 +33,7 @@ class TestDominionCvrExportJson {
         println("==================================================")
         print(AuditableCardHeader)
         cvrs.forEach {
-            val card = AuditableCard.fromCvr(it, 0, 0L)
+            val card = AuditableCard.fromCvrWithZeros(it)
             print(writeAuditableCardCsv(card))
         }
     }

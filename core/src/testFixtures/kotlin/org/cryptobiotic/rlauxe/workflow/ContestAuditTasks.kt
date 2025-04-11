@@ -40,7 +40,7 @@ class ContestAuditTask(
         }
 
         // TODO since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
-        val nmvrs = lastRound.sampleNumbers.size // LOOK ??
+        val nmvrs = lastRound.samplePrns.size // LOOK ??
         val contest = lastRound.contestRounds.first() // theres only one
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?

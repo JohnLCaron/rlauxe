@@ -166,7 +166,7 @@ fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream,
 
     val cvrs = dominionCvrs.import(irvIds)
     cvrs.forEach {
-        val card = AuditableCard.fromCvr(it, 0, 0)
+        val card = AuditableCard.fromCvrWithZeros(it)
         outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
     }
     return cvrs.size
@@ -193,7 +193,7 @@ fun convertCvrExportToCardDebug(inputStream: InputStream, outputStream: OutputSt
                 }
             }
         }
-        val card = AuditableCard.fromCvr(cvr, 0, 0)
+        val card = AuditableCard.fromCvrWithZeros(cvr)
         outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
     }
     return cvrs.size

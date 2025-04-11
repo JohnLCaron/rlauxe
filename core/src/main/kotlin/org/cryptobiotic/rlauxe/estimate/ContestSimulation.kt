@@ -6,9 +6,9 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToInt
-import org.cryptobiotic.rlauxe.audit.Ballot
-import org.cryptobiotic.rlauxe.audit.BallotManifest
-import org.cryptobiotic.rlauxe.audit.BallotStyle
+import org.cryptobiotic.rlauxe.audit.CardLocation
+import org.cryptobiotic.rlauxe.audit.CardLocationManifest
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import kotlin.math.round
 import kotlin.random.Random
 
@@ -104,21 +104,21 @@ class ContestSimulation(val contest: Contest) {
         return candidateId
     }
 
-    fun makeBallotManifest(hasStyle: Boolean): BallotManifest {
+    fun makeBallotManifest(hasStyle: Boolean): CardLocationManifest {
         val ncards: Int = contest.Nc - contest.Np
         val contests = listOf("contest0")
         val contestIds = listOf(0)
-        val bs = BallotStyle.make(0, contests, listOf(0), ncards)
+        val bs = CardStyle.make(0, contests, listOf(0), ncards)
 
-        val ballots = mutableListOf<Ballot>()
+        val cardLocations = mutableListOf<CardLocation>()
         repeat(ncards) {
-            ballots.add(Ballot("ballot$it", false, if (hasStyle) bs else null))
+            cardLocations.add(CardLocation("ballot$it", false, if (hasStyle) bs else null))
         }
         // add phantoms
         repeat(contest.Np) {
-            ballots.add(Ballot("phantom$it", true, null, contestIds))
+            cardLocations.add(CardLocation("phantom$it", true, null, contestIds))
         }
-        return BallotManifest(ballots, listOf(bs))
+        return CardLocationManifest(cardLocations, listOf(bs))
     }
 
     companion object {

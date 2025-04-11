@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
-import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // SHANGRLA examples/assertion-RLA.ipynb
@@ -437,9 +436,9 @@ class AssertionRLA {
             it
         }
         val contestRounds = contestUAs.map{ contest -> ContestRound(contest, 1) }
-        val auditRound = AuditRound(1, contestRounds, sampleNumbers = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, MvrManagerClcaForTesting(rcvrs, rcvrs, 999666L))
-        println("sampled = ${auditRound.sampleNumbers.size}")
+        println("sampled = ${auditRound.samplePrns.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)
 //print(f'The sample includes {n_sampled_phantoms} phantom cards.')

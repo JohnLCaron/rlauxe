@@ -35,11 +35,11 @@ class PollingContestAuditTaskGenerator(
             val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
             testMvrs = testMvrs + otherCvrs
 
-            val otherBallots = List<Ballot>(Nb - Nc) { Ballot("other${Nc+it}", false, null) }
-            ballotManifest = BallotManifest(ballotManifest.ballots + otherBallots, emptyList())
+            val otherCardLocations = List<CardLocation>(Nb - Nc) { CardLocation("other${Nc+it}", false, null) }
+            ballotManifest = CardLocationManifest(ballotManifest.cardLocations + otherCardLocations, emptyList())
         }
 
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, useConfig.seed)
+        val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
         val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
         return ContestAuditTask(
             name(),
@@ -76,7 +76,7 @@ class PollingSingleRoundAuditTaskGenerator(
         var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
         var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
 
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.ballots, testMvrs, useConfig.seed)
+        val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
         val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(

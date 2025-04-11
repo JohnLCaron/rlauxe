@@ -65,7 +65,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testCvrsFromContests() {
-        val (testCvrs, ballotManifest) = test.makeCvrsAndBallotManifest(true)
+        val (testCvrs, ballots) = test.makeCvrsAndBallots(true)
 
         val votes: Map<Int, Map<Int, Int>> =
             org.cryptobiotic.rlauxe.util.tabulateVotes(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
@@ -77,7 +77,7 @@ class TestMultiContestTestData {
             }
         }
 
-        println("test makeBallotsForPolling nballots= ${ballotManifest.ballots.size}")
+        println("test makeBallotsForPolling nballots= ${ballots.size}")
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]
@@ -87,7 +87,7 @@ class TestMultiContestTestData {
             println(" ${contest.id} ncards ${fcontest.ncards} Nc=${contest.Nc}")
             val ncvr = testCvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
-            val nbs = ballotManifest.ballots.count { it.hasContest(contest.id) }
+            val nbs = ballots.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, nbs)
 
             val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
@@ -132,7 +132,7 @@ class TestMultiContestTestData {
             println("contest $contest ncards=${fcontest.ncards}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
-            val nbsCount = ballotManifest.ballots.count { it.hasContest(contest.id) }
+            val nbsCount = ballotManifest.cardLocations.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, nbsCount)
 
             print(" fcontest margin=${df(fcontest.margin)} undervotePct=${fcontest.undervotePct} phantomPct=${fcontest.phantomPct}")
@@ -146,7 +146,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testPhantomCvrs() {
-        val (cvrs, ballotManifest) = test.makeCvrsAndBallotManifest(true)
+        val (cvrs, ballotManifest) = test.makeCvrsAndBallots(true)
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]

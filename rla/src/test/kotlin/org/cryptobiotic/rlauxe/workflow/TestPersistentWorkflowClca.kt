@@ -59,11 +59,11 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxAuditIF, mvrsUA: It
 
     val nextRound = workflow.startNewRound()
 
-    if (nextRound.sampleNumbers.isEmpty()) {
+    if (nextRound.samplePrns.isEmpty()) {
         done = true
 
     } else {
-        writeSampleNumbersJsonFile(nextRound.sampleNumbers, publish.sampleNumbersFile(roundIdx))
+        writeSampleNumbersJsonFile(nextRound.samplePrns, publish.sampleNumbersFile(roundIdx))
 
         // TODO updateMvrs I think
         //val sampledMvrs = nextRound.sampleNumbers.map {
@@ -74,7 +74,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxAuditIF, mvrsUA: It
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
         writeAuditRoundJsonFile(nextRound, publish.auditRoundFile(roundIdx))
 
-        val sampledMvrus = findSamples(nextRound.sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
+        val sampledMvrus = findSamples(nextRound.samplePrns, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
         writeAuditableCardCsvFile(sampledMvrus, publish.sampleMvrsFile(roundIdx))
 
         println(nextRound)

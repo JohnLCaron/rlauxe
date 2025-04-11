@@ -48,7 +48,7 @@ fun coloradoElectionFromAudit(
         val precinctCvrs = makeCvrs(precinct, contests)
         val outputDir = "$auditDir/cards/${precinct.county}"
         validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrs"))
-        val precinctCvrsUA = precinctCvrs.map{ AuditableCard.fromCvr(it, 0, 0L)}
+        val precinctCvrsUA = precinctCvrs.map{ AuditableCard.fromCvrWithZeros(it)}
         writeAuditableCardCsvFile(precinctCvrsUA, "$outputDir/${precinct.precinct}.csv")
         count += precinctCvrs.size
     }

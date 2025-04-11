@@ -15,7 +15,7 @@ data class AuditableCard (
     val contests: IntArray, // aka ballot style.
     val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
     val poolId: Int?, // for OneAudit
-): BallotOrCvr {
+) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
         val votePairs = contests.mapIndexed { idx, contestId ->
@@ -29,14 +29,14 @@ data class AuditableCard (
         votes?.forEachIndexed { idx, vote -> appendLine("   contest $idx: ${vote.contentToString()}")}
     }
 
-    override fun hasContest(contestId: Int): Boolean {
+    fun hasContest(contestId: Int): Boolean {
          // TODO shit cant tell if we have styles or not.
         return contests.contains(contestId)
     }
 
-    override fun sampleNumber() = prn
+    fun sampleNumber() = prn
 
-    override fun index() = index
+    fun index() = index
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {
@@ -73,16 +73,29 @@ data class AuditableCard (
     }
 
     companion object {
+        // dont use this, except testing and initialization. sampleNum should be set.
+        fun fromCvrWithZeros(cvr: Cvr): AuditableCard {
+            // store the contest separate from the candidates
+            val sortedVotes = cvr.votes.toSortedMap()
+            val contests = sortedVotes.keys.toList()
+            return AuditableCard(cvr.id, 0, 0L, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
+        }
+
         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
             // store the contest separate from the candidates
             val sortedVotes = cvr.votes.toSortedMap()
             val contests = sortedVotes.keys.toList()
             return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
         }
+
         // there are no votes
         fun fromCvrWithPool(cvr: Cvr, index: Int, sampleNum: Long, poolId: Int): AuditableCard {
             val contests = cvr.votes.keys.toSortedSet().toList()
             return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), null, poolId)
+        }
+
+        fun fromBallot(cardLocation: CardLocation, index: Int, sampleNum: Long, poolId: Int? = null): AuditableCard {
+            return AuditableCard(cardLocation.id, index, sampleNum, cardLocation.phantom, cardLocation.contests(), null, poolId)
         }
     }
 }

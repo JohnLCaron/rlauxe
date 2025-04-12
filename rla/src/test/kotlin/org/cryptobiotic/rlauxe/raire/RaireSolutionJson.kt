@@ -2,14 +2,10 @@
 
 package org.cryptobiotic.rlauxe.raire
 
-import au.org.democracydevelopers.raire.irv.Vote
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.encodeToStream
-import org.cryptobiotic.rlauxe.persist.json.AssertionJson
-import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption

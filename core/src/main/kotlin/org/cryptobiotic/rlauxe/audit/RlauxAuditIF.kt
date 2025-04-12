@@ -4,13 +4,9 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
 
-// used in ConsistentSampling
-interface RlauxAuditProxy {
+interface RlauxAuditIF {
     fun auditConfig() : AuditConfig
     fun mvrManager() : MvrManager
-}
-
-interface RlauxAuditIF: RlauxAuditProxy {
     fun auditRounds(): MutableList<AuditRound>
     fun contestsUA(): List<ContestUnderAudit>
 
@@ -39,7 +35,9 @@ interface RlauxAuditIF: RlauxAuditProxy {
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
         // 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
-        sampleCheckLimits(this,
+        sampleCheckLimits(
+            auditConfig(),
+            mvrManager(),
             auditRound,
             auditRounds.previousSamples(roundIdx),
             quiet)

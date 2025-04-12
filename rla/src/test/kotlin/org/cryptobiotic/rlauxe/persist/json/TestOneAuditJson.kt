@@ -48,11 +48,6 @@ class TestOneAuditJson {
         assertTrue(roundtrip.equals(target))
     }
 
-    // class RaireContestUnderAudit(
-    //    contest: RaireContest,
-    //    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
-    //    val rassertions: List<RaireAssertion>,
-    //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     @Test
     fun testContestUARoundtrip() {
         val target: OAContestUnderAudit = makeTestContestOA()

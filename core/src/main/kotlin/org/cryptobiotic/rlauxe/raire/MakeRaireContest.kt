@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 
 private val quiet = true
 
+// gets RaireAssertions from raire-java libray
 fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Np: Int): RaireContestUnderAudit {
     // TODO consistency checks on voteConsolidator
 

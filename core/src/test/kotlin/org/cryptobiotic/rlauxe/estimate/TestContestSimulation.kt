@@ -111,7 +111,7 @@ class TestContestSimulation {
         val welford = Welford()
         runTest {
             checkAll(
-                propTestSlowConfig, // propTestFastConfig, // propTestSlowConfig,
+                propTestFastConfig, // propTestSlowConfig,
                 Arb.double(min = 0.0, max = 0.05),
                 Arb.double(min = 0.001, max = 0.01),
                 Arb.double(min = 0.01, max = 0.05),

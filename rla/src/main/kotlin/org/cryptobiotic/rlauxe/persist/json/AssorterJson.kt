@@ -4,21 +4,20 @@ import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
-import org.cryptobiotic.rlauxe.raire.RaireAssertionJson
-import org.cryptobiotic.rlauxe.raire.import
-import org.cryptobiotic.rlauxe.raire.publishJson
 
-// data class ClcaAssorter(
-//    val contest: ContestInfo,
-//    val assorter: AssorterFunction,   // A
-//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value = assorter.reportedMargin()? always?
-//    val hasStyle: Boolean = true
-
-// data class OAClcaAssorter(
-//    val contestOA: OneAuditContest,
-//    val assorter: AssorterIF,   // A(mvr)
-//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
+//open class ClcaAssorter(
+//    val info: ContestInfo,
+//    val assorter: AssorterIF,   // A
+//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
+//    val hasStyle: Boolean = true,
+//    val check: Boolean = true, // TODO get rid of
 //)
+
+// class OAClcaAssorter(
+//    val contestOA: OneAuditContest,
+//    assorter: AssorterIF,   // A(mvr)
+//    avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
+//) : ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue)
 
 @Serializable
 data class ClcaAssorterJson(

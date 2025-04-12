@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.persist.json
+package org.cryptobiotic.rlauxe.persist
 
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File

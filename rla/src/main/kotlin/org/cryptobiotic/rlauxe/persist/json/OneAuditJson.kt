@@ -88,6 +88,8 @@ fun OAContestUnderAuditJson.import(): OAContestUnderAudit {
     return result
 }
 
+/* stored as a subtype of ClcaAssorterJson
+//
 // data class OAClcaAssorter(
 //    val contestOA: OneAuditContest,
 //    val assorter: AssorterIF,
@@ -114,3 +116,4 @@ fun OAClcaAssorterJson.import(info: ContestInfo): OAClcaAssorter {
         this.avgCvrAssortValue,
     )
 }
+*/

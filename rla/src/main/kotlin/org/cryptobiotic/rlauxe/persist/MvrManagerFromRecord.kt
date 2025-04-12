@@ -1,11 +1,11 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.persist
 
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readSampleNumbersJsonFile
 import java.nio.file.Files
 import java.nio.file.Path
@@ -80,8 +80,8 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
             require(sampledMvrs.size == sampleNumbers.size)
             var lastRN = 0L
             sampledMvrs.forEach { mvr ->
-                require(mvr.sampleNumber() > lastRN)
-                lastRN = mvr.sampleNumber()
+                require(mvr.prn > lastRN)
+                lastRN = mvr.prn
             }
         }
         setMvrsForRound(sampledMvrs)

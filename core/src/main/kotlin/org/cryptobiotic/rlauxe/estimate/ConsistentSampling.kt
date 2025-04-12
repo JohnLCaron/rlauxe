@@ -16,12 +16,17 @@ private val debugSizeNudge = true
  * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= auditConfig.sampleLimit, removing contests until satisfied.
  * Also called from rlauxe_viewer
  */
-fun sampleCheckLimits(workflow: RlauxAuditProxy, auditRound: AuditRound, previousSamples: Set<Long>, quiet: Boolean) {
-    val auditConfig = workflow.auditConfig()
+fun sampleCheckLimits(
+    auditConfig: AuditConfig,
+    mvrManager : MvrManager,
+    auditRound: AuditRound,
+    previousSamples: Set<Long>,
+    quiet: Boolean
+) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
-        sample(workflow, auditRound, previousSamples, quiet = quiet)
+        sample(auditConfig, mvrManager, auditRound, previousSamples, quiet = quiet)
 
         //// the rest of this implements sampleLimit
         if (auditConfig.sampleLimit < 0 || auditRound.samplePrns.size <= auditConfig.sampleLimit) {
@@ -42,19 +47,19 @@ fun sampleCheckLimits(workflow: RlauxAuditProxy, auditRound: AuditRound, previou
 
 /** Choose what ballots to sample */
 fun sample(
-    workflow: RlauxAuditProxy,
+    auditConfig: AuditConfig,
+    mvrManager : MvrManager,
     auditRound: AuditRound,
     previousSamples: Set<Long> = emptySet(),
     quiet: Boolean = true
 ) {
-    val auditConfig = workflow.auditConfig()
     if (auditConfig.hasStyles) {
         if (!quiet) println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
-        consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
+        consistentSampling(auditRound, mvrManager, previousSamples)
         if (!quiet) println(" consistentSamplingSize= ${auditRound.samplePrns.size}")
     } else {
         if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
-        uniformSampling(auditRound, workflow.mvrManager(), previousSamples, auditConfig.sampleLimit, auditRound.roundIdx)
+        uniformSampling(auditRound, mvrManager, previousSamples, auditConfig.sampleLimit, auditRound.roundIdx)
         if (!quiet) println(" uniformSamplingSize= ${auditRound.samplePrns.size}")
     }
 }
@@ -143,7 +148,7 @@ fun consistentSampling(
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
-    auditRound.samplePrns = sampledCards.map { it.sampleNumber() }
+    auditRound.samplePrns = sampledCards.map { it.prn }
     auditRound.sampledBorc = sampledCards
 }
 

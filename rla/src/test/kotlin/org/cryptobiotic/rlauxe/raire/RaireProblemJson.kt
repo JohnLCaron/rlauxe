@@ -132,14 +132,14 @@ fun readRaireProblemJson(filename: String): RaireProblem {
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
 
     Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-        val jsonObject:RaireProblemJson =  jsonReader.decodeFromStream<RaireProblemJson>(inp)
+        val jsonObject: RaireProblemJson =  jsonReader.decodeFromStream<RaireProblemJson>(inp)
         return jsonObject.import()
     }
 }
 
 fun readRaireProblemFromString(json: String): RaireProblem {
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
-    val jsonObject:RaireProblemJson = jsonReader.decodeFromString<RaireProblemJson>(json)
+    val jsonObject: RaireProblemJson = jsonReader.decodeFromString<RaireProblemJson>(json)
     return jsonObject.import()
 }
 

@@ -1,10 +1,11 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.persist
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSampleNumbersJsonFile
+import org.cryptobiotic.rlauxe.workflow.*
 
 /** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
 class PersistentAudit(
@@ -21,6 +22,7 @@ class PersistentAudit(
     }
 
     override fun startNewRound(quiet: Boolean): AuditRound {
+
         val nextRound = super.startNewRound(quiet)
 
         if (nextRound.samplePrns.isEmpty()) {
@@ -46,15 +48,15 @@ class PersistentAudit(
 
         // TODO
         //   in a real audit, we need to set the real mvrs
-        //   val enterMvrsOk = workflow.auditRecord.enterMvrs(mvrFile)
-        //   instead, we assume its a test (for now)
+        //   val enterMvrsOk = auditRecord.enterMvrs(mvrFile)
+        //   instead, we assume its a test (mvrManager as MvrManagerTest)
         val sampledMvrs = (mvrManager as MvrManagerTest).setMvrsForRoundIdx(roundIdx)
         if (!quiet) println("  added ${sampledMvrs.size} mvrs to mvrManager")
 
         val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClcaIF, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
-            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerPollingIF, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager() as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditClcaAssertion(quiet))
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
+            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditClcaAssertion(quiet))
         }
 
         auditRound.auditWasDone = true

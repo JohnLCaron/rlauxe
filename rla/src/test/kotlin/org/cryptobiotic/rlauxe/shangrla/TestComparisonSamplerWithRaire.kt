@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.raire.import
 import org.cryptobiotic.rlauxe.raire.readRaireBallotsCsv
 import org.cryptobiotic.rlauxe.raire.readRaireResultsJson
-import kotlin.test.Test
 
 class TestComparisonSamplerWithRaire {
 

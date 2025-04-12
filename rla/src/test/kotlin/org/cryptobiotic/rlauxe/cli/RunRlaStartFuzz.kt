@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -25,7 +25,7 @@ object RunRlaStartFuzz {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val parser = ArgParser("RunRlaStartTest")
+        val parser = ArgParser("RunRlaStartFuzz")
         val inputDir by parser.option(
             ArgType.String,
             shortName = "in",
@@ -78,8 +78,8 @@ object RunRlaStartFuzz {
         ).default(5)
 
         parser.parse(args)
-        println("RunRlaStartTest on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                "addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates\n  mvrFile=$mvrFile")
+        println("RunRlaStartFuzz on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
+                " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates\n  mvrFile=$mvrFile")
         val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates, mvrFile)
         else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, mvrFile)
     }
@@ -221,3 +221,15 @@ object RunRlaStartFuzz {
         return if (auditRound.samplePrns.isNotEmpty()) 0 else 1
     }
 }
+
+fun runChooseSamples(workflow: RlauxAuditIF, publish: Publisher): AuditRound {
+    val round = workflow.startNewRound(quiet = false)
+    if (round.samplePrns.isNotEmpty()) {
+        writeSampleNumbersJsonFile(round.samplePrns, publish.sampleNumbersFile(round.roundIdx))
+        println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
+    } else {
+        println("*** FAILED TO GET ANY SAMPLES ***")
+    }
+    return round
+}
+

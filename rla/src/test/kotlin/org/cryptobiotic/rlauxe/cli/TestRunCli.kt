@@ -6,7 +6,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundClca() {
-        // val topdir = "/home/stormy/temp/persist/testRunCli"
+        // val topdir = "/home/stormy/temp/persist/testCliRoundClca"
         val topdir = kotlin.io.path.createTempDirectory().toString()
         val mvrs =  "$topdir/private/testMvrs.csv"
         RunRlaStartFuzz.main(
@@ -21,7 +21,7 @@ class TestRunCli {
         )
 
         repeat(3) {
-            RunRliRoundCli.main(arrayOf("-in", topdir, "-mvrs", mvrs))
+            RunRliRoundCli.main(arrayOf("-in", topdir))
         }
 
         println("============================================================")
@@ -44,7 +44,32 @@ class TestRunCli {
         )
 
         repeat(3) {
-            RunRliRoundCli.main(arrayOf("-in", topdir, "-mvrs", mvrs))
+            RunRliRoundCli.main(arrayOf("-in", topdir))
+        }
+
+        RunVerifier.main(arrayOf("-in", topdir))
+    }
+
+    @Test
+    fun testCliRoundRaire() {
+        // val topdir = "/home/stormy/temp/persist/testCliRoundRaire"
+        val topdir = kotlin.io.path.createTempDirectory().toString()
+        val mvrs =  "$topdir/private/testMvrs.csv"
+        RunRlaStartFuzz.main(
+            arrayOf(
+                "-in", topdir,
+                "-minMargin", "0.01",
+                "-fuzzMvrs", ".0123",
+                "-mvrs", mvrs,
+                "-ncards", "10000",
+                "-ncontests", "10",
+                "--addRaireContest",
+                "--addRaireCandidates", "5",
+            )
+        )
+
+        repeat(3) {
+            RunRliRoundCli.main(arrayOf("-in", topdir))
         }
 
         RunVerifier.main(arrayOf("-in", topdir))

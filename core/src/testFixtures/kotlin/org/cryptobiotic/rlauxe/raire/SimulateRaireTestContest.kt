@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
-/** Simulation of Raire Contest */
+/** Simulation of Raire Contest. TODO only in test. maybe move to testFixtures? */
 fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
     repeat(11) {
         val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
@@ -26,7 +26,7 @@ fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Doub
     throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
 }
 
-fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
+private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val testContest = RaireContestTestData(contestId, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
@@ -104,9 +104,9 @@ fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
 
     val rcontestUA = RaireContestUnderAudit.makeFromInfo(
         testContest.info,
-        winner=solution.first,
-        Nc=testContest.Nc,
-        Np=testContest.phantomCount,
+        winner = solution.first,
+        Nc = testContest.Nc,
+        Np = testContest.phantomCount,
         raireAssertions,
     )
 
@@ -272,7 +272,7 @@ data class RaireContestTestData(
     }
 }
 
-fun showIrvAssertion(assertion: Assertion) = buildString {
+private fun showIrvAssertion(assertion: Assertion) = buildString {
     if (assertion is NotEliminatedBefore) {
         append("   NotEliminatedBefore winner=${assertion.winner} loser=${assertion.loser} ")
     } else if (assertion is NotEliminatedNext) {

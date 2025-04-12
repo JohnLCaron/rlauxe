@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -30,7 +31,6 @@ class ClcaAudit(
         // TODO filter out contests that are done... */
     }
 
-    //  return complete
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = AuditClcaAssertion(quiet)
@@ -57,7 +57,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
 ): Boolean {
     val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
 
-    // parellelize over contests
+    // parallelize over contests
     val contestsNotDone = contests.filter{ !it.done }
     val auditContestTasks = mutableListOf<RunContestTask>()
     contestsNotDone.forEach { contest ->
@@ -97,6 +97,7 @@ class RunContestTask(
     }
 }
 
+// abstraction so ClcaAudit can be used for OneAudit
 fun interface ClcaAssertionAuditor {
     fun run(
         auditConfig: AuditConfig,

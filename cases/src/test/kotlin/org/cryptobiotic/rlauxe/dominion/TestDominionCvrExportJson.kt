@@ -66,10 +66,12 @@ class TestDominionCvrExportJson {
         zipReader.tourFiles()
         println("testReadCountingGroupId $countFiles files")
         countIds.forEach { (key, value) -> println("  $key $value") }
+
+        testWriteSfBallotManifest()
     }
 
     // use the cvrs to write a fake SF ballot manifest, following ballotManifest-dummy.xlsx format
-    @Test
+    // @Test
     fun testWriteSfBallotManifest() {
         val topDir = "/home/stormy/temp/cases/sf2024P"
         val zipFilename = "$topDir/CVR_Export_20240322103409.zip"

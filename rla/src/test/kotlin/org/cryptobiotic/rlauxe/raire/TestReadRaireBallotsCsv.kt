@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Assertions
 import java.io.File

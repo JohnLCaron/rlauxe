@@ -10,8 +10,6 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestAssertionJson {
-    val filename = "/home/stormy/temp/persist/test/TestAssertion.json"
-
     @Test
     fun testAssertionRoundtrip() {
         val target = makeAssertion()
@@ -66,5 +64,28 @@ class TestAssertionJson {
         val target = Assertion(info, assorter)
 
         return target
+    }
+
+    @Test
+    fun testSuperAssertionRoundtrip() {
+        val info = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            candidateNames = listToMap("A", "B", "C"),
+            minFraction = .67
+        )
+        val winnerCvr = makeCvr(0)
+        val loserCvr = makeCvr(1)
+        val otherCvr = makeCvr(2)
+        val contest = makeContestFromCvrs(info, listOf(winnerCvr, winnerCvr, winnerCvr, loserCvr, otherCvr))
+
+        val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 0, info.minFraction!!)
+        val target = Assertion(info, assorter)
+
+        val json = target.publishJson()
+        val roundtrip = json.import(target.info)
+        assertNotNull(roundtrip)
+        assertTrue(roundtrip.equals(target))
     }
 }

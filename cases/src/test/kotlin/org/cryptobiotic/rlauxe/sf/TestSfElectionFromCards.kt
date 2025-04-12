@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.persist.csv.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
@@ -50,7 +50,7 @@ class TestSfElectionFromCvrs {
         mergeCards(auditDir, "$topDir/sortChunks")
     }
 
-    @Test
+    // @Test
     fun testCopyFile() {
         val auditDir = "/home/stormy/temp/cases/sf2024"
         val fromFile = File("src/test/data/SF2024/sortedCvrs.zip")

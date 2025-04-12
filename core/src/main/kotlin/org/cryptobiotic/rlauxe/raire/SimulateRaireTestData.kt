@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
 import kotlin.random.Random
 
+// called from estimateSampleSize
 data class SimulateRaireTestData(
     val contest: RaireContest,
     val minMargin: Double,

@@ -1,9 +1,12 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.persist.json.import
 import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.raire.RaireAssertion
+import org.cryptobiotic.rlauxe.raire.RaireAssertionType
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
 // class RaireContestUnderAudit(
 //    contest: RaireContest,

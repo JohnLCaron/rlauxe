@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestAuditConfigJson {
-    val filename = "/home/stormy/temp/persist/test/TestAuditConfig.json"
+    val filename = "/home/stormy/temp/tests/scratch/TestAuditConfig.json"
 
     @Test
     fun testRoundtrip() {

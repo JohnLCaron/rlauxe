@@ -1,9 +1,12 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.workflow.MvrManagerClcaForTesting
 import kotlin.test.Test
 
 class TestRaireAudit {

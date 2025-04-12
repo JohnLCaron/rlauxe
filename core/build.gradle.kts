@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation("org.apache.commons:commons-math3:3.6.1")
 
+    testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
     testFixturesImplementation(libs.bundles.egtest)
     testImplementation(kotlin("test"))
     testImplementation(libs.bundles.egtest)

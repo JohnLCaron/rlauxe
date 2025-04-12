@@ -58,7 +58,7 @@ class MvrManagerClcaForTesting(val cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         cvruaPairs.forEach { (mvr, cvr) ->
             require(mvr.desc == cvr.desc)
             require(mvr.index == cvr.index)
-            require(mvr.prn== cvr.sampleNumber())
+            require(mvr.prn== cvr.prn)
         }
         return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
     }

@@ -6,16 +6,13 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import kotlinx.cli.default
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.PersistentAudit
-import org.cryptobiotic.rlauxe.audit.RlauxAuditIF
-import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-/** Run one round of an RLA that has already been started. */
+/** Run one round of a PersistentAudit that has already been started. */
 object RunRliRoundCli {
 
     @JvmStatic
@@ -35,7 +32,6 @@ object RunRliRoundCli {
         parser.parse(args)
         println("RunRound on $inputDir quiet=$quiet")
         runRound(inputDir, quiet)
-        // println("  retval $retval")
     }
 }
 
@@ -75,15 +71,4 @@ fun runRound(inputDir: String, quiet: Boolean): AuditRound? {
     }
 
     return null
-}
-
-fun runChooseSamples(workflow: RlauxAuditIF, publish: Publisher): AuditRound {
-    val round = workflow.startNewRound(quiet = false)
-    if (round.samplePrns.isNotEmpty()) {
-        writeSampleNumbersJsonFile(round.samplePrns, publish.sampleNumbersFile(round.roundIdx))
-        println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
-    } else {
-        println("*** FAILED TO GET ANY SAMPLES ***")
-    }
-    return round
 }

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
 
+// called from cases module; TODO add unit tests.
 data class IrvContestVotes(val irvContestInfo: ContestInfo) {
     // The candidate Ids must from 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
     val candidateIdMap = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()

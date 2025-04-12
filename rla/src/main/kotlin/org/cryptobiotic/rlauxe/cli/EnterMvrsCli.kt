@@ -4,7 +4,7 @@ package org.cryptobiotic.rlauxe.cli
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.audit.AuditRecord
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 

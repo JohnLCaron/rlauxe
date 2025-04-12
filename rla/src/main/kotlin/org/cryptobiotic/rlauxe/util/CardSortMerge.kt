@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.util
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.csv.*
-import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.validateOutputDir
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import java.nio.file.*
 
 private val maxChunk = 100000

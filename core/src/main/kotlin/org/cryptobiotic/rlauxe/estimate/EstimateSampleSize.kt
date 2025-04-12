@@ -179,7 +179,7 @@ data class EstimationResult(
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //// Clca, including with IRV
 
-// TODO how does this differ from ClcaSingleRoundAuditTask ? Can they be merged ?
+private val quiet = true
 
 fun simulateSampleSizeClcaAssorter(
     roundIdx: Int,
@@ -194,7 +194,7 @@ fun simulateSampleSizeClcaAssorter(
     val cassorter = cassertion.cassorter
     val contest = contestUA.contest
 
-    println("simulateSampleSizeClcaAssorter ${contest.info.name} ${cassorter.assorter().desc()}")
+    if (!quiet) println("simulateSampleSizeClcaAssorter ${contest.info.name} ${cassorter.assorter().desc()}")
     if (contest.isIRV())
         println("  contest is IRV ${contest.info.name}")
     // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.

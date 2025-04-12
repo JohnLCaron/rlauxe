@@ -7,17 +7,21 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 class TestPersistentWorkflowClca {
-    // val topdir = "/home/stormy/temp/persist/testPersistentWorkflowClca"
-    val topdir = kotlin.io.path.createTempDirectory().toString()
+    val topdir = "/home/stormy/temp/persist/testPersistentWorkflowClca"
+    // val topdir = kotlin.io.path.createTempDirectory().toString()
 
     @Test
     fun testPersistentWorkflowClca() {
+        clearDirectory(Path.of(topdir))
+
         val fuzzMvrs = .01
         val publish = Publisher(topdir)
         val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10)

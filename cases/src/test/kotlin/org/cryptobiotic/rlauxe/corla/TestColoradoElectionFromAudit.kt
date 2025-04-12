@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.Publisher
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
@@ -30,18 +30,21 @@ class TestColoradoElectionFromAudit {
         // out of memory sort by sampleNum()
         sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
         mergeCards(auditDir, "$auditDir/sortChunks")
+
+        // other tests depend on this one
+        testTreeReader()
+        makeCountySampleLists()
     }
 
     //// zip cvrs directory to cvrs.zip
 
     // out of memory sort by sampleNum()
-    @Test
+    // @Test
     fun testSortMergeCvrs() {
         val auditDir = "/home/stormy/temp/cases/corla"
         // out of memory sort by sampleNum()
         sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
         mergeCards(auditDir, "$auditDir/sortChunks")
-
     }
 
     // class TreeReaderIterator <T> (
@@ -49,7 +52,7 @@ class TestColoradoElectionFromAudit {
     //    val fileFilter: (Path) -> Boolean,
     //    val reader: (Path) -> Iterator<T>
     //)
-    @Test
+    // @Test
     fun testTreeReader() {
         val stopwatch = Stopwatch()
         val auditDir = "/home/stormy/temp/cases/corla"
@@ -84,7 +87,7 @@ class TestColoradoElectionFromAudit {
         return CountyAndPrecinct(county.toString(), precinct)
     }
 
-    @Test
+    // @Test
     fun makeCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 

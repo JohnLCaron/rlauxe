@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
-import org.cryptobiotic.rlauxe.persist.json.clearDirectory
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import java.nio.file.Path
 import kotlin.test.Test
 

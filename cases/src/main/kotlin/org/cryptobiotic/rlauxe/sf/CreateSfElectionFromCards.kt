@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCard
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCardDebug
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator

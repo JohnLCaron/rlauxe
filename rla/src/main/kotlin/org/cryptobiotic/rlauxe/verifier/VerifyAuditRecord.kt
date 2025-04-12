@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.verifier
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 
 class VerifyAuditRecord(val auditRecordLocation: String) {
     val auditRecord: AuditRecord

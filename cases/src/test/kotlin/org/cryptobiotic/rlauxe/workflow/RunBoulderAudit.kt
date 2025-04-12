@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.boulder.createElectionFromDominionCvrs
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.junit.jupiter.api.Test
 

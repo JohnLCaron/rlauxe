@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestSampleNumbersJson {
-    val filename = "/home/stormy/temp/persist/test/TestSampleIndices.json"
+    val filename = "/home/stormy/temp/tests/scratch/TestSampleIndices.json"
 
     @Test
     fun testRoundtrip() {

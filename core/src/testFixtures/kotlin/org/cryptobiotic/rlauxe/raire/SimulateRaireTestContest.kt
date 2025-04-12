@@ -104,9 +104,9 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
 
     val rcontestUA = RaireContestUnderAudit.makeFromInfo(
         testContest.info,
-        winner=solution.first,
-        Nc=testContest.Nc,
-        Np=testContest.phantomCount,
+        winner = solution.first,
+        Nc = testContest.Nc,
+        Np = testContest.phantomCount,
         raireAssertions,
     )
 

@@ -1,12 +1,30 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.persist.json.clearDirectory
+import java.nio.file.Path
 import kotlin.test.Test
 
 class TestRunRlaStartFuzz {
 
     @Test
-    fun testRlaStartClca() {
+    fun testRlaPollingFuzz() {
+        val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
+        clearDirectory(Path.of(topdir))
+
+        RunRlaStartFuzz.main(
+            arrayOf(
+                "-in", topdir,
+                "-isPolling",
+                "-fuzzMvrs", ".0123",
+                "-mvrs", "$topdir/private/testMvrs.csv",
+            )
+        )
+    }
+
+    @Test
+    fun testRlaClcaFuzz() {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
+        clearDirectory(Path.of(topdir))
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -19,9 +37,11 @@ class TestRunRlaStartFuzz {
         )
     }
 
-    // @Test
-    fun testRlaStartRaireClca() {
-        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+    @Test
+    fun testRlaRaire() {
+        val topdir = "/home/stormy/temp/persist/testRlaRaire"
+        clearDirectory(Path.of(topdir))
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -36,9 +56,12 @@ class TestRunRlaStartFuzz {
         )
     }
 
-    // @Test
-    fun testRlaStartOAClca() {
-        val topdir = "/home/stormy/temp/persist/runClcaRaire"
+    /*
+    @Test
+    fun testRlaOA() {
+        val topdir = "/home/stormy/temp/persist/testRlaOA"
+        clearDirectory(Path.of(topdir))
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -48,22 +71,10 @@ class TestRunRlaStartFuzz {
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addOAContest",
-                "--addRaireCandidates", "5",
             )
         )
     }
 
-    @Test
-    fun testRunAuditPolling() {
-        val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
+     */
 
-        RunRlaStartFuzz.main(
-            arrayOf(
-                "-in", topdir,
-                "-isPolling",
-                "-fuzzMvrs", ".0123",
-                "-mvrs", "$topdir/private/testMvrs.csv",
-            )
-        )
-    }
 }

@@ -1,10 +1,9 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
-import org.cryptobiotic.rlauxe.workflow.MvrManagerClcaForTesting
-import org.cryptobiotic.rlauxe.workflow.runClcaSingleRoundAudit
 import kotlin.test.Test
 
 class TestOneAudit {

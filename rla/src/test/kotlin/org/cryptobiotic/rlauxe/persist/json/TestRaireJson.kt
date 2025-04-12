@@ -23,7 +23,7 @@ class TestRaireJson {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.PLURALITY,
+            choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
         val target = RaireContest(info, listOf(3), 42, 33)
@@ -45,7 +45,7 @@ class TestRaireJson {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.PLURALITY,
+            choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
         val contest = RaireContest(info, listOf(1), 42, 33)
@@ -80,7 +80,7 @@ class TestRaireJson {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.PLURALITY,
+            choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
         val rassertion = RaireAssertion(4, 2, 42, RaireAssertionType.irv_elimination,

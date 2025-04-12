@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
@@ -8,7 +9,6 @@ class OneAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<OneAuditContest>, // the contests you want to audit
     val mvrManager: MvrManagerClcaIF,
-    // val cvrs: List<Cvr>
 ): RlauxAuditIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()

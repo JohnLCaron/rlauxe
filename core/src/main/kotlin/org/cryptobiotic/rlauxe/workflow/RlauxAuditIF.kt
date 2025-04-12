@@ -1,8 +1,10 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
+import org.cryptobiotic.rlauxe.util.Stopwatch
 
 interface RlauxAuditIF {
     fun auditConfig() : AuditConfig
@@ -51,6 +53,36 @@ interface RlauxAuditIF {
 
     // 6. _Run the audit_
     fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
+}
+
+// runs audit rounds until finished. return last audit round
+// Can only use this if the MvrManager implements MvrManagerTest
+// otherwise run one round at a time with PersistentAudit
+fun runAudit(name: String, workflow: RlauxAuditIF, quiet: Boolean=true): AuditRound? {
+    val stopwatch = Stopwatch()
+
+    var nextRound: AuditRound? = null
+    var complete = false
+    while (!complete) {
+        nextRound = workflow.startNewRound(quiet=quiet)
+        if (nextRound.samplePrns.isEmpty()) {
+            complete = true
+
+        } else {
+            stopwatch.start()
+
+            // workflow MvrManager must implement MvrManagerTest, else Exception
+            (workflow.mvrManager() as MvrManagerTest).setMvrsBySampleNumber(nextRound.samplePrns)
+
+            if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")
+            complete = workflow.runAuditRound(nextRound, quiet)
+            nextRound.auditWasDone = true
+            nextRound.auditIsComplete = complete
+            if (!quiet) println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
+        }
+    }
+
+    return nextRound
 }
 
 /*

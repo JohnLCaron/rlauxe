@@ -148,7 +148,7 @@ fun consistentSampling(
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
-    auditRound.samplePrns = sampledCards.map { it.sampleNumber() }
+    auditRound.samplePrns = sampledCards.map { it.prn }
     auditRound.sampledBorc = sampledCards
 }
 

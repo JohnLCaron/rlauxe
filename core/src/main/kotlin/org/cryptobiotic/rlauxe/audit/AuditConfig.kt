@@ -31,14 +31,14 @@ data class AuditConfig(
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
             AuditType.CLCA -> appendLine("  $clcaConfig")
-            AuditType.ONEAUDIT -> appendLine("  $oaConfig, ")
+            AuditType.ONEAUDIT -> appendLine("  $oaConfig")
         }
     }
     fun strategy() : String {
         return when (auditType) {
             AuditType.POLLING -> "polling"
             AuditType.CLCA -> clcaConfig.strategy.toString()
-            AuditType.ONEAUDIT -> "oneaudit"
+            AuditType.ONEAUDIT -> oaConfig.strategy.toString()
         }
     }
 }

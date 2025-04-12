@@ -34,10 +34,6 @@ data class AuditableCard (
         return contests.contains(contestId)
     }
 
-    fun sampleNumber() = prn
-
-    fun index() = index
-
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -68,12 +64,14 @@ data class AuditableCard (
         result = 31 * result + (poolId ?: 0)
         result = 31 * result + desc.hashCode()
         result = 31 * result + contests.contentHashCode()
-        result = 31 * result + (votes?.hashCode() ?: 0)
+        votes?.forEach { vote ->
+            result = 31 * result + vote.contentHashCode()
+        }
         return result
     }
 
     companion object {
-        // dont use this, except testing and initialization. sampleNum should be set.
+        // dont use this, except for testing and initialization. generally, sampleNum should be set.
         fun fromCvrWithZeros(cvr: Cvr): AuditableCard {
             // store the contest separate from the candidates
             val sortedVotes = cvr.votes.toSortedMap()

@@ -16,7 +16,6 @@ class TestRunRlaStartFuzz {
                 "-in", topdir,
                 "-isPolling",
                 "-fuzzMvrs", ".0123",
-                "-mvrs", "$topdir/private/testMvrs.csv",
             )
         )
     }
@@ -30,7 +29,6 @@ class TestRunRlaStartFuzz {
                 "-in", topdir,
                 "-minMargin", "0.01",
                 "-fuzzMvrs", ".0123",
-                "-mvrs", "$topdir/private/testMvrs.csv",
                 "-ncards", "10000",
                 "-ncontests", "11",
             )
@@ -47,7 +45,6 @@ class TestRunRlaStartFuzz {
                 "-in", topdir,
                 "-minMargin", "0.01",
                 "-fuzzMvrs", ".0123",
-                "-mvrs", "$topdir/private/testMvrs.csv",
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addRaireContest",
@@ -67,7 +64,6 @@ class TestRunRlaStartFuzz {
                 "-in", topdir,
                 "-minMargin", "0.01",
                 "-fuzzMvrs", ".0123",
-                "-mvrs", "$topdir/private/testMvrs.csv",
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addOAContest",

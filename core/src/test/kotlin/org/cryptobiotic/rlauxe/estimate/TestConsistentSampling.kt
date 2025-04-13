@@ -67,7 +67,7 @@ class TestConsistentSampling {
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
-        val ballotManifest = test.makeBallotManifest(true)
+        val ballotManifest = test.makeCardLocationManifest(true)
         val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
 
         //val prng = Prng(Random.nextLong())
@@ -105,7 +105,7 @@ class TestConsistentSampling {
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
-        val ballotManifest = test.makeBallotManifest(false)
+        val ballotManifest = test.makeCardLocationManifest(false)
         val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
 
         //val prng = Prng(Random.nextLong())

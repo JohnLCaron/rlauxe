@@ -74,7 +74,7 @@ fun consistentSampling(
     if (contestsNotDone.isEmpty()) return
 
     // calculate how many samples are wanted for each contest
-    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, mvrManager.ballotCards())
+    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards())
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
@@ -95,7 +95,7 @@ fun consistentSampling(
 
     // while we need more samples
     var countSamples = 0
-    val sortedBorcIter = mvrManager.ballotCards()
+    val sortedBorcIter = mvrManager.sortedCards()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
         contestsIncluded.any { contestWantsMoreSamples(it) } &&

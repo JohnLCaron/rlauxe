@@ -47,7 +47,7 @@ class TestRaireWorkflowFromJson {
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
         val workflow = ClcaAudit(auditConfig, emptyList(), raireResults.contests, ballotCards)
 
-        runComparisonWorkflowR(workflow, ballotCards.cvrsUA, nassertions)
+        runComparisonWorkflowR(workflow, ballotCards.sortedCards, nassertions)
     }
 
 }

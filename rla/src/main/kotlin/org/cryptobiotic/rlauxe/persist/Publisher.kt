@@ -14,7 +14,7 @@ import java.nio.file.Path
 
       roundX/
         auditState.json     // AuditRoundJson
-        sampleNumbers.json  // SampleNumbersJson // the sample numbers to be audited
+        samplePrns.json     // SamplePrnsJson // the sample prns to be audited
         sampleMvrs.csv      // AuditableCardCsv  // the mvrs used for the audit; matches sampleNumbers.json
 
  */
@@ -30,10 +30,10 @@ class Publisher(val topdir: String) {
     fun cardsCsvFile() = "$topdir/sortedCards.csv"
     fun cardsCsvZipFile() = "$topdir/sortedCards.zip"
 
-    fun sampleNumbersFile(round: Int): String {
+    fun samplePrnsFile(round: Int): String {
         val dir = "$topdir/round$round"
         validateOutputDir(Path.of(dir), errs)
-        return "$dir/sampleNumbers.json"
+        return "$dir/samplePrns.json"
     }
 
     fun sampleMvrsFile(round: Int): String {

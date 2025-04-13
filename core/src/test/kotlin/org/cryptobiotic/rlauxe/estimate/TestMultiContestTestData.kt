@@ -123,7 +123,7 @@ class TestMultiContestTestData {
         assertEquals(ncontests, test.contests.size)
 
         val cvrs = test.makeCvrsFromContests()
-        val ballotManifest = test.makeBallotManifest(true)
+        val ballotManifest = test.makeCardLocationManifest(true)
 
         test.contests.forEachIndexed { idx, contest ->
             assertEquals(roundToInt(N * (1.0 + phantomPct)), contest.Nc)

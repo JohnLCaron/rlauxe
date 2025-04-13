@@ -334,7 +334,7 @@ fun readAuditRoundJsonFile(
     if (contestsResult is Err) return contestsResult
     val contests = contestsResult.unwrap()
 
-    val sampleResult = readSampleNumbersJsonFile(samplesFile)
+    val sampleResult = readSamplePrnsJsonFile(samplesFile)
     if (sampleResult is Err) return sampleResult
     val samples = sampleResult.unwrap()
 

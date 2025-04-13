@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.junit.jupiter.api.assertThrows
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class TestUtils {
@@ -37,7 +37,7 @@ class TestUtils {
         assertEquals(TestH0Status.LimitReached, enumValueOf("LimitReacHED", TestH0Status.entries))
 
         assertNull(enumValueOf("bad", TestH0Status.entries))
-        assertThrows<IllegalArgumentException> {
+        assertFailsWith<IllegalArgumentException> {
             assertEquals(TestH0Status.InProgress, enumValueOf("bad"))
         }
     }

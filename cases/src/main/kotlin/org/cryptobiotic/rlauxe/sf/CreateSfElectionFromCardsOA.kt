@@ -184,9 +184,7 @@ class CardPool(val poolId: Int) {
 
 class BallotManifest(val tab: Int, val batch: Int, var count: Int)
 
-class ContestCount() {
-    var ncards = 0
-    val counts = mutableMapOf<Int, Int>() // groupCount or candCount
+data class ContestCount(var ncards: Int = 0, val counts: MutableMap<Int, Int> = mutableMapOf() ) {
 
     fun reportedMargin(winner: Int, loser: Int): Double {
         val winnerVotes = counts[winner] ?: 0
@@ -197,25 +195,6 @@ class ContestCount() {
     override fun toString(): String {
         return "total=$ncards, counts=${counts.toSortedMap()}"
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ContestCount
-
-        if (ncards != other.ncards) return false
-        if (counts != other.counts) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = ncards
-        result = 31 * result + counts.hashCode()
-        return result
-    }
-
 }
 
 

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.persist.*
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Prng
 import java.nio.file.Path
@@ -46,6 +47,11 @@ class TestPersistentAuditPolling {
 
         val mvrManager = MvrManagerFromRecord(auditDir)
         val pollingWorkflow = PollingAudit(auditConfig, contests, mvrManager)
+
+        // these checks may modify the contest status
+        checkContestsCorrectlyFormed(auditConfig, pollingWorkflow.contestsUA())
+        checkContestsWithCards(pollingWorkflow.contestsUA(), readCardsCsvIterator(publisher.cardsCsvFile()))
+
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")
 

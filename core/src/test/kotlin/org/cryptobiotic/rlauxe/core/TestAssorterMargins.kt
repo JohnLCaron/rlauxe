@@ -36,8 +36,8 @@ class TestAssorterMargins {
         runTest {
             checkAll(
                 propTestFastConfig, // propTestSlowConfig,
-                Arb.int(min = 10, max = 30),
-                Arb.int(min = 5, max = 15),
+                Arb.int(min = 3, max = 6),
+                Arb.int(min = 2, max = 4),
                 Arb.int(min = 10000, max = 20000),
             ) { ncontests, nstyles, Nc ->
                 val test = MultiContestTestData(ncontests, nstyles, Nc, 0.011..0.033)

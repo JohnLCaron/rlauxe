@@ -13,10 +13,12 @@ private val maxChunk = 100000
 fun sortMergeCards(
     auditDir: String,
     cardFile: String,
+    workingDir: String,
+    outputFile: String,
 ) {
     // out of memory sort by sampleNum()
-    sortCards(auditDir, cardFile, "$auditDir/sortChunks")
-    mergeCards(auditDir, "$auditDir/sortChunks")
+    sortCards(auditDir, cardFile, workingDir)
+    mergeCards(auditDir, workingDir, outputFile)
 }
 
 // out of memory sorting from directory
@@ -72,11 +74,12 @@ fun sortCards(
 fun mergeCards(
     auditDir: String,
     workingDirectory: String,
+    outputFile: String = "$auditDir/sortedCards.csv",
 ) {
     val stopwatch = Stopwatch()
 
     //// the merging of the sorted chunks, and writing the completely sorted file
-    val writer = AuditableCardCsvWriter("$auditDir/sortedCards.csv")
+    val writer = AuditableCardCsvWriter(outputFile)
 
     val paths = mutableListOf<String>()
     Files.newDirectoryStream(Path.of(workingDirectory)).use { stream ->

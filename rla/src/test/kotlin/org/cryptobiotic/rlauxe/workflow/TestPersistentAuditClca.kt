@@ -6,9 +6,11 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.*
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.TreeReaderIterator
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
@@ -31,8 +33,6 @@ class TestPersistentWorkflowClca {
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowClca $testData")
-        contests.forEach{ println("  $it")}
-        println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
@@ -52,6 +52,11 @@ class TestPersistentWorkflowClca {
         // val mvrManagerTest = MvrManagerTestFromRecord(testCvrs, testMvrs, auditConfig.seed) this does the mvrs manipulations internally
         val mvrManager = MvrManagerFromRecord(auditDir)
         var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), mvrManager)
+
+        // these checks may modify the contest status
+        checkContestsCorrectlyFormed(auditConfig, clcaWorkflow.contestsUA())
+        checkContestsWithCards(clcaWorkflow.contestsUA(), readCardsCsvIterator(publisher.cardsCsvFile()))
+
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")
 

@@ -202,7 +202,7 @@ class OAClcaAssorter(
     override fun toString() = buildString {
         appendLine("OneAuditComparisonAssorter for contest ${contestOA.name} (${contestOA.id})")
         appendLine("  assorter=${assorter.desc()}")
-        appendLine("  avgCvrAssortValue=$avgCvrAssortValue")
+        append("  avgCvrAssortValue=$avgCvrAssortValue")
     }
 
     override fun equals(other: Any?): Boolean {

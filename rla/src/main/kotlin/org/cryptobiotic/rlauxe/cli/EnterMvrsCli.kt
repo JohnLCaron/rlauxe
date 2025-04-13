@@ -5,6 +5,7 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
@@ -43,5 +44,6 @@ fun enterMvrs(inputDir: String, mvrFile: String): Boolean {
     }
 
     val auditRecord: AuditRecord = AuditRecord.readFrom(inputDir)
-    return auditRecord.enterMvrs(mvrFile)
+    val mvrs = readAuditableCardCsvFile(mvrFile)
+    return auditRecord.enterMvrs(mvrs)
 }

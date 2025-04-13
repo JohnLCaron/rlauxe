@@ -7,10 +7,12 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.persist.csv.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
 import java.io.File
+import java.nio.file.Path
 import kotlin.test.Test
 
 class TestSfElectionFromCvrs {
@@ -88,6 +90,8 @@ class TestSfElectionFromCvrs {
     fun createSF2024() {
         val topDir = "/home/stormy/temp/cases/sf2024"
         val auditDir = "$topDir/audit"
+        clearDirectory(Path.of(auditDir))
+
         createSfElectionFromCards(
             auditDir,
             "$topDir/CVR_Export_20241202143051/ContestManifest.json",
@@ -95,9 +99,13 @@ class TestSfElectionFromCvrs {
             "$topDir/cards.csv",
             show = false,
         )
+
+        sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
+        mergeCards(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCards.csv"
+        // manually zip (TODO)
     }
 
-    @Test
+    // @Test
     fun sortSF2024() {
         val topDir = "/home/stormy/temp/cases/sf2024"
         val auditDir = "$topDir/audit"
@@ -133,7 +141,7 @@ class TestSfElectionFromCvrs {
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
         }
 
-        val cvrIter = CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvZipFile()))
+        val cvrIter = CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvFile()))
         var count = 0
         while (cvrIter.hasNext()) {
             irvCounters.forEach { it.addCvr(cvrIter.next())}

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.persist
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditConfig
@@ -26,18 +27,20 @@ class AuditRecord(
     }
 
     // TODO new mvrs vs mvrs. Build interface to manage this process
-    fun enterMvrs(mvrFile: String): Boolean {
-        val mvrs = readAuditableCardCsvFile(mvrFile)
+    fun enterMvrs(mvrs: List<AuditableCard>): Boolean {
         val mvrMap = mvrs.associateBy { it.prn }.toMap()
 
         val publisher = Publisher(location)
-        val lastRound = rounds.last()
-        val lastRoundIdx = lastRound.roundIdx
+        val lastRoundIdx = if (rounds.isEmpty()) 1 else rounds.last().roundIdx
 
-        // get complete match with sampleNums
+        // get complete match with sampleNums in last round
         var missing = false
-        val sampledNumbers = readSampleNumbersJsonFile(publisher.sampleNumbersFile(lastRoundIdx)).unwrap()
-        sampledNumbers.forEach { sampleNumber ->
+        val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
+        if (sampledPrnsResult is Err) {
+            println(sampledPrnsResult)
+        }
+        val sampledPrns = sampledPrnsResult.unwrap()
+        sampledPrns.forEach { sampleNumber ->
             var mvr = previousMvrs[sampleNumber]
             if (mvr == null) {
                 mvr = mvrMap[sampleNumber]
@@ -51,12 +54,11 @@ class AuditRecord(
         }
         if (missing) return false
 
-        val sampledMvrs = sampledNumbers.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
+        val sampledMvrs = sampledPrns.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
         writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
         println("    write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx")
 
-        // TODO
-        //   mvrManager.setMvrsForRound(sampledMvrs)
+        sampledMvrs.forEach { previousMvrs[it.prn] = it } // cumulative
         return true
     }
 
@@ -75,23 +77,30 @@ class AuditRecord(
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.rounds()) {
-                val sampledNumbers = readSampleNumbersJsonFile(publisher.sampleNumbersFile(roundIdx)).unwrap()
+                val sampledNumbers = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx)).unwrap()
 
                 // may not exist yet
-                val mvrsForRoundFile = Path.of(publisher.sampleMvrsFile(roundIdx))
-                val sampledMvrs = if (Files.exists(mvrsForRoundFile)) {
-                    readAuditableCardCsvFile(publisher.sampleMvrsFile(roundIdx))
+                val mvrsForRoundFile = publisher.sampleMvrsFile(roundIdx)
+                val sampledMvrs = if (Files.exists(Path.of(mvrsForRoundFile))) {
+                    readAuditableCardCsvFile(mvrsForRoundFile)
                 } else {
                     emptyList()
                 }
                 sampledMvrsAll.addAll(sampledMvrs) // cumulative
 
-                val auditRound = readAuditRoundJsonFile(publisher.auditRoundFile(roundIdx), contests, sampledNumbers, sampledMvrs).unwrap()
-                rounds.add(auditRound)
+                // may not exist yet
+                val auditRoundFile = publisher.auditRoundFile(roundIdx)
+                if (Files.exists(Path.of(auditRoundFile))) {
+                    val auditRound = readAuditRoundJsonFile(
+                        auditRoundFile,
+                        contests,
+                        sampledNumbers,
+                        sampledMvrs
+                    )
+                    rounds.add(auditRound.unwrap())
+                }
             }
             return AuditRecord(location, auditConfig, contests, rounds, sampledMvrsAll)
         }
     }
 }
-
-fun makeMvrManager(auditDir: String) = MvrManagerFromRecord(auditDir)

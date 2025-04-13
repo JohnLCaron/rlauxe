@@ -92,7 +92,7 @@ data class AuditableCard (
             return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), null, poolId)
         }
 
-        fun fromBallot(cardLocation: CardLocation, index: Int, sampleNum: Long, poolId: Int? = null): AuditableCard {
+        fun fromCardLocation(cardLocation: CardLocation, index: Int, sampleNum: Long, poolId: Int? = null): AuditableCard {
             return AuditableCard(cardLocation.id, index, sampleNum, cardLocation.phantom, cardLocation.contests(), null, poolId)
         }
     }

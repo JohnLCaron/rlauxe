@@ -23,6 +23,11 @@ object RunRliRoundCli {
             shortName = "in",
             description = "Directory containing input election record"
         ).required()
+        val useTest by parser.option(
+            ArgType.Boolean,
+            shortName = "test",
+            description = "use MvrManagerTestFromRecord"
+        ).default(false)
         val quiet by parser.option(
             ArgType.Boolean,
             shortName = "quiet",
@@ -31,13 +36,12 @@ object RunRliRoundCli {
 
         parser.parse(args)
         println("RunRound on $inputDir quiet=$quiet")
-        runRound(inputDir, quiet)
+        runRound(inputDir, useTest, quiet)
     }
 }
 
-
 // Also called from rlaux-viewer
-fun runRound(inputDir: String, quiet: Boolean): AuditRound? {
+fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     if (notExists(Path.of(inputDir))) {
         println("RunRliRoundCli Audit Directory $inputDir does not exist")
         return null
@@ -45,7 +49,7 @@ fun runRound(inputDir: String, quiet: Boolean): AuditRound? {
 
     var complete = false
     var roundIdx = 0
-    val workflow = PersistentAudit(inputDir)
+    val workflow = PersistentAudit(inputDir, useTest)
 
     if (!workflow.auditRounds().isEmpty()) {
         val auditRound = workflow.auditRounds().last()

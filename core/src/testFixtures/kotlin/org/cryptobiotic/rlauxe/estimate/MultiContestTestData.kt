@@ -97,7 +97,7 @@ data class MultiContestTestData(
     }
 
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeBallotManifest(hasStyle: Boolean): CardLocationManifest {
+    fun makeCardLocationManifest(hasStyle: Boolean): CardLocationManifest {
         val cardLocations = mutableListOf<CardLocation>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->

@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 
 class TestSfElectionFromCards {
 
-    // make a OneAudit from Dominion expurted CVRs, using CountingGroupId=1 as the pooled votes
+    // make a OneAudit from Dominion exported CVRs, using CountingGroupId=1 as the pooled votes
     @Test
     fun createSF2024PoaCards() {
         val stopwatch = Stopwatch()
@@ -235,7 +235,7 @@ class TestSfElectionFromCards {
     fun auditSf2024Poa() {
         val auditDir = "/home/stormy/temp/cases/sf2024Poa/audit"
 
-        val workflow = PersistentAudit(auditDir)
+        val workflow = PersistentAudit(auditDir, true)
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
 
         //val contestUA = workflow.contestsUA().first()
@@ -276,17 +276,14 @@ class TestSfElectionFromCards {
     }
 }
 
+// TODO put in testFixtures?
 class MvrManagerCardsSingleRound(val sortedCardFile: String, val maxSamples: Int = -1) : MvrManagerClcaIF {
 
     override fun Nballots(contestUA: ContestUnderAudit): Int {
         TODO("Not yet implemented")
     }
 
-    override fun ballotCards(): Iterator<AuditableCard> {
-        TODO("Not yet implemented")
-    }
-
-    override fun setMvrsForRound(mvrs: List<AuditableCard>) {
+    override fun sortedCards(): Iterator<AuditableCard> {
         TODO("Not yet implemented")
     }
 

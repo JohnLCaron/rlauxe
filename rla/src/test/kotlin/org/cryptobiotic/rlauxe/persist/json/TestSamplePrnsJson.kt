@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
 
-class TestSampleNumbersJson {
+class TestSamplePrnsJson {
     val filename = "/home/stormy/temp/tests/scratch/TestSampleIndices.json"
 
     @Test
@@ -30,8 +30,8 @@ class TestSampleNumbersJson {
     fun testRoundtripIO() {
         val target = List(1111) { Random.nextLong() }
 
-        writeSampleNumbersJsonFile(target, filename)
-        val result = readSampleNumbersJsonFile(filename)
+        writeSamplePrnsJsonFile(target, filename)
+        val result = readSamplePrnsJsonFile(filename)
         assertTrue(result is Ok)
         val roundtripJson = result.unwrap()
         val roundtrip = roundtripJson

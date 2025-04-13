@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.math.min
 
 /**
- * Create a multicontest audit, with fuzzed test data.
+ * Create a multicontest audit, with fuzzed test data, stored in private record.
  */
 object RunRlaStartFuzz {
 
@@ -61,11 +61,6 @@ object RunRlaStartFuzz {
             shortName = "ncontests",
             description = "Number of contests"
         ).default(11)
-        val mvrFile by parser.option(
-            ArgType.String,
-            shortName = "mvrs",
-            description = "File containing sampled Mvrs"
-        ).required()
         val addRaireContest by parser.option(
             ArgType.Boolean,
             shortName = "addRaire",
@@ -79,13 +74,13 @@ object RunRlaStartFuzz {
 
         parser.parse(args)
         println("RunRlaStartFuzz on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates\n  mvrFile=$mvrFile")
-        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates, mvrFile)
-        else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, mvrFile)
+                " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates")
+        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+        else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards)
     }
 
     fun startTestElectionClca(
-        topdir: String,
+        auditDir: String,
         minMargin: Double,
         fuzzMvrs: Double,
         pctPhantoms: Double?,
@@ -93,13 +88,12 @@ object RunRlaStartFuzz {
         ncontests: Int,
         addRaire: Boolean,
         addRaireCandidates: Int,
-        mvrFile: String,
     ): Int {
         println("Start startTestElectionClca")
         // require(topdir.startsWith("/home/stormy/temp"))
         // clearDirectory(Path.of(topdir))
 
-        val publisher = Publisher(topdir)
+        val publisher = Publisher(auditDir)
         val auditConfig = AuditConfig(
             AuditType.CLCA, hasStyles = true, nsimEst = 100,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
@@ -129,7 +123,6 @@ object RunRlaStartFuzz {
         if (addRaire) {
             val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
             raireContests.add(rcontest)
-            // TODO merge(testCvrs + rcvrs)
             testCvrs = testCvrs + rcvrs
         }
 
@@ -138,13 +131,15 @@ object RunRlaStartFuzz {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
                     // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
-        val mvrManager = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
 
+        // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
         // save the sorted cards
-        writeAuditableCardCsvFile(mvrManager.cvrsUA, publisher.cardsCsvFile()) // TODO wrap in Result ??
+        val mvrManager = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
+        writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile()) // TODO wrap in Result ??
         println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
 
         // save the sorted testMvrs
+        val mvrFile = "$auditDir/private/testMvrs.csv"
         publisher.validateOutputDirOfFile(mvrFile)
         writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
@@ -164,14 +159,13 @@ object RunRlaStartFuzz {
     }
 
     fun startTestElectionPolling(
-        topdir: String,
+        auditDir: String,
         minMargin: Double,
         fuzzMvrsPct: Double,
         pctPhantoms: Double?,
         ncards: Int,
-        mvrFile: String,
     ): Int {
-        val publisher = Publisher(topdir)
+        val publisher = Publisher(auditDir)
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
         println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
@@ -194,13 +188,14 @@ object RunRlaStartFuzz {
             require(mvr.id == cvr.id)
         }
 
-        val mvrManager = MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
-
+        // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
         // save the sorted cards
-        writeAuditableCardCsvFile(mvrManager.ballotsUA, publisher.cardsCsvFile())
+        val mvrManager = MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
+        writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile())
         println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
 
         // save the sorted testMvrs
+        val mvrFile = "$auditDir/private/testMvrs.csv"
         publisher.validateOutputDirOfFile(mvrFile)
         writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
@@ -225,8 +220,8 @@ object RunRlaStartFuzz {
 fun runChooseSamples(workflow: RlauxAuditIF, publish: Publisher): AuditRound {
     val round = workflow.startNewRound(quiet = false)
     if (round.samplePrns.isNotEmpty()) {
-        writeSampleNumbersJsonFile(round.samplePrns, publish.sampleNumbersFile(round.roundIdx))
-        println("   writeSampleIndicesJsonFile ${publish.sampleNumbersFile(round.roundIdx)}")
+        writeSamplePrnsJsonFile(round.samplePrns, publish.samplePrnsFile(round.roundIdx))
+        println("   writeSampleIndicesJsonFile ${publish.samplePrnsFile(round.roundIdx)}")
     } else {
         println("*** FAILED TO GET ANY SAMPLES ***")
     }

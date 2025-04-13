@@ -60,7 +60,7 @@ class TestPersistentWorkflowClca {
         var workflow : RlauxAuditIF = clcaWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
-            workflow = PersistentAudit(auditDir)
+            workflow = PersistentAudit(auditDir, useTest = false)
             round++
         }
         println("------------------ ")

@@ -9,7 +9,7 @@ class TestPersistentConsistentSampling {
     // @Test TODO failing
     fun testPersistentConsistentSampling() {
         val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
-        val workflow = PersistentAudit(topdir)
+        val workflow = PersistentAudit(topdir, true)
         val auditRecord = workflow.auditRecord
         val auditRound = workflow.auditRounds().last()
 

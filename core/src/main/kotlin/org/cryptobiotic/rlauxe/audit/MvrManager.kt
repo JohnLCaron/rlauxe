@@ -2,17 +2,9 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
 
-private val debugWantSampleSize = false
-
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
     fun sortedCards() : Iterator<AuditableCard>
-
-    // this is where you would add the real mvrs TODO: maybe set using AuditRecord.enterMvrs() ?
-    // fun setMvrsForRound(mvrs: List<AuditableCard>)
-
-    // TODO dont we always just need this?
-    // fun getMvrsForRoundIdx(roundIdx: Int): List<AuditableCard>
 
     //// for uniformSampling
     fun takeFirst(nmvrs: Int): List<AuditableCard> {
@@ -36,8 +28,8 @@ interface MvrManagerPollingIF : MvrManager {
     fun makeMvrsForRound(): List<Cvr>
 }
 
-// when the MvrManager supplies the audited mvrs
-// setting the internal state for makeCvrPairsForRound, makeMvrsForRound
+// when the MvrManager supplies the audited mvrs, its a test
+// calling this sets the internal state used by makeCvrPairsForRound(), makeMvrsForRound()
 interface MvrManagerTest : MvrManager {
     fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard>
 }
@@ -64,7 +56,7 @@ fun findSamples(samplePrns: List<Long>, sortedCards: Iterator<AuditableCard>): L
 
 //// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize
-fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : Iterator<AuditableCard>): Map<Int, Int> {
+fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : Iterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
     //// count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }
@@ -83,14 +75,13 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
             }
         }
     }
-    if (debugWantSampleSize) {
+    if (debug) {
         val prevContestCountsById = prevContestCounts.entries.map { it.key.id to it.value }.toMap()
         println("**wantSampleSize prevContestCountsById = ${prevContestCountsById}")
     }
-
     // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
     val wantSampleSizeMap = prevContestCounts.entries.map { it.key.id to it.key.wantSampleSize(it.value) }.toMap()
-    if (debugWantSampleSize) println("**wantSampleSize = $wantSampleSizeMap")
+    if (debug) println("**wantSampleSize = $wantSampleSizeMap")
 
     return wantSampleSizeMap
 }

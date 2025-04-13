@@ -11,6 +11,7 @@ import java.nio.file.Path
 /** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
 class PersistentAudit(
     val auditDir: String,
+    val useTest: Boolean,
 ): RlauxAuditIF {
     val auditRecord: AuditRecord = AuditRecord.readFrom(auditDir) // TODO need auditConfig, contests in record
     private val auditConfig: AuditConfig = auditRecord.auditConfig
@@ -20,7 +21,7 @@ class PersistentAudit(
 
     init {
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (Files.exists(Path.of("$auditDir/private/testMvrs.csv"))) {
+        mvrManager = if (useTest || Files.exists(Path.of("$auditDir/private/testMvrs.csv"))) {
             MvrManagerTestFromRecord(auditRecord.location)
         } else {
             MvrManagerFromRecord(auditRecord.location)

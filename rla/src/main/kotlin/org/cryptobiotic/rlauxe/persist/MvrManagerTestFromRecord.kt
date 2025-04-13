@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import java.nio.file.Files
 import java.nio.file.Path
 
-private val checkValidity = false
+private val checkValidity = true
 
 // stores the testMvrs in "$auditDir/private/testMvrs.csv"
 class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF, MvrManagerTest {
@@ -64,7 +64,7 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
 
     private fun auditableCards(): Iterator<AuditableCard> = readCardsCsvIterator(cardFile)
 
-    //// MvrManagerTest TODO too complicated!
+    //// MvrManagerTest
     // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
         val mvrFile = "$auditDir/private/testMvrs.csv"

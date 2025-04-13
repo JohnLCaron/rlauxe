@@ -39,7 +39,7 @@ class TestOAClcaAssorter {
         // fun makeContestOA(Nc: Int, margin: Double, poolPct: Double, poolMargin: Double) : OneAuditContest {
         val contestOA: OneAuditContest = makeContestOA(N, margin, poolPct = 0.66, poolMargin = mean2margin(0.625))
         val contestUA = contestOA.makeContestUnderAudit()
-        val cassorter = contestUA.minClcaAssertion()!!.cassorter // as OAClcaAssorter
+        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OAClcaAssorter
 
         val assortMargin = cassorter.assorter.reportedMargin()
         val assortMean = margin2mean(assortMargin)
@@ -56,14 +56,6 @@ class TestOAClcaAssorter {
         println("pool=${contestOA.pools[1]}")
         val poolMargin = contestOA.pools[1]!!.calcReportedMargin(0, 1)
         assertEquals(mean2margin(0.625), poolMargin)
-
-        //println(" mvr winner bassort=${oaClcaAssorter.bassort(winnerNoCvr, winnerNoCvr)} ")
-        //println(" mvr loser bassort=${oaClcaAssorter.bassort(loserNoCvr, winnerNoCvr)} ")
-        //println(" mvr other bassort=${oaClcaAssorter.bassort(otherNoCvr, winnerNoCvr)} ")
-
-        //val bassortWinner = oaClcaAssorter.bassort(winnerNoCvr, winnerNoCvr)
-        //val bassortLoser = oaClcaAssorter.bassort(loserNoCvr, winnerNoCvr)
-        // val bassortOther = oaClcaAssorter.bassort(otherNoCvr, winnerNoCvr)
 
         // From Shangrla
         // tally_pool 31-119 means: 0.625
@@ -112,6 +104,11 @@ class TestOAClcaAssorter {
         assertEquals(winnerVoteNoCvr, cassorter.bassort(winnerNoCvr, winnerNoCvr), .0001)
         assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr), .0001)
         assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
+
+        val expect = """OneAuditComparisonAssorter for contest makeContestOA (0)
+  assorter= winner=0 loser=1 reportedMargin=0.6572
+  avgCvrAssortValue=0.8286"""
+        assertEquals(expect, cassorter.toString())
     }
 
     /*

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.audit.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
 import kotlin.math.max
 import kotlin.test.Test
@@ -19,7 +18,7 @@ class TestAlphaMartComparison {
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
-        val calcMargin = (compareAssorter as ClcaAssorter).calcClcaAssorterMargin(cvrs.zip(cvrs))
+        val calcMargin = compareAssorter.calcClcaAssorterMargin(cvrs.zip(cvrs))
 
         val sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, compareAssorter)
         val theta = compareAssorter.meanAssort()

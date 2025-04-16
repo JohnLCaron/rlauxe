@@ -24,16 +24,16 @@ class TestClcaAttackSamplers {
         repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
             val contest = makeContestUAfromCvrs(info, cvrs).makeClcaAssertions()
-            val bassorter = contest.clcaAssertions.first().cassorter as ClcaAssorter
-            assertEquals(.02, bassorter.assorter().reportedMargin(), doublePrecision)
-            assertEquals(0.5050505050505051, bassorter.noerror(), doublePrecision)
-            assertEquals(1.0101010101010102, bassorter.upperBound(), doublePrecision)
+            val cassorter = contest.clcaAssertions.first().cassorter
+            assertEquals(.02, cassorter.assorter().reportedMargin(), doublePrecision)
+            assertEquals(0.5050505050505051, cassorter.noerror(), doublePrecision)
+            assertEquals(1.0101010101010102, cassorter.upperBound(), doublePrecision)
 
-            val cs0 = ClcaFlipErrorsSampler(cvrs, bassorter, cvrMean)
-            assertEquals(bassorter.noerror(), cs0.sampleMean, doublePrecision)
+            val cs0 = ClcaFlipErrorsSampler(cvrs, cassorter, cvrMean)
+            assertEquals(cassorter.noerror(), cs0.sampleMean, doublePrecision)
 
-            val cs = ClcaFlipErrorsSampler(cvrs, bassorter, cvrMean + meanDiff)
-            val assorter = bassorter.assorter()
+            val cs = ClcaFlipErrorsSampler(cvrs, cassorter, cvrMean + meanDiff)
+            val assorter = cassorter.assorter()
             val cvrVotes = cs.cvrs.map { assorter.assort(it) }.sum()
             val mvrVotes = cs.mvrs.map { assorter.assort(it) }.sum()
             assertEquals(cvrVotes - cs.flippedVotes, mvrVotes, doublePrecision)
@@ -41,9 +41,9 @@ class TestClcaAttackSamplers {
 
             println(" ComparisonWithErrors: cvrVotes=$cvrVotes mvrVotes=$mvrVotes sampleCount=${cs.sampleCount} sampleMean=${cs.sampleMean}")
 
-            val expectedAssortValue = (N - cs.flippedVotes) * (bassorter.noerror())
+            val expectedAssortValue = (N - cs.flippedVotes) * (cassorter.noerror())
 
-            testLimits(cs, N, bassorter.upperBound())
+            testLimits(cs, N, cassorter.upperBound())
 
             repeat(11) {
                 cs.reset()
@@ -64,13 +64,13 @@ class TestClcaAttackSamplers {
         val cvrs = makeCvrsByExactMean(N, reportedAvg)
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
-        val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
+        val cassorter = contestUA.clcaAssertions.first().cassorter
 
         val meanDiff = .01
-        val sampler = ClcaFlipErrorsSampler(cvrs, compareAssorter, reportedAvg - meanDiff)
-        testLimits(sampler, N, compareAssorter.upperBound())
+        val sampler = ClcaFlipErrorsSampler(cvrs, cassorter, reportedAvg - meanDiff)
+        testLimits(sampler, N, cassorter.upperBound())
 
-        val noerror = compareAssorter.noerror()
+        val noerror = cassorter.noerror()
         assertEquals((meanDiff * N).toInt(), countAssortValues(sampler, N, 0.0))
         assertEquals(0, countAssortValues(sampler, N, noerror / 2))
         assertEquals(
@@ -93,12 +93,12 @@ class TestClcaAttackSamplers {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
                 val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
-                val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
+                val cassorter = contestUA.clcaAssertions.first().cassorter
 
-                val sampler = ClcaAttackSampler(cvrs, compareAssorter, p2)
-                testLimits(sampler, N, compareAssorter.upperBound())
+                val sampler = ClcaAttackSampler(cvrs, cassorter, p2)
+                testLimits(sampler, N, cassorter.upperBound())
 
-                val noerror = compareAssorter.noerror()
+                val noerror = cassorter.noerror()
                 assertEquals((p2 * N).toInt(), countAssortValues(sampler, N, 0.0))
                 assertEquals(0, countAssortValues(sampler, N, noerror / 2))
                 assertEquals(
@@ -124,18 +124,18 @@ class TestClcaAttackSamplers {
                     val cvrs = makeCvrsByExactMean(N, theta)
                     val contest = makeContestsFromCvrs(cvrs).first()
                     val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
-                    val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
+                    val cassorter = contestUA.clcaAssertions.first().cassorter
 
                     val sampler = ClcaAttackSampler(
                         cvrs,
-                        compareAssorter,
+                        cassorter,
                         p2,
                         p1,
                         true
                     ) // false just makes the numbers imprecise
-                    testLimits(sampler, N, compareAssorter.upperBound())
+                    testLimits(sampler, N, cassorter.upperBound())
                     println("\nmargin=$margin p2 = $p2 p1= $p1")
-                    val noerror = compareAssorter.noerror()
+                    val noerror = cassorter.noerror()
                    // println(" p2 = ${countAssortValues(sampler, N, 0.0)} expect ${(p2 * N)}")
                     // println(" p1 = ${countAssortValues(sampler, N, noerror / 2)} expect ${(p1 * N)}")
 

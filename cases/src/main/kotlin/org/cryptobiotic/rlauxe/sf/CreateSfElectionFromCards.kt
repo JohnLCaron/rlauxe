@@ -7,7 +7,6 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCard
-import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCardDebug
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.CvrIteratorAdapter
@@ -42,72 +41,6 @@ fun createAuditableCards(topDir: String, castVoteRecordZip: String, manifestFile
     cardsOutputStream.close()
     println("read $countCards cards in $countFiles files took $stopwatch")
     println("took = $stopwatch")
-}
-
-fun createAuditableCardsDebug(
-    topDir: String,
-    castVoteRecordZip: String,
-    contestManifestFile: String,
-    candidateManifestFile: String,
-) {
-    val stopwatch = Stopwatch()
-    val outputFilename = "$topDir/cardsDebug.csv"
-    val cardsOutputStream = FileOutputStream(outputFilename)
-    cardsOutputStream.write(AuditableCardHeader.toByteArray())
-
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(contestManifestFile)
-    val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from ${contestManifestFile} err = $resultContestM")
-
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(candidateManifestFile)
-    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
-    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
-    val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
-
-    var countFiles = 0
-    var countCards = 0
-    val zipReader = ZipReaderTour(
-        castVoteRecordZip, silent = true, sort = true,
-        filter = { path -> path.toString().contains("CvrExport_") },
-        visitor = { inputStream ->
-            countCards += convertCvrExportToCardDebug(inputStream, cardsOutputStream, contestInfos)
-            countFiles++
-        },
-    )
-    zipReader.tourFiles()
-    cardsOutputStream.close()
-    println("read $countCards cards in $countFiles files took $stopwatch")
-    println("took = $stopwatch")
-}
-
-fun checkAuditableCardsDebug(
-    cardsFile: String,
-    contestManifestFile: String,
-    candidateManifestFile: String,
-) {
-
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(contestManifestFile)
-    val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from ${contestManifestFile} err = $resultContestM")
-
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(candidateManifestFile)
-    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
-    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
-    val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
-    val contestMap = contestInfos.associateBy { it.id }
-
-    val cvrIter = CvrIteratorAdapter(readCardsCsvIterator(cardsFile))
-    while (cvrIter.hasNext()) {
-        val cvr = cvrIter.next()
-        cvr.votes.forEach { (contestId, votes) ->
-            val contest = contestMap[contestId]!!
-            votes.forEach { cand ->
-                if (!contest.candidateIds.contains(cand)) {
-                    println("why?")
-                }
-            }
-        }
-    }
 }
 
 fun createSfElectionFromCards(

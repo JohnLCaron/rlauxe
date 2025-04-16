@@ -13,14 +13,14 @@ class BettingMart(
     val withoutReplacement: Boolean = true,
     val noerror: Double, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
-    val upperBound: Double,  // aka u
+    val upperBound: Double,  // the upper bound of the values of the sequence. TODO OneAudit??
 ): RiskTestingFn {
     private val showEachSample = false
     private val sequences = DebuggingSequences()
 
     init {
         require(riskLimit > 0.0 && riskLimit < 1.0 )
-        require(upperBound > 0.0)
+        require(upperBound > 0.5)
     }
 
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
@@ -43,13 +43,15 @@ class BettingMart(
             val xj: Double = drawSample()
             sampleNumber++
             require(xj >= 0.0)
+            // if (xj > upperBound)
+            //    println("why?") // in OA, upperbound is 3*noerror. but maybe its just a bound on what populationMeanIfH0 can be ??
             require(xj <= upperBound)
 
             val lamj = bettingFn.bet(tracker)
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(Nc, withoutReplacement, tracker)
-            val eta = lamToEta(lamj, mu=mj, upper=upperBound)
+            val eta = lamToEta(lamj, mu=mj, upper=upperBound) // informational only
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0

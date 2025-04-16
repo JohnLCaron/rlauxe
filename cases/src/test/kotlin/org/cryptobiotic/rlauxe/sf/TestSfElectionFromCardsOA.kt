@@ -8,13 +8,15 @@ import org.cryptobiotic.rlauxe.persist.csv.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.OneAuditClcaAssertion
+import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestSfElectionFromCards {
 
+    // This is to match up with SHANGRLA
     // make a OneAudit from Dominion exported CVRs, using CountingGroupId=1 as the pooled votes
+    // write "$topDir/cards.csv", "$topDir/ballotPools.csv"
     @Test
     fun createSF2024PoaCards() {
         val stopwatch = Stopwatch()
@@ -31,9 +33,16 @@ class TestSfElectionFromCards {
         // total 2086 pools
         // total contest1 cards in pools = 20932
         // total contest2 cards in pools = 3243
+
+        createSF2024PoaElectionFromCards()
+        testCardContests()
+        testCardVotes()
+        testCardAssertions()
+        auditSf2024Poa()
     }
 
-    @Test
+    // needs createSF2024PoaCards to be run first
+    // @Test
     fun createSF2024PoaElectionFromCards() {
         val stopwatch = Stopwatch()
         val sfDir = "/home/stormy/temp/cases/sf2024P"
@@ -59,7 +68,7 @@ class TestSfElectionFromCards {
         //PRESIDENT OF THE UNITED STATES-DEM (1) Nc=176637 Np=0 votes={5=142814, 7=5761, 6=6374, 3=1185, 234=5923, 1=952, 2=617, 4=987, 8=584, 245=0, 246=0, 247=0, 248=0, 249=0, 250=0} minMargin=0.7724
     }
 
-    @Test
+    // @Test
     fun testCardContests() {
         val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
@@ -99,7 +108,7 @@ class TestSfElectionFromCards {
         assertEquals(countingContestsFromCards, countingContestsFromSortedCards)
     }
 
-    @Test
+    // @Test
     fun testCardVotes() {
         val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
@@ -145,7 +154,7 @@ class TestSfElectionFromCards {
         assertEquals(countingVotesFromCards[2], countingVotesFromSortedCards[2])
     }
 
-    @Test
+    // @Test
     fun testCardAssertions() {
         val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
@@ -248,7 +257,7 @@ class TestSfElectionFromCards {
         //val sampler = ClcaWithoutReplacement(contestUA.id, true, cvrPairs, cassorter, allowReset = false)
 
         //     runClcaAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClcaIF, 1, auditor = auditor)
-        val runner = OneAuditClcaAssertion()
+        val runner = OneAuditAssertionAuditor()
 
         contestRounds.forEach { contestRound ->
             println("run contest ${contestRound.contestUA.contest}")
@@ -256,11 +265,6 @@ class TestSfElectionFromCards {
                 val cassorter = (assertionRound.assertion as ClcaAssertion).cassorter
                 val sampler = ClcaWithoutReplacement(contestRound.contestUA.id, true, cvrPairs, cassorter, allowReset = false)
                 println("  run assertion ${assertionRound.assertion} cvrMargin= ${mean2margin(cassorter.meanAssort())}")
-                if (contestRound.contestUA.contest.id == 2) {
-                    if (cassorter.assorter().loser() == 9) {
-                        print("here")
-                    }
-                }
 
                 val result: TestH0Result = runner.run(
                     workflow.auditConfig(),

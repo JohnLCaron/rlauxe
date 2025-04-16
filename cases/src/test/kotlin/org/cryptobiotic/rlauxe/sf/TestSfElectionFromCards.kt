@@ -70,23 +70,6 @@ class TestSfElectionFromCvrs {
     }
 
     @Test
-    fun createSF2024cardsDebug() {
-        val topDir = "/home/stormy/temp/cases/sf2024"
-        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
-        val contestManifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
-        val candidateManifestFile = "$topDir/CVR_Export_20241202143051/CandidateManifest.json"
-        createAuditableCardsDebug(topDir, zipFilename, contestManifestFile, candidateManifestFile)
-    }
-
-    @Test
-    fun checkSF2024cardsDebug() {
-        val topDir = "/home/stormy/temp/cases/sf2024"
-        val contestManifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
-        val candidateManifestFile = "$topDir/CVR_Export_20241202143051/CandidateManifest.json"
-        checkAuditableCardsDebug("$topDir/cards.csv", contestManifestFile, candidateManifestFile)
-    }
-
-    @Test
     fun createSF2024() {
         val topDir = "/home/stormy/temp/cases/sf2024"
         val auditDir = "$topDir/audit"

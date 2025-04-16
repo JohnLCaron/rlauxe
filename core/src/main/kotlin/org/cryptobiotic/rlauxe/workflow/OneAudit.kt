@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 class OneAudit(
@@ -23,7 +24,7 @@ class OneAudit(
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
-            auditor = OneAuditClcaAssertion()
+            auditor = OneAuditAssertionAuditor()
         )
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
@@ -37,7 +38,7 @@ class OneAudit(
     override fun mvrManager() = mvrManager
 }
 
-class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
+class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor {
 
     override fun run(
         auditConfig: AuditConfig,
@@ -47,7 +48,7 @@ class OneAuditClcaAssertion(val quiet: Boolean = true) : ClcaAssertionAuditor {
         roundIdx: Int,
     ): TestH0Result {
         val cassertion = assertionRound.assertion as ClcaAssertion
-        val cassorter = cassertion.cassorter // as OAClcaAssorter
+        val cassorter = cassertion.cassorter as OneAuditAssorter
 
         // // default: eta0 = reportedMean, shrinkTrunk
         //// bet99: eta0 = reportedMean, 99% max bet

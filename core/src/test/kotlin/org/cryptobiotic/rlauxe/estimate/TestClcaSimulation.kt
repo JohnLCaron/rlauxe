@@ -19,7 +19,7 @@ class TestClcaSimulation {
 
             val contest = makeContestsFromCvrs(cvrs).first()
             val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
-            val compareAssorter = contestUA.clcaAssertions.first().cassorter as ClcaAssorter
+            val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
             val sampler = ClcaSimulation(cvrs,
                 contestUA.contest as Contest,
@@ -27,7 +27,7 @@ class TestClcaSimulation {
                 ClcaErrorTable.standard,
             )
 
-            testLimits(sampler, N, compareAssorter.upperBound)
+            testLimits(sampler, N, compareAssorter.upperBound())
 
             val errs = sampler.errorRates
             assertEquals(errs.p1o * N, sampler.flippedVotesP1o.toDouble())
@@ -35,7 +35,7 @@ class TestClcaSimulation {
             assertEquals(errs.p1u * N, sampler.flippedVotesP1u.toDouble())
             assertEquals(errs.p2u * N, sampler.flippedVotesP2u.toDouble())
 
-            val noerror = compareAssorter.noerror
+            val noerror = compareAssorter.noerror()
             val p = 1.0 - errs.p1o - errs.p2o - errs.p1u - errs.p2u
             assertEquals(errs.p1o * N, countAssortValues(sampler, N, noerror / 2).toDouble())
             assertEquals(errs.p2o * N, countAssortValues(sampler, N, 0.0).toDouble())
@@ -56,7 +56,7 @@ class TestClcaSimulation {
             val contestUA = ContestUnderAudit(contest).makeClcaAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
-            runClcaSimulation(cvrs, contestUA, compareAssorter as ClcaAssorter)
+            runClcaSimulation(cvrs, contestUA, compareAssorter)
         }
     }
 
@@ -75,9 +75,9 @@ class TestClcaSimulation {
 
         val before = cvrs.map { assorter.bassort(it, it) }.average()
 
-        val tracker = PrevSamplesWithRates(assorter.noerror)
+        val tracker = PrevSamplesWithRates(assorter.noerror())
         while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
-        println(" bassort expectedNoerror=${df(assorter.noerror)} noerror=${df(before)} sampleMean = ${df(tracker.mean())}")
+        println(" bassort expectedNoerror=${df(assorter.noerror())} noerror=${df(before)} sampleMean = ${df(tracker.mean())}")
         assertTrue( tracker.mean() > .5)
     }
 

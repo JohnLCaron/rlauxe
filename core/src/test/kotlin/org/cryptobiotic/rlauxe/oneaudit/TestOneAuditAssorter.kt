@@ -5,28 +5,28 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestOAClcaAssorter {
+class TestOneAuditAssorter {
 
     // OneAudit, section 2.3
-// "compares the manual interpretation of individual cards to the implied “average” CVR of the reporting batch each card belongs to"
-//
-// Let bi denote the true votes on the ith ballot card; there are N cards in all.
-// Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
-// Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
-//
-//     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-//     margin ≡ 2Ā(c) − 1, the _reported assorter margin_
-//
-//     ωi ≡ A(ci) − A(bi)   overstatementError
-//     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-//     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
-
+    // "compares the manual interpretation of individual cards to the implied “average” CVR of the reporting batch each card belongs to"
+    //
+    // Let bi denote the true votes on the ith ballot card; there are N cards in all.
+    // Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
+    // Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
+    //
+    //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
+    //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_
+    //
+    //     ωi ≡ A(ci) − A(bi)   overstatementError
+    //     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
+    //     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
+    //
     //    Ng = |G_g|
-//    Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
-//    margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
-//    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
-//    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
-//    otherwise = 1/2
+    //    Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
+    //    margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
+    //    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
+    //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
+    //    otherwise = 1/2
 
     @Test
     fun testOAShangrla() {
@@ -39,7 +39,7 @@ class TestOAClcaAssorter {
         // fun makeContestOA(Nc: Int, margin: Double, poolPct: Double, poolMargin: Double) : OneAuditContest {
         val contestOA: OneAuditContest = makeContestOA(N, margin, poolPct = 0.66, poolMargin = mean2margin(0.625))
         val contestUA = contestOA.makeContestUnderAudit()
-        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OAClcaAssorter
+        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditAssorter
 
         val assortMargin = cassorter.assorter.reportedMargin()
         val assortMean = margin2mean(assortMargin)

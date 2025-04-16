@@ -22,6 +22,7 @@ import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import java.io.FileOutputStream
 
+// This is to write ballotPools.csv for SHANGRLA comparison
 // read Dominion "cvr export" json file
 // write "$topDir/cards.csv", "$topDir/ballotPools.csv"
 fun createAuditableCardsWithPools(
@@ -68,16 +69,6 @@ fun createAuditableCardsWithPools(
                     totalCards++
                     sessionCards++
                 }
-
-                // data class AuditableCard (
-                //    val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
-                //    val index: Int,  // index into the original, canonical (committed-to) list of cards
-                //    val sampleNum: Long,
-                //    val phantom: Boolean,
-                //    val contests: IntArray, // aka ballot style
-                //    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
-                //    val poolId: Int?, // for OneAudit
-                //)
 
                 if (session.CountingGroupId == 2) {
                     val cvrs = session.import(irvIds)
@@ -161,12 +152,14 @@ class CardPool(val poolId: Int) {
 
     fun addPooledVotes(cvr : Cvr) {
         cvrs.add(cvr)
-        cvr.votes.forEach { (contestId, choiceIds) ->
+        cvr.votes.forEach { (contestId, candIds) ->
             val contestCount = contestMap.getOrPut(contestId) { ContestCount() }
             contestCount.ncards++
-            choiceIds.forEach { cand ->
+            candIds.forEach { cand ->
                 val nvotes = contestCount.counts[cand] ?: 0
                 contestCount.counts[cand] = nvotes + 1
+                if (contestCount.counts[cand]!! > contestCount.ncards)
+                    throw RuntimeException()
             }
         }
     }

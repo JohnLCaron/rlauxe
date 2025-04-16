@@ -112,7 +112,7 @@ class OAContestUnderAudit(
         // turn into comparison assertions
         this.clcaAssertions = assertions.map { assertion ->
             val margin = assertion.assorter.reportedMargin()
-            ClcaAssertion(contest.info, OAClcaAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
+            ClcaAssertion(contest.info, OneAuditAssorter(this.contestOA, assertion.assorter, margin2mean(margin)))
         }
         return this
     }
@@ -132,39 +132,28 @@ class OAContestUnderAudit(
         result = 31 * result + contestOA.hashCode()
         return result
     }
-
-
 }
 
-// "assorter" here is the plurality assorter
-// from oa_polling.ipynb
-// assorter_mean_all = (whitmer-schuette)/N
-// v = 2*assorter_mean_all-1
-// u_b = 2*u/(2*u-v)  # upper bound on the overstatement assorter
-// noerror = u/(2*u-v)
-
-// OneAudit, section 2.3
-// "compares the manual interpretation of individual cards to the implied “average” CVR of the reporting batch each card belongs to"
-//
-// Let bi denote the true votes on the ith ballot card; there are N cards in all.
-// Let ci denote the voting system’s interpretation of the ith card, for ballots in C, cardinality |C|.
-// Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {G_g}, g=1..G for which reported assorter subtotals are available.
-//
-//     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-//     margin ≡ 2Ā(c) − 1, the _reported assorter margin_
-//
-//     ωi ≡ A(ci) − A(bi)   overstatementError
-//     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-//     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
-
-//    Ng = |G_g|
-//    Ā(g) ≡ assorter_mean_poll = (winner total - loser total) / Ng
-//    margin ≡ 2Ā(g) − 1 ≡ v = 2*assorter_mean_poll − 1
-//    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
-//    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
-//    otherwise = 1/2
-
-class OAClcaAssorter(
+/** See OneAudit Section 2.3.
+ * Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is |C|.
+ * Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {Gg} for which reported assorter subtotals are available.
+ * Let
+ *    Āc = AVG_N(A(ci)), Āc_C = AVG_C(A(ci)), Āc_Gg = AVG_Gg(A(ci))
+ *    Āb = AVG_N(A(bi)), Āb_C = AVG_C(A(bi)), Āb_Gg = AVG_Gg(A(bi))
+ * The assertion is the claim Āb > 1/2.
+ * The reported assorter mean Āc > 1/2.
+ *
+ * We dont actually have ci for i in Gg, so we declare A(ci) := Âc_Gg, the average value in group Gg.
+ * From eq 7 define B(bi, ci) ≡ (1 − (ωi / u)) / (2 − v/u) = (u - A(ci) + A(bi)) / (2u - v) in [0, 2u/(2u-v)]] (OA 6) TODO HEY [0, 3u/(2u-v)]] ?
+ *   B̄b = AVG_N((u - A(ci) + A(bi)) / (2u - v) =  u - AVG_N(A(ci)) + AVG_N(A(bi)) / (2u - v) =
+ *        (u - Āc + Āb)  / (2u - v)
+ *  define v := 2Āc − 1 ≤ 2u − 1 < 2u     [show that (2u - 2Āc + 1) > 0, so dont flip the sign]
+ *   Bb = (u - Āc + Āb)  / (2u - 2Āc + 1)       (OA 7)
+ * So B̄b > 1/2  iff  (u - Āc + Āb) / (2u - 2Āc + 1) > 1/2  iff  (u - Āc + Āb) > (u - Āc + 1/2) iff  Āb > 1/2   (OA 8)
+ * If the reported tallies are correct, i.e., if Āc = Āb = (v + 1)/2, then
+ *  B̄b = u /(2u − v)       (OA 9)
+ */
+class OneAuditAssorter(
     val contestOA: OneAuditContest,
     assorter: AssorterIF,   // A(mvr)
     avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
@@ -178,13 +167,27 @@ class OAClcaAssorter(
         val pool = contestOA.pools[cvr.poolId]
         if (pool == null) { throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}") }
 
+        // TODO do you believe this is the same as if you ran the assorter on the cvrs? But we dont have the cvrs....
         val avgBatchAssortValue = margin2mean(pool.calcReportedMargin(assorter.winner(), assorter.loser()))
         val overstatement = overstatementPoolError(mvr, cvr, avgBatchAssortValue) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
-        // had error using the pool margin instead of the assorter margin
-        //val margin = 2.0 * avgBatchAssortValue - 1.0 // reported assorter margin
+
+        //// had error using the pool margin (pool.calcReportedMargin) instead of the assorter margin (in noerror)
+        //val margin = 2.0 * avgBatchAssortValue - 1.0 // reported pool margin
         //val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
-        val result =  tau * noerror
+
+        // for pooled data (i in Gg):
+        //   A(ci) = 1/2 or poolAvg = 0 to 1 TODO assume 0 to u ??
+        //   A(bi) in [0, .5, u],
+        //   so ωi ≡ A(ci) − A(bi) ranges from -u to u
+        //   so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from [0, 2] * noerror
+        val result =  tau * noerror()
+        if (result > upperBound()) {
+            println("how?")
+            val poolMargin = pool.calcReportedMargin(assorter.winner(), assorter.loser())
+            val mean = margin2mean(poolMargin)
+            overstatementPoolError(mvr, cvr, avgBatchAssortValue)
+        }
         return result
     }
 
@@ -195,7 +198,12 @@ class OAClcaAssorter(
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(contestOA.id))) 0.0
                          else this.assorter.assort(mvr, usePhantoms = false)
 
-        val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue // TODO phantom probaly not used
+        // for pooled data (i in Gg):
+        //   A(ci) = 1/2 or poolAvg = 0 to 1 TODO assume 0 to u ?? Note poolAvg may be less than 1/2
+        //   A(bi) in [0, .5, u],
+        //   so ωi ≡ A(ci) − A(bi) ranges from -u to u
+
+        val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue // TODO phantom not ever set?
         return cvr_assort - mvr_assort
     }
 
@@ -210,7 +218,7 @@ class OAClcaAssorter(
         if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
 
-        other as OAClcaAssorter
+        other as OneAuditAssorter
 
         return contestOA == other.contestOA
     }
@@ -220,7 +228,5 @@ class OAClcaAssorter(
         result = 31 * result + contestOA.hashCode()
         return result
     }
-
-
 }
 

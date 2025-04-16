@@ -70,7 +70,7 @@ class TestAssorterClca {
         val noerror = 1.0 / (2.0 - margin)
         assertEquals(.5050505050505051, noerror, doublePrecision)
         assertEquals(1.0 / (3 - 2 * awinnerAvg), noerror, doublePrecision)
-        assertEquals(noerror, bassorter.noerror, doublePrecision)
+        assertEquals(noerror, bassorter.noerror(), doublePrecision)
 
         // bassort(mvr: Cvr, cvr:Cvr)
         // (1 − ωi /upper) / (2 − margin/upper), upper == assorter.upper
@@ -377,7 +377,7 @@ class TestAssorterClca {
         val noerror = 1.0 / (2.0 - margin)
         assertEquals(.5050505050505051, noerror, doublePrecision)
         assertEquals(1.0 / (3 - 2 * awinnerAvg), noerror, doublePrecision)
-        assertEquals(noerror, bassorter.noerror, doublePrecision)
+        assertEquals(noerror, bassorter.noerror(), doublePrecision)
         println("noerror = $noerror")
 
         // bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
@@ -444,13 +444,13 @@ class TestAssorterClca {
         val contest = makeContestUAfromCvrs(info, cvrs)
         val contestAU = contest.makeClcaAssertions()
         val compareAssertion = contestAU.clcaAssertions.first()
-        val bassorter = compareAssertion.cassorter as ClcaAssorter
+        val cassorter = compareAssertion.cassorter
 
-        val theta = bassorter.meanAssort()
+        val theta = cassorter.meanAssort()
         val expected = 1.0 / (3 - 2 * cvrMean)
         assertEquals(expected, theta, doublePrecision)
 
-        val calcMargin = bassorter.calcClcaAssorterMargin(cvrs.zip(cvrs))
+        val calcMargin = cassorter.calcClcaAssorterMargin(cvrs.zip(cvrs))
         val calcMean = margin2mean(calcMargin)
         assertEquals(expected, calcMean, doublePrecision)
     }

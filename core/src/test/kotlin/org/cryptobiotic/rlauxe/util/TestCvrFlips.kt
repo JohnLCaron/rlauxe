@@ -21,7 +21,7 @@ class TestCvrFlips {
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
         val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion()!!
-        val cassorter = (minClcaAssertion.cassorter as ClcaAssorter)
+        val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
         println("margin = $margin reportedMargin=${assorter.reportedMargin()} calcAssorterMargin=${calcAssorter}")
@@ -75,7 +75,7 @@ class TestCvrFlips {
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
         val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion()!!
-        val cassorter = (minClcaAssertion.cassorter as ClcaAssorter)
+        val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
         println("margin = $margin reportedMargin=${assorter.reportedMargin()} calcAssorterMargin=${calcAssorter}")

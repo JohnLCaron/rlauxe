@@ -45,7 +45,7 @@ class OneAuditWithErrors {
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "default"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorDefault))

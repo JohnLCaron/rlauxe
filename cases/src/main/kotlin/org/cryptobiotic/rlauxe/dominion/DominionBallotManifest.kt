@@ -27,14 +27,6 @@ data class DominionBallotBatch(
 
 fun readDominionBallotManifest(filename: String, countyId: Long): DominionBallotManifest {
     val parser = CSVParser.parse(File(filename), Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
-
-    /*
-    val path: Path = Paths.get(filename)
-    val reader: Reader = Files.newBufferedReader(path)
-    val parser = CSVParser(reader, CSVFormat.DEFAULT)
-
-     */
-
     val records = parser.iterator()
 
     var sequenceStart = 0
@@ -42,7 +34,7 @@ fun readDominionBallotManifest(filename: String, countyId: Long): DominionBallot
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
     require("Tray #, Tabulator Number, Batch Number, Total Ballots, VBMCart.Cart number".equals(header))
 
     // subsequent lines contain ballot manifest info

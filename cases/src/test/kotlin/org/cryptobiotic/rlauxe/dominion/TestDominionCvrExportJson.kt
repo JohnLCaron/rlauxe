@@ -22,7 +22,7 @@ class TestDominionCvrExportJson {
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
         val dominionCvrs = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
-        println(dominionCvrs)
+        // println(dominionCvrs)
 
         val irvIds = readContestManifestForIRV("src/test/data/SF2024/ContestManifest.json")
 
@@ -34,7 +34,7 @@ class TestDominionCvrExportJson {
         print(AuditableCardHeader)
         cvrs.forEach {
             val card = AuditableCard.fromCvrWithZeros(it)
-            print(writeAuditableCardCsv(card))
+            writeAuditableCardCsv(card)
         }
     }
 

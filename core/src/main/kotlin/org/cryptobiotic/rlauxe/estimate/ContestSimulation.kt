@@ -142,6 +142,7 @@ class ContestSimulation(val contest: Contest) {
 
         fun makeContestWithLimits(contest: Contest, sampleLimit: Int): ContestSimulation {
             if (sampleLimit < 0 || contest.Nc <= sampleLimit) return ContestSimulation(contest)
+
             // otherwise scale everything
             val sNc = sampleLimit / contest.Nc.toDouble()
             val sNp = roundToInt(sNc * contest.Np)

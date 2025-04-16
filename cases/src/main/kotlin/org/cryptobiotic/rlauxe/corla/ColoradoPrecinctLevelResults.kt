@@ -66,7 +66,7 @@ fun readColoradoPrecinctLevelResults(inputStream: InputStream): List<ColoradoPre
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
 
     // val precintResult = mutableListOf<ColoradoPrecinctLevelResult>()
 

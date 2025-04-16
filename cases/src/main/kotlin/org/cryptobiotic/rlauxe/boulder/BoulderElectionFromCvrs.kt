@@ -7,12 +7,14 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.nio.file.Path
 
 class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderStatementOfVotes, val quiet: Boolean = true) {
     val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
@@ -264,7 +266,7 @@ fun createElectionFromDominionCvrs(
     minRecountMargin: Double = .01,
     auditConfigIn: AuditConfig? = null,
 ) {
-    // clearDirectory(Path.of(auditDir))
+    clearDirectory(Path.of(auditDir))
 
     val stopwatch = Stopwatch()
     val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")

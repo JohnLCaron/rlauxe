@@ -203,8 +203,6 @@ fun createSfElectionFromCardsOA(
     onlyContests: List<Int>,
     auditConfigIn: AuditConfig? = null
 ) {
-    // clearDirectory(Path.of(auditDir))
-
     val stopwatch = Stopwatch()
 
     val resultContestM: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(contestManifestFile)

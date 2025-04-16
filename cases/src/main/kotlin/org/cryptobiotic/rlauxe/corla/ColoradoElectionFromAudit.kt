@@ -14,25 +14,27 @@ import java.nio.file.Path
 
 private val showMissingCandidates = false
 
-fun coloradoElectionFromAudit(
-    auditDir: String,
+// making vote counts from the electionDetailXml
+// making cards (cvrs) from the precinct results
+fun coloradoElectionFromDetailXmlAndPrecincts(
+    topDir: String,
     detailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     auditConfigIn: AuditConfig? = null
 ) {
-    clearDirectory(Path.of(auditDir))
-
     val stopwatch = Stopwatch()
 
-    // val tabulatedContests: Map<String, TabulateContestCsv> = readTabulateCsv(tabulateFile)
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
 
+    // making vote counts from the electionDetailXml
     val contests = makeContests(electionDetailXml, roundContests)
     println("contests = ${contests.size}")
 
     // auditConfig
+    val auditDir = "$topDir/audit"
+    clearDirectory(Path.of(auditDir))
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03,
@@ -49,7 +51,7 @@ fun coloradoElectionFromAudit(
     var count = 0
     precincts.forEach { precinct ->
         val precinctCvrs = makeCvrs(precinct, contests)
-        val outputDir = "$auditDir/cards/${precinct.county}"
+        val outputDir = "$topDir/cards/${precinct.county}"
         validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrs"))
         val precinctCvrsUA = precinctCvrs.map{ AuditableCard.fromCvrWithZeros(it)}
         writeAuditableCardCsvFile(precinctCvrsUA, "$outputDir/${precinct.precinct}.csv")
@@ -62,7 +64,7 @@ fun coloradoElectionFromAudit(
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
     val precinctReader = TreeReaderIterator(
-        "$auditDir/cards/",
+        "$topDir/cards/",
         fileFilter = { true },
         reader = { path -> readCardsCsvIterator(path.toString()) }
     )
@@ -77,7 +79,7 @@ fun coloradoElectionFromAudit(
 
 val quiet = false
 
-fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<Contest> {
+private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<Contest> {
     val roundContestMap = roundContests.associateBy { contestNameCleanup(it.contestName) }
     val contests = mutableListOf<Contest>()
 
@@ -132,7 +134,7 @@ fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: List<Conte
 }
 
 // each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
-fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): List<Cvr>{
+private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): List<Cvr> {
     val contestsByName = contests.associateBy { it.info.name }
 
     // we are making the cvrs out of these votes.

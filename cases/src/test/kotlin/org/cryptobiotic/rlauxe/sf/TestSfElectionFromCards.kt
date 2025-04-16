@@ -42,7 +42,7 @@ class TestSfElectionFromCvrs {
     }
 
     // out of memory sort by sampleNum()
-    @Test
+    // @Test
     fun testSortMergeCvrs() {
         val topDir = "/home/stormy/temp/cases/sf2024P"
         val auditDir = "$topDir/audit"
@@ -67,9 +67,11 @@ class TestSfElectionFromCvrs {
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "$topDir/CVR_Export_20241202143051/ContestManifest.json"
         createAuditableCards(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
+
+        createSF2024()
     }
 
-    @Test
+    // @Test
     fun createSF2024() {
         val topDir = "/home/stormy/temp/cases/sf2024"
         val auditDir = "$topDir/audit"
@@ -97,7 +99,7 @@ class TestSfElectionFromCvrs {
         // manually zip (TODO)
     }
 
-    @Test
+    // @Test
     fun showSfElectionContests() {
         val publisher = Publisher("/home/stormy/temp/cases/sf2024/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
@@ -110,7 +112,7 @@ class TestSfElectionFromCvrs {
         }
     }
 
-    @Test
+    // @Test
     fun showIrvCounts() {
         val publisher = Publisher("/home/stormy/temp/cases/sf2024/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -9,6 +8,8 @@ import org.cryptobiotic.rlauxe.estimate.simulateSampleSizeClcaAssorter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import kotlin.test.Test
 
 class TestCorlaEstimateSampleSize {
@@ -55,11 +56,12 @@ class TestCorlaEstimateSampleSize {
         val gamma = 1.2
         val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 1234567890L, quantile=.90)
 
-        contestRounds.forEach { contest ->
-            val cn = contest.Nc
+        contestRounds.forEach { contestRound ->
+            val cn = contestRound.Nc
             val estSizes = mutableListOf<Int>()
-            val sampleSizes = contest.assertionRounds.map { assertRound ->
-                val result = simulateSampleSizeClcaAssorter(1, auditConfig, contest.contestUA, assertRound)
+            val cvrs = ContestSimulation.makeContestWithLimits(contestRound.contestUA.contest as Contest, auditConfig.sampleLimit).makeCvrs()
+            val sampleSizes = contestRound.assertionRounds.map { assertRound ->
+                val result = simulateSampleSizeClcaAssorter(1, auditConfig, contestRound.contestUA, cvrs, assertRound)
                 val simSize = result.findQuantile(auditConfig.quantile)
                 val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assertRound.assertion.assorter.reportedMargin(), gamma,
                     oneOver = roundUp(cn*p1), // p1
@@ -68,12 +70,12 @@ class TestCorlaEstimateSampleSize {
                     twoUnder = roundUp(cn*p4), // p4
                     )
                 estSizes.add(estSize)
-                println("  ${contest.name} margin=${df(assertRound.assertion.assorter.reportedMargin())} est=$estSize sim=$simSize")
+                println("  ${contestRound.name} margin=${df(assertRound.assertion.assorter.reportedMargin())} est=$estSize sim=$simSize")
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()
-            contest.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contest.name} estSize=$estSize  simSize=${contest.estSampleSize}\n")
+            contestRound.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            println("${contestRound.name} estSize=$estSize  simSize=${contestRound.estSampleSize}\n")
         }
     }
 }

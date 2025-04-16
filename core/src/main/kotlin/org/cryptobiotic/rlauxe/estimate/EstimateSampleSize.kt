@@ -36,6 +36,7 @@ fun estimateSampleSizes(
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
     }
+
     // run tasks concurrently
     val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=nthreads)
 
@@ -81,35 +82,57 @@ fun estimateSampleSizes(
 // starts from where the last audit left off (prevAuditResult.pvalue)
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
-    contest: ContestRound,
+    contestRound: ContestRound,
     roundIdx: Int,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
-    // TODO generate simulated contest and cvrs? once, and use across all assertions for that contest.
-    contest.assertionRounds.map { assertionRound ->
+    // make the cvrs once for all the assertions for this contest
+    val contest = contestRound.contestUA.contest
+    val cvrs: List<Cvr> = when (auditConfig.auditType) {
+        AuditType.CLCA -> {
+            // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+            if (contest.isIRV()) {
+                SimulateRaireTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
+            } else {
+                ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+            }
+        }
+        AuditType.POLLING -> {
+            // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+            // TODO what about supermajority?
+            ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+        }
+        AuditType.ONEAUDIT -> {
+            val contestOA = (contestRound.contestUA as OAContestUnderAudit).contestOA
+            contestOA.makeTestCvrs(auditConfig.sampleLimit)
+        }
+    }
+
+    contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 val prevAuditResult = assertionRound.prevAuditResult!!
-                if (prevAuditResult.samplesUsed == contest.Nc) {   // TODO or pct of ?
-                    println("***LimitReached $contest")
-                    contest.done = true
-                    contest.status = TestH0Status.LimitReached
+                if (prevAuditResult.samplesUsed == contestRound.Nc) {   // TODO or pct of ?
+                    println("***LimitReached $contestRound")
+                    contestRound.done = true
+                    contestRound.status = TestH0Status.LimitReached
                 }
                 // start where the audit left off
                 prevSampleSize = prevAuditResult.samplesUsed
                 startingTestStatistic = 1.0 / prevAuditResult.pvalue
             }
 
-            if (!contest.done) {
+            if (!contestRound.done) {
                 tasks.add(
                     EstimateSampleSizeTask(
                         roundIdx,
                         auditConfig,
-                        contest,
+                        contestRound,
+                        cvrs,
                         assertionRound,
                         startingTestStatistic,
                         prevSampleSize,
@@ -127,6 +150,7 @@ class EstimateSampleSizeTask(
     val roundIdx: Int,
     val auditConfig: AuditConfig,
     val contest: ContestRound,
+    val cvrs: List<Cvr>,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double,
     val prevSampleSize: Int,
@@ -135,8 +159,8 @@ class EstimateSampleSizeTask(
 
     override fun name() = "task ${contest.name} ${assertionRound.assertion.assorter.desc()} ${auditConfig.strategy()}}"
 
-    // each time the task is run, the contest and cvr simulation is done once, then ran ntrials=auditConfig.nsimEst times,
-    // each time the cvrs are randomly permuted. The result is a distribution of ntrials sampleSizes.
+    // all assertions share the same cvrs. run ntrials (=auditConfig.nsimEst times).
+    // each time the trial is run, the cvrs are randomly permuted. The result is a distribution of ntrials sampleSizes.
     override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (auditConfig.auditType) {
             AuditType.CLCA ->
@@ -144,6 +168,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     auditConfig,
                     contest.contestUA,
+                    cvrs,
                     assertionRound,
                     startingTestStatistic
                 )
@@ -151,7 +176,8 @@ class EstimateSampleSizeTask(
                 simulateSampleSizePollingAssorter(
                     roundIdx,
                     auditConfig,
-                    contest.contestUA.contest as Contest, // TODO COntestIF Raire??
+                    contest.contestUA.contest,
+                    cvrs,
                     assertionRound,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -161,6 +187,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     auditConfig,
                     contest.contestUA as OAContestUnderAudit,
+                    cvrs,
                     assertionRound,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -184,6 +211,7 @@ fun simulateSampleSizeClcaAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
+    cvrs: List<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -194,19 +222,6 @@ fun simulateSampleSizeClcaAssorter(
     val contest = contestUA.contest
 
     if (!quiet) println("simulateSampleSizeClcaAssorter ${contest.info.name} ${cassorter.assorter().desc()}")
-    if (contest.isIRV())
-        println("  contest is IRV ${contest.info.name}")
-    // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
-
-    // TODO TIMING make same contestSim for all the assertions in the contest: takes 20% of time of audit
-    val cvrs =  if (contest.isIRV()) {
-        SimulateRaireTestData(contest as RaireContest, contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
-    } else {
-        val contestSim = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit)
-        //val voteCount = contest.votes.map { it.value }.sum() // V_c
-        // println("${contest.id} voteCount=${voteCount} under=${contest.undervotes}\n${contestSim.show()}\n")
-        contestSim.makeCvrs()
-    }
 
     // strategies to choose how much error there is
     var fuzzPct = 0.0
@@ -326,18 +341,13 @@ fun simulateSampleSizePollingAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
     contest: ContestIF,
+    cvrs: List<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val assorter = assertionRound.assertion.assorter
     val margin = assorter.reportedMargin()
-
-    // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
-    // TODO what about supermajority?
-    /* val simContest = /* if (contest.isIRV()) ContestIrvSimulation(contest as Contest) else */ ContestSimulation(contest as Contest) */
-    val simContest = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit)
-    val cvrs = simContest.makeCvrs() // fake Cvrs with reported margin,
 
     // optional fuzzing of the cvrs
     var fuzzPct = 0.0
@@ -346,7 +356,7 @@ fun simulateSampleSizePollingAssorter(
         PollWithoutReplacement(contest.id, auditConfig.hasStyles, cvrs, assorter, allowReset=true)
     } else {
         fuzzPct = pollingConfig.simFuzzPct
-        PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest, assorter) // TODO cant use Raire
+        PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest as Contest, assorter) // TODO cant use Raire
     }
 
     val result = simulateSampleSizeAlphaMart(
@@ -415,6 +425,7 @@ fun simulateSampleSizeOneAuditAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
     contestUA: OAContestUnderAudit,
+    cvrs: List<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -424,7 +435,6 @@ fun simulateSampleSizeOneAuditAssorter(
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 
-    val cvrs = contestUA.contestOA.makeTestCvrs() // TODO
     println("simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${cassorter.assorter().desc()} ${cvrs.size} ")
 
     // the sampler is specific to the assertion

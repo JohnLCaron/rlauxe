@@ -51,8 +51,6 @@ fun createSfElectionFromCards(
     auditConfigIn: AuditConfig? = null,
     show: Boolean = false
 ) {
-    // clearDirectory(Path.of(auditDir))
-
     val stopwatch = Stopwatch()
 
     val resultContestM: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(contestManifestFile)

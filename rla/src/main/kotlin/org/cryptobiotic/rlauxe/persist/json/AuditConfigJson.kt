@@ -191,7 +191,7 @@ fun OneAuditConfig.publishJson() : OneAuditConfigJson {
 }
 
 fun OneAuditConfigJson.import(): OneAuditConfig {
-    val strategy = enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.default
+    val strategy = enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.reportedMean
     return OneAuditConfig(
         strategy,
         this.simFuzzPct,

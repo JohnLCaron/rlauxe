@@ -20,7 +20,7 @@ data class AuditConfig(
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.phantoms),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.eta0Eps),
     val version: Double = 1.0,
 ) {
     val isClca = auditType == AuditType.CLCA || auditType == AuditType.ONEAUDIT
@@ -62,12 +62,12 @@ data class ClcaConfig(
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
-// default: eta0 = reportedMean, shrinkTrunk
+// reportedMean: eta0 = reportedMean, shrinkTrunk
 // bet99: eta0 = reportedMean, 99% max bet
-// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
-enum class OneAuditStrategyType { default, bet99, eta0Eps }
+// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk (default strategy)
+enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps }
 data class OneAuditConfig(
-    val strategy: OneAuditStrategyType = OneAuditStrategyType.default,
+    val strategy: OneAuditStrategyType = OneAuditStrategyType.eta0Eps,
     val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight
 )

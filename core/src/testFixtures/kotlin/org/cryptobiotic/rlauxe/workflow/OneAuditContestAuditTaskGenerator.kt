@@ -22,7 +22,7 @@ class OneAuditContestAuditTaskGenerator(
     override fun generateNewTask(): ContestAuditTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
@@ -61,7 +61,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val auditConfig = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default, simFuzzPct = mvrsFuzzPct)
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
         val contestOA = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)

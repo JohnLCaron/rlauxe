@@ -29,11 +29,11 @@ class TestAssorterSuperMajority {
 
         val minFraction = contest.info.minFraction!!
         val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction)
-        assertEquals(1.0 / (2 * superAssorter.minFraction), superAssorter.upperBound)
-        println("minFraction = $minFraction upperBound=${superAssorter.upperBound}")
+        assertEquals(1.0 / (2 * superAssorter.minFraction), superAssorter.upperBound())
+        println("minFraction = $minFraction upperBound=${superAssorter.upperBound()}")
 
         assertEquals(0.0, superAssorter.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
-        assertEquals(superAssorter.upperBound, superAssorter.assort(cvr1)) // // bi has a mark for Alice and no one else
+        assertEquals(superAssorter.upperBound(), superAssorter.assort(cvr1)) // // bi has a mark for Alice and no one else
         assertEquals(0.0, superAssorter.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
 
         val votes = mutableMapOf<Int, IntArray>()
@@ -122,7 +122,7 @@ class TestAssorterSuperMajority {
 
     fun testNway(contest: Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
         val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!)
-        assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound)
+        assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound())
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         assertEquals(margin2mean(assort.reportedMargin), assortAvg, doublePrecision)
 

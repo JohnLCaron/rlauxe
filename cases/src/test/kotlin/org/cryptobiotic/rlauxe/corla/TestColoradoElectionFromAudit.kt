@@ -18,18 +18,18 @@ class TestColoradoElectionFromAudit {
     // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)
     // and precinctFile for cvrs
     @Test
-    fun createElectionFromAudit() {
-        val auditDir = "/home/stormy/temp/cases/corla"
+    fun createElectionFromDetailXmlAndPrecincts() {
+        val topDir = "/home/stormy/temp/cases/corla"
         val tabulateFile = "src/test/data/2024audit/tabulate.csv"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        coloradoElectionFromAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile)
+        coloradoElectionFromDetailXmlAndPrecincts(topDir, detailXmlFile, contestRoundFile, precinctFile)
 
         // out of memory sort by sampleNum()
-        sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
-        mergeCards(auditDir, "$auditDir/sortChunks")
+        sortCardsInDirectoryTree(topDir, "$topDir/cards/", "$topDir/sortChunks")
+        mergeCards(topDir, "$topDir/sortChunks")
 
         // other tests depend on this one
         testTreeReader()
@@ -41,10 +41,10 @@ class TestColoradoElectionFromAudit {
     // out of memory sort by sampleNum()
     // @Test
     fun testSortMergeCvrs() {
-        val auditDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/temp/cases/corla"
         // out of memory sort by sampleNum()
-        sortCardsInDirectoryTree(auditDir, "$auditDir/cards/", "$auditDir/sortChunks")
-        mergeCards(auditDir, "$auditDir/sortChunks")
+        sortCardsInDirectoryTree(topDir, "$topDir/cards/", "$topDir/sortChunks")
+        mergeCards(topDir, "$topDir/sortChunks")
     }
 
     // class TreeReaderIterator <T> (
@@ -55,9 +55,9 @@ class TestColoradoElectionFromAudit {
     // @Test
     fun testTreeReader() {
         val stopwatch = Stopwatch()
-        val auditDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/temp/cases/corla"
         val precinctReader = TreeReaderIterator(
-            "$auditDir/cards/",
+            "$topDir/cards/",
             fileFilter = { true },
             reader = { path -> readCardsCsvIterator(path.toString()) }
         )
@@ -70,7 +70,7 @@ class TestColoradoElectionFromAudit {
         println("count = $count took = $stopwatch")
     }
 
-    @Test
+    // @Test
     fun makePrecinctTree() {
         val cvrsDir = "/home/stormy/temp/cases/corla/cards"
         val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }
@@ -91,21 +91,21 @@ class TestColoradoElectionFromAudit {
     fun makeCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
-        val auditDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/temp/cases/corla"
         val precinctReader = TreeReaderIterator(
-            "$auditDir/cards/",
+            "$topDir/cards/",
             fileFilter = { true },
             reader = { path -> readCardsCsvIterator(path.toString()) }
         )
 
-        val tour = TreeReaderTour("$auditDir/cards") { path -> countyPrecincts.add(precinctLine(path)) }
+        val tour = TreeReaderTour("$topDir/cards") { path -> countyPrecincts.add(precinctLine(path)) }
         tour.tourFiles()
 
         val precinctMap = countyPrecincts.associate { it.precinct to it.county }
         val countySamples = countyPrecincts.associate { it.county to mutableMapOf<String, PrecinctSamples>() }
 
         // fake: reading the mvrs instead of the cvrs
-        val publisher = Publisher(auditDir)
+        val publisher = Publisher("$topDir/audit")
         val sampledMvrs = readAuditableCardCsvFile(publisher.sampleMvrsFile(1))
         println("number of samples = ${sampledMvrs.size}")
 

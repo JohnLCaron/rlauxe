@@ -38,7 +38,7 @@ class TestOneAudit {
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
             AuditType.ONEAUDIT, hasStyles=true, nsimEst=10,
-            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.default , simFuzzPct=mvrFuzzPct)
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean , simFuzzPct=mvrFuzzPct)
         )
         val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, 0.01, undervotePercent=.01, phantomPercent = .0)
         println(contestOA)

@@ -133,6 +133,7 @@ fun OneAuditContest.makeTestCvrs(): List<Cvr> {
         if (pool.ncards != poolCvrs.size) {
             poolSim.makeCvrs(pool.id)
         }
+        // TODO why dont these agree?
         //if (pool.ncards != poolCvrs.size)
         //    println("why")
         // require(pool.ncards == poolCvrs.size)
@@ -141,6 +142,38 @@ fun OneAuditContest.makeTestCvrs(): List<Cvr> {
     // require(this.Nc == cvrs.size)
     cvrs.shuffle()
     return cvrs
+}
+
+fun OneAuditContest.makeTestCvrs(sampleLimit: Int): List<Cvr> {
+    if (sampleLimit < 0 || this.Nc <= sampleLimit) return this.makeTestCvrs()
+
+    // otherwise scale everything
+    val scale = sampleLimit / this.Nc.toDouble()
+
+    // add the regular cvrs
+    val cvrs = mutableListOf<Cvr>()
+    cvrs.addAll(makeScaledCvrs(this.makeContest(), scale, null)) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
+
+    // add the pooled cvrs
+    this.pools.values.forEach { pool: BallotPool ->
+        val contestPool = Contest(this.info, pool.votes, Nc = pool.ncards, Np = 0)
+        cvrs.addAll(makeScaledCvrs(contestPool, scale, pool.id))
+    }
+
+    // require(this.Nc == cvrs.size)
+    cvrs.shuffle()
+    return cvrs
+}
+
+fun makeScaledCvrs(org: Contest, scale: Double, poolId: Int?): List<Cvr> {
+    val sNc = roundToInt(scale * org.Nc)
+    val sNp = roundToInt(scale * org.Np)
+    val scaledVotes = org.votes.map { (id, nvotes) -> id to roundToInt(scale * nvotes) }.toMap()
+
+    // add the regular cvrs
+    val contestCvrs = Contest(org.info, scaledVotes, Nc = sNc, Np = sNp)
+    val sim = ContestSimulation(contestCvrs)
+    return sim.makeCvrs(poolId)
 }
 
 // data class BallotPool(

@@ -45,6 +45,7 @@ class PollingAudit(
     override fun mvrManager() = mvrManager
 }
 
+// TODO parallelize over contests
 fun runPollingAudit(
     auditConfig: AuditConfig,
     contests: List<ContestRound>,

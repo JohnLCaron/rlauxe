@@ -29,7 +29,7 @@ class TestComparisonSamplerWithRaire {
         contestUA.makeClcaAssertions()
 
         contestUA.clcaAssertions.forEach { assert ->
-            run(cvrs, contestUA, assert.cassorter as ClcaAssorter)
+            run(cvrs, contestUA, assert.cassorter)
         }
     }
 

@@ -75,7 +75,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
             oaMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,
-            auditor = OneAuditClcaAssertion(),
+            auditor = OneAuditAssertionAuditor(),
         )
     }
 }

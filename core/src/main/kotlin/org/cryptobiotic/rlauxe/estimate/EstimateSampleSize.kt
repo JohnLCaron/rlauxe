@@ -28,7 +28,7 @@ fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
     showTasks: Boolean = false,
-    nthreads: Int = 30,
+    nthreads: Int = 24,
 ): List<RunTestRepeatedResult> {
 
     // create the estimation tasks
@@ -87,7 +87,7 @@ fun makeEstimationTasks(
 ): List<EstimateSampleSizeTask> {
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
-    // TODO generate simulated contest once, and use across all assertions for that contest.
+    // TODO generate simulated contest and cvrs? once, and use across all assertions for that contest.
     contest.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
             var prevSampleSize = 0
@@ -122,7 +122,6 @@ fun makeEstimationTasks(
     return tasks
 }
 
-// TODO how does this differ from ContestAuditTask ?
 // For one contest, for one assertion, a concurrent task
 class EstimateSampleSizeTask(
     val roundIdx: Int,
@@ -198,6 +197,7 @@ fun simulateSampleSizeClcaAssorter(
     if (contest.isIRV())
         println("  contest is IRV ${contest.info.name}")
     // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+
     // TODO TIMING make same contestSim for all the assertions in the contest: takes 20% of time of audit
     val cvrs =  if (contest.isIRV()) {
         SimulateRaireTestData(contest as RaireContest, contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
@@ -257,7 +257,7 @@ fun simulateSampleSizeClcaAssorter(
         )
     }
 
-    // we need a permutation to get uniform distribution of errors, since some simulations puts all the errors at the beginning
+    // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
     sampler.reset()
 
     // run the simulation ntrials (=auditConfig.nsimEst) times
@@ -425,8 +425,9 @@ fun simulateSampleSizeOneAuditAssorter(
     var fuzzPct = 0.0
 
     val cvrs = contestUA.contestOA.makeTestCvrs() // TODO
+    println("simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${cassorter.assorter().desc()} ${cvrs.size} ")
 
-    // TODO is this right, no special processing for the "hasCvr" strata?
+    // the sampler is specific to the assertion
     val sampler = if (oaConfig.simFuzzPct == null) {
         ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyles, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
     } else {
@@ -453,5 +454,6 @@ fun simulateSampleSizeOneAuditAssorter(
         estimatedDistribution = makeDeciles(result.sampleCount),
     )
 
+    println("  finish ${contestUA.id} ${cassorter.assorter().desc()} ${makeDeciles(result.sampleCount)} ")
     return result
 }

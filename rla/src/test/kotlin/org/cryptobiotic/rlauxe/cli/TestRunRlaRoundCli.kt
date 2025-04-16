@@ -5,7 +5,7 @@ import kotlin.test.Test
 // use this to run a round, but not as a test
 class TestRunRlaRoundCli {
 
-    // @Test
+    @Test
     fun testRliRoundCli() {
         val topdir = "/home/stormy/temp/cases/sf2024Poa/audit"
         RunRliRoundCli.main(

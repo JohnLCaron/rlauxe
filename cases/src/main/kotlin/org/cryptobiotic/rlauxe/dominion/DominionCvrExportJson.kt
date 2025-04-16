@@ -139,18 +139,20 @@ fun Session.import(irvContests: Set<Int>): List<Cvr> {
         val votes = mutableMapOf<Int, IntArray>()
         card.Contests.forEach { contest ->
             if (irvContests.contains(contest.Id)) {
-                val contestVoteAndRank = mutableListOf<Pair<Int, Int>>()
+                // dont allow multiple votes for same candidate
+                val contestVoteAndRank = mutableMapOf<Int, Int>() // candId -> rank
                 contest.Marks.forEach { mark ->
-                    contestVoteAndRank.add(Pair(mark.Rank, mark.CandidateId))
+                    contestVoteAndRank[mark.CandidateId] = mark.Rank
                 }
-                val sortedVotes = contestVoteAndRank.sortedBy { it.first }.map { it.second }
-                votes[contest.Id] = sortedVotes.toIntArray()
+                val sortedVotes = contestVoteAndRank.entries.sortedBy { it.value } // sort by rank
+                votes[contest.Id] = sortedVotes.map{ it.key }.toIntArray() // make ranked candidates into intArray
             } else {
-                val contestVotes = mutableListOf<Int>()
+                // dont allow multiple votes for same candidate
+                val candVotes = mutableSetOf<Int>()
                 contest.Marks.forEach { mark ->
-                    contestVotes.add(mark.CandidateId)
+                    candVotes.add(mark.CandidateId)
                 }
-                votes[contest.Id] = contestVotes.toIntArray()
+                votes[contest.Id] = candVotes.toIntArray()
             }
         }
         result.add(Cvr("${this.TabulatorId}-${this.BatchId}-${card.Id}", votes, false))
@@ -167,33 +169,6 @@ fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream,
     val cvrs = dominionCvrs.import(irvIds)
     cvrs.forEach {
         val card = AuditableCard.fromCvrWithZeros(it)
-        outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
-    }
-    return cvrs.size
-}
-
-fun convertCvrExportToCardDebug(inputStream: InputStream, outputStream: OutputStream, contestInfos: List<ContestInfo>): Int {
-    val irvIds = mutableSetOf<Int>()
-    contestInfos.forEach {
-        if (it.choiceFunction == SocialChoiceFunction.IRV) irvIds.add(it.id)
-    }
-    val contestMap = contestInfos.associateBy { it.id }
-
-    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-    val dominionCvrs = if (result is Ok) result.unwrap()
-    else throw RuntimeException("Cannot read DominionCvrJson err = $result")
-
-    val cvrs = dominionCvrs.import(irvIds)
-    cvrs.forEach { cvr ->
-        cvr.votes.forEach { (contestId, votes) ->
-            val contest = contestMap[contestId]!!
-            votes.forEach { cand ->
-                if (!contest.candidateIds.contains(cand)) {
-                    println("why?")
-                }
-            }
-        }
-        val card = AuditableCard.fromCvrWithZeros(cvr)
         outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
     }
     return cvrs.size

@@ -38,7 +38,7 @@ class TestClcaEstimationFailure {
         println("\nrunClcaSimulation")
         workflow.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { assertion ->
-                runClcaSimulation(testCvrs, contestUA, assertion.cassorter as ClcaAssorter)
+                runClcaSimulation(testCvrs, contestUA, assertion.cassorter)
             }
         }
         //println("\nchooseSamples")
@@ -57,7 +57,7 @@ class TestClcaEstimationFailure {
 
         sampler.reset()
 
-        val tracker = PrevSamplesWithRates(cassorter.noerror)
+        val tracker = PrevSamplesWithRates(cassorter.noerror())
         while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
 
         val assorter = cassorter.assorter

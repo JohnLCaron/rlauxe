@@ -181,9 +181,6 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        // temp debug
-        // val (bet, payoff, samples) = betPayoffSamples(contest.Nc, risk=auditConfig.riskLimit, (cassorter as ClcaAssorter).assorterMargin, 0.0)
-
         if (!quiet) println(" (${contest.info.id}) ${contest.info.name} ${cassertion} ${assertionRound.auditResult}")
         return testH0Result
     }

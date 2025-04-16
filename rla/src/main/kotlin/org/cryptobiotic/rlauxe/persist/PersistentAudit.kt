@@ -64,7 +64,7 @@ class PersistentAudit(
         val complete =  when (auditConfig.auditType) {
             AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
             AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditClcaAssertion(quiet))
+            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditAssertionAuditor(quiet))
         }
 
         auditRound.auditWasDone = true

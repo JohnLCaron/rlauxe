@@ -55,6 +55,7 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
+    // assort in [0, .5, 1]
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
@@ -81,8 +82,13 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
 /** See SHANGRLA, section 2.3, p.5. */
 data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterIF {
-    val upperBound = 0.5 / minFraction // 1/2f
+    private val upperBound = 0.5 / minFraction // 1/2f  in (.5, Inf)
 
+    init {
+        require (minFraction > 0.0  && minFraction <= 1.0)
+    }
+
+    // assort in [0, .5, u], u > .5
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
@@ -111,132 +117,4 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
             return SuperMajorityAssorter(contest.info, winner, minFraction, reportedMargin)
         }
     }
-}
-
-////////////////////////////////////////////////////////////////////////////
-
-/** See SHANGRLA Section 3.2 */
-open class ClcaAssorter(
-    val info: ContestInfo,
-    val assorter: AssorterIF,   // A
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
-    val hasStyle: Boolean = true,
-    val check: Boolean = true, // TODO get rid of
-) {
-    val assorterMargin = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
-    val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())  // assort value when there's no error
-    val upperBound = 2.0 * noerror  // maximum assort value
-
-    init {
-        if (avgCvrAssortValue <= 0.5 || (noerror <= 0.5))
-            println("*** ${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
-        if (check) { // suspend checking for some tests that expect to fail
-            require(avgCvrAssortValue > 0.5) { "${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
-            require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
-        }
-    }
-
-    fun id() = info.id
-    fun noerror() = noerror
-    fun upperBound() = upperBound
-    fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
-    fun assorter() = assorter
-    override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$assorterMargin noerror=$noerror upperBound=$upperBound"
-
-    fun calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
-        val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
-            .map { bassort(it.first, it.second) }.average()
-        return mean2margin(mean)
-    }
-
-    // B(bi, ci) = (1-o/u)/(2-v/u), where
-    //                o is the overstatement
-    //                u is the upper bound on the value the assorter assigns to any ballot
-    //                v is the assorter margin
-    open fun bassort(mvr: Cvr, cvr:Cvr): Double {
-        // Let
-        //     Ā(c) ≡ Sum(A(ci))/N be the average CVR assort value
-        //     margin ≡ 2Ā(c) − 1, the _reported assorter margin_, (for 2 candidate plurality, aka the _diluted margin_).
-        //
-        //     ωi ≡ A(ci) − A(bi)   overstatementError
-        //     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
-        //     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
-        //
-        //     B assigns nonnegative numbers to ballots, and the outcome is correct iff Bavg > 1/2
-        //     So, B is an assorter.
-
-        val overstatement = overstatementError(mvr, cvr, this.hasStyle) // ωi
-        val tau = (1.0 - overstatement / this.assorter.upperBound())
-        return tau * noerror
-    }
-
-    //    overstatement error for a CVR compared to the human reading of the ballot.
-    //    the overstatement error ωi for CVR i is at most the value the assorter assigned to CVR i.
-    //
-    //     ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ upper              ≡   overstatement error (SHANGRLA eq 2, p 9)
-    //      bi is the manual voting record (MVR) for the ith ballot
-    //      ci is the cast-vote record for the ith ballot
-    //      A() is the assorter function
-    //
-    //        Phantom CVRs and MVRs are treated specially:
-    //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
-    //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
-    fun overstatementError(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
-
-
-        //        # sanity check
-        //        if use_style and not cvr.has_contest(self.contest.id):
-        //            raise ValueError(
-        //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
-        //            )
-        if (hasStyle and !cvr.hasContest(info.id)) {
-            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
-        }
-
-        //        If use_style, then if the CVR contains the contest but the MVR does
-        //        not, treat the MVR as having a vote for the loser (assort()=0)
-        //
-        //        mvr_assort = (
-        //            0
-        //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
-        //            else self.assort(mvr)
-        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
-                         else this.assorter.assort(mvr, usePhantoms = false)
-
-        //        If not use_style, then if the CVR contains the contest but the MVR does not,
-        //        the MVR is considered to be a non-vote in the contest (assort()=1/2).
-        //
-        //        # assort the CVR
-        //        cvr_assort = (
-        //            self.tally_pool_means[cvr.tally_pool]
-        //            if cvr.pool and self.tally_pool_means is not None
-        //            else int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
-        //        )
-
-        val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
-        return cvr_assort - mvr_assort
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ClcaAssorter
-
-        if (avgCvrAssortValue != other.avgCvrAssortValue) return false
-        if (hasStyle != other.hasStyle) return false
-        if (info != other.info) return false
-        if (assorter != other.assorter) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = avgCvrAssortValue.hashCode()
-        result = 31 * result + hasStyle.hashCode()
-        result = 31 * result + info.hashCode()
-        result = 31 * result + assorter.hashCode()
-        return result
-    }
-
 }

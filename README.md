@@ -181,8 +181,9 @@ Also known as Ranked Choice Voting, this allows voters to rank their choices by 
 In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated. 
 This continues until only one candidate is left.
 
-Currently we only support IRV with CLCA audits. In principle one could use polling audits for IRV, but the information
+In principle one could use polling audits for IRV, but the information
 needed to create the RaireAssertions all but necessitates CVRs.
+So currently we only support IRV with CLCA audits.
 
 We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions 
 that fit into the SHANGRLA framewok, and makes IRV contests amenable to risk limiting auditing, just like plurality contests.

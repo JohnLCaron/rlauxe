@@ -5,7 +5,7 @@ import kotlin.test.Test
 class TestIrvCount {
 
     // Need a lot of tries to be sure to get some double ties
-    // @Test
+    @Test
     fun testRepeat() {
         var idx = 0
         repeat(1111) {

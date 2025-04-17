@@ -27,8 +27,8 @@ class TestDominionCvrExportJson {
         val irvIds = readContestManifestForIRV("src/test/data/SF2024/ContestManifest.json")
 
         val cvrs = dominionCvrs.import(irvIds)
-        println("ncvrs = ${cvrs.size}")
-        cvrs.forEach { println(it) }
+        // println("ncvrs = ${cvrs.size}")
+        // cvrs.forEach { println(it) }
 
         println("==================================================")
         print(AuditableCardHeader)

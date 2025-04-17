@@ -222,7 +222,7 @@ fun createSfElectionFromCardsOA(
     // No IRV contests are allowed
 
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
+        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
     )
 
     // read in ballotPools

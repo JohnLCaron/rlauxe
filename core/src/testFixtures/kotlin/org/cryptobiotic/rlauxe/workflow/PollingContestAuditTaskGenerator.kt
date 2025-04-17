@@ -17,6 +17,7 @@ class PollingContestAuditTaskGenerator(
     val Nb: Int = Nc,
     val nsimEst: Int = 100,
     ) : ContestAuditTaskGenerator {
+
     override fun name() = "PollingWorkflowTaskGenerator"
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {

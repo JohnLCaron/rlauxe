@@ -1,14 +1,11 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.estimate.makeCvr
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class TestRaireContest {
 
@@ -41,41 +38,28 @@ class TestRaireContest {
     }
 
     @Test
-    fun testContestUnderAudit() {
-        val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+    fun testRaireContestUnderAudit() {
+        val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=111, ncands=3, minMargin=.04, quiet = true)
+        rcontestUA.makeClcaAssertions()
 
-        val contestUAp = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
-        val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+        assertEquals(rcontestUA, rcontestUA)
+        assertEquals(rcontestUA.hashCode(), rcontestUA.hashCode())
 
-        assertNotEquals(contestUAp, contestUAc)
-        assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
+        val (rcontestUA2: RaireContestUnderAudit, _) = simulateRaireTestContest(5000, contestId=111, ncands=3, minMargin=.04, quiet = true)
+        assertNotEquals(rcontestUA, rcontestUA2)
+        assertNotEquals(rcontestUA.hashCode(), rcontestUA2.hashCode())
 
-        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
-        assertEquals(contestUAc2, contestUAc)
-        assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
-        assertEquals(contestUAc2.toString(), contestUAc.toString())
-        assertEquals(contestUAc2.showShort(), contestUAc.showShort())
-
-        val expectedShowCandidates = """
-               0 'cand0': votes=100
-               1 'cand1': votes=108
-               2 'cand2': votes=0
-                Total=208
-        """.replaceIndent("   ")
-        assertEquals(expectedShowCandidates, contestUAc.showCandidates())
-
-        val expectedShow = """'testContestInfo' (0) votes={1=108, 0=100, 2=0}
- margin=0.0379 recount=0.0741 Nc=211 Np=0 Nu=3
- choiceFunction=PLURALITY nwinners=1, winners=[1]
+       /* val expectedShowCandidates = """
    0 'cand0': votes=100
    1 'cand1': votes=108
    2 'cand2': votes=0
-    Total=208"""
-        assertEquals(expectedShow, contestUAc.show())
+    Total=208
+        """.replaceIndent("   ")
+        assertEquals(expectedShowCandidates, rcontestUA.showCandidates()) */
 
-        assertEquals(0.07407407407407407, contestUAc.recountMargin(), doublePrecision)
+        assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner0 losers [1, 2] minMargin="))
+        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25 Nu=-1\n choiceFunction=IRV nwinners=1, winners=[0]"))
+        assertEquals(-1.0, rcontestUA.recountMargin(), doublePrecision)
     }
 
 

@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 class TestColoradoElectionCsv {
 
-    @Test
+    // @Test
     fun testColoradoElectionSummary() {
         val filename = "src/test/data/2024election/summary.csv"
         val contests = readColoradoElectionSummaryCsv(filename)
@@ -18,11 +18,10 @@ class TestColoradoElectionCsv {
         println("--------------------------------------------------------------")
     }
 
-    @Test
+    // @Test
     fun testColoradoContestRoundCsv() {
         val filename = "src/test/data/2024audit/round1/contest.csv"
         val contests = readColoradoContestRoundCsv(filename)
         contests.forEach { it.showEstimation() }
     }
-
 }

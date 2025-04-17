@@ -14,7 +14,7 @@ class TestReadSfJson {
         val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(filename)
         val contestManifest = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from ${filename} err = $result")
-        println(contestManifest)
+        // println(contestManifest)
     }
 
     @Test
@@ -23,7 +23,7 @@ class TestReadSfJson {
         val result: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(filename)
         val candidateManifest = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read CandidateManifestJson from ${filename} err = $result")
-        println(candidateManifest)
+        // println(candidateManifest)
     }
 
 }

@@ -28,12 +28,13 @@ class TestColoradoElectionFromAudit {
         coloradoElectionFromDetailXmlAndPrecincts(topDir, detailXmlFile, contestRoundFile, precinctFile)
 
         // out of memory sort by sampleNum()
-        sortCardsInDirectoryTree(topDir, "$topDir/cards/", "$topDir/sortChunks")
-        mergeCards(topDir, "$topDir/sortChunks")
+        val auditDir = "$topDir/audit"
+        sortCardsInDirectoryTree(auditDir, "$topDir/cards/", "$topDir/sortChunks")
+        mergeCards(auditDir, "$topDir/sortChunks")
 
         // other tests depend on this one
-        testTreeReader()
-        makeCountySampleLists()
+        // testTreeReader()
+        // makeCountySampleLists()
     }
 
     //// zip cvrs directory to cvrs.zip

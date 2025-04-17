@@ -21,14 +21,12 @@ class ClcaSimulation(
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
     val Nc = contest.Nc
-    val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
+    // val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()
 
     val permutedIndex = MutableList(Ncvrs) { it }
-    val sampleMean: Double
-    val sampleCount: Double
     val flippedVotesP1o: Int
     val flippedVotesP2o: Int
     val flippedVotesP1u: Int
@@ -39,7 +37,7 @@ class ClcaSimulation(
 
     init {
         // reset() we use the original order unless reset() is called, then we use a permutation
-
+        require(contest.choiceFunction != SocialChoiceFunction.IRV)
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
         val mmvrs = mutableListOf<Cvr>()
@@ -50,17 +48,13 @@ class ClcaSimulation(
         flippedVotesP1o = flipP1o(mmvrs, needToChange = (Nc * errorRates.p1o).toInt())
         flippedVotesP2o = flipP2o(mmvrs, needToChange = (Nc * errorRates.p2o).toInt())
         flippedVotesP2u = flipP2u(mmvrs, needToChange = (Nc * errorRates.p2u).toInt())
-        flippedVotesP1u = if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt())
-                          else flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
+        flippedVotesP1u = // if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt()) else
+                          flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
-
-        sampleCount = rcvrs.filter { it.hasContest(contest.id) }.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it) }.sum()
-        sampleMean = sampleCount / Nc
     }
 
-    fun sampleCount() = sampleCount
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
     override fun nmvrs() = idx // TODO
@@ -88,12 +82,14 @@ class ClcaSimulation(
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
 
+    /*
     fun showFlips() = buildString {
         appendLine(" flippedVotesP1o = $flippedVotesP1o = ${df(1.0*flippedVotesP1o/Nc)}")
         appendLine(" flippedVotesP2o = $flippedVotesP2o = ${df(1.0*flippedVotesP2o/Nc)}")
         appendLine(" flippedVotesP1u = $flippedVotesP1u = ${df(1.0*flippedVotesP1u/Nc)}")
         appendLine(" flippedVotesP2u = $flippedVotesP2u = ${df(1.0*flippedVotesP2u/Nc)}")
     }
+     */
 
     //  plurality:  two vote overstatement: cvr has winner (1), mvr has loser (0)
     //  NEB two vote overstatement: cvr has winner as first pref (1), mvr has loser preceeding winner (0)
@@ -108,21 +104,21 @@ class ClcaSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx] // this is the cvr
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 1.0) {
-                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().loser())
-                            else mapOf(contest.id to intArrayOf(cassorter.assorter().loser()))
+                val votes = // if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().loser()) else
+                            mapOf(contest.id to intArrayOf(cassorter.assorter().loser()))
 
                 val alteredMvr = makeNewCvr(cvr, votes) // this is the altered mvr
                 mcvrs[cardIdx] = alteredMvr
-                if (show && cassorter.assorter().assort(alteredMvr) != 0.0) {
+                /* if (show && cassorter.assorter().assort(alteredMvr) != 0.0) {
                     println("  flipP2o ${cassorter.assorter().assort(alteredMvr)} != 0.0")
                     println("    cvr=${cvr}")
                     println("    alteredMvr=${alteredMvr}")
-                }
+                } */
                 require(cassorter.assorter().assort(alteredMvr) == 0.0)
-                val bassort = cassorter.bassort(alteredMvr, cvr) // mvr, cvr
+                /* val bassort = cassorter.bassort(alteredMvr, cvr) // mvr, cvr
                 if (bassort != 0.0 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr)
-                }
+                } */
                 require(cassorter.bassort(alteredMvr, cvr) == 0.0 * cassorter.noerror())
                 changed++
             }
@@ -148,8 +144,8 @@ class ClcaSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 0.0) {
-                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().winner())
-                            else mapOf(contest.id to intArrayOf(cassorter.assorter().winner()))
+                val votes = // if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().winner()) else
+                            mapOf(contest.id to intArrayOf(cassorter.assorter().winner()))
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter().assort(alteredMvr) != 1.0) {
@@ -158,10 +154,10 @@ class ClcaSimulation(
                     println("    alteredMvr=${alteredMvr}")
                 }
                 require(cassorter.assorter().assort(alteredMvr) == 1.0)
-                val bassort = cassorter.bassort(alteredMvr, cvr)
+                /* val bassort = cassorter.bassort(alteredMvr, cvr)
                 if (bassort != 2.0 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr) // mvr, cvr
-                }
+                } */
                 require(cassorter.bassort(alteredMvr, cvr) == 2.0 * cassorter.noerror())
                 changed++
             }
@@ -198,10 +194,10 @@ class ClcaSimulation(
                     println("    alteredMvr=${alteredMvr}")
                 }
                 require(cassorter.assorter().assort(alteredMvr) == 0.5)
-                val bassort = cassorter.bassort(alteredMvr, cvr)
+                /* val bassort = cassorter.bassort(alteredMvr, cvr)
                 if (bassort != 0.5 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr)
-                }
+                } */
                 require(cassorter.bassort(alteredMvr, cvr) == 0.5 * cassorter.noerror())
                 changed++
             }
@@ -218,7 +214,7 @@ class ClcaSimulation(
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1)
     //  NEB one vote understatement: cvr has winner preceding loser (1/2), but not first, mvr has winner as first pref (1)
     //  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining (1)
-    fun flipP1uIRV(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    /* fun flipP1uIRV(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -247,7 +243,7 @@ class ClcaSimulation(
         // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
-    }
+    } */
 
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1). have to change cvr to other
     fun flipP1uP(mcvrs: MutableList<Cvr>, cvrs: MutableList<Cvr>, needToChange: Int): Int {
@@ -283,6 +279,7 @@ class ClcaSimulation(
         return changed
     }
 
+    /*
     fun moveToFront(votes: Map<Int, IntArray>, contestId: Int, toFront: Int) : Map<Int, IntArray> {
         // all we have to do is put a candidate that is not the winner or the loser, aka other
         val result = votes.toMutableMap()
@@ -290,7 +287,7 @@ class ClcaSimulation(
         val removed = c.filterNot{ it == toFront }
         result[contestId] = (listOf(toFront) + removed).toIntArray()
         return result
-    }
+    } */
 
     fun emptyList(votes: Map<Int, IntArray>, contestId: Int) : Map<Int, IntArray> {
         val result = votes.toMutableMap()

@@ -84,7 +84,6 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             riskLimit = auditConfig.riskLimit,
             upperBound = cassorter.upperBound(),
         )
-        val seq: DebuggingSequences = testFn.setDebuggingSequences()
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
 

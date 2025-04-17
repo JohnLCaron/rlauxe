@@ -45,7 +45,7 @@ data class ContestRoundCsv(
             val est = optimistic(riskLimit, dilutedMargin, gamma)
             val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
 
-            println("dilutedMargin = $dilutedMargin estSamples = ${est.toInt()} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
+            // println("dilutedMargin = $dilutedMargin estSamples = ${est.toInt()} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
             require(optimisticSamplesToAudit == est.toInt())
             // println("   rauxe bet = $bet payoff = $payoff rauxeEst=$samples")
         }

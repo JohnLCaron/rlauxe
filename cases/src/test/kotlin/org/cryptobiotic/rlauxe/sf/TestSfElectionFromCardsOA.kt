@@ -244,6 +244,8 @@ class TestSfElectionFromCards {
         }
     }
 
+    private val show = false
+
     @Test
     fun auditSf2024Poa() {
         val auditDir = "/home/stormy/temp/cases/sf2024Poa/audit"
@@ -264,11 +266,11 @@ class TestSfElectionFromCards {
         val runner = OneAuditAssertionAuditor()
 
         contestRounds.forEach { contestRound ->
-            println("run contest ${contestRound.contestUA.contest}")
+            if (show) println("run contest ${contestRound.contestUA.contest}")
             contestRound.assertionRounds.forEach { assertionRound ->
                 val cassorter = (assertionRound.assertion as ClcaAssertion).cassorter
                 val sampler = ClcaWithoutReplacement(contestRound.contestUA.id, true, cvrPairs, cassorter, allowReset = false)
-                println("  run assertion ${assertionRound.assertion} cvrMargin= ${mean2margin(cassorter.meanAssort())}")
+                if (show) println("  run assertion ${assertionRound.assertion} cvrMargin= ${mean2margin(cassorter.meanAssort())}")
 
                 val result: TestH0Result = runner.run(
                     workflow.auditConfig(),
@@ -278,7 +280,7 @@ class TestSfElectionFromCards {
                     1,
                 )
                 // assertEquals(TestH0Status.StatRejectNull, result.status)
-                println("    sampleCount = ${result.sampleCount} poolCount = ${sampler.poolCount()} maxIdx=${sampler.maxSampleIndexUsed()} status = ${result.status}\n")
+                if (show) println("    sampleCount = ${result.sampleCount} poolCount = ${sampler.poolCount()} maxIdx=${sampler.maxSampleIndexUsed()} status = ${result.status}\n")
             }
         }
     }

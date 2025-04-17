@@ -28,7 +28,7 @@ fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
     showTasks: Boolean = false,
-    nthreads: Int = 24,
+    nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
 
     // create the estimation tasks
@@ -421,6 +421,7 @@ fun simulateSampleSizeAlphaMart(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //// OneAudit
 
+// TODO why so slow ??
 fun simulateSampleSizeOneAuditAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,

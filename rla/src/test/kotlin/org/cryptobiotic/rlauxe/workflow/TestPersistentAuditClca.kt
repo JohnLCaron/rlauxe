@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.TreeReaderIterator
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
@@ -25,7 +24,7 @@ class TestPersistentWorkflowClca {
 
         val fuzzMvrPct = .01
         val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10, sampleLimit = 1000)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000

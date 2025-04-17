@@ -98,7 +98,9 @@ class Contest(
     init {
         // construct votes, adding 0 votes if needed
         voteInput.forEach {
-            require(info.candidateIds.contains(it.key)) { "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"}
+            require(info.candidateIds.contains(it.key)) {
+                "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
+            }
         }
         val voteBuilder = mutableMapOf<Int, Int>()
         voteBuilder.putAll(voteInput)

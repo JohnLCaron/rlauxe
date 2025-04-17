@@ -59,8 +59,8 @@ class TestFuzzedWithRaire {
         require(testCvrs.size == testMvrs.size)
         val cvrPairs: List<Pair<Cvr, Cvr>> = testMvrs.zip(testCvrs)
         cvrPairs.forEach { (mvr, cvr) ->
-            assertEquals(mvr.id, cvr.id)
             if (show) println(" mvr='$mvr' cvr='$cvr' ")
+            assertEquals(mvr.id, cvr.id)
         }
 
         val count1 = cvrPairs.count {

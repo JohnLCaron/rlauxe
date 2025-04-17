@@ -34,7 +34,6 @@ class OneAuditContestAuditTaskGenerator(
         return ContestAuditTask(
             name(),
             oneaudit,
-            // oaMvrs,
             parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to mvrsFuzzPct, "auditType" to 1.0)
         )
     }
@@ -52,8 +51,6 @@ class OneAuditSingleRoundAuditTaskGenerator(
     val auditConfigIn: AuditConfig? = null,
     val nsimEst: Int = 100,
     val quiet: Boolean = true,
-    val p2flips: Double? = null,
-    val p1flips: Double? = null,
 ): ContestAuditTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"

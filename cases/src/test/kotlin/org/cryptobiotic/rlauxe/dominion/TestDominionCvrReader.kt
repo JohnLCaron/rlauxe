@@ -164,7 +164,7 @@ class TestDominionCvrReader {
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
         assertEquals(8, export.redacted.size)
-        export.redacted.forEach { println(it.contestVotes.toString()) }
+        // export.redacted.forEach { println(it.contestVotes.toString()) }
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
         val cvr0 = export.redacted[0]
@@ -224,6 +224,7 @@ class TestDominionCvrReader {
             assertNull(cvr0.contestVotes[i])
         }
 
+        /*
         export.redacted.forEach { redactedVotes ->
             println("ballotType=${redactedVotes.ballotType}")
             redactedVotes.contestVotes.forEach { (key, votes) ->
@@ -231,6 +232,8 @@ class TestDominionCvrReader {
             }
             println()
         }
+
+         */
     }
 
 
@@ -400,32 +403,31 @@ class TestDominionCvrReader {
         val countVotes = maker.countVotes()
         val contests = countVotes.map { contestCount ->
             val info = infos.find { it.id == contestCount.contestId }!!
-            // class Contest(
-            //        override val info: ContestInfo,
-            //        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-            //        override val Nc: Int,         // where do we get this?
-            //        override val Np: Int,       // TODO may not know this value, if !hasStyles
-            //
-            Contest(info, contestCount.candidateCounts, contestCount.Nc, 0)
+            contestCount.candidateCounts.forEach {
+                if (!info.candidateIds.contains(it.key)) {
+                    "contestCount ${contestCount.contestId } has candidate '${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
+                }
+            }
+            val inputVotes = contestCount.candidateCounts.filter{ info.candidateIds.contains(it.key) }
+            Contest(info, inputVotes, contestCount.Nc, 0)
         }
-        println("ncontests with votes = ${contests.size}")
+        /* println("ncontests with votes = ${contests.size}")
         contests.forEach { contest ->
             println(contest.show2())
-        }
+        } */
 
         // from https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
         val expected = mapOf(
-            "Kamala D. Harris / Tim Walz (DEM)" to 150149,
-            "Donald J. Trump / JD Vance (REP)" to 40758,
-            "Blake Huber / Andrea Denault (APV)" to 123,
-            "Chase Russell Oliver / Mike ter Maat (LBR)" to 1263,
-            "Jill Stein / Rudolph Ware (GRN)" to 1499,
-            "Randall Terry / Stephen E Broden (ACN)" to 147,
-            "Cornel West / Melina Abdullah (UNI)" to 457,
-            "Robert F. Kennedy Jr. / Nicole Shanahan (UNA)" to 1754,
-            "Write-in" to 2,
+            "Kamala D. Harris / Tim Walz" to 150149,
+            "Donald J. Trump / JD Vance" to 40758,
+            "Blake Huber / Andrea Denault" to 123,
+            "Chase Russell Oliver / Mike ter Maat" to 1263,
+            "Jill Stein / Rudolph Ware" to 1499,
+            "Randall Terry / Stephen E Broden" to 147,
+            "Cornel West / Melina Abdullah" to 457,
+            "Robert F. Kennedy Jr. / Nicole Shanahan" to 1754,
             "Chris Garrity / Cody Ballard" to 4,
-            "Claudia De la Cruz / Karina GarcÃ­a" to 82,
+            "Claudia De la Cruz / Karina García" to 82,
             "Shiva Ayyadurai / Crystal Ellis" to 2,
             "Peter Sonski / Lauren Onak" to 65,
             "Bill Frankel / Steve Jenkins" to 1,
@@ -437,10 +439,11 @@ class TestDominionCvrReader {
         val votesByCandidateName = contestPrez.votes.toSortedMap().map { (id, nvotes) ->
             Pair(candidatesById[id]!!, nvotes)
         }.toMap()
+        /*
         votesByCandidateName.forEach { (name, nvotes) ->
             println("  \"$name\" to $nvotes,")
         }
-
+*/
         assertEquals(expected, votesByCandidateName)
     }
 
@@ -478,7 +481,7 @@ class TestDominionCvrReader {
                 }
             }
         }
-        println(compareRedactions(redactedCvrVotes, redactedDirect))
+        // println(compareRedactions(redactedCvrVotes, redactedDirect))
         assertEquals(redactedCvrVotes, redactedDirect)
         println("redactedCvrVotes agrees with redactedDirect")
     }
@@ -498,7 +501,7 @@ class TestDominionCvrReader {
             "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
         // println("sovoRcv = ${sovoRcv.show()}")
         val irvContest: BoulderContestVotes = sovoRcv.contests.first()
-        println("irvContest = ${irvContest}")
+        // println("irvContest = ${irvContest}")
 
         val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
 

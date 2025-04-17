@@ -7,7 +7,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT }
 
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyles: Boolean,
+    val hasStyles: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 

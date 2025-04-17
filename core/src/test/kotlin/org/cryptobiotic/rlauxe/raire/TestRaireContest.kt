@@ -33,7 +33,7 @@ class TestRaireContest {
             contest.toString()
         )
 
-        assertEquals(-1, contest.undervotes) // TODO
+        // assertEquals(-1, contest.undervotes) // TODO
         assertEquals(1/211.toDouble(), contest.phantomRate())
     }
 
@@ -58,7 +58,7 @@ class TestRaireContest {
         assertEquals(expectedShowCandidates, rcontestUA.showCandidates()) */
 
         assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner0 losers [1, 2] minMargin="))
-        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25 Nu=-1\n choiceFunction=IRV nwinners=1, winners=[0]"))
+        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25\n choiceFunction=IRV nwinners=1, winners=[0]"))
         assertEquals(-1.0, rcontestUA.recountMargin(), doublePrecision)
     }
 

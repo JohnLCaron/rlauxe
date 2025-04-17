@@ -2,32 +2,9 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.*
 
-// called from cases module; TODO add unit tests.
-data class IrvContestVotes(val irvContestInfo: ContestInfo) {
-    // The candidate Ids must from 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
-    val candidateIdMap = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()
-    val vc = VoteConsolidator()
-    var countBallots = 0
-    val notfound = mutableMapOf<Int, Int>()
-
-    init {
-        require(irvContestInfo.choiceFunction == SocialChoiceFunction.IRV)
-    }
-
-    fun addVote(votes: IntArray) {
-        votes.forEach {
-            if (candidateIdMap[it] == null) {
-                // println("*** Cant find candidate '${it}' in irvContestVotes ${irvContestInfo}") // TODO why ?
-                notfound[it] = notfound.getOrDefault(it, 0) + 1
-            }
-        }
-        val mappedVotes = votes.map { candidateIdMap[it] }
-        vc.addVote(mappedVotes.filterNotNull().toIntArray())
-    }
-}
-
+// called from cases module to extract vote info from Cvrs
 fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cvr>): Map<Int, IrvContestVotes> {
-    val irvVotes = mutableMapOf<Int, IrvContestVotes>()
+    val irvVotes = mutableMapOf<Int, IrvContestVotes>() // contestId -> contestVotes
 
     println("makeIrvContestVotes")
     var count = 0
@@ -51,6 +28,7 @@ fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cv
     return irvVotes
 }
 
+// called from cases module to create RaireContestUnderAudit from ContestInfo and IrvContestVotes
 fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvContestVotes>): List<RaireContestUnderAudit> {
     val contests = mutableListOf<RaireContestUnderAudit>()
     contestInfos.forEach { info: ContestInfo ->
@@ -58,7 +36,6 @@ fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvC
         if (irvContestVotes == null) {
             println("*** Cant find contest '${info.id}' in irvContestVotes")
         } else {
-            // TODO undervotes
             val rcontestUA = makeRaireContestUA(
                 info,
                 irvContestVotes.vc,
@@ -86,4 +63,26 @@ fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvC
         }
     }
     return contests
+}
+
+data class IrvContestVotes(val irvContestInfo: ContestInfo) {
+    // TODO The candidate Ids must fgo rom 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
+    val candidateIdMap = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()
+    val vc = VoteConsolidator()
+    var countBallots = 0
+    val notfound = mutableMapOf<Int, Int>()
+
+    init {
+        require(irvContestInfo.choiceFunction == SocialChoiceFunction.IRV)
+    }
+
+    fun addVote(votes: IntArray) {
+        votes.forEach {
+            if (candidateIdMap[it] == null) {
+                notfound[it] = notfound.getOrDefault(it, 0) + 1
+            }
+        }
+        val mappedVotes = votes.map { candidateIdMap[it] }
+        vc.addVote(mappedVotes.filterNotNull().toIntArray())
+    }
 }

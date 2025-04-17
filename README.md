@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 04/07/2026_
+_last changed: 04/17/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -13,6 +13,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
 **Table of Contents**
 <!-- TOC -->
 * [Audit Workflow](#audit-workflow)
+  * [Estimation](#estimation)
 * [SHANGRLA framework](#shangrla-framework)
   * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
     * [Plurality](#plurality)
@@ -29,7 +30,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
-  * [Estimation](#estimation)
+  * [Estimation](#estimation-1)
   * [Card Style Data](#card-style-data)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
@@ -179,6 +180,9 @@ Notes
 Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
 In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated. 
 This continues until only one candidate is left.
+
+Currently we only support IRV with CLCA audits. In principle one could use polling audits for IRV, but the information
+needed to create the RaireAssertions all but necessitates CVRs.
 
 We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions 
 that fit into the SHANGRLA framewok, and makes IRV contests amenable to risk limiting auditing, just like plurality contests.

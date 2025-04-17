@@ -5,20 +5,20 @@ import org.cryptobiotic.rlauxe.core.*
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
     contestsUA.forEach { contestUA ->
-        if (contestUA.status == TestH0Status.InProgress && contestUA.choiceFunction != SocialChoiceFunction.IRV) {
+        if (contestUA.preAuditStatus == TestH0Status.InProgress && contestUA.choiceFunction != SocialChoiceFunction.IRV) {
             checkWinners(contestUA)
 
             // see if margin is too small
             if (contestUA.recountMargin() <= auditConfig.minRecountMargin) {
                 println("*** MinMargin contest ${contestUA} recountMargin ${contestUA.recountMargin()} <= ${auditConfig.minRecountMargin}")
-                contestUA.status = TestH0Status.MinMargin
+                contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms
                 val minMargin = contestUA.minMargin()
                 val adjustedMargin = minMargin - contestUA.contest.phantomRate()
                 if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
                     println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
-                    contestUA.status = TestH0Status.TooManyPhantoms
+                    contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
                 }
             }
         }
@@ -37,7 +37,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     winnerSet.addAll(contest.winners)
     if (winnerSet.size != contest.winners.size) {
         println("*** winners in contest ${contest} have duplicates")
-        contestUA.status = TestH0Status.ContestMisformed
+        contestUA.preAuditStatus = TestH0Status.ContestMisformed
         return
     }
 
@@ -47,7 +47,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
         val firstLoser = sortedVotes[nwinners]
         if (firstLoser.value == winnerMin ) {
             println("*** tie in contest ${contest}")
-            contestUA.status = TestH0Status.MinMargin
+            contestUA.preAuditStatus = TestH0Status.MinMargin
             return
         }
     }
@@ -56,7 +56,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     sortedVotes.take(nwinners).forEach { (candId, vote) ->
         if (!contest.winners.contains(candId)) {
             println("*** winners ${contest.winners} does not contain candidateId $candId")
-            contestUA.status = TestH0Status.ContestMisformed
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
             return
         }
     }
@@ -64,16 +64,16 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 
 fun checkContestsWithCards(contestsUA: List<ContestUnderAudit>, cards: Iterator<AuditableCard>) {
     val votes = tabulateVotesFromCards(cards)
-    contestsUA.filter { it.status == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
+    contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
         val contestVotes = (contestUA.contest as Contest).votes
         val cvrVotes = votes[contestUA.id]
         if (cvrVotes == null) {
             println("*** contest ${contestUA.contest} not found in tabulatedVotesFromCvrsUA")
-            contestUA.status = TestH0Status.ContestMisformed
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
         } else {
             if (!checkEquivilentVotes(contestVotes, cvrVotes)) {
                 println("*** contest ${contestUA.contest} votes ${contestVotes} cvrVotes = $cvrVotes")
-                contestUA.status = TestH0Status.ContestMisformed
+                contestUA.preAuditStatus = TestH0Status.ContestMisformed
             }
             require(checkEquivilentVotes((contestUA.contest as Contest).votes, contestVotes))
         }

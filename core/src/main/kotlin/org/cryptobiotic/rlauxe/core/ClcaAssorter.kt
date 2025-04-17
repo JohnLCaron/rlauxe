@@ -159,12 +159,4 @@ open class ClcaAssorter(
         result = 31 * result + assorter.hashCode()
         return result
     }
-
 }
-
-// ONEAUDIT p 9
-// This algorithm be made more efficient statistically and logistically in a variety
-//of ways, for instance, by making an affine translation of the data so that the
-//minimum possible value is 0 (by subtracting the minimum of the possible over-
-//statement assorters across batches and re-scaling so that the null mean is still
-//1/2)

@@ -83,7 +83,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         val votes = if (aand.assertion is NotEliminatedNext) {
             val nen = (aand.assertion as NotEliminatedNext)
             val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
-            val nenChoices = voteSeq.nenChoices(nen.winner, nen.loser)
+            val nenChoices = voteSeq.nenFirstChoices(nen.winner, nen.loser)
             val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
             // println("    nenChoices = $nenChoices margin=$margin\n")
             require(aand.margin == margin)
@@ -92,7 +92,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         } else {
             val neb = (aand.assertion as NotEliminatedBefore)
             val voteSeq = VoteSequences(startingVotes)
-            val nebChoices = voteSeq.nebChoices(neb.winner, neb.loser)
+            val nebChoices = voteSeq.nebFirstChoices(neb.winner, neb.loser)
             val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
             // println("    nebChoices = $nebChoices margin=$margin\n")
             require(aand.margin == margin)

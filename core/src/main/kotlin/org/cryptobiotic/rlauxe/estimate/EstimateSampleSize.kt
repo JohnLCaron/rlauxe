@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.SimulateRaireTestData
+import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -94,7 +94,7 @@ fun makeEstimationTasks(
         AuditType.CLCA -> {
             // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             if (contest.isIRV()) {
-                SimulateRaireTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
+                SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
             } else {
                 ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
             }
@@ -255,12 +255,11 @@ fun simulateSampleSizeClcaAssorter(
     }
 
     // optional fuzzing of the cvrs
-    // TODO without Optimal strategy, the bettingFn is the same
+    val isIrvFzz = (contest.isIRV() && clcaConfig.simFuzzPct != null)
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
-        val irvFuzz = (contest.isIRV() && clcaConfig.simFuzzPct != null)
-        if (irvFuzz) fuzzPct = clcaConfig.simFuzzPct!! // TODO
+        if (isIrvFzz) fuzzPct = clcaConfig.simFuzzPct!!
         Pair(
-            if (irvFuzz) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter)
+            if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter)
             else ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
             AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )

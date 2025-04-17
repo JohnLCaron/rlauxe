@@ -129,11 +129,11 @@ class TestContest {
         assertEquals(contest.hashCode(), contest2.hashCode())
 
         assertEquals("testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0}", contest.toString())
-        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2}, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votes={1=108, 0=100, 2=0}, winnerNames=[cand1], winners=[1], losers=[0, 2], undervotes=2)",
+        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2}, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votes={1=108, 0=100, 2=0}, winnerNames=[cand1], winners=[1], losers=[0, 2])",
             contest.show())
 
 
-        assertEquals((211-208-1)/211.toDouble(), contest.undervoteRate())
+        // assertEquals((211-208-1)/211.toDouble(), contest.undervoteRate())
         assertEquals(1/211.toDouble(), contest.phantomRate())
     }
 
@@ -164,7 +164,7 @@ class TestContest {
         assertEquals(expectedShowCandidates, contestUAc.showCandidates())
 
         val expectedShow = """'testContestInfo' (0) votes={1=108, 0=100, 2=0}
- margin=0.0379 recount=0.0741 Nc=211 Np=0 Nu=3
+ margin=0.0379 recount=0.0741 Nc=211 Np=0
  choiceFunction=PLURALITY nwinners=1, winners=[1]
    0 'cand0': votes=100
    1 'cand1': votes=108

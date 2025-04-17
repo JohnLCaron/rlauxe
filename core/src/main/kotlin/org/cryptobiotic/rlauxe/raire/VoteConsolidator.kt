@@ -4,6 +4,7 @@ import au.org.democracydevelopers.raire.irv.Vote
 import kotlin.collections.getOrPut
 
 /**
+ * Adapted from au.org.democracydevelopers.raire.util.VoteConsolidator
  * For a single Contest.
  *
  * A utility class for building an array of Vote[] structures
@@ -33,12 +34,12 @@ class VoteConsolidator {
     }
 }
 
-// Used to calculate the margin and assertion-specific votes
+// Added here because I want to show the runoff stages, embodied in nenFirstChoices() and nebFirstChoices()
 // TODO the candidate Ids go from 0 ... ncandidates-1
 data class VoteList(val n: Int, val candRanks: List<Int>)
 data class VoteSequences(val votes: List<VoteList>) {
 
-    fun nenChoices(winner: Int, loser: Int): Map<Int, Int> {
+    fun nenFirstChoices(winner: Int, loser: Int): Map<Int, Int> {
         val firstChoices = mutableMapOf<Int, Int>()
         votes.forEach { vote ->
             if (vote.candRanks.isNotEmpty()) {
@@ -57,15 +58,8 @@ data class VoteSequences(val votes: List<VoteList>) {
         return winnerVotes - loserVotes
     }
 
-
-    /** Compute and return the difficulty estimate associated with this assertion. This method
-     * computes the minimum tally of the assertion's winner (its first preference tally) and the
-     * maximum tally of the assertion's loser, according to the given set of Votes (votes). This
-     * maximum tally contains all votes that preference the loser higher than the winner, or on
-     * which the loser appears and the winner does not. The given AuditType, audit, defines the
-     * chosen method of computing assertion difficulty given these winner and loser tallies.*/
-    fun nebChoices(winner: Int, loser: Int): Map<Int, Int> {
-        val firstChoices = nenChoices(winner, loser)
+    fun nebFirstChoices(winner: Int, loser: Int): Map<Int, Int> {
+        val firstChoices = nenFirstChoices(winner, loser)
         val minWinner = firstChoices[winner] ?: 0
         var maxLoser = 0
         votes.forEach { vote ->
@@ -93,6 +87,7 @@ data class VoteSequences(val votes: List<VoteList>) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Adapted from au.org.democracydevelopers.raire.util.VoteConsolidator
 /** A wrapper around int[] that works as a key in a hash map  */
 private class HashableIntArray(val array: IntArray) {
 

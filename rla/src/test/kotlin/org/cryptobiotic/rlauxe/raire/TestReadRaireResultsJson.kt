@@ -199,3 +199,9 @@ class TestReadRaireResultsJson {
         assertEquals(0.5, eassorter.assort(Cvr(contest, listOf())))
     }
 }
+
+fun RaireContestUnderAudit.makeAssorters(): List<RaireAssorter> {
+    return this.rassertions.map {
+        RaireAssorter(contest.info, it, (it.marginInVotes.toDouble() / contest.Nc))
+    }
+}

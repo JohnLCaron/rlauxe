@@ -2,11 +2,6 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 
-// PS email 3/27/25. I think this is the case when theres no style info for the pooled cards
-// With ONEAudit, things get more complicated because you have to start by adding every contest that appears on any card
-// in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in
-// the contest appropriately. That's in the SHANGRLA codebase.
-
 data class AuditableCard (
     val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
     val index: Int,  // index into the original, canonical (committed-to) list of cards

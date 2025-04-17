@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.audit.Sampler
 import kotlin.math.max
 import kotlin.random.Random
@@ -10,7 +9,6 @@ private val show = true
 
 /** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
  * Specific to a contest. Only used for estimating the sample size.
- * TODO why cant we use this with Raire??
  */
 class ClcaSimulation(
     rcvrs: List<Cvr>, // may have phantoms
@@ -21,7 +19,7 @@ class ClcaSimulation(
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
     val Nc = contest.Nc
-    // val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
+    val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()
@@ -37,7 +35,6 @@ class ClcaSimulation(
 
     init {
         // reset() we use the original order unless reset() is called, then we use a permutation
-        require(contest.choiceFunction != SocialChoiceFunction.IRV)
         // we want to flip the exact number of votes, for reproducibility
         // note we only do this on construction, reset just uses a different permutation
         val mmvrs = mutableListOf<Cvr>()
@@ -48,7 +45,7 @@ class ClcaSimulation(
         flippedVotesP1o = flipP1o(mmvrs, needToChange = (Nc * errorRates.p1o).toInt())
         flippedVotesP2o = flipP2o(mmvrs, needToChange = (Nc * errorRates.p2o).toInt())
         flippedVotesP2u = flipP2u(mmvrs, needToChange = (Nc * errorRates.p2u).toInt())
-        flippedVotesP1u = // if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt()) else
+        flippedVotesP1u = if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt()) else
                           flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
@@ -104,7 +101,7 @@ class ClcaSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx] // this is the cvr
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 1.0) {
-                val votes = // if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().loser()) else
+                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().loser()) else
                             mapOf(contest.id to intArrayOf(cassorter.assorter().loser()))
 
                 val alteredMvr = makeNewCvr(cvr, votes) // this is the altered mvr
@@ -144,7 +141,7 @@ class ClcaSimulation(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 0.0) {
-                val votes = // if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().winner()) else
+                val votes = if (isIRV) moveToFront(cvr.votes, contest.id, cassorter.assorter().winner()) else
                             mapOf(contest.id to intArrayOf(cassorter.assorter().winner()))
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
@@ -214,7 +211,7 @@ class ClcaSimulation(
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1)
     //  NEB one vote understatement: cvr has winner preceding loser (1/2), but not first, mvr has winner as first pref (1)
     //  NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining (1)
-    /* fun flipP1uIRV(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
+    fun flipP1uIRV(mcvrs: MutableList<Cvr>, needToChange: Int): Int {
         if (needToChange == 0) return 0
         val ncards = mcvrs.size
         var changed = 0
@@ -243,7 +240,7 @@ class ClcaSimulation(
         // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
-    } */
+    }
 
     //  plurality: one vote understatement: cvr has other (1/2), mvr has winner (1). have to change cvr to other
     fun flipP1uP(mcvrs: MutableList<Cvr>, cvrs: MutableList<Cvr>, needToChange: Int): Int {
@@ -279,7 +276,6 @@ class ClcaSimulation(
         return changed
     }
 
-    /*
     fun moveToFront(votes: Map<Int, IntArray>, contestId: Int, toFront: Int) : Map<Int, IntArray> {
         // all we have to do is put a candidate that is not the winner or the loser, aka other
         val result = votes.toMutableMap()
@@ -287,7 +283,7 @@ class ClcaSimulation(
         val removed = c.filterNot{ it == toFront }
         result[contestId] = (listOf(toFront) + removed).toIntArray()
         return result
-    } */
+    }
 
     fun emptyList(votes: Map<Int, IntArray>, contestId: Int) : Map<Int, IntArray> {
         val result = votes.toMutableMap()

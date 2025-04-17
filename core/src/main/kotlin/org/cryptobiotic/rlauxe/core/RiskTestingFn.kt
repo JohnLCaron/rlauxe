@@ -2,13 +2,15 @@ package org.cryptobiotic.rlauxe.core
 
 // NOTE: contest status is min rank of assertions
 enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boolean) {
+    // starting state
     InProgress(0,false, false),
 
-    // contest status
+    // "pre-audit" contest status
     NoLosers(1,true, true),  // no losers, ie ncandidates <= nwinners
     ContestMisformed(2,true, false), // Contest incorrectly formed
     MinMargin(3,true, false), // margin too small for RLA to efficiently work
     TooManyPhantoms(4,true, false), // too many phantoms, makes margin < 0
+
     FailMaxSamplesAllowed(5,true, false),  // estimated samples greater than maximum samples allowed
     AuditorRemoved(6,true, false),  // auditor decide to remove it
 

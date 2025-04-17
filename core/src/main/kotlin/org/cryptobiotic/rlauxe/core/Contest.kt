@@ -50,19 +50,23 @@ interface ContestIF {
     val Np: Int
     val ncandidates: Int
     val choiceFunction: SocialChoiceFunction
-    val undervotes: Int
 
     val winnerNames: List<String>
     val winners: List<Int>
     val losers: List<Int>
-    fun show() : String = toString()
 
     fun phantomRate() = Np / Nc.toDouble()
-    fun undervoteRate() = undervotes / Nc.toDouble()
     fun isIRV() = choiceFunction == SocialChoiceFunction.IRV
+    fun show() : String = toString()
 }
 
-//    When we have styles, we can calculate Nb_c = physical ballots for contest C.
+//    When we have styles and a complete CardLocationManifest, we can calculate Nb_c = physical ballots containing contest C.
+//    Then Nc = Np + Nb_c
+
+// nvotes = sum(votes)
+// undervotes = Nc * nwinners - nvotes - Np
+
+// Nu =
 //    Let V_c = reported votes for contest C; V_c <= Nb_c <= N_c.
 
 //    Let N_c = upper bound on ballots for contest C.
@@ -93,8 +97,6 @@ class Contest(
     override val winners: List<Int>
     override val losers: List<Int>
 
-    override val undervotes: Int // TODO may not know this, if !hasStyles
-
     init {
         // construct votes, adding 0 votes if needed
         voteInput.forEach {
@@ -115,7 +117,7 @@ class Contest(
         /* if (info.nwinners == 1 && info.choiceFunction != SocialChoiceFunction.IRV) {
             require(nvotes <= Nc) { "Nc $Nc must be > totalVotes ${nvotes}" }
         } */
-        undervotes = Nc * info.nwinners - nvotes - Np
+        // undervotes = Nc * info.nwinners - nvotes - Np // assumes nwinners = "vote for n"
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
@@ -176,7 +178,7 @@ class Contest(
     }
 
     override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers, undervotes=$undervotes)"
+        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
     }
 
     companion object {
@@ -200,13 +202,14 @@ open class ContestUnderAudit(
     val Nc = contest.Nc
     val Np = contest.Np
 
+    // TODO can we just call the correct makeAssertions()? before we needed the cvrs....
     var pollingAssertions: List<Assertion> = emptyList()
     var clcaAssertions: List<ClcaAssertion> = emptyList()
-    var status = TestH0Status.InProgress
+    var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, ContestMisformed, MinMargin, TooManyPhantoms
 
     init {
         if (contest.losers.size == 0) {
-            status = TestH0Status.NoLosers
+            preAuditStatus = TestH0Status.NoLosers
         }
     }
 
@@ -314,7 +317,7 @@ open class ContestUnderAudit(
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votes else emptyMap()
         appendLine("'$name' ($id) votes=${votes}")
-        appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=${contest.undervotes}")
+        appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners}")
         append(showCandidates())
     }
@@ -354,7 +357,6 @@ open class ContestUnderAudit(
         result = 31 * result + clcaAssertions.hashCode()
         return result
     }
-
 
 }
 

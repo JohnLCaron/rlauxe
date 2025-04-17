@@ -82,8 +82,8 @@ fun OAContestUnderAuditJson.import(): OAContestUnderAudit {
     val contestUA = this.contestUA.import()
     val contestOA = this.contestOA.import(contestUA.contest.info)
 
-    val result = OAContestUnderAudit(contestOA, contestUA.isComparison, contestUA.hasStyle)
-    result.pollingAssertions = contestUA.pollingAssertions
+    val result = OAContestUnderAudit(contestOA, contestUA.hasStyle)
+    // result.pollingAssertions = contestUA.pollingAssertions
     result.clcaAssertions = contestUA.clcaAssertions
     return result
 }

@@ -4,6 +4,12 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.min
 
+
+// PS email 3/27/25. (I think this is the case when theres no style info for the pooled cards)
+// With ONEAudit, things get more complicated because you have to start by adding every contest that appears on any card
+// in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in
+// the contest appropriately. That's in the SHANGRLA codebase.
+
 data class OneAuditContest (
     override val info: ContestInfo,
     val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
@@ -22,8 +28,6 @@ data class OneAuditContest (
 
     override val Nc: Int  // upper limit on number of ballots for all strata for this contest
     override val Np: Int  // number of phantom ballots for all strata for this contest
-
-    override val undervotes: Int
     val minMargin: Double
 
     init {
@@ -67,7 +71,7 @@ data class OneAuditContest (
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
-        undervotes = Nc * info.nwinners - nvotes - Np
+        // undervotes = Nc * info.nwinners - nvotes - Np
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
@@ -96,9 +100,8 @@ data class OneAuditContest (
 
 class OAContestUnderAudit(
     val contestOA: OneAuditContest,
-    isComparison: Boolean = true,
     hasStyle: Boolean = true
-): ContestUnderAudit(contestOA.makeContest(), isComparison=isComparison, hasStyle=hasStyle) {
+): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=hasStyle) {
 
     override fun makeClcaAssertions(): ContestUnderAudit {
         // TODO assume its plurality for now
@@ -229,4 +232,26 @@ class OneAuditAssorter(
         return result
     }
 }
+
+// ONEAUDIT p 9
+// This algorithm be made more efficient statistically and logistically in a variety
+// of ways, for instance, by making an affine translation of the data so that the
+// minimum possible value is 0 (by subtracting the minimum of the possible over-
+// statement assorters across batches and re-scaling so that the null mean is still 1/2)
+//
+// Also see Section 5.1 and fig 1. "The original assorter values will generally be closer to the endpoints of [0, u]
+// than the transformed values are to the endpoints of [0, 2u/(2u − v)]"
+// TODO investigate: "An affine transformation of the over-statement assorter values can move them back to the endpoints
+//    of the support constraint".
+//    where does this happen? The constraint is "the null mean is 1/2".
+//
+// A test that uses the prior information xj ∈ [0, u] may not be as efficient for
+// populations for which xj ∈ [a, b] with a > 0 and b < u as it is for populations
+// where the values 0 and u actually occur. An affine transformation of the over-
+// statement assorter values can move them back to the endpoints of the support
+// constraint by subtracting the minimum possible value then re-scaling so that the
+// null mean is 1/2 once again, which reproduces the original assorter, A. (see eq 10)
+//
+// I think the claim is that you can find a better bounds based on avgAssortValue?
+// is SHANGRLA already doing that??
 

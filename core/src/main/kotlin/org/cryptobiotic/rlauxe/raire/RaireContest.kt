@@ -7,7 +7,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 
-// a Contest that does not have votes: Map<Int, Int>,   // candidateId -> nvotes
+// an IRV Contest that does not have votes (candidateId -> nvotes Map<Int, Int>)
+// this is the motivation for ContestIF
 data class RaireContest(
     override val info: ContestInfo,
     override val winners: List<Int>,
@@ -19,8 +20,9 @@ data class RaireContest(
     override val ncandidates = info.candidateIds.size
     override val id = info.id
     override val choiceFunction = info.choiceFunction
-    override val undervotes: Int = -1  // TODO get this; nballots not voted on?
 
+    // added by makeIrvContests() during construction of RaireContestUnderAudit
+    // there may be multiple paths through the elimination tree when there are ties
     val roundsPaths = mutableListOf<IrvRoundsPath>()
 
     init {
@@ -39,19 +41,11 @@ class RaireContestUnderAudit(
     contest: RaireContest,
     val winner: Int,
     val rassertions: List<RaireAssertion>,
-    isComparison: Boolean = true,
+    // isComparison: Boolean = true, // TODO could this be polling ??
     hasStyle: Boolean = true
-): ContestUnderAudit(contest, isComparison=isComparison, hasStyle=hasStyle) {
+): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle) {
     val candidates =  contest.info.candidateIds
 
-    // TODO eliminate who calls this?
-    fun makeAssorters(): List<RaireAssorter> {
-        return this.rassertions.map {
-            RaireAssorter(contest.info, it, (it.marginInVotes.toDouble() / contest.Nc))
-        }
-    }
-
-    // override fun makeComparisonAssertions(cvrs: Iterable<Cvr>, votes: Map<Int, Int>?): ContestUnderAudit {
     override fun makeClcaAssertions(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
         this.clcaAssertions = rassertions.map { rassertion ->
@@ -199,6 +193,8 @@ enum class RaireAssertionType(val aname:String) {
     }
 }
 
+// wraps the info in au.org.democracydevelopers.raire.assertions.Assertion
+// converts a raire.java AssertionAndDifficulty
 data class RaireAssertion(
     val winnerId: Int, // TODO this is index
     val loserId: Int,
@@ -206,10 +202,9 @@ data class RaireAssertion(
     val assertionType: RaireAssertionType,
     val eliminated: List<Int> = emptyList(), // NEN only; already eliminated for the purpose of this assertion
     val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
-    val explanation: String? = null,
 ) {
     fun show() = buildString {
-        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated explanation: '$explanation'")
+        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated")
     }
 
     fun remaining(candidateIds: List<Int>) = candidateIds.filter { !eliminated.contains(it) }

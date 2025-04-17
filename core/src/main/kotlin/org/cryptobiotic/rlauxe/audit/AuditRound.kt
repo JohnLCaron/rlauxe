@@ -60,7 +60,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
 
     var done = false
     var included = true
-    var status = contestUA.status
+    var status = contestUA.preAuditStatus
 
     init {
         if (status.complete) {

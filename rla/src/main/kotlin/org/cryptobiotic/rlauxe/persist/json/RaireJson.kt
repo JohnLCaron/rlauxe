@@ -40,10 +40,10 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
         raireContest as RaireContest,
         this.winner,
         this.rassertions.map { it.import() },
-        contestUA.isComparison,
+        // contestUA.isComparison,
         contestUA.hasStyle,
     )
-    result.pollingAssertions = contestUA.pollingAssertions
+    // result.pollingAssertions = contestUA.pollingAssertions
     result.clcaAssertions = contestUA.clcaAssertions
     return result
 }
@@ -74,7 +74,6 @@ data class RaireAssertionJson(
     val assertion_type: String,
     val eliminated: List<Int>,
     val votes: Map<Int, Int>,
-    val explanation: String?,
 )
 
 fun RaireAssertion.publishJson() = RaireAssertionJson(
@@ -84,7 +83,6 @@ fun RaireAssertion.publishJson() = RaireAssertionJson(
     this.assertionType.name,
     this.eliminated,
     this.votes,
-    this.explanation,
 )
 
 fun RaireAssertionJson.import(): RaireAssertion {
@@ -95,6 +93,5 @@ fun RaireAssertionJson.import(): RaireAssertion {
         RaireAssertionType.fromString(this.assertion_type),
         this.eliminated,
         this.votes,
-        this.explanation,
     )
 }

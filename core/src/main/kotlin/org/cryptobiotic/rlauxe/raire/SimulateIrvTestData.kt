@@ -6,7 +6,7 @@ import kotlin.math.min
 import kotlin.random.Random
 
 // called from estimateSampleSize
-data class SimulateRaireTestData(
+data class SimulateIrvTestData(
     val contest: RaireContest,
     val minMargin: Double,
     val sampleLimits: Int,
@@ -61,7 +61,6 @@ data class SimulateRaireTestData(
     }
 
     override fun toString() = buildString {
-        append("SimulateRaireTestData(${contest.id}, undervotePct=${df(contest.undervoteRate())}")
-        append(" phantomPct=${df(contest.phantomRate())} ncards=${ncards}")
+        append("SimulateRaireTestData(${contest.id}} phantomPct=${df(contest.phantomRate())} ncards=${ncards}")
     }
 }

@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-// TODO immutable except for the IntArray (!)
-// assumes that a vote is 0 or 1. compact form might be List<Pair<contestId, candidateId>>
+// TODO immutable except for the IntArray (!) Consider https://github.com/daniel-rusu/pods4k/tree/main/immutable-arrays
+// assumes that a vote is 0 or 1.
+// compact form in AuditableCard is (contests: IntArray, val votes: List<IntArray>?)
 data class Cvr(
     val id: String,
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last

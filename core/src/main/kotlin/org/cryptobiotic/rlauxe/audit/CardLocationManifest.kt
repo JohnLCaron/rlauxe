@@ -1,12 +1,15 @@
 package org.cryptobiotic.rlauxe.audit
 
-// used for polling audits
+// used for polling audits using List<CardLocation> instead of List<Cvr>
+// AuditableCard serializes both, adding the original index in the manifest and the prn.
 data class CardLocationManifest(
     val cardLocations: List<CardLocation>,
     val cardStyles: List<CardStyle> // empty if style info not available
 )
 
-// if hasStyles, has cardStyle or contestIds, otherwise both are null
+// if hasStyles, then either cardStyle or contestIds is non null, otherwise both are null
+// essentially, CardStyle factors out the contestIds, which the CardLocation references
+// so its a form of normalization
 data class CardLocation(
     val id: String,
     val phantom: Boolean = false,

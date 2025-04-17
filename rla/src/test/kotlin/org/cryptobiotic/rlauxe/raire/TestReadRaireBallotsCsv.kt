@@ -113,14 +113,14 @@ fun tabulateRaireMargins(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr
         rcontest.rassertions.forEach { rassertion ->
             if (rassertion.assertionType == RaireAssertionType.irv_elimination) {
                 val voteSeqElim = VoteSequences.eliminate(startingVotes, rassertion.remaining(rcontest.candidates))
-                val nenChoices = voteSeqElim.nenChoices(rassertion.winnerId, rassertion.loserId)
+                val nenChoices = voteSeqElim.nenFirstChoices(rassertion.winnerId, rassertion.loserId)
                 val margin = voteSeqElim.margin(rassertion.winnerId, rassertion.loserId, nenChoices)
                 //println("${rassertion.winnerId}, ${rassertion.loserId} == $margin")
                 assertTrue(margin > 0)
                 rassertion.marginInVotes = margin
             } else {
                 val voteSeq = VoteSequences(startingVotes)
-                val nebChoices = voteSeq.nebChoices(rassertion.winnerId, rassertion.loserId)
+                val nebChoices = voteSeq.nebFirstChoices(rassertion.winnerId, rassertion.loserId)
                 val margin = voteSeq.margin(rassertion.winnerId, rassertion.loserId, nebChoices)
                 assertTrue(margin > 0)
                 rassertion.marginInVotes = margin

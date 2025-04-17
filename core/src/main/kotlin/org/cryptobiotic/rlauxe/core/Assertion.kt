@@ -32,7 +32,6 @@ open class Assertion(
         appendLine(" contestInfo: $info")
         appendLine(" assorter: ${assorter.desc()}")
     }
-
 }
 
 class ClcaAssertion(

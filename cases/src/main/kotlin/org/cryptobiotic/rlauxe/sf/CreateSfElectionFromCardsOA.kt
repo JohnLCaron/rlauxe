@@ -243,7 +243,7 @@ fun createSfElectionFromCardsOA(
             val pools = ballotPools.filter { it.contest == info.id }.associateBy { it.id }
             val contestOA = OneAuditContest(info, contestVotes.votes, contestVotes.countBallots, pools)
             println(contestOA)
-            contestsUA.add(OAContestUnderAudit(contestOA, isComparison = true, auditConfig.hasStyles).makeClcaAssertions())
+            contestsUA.add(OAContestUnderAudit(contestOA, auditConfig.hasStyles).makeClcaAssertions())
         }
     }
     // these checks may modify the contest status

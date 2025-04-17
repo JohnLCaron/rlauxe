@@ -8,6 +8,9 @@ import kotlin.collections.getOrPut
 
 private val quiet = true
 
+// recreate raire's elimination paths, so that we can display to the user
+
+// this is called from Viewer in "Show Contest" for IRV
 fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString {
     val multipleRounds = result.ivrRoundsPaths.size > 1
 
@@ -32,7 +35,7 @@ fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString 
     }
 }
 
-// one for each round, in order
+// one for each round, in order, for one elimination path
 data class IrvRoundsPath(val rounds: List<IrvRound>, val irvWinner: IrvWinners)
 
 data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes for one round
@@ -45,6 +48,7 @@ data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes 
     }
 }
 
+// there may be multiple paths through the elimination tree when there are ties
 data class IrvCountResult(val ivrRoundsPaths: List<IrvRoundsPath>)
 
 data class IrvWinners(val done:Boolean = false, val winners: Set<Int> = emptySet()) {
@@ -69,12 +73,6 @@ class IrvCount(val votes: Array<Vote>, val candidates: List<Int>) {
         }
         return IrvCountResult(rootPath.paths(emptyList()))
     }
-
-    /* alternate, lower level API for testing
-    fun runRound(): IrvCountWinners {
-        if (rootPath.roundWinner.done) return rootPath.roundWinner
-        return rootPath.nextRoundCount()
-    } */
 }
 
 class EliminationPath(startingRound: Int, startingElimination: List<Int>, startingViable: Set<Int>, val votes: Array<Vote>) {

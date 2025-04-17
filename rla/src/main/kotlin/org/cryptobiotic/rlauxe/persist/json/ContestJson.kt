@@ -186,7 +186,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
         this.hasStyle,
         this.pollingAssertions.map { it.publishJson() },
         this.clcaAssertions.map { it.publishJson() },
-        this.status
+        this.preAuditStatus
     )
 }
 
@@ -199,7 +199,7 @@ fun ContestUnderAuditJson.import(): ContestUnderAudit {
     )
     contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
-    contestUA.status = this.status
+    contestUA.preAuditStatus = this.status
     return contestUA
 }
 

@@ -114,11 +114,9 @@ class TestAlphaMart {
         println("test_shrink_trunk_f1 $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val t= 0.5
-        val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
@@ -147,8 +145,6 @@ class TestAlphaMart {
         println("test_shrink_trunk_f1 $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val t= 0.5
-        val c = (eta0 - t) / 2
         val N = x.size
 
         val estimFn = TruncShrinkage(
@@ -157,7 +153,6 @@ class TestAlphaMart {
             upperBound = u,
             d = d,
             eta0 = eta0,
-            c = c
         )
         val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
@@ -220,11 +215,9 @@ class TestAlphaMart {
         // println("testAlphaMartWithTermination $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val t = 0.5
-        val c = (eta0 - t) / 2
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
@@ -236,11 +229,9 @@ class TestAlphaMart {
         println("testAlphaMartBatch $eta0 x=$x")
         val u = 1.0
         val d = 10
-        val t = 0.5
-        val c = max(eps, (eta0 - t) / 2)
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 

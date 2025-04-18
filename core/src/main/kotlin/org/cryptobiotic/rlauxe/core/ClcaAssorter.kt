@@ -30,7 +30,7 @@ open class ClcaAssorter(
     val assorter: AssorterIF,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
     val hasStyle: Boolean = true,
-    val check: Boolean = true, // TODO get rid of
+    val check: Boolean = true,
 ) {
     val assorterMargin = 2.0 * avgCvrAssortValue - 1.0 // Define v ≡ 2Āc − 1, the reported assorter margin
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)

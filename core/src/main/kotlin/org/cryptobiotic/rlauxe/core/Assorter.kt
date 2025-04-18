@@ -74,7 +74,9 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val useVotes = votes ?: (contest as Contest).votes
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
-            val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
+            // TODO divide by voteForN * contest.Nc.toDouble() ?? Need to test.
+            //   Im thinking you dont have this problem when averaging assort values.
+            val reportedMargin = (winnerVotes - loserVotes) / (contest.info.voteForN * contest.Nc.toDouble())
             return PluralityAssorter(contest.info, winner, loser, reportedMargin)
         }
     }
@@ -110,9 +112,9 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
             val loserVotes = useVotes.filter { it.key != winner }.values.sum()
             val nuetralVotes = contest.Nc - winnerVotes - loserVotes
 
-            // TODO i think this works when theres only 1 vote allowed ??
+            // TODO divide by voteForN * contest.Nc.toDouble() ??
             val weight = 1 / (2 * minFraction)
-            val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
+            val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / (contest.info.voteForN * contest.Nc.toDouble())
             val reportedMargin = mean2margin(mean)
             return SuperMajorityAssorter(contest.info, winner, minFraction, reportedMargin)
         }

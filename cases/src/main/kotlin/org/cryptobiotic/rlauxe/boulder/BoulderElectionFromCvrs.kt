@@ -84,7 +84,8 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         if (!quiet) println("ncontests with info = ${infos.size}")
 
         val countVotes = countVotes()
-        val allContests = infos.map { info ->
+
+        val regContests = infos.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
             val contestCount = countVotes.find { it.contestId == info.id }!!
             val sovContest = sovo.contests.find {
                 it.contestTitle == info.name
@@ -98,28 +99,27 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
             val votesIn = contestCount.candidateCounts.filter { info.candidateIds.contains(it.key) }
             Contest(info, votesIn, Nc, 0)
         }
-        // TODO no losers - leave in and mark "done? "
-        val contests = allContests.filter { it.info.choiceFunction != SocialChoiceFunction.IRV }
+
         if (!quiet) {
-            println("ncontests with votes = ${contests.size}")
-            contests.forEach { contest ->
+            println("Regular contests (No IRV)) = ${regContests.size}")
+            regContests.forEach { contest ->
                 println(contest.show2())
             }
         }
         // val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
-        val irvInfos = allContests.filter { it.choiceFunction == SocialChoiceFunction.IRV }.map { it.info }
+        val irvInfos = infos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
         val irvContests = if (irvInfos.isEmpty()) emptyList() else {
             val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrs.iterator())
             makeIrvContests(irvInfos, irvVoteMap)
         }
 
         if (!quiet) {
-            println("ncontests with IRV = ${irvContests.size}")
+            println("contests with IRV = ${irvContests.size}")
             irvContests.forEach { contest ->
                 println(contest.show2())
             }
         }
-        return Pair(contests, irvContests)
+        return Pair(regContests, irvContests)
     }
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes

@@ -30,7 +30,7 @@ fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
     return d
 }
 
-// tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
+// tabulate votes, make sure of correct winners, count ncvrs for each contest
 fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Int> {
     val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
     contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete

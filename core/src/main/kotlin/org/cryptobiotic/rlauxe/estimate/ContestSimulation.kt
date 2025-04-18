@@ -36,7 +36,7 @@ class ContestSimulation(val contest: Contest) {
     val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
     val phantomCount = contest.Np //  - underCount - voteCount // Np_c
-    val underCount = contest.Nc * info.nwinners - contest.Np - voteCount // U_c
+    val underCount = contest.Nc * info.voteForN - contest.Np - voteCount // U_c
 
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0

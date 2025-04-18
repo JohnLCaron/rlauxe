@@ -13,7 +13,7 @@ class BettingMart(
     val withoutReplacement: Boolean = true,
     val noerror: Double, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
-    val upperBound: Double,  // the upper bound of the values of the sequence. TODO OneAudit??
+    val upperBound: Double,  // the upper bound of the values of the sequence.
 ): RiskTestingFn {
     private val showEachSample = false
     private val sequences = DebuggingSequences()
@@ -37,14 +37,11 @@ class BettingMart(
 
         var pvalueLast = 1.0
         var pvalueMin = 1.0
-        var sampleFirstUnderLimit = 0
 
         while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
             sampleNumber++
             require(xj >= 0.0)
-            // if (xj > upperBound)
-            //    println("why?") // in OA, upperbound is 3*noerror. but maybe its just a bound on what populationMeanIfH0 can be ??
             require(xj <= upperBound)
 
             val lamj = bettingFn.bet(tracker)
@@ -80,7 +77,6 @@ class BettingMart(
             // – S ← S + Xj
             tracker.addSample(xj)
             pvalueLast = 1.0 / testStatistic
-            if (sampleFirstUnderLimit == 0 && pvalueLast < riskLimit) sampleFirstUnderLimit = sampleNumber + 1
             if (pvalueLast < pvalueMin) pvalueMin = pvalueLast
 
             if (terminateOnNullReject && (pvalueLast < riskLimit)) {
@@ -108,7 +104,7 @@ class BettingMart(
         //    val pvalueLast: Double,    // last pvalue
         //    val tracker: SampleTracker,
         //)
-        return TestH0Result(status, sampleCount=sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalueLast, tracker)
+        return TestH0Result(status, sampleCount=sampleNumber, pvalueMin, pvalueLast, tracker)
     }
 
     fun setDebuggingSequences(): DebuggingSequences {

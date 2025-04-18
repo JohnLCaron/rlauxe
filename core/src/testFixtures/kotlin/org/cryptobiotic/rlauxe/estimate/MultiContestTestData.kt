@@ -209,7 +209,7 @@ data class ContestTestData(
         }
         val contest = Contest(this.info, svotes.toMap(), Nc, this.phantomCount)
 
-        svotes.add(Pair(ncands, underCount)) // the adjusted votes include the undervotes
+        svotes.add(Pair(ncands, underCount)) // the adjusted votes include the undervotes TODO check this
         this.adjustedVotes = svotes // includes the undervotes
         return contest
     }
@@ -226,7 +226,7 @@ data class ContestTestData(
         return adjust // will be 0 when done
     }
 
-    // choose Candidate, add contest, including undervote (no candidate selected)
+    // choose Candidate, add contest, including undervote
     fun addContestToCvr(cvrb: CvrBuilder) {
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
         if (candidateIdx == ncands) {
@@ -264,7 +264,7 @@ data class ContestTestData(
 }
 
 // partition nthings into npartitions randomly
-// return map partIdx -> nvotes, sum(nvotes) = nthings // index not id!!
+// return map partitionIdx -> nvotes, where sum(nvotes) = nthings NOTE partitionIdx not id!!
 fun partition(nthings: Int, npartitions: Int): List<Pair<Int, Int>> {
     val cutoffs = List(npartitions - 1) { it }.map { Pair(it, Random.nextInt(nthings)) }.toMutableList()
     cutoffs.add(Pair(npartitions - 1, nthings)) // add the end point

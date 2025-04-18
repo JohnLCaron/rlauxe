@@ -389,14 +389,12 @@ fun simulateSampleSizeAlphaMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val eta0 = margin2mean(margin)
-    val c = (eta0 - 0.5) / 2 // TODO should this be sometimes different? TruncShrinkage with AlphaMart
 
     val estimFn = TruncShrinkage(
         N = Nc,
         upperBound = upperBound,
         d = auditConfig.pollingConfig.d,
         eta0 = eta0,
-        c = c,
     )
     val testFn = AlphaMart(
         estimFn = estimFn,

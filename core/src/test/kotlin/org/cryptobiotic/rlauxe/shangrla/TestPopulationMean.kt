@@ -129,10 +129,8 @@ class TestPopulationMeanWithoutReplacement {
         }
 
         val eta = 0.5714285714285714
-        val t = .5
         val u = 1.0
         val d = 10
-        val c = (eta - t) / 2
 
         // compare directly to TruncShrinkage
         val assortValues = PrevSamples()
@@ -149,7 +147,7 @@ class TestPopulationMeanWithoutReplacement {
         assertEquals(ClcaErrorRates(0.0, 0.0, 0.0, 0.0, ), assortValues.errorRates())
 
         // compare directly to ALPHA
-        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta, c = c)
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta)
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
 
         val sampler = SampleFromArray(x.toDoubleArray())

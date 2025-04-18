@@ -124,7 +124,7 @@ class AuditCobraAssertion(
         )
 
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
-        val samplesNeeded = if (testH0Result.sampleFirstUnderLimit > 0) testH0Result.sampleFirstUnderLimit else testH0Result.sampleCount
+        val samplesNeeded = testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

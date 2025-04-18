@@ -62,8 +62,6 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         else
             cassorter.meanAssort()
 
-        val c = (eta0 - 0.5) / 2
-
         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
             FixedEstimFn(.99 * cassorter.upperBound())
         } else {
@@ -73,7 +71,6 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 upperBound = cassorter.upperBound(),
                 d = auditConfig.pollingConfig.d,
                 eta0 = eta0,
-                c = c,
             )
         }
 

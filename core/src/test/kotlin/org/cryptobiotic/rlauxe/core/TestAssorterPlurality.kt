@@ -298,4 +298,45 @@ class TestAssorterPlurality {
         assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = false))
         assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
     }
+
+    @Test
+    fun testAssortValuesNWinners() {
+        val info = ContestInfo(
+            name = "ABCs",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap("Alice", "Bob", "Candy"),
+            nwinners = 2,
+        )
+        val contest = Contest(info, mapOf(0 to 52, 1 to 44), Nc = 100, Np = 0)
+        println(contest.show())
+
+        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        contestUA.pollingAssertions.forEach { assertion ->
+            val assorter = assertion.assorter
+            println("  assorter = $assorter")
+        }
+
+        val assertion = contestUA.minPollingAssertion()!!
+        assertTrue(assertion.winner == 1)
+        assertTrue(assertion.loser == 2)
+        val assorter = assertion.assorter
+
+        assertEquals(0.5, assorter.assort(makeCvr(0)))
+        assertEquals(1.0, assorter.assort(makeCvr(1)))
+        assertEquals(0.0, assorter.assort(makeCvr(2)))
+        assertEquals(0.5, assorter.assort(makeCvr(3)))
+
+        assertEquals(1.0, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(0,1)))))
+        assertEquals(1.0, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(1,0)))))
+        assertEquals(1.0, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(1,3)))))
+
+        assertEquals(0.0, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(0,2)))))
+        assertEquals(0.0, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(2,0)))))
+        assertEquals(0.0, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(2,3)))))
+
+        // may be the problem. votes doesnt know when a cvr has both the winner and the loser on it
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(1,2)))))
+
+    }
 }

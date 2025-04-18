@@ -18,13 +18,12 @@ class FixedEstimFn(
     override fun eta(prevSampleTracker: SampleTracker) = eta0
 }
 
-// TODO see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
 class TruncShrinkage(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
     val eta0: Double,
-    val c: Double,
+    val c: Double = (eta0 - 0.5) / 2,
     val d: Int,
 ) : EstimFn {
     val capAbove = upperBound * (1 - eps)
@@ -33,7 +32,6 @@ class TruncShrinkage(
         require(upperBound > 0.0)
         require(eta0 <= upperBound) // ?? otherwise the math in alphamart gets wierd
         require(eta0 >= 0.5) // ??
-        require(c > 0.0)
         require(d >= 0)
     }
 
@@ -65,6 +63,135 @@ class TruncShrinkage(
         //    where ǫi → 0 as the sample size grows.
         //    return min(capAbove, max(est, capBelow)): capAbove > est > capAbove: u*(1-eps) > est > mu_j+e_j(c,j)
         val boundedEst = min(max(capBelow, est), capAbove)
+        return boundedEst
+    }
+}
+
+
+//        x: np.array
+//            input data
+//        attributes used:
+//             eta: float in (t, u) (default u*(1-eps))
+//                initial alternative hypothethesized value for the population mean
+//            c: positive float
+//                scale factor in constraints to keep the estimator of the mean from getting too close to t or u before
+//                the empirical mean is stable
+//            d: positive float
+//                relative weight of eta compared to an observation, in updating the alternative for each term
+//            f: positive float
+//                relative weight of the upper bound u (normalized by the sample standard deviation)
+//            minsd: positive float
+//                lower threshold for the standard deviation of the sample, to avoid divide-by-zero errors and
+//                to limit the weight of u
+
+// see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
+// old way:
+//             c: positive float
+//                scale factor for allowing the estimated mean to approach t from above
+//
+//        c = getattr(self, "c", 1 / 2)
+//        d = getattr(self, "d", 100)
+//        f = getattr(self, "f", 0)
+//        minsd = getattr(self, "minsd", 10**-6)
+//          ..
+//         return np.minimum(
+//            u * (1 - np.finfo(float).eps),
+//            np.maximum(weighted, m + c / np.sqrt(d + j - 1)),
+//        )
+// new way:
+//            c: positive float
+//                scale factor in constraints to keep the estimator of the mean from getting too close to t or u before
+//                the empirical mean is stable
+//        c = getattr(self, "c", (eta-t)/2-np.finfo(float).eps)
+//        if u-c < t+c: # constraints could be inconsistent
+//            new_c = (u-c)/2
+//            warnings.warn(f'{c=} is too large: resetting to {new_c}')
+//            c = new_c
+// ...
+//         tol = c / np.sqrt(d + j - 1))
+//        return np.minimum(
+//            u * (1 - np.finfo(float).eps) - tol,
+//            np.maximum(weighted, m * (1 + np.finfo(float).eps) + tol)
+//        )
+// TODO test against TruncShrinkage
+class TruncShrinkageNew(
+    val N: Int,
+    val withoutReplacement: Boolean = true,
+    val upperBound: Double,
+    val eta0: Double,
+    val c: Double = (eta0 - 0.5)/2 - eps,  // previous didnt have the -eps
+    val d: Int,
+) : EstimFn {
+    val welford = Welford()
+
+    val useC: Double
+    init {
+        require(eta0 <= upperBound) // ?? otherwise the math in alphamart gets wierd
+        require(eta0 >= 0.5)
+        require(d >= 0)
+
+        // SHANGRLA change 1/24/25
+        //        c = getattr(self, "c", (eta-t)/2-np.finfo(float).eps)
+        //        if u-c < t+c: # constraints could be inconsistent
+        //            new_c = (u-c)/2
+        //            warnings.warn(f'{c=} is too large: resetting to {new_c}')
+        //            c = new_c
+        useC = if (upperBound - c < .5 + c) { // constraints could be inconsistent
+            val newC = (upperBound - c) / 2.0
+            println("TruncShrinkage: $c is too large: resetting to $newC")
+            newC
+        } else {
+            c
+        }
+    }
+
+    //        d = getattr(self, "d", 100)
+    //        f = getattr(self, "f", 0)
+    //        minsd = getattr(self, "minsd", 10**-6)
+    //        S, _, j, m = self.sjm(N, t, x)
+    //        _, v = welford_mean_var(x)
+    //        sdj = np.sqrt(v)
+    //        # threshold the sd, set first two sds to 1
+    //        sdj = np.insert(np.maximum(sdj, minsd), 0, 1)[0:-1]
+    //        sdj[1] = 1
+    //        weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
+    //        tol = c / np.sqrt(d + j - 1)
+    //        return np.minimum(
+    //            u * (1 - np.finfo(float).eps) - tol,
+    //            np.maximum(weighted, m * (1 + np.finfo(float).eps) + tol)
+    //        )
+
+    // estimate population mean from previous samples
+    override fun eta(prevSampleTracker: SampleTracker): Double {
+        val lastj = prevSampleTracker.numberOfSamples()
+        val dj1 = (d + lastj).toDouble()
+
+        val sampleSum = if (lastj == 0) 0.0 else {
+            welford.update(prevSampleTracker.last())
+            prevSampleTracker.sum()
+        }
+
+        // (2.5.2, eq 14, "truncated shrinkage")
+        // weighted = ((d * eta + S) / (d + j - 1) + u * f / sdj) / (1 + f / sdj)
+        // val weighted = ((d * eta0 + sampleSum) / dj1 + upperBound * f / sdj3) / (1 + f / sdj3)
+        // val weighted = ((d * eta0 + sampleSum) / dj1 // f = 0
+        val weighted = (d * eta0 + sampleSum) / dj1
+
+        //  tol = c / np.sqrt(d + j - 1)
+        val tol = useC / sqrt(dj1)
+
+        // u * (1 - np.finfo(float).eps) - tol
+        val capAbove = upperBound * (1 - eps) - tol
+
+        // m * (1 + np.finfo(float).eps) + tol
+        val mean = populationMeanIfH0(N, withoutReplacement, prevSampleTracker)
+        val capBelow = mean * (1 + eps) + tol
+
+        //        return np.minimum(
+        //            u * (1 - np.finfo(float).eps) - tol,
+        //            np.maximum(weighted, m * (1 + np.finfo(float).eps) + tol)
+        //        )
+        val boundedEst = min(capAbove, max(weighted, capBelow))
         return boundedEst
     }
 }

@@ -98,6 +98,21 @@ import org.cryptobiotic.rlauxe.core.Cvr
 //        cvr_list = cvr_list + phantom_vrs
 //        return cvr_list, phantoms
 
+// cvrs for single contest
+fun makePhantomCvrs(
+    contestId: Int,
+    nphantoms: Int,
+    prefix: String = "phantom-",
+): List<Cvr> {
+    val results = mutableListOf<Cvr>()
+    repeat(nphantoms) {
+        val votes = mapOf( contestId to intArrayOf() )
+        Cvr("$prefix$it", votes, phantom = true)
+    }
+    return results
+}
+
+// cvrs for multiple contests
 fun makePhantomCvrs(
     contests: List<Contest>,
     ncvrs: Map<Int, Int>,

@@ -47,11 +47,11 @@ fun doOneAlphaMartRun(
 ): TestH0Result {
     val t = 0.5
     val upperBound = u
-    val c = max(eps, ((eta0 - t) / 2))
 
     val estimFn = TruncShrinkage(
         N = drawSample.maxSamples(), withoutReplacement = withoutReplacement, upperBound = upperBound,
-        eta0 = eta0, c = c, d = d
+        eta0 = eta0,
+        d = d
     )
 
     val alpha = AlphaMart(

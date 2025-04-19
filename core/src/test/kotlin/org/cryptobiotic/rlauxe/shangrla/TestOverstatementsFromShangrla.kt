@@ -207,7 +207,7 @@ class TestOverstatementsFromShangrla {
             candidateNames = listToMap( "Alice", "Bob"),
         )
         val contest = makeFakeContest(info, 100)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter
 
@@ -311,7 +311,7 @@ class TestOverstatementsFromShangrla {
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
         )
         val contest = makeFakeContest(info, 100)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter
 
@@ -438,7 +438,7 @@ class TestOverstatementsFromShangrla {
             candidateNames = listToMap( "Alice", "Bob"),
         )
         val contest = makeFakeContest(info, 100)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter
 

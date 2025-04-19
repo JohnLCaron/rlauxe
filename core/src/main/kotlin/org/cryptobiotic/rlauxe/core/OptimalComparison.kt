@@ -8,8 +8,6 @@ import org.apache.commons.math3.optim.univariate.BrentOptimizer
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
 import kotlin.math.max
 

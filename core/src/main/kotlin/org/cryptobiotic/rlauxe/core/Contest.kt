@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.math.min
@@ -193,7 +196,7 @@ class Contest(
     }
 }
 
-/** Contest with assertions. */
+/** Contest with assertions, some mutability. */
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true,
@@ -206,9 +209,9 @@ open class ContestUnderAudit(
     val Nc = contest.Nc
     val Np = contest.Np
 
-    var pollingAssertions: List<Assertion> = emptyList()
+    var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
+    var pollingAssertions: List<Assertion> = emptyList() // TODO var for serialization. is that ok?
     var clcaAssertions: List<ClcaAssertion> = emptyList()
-    var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, ContestMisformed, MinMargin, TooManyPhantoms
 
     init {
         if (contest.losers.size == 0) {
@@ -216,20 +219,25 @@ open class ContestUnderAudit(
         } else  if (contest.winners.size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
+        // should really be called after init
+        if (contest !is RaireContest  ) {
+            pollingAssertions = makePollingAssertions()
+        }
     }
 
-    // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
-    fun makePollingAssertions(): ContestUnderAudit {
-        require(!isComparison) { "makePollingAssertions() can be called only on polling contest"}
-        val useVotes = (contest as Contest).votes
+    fun makePollingAssertions(): List<Assertion> {
+        val useVotes = when (contest) {
+            is Contest -> contest.votes
+            is OneAuditContest -> contest.votes
+            else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
+        }
 
-        this.pollingAssertions = when (choiceFunction) {
+        return when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions(useVotes)
             SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
-        return this
     }
 
     open fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
@@ -255,42 +263,36 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    // TODO: only make one pass through the cvrs, and calcAssorterMargin for all assertions.
     open fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
-        require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        // val useVotes = if (votes != null) votes else (contest as Contest).votes
-        val useVotes = (contest as Contest).votes // // TODO assumes Contest ??
-        val assertions = when (contest.info.choiceFunction) {
-            SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY, -> makePluralityAssertions(useVotes)
-            SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
-            else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
+        val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
+        cvrs.filter { it.hasContest(id) }.forEach { cvr ->
+            assertionMap.map { (assertion, welford) ->
+                welford.update(assertion.assorter.assort(cvr, usePhantoms = false))  //TODO usePhantoms?
+            }
         }
+        return makeClcaAssertions(assertionMap)
+    }
 
-        this.clcaAssertions = assertions.map { assertion ->
-            val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
-            ClcaAssertion(contest.info, clcaAssorter)
-        }
+    open fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
+        require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
+
+        this.clcaAssertions = assertionMap.filter { it.first.info.id == this.id }
+            .map { (assertion, welford) ->
+                val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, welford.mean, hasStyle=hasStyle, check=false) // TODO check = false
+                ClcaAssertion(contest.info, clcaAssorter)
+            }
         return this
     }
 
-    // TODO: assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ??
-    //   only when voteForN = 1
+    // when does assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ?? only when voteForN = 1 ???
+    // no cvrs, use assertion.assorter.reportedMargin()
+    // TODO  in some ways this is more robust than averaging cvrs, since cvrs have to be complete and accurate.
+    //   OTOH, need complete and accurate CardLocation Manifest!!
     open fun makeClcaAssertions(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        val useVotes = (contest as Contest).votes
-        val assertions = when (contest.info.choiceFunction) {
-            SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY,
-                -> makePluralityAssertions(useVotes)
-            SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
-            else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
-        }
+        // require(contest.info.voteForN == 1) { "makeComparisonAssertions() with no cvrs can only be used when voteForN = 1"}
 
-        this.clcaAssertions = assertions.map { assertion ->
-            //val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            //require (doubleIsClose(margin, assertion.assorter.reportedMargin())) { "margin mismatch: $margin != ${assertion.assorter.reportedMargin()}" }
+        this.clcaAssertions = pollingAssertions.map { assertion ->
             val margin = assertion.assorter.reportedMargin()
             val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ClcaAssertion(contest.info, clcaAssorter)
@@ -381,5 +383,26 @@ open class ContestUnderAudit(
         return result
     }
 
+}
+
+fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>) {
+    val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
+    contestsUA.forEach { contestsUA ->
+        contestsUA.pollingAssertions.forEach { assertion ->
+            assertionMap.add(Pair(assertion, Welford()))
+        }
+    }
+    println("assertions = ${assertionMap.size}")
+
+    cvrs.forEach { cvr ->
+        assertionMap.map { (assertion, welford) ->
+            if (cvr.hasContest(assertion.info.id)) {
+                welford.update(assertion.assorter.assort(cvr, usePhantoms = false))
+            }
+        }
+    }
+    assertionMap.forEach { (assert, welford) -> println("contest $assert : ${welford.mean}")}
+
+    contestsUA.forEach { it.makeClcaAssertions(assertionMap) }
 }
 

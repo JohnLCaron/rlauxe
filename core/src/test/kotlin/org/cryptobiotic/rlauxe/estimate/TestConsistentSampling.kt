@@ -63,7 +63,7 @@ class TestConsistentSampling {
     @Test
     fun testConsistentPollingSampling() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false) }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
@@ -101,7 +101,7 @@ class TestConsistentSampling {
     fun testUniformPollingSampling() {
         val N = 20000
         val test = MultiContestTestData(20, 11, N)
-        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false) }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 

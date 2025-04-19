@@ -67,19 +67,5 @@ fun <T : Enum<T>> enumValueOf(name: String, entries: EnumEntries<T>): T? {
     return null
 }
 
-// Number of votes in each contest, return contestId -> candidateId -> nvotes
-fun tabulateVotes(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
-    val r = mutableMapOf<Int, MutableMap<Int, Int>>()
-    for (cvr in cvrs) {
-        for ((con, conVotes) in cvr.votes) {
-            val accumVotes = r.getOrPut(con) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return r
-}
 
 

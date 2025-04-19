@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.Sampler
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -37,7 +38,7 @@ class TestAuditPolling {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val assorter = contestUA.pollingAssertions.first().assorter
 
         val cvrs = test.makeCvrsFromContests()
@@ -90,7 +91,7 @@ class TestAuditPolling {
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 
         // count actual votes
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator()) // contest -> candidate -> count
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator()) // contest -> candidate -> count
         if (!silent && showContests) {
             votes.forEach { key, cands ->
                 println("contest ${key} ")
@@ -104,7 +105,7 @@ class TestAuditPolling {
             println("Contests")
             contests.forEach { println("  ${it}") }
         }
-        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false) }
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()

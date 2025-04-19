@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -47,7 +48,7 @@ class TestCvrs {
         val cvrs = makeCvrsByExactMean(N, theta)
         println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator()) // contest -> candidate -> count
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator()) // contest -> candidate -> count
         val contests: List<Contest> = makeContestsFromCvrs(votes, cardsPerContest(cvrs))
 
         val contestsUA = makeContestUAFromCvrs(contests, cvrs, true) // contest -> candidate -> count
@@ -118,7 +119,7 @@ class TestCvrs {
             candidateNames = listToMap("A", "B", "C", "D", "E"),
         )
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter
 

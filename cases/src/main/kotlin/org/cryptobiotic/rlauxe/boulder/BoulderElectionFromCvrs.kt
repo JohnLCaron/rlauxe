@@ -55,8 +55,9 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         }
     }
 
-    // make contest votes from the export.cvrs and export.redacted
-    fun countVotes() : List<ContestCount> { // contestId -> candidateId -> nvotes
+    data class ContestCount(val contestId: Int, val Nc: Int, val candidateCounts: Map<Int, Int>)
+
+    fun countVotesOld() : List<ContestCount> { // contestId -> candidateId -> nvotes
         val cvrCount = mutableMapOf<Int, Int>() // use the count for Nc until we have something better
         val contestCount = mutableMapOf<Int, MutableMap<Int, Int>>()
         export.cvrs.forEach { cvr ->
@@ -79,6 +80,32 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         }.sortedBy { it.contestId }
     }
 
+    // make contest votes from the export.cvrs and export.redacted
+    fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
+        val votes = mutableMapOf<Int, ContestTabulation>()
+
+        export.cvrs.forEach { cvr ->
+            cvr.contestVotes.forEach { contestVote ->
+                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation() }
+                tab.ncards++
+                tab.addVotes(contestVote.candVotes.toIntArray())
+            }
+        }
+        export.redacted.forEach { redacted ->
+            redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
+                val tab = votes.getOrPut(contestId) { ContestTabulation() }
+                // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
+                //   would be safer to make the cvrs first, then just use them to make the Contest
+                //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
+                //   one could also try to use OneAudit for the redacted cvrs.
+                //   but we still need to make an accuracte CardLocationManifest
+                tab.ncards += contestVote.map { it.value }.sum()
+                contestVote.forEach { cand, nvotes -> tab.addVote(cand, nvotes) }
+            }
+        }
+        return votes
+    }
+
     fun makeContests(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
         val infos = makeContestInfo()
         if (!quiet) println("ncontests with info = ${infos.size}")
@@ -86,18 +113,20 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         val countVotes = countVotes()
 
         val regContests = infos.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
-            val contestCount = countVotes.find { it.contestId == info.id }!!
+            val contestCount = countVotes[info.id]!!
             val sovContest = sovo.contests.find {
                 it.contestTitle == info.name
             }
             if (sovContest == null) {
                 println("*** cant find '${info.name}' in BoulderStatementOfVotes")
+            } else {
+                val diff = sovContest.totalBallots - contestCount.ncards
+                println(" makeContest ${info.id} cvrCount = ${contestCount.ncards} sovContest.totalBallots = ${sovContest.totalBallots} diff=$diff" )
+                // TODO undervotes, phantoms to deal with diff?
             }
-            val Nc = if (sovContest == null) contestCount.Nc else sovContest.totalBallots
-            // TODO undervotes, phantoms?
             // remove Write-Ins
-            val votesIn = contestCount.candidateCounts.filter { info.candidateIds.contains(it.key) }
-            Contest(info, votesIn, Nc, 0)
+            val votesIn = contestCount.votes.filter { info.candidateIds.contains(it.key) }
+            Contest(info, votesIn, contestCount.ncards, 0)
         }
 
         if (!quiet) {
@@ -191,9 +220,6 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         return rcvrs
     }
 }
-
-
-data class ContestCount(val contestId: Int, val Nc: Int, val candidateCounts: Map<Int, Int>)
 
 fun ContestInfo.show() = buildString {
     appendLine("$name ($id) choiceFunction=${choiceFunction} nwinners=$nwinners")
@@ -289,14 +315,17 @@ fun createElectionFromDominionCvrs(
     val allCvrs = electionFromCvrs.cvrs + redactedCvrs
 
     /////////////////
-    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
+    val contestsUA = contests.map {
+        ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles)
+    }
+    makeClcaAssertions(contestsUA, allCvrs.iterator())
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
     val cards = createSortedCards(allCvrs, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${allCvrs.size}")
 
-    checkContestsWithCards(contestsUA, cards.iterator())
+    checkContestsWithCards(contestsUA, cards.iterator(), show = true)
     checkVotesVsSovo(contests, sovo)
 
     writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())

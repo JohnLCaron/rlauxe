@@ -22,10 +22,10 @@ class PollingAudit(
             }
         } */
 
-        // TODO filter out contests that are done...
+        /* TODO filter out contests that are done...
         contestsUA.forEach { contest ->
             contest.makePollingAssertions()
-        }
+        } */
 
         /* check contests well formed etc
         contests = contestsUA.map { ContestRound(it, 1) }

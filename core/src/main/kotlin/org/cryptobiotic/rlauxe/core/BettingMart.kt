@@ -113,7 +113,7 @@ class BettingMart(
     }
 }
 
-class DebuggingSequences() {
+class DebuggingSequences {
     var isOn = false
     val xs = mutableListOf<Double>()
     val bets = mutableListOf<Double>()

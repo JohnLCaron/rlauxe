@@ -274,7 +274,7 @@ class TestAssorterPlurality {
             nwinners = 1,
         )
         val contest = Contest(info, mapOf(0 to 52, 1 to 44), Nc=100, Np=0)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val assorter = contestUA.pollingAssertions.first().assorter
         assertTrue(assorter is PluralityAssorter)
         assertEquals(0, assorter.winner())
@@ -311,7 +311,7 @@ class TestAssorterPlurality {
         val contest = Contest(info, mapOf(0 to 52, 1 to 44), Nc = 100, Np = 0)
         println(contest.show())
 
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         contestUA.pollingAssertions.forEach { assertion ->
             val assorter = assertion.assorter
             println("  assorter = $assorter")
@@ -337,6 +337,8 @@ class TestAssorterPlurality {
 
         // may be the problem. votes doesnt know when a cvr has both the winner and the loser on it
         assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(1,2)))))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(0,1,2)))))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to intArrayOf(0,1,2,3)))))
 
     }
 }

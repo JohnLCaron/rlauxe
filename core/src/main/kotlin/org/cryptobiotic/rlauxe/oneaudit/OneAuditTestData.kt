@@ -5,10 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToInt
-import kotlin.math.round
-import kotlin.random.Random
 
 // margin = (winner - loser) / Nc
 // (winner - loser) = margin * Nc

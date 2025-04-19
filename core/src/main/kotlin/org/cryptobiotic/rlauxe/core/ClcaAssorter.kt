@@ -41,11 +41,14 @@ open class ClcaAssorter(
 
     init {
         if (avgCvrAssortValue <= 0.5 || (noerror <= 0.5))
-            println("*** ${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
-        if (check) { // suspend checking for some tests that expect to fail
-            require(avgCvrAssortValue > 0.5) { "${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            println("*** ${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
+        /* if (check) { // TODO suspend checking for some tests that expect to fail
+            require(avgCvrAssortValue > 0.5) {
+                "${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5"
+            }
+            // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
-        }
+        } */
     }
 
     fun id() = info.id

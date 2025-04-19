@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.*
@@ -179,7 +180,7 @@ class TestClcaAttackSamplers {
 }
 
 fun showMargin(what: String, cvrs: List<Cvr>): Double {
-    val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator())
+    val votes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
     assertEquals(1, votes.size )
     val contest0 =  votes[0]!!.toSortedMap()
     assertEquals(2, contest0.size )

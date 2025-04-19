@@ -62,37 +62,30 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     }
 }
 
-fun checkContestsWithCards(contestsUA: List<ContestUnderAudit>, cards: Iterator<AuditableCard>) {
-    val votes = tabulateVotesFromCards(cards)
+fun checkContestsWithCards(contestsUA: List<ContestUnderAudit>, cards: Iterator<AuditableCard>, show: Boolean = false) {
+    val votes = tabulateCvrs(CvrIteratorAdapter(cards))
+    if (show) {
+        println("tabulateCvrs")
+        votes.toSortedMap().forEach { (key, value) ->
+            println(" $key : $value")
+        }
+    }
     contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
         val contestVotes = (contestUA.contest as Contest).votes
-        val cvrVotes = votes[contestUA.id]
-        if (cvrVotes == null) {
-            println("*** contest ${contestUA.contest} not found in tabulatedVotesFromCvrsUA")
+        val contestTab = votes[contestUA.id]
+        if (contestTab == null) {
+            println("*** contest ${contestUA.contest} not found in tabulated Cvrs")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         } else {
-            if (!checkEquivilentVotes(contestVotes, cvrVotes)) {
-                println("*** contest ${contestUA.contest} votes ${contestVotes} cvrVotes = $cvrVotes")
+            if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
+                println("*** contest ${contestUA.contest} cvrVotes = $contestTab")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
+            } else if (show) {
+                println("    contest ${contestUA.contest} cvrVotes = $contestTab")
             }
-            require(checkEquivilentVotes((contestUA.contest as Contest).votes, contestVotes))
+            require(checkEquivilentVotes(contestUA.contest.votes, contestVotes))
         }
     }
-}
-
-fun tabulateVotesFromCards(cards: Iterator<AuditableCard>): Map<Int, Map<Int, Int>> {
-    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    for (card in cards) {
-        val cvr = card.cvr()
-        for ((con, conVotes) in cvr.votes) {
-            val accumVotes = votes.getOrPut(con) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return votes
 }
 
 // ok if one has zero votes and the other doesnt
@@ -115,4 +108,52 @@ fun samplesNeeded(pvalues: List<Double>, riskLimit: Double): Int {
         }
     }
     return firstIndex
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Number of votes in each contest, return contestId -> candidateId -> nvotes
+fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
+    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
+    for (cvr in cvrs) {
+        for ((con, conVotes) in cvr.votes) {
+            val accumVotes = votes.getOrPut(con) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
+        }
+    }
+    return votes
+}
+
+// has both votes and ncards, return contestId -> ContestTabulation
+fun tabulateCvrs(cvrs: Iterator<Cvr>): Map<Int, ContestTabulation> {
+    val votes = mutableMapOf<Int, ContestTabulation>()
+    for (cvr in cvrs) {
+        for ((con, conVotes) in cvr.votes) {
+            val tab = votes.getOrPut(con) { ContestTabulation() }
+            tab.ncards++
+            tab.addVotes(conVotes)
+        }
+    }
+    return votes
+}
+
+class ContestTabulation {
+    val votes = mutableMapOf<Int, Int>()
+    var ncards = 0
+
+    fun addVote(cand: Int, vote: Int) {
+        val accum = votes.getOrPut(cand) { 0 }
+        votes[cand] = accum + vote
+    }
+
+    fun addVotes(cands: IntArray) {
+        cands.forEach { addVote(it, 1) }
+    }
+
+    override fun toString(): String {
+        return "${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards)"
+    }
 }

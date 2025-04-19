@@ -119,7 +119,7 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Np = 2)
         }.message
         assertNotNull(mess)
-        assertEquals("nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
 
         val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=1)
         assertEquals(contest, contest2)
@@ -209,7 +209,7 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Np = 2)
         }.message
         assertNotNull(mess)
-        assertEquals("nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
     }
 
     @Test
@@ -257,7 +257,7 @@ class TestContest {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
 
-        val contestUAp = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
         val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
 
@@ -291,34 +291,26 @@ class TestContest {
     }
 
     @Test
-    fun testContestUnderAuditExceptions() {
+    fun testContestUnderAuditIrvException() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.IRV)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Np = 0)
 
-        val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val mess1 = assertFailsWith<RuntimeException> {
-            contestUAp.makePollingAssertions()
+            ContestUnderAudit(contest, isComparison = false)
         }.message
         assertEquals("choice function IRV is not supported", mess1)
+    }
 
-        val mess2 = assertFailsWith<RuntimeException> {
-            contestUAp.makeClcaAssertions()
-        }.message
-        assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess2)
+    @Test
+    fun testContestUnderAuditExceptions() {
+        val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true)
-        val mess3 = assertFailsWith<RuntimeException> {
-            contestUAc.makePollingAssertions()
-        }.message
-        assertEquals("makePollingAssertions() can be called only on polling contest", mess3)
-
+        val contestUAc = ContestUnderAudit(contest, isComparison = false)
         val mess4 = assertFailsWith<RuntimeException> {
             contestUAc.makeClcaAssertions()
         }.message
-        assertEquals("choice function IRV is not supported", mess4)
-
-        assertNotEquals(contestUAp, contestUAc)
-        assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
+        assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess4)
     }
 
     @Test

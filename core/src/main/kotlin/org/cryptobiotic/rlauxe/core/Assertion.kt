@@ -39,7 +39,7 @@ class ClcaAssertion(
     val cassorter: ClcaAssorter,
 ): Assertion(info, cassorter.assorter()) {
 
-    override fun toString() = "${cassorter.assorter().desc()}"
+    override fun toString() = cassorter.assorter().desc()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

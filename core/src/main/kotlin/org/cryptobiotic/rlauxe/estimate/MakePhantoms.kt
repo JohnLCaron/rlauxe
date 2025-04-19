@@ -107,7 +107,7 @@ fun makePhantomCvrs(
     val results = mutableListOf<Cvr>()
     repeat(nphantoms) {
         val votes = mapOf( contestId to intArrayOf() )
-        Cvr("$prefix$it", votes, phantom = true)
+        results.add(Cvr("$prefix$it", votes, phantom = true))
     }
     return results
 }

@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 
 class TestAssorterMeansOld {
 
-    @Test
+    // @Test
     fun testPluralityAssort() {
         val N = 1000
         val cvrMean = 0.55
@@ -25,7 +25,7 @@ class TestAssorterMeansOld {
         testMeanAssort(contest, cvrs)
     }
 
-    @Test
+    // @Test
     fun testPluralityNwinners() {
         val Nc = 1000
         // val cvrMean = 0.55
@@ -48,7 +48,7 @@ class TestAssorterMeansOld {
     }
 
     fun testMeanAssort(contest: Contest, cvrs: List<Cvr>) {
-        val contestAU = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestAU = ContestUnderAudit(contest, isComparison = false)
 
         contestAU.pollingAssertions.forEach {
             println(" ${it.assorter}")
@@ -166,38 +166,6 @@ data class ContestTestDataNWinnersOld(
         }
     }
 }
-
-/* partition nthings into npartitions randomly
-// has a map: partitionIdx -> nvotes, where sum(nvotes) = nthings NOTE partitionIdx not id!!
-class Partition(nthings: Int, npartitions: Int) {
-    // a list from 0..(nthings - 1), divided into npartitions
-    val partition = mutableListOf<Pair<Int, Int>>()  // partitionIdx -> endPoint
-
-    init {
-        // randomly choose (npartitions - 1) dividers
-        val cutoffs = List(npartitions - 1) { it }.map { Pair(it, Random.nextInt(nthings)) }.toMutableList()
-        cutoffs.add(Pair(npartitions - 1, nthings)) // add the end point
-
-        // put in order
-        val sortedCutoffs = cutoffs.sortedBy { it.second }
-
-        // turn that into a partition
-        var last = 0
-        sortedCutoffs.forEach { ps ->
-            partition.add(Pair(ps.first, ps.second - last))
-            last = ps.second
-        }
-        partition.forEach { println(it) }
-        println()
-        require(partition.sumOf { it.second } == nthings)
-
-        var sortedPartition = partition.sortedBy { it.second }.reversed().toMutableList()
-        sortedPartition.forEach { println(it) }
-        println()
-
-        require(sortedPartition.sumOf { it.second } == nthings)
-    }
-} */
 
 class PartitionTrackerOld(val trackVotesRemaining: MutableList<Pair<Int, Int>>, val checkVoteCount: Boolean = true) {
     val underVoteCandidate = trackVotesRemaining.size

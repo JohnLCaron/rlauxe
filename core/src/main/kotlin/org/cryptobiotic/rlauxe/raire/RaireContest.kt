@@ -41,10 +41,20 @@ class RaireContestUnderAudit(
     contest: RaireContest,
     val winner: Int,
     val rassertions: List<RaireAssertion>,
-    // isComparison: Boolean = true, // TODO could this be polling ??
     hasStyle: Boolean = true
 ): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle) {
     val candidates =  contest.info.candidateIds
+
+    init {
+        this.pollingAssertions = makeRairePollingAssertions()
+    }
+
+    fun makeRairePollingAssertions(): List<Assertion> {
+        return rassertions.map { rassertion ->
+            val assorter = RaireAssorter(contest.info, rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
+            Assertion(contest.info, assorter)
+        }
+    }
 
     override fun makeClcaAssertions(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}

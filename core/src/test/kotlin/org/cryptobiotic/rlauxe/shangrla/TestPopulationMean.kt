@@ -214,7 +214,7 @@ class TestPopulationMeanWithoutReplacement {
             val num = (N * 0.5 - halfSamples.sum())
             val den = (N - halfSamples.numberOfSamples())
             val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = halfSamples)
-            println("mj=${mj} num=$num den=$den")
+            // println("mj=${mj} num=$num den=$den")
             halfSamples.count++
             assertEquals(.5, mj) // its the deviations of the sample from 1/2 that cause mj to change
         }
@@ -239,7 +239,7 @@ class TestPopulationMeanWithoutReplacement {
 
         repeat(100) {
             val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = samples)
-            println("mj=${mj}")
+            // println("mj=${mj}")
             samples.count++
         }
     }

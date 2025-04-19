@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -68,7 +69,7 @@ class TestMultiContestTestData {
         val (testCvrs, ballots) = test.makeCvrsAndBallots(true)
 
         val votes: Map<Int, Map<Int, Int>> =
-            org.cryptobiotic.rlauxe.util.tabulateVotes(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
+            tabulateVotesFromCvrs(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
         votes.forEach { vcontest ->
             println("  tabulate contest $vcontest")
             votes.forEach { vcontest ->
@@ -137,7 +138,7 @@ class TestMultiContestTestData {
 
             print(" fcontest margin=${df(fcontest.margin)} undervotePct=${fcontest.undervotePct} phantomPct=${fcontest.phantomPct}")
             println(" underCount=${fcontest.underCount} phantomCount=${fcontest.phantomCount}")
-            val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+            val contestUA = ContestUnderAudit(contest, isComparison = false)
             contestUA.assertions().forEach {
                 println("  $it")
             }

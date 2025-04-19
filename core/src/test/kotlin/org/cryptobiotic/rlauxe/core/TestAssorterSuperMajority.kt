@@ -148,7 +148,7 @@ class TestAssorterSuperMajority {
             nwinners = 1,
         )
         val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Np=0)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         val assorter = contestUA.pollingAssertions.first().assorter
         assertTrue(assorter is SuperMajorityAssorter)
         assertEquals(1, assorter.winner())

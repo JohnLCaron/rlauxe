@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
-import org.cryptobiotic.rlauxe.util.Stopwatch
 
 interface RlauxAuditIF {
     fun auditConfig() : AuditConfig

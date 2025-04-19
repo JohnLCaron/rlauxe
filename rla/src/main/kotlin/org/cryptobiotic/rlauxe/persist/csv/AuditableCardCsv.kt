@@ -157,11 +157,5 @@ class IteratorCardsCsvFile(filename: String): Iterator<AuditableCard> {
     }
 }
 
-class CvrIteratorAdapter(val cardIterator: Iterator<AuditableCard>) : Iterator<Cvr> {
-    override fun hasNext() = cardIterator.hasNext()
-    override fun next() = cardIterator.next().cvr()
-}
-
-
 
 

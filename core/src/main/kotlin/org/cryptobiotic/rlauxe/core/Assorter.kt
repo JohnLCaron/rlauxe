@@ -1,15 +1,19 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface AssorterIF {
+    // we need usePhantoms=false for avgAssort = reportedMargin, and for the overstatement
+    // we need usePhantoms=true for polling assort
     fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
     fun upperBound(): Double
     fun desc(): String
     fun winner(): Int
     fun loser(): Int
-    fun reportedMargin(): Double
+    fun reportedMargin(): Double // only agrees with assort average when nwinners = 1
+    fun reportedMean() = margin2mean(reportedMargin())
 
     // Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
     //    by treating the phantom CVRs as if they contain no valid vote in the contest
@@ -76,7 +80,7 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val loserVotes = useVotes[loser] ?: 0
             // TODO divide by voteForN * contest.Nc.toDouble() ?? Need to test.
             //   Im thinking you dont have this problem when averaging assort values.
-            val reportedMargin = (winnerVotes - loserVotes) / (contest.info.voteForN * contest.Nc.toDouble())
+            val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
             return PluralityAssorter(contest.info, winner, loser, reportedMargin)
         }
     }
@@ -114,7 +118,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
 
             // TODO divide by voteForN * contest.Nc.toDouble() ??
             val weight = 1 / (2 * minFraction)
-            val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / (contest.info.voteForN * contest.Nc.toDouble())
+            val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
             val reportedMargin = mean2margin(mean)
             return SuperMajorityAssorter(contest.info, winner, minFraction, reportedMargin)
         }

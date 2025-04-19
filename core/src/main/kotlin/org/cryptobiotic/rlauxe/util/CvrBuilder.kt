@@ -149,7 +149,7 @@ class ContestVoteBuilder(
     }
 
     fun addCandidate(candId: Int, addVote: Int = 1): ContestVoteBuilder {
-        if (addVote == 1) votes.add(candId) // TODO WRONG
+        if (addVote == 1) votes.add(candId) // TODO assumes vote = 1
         return this
     }
 

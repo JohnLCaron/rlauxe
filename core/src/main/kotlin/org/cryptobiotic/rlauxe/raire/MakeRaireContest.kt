@@ -79,7 +79,7 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
         Np = Np,
         raireAssertions,
     )
-    rcontestUA.makeClcaAssertions()
+    // rcontestUA.makeClcaAssertions()
 
     return rcontestUA
 }

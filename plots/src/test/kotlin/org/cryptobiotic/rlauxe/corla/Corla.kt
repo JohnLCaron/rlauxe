@@ -26,7 +26,6 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         val prevSamples = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
         var pvalue = 0.0
         var pvalueMin = 1.0
-        var sampleFirstUnderLimit = 0
 
         while (sampleNumber < maxSample) {
             val xj: Double = drawSample()
@@ -48,7 +47,6 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
 
             // not clear we should wait until now to update prevSamples
             prevSamples.addSample(xj)
-            if (sampleFirstUnderLimit == 0 && pvalue < riskLimit) sampleFirstUnderLimit = sampleNumber + 1
             if (pvalue < pvalueMin) pvalueMin = pvalue
 
             if (terminateOnNullReject && (pvalue < riskLimit)) {
@@ -57,7 +55,7 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         }
         val status = if (pvalue <= riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
 
-        return TestH0Result(status, sampleNumber, sampleFirstUnderLimit, pvalueMin, pvalue, prevSamples)
+        return TestH0Result(status, sampleNumber, pvalueMin, pvalue, prevSamples)
     }
 }
 

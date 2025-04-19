@@ -2,10 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.*
 
 class TestContest {
 
@@ -118,11 +115,11 @@ class TestContest {
         }.message
         assertEquals("'3' not found in contestInfo candidateIds [0, 1, 2]", mess1)
 
-        // TODO
-/*        val mess2 = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 108), Nc=111, Np=0)
+        val mess = assertFailsWith<IllegalArgumentException> {
+            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Np = 2)
         }.message
-        assertEquals("Nc 111 must be > totalVotes 208", mess2) */
+        assertNotNull(mess)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
 
         val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=1)
         assertEquals(contest, contest2)
@@ -138,11 +135,129 @@ class TestContest {
     }
 
     @Test
+    fun testContestSMBasics() {
+        val info = ContestInfo(
+            "testContestInfo",
+            0,
+            mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
+            SocialChoiceFunction.SUPERMAJORITY,
+            minFraction = .55,
+        )
+        val contest = Contest(info, mapOf(0 to 100, 1 to 125), Nc=227, Np=2)
+        assertEquals(info.id, contest.id)
+        assertEquals(info.name, contest.name)
+        assertEquals(info.choiceFunction, contest.choiceFunction)
+        assertEquals(mapOf(0 to 100, 1 to 125, 2 to 0), contest.votes)
+        assertEquals(227, contest.Nc)
+        assertEquals(2, contest.Np)
+        assertEquals(listOf(1), contest.winners)
+        assertEquals(listOf(0, 2), contest.losers)
+        assertEquals(listOf("cand1"), contest.winnerNames)
+        assertEquals(
+            "testContestInfo (0) Nc=227 Np=2 votes={1=125, 0=100, 2=0}",
+            contest.toString()
+        )
+        println("margin(1,0) = ${contest.calcMargin(1,0)}")
+        assertEquals(25/227.toDouble(), contest.calcMargin(1,0))
+
+        assertTrue(contest.percent(1) > info.minFraction!!)
+    }
+
+    @Test
+    fun testContestSMnoWinner() {
+        val info = ContestInfo(
+            "testContestInfo",
+            0,
+            mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
+            SocialChoiceFunction.SUPERMAJORITY,
+            minFraction = .55,
+        )
+        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Np=2)
+        assertEquals(info.id, contest.id)
+        assertEquals(info.name, contest.name)
+        assertEquals(info.choiceFunction, contest.choiceFunction)
+        assertEquals(mapOf(0 to 100, 1 to 123, 2 to 2), contest.votes)
+        assertEquals(227, contest.Nc)
+        assertEquals(2, contest.Np)
+        assertEquals(emptyList(), contest.winners)
+        assertEquals(listOf(0, 1, 2), contest.losers)
+        assertEquals(emptyList(), contest.winnerNames)
+        assertEquals(
+            "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2}",
+            contest.toString()
+        )
+        println("margin(1,0) = ${contest.calcMargin(1,0)}")
+        assertEquals(23/227.toDouble(), contest.calcMargin(1,0))
+
+        assertTrue(contest.percent(1) < info.minFraction!!)
+
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+        contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
+        println("minAssert = ${contestUAc.minAssertion()}")
+    }
+
+    @Test
+    fun testContestSMerrs() {
+        val info = ContestInfo(
+            "testContestInfo",
+            0,
+            mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
+            SocialChoiceFunction.SUPERMAJORITY,
+            minFraction = .55,
+        )
+        val mess = assertFailsWith<IllegalArgumentException> {
+            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Np = 2)
+        }.message
+        assertNotNull(mess)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
+    }
+
+    @Test
+    fun testContestSMtwoWinners() {
+        val info = ContestInfo(
+            "testContestInfo",
+            0,
+            mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
+            SocialChoiceFunction.SUPERMAJORITY,
+            minFraction = .33,
+            nwinners = 2
+        )
+        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Np=2)
+        assertEquals(info.id, contest.id)
+        assertEquals(info.name, contest.name)
+        assertEquals(info.choiceFunction, contest.choiceFunction)
+        assertEquals(mapOf(0 to 100, 1 to 123, 2 to 2), contest.votes)
+        assertEquals(227, contest.Nc)
+        assertEquals(2, contest.Np)
+        assertEquals(listOf(1, 0), contest.winners)
+        assertEquals(listOf(2), contest.losers)
+        assertEquals(listOf("cand1", "cand0"), contest.winnerNames)
+        assertEquals(
+            "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2}",
+            contest.toString()
+        )
+        println("margin(1,0) = ${contest.calcMargin(1,0)} percent(1) = ${contest.percent(1)}")
+        assertEquals(23/227.toDouble(), contest.calcMargin(1,0))
+        println("margin(1,2) = ${contest.calcMargin(1,2)} percent(2) = ${contest.percent(2)}")
+        assertEquals(121/227.toDouble(), contest.calcMargin(1,2))
+        println("margin(0,2) = ${contest.calcMargin(0,2)} percent(0) = ${contest.percent(0)}")
+        assertEquals(98/227.toDouble(), contest.calcMargin(0,2))
+
+        assertTrue(contest.percent(0) >= info.minFraction!!)
+        assertTrue(contest.percent(1) >= info.minFraction!!)
+        assertTrue(contest.percent(2) < info.minFraction!!)
+
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+        contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
+        println("minAssert = ${contestUAc.minAssertion()}")
+    }
+
+    @Test
     fun testContestUnderAudit() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
 
-        val contestUAp = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
         val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
 
@@ -176,34 +291,26 @@ class TestContest {
     }
 
     @Test
-    fun testContestUnderAuditExceptions() {
+    fun testContestUnderAuditIrvException() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.IRV)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Np = 0)
 
-        val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val mess1 = assertFailsWith<RuntimeException> {
-            contestUAp.makePollingAssertions()
+            ContestUnderAudit(contest, isComparison = false)
         }.message
         assertEquals("choice function IRV is not supported", mess1)
+    }
 
-        val mess2 = assertFailsWith<RuntimeException> {
-            contestUAp.makeClcaAssertions()
-        }.message
-        assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess2)
+    @Test
+    fun testContestUnderAuditExceptions() {
+        val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true)
-        val mess3 = assertFailsWith<RuntimeException> {
-            contestUAc.makePollingAssertions()
-        }.message
-        assertEquals("makePollingAssertions() can be called only on polling contest", mess3)
-
+        val contestUAc = ContestUnderAudit(contest, isComparison = false)
         val mess4 = assertFailsWith<RuntimeException> {
             contestUAc.makeClcaAssertions()
         }.message
-        assertEquals("choice function IRV is not supported", mess4)
-
-        assertNotEquals(contestUAp, contestUAc)
-        assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
+        assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess4)
     }
 
     @Test

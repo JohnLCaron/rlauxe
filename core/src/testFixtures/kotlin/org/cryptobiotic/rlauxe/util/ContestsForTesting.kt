@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.random.Random
 
@@ -8,7 +9,7 @@ fun makeContestFromCvrs(
     info: ContestInfo,
     cvrs: List<Cvr>,
 ): Contest {
-    val votes = tabulateVotes(cvrs.iterator())
+    val votes = tabulateVotesFromCvrs(cvrs.iterator())
     val ncards = cardsPerContest(cvrs)
     return Contest(
         info,
@@ -30,7 +31,7 @@ fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
     return d
 }
 
-// tabulate votes, make sure of correct winners, count ncvrs for each contest, create ContestUnderAudit
+// tabulate votes, make sure of correct winners, count ncvrs for each contest
 fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Int> {
     val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
     contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete
@@ -55,7 +56,7 @@ fun makeContestsFromCvrs(
     cvrs: List<Cvr>,
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
 ): List<Contest> {
-    val votes = tabulateVotes(cvrs.iterator())
+    val votes = tabulateVotesFromCvrs(cvrs.iterator())
     val ncards = cardsPerContest(cvrs)
     return makeContestsFromCvrs(votes, ncards, choiceFunction)
 }

@@ -3,12 +3,10 @@ package org.cryptobiotic.rlauxe.sf
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.makeClcaAssertions
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportJson
 import org.cryptobiotic.rlauxe.dominion.import
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrJsonStream
@@ -177,6 +175,7 @@ class CardPool(val poolId: Int) {
 
 class BallotManifest(val tab: Int, val batch: Int, var count: Int)
 
+// TODO use ContestTabulation in CheckAudits
 data class ContestCount(var ncards: Int = 0, val counts: MutableMap<Int, Int> = mutableMapOf() ) {
 
     fun reportedMargin(winner: Int, loser: Int): Double {
@@ -220,7 +219,6 @@ fun createSfElectionFromCardsOA(
     // val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap)
 
     // No IRV contests are allowed
-
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
     )
@@ -243,9 +241,13 @@ fun createSfElectionFromCardsOA(
             val pools = ballotPools.filter { it.contest == info.id }.associateBy { it.id }
             val contestOA = OneAuditContest(info, contestVotes.votes, contestVotes.countBallots, pools)
             println(contestOA)
-            contestsUA.add(OAContestUnderAudit(contestOA, auditConfig.hasStyles).makeClcaAssertions())
+            contestsUA.add(OAContestUnderAudit(contestOA, auditConfig.hasStyles))
         }
     }
+
+    // make all the clca assertions in one go
+    makeClcaAssertions(contestsUA, CvrIteratorAdapter(readCardsCsvIterator(cardFile)))
+
     // these checks may modify the contest status
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 

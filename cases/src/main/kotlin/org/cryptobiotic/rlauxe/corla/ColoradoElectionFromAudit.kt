@@ -59,17 +59,27 @@ fun coloradoElectionFromDetailXmlAndPrecincts(
     }
     println("   total cards = $count")
 
-    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
-    // these checks may modify the contest status
-    checkContestsCorrectlyFormed(auditConfig, contestsUA)
+    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
 
-    val precinctReader = TreeReaderIterator(
+    // note that here, the cvrs dont have to be sorted
+    val precinctCvrReader = TreeReaderIterator(
         "$topDir/cards/",
         fileFilter = { true },
         reader = { path -> readCardsCsvIterator(path.toString()) }
     )
-    // val precinctReader = PrecinctReader("$auditDir/cards/")
-    checkContestsWithCards(contestsUA, precinctReader)
+    // make all the clca assertions in one go
+    makeClcaAssertions(contestsUA, CvrIteratorAdapter(precinctCvrReader))
+
+    // these checks may modify the contest status
+    checkContestsCorrectlyFormed(auditConfig, contestsUA)
+
+    // need to reinit the iterator
+    val precinctCvrReader2 = TreeReaderIterator(
+        "$topDir/cards/",
+        fileFilter = { true },
+        reader = { path -> readCardsCsvIterator(path.toString()) }
+    )
+    checkContestsWithCards(contestsUA, precinctCvrReader2)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
@@ -119,7 +129,10 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
             useNc,
             0
         )
-        contests.add(contest)
+        // they dont have cvrs for contest >= 260, so well just skip them
+        if (contest.id < 260) {
+            contests.add(contest)
+        }
     }
 
     // TODO
@@ -162,8 +175,6 @@ private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Cont
                     votes[candidateId] = it.totalVotes
                 }
             }
-            if (contest.id > 260)
-                print("")
             contestVotes[contest.id] = votes
         }
     }

@@ -22,10 +22,7 @@ fun runAlphaMartRepeated(
     estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
 ): RunTestRepeatedResult {
 
-    val t = 0.5
-    val c = max(eps, ((eta0 - t) / 2))
-
-    val useEstimFn = estimFn ?: TruncShrinkage(drawSample.maxSamples(), true, upperBound = upperBound, d = d, eta0 = eta0, c = c)
+    val useEstimFn = estimFn ?: TruncShrinkage(drawSample.maxSamples(), true, upperBound = upperBound, d = d, eta0 = eta0)
 
     val alpha = AlphaMart(
         estimFn = useEstimFn,

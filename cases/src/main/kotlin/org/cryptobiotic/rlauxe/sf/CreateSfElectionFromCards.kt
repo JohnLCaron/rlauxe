@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCard
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
-import org.cryptobiotic.rlauxe.persist.csv.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.*
@@ -85,10 +84,15 @@ fun createSfElectionFromCards(
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
 
-    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles).makeClcaAssertions() }
+    val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
     val allContests = contestsUA + irvContests
-    // these checks may modify the contest status
+
+    // these checks may modify the contest status; may not reference the clca assertions
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
+
+    // make all the clca assertions in one go
+    val auditableContests = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
+    makeClcaAssertions(auditableContests, CvrIteratorAdapter(readCardsCsvIterator(cardFile)))
 
     val publisher = Publisher(auditDir)
     writeContestsJsonFile(allContests, publisher.contestsFile())

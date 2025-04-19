@@ -40,11 +40,9 @@ class CompareShrinkTrunkWithFixed {
     fun testAlphaMartTrunc(eta0: Double, sampler: Sampler): TestH0Result {
         val u = 1.0
         val d = 10000
-        val t = 0.5
-        val c = max(eps, (eta0 - t) / 2)
         val N = sampler.maxSamples()
 
-        val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
+        val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
         val alpha = AlphaMart(estimFn = trunc, N = N)
         return alpha.testH0(N, true) { sampler.sample() }
     }
@@ -103,11 +101,9 @@ class CompareShrinkTrunkWithFixed {
     fun runAlphaMartTruncRepeated(eta0: Double, sampler: Sampler, ntrials: Int): RunTestRepeatedResult {
         val u = 1.0
         val d = 10000
-        val t = 0.5
-        val c = max(eps, (eta0 - t) / 2)
         val N = sampler.maxSamples()
 
-        val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
+        val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
         val alpha = AlphaMart(estimFn = trunc, N = sampler.maxSamples())
 
         return runTestRepeated(

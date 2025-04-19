@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
@@ -13,6 +15,18 @@ class TestColoradoElectionFromAudit {
     fun testReadColoradoElectionDetail() {
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
+    }
+
+    @Test
+    fun testCvrsAreComplete() {
+        val topDir = "/home/stormy/temp/cases/corla"
+        val precinctCvrReader = TreeReaderIterator(
+            "$topDir/cards/",
+            fileFilter = { true },
+            reader = { path -> readCardsCsvIterator(path.toString()) }
+        )
+        val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(CvrIteratorAdapter(precinctCvrReader)).toSortedMap()
+        tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
     }
 
     // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)

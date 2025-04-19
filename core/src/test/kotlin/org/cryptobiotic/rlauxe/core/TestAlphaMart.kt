@@ -34,7 +34,7 @@ class TestAlphaMart {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()
-        val contestUA = ContestUnderAudit(contest, isComparison = false, hasStyle = true).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false, hasStyle = true)
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
@@ -80,9 +80,8 @@ fun runAlphaMartRepeated(
 ): RunTestRepeatedResult {
 
     val t = 0.5
-    val c = max(eps, ((eta0 - t) / 2))
 
-    val useEstimFn = estimFn ?: TruncShrinkage(drawSample.maxSamples(), true, upperBound = upperBound, d = d, eta0 = eta0, c = c)
+    val useEstimFn = estimFn ?: TruncShrinkage(drawSample.maxSamples(), true, upperBound = upperBound, d = d, eta0 = eta0)
 
     val alpha = AlphaMart(
         estimFn = useEstimFn,

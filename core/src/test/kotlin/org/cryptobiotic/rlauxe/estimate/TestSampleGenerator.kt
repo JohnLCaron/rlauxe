@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.Sampler
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -25,7 +26,7 @@ class TestSampleGenerator {
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
         // count actual votes
-        val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs.iterator()) // contest -> candidate -> count
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator()) // contest -> candidate -> count
         if (!silent && showContests) {
             votes.forEach { key, cands ->
                 println("contest ${key} ")
@@ -45,7 +46,7 @@ class TestSampleGenerator {
             }
             assertEquals(contest.winners, listOf(0))
         }
-        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false).makePollingAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false) }
 
         contestsUA.forEach { contestUA ->
             contestUA.pollingAssertions.forEach { ass ->

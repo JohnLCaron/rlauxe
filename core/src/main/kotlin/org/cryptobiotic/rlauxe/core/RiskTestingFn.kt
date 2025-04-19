@@ -7,12 +7,13 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 
     // "pre-audit" contest status
     NoLosers(1,true, true),  // no losers, ie ncandidates <= nwinners
-    ContestMisformed(2,true, false), // Contest incorrectly formed
-    MinMargin(3,true, false), // margin too small for RLA to efficiently work
-    TooManyPhantoms(4,true, false), // too many phantoms, makes margin < 0
+    NoWinners(2,true, true),  // no winners, eg all candidates have < minFraction
+    ContestMisformed(3,true, false), // Contest incorrectly formed
+    MinMargin(4,true, false), // margin too small for RLA to efficiently work
+    TooManyPhantoms(5,true, false), // too many phantoms, makes margin < 0
 
-    FailMaxSamplesAllowed(5,true, false),  // estimated samples greater than maximum samples allowed
-    AuditorRemoved(6,true, false),  // auditor decide to remove it
+    FailMaxSamplesAllowed(6,true, false),  // estimated samples greater than maximum samples allowed
+    AuditorRemoved(7,true, false),  // auditor decide to remove it
 
     // possible returns from RiskTestingFn
     LimitReached(10,false, false),  // cant tell from the number of samples available
@@ -25,7 +26,6 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,      // number of samples used in testH0
-    val sampleFirstUnderLimit: Int, // first sample index with pvalue with risk < limit, one based TODO not needed
     val pvalueMin: Double,    // smallest pvalue in the sequence
     val pvalueLast: Double,    // last pvalue
     val tracker: SampleTracker,
@@ -33,7 +33,6 @@ data class TestH0Result(
     override fun toString() = buildString {
         append("TestH0Result status=$status")
         append(" sampleCount=$sampleCount")
-        append(" sampleFirstUnderLimit=${sampleFirstUnderLimit}")
         append(" pvalueMin=${pvalueMin}")
         append(" pvalueLast=${pvalueLast}")
     }

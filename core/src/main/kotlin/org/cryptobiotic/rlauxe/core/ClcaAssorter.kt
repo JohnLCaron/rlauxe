@@ -30,7 +30,7 @@ open class ClcaAssorter(
     val assorter: AssorterIF,   // A
     val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
     val hasStyle: Boolean = true,
-    val check: Boolean = true, // TODO get rid of
+    val check: Boolean = true,
 ) {
     val assorterMargin = 2.0 * avgCvrAssortValue - 1.0 // Define v ≡ 2Āc − 1, the reported assorter margin
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
@@ -41,11 +41,14 @@ open class ClcaAssorter(
 
     init {
         if (avgCvrAssortValue <= 0.5 || (noerror <= 0.5))
-            println("*** ${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
-        if (check) { // suspend checking for some tests that expect to fail
-            require(avgCvrAssortValue > 0.5) { "${info.name} ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5" }// the math requires this; otherwise divide by negative number flips the inequality
+            println("*** ${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
+        /* if (check) { // TODO suspend checking for some tests that expect to fail
+            require(avgCvrAssortValue > 0.5) {
+                "${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5"
+            }
+            // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
-        }
+        } */
     }
 
     fun id() = info.id

@@ -223,7 +223,7 @@ class CreatePollingDiffMeans {
         val reportedMean = theta + reportedMeanDiff
 
         val info = ContestInfo("contest0", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
-        val contestUA = makeContestUAfromCvrs(info, cvrs, isComparison = false).makePollingAssertions()
+        val contestUA = makeContestUAfromCvrs(info, cvrs, isComparison = false)
 
         val results = mutableListOf<RunTestRepeatedResult>()
         contestUA.pollingAssertions.map { assert ->

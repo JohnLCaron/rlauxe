@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.math.min
@@ -11,8 +14,9 @@ data class ContestInfo(
     val name: String,
     val id: Int,
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    val choiceFunction: SocialChoiceFunction,
-    val nwinners: Int = 1,
+    val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
+    val nwinners: Int = 1,          // eg "numberElected"
+    val voteForN: Int = nwinners,   // eg "contestSelectionLimit" or maybe "optionSelectionLimit"
     val minFraction: Double? = null, // supermajority only.
 ) {
     val candidateIds: List<Int>
@@ -22,6 +26,7 @@ data class ContestInfo(
         require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || minFraction == null) { "only SUPERMAJORITY can have minFraction"}
         require(minFraction == null || minFraction in (0.0..1.0)) { "minFraction between 0 and 1"}
         require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
+        require(voteForN in (1..candidateNames.size)) { "voteForN between 1 and candidateNames.size"}
 
         val candidateSet = candidateNames.toList().map { it.first }.toSet()
         require(candidateSet.size == candidateNames.size) { "duplicate candidate name $candidateNames"} // may not be possible
@@ -85,7 +90,7 @@ class Contest(
         override val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
         override val Nc: Int,
-        override val Np: Int,       // TODO may not know this value, if !hasStyles
+        override val Np: Int,
     ): ContestIF {
     override val id = info.id
     val name = info.name
@@ -113,11 +118,9 @@ class Contest(
         }
         votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
         val nvotes = votes.values.sum()
-        // only true when nwinners = 1
-        /* if (info.nwinners == 1 && info.choiceFunction != SocialChoiceFunction.IRV) {
-            require(nvotes <= Nc) { "Nc $Nc must be > totalVotes ${nvotes}" }
-        } */
-        // undervotes = Nc * info.nwinners - nvotes - Np // assumes nwinners = "vote for n"
+        require(nvotes <= info.voteForN * (Nc - Np)) {
+            "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
+        }
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
@@ -126,7 +129,7 @@ class Contest(
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }
         val useNwinners = min(overTheMin.size, info.nwinners)
-        winners = overTheMin.subList(0, useNwinners).map { it.first } // TODO deal with when there are no winners
+        winners = overTheMin.subList(0, useNwinners).map { it.first }
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
         winnerNames = winners.map { mapIdToName[it]!! }
 
@@ -145,8 +148,12 @@ class Contest(
     fun calcMargin(winner: Int, loser: Int): Double {
         val winnerVotes = votes[winner] ?: 0
         val loserVotes = votes[loser] ?: 0
-        val reportedMargin = (winnerVotes - loserVotes) / Nc.toDouble()
-        return reportedMargin
+        return (winnerVotes - loserVotes) / Nc.toDouble()
+    }
+
+    fun percent(cand: Int): Double {
+        val candVotes = votes[cand] ?: 0
+        return candVotes / Nc.toDouble()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -189,7 +196,7 @@ class Contest(
     }
 }
 
-/** Contest with assertions. */
+/** Contest with assertions, some mutability. */
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true,
@@ -202,30 +209,35 @@ open class ContestUnderAudit(
     val Nc = contest.Nc
     val Np = contest.Np
 
-    // TODO can we just call the correct makeAssertions()? before we needed the cvrs....
-    var pollingAssertions: List<Assertion> = emptyList()
+    var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
+    var pollingAssertions: List<Assertion> = emptyList() // TODO var for serialization. is that ok?
     var clcaAssertions: List<ClcaAssertion> = emptyList()
-    var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, ContestMisformed, MinMargin, TooManyPhantoms
 
     init {
         if (contest.losers.size == 0) {
             preAuditStatus = TestH0Status.NoLosers
+        } else  if (contest.winners.size == 0) {
+            preAuditStatus = TestH0Status.NoWinners
+        }
+        // should really be called after init
+        if (contest !is RaireContest  ) {
+            pollingAssertions = makePollingAssertions()
         }
     }
 
-    // open fun makePollingAssertions(votes: Map<Int, Int>?=null): ContestUnderAudit {
-    open fun makePollingAssertions(): ContestUnderAudit {
-        require(!isComparison) { "makePollingAssertions() can be called only on polling contest"}
-        // val useVotes = if (votes != null) votes else (contest as Contest).votes
-        val useVotes = (contest as Contest).votes // TODO assumes Contest ??
+    fun makePollingAssertions(): List<Assertion> {
+        val useVotes = when (contest) {
+            is Contest -> contest.votes
+            is OneAuditContest -> contest.votes
+            else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
+        }
 
-        this.pollingAssertions = when (choiceFunction) {
+        return when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions(useVotes)
             SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
-        return this
     }
 
     open fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
@@ -251,23 +263,36 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    // TODO: assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ??
-    // cvrs must be complete in order to get the margin right.
+    open fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
+        val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
+        cvrs.filter { it.hasContest(id) }.forEach { cvr ->
+            assertionMap.map { (assertion, welford) ->
+                welford.update(assertion.assorter.assort(cvr, usePhantoms = false))  //TODO usePhantoms?
+            }
+        }
+        return makeClcaAssertions(assertionMap)
+    }
+
+    open fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
+        require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
+
+        this.clcaAssertions = assertionMap.filter { it.first.info.id == this.id }
+            .map { (assertion, welford) ->
+                val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, welford.mean, hasStyle=hasStyle, check=false) // TODO check = false
+                ClcaAssertion(contest.info, clcaAssorter)
+            }
+        return this
+    }
+
+    // when does assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ?? only when voteForN = 1 ???
+    // no cvrs, use assertion.assorter.reportedMargin()
+    // TODO  in some ways this is more robust than averaging cvrs, since cvrs have to be complete and accurate.
+    //   OTOH, need complete and accurate CardLocation Manifest!!
     open fun makeClcaAssertions(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        // val useVotes = if (votes != null) votes else (contest as Contest).votes
-        val useVotes = (contest as Contest).votes // // TODO assumes Contest ??
-        val assertions = when (contest.info.choiceFunction) {
-            SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY,
-                -> makePluralityAssertions(useVotes)
-            SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
-            else -> throw RuntimeException("choice function ${contest.info.choiceFunction} is not supported")
-        }
+        // require(contest.info.voteForN == 1) { "makeComparisonAssertions() with no cvrs can only be used when voteForN = 1"}
 
-        this.clcaAssertions = assertions.map { assertion ->
-            //val margin = assertion.assorter.calcAssorterMargin(id, cvrs)
-            //require (doubleIsClose(margin, assertion.assorter.reportedMargin())) { "margin mismatch: $margin != ${assertion.assorter.reportedMargin()}" }
+        this.clcaAssertions = pollingAssertions.map { assertion ->
             val margin = assertion.assorter.reportedMargin()
             val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
             ClcaAssertion(contest.info, clcaAssorter)
@@ -358,5 +383,26 @@ open class ContestUnderAudit(
         return result
     }
 
+}
+
+fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>) {
+    val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
+    contestsUA.forEach { contestsUA ->
+        contestsUA.pollingAssertions.forEach { assertion ->
+            assertionMap.add(Pair(assertion, Welford()))
+        }
+    }
+    println("assertions = ${assertionMap.size}")
+
+    cvrs.forEach { cvr ->
+        assertionMap.map { (assertion, welford) ->
+            if (cvr.hasContest(assertion.info.id)) {
+                welford.update(assertion.assorter.assort(cvr, usePhantoms = false))
+            }
+        }
+    }
+    assertionMap.forEach { (assert, welford) -> println("contest $assert : ${welford.mean}")}
+
+    contestsUA.forEach { it.makeClcaAssertions(assertionMap) }
 }
 

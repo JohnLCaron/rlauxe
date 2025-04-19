@@ -33,7 +33,7 @@ class TestAssorterBasics {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -79,7 +79,7 @@ class TestAssorterBasics {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -132,7 +132,7 @@ class TestAssorterBasics {
             minFraction = .42,
             )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
         println("votes: [${showVotes((contestUA.contest as Contest).votes)}]")
 
         val assertions = contestUA.pollingAssertions
@@ -143,15 +143,19 @@ class TestAssorterBasics {
             assertIs<SuperMajorityAssorter>(assertion.assorter)
             val facc = 1.0 / (2.0 * contest.info.minFraction!!)
             assertEquals(facc, assertion.assorter.upperBound())
+
             val assortAvg = cvrs.map { cvr ->
                 val usew1 = cvr.hasMarkFor(contest.id, assertion.assorter.winner())
                 val usew2 = cvr.hasOneVote(contest.id, contest.info.candidateIds)
                 println("${cvr.id}: ${assertion.assorter.assort(cvr)} usew1=$usew1 usew2=$usew2")
                 assertion.assorter.assort(cvr)
             }.average()
+
             val mean = margin2mean(assertion.assorter.reportedMargin())
             println("$assertion: facc=$facc assortAvg=${assortAvg} mean=${mean}")
-            assertEquals(assortAvg, mean)
+
+            // we no longer expect these to be equal, when nwinners > 1
+            // assertEquals(assortAvg, mean)
         }
     }
 }

@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.dominion
 
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.boulder.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.tabulateVotes
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -401,15 +401,15 @@ class TestDominionCvrReader {
             println(info.show())
         } */
         val countVotes = maker.countVotes()
-        val contests = countVotes.map { contestCount ->
-            val info = infos.find { it.id == contestCount.contestId }!!
-            contestCount.candidateCounts.forEach {
+        val contests = infos.map { info ->
+            val contestTab = countVotes[info.id]!!
+            contestTab.votes.forEach {
                 if (!info.candidateIds.contains(it.key)) {
-                    "contestCount ${contestCount.contestId } has candidate '${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
+                    "contestCount ${info.id } has candidate '${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
                 }
             }
-            val inputVotes = contestCount.candidateCounts.filter{ info.candidateIds.contains(it.key) }
-            Contest(info, inputVotes, contestCount.Nc, 0)
+            val inputVotes = contestTab.votes.filter{ info.candidateIds.contains(it.key) }
+            Contest(info, inputVotes, contestTab.ncards, 0)
         }
         /* println("ncontests with votes = ${contests.size}")
         contests.forEach { contest ->
@@ -467,7 +467,7 @@ class TestDominionCvrReader {
         println("took = $stopwatch")
 
         // TODO check that vote tallies agree...
-        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(redactedCvrs.iterator())
+        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(redactedCvrs.iterator())
 
         val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
         export.redacted.forEach { redacted ->

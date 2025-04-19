@@ -22,10 +22,10 @@ class PollingAudit(
             }
         } */
 
-        // TODO filter out contests that are done...
+        /* TODO filter out contests that are done...
         contestsUA.forEach { contest ->
             contest.makePollingAssertions()
-        }
+        } */
 
         /* check contests well formed etc
         contests = contestsUA.map { ContestRound(it, 1) }
@@ -95,7 +95,6 @@ fun auditPollingAssertion(
     val assorter = assertion.assorter
 
     val eta0 = margin2mean(assorter.reportedMargin())
-    val c = (eta0 - 0.5) / 2
 
     val estimFn = TruncShrinkage(
         N = contest.Nc,
@@ -103,7 +102,6 @@ fun auditPollingAssertion(
         upperBound = assorter.upperBound(),
         d = auditConfig.pollingConfig.d,
         eta0 = eta0,
-        c = c,
     )
     val testFn = AlphaMart(
         estimFn = estimFn,

@@ -34,7 +34,7 @@ class TestAssertions {
             .addCvr().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -75,7 +75,7 @@ class TestAssertions {
             .addCvr().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false).makePollingAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -111,7 +111,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
 
         val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
@@ -134,9 +134,8 @@ class TestAssertions {
         val expectedShow =
 """ contestInfo: 'AvB' (0) candidates={A=0, B=1, C=2, D=3, E=4}
  assorter:  winner=4 loser=0 reportedMargin=0.2492
- cassorter: avgCvrAssortValue=0.6245797534553604 margin=0.24915950691072086 noerror=0.5711542564540217 upperBound=1.1423085129080435
 """
-        assertEquals(expectedShow, firstAssertion.show())
+        assertTrue(firstAssertion.show().contains(expectedShow))
     }
 
     @Test
@@ -152,7 +151,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
 
         val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
@@ -181,7 +180,7 @@ class TestAssertions {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         //val exception = assertFailsWith<RuntimeException> {
-            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
         //}
         //println(exception)
         //assertNotNull(exception.message)

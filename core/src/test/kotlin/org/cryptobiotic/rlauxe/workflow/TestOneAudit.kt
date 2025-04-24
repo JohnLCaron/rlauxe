@@ -48,7 +48,7 @@ class TestOneAudit {
         val workflow = OneAudit(auditConfig, listOf(contestOA),
             MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
 
-        runAudit("testOneAuditContest", workflow)
+        runAudit("testOneAuditContest", workflow, quiet=false)
     }
 
     @Test

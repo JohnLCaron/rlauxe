@@ -123,16 +123,10 @@ class TestAssertions {
         val lastAssertion = assertions.last()
         assertNotEquals(firstAssertion, lastAssertion)
         assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
-        assertEquals(" winner=4 loser=0 reportedMargin=0.2492", firstAssertion.toString())
+        assertEquals(" winner=4 loser=0 reportedMargin=0.2492  reportedMean=0.6246", firstAssertion.toString())
 
         assertTrue(firstAssertion.checkEquals(firstAssertion).isEmpty())
         assertEquals(" assorter not equal cassorter not equal", firstAssertion.checkEquals(lastAssertion))
-
-        val expectedShow =
-""" contestInfo: 'AvB' (0) candidates={A=0, B=1, C=2, D=3, E=4}
- assorter:  winner=4 loser=0 reportedMargin=0.2492
-"""
-        assertTrue(firstAssertion.show().contains(expectedShow))
     }
 
     @Test

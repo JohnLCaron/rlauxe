@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 class OneAudit(
@@ -48,7 +48,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         roundIdx: Int,
     ): TestH0Result {
         val cassertion = assertionRound.assertion as ClcaAssertion
-        val cassorter = cassertion.cassorter as OneAuditAssorter
+        val cassorter = cassertion.cassorter as OneAuditClcaAssorter
 
         // // default: eta0 = reportedMean, shrinkTrunk
         //// bet99: eta0 = reportedMean, 99% max bet
@@ -59,7 +59,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
             cassorter.upperBound() * (1.0 - eps)
         else
-            cassorter.meanAssort() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
+            cassorter.noerror() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
 
         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
             FixedEstimFn(.99 * cassorter.upperBound())

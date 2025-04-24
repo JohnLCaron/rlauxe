@@ -278,7 +278,7 @@ class TestContest {
         """.replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.showCandidates())
 
-        val expectedShow = """'testContestInfo' (0) votes={1=108, 0=100, 2=0}
+        val expectedShow = """Contest 'testContestInfo' (0) votes={1=108, 0=100, 2=0}
  margin=0.0379 recount=0.0741 Nc=211 Np=0
  choiceFunction=PLURALITY nwinners=1, winners=[1]
    0 'cand0': votes=100

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestOneAuditAssorter {
+class TestOneAuditClcaAssorter {
 
     // OneAudit, section 2.3
     // "compares the manual interpretation of individual cards to the implied “average” CVR of the reporting batch each card belongs to"
@@ -39,7 +39,7 @@ class TestOneAuditAssorter {
         // fun makeContestOA(Nc: Int, margin: Double, poolPct: Double, poolMargin: Double) : OneAuditContest {
         val contestOA: OneAuditContest = makeContestOA(N, margin, poolPct = 0.66, poolMargin = mean2margin(0.625))
         val contestUA = contestOA.makeContestUnderAudit()
-        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditAssorter
+        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
 
         val assortMargin = cassorter.assorter.reportedMargin()
         val assortMean = margin2mean(assortMargin)
@@ -106,8 +106,8 @@ class TestOneAuditAssorter {
         assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
 
         val expect = """OneAuditComparisonAssorter for contest makeContestOA (0)
-  assorter= winner=0 loser=1 reportedMargin=0.6572
-  avgCvrAssortValue=0.8286"""
+  assorter= winner=0 loser=1 reportedMargin=0.6572 reportedMean=0.8286
+  cvrAssortMargin=0.6572 noerror=0.7447125409591897 upperBound=1.4894250819183794 avgCvrAssortValue=null"""
         assertEquals(expect, cassorter.toString())
     }
 

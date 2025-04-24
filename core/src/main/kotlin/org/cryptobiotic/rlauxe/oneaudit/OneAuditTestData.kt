@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.roundToInt
 
 // margin = (winner - loser) / Nc
@@ -14,9 +15,10 @@ import org.cryptobiotic.rlauxe.util.roundToInt
 // winner = (margin * Nc + nvotes) / 2
 fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
     val nvotes = roundToInt(Nc * (1.0 - undervotePercent - phantomPercent))
-    val winner = ((margin * Nc + nvotes) / 2)
+    val winner = roundToInt((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    return makeContestOA(roundToInt(winner), roundToInt(loser), cvrPercent, skewVotesPercent, undervotePercent, phantomPercent)
+    require(doubleIsClose(margin, (winner - loser) / Nc.toDouble()))
+    return makeContestOA(winner, loser, cvrPercent, skewVotesPercent, undervotePercent, phantomPercent)
 }
 
 // two contest, specified total votes
@@ -38,11 +40,12 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, skewVot
 
     val nvotes = winnerVotes + loserVotes
     val Nc = roundToInt(nvotes / (1.0 - undervotePercent - phantomPercent))
-    // val noCvrPercent = (1.0 - cvrPercent)
+    val Np = roundToInt(Nc * phantomPercent)
     val skewVotes = skewVotesPercent * Nc
 
-    val cvrSize = roundToInt(Nc * cvrPercent + skewVotes)
-    val noCvrSize = Nc - cvrSize
+    val cvrSize = roundToInt(nvotes * cvrPercent + skewVotes)
+    val noCvrSize = nvotes - cvrSize
+    require(cvrSize + noCvrSize == nvotes)
 
     // reported results for the two strata
     val winnerCvr = roundToInt(winnerVotes * cvrPercent + skewVotes)
@@ -50,8 +53,8 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, skewVot
     val votesCvr = mapOf(0 to winnerCvr, 1 to loserCvr)
     val votesNoCvr = mapOf(0 to (winnerVotes - winnerCvr), 1 to (loserVotes - loserCvr))
 
-    val cvrVotes = votesCvr.values.sum()
-    val poolVotes = votesNoCvr.values.sum()
+    require(cvrSize  == votesCvr.values.sum())
+    require(noCvrSize  == votesNoCvr.values.sum())
 
     val pools = mutableListOf<BallotPool>()
     pools.add(
@@ -65,55 +68,12 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, skewVot
         )
     )
 
-    //    override val info: ContestInfo,
-    //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    //    cvrNc: Int,
-    //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
-    return OneAuditContest(info, votesCvr, cvrSize, pools.associateBy { it.id })
-}
-
-fun makeContestOA(Nc: Int, margin: Double, poolPct: Double, poolMargin: Double) : OneAuditContest {
-    // the candidates
-    val info = ContestInfo(
-        "makeContestOA", 0,
-        mapOf(
-            "winner" to 0,
-            "loser" to 1,
-        ),
-        SocialChoiceFunction.PLURALITY,
-        nwinners = 1,
-    )
-
-    val winnerTotal = roundToInt(Nc * ((margin + 1) / 2))
-    val loserTotal = Nc - winnerTotal
-
-    val poolSize = roundToInt(poolPct * Nc)
-    val poolWinner = roundToInt(poolSize * ((poolMargin + 1) / 2))
-    val poolLoser = poolSize - poolWinner
-    val votesPool = mapOf(0 to poolWinner, 1 to poolLoser)
-
-    val cvrSize = Nc - poolSize
-    val cvrWinner = winnerTotal - poolWinner
-    val cvrLoser = loserTotal - poolLoser
-    val votesCvr = mapOf(0 to cvrWinner, 1 to cvrLoser)
-
-    val pools = mutableListOf<BallotPool>()
-    pools.add(
-        // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
-        BallotPool(
-            "noCvr",
-            1, // poolId
-            0, // contestId
-            poolSize,
-            votes = votesPool,
-        )
-    )
-
-    //    override val info: ContestInfo,
-    //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    //    cvrNc: Int,
-    //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
-    return OneAuditContest(info, votesCvr, cvrSize, pools.associateBy { it.id })
+    // TODO where do the undervotes go ?
+    val result =  OneAuditContest(info, votesCvr, cvrSize, pools.associateBy { it.id }, Np = Np)
+    require(result.Nc == Nc) {
+        println("nope")
+    }
+    return result
 }
 
 // used by simulateSampleSizeOneAuditAssorter()
@@ -138,6 +98,9 @@ fun OneAuditContest.makeTestCvrs(): List<Cvr> {
         //    println("why")
         // require(pool.ncards == poolCvrs.size)
         cvrs.addAll(poolCvrs)
+    }
+    repeat(this.Np) {
+        cvrs.add(Cvr("phantom$it", mapOf(info.id to intArrayOf()), phantom = true))
     }
     require(this.Nc == cvrs.size)
     cvrs.shuffle()

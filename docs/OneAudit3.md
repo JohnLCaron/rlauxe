@@ -22,7 +22,7 @@ As a function of fuzzPct:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/OneAuditWithErrors95/OneAuditWithErrors95LogLog.html" rel="OneAuditNoErrorsLogLog">![OneAuditNoErrorsLogLog](plots/oneaudit3/OneAuditWithErrors95/OneAuditWithErrors95LogLog.png)</a>
 
 * The bet99 strategy does best when the fuzzPct is < .0075 (75 in 10000 have a random error), then degrades quickly.
-* The eta0Eps strategy stays reletively flat, and does much better when fuzzPct is > .01.
+* The eta0Eps strategy stays reletively flat, and does much better than bet99 when fuzzPct is > .01.
 
 ## Compare Audit Types
 
@@ -36,8 +36,8 @@ When there are no errors in the CVRs, as a function of margin:
 
 When there are errors (again parameterized by fuzzPct, the percent of ballots randomly changed), for fixed margin of 2% and 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/auditsWithErrors/AuditsWithErrorsLogLog.html" rel="AuditsWithErrorsLogLog">![AuditsWithErrorsLogLog](plots/oneaudit3/auditsWithErrors/AuditsWithErrorsLogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/auditsWithErrors/auditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit3/auditsWithErrors/auditsWithErrors4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrorsLogLog.html" rel="AuditsWithErrorsLogLog">![AuditsWithErrorsLogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrorsLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
 * Again, OneAudit results are much better in version 3. It appears that it doesnt matter what the cvr percent is; 
   the scatter in the various oneaudit-cvrPercent is likely due to random variation in when errors are encountered.

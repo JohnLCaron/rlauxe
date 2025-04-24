@@ -42,8 +42,8 @@ data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes 
     fun countFor(cand: Int): Int {
         return count.getOrDefault(cand, 0)
     }
-    fun convert(candidateIndexToId: Map<Int, Int>): IrvRound {
-        val mapById = count.map { Pair(candidateIndexToId[it.key]!!, it.value) }.toMap()
+    fun convert(candidateIds: List<Int>): IrvRound {
+        val mapById = count.map { Pair(candidateIds[it.key], it.value) }.toMap()
         return IrvRound(mapById)
     }
 }
@@ -52,8 +52,8 @@ data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes 
 data class IrvCountResult(val ivrRoundsPaths: List<IrvRoundsPath>)
 
 data class IrvWinners(val done:Boolean = false, val winners: Set<Int> = emptySet()) {
-    fun convert(candidateIndexToId: Map<Int, Int>): IrvWinners {
-        val mapById = winners.map { candidateIndexToId[it]!!}.toSet()
+    fun convert(candidateIds: List<Int>): IrvWinners {
+        val mapById = winners.map { candidateIds[it] }.toSet()
         return IrvWinners(done, mapById)
     }
 }

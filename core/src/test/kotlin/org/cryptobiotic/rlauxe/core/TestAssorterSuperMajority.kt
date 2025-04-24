@@ -67,7 +67,7 @@ class TestAssorterSuperMajority {
         // (2)= 0.04006410256410255
     }
 
-    @Test
+    // @Test not allowed
     fun testThreeCandidateMultipleWinners() {
         val info = ContestInfo(
             name = "ABC",
@@ -90,7 +90,7 @@ class TestAssorterSuperMajority {
         // (2)= 0.06868131868131867
     }
 
-    @Test
+    // @Test not allowed
     fun testNCandidateSuperMajority() {
         val counts = listOf(1600, 1300, 500, 1500, 50, 12, 1)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)

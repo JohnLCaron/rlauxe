@@ -16,20 +16,23 @@ private val quiet = true
 // gets RaireAssertions from raire-java libray
 fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Np: Int): RaireContestUnderAudit {
     // TODO consistency checks on voteConsolidator
-
+    // all candidate indexes
     val startingVotes = voteConsolidator.makeVoteList()
     val cvotes = voteConsolidator.makeVotes()
     val votes = Votes(cvotes, info.candidateIds.size)
 
+    //// TODO seems like we just need to know the winner. we could replace this with IrvCount
+    //      then we could add annotation here, currently in makeIrvContests
     // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
-    val result: IRVResult = votes.runElection(TimeOut.never())
-    if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
+    val irvResult: IRVResult = votes.runElection(TimeOut.never())
+    if (!quiet) println(" runElection: possibleWinners=${irvResult.possibleWinners.contentToString()} eliminationOrder=${irvResult.eliminationOrder.contentToString()}")
 
-    if (1 != result.possibleWinners.size) {
-        throw RuntimeException("nwinners ${result.possibleWinners.size} must be 1")
+    if (1 != irvResult.possibleWinners.size) {
+        throw RuntimeException("nwinners ${irvResult.possibleWinners.size} must be 1")
     }
-    val winner: Int = result.possibleWinners[0] // we need a winner in order to generate the assertions
+    val winner: Int = irvResult.possibleWinners[0] // we need a winner in order to generate the assertions
 
+    //// heres the hard part - solving for the assertions
     val problem = RaireProblem(
         mapOf("candidates" to info.candidateNames.keys.toList()),
         cvotes,
@@ -44,8 +47,26 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
     if (raireSolution.solution.Err != null) {
         throw RuntimeException("solution.solution.Err=${raireSolution.solution.Err}")
     }
-    requireNotNull(raireSolution.solution.Ok) // TODO
+    requireNotNull(raireSolution.solution.Ok)
     val raireResult: RaireResult = raireSolution.solution.Ok
+
+    // public class RaireResult {
+    //    public AssertionAndDifficulty[] assertions;
+    //    public double difficulty;
+    //    public int margin;
+    //    public int winner;
+    //    public int num_candidates;
+    //    public TimeTaken time_to_determine_winners;
+    //    public TimeTaken time_to_find_assertions;
+    //    public TimeTaken time_to_trim_assertions;
+    //    public boolean warning_trim_timed_out;
+    //    private static final boolean USE_DIVING = true;
+
+    // public class AssertionAndDifficulty {
+    //    public final Assertion assertion;
+    //    public final double difficulty;
+    //    public final int margin;
+    //    public final Map<String, Object> status;
 
     val raireAssertions = raireResult.assertions.map { aand ->
         val votes = if (aand.assertion is NotEliminatedNext) {
@@ -67,14 +88,12 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
             nebChoices
         }
 
-        // TODO the candidate Ids go from 0 ... ncandidats
         RaireAssertion.convertAssertion(info.candidateIds, aand, votes)
     }
 
-    val winnerId = info.candidateIds[raireResult.winner] // convert back to "real" id
     val rcontestUA = RaireContestUnderAudit.makeFromInfo(
         info,
-        winner = winnerId,
+        winnerIndex = raireResult.winner,
         Nc = Nc,
         Np = Np,
         raireAssertions,

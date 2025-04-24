@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 04/17/2026_
+_last changed: 04/23/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -155,7 +155,7 @@ The plurality voting algorithm is used, with K winners and C-K losers.
 See SHANGRLA, section 2.3.
 
 A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win.
-If multiple winners are allowed, each reported winner generates one assertion.
+Currently only 1 winner is allowed.
 
 For the ith ballot, define `A_wk,ℓj(bi)` as
 ````
@@ -172,14 +172,13 @@ One only needs one assorter for each winner, not one for each winner/loser pair.
 Notes
 * "minimum fraction of the valid votes": so use V-c, not N_c as the denominator.
 * Someone has to enforce that each CVR has <= number of allowed votes.
-* multiple winners are not yet supported for auditing. TODO is that true ??
 * TODO test when there are no winners.
 
 ### Instant Runoff Voting (IRV)
 
 Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
 In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated. 
-This continues until only one candidate is left.
+This continues until only one candidate is left. Only 1 winner is allowed.
 
 In principle one could use polling audits for IRV, but the information
 needed to create the RaireAssertions all but necessitates CVRs.
@@ -263,9 +262,12 @@ more efficient than BLCA (batch-level comparison RLAs) when batches are large. C
 more efficient than BPA when batches are more homogenous than the contest
 votes as a whole, i.e., when precincts are polarized in different directions." (OneAudit p 9)
 
+Currently we do not support IRV with One Audit.
+
+
 See [OneAudit version 2](docs/OneAudit2.md).
 
-Oder version: [OneAudit version 1](docs/OneAudit.md).
+Older version: [OneAudit version 1](docs/OneAudit.md).
 
 
 # Comparing Samples Needed by Audit type

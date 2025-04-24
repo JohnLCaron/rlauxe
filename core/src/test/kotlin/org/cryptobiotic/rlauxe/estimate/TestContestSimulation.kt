@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
-import org.cryptobiotic.rlauxe.propTestSlowConfig
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Test
@@ -129,7 +128,7 @@ class TestContestSimulation {
 
                 // speculative if this is really what happens
                 val contest = sim.contest
-                val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions()
+                val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
                 val cassertion: ClcaAssertion = contestUA.minClcaAssertion()!!
                 val cassorter = cassertion.cassorter
                 val orgMargin = cassorter.calcClcaAssorterMargin(testPairs)

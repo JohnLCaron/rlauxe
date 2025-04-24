@@ -55,12 +55,11 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         //// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
         //// maximal: eta0 = upper*(1 - eps), 99% max bet
 
-        // val eta0 = oaClcaAssorter.meanAssort()
         val strategy = auditConfig.oaConfig.strategy
         val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
             cassorter.upperBound() * (1.0 - eps)
         else
-            cassorter.meanAssort()
+            cassorter.meanAssort() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
 
         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
             FixedEstimFn(.99 * cassorter.upperBound())

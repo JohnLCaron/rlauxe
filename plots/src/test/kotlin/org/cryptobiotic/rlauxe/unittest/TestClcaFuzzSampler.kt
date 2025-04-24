@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.simulateSampleSizeBetaMart
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.*
 import org.junit.jupiter.api.Test
 
 // TODO make into a test with asserts ?
@@ -20,7 +19,7 @@ class TestClcaFuzzSampler {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it) }
         val cvrs = test.makeCvrsFromContests()
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions()
+            contest.makeClcaAssertionsFromReportedMargin()
         }
         println("total ncvrs = ${cvrs.size}\n")
         val contests = contestsUA.map { ContestRound(it, 1) }

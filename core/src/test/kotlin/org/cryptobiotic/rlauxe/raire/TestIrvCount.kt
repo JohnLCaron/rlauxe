@@ -3,16 +3,19 @@ package org.cryptobiotic.rlauxe.raire
 import kotlin.test.Test
 
 class TestIrvCount {
+    var nties = 0
+    var nwinners = mutableMapOf<Int, Int>()
 
     // Need a lot of tries to be sure to get some double ties
-    @Test
+    // @Test
     fun testRepeat() {
         var idx = 0
-        repeat(1111) {
+        repeat(1000) {
             print("\n$idx ")
             testIrvCount()
             idx++
         }
+        println("\nnties=$nties nwinners=$nwinners")
     }
 
     @Test
@@ -53,9 +56,17 @@ class TestIrvCount {
 
         val result = irvCount.runRounds()
         if (result.ivrRoundsPaths.size > 1) {
+            nties++
+            countWinners(result)
             println(showIrvCountResult(result, testContest.info))
             println()
         }
-
      }
+
+    fun countWinners(result: IrvCountResult) {
+        var winners = mutableMapOf<Int, Int>()
+        result.ivrRoundsPaths.forEach { ivrRoundsPath ->
+            // TODO
+        }
+    }
 }

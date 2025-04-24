@@ -5,6 +5,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -54,17 +56,25 @@ data class RaireResultsContestAuditJson(
     val assertions: List<RaireResultsAssertionJson>,
 )
 
-fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int) =
-    RaireContestUnderAudit.make(
-        this.contest,
-        this.winner.toInt(),
+fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestUnderAudit {
+    val name = this.contest
+    val winner = this.winner.toInt()
+    val eliminated = this.eliminated.map { it.toInt() } // eliminated
+    val assertions = this.assertions.map { it.import() }
+    val candidates = listOf(winner) + eliminated // the sum of winner and eliminated must be all the candiates
+    val contest = RaireContest(
+        ContestInfo(
+            this.contest,
+            name.toInt(), // ??
+            candidates.associate { it.toString() to it },
+            SocialChoiceFunction.IRV,
+        ),
+        listOf(winner),
         Nc = Nc,
         Np = Np,
-        this.eliminated.map { it.toInt() }, // eliminated
-        // this.expectedPollsNumber.toInt(),
-        // this.expectedPollsPercent.toDouble(),
-        this.assertions.map { it.import() },
     )
+    return RaireContestUnderAudit(contest, winner, assertions)
+}
 
 @Serializable
 data class RaireResultsAssertionJson(

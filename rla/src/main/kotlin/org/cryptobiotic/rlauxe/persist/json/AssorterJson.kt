@@ -24,7 +24,7 @@ data class ClcaAssorterJson(
     val className: String,
     val contestOA: OAContestJson?, // duplicate storage, argghh
     val assorter: AssorterIFJson,
-    val avgCvrAssortValue: Double,
+    val avgCvrAssortValue: Double?,
     val hasStyle: Boolean,
 )
 
@@ -71,7 +71,6 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
 @Serializable
 data class AssorterIFJson(
     val className: String,
-    // val info: ContestInfoJson,
     val reportedMargin: Double,
     val winner: Int,   // estimated sample size
     val loser: Int? = null,   // estimated sample size
@@ -84,7 +83,6 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is PluralityAssorter ->
             AssorterIFJson(
                 "PluralityAssorter",
-                // this.info.publishJson(),
                 this.reportedMargin,
                 this.winner,
                 this.loser,
@@ -92,7 +90,6 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is SuperMajorityAssorter ->
             AssorterIFJson(
                 "SuperMajorityAssorter",
-                // this.info.publishJson(),
                 this.reportedMargin,
                 this.winner,
                 minFraction = this.minFraction,
@@ -100,7 +97,6 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is RaireAssorter ->
             AssorterIFJson(
                 "RaireAssorter",
-                // this.info.publishJson(),
                 this.reportedMargin,
                 this.rassertion.winnerId,
                 this.rassertion.loserId,

@@ -19,7 +19,7 @@ class TestCvrs {
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap("A", "B", "C", "D", "E"),
-            nwinners = 2,
+            nwinners = 1,
             minFraction = .42
         )
         val cvrs = CvrBuilders()
@@ -37,7 +37,7 @@ class TestCvrs {
             .addCvr().addContest("AvB", "4").ddone()
             .build()
         val contestUA = makeContestUAfromCvrs(info, cvrs, true, true)
-        assertEquals(2, contestUA.contest.winners.size)
+        assertEquals(1, contestUA.contest.winners.size)
         assertEquals(11, contestUA.Nc)
     }
 

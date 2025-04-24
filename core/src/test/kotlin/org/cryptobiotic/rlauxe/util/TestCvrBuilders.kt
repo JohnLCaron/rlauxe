@@ -46,7 +46,7 @@ class TestCvrBuilders {
             println("fuzzPct = $fuzzPct")
             val allErrorRates = mutableListOf<ClcaErrorRates>()
             contests.forEach { contest ->
-                val contestUA = makeContestUAfromCvrs(contest.info, cvrs).makeClcaAssertions()
+                val contestUA = makeContestUAfromCvrs(contest.info, cvrs).makeClcaAssertionsFromReportedMargin()
                 val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter

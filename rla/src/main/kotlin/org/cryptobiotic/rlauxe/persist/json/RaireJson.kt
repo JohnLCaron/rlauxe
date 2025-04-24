@@ -14,6 +14,12 @@ import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 //    val rassertions: List<RaireAssertion>,
 //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
 
+// class RaireContestUnderAudit(
+//    contest: RaireContest,
+//    val winner: Int,
+//    val rassertions: List<RaireAssertion>,
+//    hasStyle: Boolean = true
+//)
 @Serializable
 data class RaireContestUnderAuditJson(
         // val info: ContestInfoJson,
@@ -49,23 +55,14 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
 }
 
 // data class RaireAssertion(
-//    val winner: Int,
-//    val loser: Int,
-//    val margin: Int,
+//    val winnerId: Int, // this must be the candidate ID, in order to match with Cvr.votes
+//    val loserId: Int,  // ditto
+//    var marginInVotes: Int,
 //    val assertionType: RaireAssertionType,
-//    val alreadyEliminated: List<Int> = emptyList(), // NEN only; already eliminated for the purpose of this assertion
-//    val explanation: String? = null,
+//    val eliminated: List<Int> = emptyList(), // candidate Ids; NEN only; already eliminated for the purpose of this assertion
+//    val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
 //)
 
-// data class AssertionJson(
-//    val contest: ContestJson,
-//    val assorter: AssorterJson,
-//    val estSampleSize: Int,   // estimated sample size
-//    val estRoundResults: List<EstimationRoundResultJson>,   // first sample when pvalue < riskLimit
-//    val roundResults: List<AuditRoundResultJson>,   // first sample when pvalue < riskLimit
-//    val status: String, // testH0 status
-//    val round: Int,
-//)
 @Serializable
 data class RaireAssertionJson(
     val winner: Int,

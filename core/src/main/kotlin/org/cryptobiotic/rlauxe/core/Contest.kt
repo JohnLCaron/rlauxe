@@ -4,10 +4,11 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
+
+private val showPct = false
 
 /** pre-election information **/
 data class ContestInfo(
@@ -22,6 +23,8 @@ data class ContestInfo(
     val candidateIds: List<Int>
 
     init {
+        require(choiceFunction == SocialChoiceFunction.PLURALITY || choiceFunction == SocialChoiceFunction.APPROVAL ||
+                (nwinners == 1 && voteForN == 1)) { "Only PLURALITY and APPROVAL can have voteForN > 1"}
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null) { "SUPERMAJORITY requires minFraction"}
         require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || minFraction == null) { "only SUPERMAJORITY can have minFraction"}
         require(minFraction == null || minFraction in (0.0..1.0)) { "minFraction between 0 and 1"}
@@ -121,6 +124,10 @@ class Contest(
         require(nvotes <= info.voteForN * (Nc - Np)) {
             "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
         }
+        val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
+        if (showPct) {
+            println("contest candidate pcts = $pct")
+        }
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
@@ -132,6 +139,9 @@ class Contest(
         winners = overTheMin.subList(0, useNwinners).map { it.first }
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
         winnerNames = winners.map { mapIdToName[it]!! }
+        if (winners.isEmpty()) {
+            println("*** there are no winners for minFraction=$useMin $pct")
+        }
 
         // find losers
         val mlosers = mutableListOf<Int>()
@@ -216,7 +226,7 @@ open class ContestUnderAudit(
     init {
         if (contest.losers.size == 0) {
             preAuditStatus = TestH0Status.NoLosers
-        } else  if (contest.winners.size == 0) {
+        } else if (contest.winners.size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init
@@ -240,7 +250,7 @@ open class ContestUnderAudit(
         }
     }
 
-    open fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
+    fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
         // test that every winner beats every loser. SHANGRLA 2.1
         val assertions = mutableListOf<Assertion>()
         contest.winners.forEach { winner ->
@@ -263,7 +273,7 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    open fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
+    fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
         cvrs.filter { it.hasContest(id) }.forEach { cvr ->
             assertionMap.map { (assertion, welford) ->
@@ -273,12 +283,12 @@ open class ContestUnderAudit(
         return makeClcaAssertions(assertionMap)
     }
 
-    open fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
+    fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
         this.clcaAssertions = assertionMap.filter { it.first.info.id == this.id }
             .map { (assertion, welford) ->
-                val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, welford.mean, hasStyle=hasStyle, check=false) // TODO check = false
+                val clcaAssorter = makeClcaAssorter(assertion, welford.mean)
                 ClcaAssertion(contest.info, clcaAssorter)
             }
         return this
@@ -287,17 +297,19 @@ open class ContestUnderAudit(
     // when does assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ?? only when voteForN = 1 ???
     // no cvrs, use assertion.assorter.reportedMargin()
     // TODO  in some ways this is more robust than averaging cvrs, since cvrs have to be complete and accurate.
-    //   OTOH, need complete and accurate CardLocation Manifest!!
-    open fun makeClcaAssertions(): ContestUnderAudit {
+    //   OTOH, need complete and accurate CardLocation Manifest anyway!!
+    open fun makeClcaAssertionsFromReportedMargin(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-        // require(contest.info.voteForN == 1) { "makeComparisonAssertions() with no cvrs can only be used when voteForN = 1"}
 
         this.clcaAssertions = pollingAssertions.map { assertion ->
-            val margin = assertion.assorter.reportedMargin()
-            val clcaAssorter = ClcaAssorter(contest.info, assertion.assorter, margin2mean(margin), hasStyle=hasStyle)
+            val clcaAssorter = makeClcaAssorter(assertion, null)
             ClcaAssertion(contest.info, clcaAssorter)
         }
         return this
+    }
+
+    open fun makeClcaAssorter(assertion: Assertion, avgCvrAssortValue: Double?): ClcaAssorter {
+        return ClcaAssorter(contest.info, assertion.assorter, avgCvrAssortValue, hasStyle=hasStyle)
     }
 
     fun assertions(): List<Assertion> {
@@ -341,7 +353,7 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votes else emptyMap()
-        appendLine("'$name' ($id) votes=${votes}")
+        appendLine("${contest.javaClass.simpleName} '$name' ($id) votes=${votes}")
         appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners}")
         append(showCandidates())
@@ -387,8 +399,8 @@ open class ContestUnderAudit(
 
 fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>) {
     val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
-    contestsUA.forEach { contestsUA ->
-        contestsUA.pollingAssertions.forEach { assertion ->
+    contestsUA.forEach { contestUA ->
+        contestUA.pollingAssertions.forEach { assertion ->
             assertionMap.add(Pair(assertion, Welford()))
         }
     }

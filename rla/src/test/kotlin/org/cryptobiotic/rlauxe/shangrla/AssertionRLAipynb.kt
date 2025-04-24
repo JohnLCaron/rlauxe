@@ -645,7 +645,7 @@ fun calc_sample_sizes(
     //val minAssertion = comparisonAssertions.minBy { it.margin }
     //val minAssorter = minAssertion.assorter
 
-    val contest = contests.first().makeClcaAssertions()
+    val contest = contests.first().makeClcaAssertionsFromReportedMargin()
     val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, minAssorter)

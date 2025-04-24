@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.alpha
 
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -41,7 +40,7 @@ class CompareAlphaPaper {
             val pollingAssertion = contestUA.pollingAssertions.first()
 
             val contestUAc = ContestUnderAudit(contest, isComparison = true, hasStyle = true)
-            contestUAc.makeClcaAssertions()
+            contestUAc.makeClcaAssertionsFromReportedMargin()
             val compareAssertion = contestUAc.clcaAssertions.first()
 
             for (eta in etas) {

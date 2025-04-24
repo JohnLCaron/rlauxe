@@ -128,7 +128,7 @@ class TestAssorterBasics {
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
-            nwinners = 2,
+            nwinners = 1,
             minFraction = .42,
             )
         val contest = makeContestFromCvrs(contestInfo, cvrs)

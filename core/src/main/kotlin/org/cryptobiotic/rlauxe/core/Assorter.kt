@@ -10,9 +10,9 @@ interface AssorterIF {
     fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
     fun upperBound(): Double
     fun desc(): String
-    fun winner(): Int
-    fun loser(): Int
-    fun reportedMargin(): Double // only agrees with assort average when nwinners = 1
+    fun winner(): Int  // candidate id
+    fun loser(): Int   // candidate id
+    fun reportedMargin(): Double
     fun reportedMean() = margin2mean(reportedMargin())
 
     // Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
@@ -78,13 +78,22 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val useVotes = votes ?: (contest as Contest).votes
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
-            // TODO divide by voteForN * contest.Nc.toDouble() ?? Need to test.
-            //   Im thinking you dont have this problem when averaging assort values.
             val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
             return PluralityAssorter(contest.info, winner, loser, reportedMargin)
         }
     }
 }
+
+// i think this algorithm doesnt work for vote4N > 1
+//             assorter=Assorter(
+//                contest=contest,
+//                assort=lambda c, contest_id=contest.id: (
+//                    CVR.as_vote(c.get_vote_for(contest.id, winner))
+//                    / (2 * contest.share_to_win)
+//                    if c.has_one_vote(contest.id, cands)
+//                    else 1 / 2
+//                ),
+//                upper_bound=1 / (2 * contest.share_to_win),
 
 /** See SHANGRLA, section 2.3, p.5. */
 data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterIF {
@@ -111,12 +120,10 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, votes: Map<Int, Int>?=null): SuperMajorityAssorter {
             val useVotes = votes ?: (contest as Contest).votes
-
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes.filter { it.key != winner }.values.sum()
             val nuetralVotes = contest.Nc - winnerVotes - loserVotes
 
-            // TODO divide by voteForN * contest.Nc.toDouble() ??
             val weight = 1 / (2 * minFraction)
             val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
             val reportedMargin = mean2margin(mean)

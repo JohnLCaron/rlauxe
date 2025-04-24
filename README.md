@@ -24,7 +24,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
-  * [Hybrid Audits using OneAudit (In Progress)](#hybrid-audits-using-oneaudit-in-progress)
+  * [Hybrid Audits using OneAudit](#hybrid-audits-using-oneaudit)
 * [Comparing Samples Needed by Audit type](#comparing-samples-needed-by-audit-type)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
@@ -253,7 +253,7 @@ are specified in SHANGRLA, section 2. See Assorter.kt for our implementation.
 See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart risk function.
 
 
-## Hybrid Audits using OneAudit (In Progress)
+## Hybrid Audits using OneAudit
 
 When the voting system can report CVRs for some but not all cards, a _OneAudit_ audit may be the best way to proceed.
 
@@ -317,12 +317,12 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 These are log-log plots of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
 * CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
 * OneAudits are intermediate between Polling and CLCA; surprisingly, in this formulation it doesnt matter what percent of ballots have CVRs.
-* Raire audits are CLCA audits using Raire assertions. These are less sensitive sensitive to errors
-  because the changes are less likely to change the assorter values.
+* Raire audits are CLCA audits using Raire assertions. These are less sensitive to errors
+  because the errors are less likely to change the assorter values.
 * Polling audit sample sizes are all but impervious to errors.
 * OneAudits have similar sensitivities to errors as CLCA.
 

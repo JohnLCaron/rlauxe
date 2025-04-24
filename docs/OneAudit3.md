@@ -27,20 +27,21 @@ As a function of fuzzPct:
 ## Compare Audit Types
 
 We will use the eta0Eps strategy for oneaudit, and compare Polling, Comparison (CLCA) and OneAudit (with 5%, 50%, 80%, 95% and 99% of cards having CVRs).
+
 When there are no errors in the CVRs, as a function of margin:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsNoErrors/AuditsNoErrorsLogLinear.html" rel="AuditsNoErrorsLogLinear">![AuditsNoErrorsLogLinear](plots/oneaudit3/AuditsNoErrors/AuditsNoErrorsLogLinear.png)</a>
 
-* OneAudit results are much better in version 3. When there are no errors, it doesnt matter what the cvr percent is, 
-  which is much different than before, and surprising.
+* OneAudit results are much better in version 3. Surprisingly, it doesnt matter what the cvr percent is (all the lines are exactly on top of each other).
 
-When there are errors (again parameterized by fuzzPct, the percent of ballots randomly changed), for fixed margin of 2% and 4%:
+When there are errors (parameterized by fuzzPct, the percent of ballots randomly changed), for fixed margin of 2% and 4%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrorsLogLog.html" rel="AuditsWithErrorsLogLog">![AuditsWithErrorsLogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrorsLogLog.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
-* Again, OneAudit results are much better in version 3. It appears that it doesnt matter what the cvr percent is; 
-  the scatter in the various oneaudit-cvrPercent is likely due to random variation in when errors are encountered.
+* OneAudit results are much better in version 3. 
+* It doesnt matter what the cvr percent is: the variation in the various oneaudit-cvrPercent is likely due to random 
+  variation in when errors are encountered in the sequence.
 * OneAudit results have similar sensitities to errors as CLCA.
 * IRV (Raire) audits are less likely to have their outcomes altered due to random changes in the ballots.
 * Polling audit sample sizes are all but impervious to errors.

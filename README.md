@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 04/23/2026_
+_last changed: 04/24/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -264,10 +264,9 @@ votes as a whole, i.e., when precincts are polarized in different directions." (
 
 Currently we do not support IRV with One Audit.
 
+See [OneAudit version 3](docs/OneAudit3.md).
 
-See [OneAudit version 2](docs/OneAudit2.md).
-
-Older version: [OneAudit version 1](docs/OneAudit.md).
+Older version: [OneAudit version 2](docs/OneAudit2.md).
 
 
 # Comparing Samples Needed by Audit type

@@ -1,0 +1,140 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;XJLjQF&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAuditNoErrors samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100 cvrPercent=0.95&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;true margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;true margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;samplesNeeded&quot;:[5754.0,2964.0,1996.0,1504.0,1207.0,1008.0,757.0,607.0,506.0,380.0,304.0,202.0,151.0,121.0,101.0,86.0,75.0,60.0,5748.0,2934.0,1969.0,1482.0,1188.0,991.0,744.0,596.0,497.0,373.0,298.0,198.0,149.0,119.0,99.0,85.0,74.0,59.0,49793.0,49180.0,48191.0,46871.0,45277.0,43471.0,39462.0,35280.0,31233.0,24176.0,18733.0,10514.0,6513.0,4373.0,3120.0,2331.0,1804.0,1169.0,49744.0,48785.0,46830.0,43631.0,39125.0,33569.0,21754.0,12716.0,7405.0,2999.0,1560.0,572.0,320.0,215.0,160.0,127.0,105.0,77.0,48330.759999999995,46663.89999999999,42919.13999999999,42421.520000000026,38030.48999999997,36718.78,32644.51999999999,28100.51,26444.65000000001,17951.679999999993,15291.29,7617.549999999999,4819.93,3156.2199999999993,2206.35,1447.2100000000003,1073.6899999999998,546.2],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;true margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;true margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;true margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;samplesNeeded&quot;:[5754.0,2964.0,1996.0,1504.0,1207.0,1008.0,757.0,607.0,506.0,380.0,304.0,202.0,151.0,121.0,101.0,86.0,75.0,60.0,5748.0,2934.0,1969.0,1482.0,1188.0,991.0,744.0,596.0,497.0,373.0,298.0,198.0,149.0,119.0,99.0,85.0,74.0,59.0,49793.0,49180.0,48191.0,46871.0,45277.0,43471.0,39462.0,35280.0,31233.0,24176.0,18733.0,10514.0,6513.0,4373.0,3120.0,2331.0,1804.0,1169.0,49744.0,48785.0,46830.0,43631.0,39125.0,33569.0,21754.0,12716.0,7405.0,2999.0,1560.0,572.0,320.0,215.0,160.0,127.0,105.0,77.0,48330.759999999995,46663.89999999999,42919.13999999999,42421.520000000026,38030.48999999997,36718.78,32644.51999999999,28100.51,26444.65000000001,17951.679999999993,15291.29,7617.549999999999,4819.93,3156.2199999999993,2206.35,1447.2100000000003,1073.6899999999998,546.2],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;true margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;true margin&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;6&quot;
+};
+       var containerDiv = document.getElementById(&quot;XJLjQF&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

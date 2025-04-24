@@ -1,16 +1,23 @@
 package org.cryptobiotic.rlauxe.sf
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import java.nio.file.Path
+import kotlin.math.min
+import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -36,16 +43,15 @@ class TestSfElectionFromCards {
         // total contest1 cards in pools = 20932
         // total contest2 cards in pools = 3243
 
-        /*
         createSF2024PoaElectionFromCards()
         testCardContests()
         testCardVotes()
         testCardAssertions()
-        auditSf2024Poa() */
+        auditSf2024Poa()
     }
 
     // needs createSF2024PoaCards to be run first
-    @Test
+    // @Test
     fun createSF2024PoaElectionFromCards() {
         val stopwatch = Stopwatch()
         val sfDir = "/home/stormy/temp/cases/sf2024P"
@@ -164,41 +170,70 @@ class TestSfElectionFromCards {
         val topDir = "/home/stormy/temp/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
 
-        // data class ContestInfo(
-        //    val name: String,
-        //    val id: Int,
-        //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-        //    val choiceFunction: SocialChoiceFunction,
-        //    val nwinners: Int = 1,
-        //    val minFraction: Double? = null, // supermajority only.
-        //)
+        val publisher = Publisher("$topDir/audit")
+        val contestsResults = readContestsJsonFile(publisher.contestsFile())
+        val contests = if (contestsResults is Ok) contestsResults.unwrap()
+            else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
+
         val wantContest = 2
-        val winner = 11
-        val loser = 9
-        val info = ContestInfo("test", wantContest, mapOf(winner.toString() to winner, loser.toString() to loser), SocialChoiceFunction.PLURALITY)
-        // totalCount = total=19175, counts={9=5801, 10=51, 11=11530, 12=307, 13=39, 14=63, 15=44, 16=399, 17=225, 230=210} reportedMargin = 0.29877444589308993
+        val wantWinner = 11
+        val wantLoser = 9
+        val contest2 = contests.find { it.id == wantContest }!!
+        val assert911 = contest2.clcaAssertions.find { it.winner == wantWinner && it.loser == wantLoser } ?: throw RuntimeException("no assorter for contest $contest2")
+        val cassort911 = assert911.cassorter as OneAuditClcaAssorter
+        val assort911 = assert911.cassorter.assorter
+
         val expectedMargin = (11530 - 5801)/19175.toDouble()
+        println("contest: ${contest2.show()}")
+        println("cassort:  ${cassort911}")
+        println("  calcAssortMeanFromPools = ${cassort911.calcAssortMeanFromPools()}")
+        println("  expectedAssorterMargin=$expectedMargin")
+        //  cassort  OneAuditComparisonAssorter for contest PRESIDENT OF THE UNITED STATES-REP (2)
+        //  assorter= winner=11 loser=9 reportedMargin=0.2988 reportedMean=0.6494
+        //
+        //  avgCvrAssortValue=0.607275097783572 calcAssortMeanFromPools = 0.6493872229465447
+        //  assort   winner=11 loser=9 reportedMargin=0.2988 reportedMean=0.6494 expectedMargin=0.29877444589308993
 
-        val testAssort = PluralityAssorter(info, winner, loser, expectedMargin)
-        val welford = Welford()
-
-        val cvrsCount = ContestCount()
+        val track = Tracking()
         val cardIter = CvrIteratorAdapter(readCardsCsvIterator(cardFile))
         while (cardIter.hasNext()) {
             val cvr = cardIter.next()
-            if (cvr.poolId == null) { // only want non-pool cards
-                if (cvr.votes[wantContest] != null) {
-                    welford.update(testAssort.assort(cvr))
+            if (cvr.votes[wantContest] != null) {
+                track.add(cassort911.bassort(cvr, cvr)) // TODO fuzz
+            }
+        }
+        println(track)
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /*
+        val welfordNonPool = Welford()
+        val welfordPool = Welford()
+
+        val cvrsCount = ContestCount()
+        val cvrsCountPool = ContestCount()
+
+        val cardIter2 = CvrIteratorAdapter(readCardsCsvIterator(cardFile))
+        while (cardIter2.hasNext()) {
+            val cvr = cardIter2.next()
+            if (cvr.votes[wantContest] != null) {
+                if (cvr.poolId == null) { // only want non-pool cards
+                    welfordNonPool.update(assort911.assort(cvr))
                     cvrsCount.ncards++
                     mergeVotes(cvr.votes[wantContest]!!, cvrsCount.counts)
+                } else {
+                    welfordPool.update(assort911.assort(cvr))
+                    cvrsCountPool.ncards++
+                    mergeVotes(cvr.votes[wantContest]!!, cvrsCountPool.counts)
                 }
             }
         }
         //    2 total=19175, counts={2=15932, 1=3243}
         //   contest2 = total=19175, counts={9=5087, 10=44, 11=9201, 12=283, 13=35, 14=57, 15=37, 16=358, 17=190, 230=189}
-        println(" assort ${testAssort.desc()}")
-        println("   welford=${welford.count} mean=${welford.mean} margin=${mean2margin(welford.mean)}")
-        println("   cvrsCount ${cvrsCount} reportedMargin = ${cvrsCount.reportedMargin(winner, loser)}")
+
+        println("   nonpool welford=${welfordNonPool.count} mean=${welfordNonPool.mean} margin=${mean2margin(welfordNonPool.mean)}")
+        println("           cvrsCount ${cvrsCount} reportedMargin = ${cvrsCount.reportedMargin(wantWinner, wantLoser)}")
+        println("      pool welford=${welfordPool.count} mean=${welfordPool.mean} margin=${mean2margin(welfordPool.mean)}")
+        println("           cvrsCount ${cvrsCountPool} reportedMargin = ${cvrsCountPool.reportedMargin(wantWinner, wantLoser)}")
         //  assort  winner=11 loser=9 reportedMargin=0.6073: count=19175 mean=0.5044041167893594
 
         // problem is the pool votes are all undercounts. have to add the pool votes in
@@ -216,17 +251,20 @@ class TestSfElectionFromCards {
             poolCount.ncards += pool.ncards
             mergeVotes(pool.votes, poolCount.counts)
         }
-        println("   pool counts = $poolCount reportedMargin = ${poolCount.reportedMargin(winner, loser)}")
+        println("   pool counts = $poolCount reportedMargin = ${poolCount.reportedMargin(wantWinner, wantLoser)}")
 
         val totalCount = ContestCount()
         mergeVotes(cvrsCount.counts, totalCount.counts)
         mergeVotes(poolCount.counts, totalCount.counts)
         totalCount.ncards = cvrsCount.ncards + poolCount.ncards
-        println("   totalCount = $totalCount reportedMargin = ${totalCount.reportedMargin(winner, loser)}")
+        println("   totalCount = $totalCount reportedMargin = ${totalCount.reportedMargin(wantWinner, wantLoser)}")
 
-        // assort  winner=11 loser=9 reportedMargin=0.2988
-        //   welford=15932 mean=0.6291112226964624 margin=0.2582224453929247
-        //   cvrsCount total=15932, counts={9=5087, 10=44, 11=9201, 12=283, 13=35, 14=57, 15=37, 16=358, 17=190, 230=189} reportedMargin = 0.2582224453929199
+         */
+
+        //   nonpool welford=15932 mean=0.6291112226964624 margin=0.2582224453929247
+        //           cvrsCount total=15932, counts={9=5087, 10=44, 11=9201, 12=283, 13=35, 14=57, 15=37, 16=358, 17=190, 230=189} reportedMargin = 0.2582224453929199
+        //      pool welford=3243 mean=0.5 margin=0.0
+        //           cvrsCount total=3243, counts={} reportedMargin = 0.0
         //   pool counts = total=3243, counts={9=714, 10=7, 11=2329, 12=24, 13=4, 14=6, 15=7, 16=41, 17=35, 230=21} reportedMargin = 0.49799568300955904
         //   totalCount = total=19175, counts={9=5801, 10=51, 11=11530, 12=307, 13=39, 14=63, 15=44, 16=399, 17=225, 230=210} reportedMargin = 0.29877444589308993
     }
@@ -243,6 +281,22 @@ class TestSfElectionFromCards {
             val tvotes = total[cand] ?: 0
             total[cand] = tvotes + 1
         }
+    }
+
+    class Tracking {
+        var count = 0
+        var sum = 0.0
+        var max = 0.0
+        var min = 999.0
+
+        fun add(x: Double) {
+            count++
+            sum += x
+            min = min(min, x)
+            max = max(max, x)
+        }
+
+        override fun toString() = "Tracking count=$count min=$min max=$max avg=${sum/count}"
     }
 
     private val show = false

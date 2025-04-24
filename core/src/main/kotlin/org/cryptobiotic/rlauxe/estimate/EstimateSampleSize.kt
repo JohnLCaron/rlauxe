@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
@@ -363,9 +363,9 @@ fun simulateSampleSizePollingAssorter(
         sampler,
         null,
         eta0 = eta0,
-        assorter.upperBound(),
+        upperBound = assorter.upperBound(),
         Nc = contest.Nc,
-        startingTestStatistic,
+        startingTestStatistic = startingTestStatistic,
         moreParameters = moreParameters,
     )
 
@@ -383,7 +383,7 @@ fun simulateSampleSizePollingAssorter(
 fun simulateSampleSizeAlphaMart(
     auditConfig: AuditConfig,
     sampleFn: Sampler,
-    estimFn: EstimFn?,
+    estimFn: EstimFn?, // if null use default TruncShrinkage
     eta0: Double,  // initial estimate of mean
     upperBound: Double,
     Nc: Int,
@@ -431,35 +431,35 @@ fun simulateSampleSizeOneAuditAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val cassorter = cassertion.cassorter as OneAuditAssorter
+    val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 
-    println("simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${cassorter.assorter().desc()} ${cvrs.size} ")
+    println("simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${oaCassorter.assorter().desc()} ${cvrs.size} ")
 
     // the sampler is specific to the assertion
     val sampler = if (oaConfig.simFuzzPct == null) {
-        ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyles, cvrs.zip( cvrs), cassorter, allowReset=true, trackStratum=false)
+        ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyles, cvrs.zip( cvrs), oaCassorter, allowReset=true, trackStratum=false)
     } else {
         fuzzPct = oaConfig.simFuzzPct
-        OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
+        OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, oaCassorter) // TODO cant use Raire
     }
     sampler.reset()
 
     // the strategy effects the estimFn
     val strategy = auditConfig.oaConfig.strategy
     val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
-        cassorter.upperBound() * (1.0 - eps)
+        oaCassorter.upperBound() * (1.0 - eps)
     else
-        cassorter.meanAssort()
+        oaCassorter.noerror()
 
     val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
-        FixedEstimFn(.99 * cassorter.upperBound())
+        FixedEstimFn(.99 * oaCassorter.upperBound())
     } else {
         TruncShrinkage(
             N = contestUA.Nc,
             withoutReplacement = true,
-            upperBound = cassorter.upperBound(),
+            upperBound = oaCassorter.upperBound(),
             d = auditConfig.pollingConfig.d,
             eta0 = eta0,
         )
@@ -468,11 +468,11 @@ fun simulateSampleSizeOneAuditAssorter(
     val result = simulateSampleSizeAlphaMart(
         auditConfig,
         sampler,
-        estimFn,
-        mean2margin(cassorter.meanAssort()),
-        cassorter.upperBound(),
-        contestUA.Nc,
-        startingTestStatistic,
+        estimFn = estimFn,
+        eta0 = eta0,
+        upperBound = oaCassorter.upperBound(),
+        Nc = contestUA.Nc,
+        startingTestStatistic = startingTestStatistic,
         moreParameters
     )
 
@@ -483,6 +483,6 @@ fun simulateSampleSizeOneAuditAssorter(
         estimatedDistribution = makeDeciles(result.sampleCount),
     )
 
-    println("  finish ${contestUA.id} ${cassorter.assorter().desc()} ${makeDeciles(result.sampleCount)} ")
+    println("  finish ${contestUA.id} ${oaCassorter.assorter().desc()} ${makeDeciles(result.sampleCount)} ")
     return result
 }

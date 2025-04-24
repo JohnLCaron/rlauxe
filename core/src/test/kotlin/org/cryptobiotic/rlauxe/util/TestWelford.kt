@@ -55,6 +55,26 @@ class TestWelford {
     }
 
     @Test
+    fun testWelfordWeighted() {
+        val welford = Welford()
+        repeat(100) { welford.update(1.0) }
+        repeat(10) { welford.update(2.0) }
+        println("welford = $welford")
+
+        val welfordW = Welford()
+        welfordW.update(1.0, 100)
+        welfordW.update(2.0, 10)
+        println("welfordW = $welfordW")
+
+        val (wm, wv, _) = welfordW.result()
+        assertEquals((120.0 / 110), wm)
+
+        assertEquals(welford.mean, welfordW.mean, doublePrecision)
+        assertEquals(welford.M2, welfordW.M2, doublePrecision)
+        assertEquals(welford.count, welfordW.count)
+    }
+
+    @Test
     fun testWelfordRandom() {
         val b = Bernoulli(.45)
         val sample = DoubleArray(10) { b.get() }

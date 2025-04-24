@@ -29,7 +29,7 @@ data class ClcaAssorterJson(
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
-    return if (this is OneAuditAssorter) {
+    return if (this is OneAuditClcaAssorter) {
         ClcaAssorterJson(
             "OAClcaAssorter",
             this.contestOA.publishOAJson(),
@@ -59,7 +59,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 this.hasStyle,
             )
         "OAClcaAssorter" ->
-            OneAuditAssorter(
+            OneAuditClcaAssorter(
                 this.contestOA!!.import(info),
                 this.assorter.import(info),
                 this.avgCvrAssortValue,

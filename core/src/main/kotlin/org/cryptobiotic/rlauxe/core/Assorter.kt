@@ -68,7 +68,7 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
         return (w - l + 1) * 0.5
     }
     override fun upperBound() = 1.0
-    override fun desc() = " winner=$winner loser=$loser reportedMargin=${df(reportedMargin)}"
+    override fun desc() = " winner=$winner loser=$loser reportedMargin=${df(reportedMargin)} reportedMean=${df(margin2mean(reportedMargin))}"
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin

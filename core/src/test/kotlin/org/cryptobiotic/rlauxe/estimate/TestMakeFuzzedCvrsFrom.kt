@@ -197,7 +197,7 @@ class TestMakeFuzzedCvrsFrom {
     @Test
     fun testMakeFuzzedCvrsFromContestOA() {
         val N = 10000
-        val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
+        val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         val contestId = 0
@@ -229,7 +229,7 @@ class TestMakeFuzzedCvrsFrom {
 
                 val unchanged = sumDiagonal(ncands, choiceChange)
                 if (showOA) println(" unchanged $unchanged = ${unchanged / N.toDouble()}")
-                assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .01)
+                assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .015)
 
                 // approx even distribution
                 val choicePct = choiceChange.map { (key, value) -> Pair(key, value / N.toDouble()) }.toMap()

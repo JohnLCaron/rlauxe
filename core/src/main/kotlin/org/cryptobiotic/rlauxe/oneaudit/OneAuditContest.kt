@@ -98,6 +98,12 @@ data class OneAuditContest (
         return (winnerVotes - loserVotes) / Nc.toDouble()
     }
 
+    fun reportedMarginNonPooled(winner: Int, loser:Int): Double {
+        val winnerVotes = cvrVotes[winner] ?: 0
+        val loserVotes = cvrVotes[loser] ?: 0
+        return (winnerVotes - loserVotes) / cvrNc.toDouble()
+    }
+
     override fun toString() = buildString {
         appendLine("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
         appendLine("  npools= ${pools.size} cvrNc=$cvrNc poolNc=$poolNc pctInPools=${df(pctInPools)}")
@@ -112,7 +118,8 @@ class OAContestUnderAudit(
 ): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=hasStyle) {
 
     override fun makeClcaAssorter(assertion: Assertion, avgCvrAssortValue: Double?): ClcaAssorter {
-        return OneAuditAssorter(this.contestOA, assertion.assorter, avgCvrAssortValue)
+        // dont use avgCvrAssortValue
+        return OneAuditClcaAssorter(this.contestOA, assertion.assorter, null)
     }
 
     override fun show() = buildString {
@@ -159,19 +166,25 @@ class OAContestUnderAudit(
  * If the reported tallies are correct, i.e., if Āc = Āb = (v + 1)/2, then
  *  B̄b = u /(2u − v)       (OA 9)
  */
-class OneAuditAssorter(
+class OneAuditClcaAssorter(
     val contestOA: OneAuditContest,
     assorter: AssorterIF,   // A(mvr)
     avgCvrAssortValue: Double?,    // Ā(c) = average CVR assorter value
 ) : ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue) {
 
-    // We assume we have a reported assorter total Sum(i∈Gg A(ci))
+    // We assume we have a reported assorter total = Sum(i∈Gg A(ci))
     // from the voting system for the cards in the group Gg (e.g., reported precinct subtotals)
-    // TODO. The original idea was to include the pool averages. Not sure if its worth the trouble
-    // but, maybe it would match avgCvrAssortValue?
-    fun meanAssort(): Double {
-        val cvrAssortMargin = if (avgCvrAssortValue != null) 2.0 * avgCvrAssortValue - 1.0 else assorter.reportedMargin()
-        return 1.0 / (3 - 2 * cvrAssortMargin)
+    // this agrees with the reportedMean from the total
+    // however, we might want to do an affine transform to set range to [0, max]
+    fun calcAssortMeanFromPools(): Double {
+        val welford = Welford()
+        val cvrMargin = contestOA.reportedMarginNonPooled(assorter.winner(), assorter.loser())
+        welford.update(margin2mean(cvrMargin), contestOA.cvrNc)
+        contestOA.pools.values.forEach { pool ->
+            val poolMargin = pool.calcReportedMargin(assorter.winner(), assorter.loser())
+            welford.update(margin2mean(poolMargin), pool.ncards)
+        }
+        return welford.mean
     }
 
     // B(bi, ci)
@@ -225,7 +238,7 @@ class OneAuditAssorter(
     override fun toString() = buildString {
         appendLine("OneAuditComparisonAssorter for contest ${contestOA.name} (${contestOA.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  avgCvrAssortValue=$avgCvrAssortValue")
+        append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound avgCvrAssortValue=$avgCvrAssortValue")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -233,7 +246,7 @@ class OneAuditAssorter(
         if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
 
-        other as OneAuditAssorter
+        other as OneAuditClcaAssorter
 
         return contestOA == other.contestOA
     }

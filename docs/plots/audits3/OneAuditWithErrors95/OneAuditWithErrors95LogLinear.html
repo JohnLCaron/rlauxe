@@ -1,0 +1,140 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;wl35s7&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAuditWithErrors95 samples vs fuzz&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100 cvrPercent=0.95 margin=0.02&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;mvrsFuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;samplesNeeded&quot;:[304.0,308.89000000000004,321.5799999999999,314.1900000000001,316.47999999999985,422.0100000000001,487.1900000000001,1050.3999999999999,1984.1299999999987,21452.789999999997,35082.72000000001,40583.38000000003,42622.93999999999,298.0,298.0,317.2899999999999,320.36999999999995,348.93000000000006,559.78,693.0099999999998,954.7500000000001,1182.4400000000003,2243.07,3283.9599999999996,4632.179999999999,5510.080000000002,18733.0,18754.739999999998,18739.700000000004,18725.089999999993,18779.269999999993,18735.299999999996,18945.74,18879.739999999994,19306.960000000003,19577.039999999997,19914.66000000001,20858.000000000007,20530.62,1560.0,1586.11,1655.3899999999999,1599.7800000000002,1722.6999999999998,1833.8500000000001,2480.380000000001,2229.7399999999993,3148.920000000001,4318.25,5569.3499999999985,8115.770000000001,8861.740000000003,13229.650000000001,13087.039999999997,12942.359999999993,13419.08,14152.61,13187.539999999997,14026.94,14211.300000000001,15498.789999999995,12741.74,15352.419999999993,13408.559999999994,15029.279999999999],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;mvrsFuzzPct&quot;:[0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;mvrsFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;mvrsFuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;samplesNeeded&quot;:[304.0,308.89000000000004,321.5799999999999,314.1900000000001,316.47999999999985,422.0100000000001,487.1900000000001,1050.3999999999999,1984.1299999999987,21452.789999999997,35082.72000000001,40583.38000000003,42622.93999999999,298.0,298.0,317.2899999999999,320.36999999999995,348.93000000000006,559.78,693.0099999999998,954.7500000000001,1182.4400000000003,2243.07,3283.9599999999996,4632.179999999999,5510.080000000002,18733.0,18754.739999999998,18739.700000000004,18725.089999999993,18779.269999999993,18735.299999999996,18945.74,18879.739999999994,19306.960000000003,19577.039999999997,19914.66000000001,20858.000000000007,20530.62,1560.0,1586.11,1655.3899999999999,1599.7800000000002,1722.6999999999998,1833.8500000000001,2480.380000000001,2229.7399999999993,3148.920000000001,4318.25,5569.3499999999985,8115.770000000001,8861.740000000003,13229.650000000001,13087.039999999997,12942.359999999993,13419.08,14152.61,13187.539999999997,14026.94,14211.300000000001,15498.789999999995,12741.74,15352.419999999993,13408.559999999994,15029.279999999999],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;default&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;mvrsFuzzPct&quot;:[0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05,0.0,1.0E-4,3.3E-4,6.6E-4,0.001,0.003,0.005,0.0075,0.01,0.02,0.03,0.04,0.05]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;mvrsFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;mvrsFuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;6&quot;
+};
+       var containerDiv = document.getElementById(&quot;wl35s7&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

@@ -13,7 +13,7 @@ class CompareAuditsNoErrors {
     val name = "AuditsNoErrors"
     val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
 
-    val nruns = 100  // number of times to run workflow
+    val nruns = 10  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
 
@@ -77,14 +77,17 @@ class CompareAuditsNoErrors {
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
-        plotter.showSampleSizesVsMargin(results, null, "auditType", yscale) {
+        plotter.showSampleSizesVsMargin(results, null, "auditType", yscale) { category(it) }
+
+
+        /* {
             when (it.parameters["auditType"]) {
                 1.0 -> "oneaudit ${dfn(it.Dparam("cvrPercent"), 3)}"
                 2.0 -> "polling"
                 3.0 -> "clca"
                 else -> "unknown"
             }
-        }
+        } */
     }
 
     @Test

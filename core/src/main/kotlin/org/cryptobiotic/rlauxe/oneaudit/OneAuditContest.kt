@@ -118,7 +118,7 @@ class OAContestUnderAudit(
 ): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=hasStyle) {
 
     override fun makeClcaAssorter(assertion: Assertion, avgCvrAssortValue: Double?): ClcaAssorter {
-        // dont use avgCvrAssortValue
+        // dont use avgCvrAssortValue. TODO: consider different primitive assorter, that knows about pools.
         return OneAuditClcaAssorter(this.contestOA, assertion.assorter, null)
     }
 

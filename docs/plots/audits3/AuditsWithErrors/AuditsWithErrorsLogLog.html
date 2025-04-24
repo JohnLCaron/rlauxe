@@ -1,0 +1,142 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;AMcceO&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;AuditsWithErrors samples needed&quot;,
+&quot;subtitle&quot;:&quot;margin=0.02 Nc=50000 nruns=200&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;],
+&quot;samplesNeeded&quot;:[298.0,354.5799999999999,420.9099999999999,485.1149999999998,614.4299999999996,664.1050000000002,1123.2749999999996,1649.0550000000003,2794.4649999999997,1560.0,1635.6249999999995,2018.7299999999993,2366.6700000000005,2491.0450000000005,2936.314999999999,3852.6150000000002,5973.005,10172.805,1560.0,1828.555,1784.56,2271.089999999999,2644.575,2768.6800000000003,4288.464999999995,5999.364999999997,10530.239999999996,1560.0,1693.1349999999995,1830.0850000000003,2287.849999999999,2644.2249999999985,2901.1499999999983,4568.815000000002,5714.405000000002,9576.184999999994,1560.0,1783.105,1879.5600000000004,2407.1749999999993,2823.880000000001,2737.7949999999996,3902.61,5199.009999999999,9847.929999999991,1560.0,1655.8449999999996,1937.900000000001,2257.4250000000006,2543.045,3201.7099999999973,4580.770000000001,6637.795000000002,11181.794999999987,12963.114999999996,13689.250000000002,13267.690000000006,14430.535000000003,12790.169999999996,13638.370000000006,13322.640000000005,13253.779999999995,14875.254999999997,282.6400000000001,288.5400000000002,299.455,308.81000000000006,346.8749999999999,352.0500000000001,398.495,514.4750000000005,650.8200000000002],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;],
+&quot;samplesNeeded&quot;:[298.0,354.5799999999999,420.9099999999999,485.1149999999998,614.4299999999996,664.1050000000002,1123.2749999999996,1649.0550000000003,2794.4649999999997,1560.0,1635.6249999999995,2018.7299999999993,2366.6700000000005,2491.0450000000005,2936.314999999999,3852.6150000000002,5973.005,10172.805,1560.0,1828.555,1784.56,2271.089999999999,2644.575,2768.6800000000003,4288.464999999995,5999.364999999997,10530.239999999996,1560.0,1693.1349999999995,1830.0850000000003,2287.849999999999,2644.2249999999985,2901.1499999999983,4568.815000000002,5714.405000000002,9576.184999999994,1560.0,1783.105,1879.5600000000004,2407.1749999999993,2823.880000000001,2737.7949999999996,3902.61,5199.009999999999,9847.929999999991,1560.0,1655.8449999999996,1937.900000000001,2257.4250000000006,2543.045,3201.7099999999973,4580.770000000001,6637.795000000002,11181.794999999987,12963.114999999996,13689.250000000002,13267.690000000006,14430.535000000003,12790.169999999996,13638.370000000006,13322.640000000005,13253.779999999995,14875.254999999997,282.6400000000001,288.5400000000002,299.455,308.81000000000006,346.8749999999999,352.0500000000001,398.495,514.4750000000005,650.8200000000002],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-5%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-95%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;oneaudit-99%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;fuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;9&quot;
+};
+       var containerDiv = document.getElementById(&quot;AMcceO&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

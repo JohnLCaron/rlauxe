@@ -40,7 +40,7 @@ class TestRaireContest {
     @Test
     fun testRaireContestUnderAudit() {
         val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=111, ncands=3, minMargin=.04, quiet = true)
-        rcontestUA.makeClcaAssertions()
+        rcontestUA.makeClcaAssertionsFromReportedMargin()
 
         assertEquals(rcontestUA, rcontestUA)
         assertEquals(rcontestUA.hashCode(), rcontestUA.hashCode())

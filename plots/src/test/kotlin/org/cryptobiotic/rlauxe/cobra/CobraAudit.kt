@@ -69,7 +69,7 @@ class CobraAudit(
 
         contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison = true, auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertions()
+            contest.makeClcaAssertionsFromReportedMargin()
         }
     }
 

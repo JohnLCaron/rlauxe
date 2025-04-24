@@ -26,7 +26,7 @@ class TestComparisonSamplerWithRaire {
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()
 
-        contestUA.makeClcaAssertions()
+        contestUA.makeClcaAssertionsFromReportedMargin()
 
         contestUA.clcaAssertions.forEach { assert ->
             run(cvrs, contestUA, assert.cassorter)

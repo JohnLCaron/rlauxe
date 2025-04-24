@@ -15,9 +15,9 @@ import kotlin.collections.getOrPut
  * It is also (optionally) capable of converting a preference list of
  * strings into the array of integer preferences used by Raire.
  */
-// TODO the candidate Ids go from 0 ... ncandidates-1
+// Note that the candidates go from 0 ... ncandidates-1, not candidate ids
 class VoteConsolidator {
-    private val votes = mutableMapOf<HashableIntArray, Int>()
+    private val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
 
     fun addVote(pref: IntArray) {
         val key = HashableIntArray(pref)
@@ -34,8 +34,25 @@ class VoteConsolidator {
     }
 }
 
+// Adapted from au.org.democracydevelopers.raire.util.VoteConsolidator
+/** A wrapper around int[] that works as a key in a hash map  */
+private class HashableIntArray(val array: IntArray) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as HashableIntArray
+        return array.contentEquals(that.array)
+    }
+
+    override fun hashCode(): Int {
+        return array.contentHashCode()
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // Added here because I want to show the runoff stages, embodied in nenFirstChoices() and nebFirstChoices()
-// TODO the candidate Ids go from 0 ... ncandidates-1
+// Note that the candidates go from 0 ... ncandidates-1, not candidate ids
 data class VoteList(val n: Int, val candRanks: List<Int>)
 data class VoteSequences(val votes: List<VoteList>) {
 
@@ -82,23 +99,5 @@ data class VoteSequences(val votes: List<VoteList>) {
             }
             return VoteSequences(evotes)
         }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Adapted from au.org.democracydevelopers.raire.util.VoteConsolidator
-/** A wrapper around int[] that works as a key in a hash map  */
-private class HashableIntArray(val array: IntArray) {
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || javaClass != other.javaClass) return false
-        val that = other as HashableIntArray
-        return array.contentEquals(that.array)
-    }
-
-    override fun hashCode(): Int {
-        return array.contentHashCode()
     }
 }

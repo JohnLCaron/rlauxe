@@ -34,7 +34,7 @@ data class ContestInfoJson(
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
     val choiceFunction: String,
     val nwinners: Int,
-    val voteForN: Int,
+    val voteForN: Int? = null,
     val minFraction: Double?,
 )
 
@@ -58,7 +58,7 @@ fun ContestInfoJson.import(): ContestInfo {
         this.candidateNames,
         choiceFunction,
         this.nwinners,
-        this.voteForN,
+        this.voteForN ?: this.nwinners,
         this.minFraction,
     )
 }

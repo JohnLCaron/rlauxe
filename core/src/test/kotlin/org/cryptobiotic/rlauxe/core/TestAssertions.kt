@@ -55,7 +55,7 @@ class TestAssertions {
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            nwinners = 2,
+            nwinners = 1,
             minFraction = .40
         )
         val cvrs = CvrBuilders()
@@ -68,6 +68,7 @@ class TestAssertions {
             .addCvr().addContest("AvB", "2").ddone()
             // artifact of creating Contests and candidates from cvrs.
             .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
             .addCvr().addContest("AvB", "4").ddone()
             .addCvr().addContest("AvB", "4").ddone()
             .addCvr().addContest("AvB", "4").ddone()
@@ -92,11 +93,7 @@ class TestAssertions {
         val firstAssertion = assertions.first()
         assertEquals(firstAssertion, firstAssertion)
         assertEquals(firstAssertion.hashCode(), firstAssertion.hashCode())
-
-        val lastAssertion = assertions.last()
-        assertNotEquals(firstAssertion, lastAssertion)
-        assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
-        assertEquals("'AvB' (0) SuperMajorityAssorter winner=4 minFraction=0.4 margin=0.0385", firstAssertion.toString())
+        assertEquals("'AvB' (0) SuperMajorityAssorter winner=4 minFraction=0.4 margin=0.1429", firstAssertion.toString())
     }
 
     @Test
@@ -145,7 +142,7 @@ class TestAssertions {
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            nwinners = 2,
+            nwinners = 1,
             minFraction = .33,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)
@@ -171,7 +168,7 @@ class TestAssertions {
             id = 0,
             choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
             candidateNames = listToMap( "A", "B", "C", "D", "E"),
-            nwinners = 2,
+            nwinners = 1,
             minFraction = .66,
         )
         val counts = listOf(1000, 980, 3000, 50, 3001)

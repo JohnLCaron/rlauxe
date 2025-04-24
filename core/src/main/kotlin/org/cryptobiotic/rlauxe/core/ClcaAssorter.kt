@@ -28,20 +28,32 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
+    val avgCvrAssortValue: Double?,    // Ā(c) = average CVR assort value; use reportedMargin if missing
     val hasStyle: Boolean = true,
     val check: Boolean = true,
 ) {
-    val assorterMargin = 2.0 * avgCvrAssortValue - 1.0 // Define v ≡ 2Āc − 1, the reported assorter margin
+    // Define v ≡ 2Āc − 1, the assorter margin
+    val cvrAssortMargin: Double
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
-    private val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
+    val noerror: Double // clca assort value when no error
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
     // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7)
-    private val upperBound = 2.0 * noerror
+    val upperBound: Double // upper bound of clca assorter
 
     init {
-        if (avgCvrAssortValue <= 0.5 || (noerror <= 0.5))
-            println("*** ${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue) must be > .5" )
+        // Define v ≡ 2Āc − 1, the assorter margin
+        cvrAssortMargin = if (avgCvrAssortValue != null) 2.0 * avgCvrAssortValue - 1.0 else assorter.reportedMargin()
+        // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
+        noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error
+        // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
+        // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7)
+        upperBound = 2.0 * noerror // upper bound of clca assorter
+
+        val cvrAssortAvg = if (avgCvrAssortValue != null) avgCvrAssortValue else assorter.reportedMean()
+        if (cvrAssortAvg <= 0.5)
+            println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5" )
+        if (noerror <= 0.5)
+            println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: noerror ($noerror) must be > .5" )
         /* if (check) { // TODO suspend checking for some tests that expect to fail
             require(avgCvrAssortValue > 0.5) {
                 "${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5"
@@ -54,10 +66,9 @@ open class ClcaAssorter(
     fun id() = info.id
     fun noerror() = noerror
     fun upperBound() = upperBound
-    fun meanAssort() = 1.0 / (3 - 2 * avgCvrAssortValue) // calcAssorterMargin when there are no errors
     fun assorter() = assorter
-    override fun toString() = "avgCvrAssortValue=$avgCvrAssortValue margin=$assorterMargin noerror=$noerror upperBound=$upperBound"
 
+    // TODO move to test
     fun calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
         val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
             .map { bassort(it.first, it.second) }.average()
@@ -156,10 +167,16 @@ open class ClcaAssorter(
     }
 
     override fun hashCode(): Int {
-        var result = avgCvrAssortValue.hashCode()
+        var result = avgCvrAssortValue?.hashCode() ?: 0
         result = 31 * result + hasStyle.hashCode()
         result = 31 * result + info.hashCode()
         result = 31 * result + assorter.hashCode()
         return result
+    }
+
+    override fun toString() = buildString {
+        appendLine("OneAuditComparisonAssorter for contest ${info.name} (${info.id})")
+        appendLine("  assorter=${assorter.desc()}")
+        append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound")
     }
 }

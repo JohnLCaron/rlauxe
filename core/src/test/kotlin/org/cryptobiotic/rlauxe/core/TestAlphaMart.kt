@@ -41,23 +41,24 @@ class TestAlphaMart {
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
         val cvrSampler = PollWithoutReplacement(contestUA.contest.id, auditConfig.hasStyles, cvrs, assorter)
 
-        val margin = assorter.reportedMargin()
-        println("margin=$margin, mean=${margin2mean(margin)}")
+        val eta0 = assorter.reportedMean()
+        println("eta0=$eta0, margin=${mean2margin(eta0)}")
 
         val result = simulateSampleSizeAlphaMart(
             auditConfig = auditConfig,
             sampleFn = cvrSampler,
-            margin = margin,
+            estimFn = null,
+            eta0 = assorter.reportedMean(),
             upperBound = assorter.upperBound(),
             Nc = contest.Nc,
-            moreParameters = mapOf("eta0" to margin2mean(margin)),
+            moreParameters = mapOf("eta0" to eta0),
         )
         println("simulateSampleSizeAlphaMart = $result")
 
         val d = 100
         val result2 = runAlphaMartRepeated(
             drawSample = cvrSampler,
-            eta0 = margin2mean(margin),
+            eta0 = eta0,
             d = d,
             ntrials = 10,
             upperBound = assorter.upperBound()
@@ -79,9 +80,12 @@ fun runAlphaMartRepeated(
     estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
 ): RunTestRepeatedResult {
 
-    val t = 0.5
-
-    val useEstimFn = estimFn ?: TruncShrinkage(drawSample.maxSamples(), true, upperBound = upperBound, d = d, eta0 = eta0)
+    val useEstimFn = estimFn ?: TruncShrinkage(
+        drawSample.maxSamples(),
+        true,
+        upperBound = upperBound,
+        d = d,
+        eta0 = eta0)
 
     val alpha = AlphaMart(
         estimFn = useEstimFn,

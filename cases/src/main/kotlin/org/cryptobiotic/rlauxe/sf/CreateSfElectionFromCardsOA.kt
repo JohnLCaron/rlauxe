@@ -23,10 +23,11 @@ import java.io.FileOutputStream
 // This is to write ballotPools.csv for SHANGRLA comparison
 // read Dominion "cvr export" json file
 // write "$topDir/cards.csv", "$topDir/ballotPools.csv"
+// return number of cards written into the csv pool
 fun createAuditableCardsWithPools(
     topDir: String,
     dominionCvrJson: String, // DominionCvrJson
-    manifestFile: String) {
+    manifestFile: String): Int {
 
     val cardsOutputFilename = "$topDir/cards.csv"
     val cardsOutputStream = FileOutputStream(cardsOutputFilename)
@@ -142,6 +143,8 @@ fun createAuditableCardsWithPools(
     println(" total ${spools.size} pools")
     println(" total contest1 cards in pools = $pcount1")
     println(" total contest2 cards in pools = $pcount2")
+
+    return countCvrs2
 }
 
 class CardPool(val poolId: Int) {
@@ -246,10 +249,12 @@ fun createSfElectionFromCardsOA(
     }
 
     // make all the clca assertions in one go
+    // TODO: the card file only has the cvrs, not the non-cvrs....
     makeClcaAssertions(contestsUA, CvrIteratorAdapter(readCardsCsvIterator(cardFile)))
 
     // these checks may modify the contest status
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
+    checkContestsWithCards(contestsUA, readCardsCsvIterator(cardFile), show = true)
 
     val publisher = Publisher(auditDir)
     writeContestsJsonFile(contestsUA, publisher.contestsFile())

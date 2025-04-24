@@ -70,7 +70,7 @@ fun createSfElectionFromCards(
     val irvInfos = contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
     val irvContests = if (irvInfos.isEmpty()) emptyList() else {
         val cvrIter = CvrIteratorAdapter(readCardsCsvIterator(cardFile))
-        val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrIter)
+        val irvVoteMap = makeIrvContestVotes( irvInfos.associateBy { it.id }, cvrIter)
         if (show) {
             irvVoteMap.values.forEach { println("IrvVotes( ${it.irvContestInfo.id} ${it.irvContestInfo.choiceFunction} ${it.irvContestInfo}")
                 it.notfound.forEach { (cand, count) -> println("  candidate $cand not found $count times")}
@@ -83,16 +83,16 @@ fun createSfElectionFromCards(
         AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
-
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
     val allContests = contestsUA + irvContests
-
-    // these checks may modify the contest status; may not reference the clca assertions
-    checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
     // make all the clca assertions in one go
     val auditableContests = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
     makeClcaAssertions(auditableContests, CvrIteratorAdapter(readCardsCsvIterator(cardFile)))
+
+    // these checks may modify the contest status; dont call until clca assertions are created
+    checkContestsCorrectlyFormed(auditConfig, contestsUA)
+    checkContestsWithCards(contestsUA, readCardsCsvIterator(cardFile), show = true)
 
     val publisher = Publisher(auditDir)
     writeContestsJsonFile(allContests, publisher.contestsFile())

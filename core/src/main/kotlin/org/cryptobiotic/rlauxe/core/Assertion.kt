@@ -29,8 +29,8 @@ open class Assertion(
     }
 
     open fun show() = buildString {
-        appendLine(" contestInfo: $info")
-        appendLine(" assorter: ${assorter.desc()}")
+        appendLine(" contestInfo: $info \n")
+        appendLine("  assorter: ${assorter.desc()}")
     }
 }
 
@@ -58,7 +58,6 @@ class ClcaAssertion(
     }
 
     override fun show() = buildString {
-        append(super.show())
         appendLine(" cassorter: ${cassorter}")
     }
 

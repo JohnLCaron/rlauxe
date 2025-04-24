@@ -3,11 +3,11 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssorter
 import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.min
@@ -346,7 +346,7 @@ fun simulateSampleSizePollingAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val assorter = assertionRound.assertion.assorter
-    val margin = assorter.reportedMargin()
+    val eta0 = assorter.reportedMean()
 
     // optional fuzzing of the cvrs
     var fuzzPct = 0.0
@@ -361,7 +361,8 @@ fun simulateSampleSizePollingAssorter(
     val result = simulateSampleSizeAlphaMart(
         auditConfig,
         sampler,
-        margin,
+        null,
+        eta0 = eta0,
         assorter.upperBound(),
         Nc = contest.Nc,
         startingTestStatistic,
@@ -382,22 +383,24 @@ fun simulateSampleSizePollingAssorter(
 fun simulateSampleSizeAlphaMart(
     auditConfig: AuditConfig,
     sampleFn: Sampler,
-    margin: Double,
+    estimFn: EstimFn?,
+    eta0: Double,  // initial estimate of mean
     upperBound: Double,
     Nc: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val eta0 = margin2mean(margin)
+    val margin = mean2margin(eta0)
 
-    val estimFn = TruncShrinkage(
+    val useEstimFn = estimFn ?: TruncShrinkage(
         N = Nc,
         upperBound = upperBound,
         d = auditConfig.pollingConfig.d,
         eta0 = eta0,
     )
+
     val testFn = AlphaMart(
-        estimFn = estimFn,
+        estimFn = useEstimFn,
         N = Nc,
         upperBound = upperBound,
         riskLimit = auditConfig.riskLimit,
@@ -418,7 +421,6 @@ fun simulateSampleSizeAlphaMart(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //// OneAudit
 
-// TODO why so slow ??
 fun simulateSampleSizeOneAuditAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
@@ -429,7 +431,7 @@ fun simulateSampleSizeOneAuditAssorter(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val cassorter = cassertion.cassorter // as OAClcaAssorter
+    val cassorter = cassertion.cassorter as OneAuditAssorter
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 
@@ -442,12 +444,31 @@ fun simulateSampleSizeOneAuditAssorter(
         fuzzPct = oaConfig.simFuzzPct
         OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, cassorter) // TODO cant use Raire
     }
-
     sampler.reset()
+
+    // the strategy effects the estimFn
+    val strategy = auditConfig.oaConfig.strategy
+    val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
+        cassorter.upperBound() * (1.0 - eps)
+    else
+        cassorter.meanAssort()
+
+    val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
+        FixedEstimFn(.99 * cassorter.upperBound())
+    } else {
+        TruncShrinkage(
+            N = contestUA.Nc,
+            withoutReplacement = true,
+            upperBound = cassorter.upperBound(),
+            d = auditConfig.pollingConfig.d,
+            eta0 = eta0,
+        )
+    }
 
     val result = simulateSampleSizeAlphaMart(
         auditConfig,
         sampler,
+        estimFn,
         mean2margin(cassorter.meanAssort()),
         cassorter.upperBound(),
         contestUA.Nc,

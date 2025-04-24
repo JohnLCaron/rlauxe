@@ -36,15 +36,16 @@ class TestSfElectionFromCards {
         // total contest1 cards in pools = 20932
         // total contest2 cards in pools = 3243
 
+        /*
         createSF2024PoaElectionFromCards()
         testCardContests()
         testCardVotes()
         testCardAssertions()
-        auditSf2024Poa()
+        auditSf2024Poa() */
     }
 
     // needs createSF2024PoaCards to be run first
-    // @Test
+    @Test
     fun createSF2024PoaElectionFromCards() {
         val stopwatch = Stopwatch()
         val sfDir = "/home/stormy/temp/cases/sf2024P"
@@ -246,7 +247,7 @@ class TestSfElectionFromCards {
 
     private val show = false
 
-    @Test
+    // @Test
     fun auditSf2024Poa() {
         val auditDir = "/home/stormy/temp/cases/sf2024Poa/audit"
 
@@ -270,7 +271,7 @@ class TestSfElectionFromCards {
             contestRound.assertionRounds.forEach { assertionRound ->
                 val cassorter = (assertionRound.assertion as ClcaAssertion).cassorter
                 val sampler = ClcaWithoutReplacement(contestRound.contestUA.id, true, cvrPairs, cassorter, allowReset = false)
-                if (show) println("  run assertion ${assertionRound.assertion} cvrMargin= ${mean2margin(cassorter.meanAssort())}")
+                if (show) println("  run assertion ${assertionRound.assertion} reported Margin= ${mean2margin(cassorter.assorter.reportedMargin())}")
 
                 val result: TestH0Result = runner.run(
                     workflow.auditConfig(),

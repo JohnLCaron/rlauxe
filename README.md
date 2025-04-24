@@ -315,20 +315,20 @@ In these simulations, errors are created between the CVRs and the MVRs, by takin
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-These are plots of samplesNeeded vs fuzzPct, with margin fixed at 4%:
+These are log-log plots of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.html" rel="auditsWithErrorsLogLinear">![auditsWithErrorsLogLinear](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLog.html" rel="auditsWithErrorsLogLog">![auditsWithErrorsLogLog](docs/plots/samples/auditsWithErrors/auditsWithErrorsLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
-* oneaudit has 99% of the ballots with CVRs, and 1% without
-* oneaudit does poorly when there are errors
 * CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
-* Raire audits are CLCA audits using Raire assertions. These are less sensitive sensitive to errors 
-  because the changes are less likely to change the assorter values. 
+* OneAudits are intermediate between Polling and CLCA; surprisingly, in this formulation it doesnt matter what percent of ballots have CVRs.
+* Raire audits are CLCA audits using Raire assertions. These are less sensitive sensitive to errors
+  because the changes are less likely to change the assorter values.
+* Polling audit sample sizes are all but impervious to errors.
+* OneAudits have similar sensitivities to errors as CLCA.
 
 Varying the percent of undervotes at margin of 4%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithUndervotes/auditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](docs/plots/samples/auditsWithUndervotes/auditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithUndervotes/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](docs/plots/oneaudit3/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
 
 * Note that undervote percentages are shown up to 50%, with little effect.
 
@@ -336,7 +336,7 @@ Varying the percent of undervotes at margin of 4%, with errors generated with 1%
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="auditsWithPhantomsLogLinear">![auditsWithPhantomsLogLinear](docs/plots/samples/auditsWithPhantoms/auditsWithPhantomsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="auditsWithPhantomsLogLinear">![auditsWithPhantomsLogLinear](docs/plots/oneaudit3/AuditsWithPhantoms/AuditsWithPhantomsLogLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
@@ -347,7 +347,7 @@ as a function of phantomPct, and also with no phantoms but the margin shifted by
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.html" rel="phantomMarginShiftLinear">![phantomMarginShiftLinear](docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.png)</a>
 
 * A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board,
-  at least at phantomPCt < 3% or so.
+  at least at phantomPct < 3% or so.
 
 
 # Estimating Sample Batch sizes
@@ -446,7 +446,7 @@ As an example, in the following plot we show averages of the overall number of b
 no style information, no errors, for Nb/Nc = 1, 2, 5 and 10. 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLog.html" rel="pollingNoStyleLog">![pollingNoStyleLog](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLogLinear.html" rel="pollingNoStyleLogLinear">![pollingNoStyleLogLinear](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLogLinear.png)</a>
 
 * The increases number of nmvrs is simply Nc/Nb, and has a strong absolute effect as the margin gets smaller.
 

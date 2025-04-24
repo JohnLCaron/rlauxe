@@ -173,5 +173,5 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
     //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     //    cvrNc: Int,
     //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
-    return OneAuditContest(info, votesCvr, stratumSizes[0], pools.associateBy { it.id })
+    return OneAuditContest(info, votesCvr, stratumSizes[0], pools.associateBy { it.id }, Np = 0)
 }

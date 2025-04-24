@@ -21,7 +21,7 @@ As a function of fuzzPct:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/OneAuditWithErrors95/OneAuditWithErrors95LogLog.html" rel="OneAuditNoErrorsLogLog">![OneAuditNoErrorsLogLog](plots/oneaudit3/OneAuditWithErrors95/OneAuditWithErrors95LogLog.png)</a>
 
-* The bet99 strategy does best when the fuzzPct is < .0075 (75 in 10000 have a random error), then degrades quickly.
+* The bet99 strategy does best when the fuzzPct is < .005 (5 in 1000 have a random error), then degrades quickly.
 * The eta0Eps strategy stays reletively flat, and does much better than bet99 when fuzzPct is > .01.
 
 ## Compare Audit Types
@@ -42,7 +42,7 @@ When there are errors (parameterized by fuzzPct, the percent of ballots randomly
 * OneAudit results are much better in version 3. 
 * It doesnt matter what the cvr percent is: the variation in the various oneaudit-cvrPercent is likely due to random 
   variation in when errors are encountered in the sequence.
-* OneAudit results have similar sensitities to errors as CLCA.
+* OneAudit results have similar sensitivities to errors as CLCA.
 * IRV (Raire) audits are less likely to have their outcomes altered due to random changes in the ballots.
 * Polling audit sample sizes are all but impervious to errors.
 

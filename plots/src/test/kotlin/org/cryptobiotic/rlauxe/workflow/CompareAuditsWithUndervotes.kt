@@ -13,8 +13,8 @@ import kotlin.test.Test
 class CompareAuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10  // number of times to run simulation
-    val name = "auditsWithUndervotes"
-    val dirName = "/home/stormy/temp/samples/$name"
+    val name = "AuditsWithUndervotes"
+    val dirName = "/home/stormy/temp/audits/$name"
     val mvrFuzzPct = .01
     val margin = .04
     val N = 50000
@@ -39,10 +39,10 @@ class CompareAuditsWithUndervotes {
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, undervote, 0.0, cvrPercent = .99, mvrsFuzzPct=mvrFuzzPct,
-                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit99"),
+                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
@@ -52,7 +52,7 @@ class CompareAuditsWithUndervotes {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/auditsWithUndervotes.cvs")
+        val writer = WorkflowResultsIO("$dirName/AuditsWithUndervotes.cvs")
         writer.writeResults(results)
 
         regenPlots()

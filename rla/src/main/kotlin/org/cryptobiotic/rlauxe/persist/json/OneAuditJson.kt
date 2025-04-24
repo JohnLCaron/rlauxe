@@ -16,12 +16,14 @@ data class OAContestJson(
     val cvrVotes: Map<Int, Int>,
     val cvrNc: Int,
     val pools: List<BallotPoolJson>,
+    val Np: Int?,
 )
 
 fun OneAuditContest.publishOAJson() = OAContestJson(
         this.cvrVotes,
         this.cvrNc,
         this.pools.values.map { it.publishJson()},
+        this.Np,
     )
 
 fun OAContestJson.import(info: ContestInfo): OneAuditContest {
@@ -31,6 +33,7 @@ fun OAContestJson.import(info: ContestInfo): OneAuditContest {
         this.cvrVotes,
         this.cvrNc,
         pools.associateBy { it.id },
+        this.Np ?: 0,
     )
 }
 

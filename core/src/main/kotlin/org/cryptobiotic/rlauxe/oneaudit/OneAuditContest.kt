@@ -15,7 +15,9 @@ data class OneAuditContest (
     val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     val cvrNc: Int,
     val pools: Map<Int, BallotPool>, // pool id -> pool
+    override val Np: Int,
 ) : ContestIF { // TODO why not subclass Contest ?
+
     override val id = info.id
     val name = info.name
     override val choiceFunction = info.choiceFunction
@@ -27,7 +29,6 @@ data class OneAuditContest (
     override val losers: List<Int>
 
     override val Nc: Int  // upper limit on number of ballots for all strata for this contest
-    override val Np: Int  // number of phantom ballots for all strata for this contest
     val minMargin: Double
     val poolNc: Int
     val pctInPools: Double
@@ -37,10 +38,8 @@ data class OneAuditContest (
         require(choiceFunction == SocialChoiceFunction.PLURALITY) { "OneAuditContest requires PLURALITY"}
 
         poolNc = pools.values.sumOf { it.ncards }
-        Nc = poolNc + cvrNc
+        Nc = poolNc + cvrNc + Np
         pctInPools = poolNc / Nc.toDouble()
-
-        Np = 0 // TODO
 
         //// construct total votes, adding 0 votes if needed
         val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote

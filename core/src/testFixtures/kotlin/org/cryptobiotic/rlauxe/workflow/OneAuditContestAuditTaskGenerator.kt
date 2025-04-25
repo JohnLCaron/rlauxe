@@ -25,7 +25,7 @@ class OneAuditContestAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
-        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
+        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA2.makeTestCvrs() // TODO
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2.makeContest()), oaCvrs, mvrsFuzzPct)
 
@@ -61,7 +61,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
-        val contestOA = makeContestOA(margin, Nc, cvrPercent = cvrPercent, skewVotesPercent= 0.0, undervotePercent = underVotePct, phantomPercent=phantomPct)
+        val contestOA = makeContestOA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
         val oaCvrs = contestOA.makeTestCvrs()
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.makeContest()), oaCvrs, mvrsFuzzPct)
 
@@ -76,7 +76,5 @@ class OneAuditSingleRoundAuditTaskGenerator(
         )
     }
 }
-
-private val debug = false
 
 

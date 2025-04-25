@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 04/24/2026_
+_last changed: 04/25/2026_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -13,7 +13,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
 **Table of Contents**
 <!-- TOC -->
 * [Audit Workflow](#audit-workflow)
-  * [Estimation](#estimation)
 * [SHANGRLA framework](#shangrla-framework)
   * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
     * [Plurality](#plurality)
@@ -30,7 +29,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
-  * [Estimation](#estimation-1)
+  * [Estimation](#estimation)
   * [Card Style Data](#card-style-data)
     * [Consistent Sampling with Card Style Data](#consistent-sampling-with-card-style-data)
     * [Uniform Sampling without Card Style Data](#uniform-sampling-without-card-style-data)
@@ -65,6 +64,13 @@ For each contest:
 The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
 
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
+- Contests are removed from the audit if:
+  - The contest has no losers (e.g. the number of candidate <= number of winners); the contest is marked NoLosers.
+  - The contest has no winners (e.g. no candidates recieve minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
+  - The contest is a tie, or its reported margin is less than _auditConfig.minMargin_; the contest is marked MinMargin.
+  - The contest's reported margin is less than its phantomPct (Np/Nc); the audit is marked TooManyPhantoms.
+  - The contest internal fields are inconsistent; the audit is marked ContestMisformed.
+  - The contest is manually removed by the Auditors; the audit is marked AuditorRemoved.
 
 For each audit round:
 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function, 
@@ -76,8 +82,6 @@ This may be done with an automated algorithm, or the Auditor may make individual
 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
 7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
-
-## Estimation
 
 # SHANGRLA framework
 
@@ -94,6 +98,10 @@ Otherwise, the audit expands, potentially to a full hand count. If every null is
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
+The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the
+AGPL-3.0 license. The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is
+based on the concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places.
+
 | term          | definition                                                                                     |
 |---------------|------------------------------------------------------------------------------------------------|
 | Nc            | the number of ballot cards validly cast in the contest                                         |
@@ -103,7 +111,7 @@ in a risk-limiting audit with risk limit α:
 | estimator     | estimates the true population mean from the sampled assorter values. (AlphaMart)               |
 | bettingFn     | decides how much to bet for each sample. (BettingMart)                                         |
 | riskTestingFn | is the statistical method to test if the assertion is true.                                    |
-| audit         | iterative process of picking ballots and checking if all the assertions are true.              |
+| audit         | iterative process of choosing ballots and checking if all the assertions are true.             |
 
 
 ## Assorters and supported SocialChoices
@@ -315,7 +323,7 @@ In these simulations, errors are created between the CVRs and the MVRs, by takin
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-These are log-log plots of samplesNeeded vs fuzzPct, with margin fixed at 4%:
+This is a log-log plot of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
@@ -324,7 +332,7 @@ These are log-log plots of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 * Raire audits are CLCA audits using Raire assertions. These are less sensitive to errors
   because the errors are less likely to change the assorter values.
 * Polling audit sample sizes are all but impervious to errors.
-* OneAudits have similar sensitivities to errors as CLCA.
+* OneAudits have similar sensitivities to errors as CLCA: the shapes of their curves are similar.
 
 Varying the percent of undervotes at margin of 4%, with errors generated with 1% fuzz:
 
@@ -513,7 +521,7 @@ The number of rounds needed reflects the default value of auditConfig.quantile =
 ## Multiple Contest Auditing
 
 An election often consists of several or many contests, and it is likely to be more efficient to audit all of the contests at once.
-We have several mechanisms for choosing contests to remove from the audit to keep the sample sizes resonable.
+We have several mechanisms for choosing contests to remove from the audit to keep the sample sizes reasonable.
 
 Before the audit begins:
 1. Any contest whose reported margin is less than _auditConfig.minMargin_ is removed from the audit with failure code MinMargin.
@@ -545,27 +553,30 @@ For any given contest, the sequence of ballots/CVRS to be used by that contest i
 In a multi-contest audit, at each round, the estimate of the number of ballots needed for each contest is calculated = n, 
 and the first n ballots in the contest's sequence are sampled.
 The total set of ballots sampled in a round is just the union of the individual contests' set. 
-When there are duplicates, one gets some efficiency gain.
+The extra efficiency of a multi-contest audit comes when the same ballot is chosen for more than one contest.
 
-The set of contests to continue to the next round is not known, so the total set of ballots sampled at each round is unknown. 
-Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed. 
-
+The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is 
+not known in advance. Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed when the PRNG is chosen.
 
 # Attacks
 
-_Attacks_ are scenarios where the actual winner is not the reported winner. They may be untentional, due to malicious actors or
-unintentional due to mistakes in the process or bugs in the software.
+_Attacks_ are scenarios where the actual winner is not the reported winner. They may be intentional, due to malicious 
+actors, or unintentional, due to mistakes in the process or bugs in the software.
 
 ## Attack with phantoms
 
 Here we investigate what happens when the percentage of phantoms is high enough to flip the election, but the reported margin
 does not reflect that. In other words an attack (or error) when the phantoms are not correctly reported.
 
-We create simulations at different margins and percentage of phantoms, and fuzz the MVRs at 1%.
+We create CLCA simulations at different margins and percentage of phantoms, and fuzz the MVRs at 1%.
 We measure the "true margin" of the MVRs, including phantoms, by applying the CVR assorter, and use that for the x axis.
 
-In this plot we also add the _phantoms_ strategy which uses _phantomPct_ from each contest as the apriori "one ballot overstatement" error rate of
-the AdaptiveBetting betting function.
+The error estimation strategies in this plot are:
+* noerror : The apriori error rates are 0.
+* fuzzPct: The apriori error rates are calculated from the true fuzzPct (so, the best possible guess).
+* phantomPct: use _phantomPct_ as the apriori error rates.
+
+These are just the initial guesses for the error rates. In all cases, they are adjusted as samples are made and errors are found.
 
 Here are plots of sample size as a function of true margin, for phantomPct of 0, 2, and 5 percent:
 

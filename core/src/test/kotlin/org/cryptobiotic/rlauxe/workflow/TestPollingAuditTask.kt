@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 
 class TestPollingAuditTask {
@@ -29,7 +28,7 @@ class TestPollingAuditTask {
         val task = taskGen.generateNewTask()
         val workflowResult = task.run()
         println(workflowResult)
-        assertEquals(workflowResult.status, TestH0Status.StatRejectNull)
+        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
     }
 
     @Test
@@ -51,6 +50,6 @@ class TestPollingAuditTask {
         val task = taskGen.generateNewTask()
         val workflowResult = task.run()
         println(workflowResult)
-        assertTrue(workflowResult.status == TestH0Status.StatRejectNull)
+        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
     }
 }

@@ -5,7 +5,7 @@ data class BallotPool(
     val id: Int,
     val contest:Int,
     val ncards: Int,
-    val votes: Map<Int, Int>, // candid -> nvotes
+    val votes: Map<Int, Int>, // candid -> nvotes // the diff from ncards tell you the undervotes
 ) {
 
     // TODO does this really agree with the average assorter?

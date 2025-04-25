@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
@@ -29,7 +30,7 @@ class TestOneAuditClcaAssorter {
     //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
     //    otherwise = 1/2
 
-    // @Test TODo match with SHANGRLA, make tests pass
+    // @Test TODO match with SHANGRLA, make tests pass
     fun testOAShangrla() {
         val winnerNoCvr = makeCvr(0, "noCvr", poolId=1)
         val loserNoCvr = makeCvr(1, "noCvr", poolId=1)
@@ -39,7 +40,7 @@ class TestOneAuditClcaAssorter {
         val N = 10000
         // val contestOA: OneAuditContest = makeContestOA(N, margin, poolPct = 0.66, poolMargin = mean2margin(0.625))
         // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-        val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 0.33, skewVotesPercent = 0.0, undervotePercent = 0.0, phantomPercent = 0.0) // poolMargin = mean2margin(0.625))
+        val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 0.33, undervotePercent = 0.0, phantomPercent = 0.0) // poolMargin = mean2margin(0.625))
         val contestUA = contestOA.makeContestUnderAudit()
         val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
 
@@ -116,7 +117,7 @@ class TestOneAuditClcaAssorter {
     /*
     @Test
     fun testMakeContestUnderAudit() {
-        val contest = makeContestOA(2000, 1800, cvrPercent = .66, 0.05, undervotePercent = .0, phantomPercent = .0)
+        val contest = makeContestOA(2000, 1800, cvrPercent = .66, undervotePercent = .0, phantomPercent = .0)
         val contestUA = contest.makeContestUnderAudit()
         println(contestUA)
 
@@ -124,16 +125,16 @@ class TestOneAuditClcaAssorter {
         val loserCvr = makeCvr(1, "noCvr")
         val otherCvr = makeCvr(2, "noCvr")
 
-        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OAClcaAssorter
+        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
 
-        val assorter_mean_poll = bassorter.stratumInfos["noCvr"]!!.avgBatchAssortValue
-        val margin = mean2margin(assorter_mean_poll)
+        val assorterMargin = bassorter.cvrAssortMargin
+        val assorterMean = margin2mean(assorterMargin)
 
         //    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
         //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
-        val loserVote = (1.0 - assorter_mean_poll) / (2 - margin)
-        val winnerVote = (2.0 - assorter_mean_poll) / (2 - margin)
+        val loserVote = (1.0 - assorterMean) / (2 - assorterMargin)
+        val winnerVote = (2.0 - assorterMean) / (2 - assorterMargin)
         println("loserVote=$loserVote winner=$winnerVote ")
 
         println(" mvr other bassort=${bassorter.bassort(otherCvr, winnerCvr)} ")
@@ -153,6 +154,9 @@ class TestOneAuditClcaAssorter {
         assertEquals(winnerVote, bassorter.bassort(winnerCvr, otherCvr), doublePrecision)
     }
 
+     */
+
+    /*
     @Test
     fun testONE() {
         // two candidate plurailty
@@ -163,7 +167,7 @@ class TestOneAuditClcaAssorter {
         val contestOA = contest.makeContestUnderAudit()
         println(contestOA)
 
-        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter
+        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
         println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${mean2margin(bassorter.meanAssort())} ")
 
@@ -210,6 +214,8 @@ class TestOneAuditClcaAssorter {
         println("clcaMean = ${bassorter.meanAssort()}")
         // assertEquals(allAvg, margin2mean(bassorter.clcaMargin), doublePrecision)
     }
+
+     */
 
     @Test
     fun genRegularBets() {
@@ -269,7 +275,6 @@ class TestOneAuditClcaAssorter {
     fun betF(xj: Double, lamda: Double): Double {
         return 1.0 + lamda * (xj - .5) // (1 + λi (Xi − µi )) ALPHA eq 10, SmithRamdas eq 34 (WoR)
     }
-     */
 
     // noCvr     7 = 0.24305555555555555 m=0.5 bet = 1.3822132305208128 tj=0.6448479893800689, Tj = 0.71610651140852 pj = 1.3964403116976076
     //card113     12 = 0.5135869565217391 m=0.5 bet = 1.358891811147106 tj=1.018463203955803, Tj = 0.7838092123617311 pj = 1.2758206770584575

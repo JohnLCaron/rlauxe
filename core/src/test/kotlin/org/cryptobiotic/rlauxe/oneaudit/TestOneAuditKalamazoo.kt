@@ -152,6 +152,7 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
     // The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest
     // the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
     val stratumSizes = listOf(5294, 22372) // hasCvr, noCvr
+    val Nc = stratumSizes.sum()
 
     // reported results for the two strata
     val votesCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()

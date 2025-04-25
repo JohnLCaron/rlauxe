@@ -10,7 +10,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestSmall() {
-        val contestOA = makeContestOA(100, 50, cvrPercent = .80, 0.0, undervotePercent=.0, phantomPercent = .0)
+        val contestOA = makeContestOA(100, 50, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
@@ -23,7 +23,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContest() {
-        val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, 0.01, undervotePercent=.01, phantomPercent = .0)
+        val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = 0.0)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs()  // one for each ballot, with and without CVRS
@@ -40,7 +40,7 @@ class TestOneAudit {
             AuditType.ONEAUDIT, hasStyles=true, nsimEst=10,
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean , simFuzzPct=mvrFuzzPct)
         )
-        val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, 0.01, undervotePercent=.01, phantomPercent = .0)
+        val contestOA = makeContestOA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = .0)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs()  // one for each ballot, with and without CVRS
@@ -53,7 +53,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestMax99() {
-        val contestOA = makeContestOA(100, 50, cvrPercent = .80, 0.0, undervotePercent=.0, phantomPercent = .0)
+        val contestOA = makeContestOA(100, 50, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
         println(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs()  // one for each ballot, with and without CVRS
@@ -71,7 +71,7 @@ class TestOneAudit {
     fun testOneAuditSingleRoundAudit() {
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
 
-        val contestOA = makeContestOA(10000, 5000, cvrPercent = .80, 0.0, undervotePercent=.0, phantomPercent = .0)
+        val contestOA = makeContestOA(10000, 5000, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
         val contests = listOf(contestOA)
 
         val testCvrs = contestOA.makeTestCvrs()  // one for each ballot, with and without CVRS

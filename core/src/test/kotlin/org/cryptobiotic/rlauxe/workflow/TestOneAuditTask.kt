@@ -16,7 +16,7 @@ class TestOneAuditTask {
         val margin = .04
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, nsimEst = 10, sampleLimit = 10000,
+            AuditType.ONEAUDIT, hasStyles = true, nsimEst = 10,
             oaConfig = OneAuditConfig(simFuzzPct = mvrFuzzPct)
         )
         val taskGen = OneAuditContestAuditTaskGenerator(
@@ -39,7 +39,7 @@ class TestOneAuditTask {
         val margin = .04
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, nsimEst = 10, sampleLimit = 10000,
+            AuditType.ONEAUDIT, hasStyles = true, nsimEst = 10,
             oaConfig = OneAuditConfig(simFuzzPct = mvrFuzzPct)
         )
         val taskGen = OneAuditSingleRoundAuditTaskGenerator(

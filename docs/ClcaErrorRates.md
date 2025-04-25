@@ -58,7 +58,7 @@ For IRV, the corresponding descriptions of the errror rates are:
     NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
     NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
 
-See [Ballot Comparison using Betting Martingales](AdaptiveBetting) for more details and plots of 2-way contests
+See [Ballot Comparison using Betting Martingales](AdaptiveBetting.md) for more details and plots of 2-way contests
 with varying p2error rates.
 
 

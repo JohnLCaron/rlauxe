@@ -13,7 +13,7 @@ class TestMakeOneAudit {
     @Test
     fun testAllCvrs() {
         val margin = .02
-        val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 1.0, 0.0, undervotePercent = 0.0, phantomPercent = 0.0)
+        val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 1.0, undervotePercent = 0.0, phantomPercent = 0.0)
         assertEquals(N, contestOA.Nc)
         assertEquals(contestOA.cvrVotes, contestOA.votes)
         assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
@@ -31,7 +31,7 @@ class TestMakeOneAudit {
     fun testHalfCvrs() {
         val margin = .02
         val cvrPercent = 0.5
-        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.0, phantomPercent = 0.0)
+        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, undervotePercent = 0.0, phantomPercent = 0.0)
 
         checkBasics(contestOA, margin, cvrPercent)
     }
@@ -41,7 +41,7 @@ class TestMakeOneAudit {
         val margin = .02
         val cvrPercent = 0.5
 
-        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = 0.10, phantomPercent = 0.0)
+        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, undervotePercent = 0.10, phantomPercent = 0.0)
         checkBasics(contestOA, margin, cvrPercent)
     }
 
@@ -53,8 +53,9 @@ class TestMakeOneAudit {
         val cvrPercents = listOf(0.01, 0.5, 1.0)
         margins.forEach { margin ->
             cvrPercents.forEach { cvrPercent ->
-                println("margin=$margin cvrPercent=$cvrPercent")
-                val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, 0.0, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
+                println("======================================================================================================")
+                println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
+                val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
                 checkBasics(contestOA, margin, cvrPercent)
                 checkAgainstCvrs(contestOA, margin, cvrPercent, undervotePercent, phantomPercent)
             }
@@ -64,38 +65,37 @@ class TestMakeOneAudit {
     fun checkBasics(contestOA: OneAuditContest, margin: Double, cvrPercent: Double) {
         println(contestOA)
 
-        assertEquals(roundToInt(N*cvrPercent), contestOA.cvrNc)
+        val nvotes = contestOA.cvrNc + contestOA.pools.values.map{ it.ncards}.sum()
+        assertEquals(roundToInt(nvotes*cvrPercent), contestOA.cvrNc)
 
         assertEquals(1, contestOA.pools.size)
         val pool = contestOA.pools[1]!!
         assertEquals("noCvr", pool.name)
         println(pool)
 
-        assertEquals(roundToInt(N*(1.0 - cvrPercent)), pool.ncards)
+        assertEquals(roundToInt(nvotes*(1.0 - cvrPercent)), pool.ncards)
 
         assertEquals(N, contestOA.Nc)
         assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
     }
 
     fun checkAgainstCvrs(contest: OneAuditContest, margin: Double, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
-        /* val testCvrs = makeTestCvrs(contest)
+        val testCvrs = contest.makeTestCvrs()
         val contestOA = contest.makeContestUnderAudit()
 
-        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OAClcaAssorter
+        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
-        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${mean2margin(bassorter.meanAssort())} ")
+        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${mean2margin(bassorter.calcAssortMeanFromPools())} ")
 
         // sanity check
         val allCount = testCvrs.count()
         assertEquals(allCount, contest.Nc)
 
-        val cvrCount = testCvrs.filter { it.id != "noCvr" }.count()
-        val noCount = testCvrs.filter { it.id == "noCvr" }.count()
+        val cvrCount = testCvrs.filter { it.poolId == null && !it.phantom }.count()
+        val noCount = testCvrs.filter { it.poolId != null }.count()
         println("allCount = $allCount cvrCount=$cvrCount noCount=$noCount")
-        val strataCvr = contest.strata.find{ it.hasCvrs }
-        val strataNo = contest.strata.find{ !it.hasCvrs }
-        assertEquals(cvrCount, strataCvr?.Ng ?: 0)
-        assertEquals(noCount, strataNo?.Ng ?: 0)
+        assertEquals(cvrCount, contest.cvrNc)
+        assertEquals(noCount, contest.pools[1]!!.ncards)
 
         val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
         assertEquals(contest.Np, nphantom)
@@ -105,12 +105,10 @@ class TestMakeOneAudit {
         if (nphantom > 2) assertEquals(phantomPct, phantomPercent, .001)
 
         val nunder = testCvrs.count { it.hasContest(contest.id) && !it.phantom && it.votes[contest.id]!!.isEmpty() }
-        assertEquals(contest.undervotes, nunder)
+        // assertEquals(contest.undervotes, nunder)
         val underPct = nunder/ contestOA.Nc.toDouble()
         println("  nunder=$nunder == ${undervotePercent}; pct= $underPct =~ ${undervotePercent} abs=${abs(underPct - undervotePercent)} " +
                 " rel=${abs(underPct - undervotePercent) /underPct}")
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
-
-         */
     }
 }

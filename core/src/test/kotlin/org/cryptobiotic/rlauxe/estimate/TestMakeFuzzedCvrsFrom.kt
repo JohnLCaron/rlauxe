@@ -207,7 +207,7 @@ class TestMakeFuzzedCvrsFrom {
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
                 val contestOA =
-                    makeContestOA(margin, N, cvrPercent = .70, 0.0, undervotePercent = .01, phantomPercent = .01)
+                    makeContestOA(margin, N, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01)
                 val cvrs = contestOA.makeTestCvrs()
                 val ncands = contestOA.ncandidates
 

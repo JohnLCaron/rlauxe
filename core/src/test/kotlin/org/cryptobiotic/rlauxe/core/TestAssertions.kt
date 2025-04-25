@@ -123,7 +123,7 @@ class TestAssertions {
         val lastAssertion = assertions.last()
         assertNotEquals(firstAssertion, lastAssertion)
         assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
-        assertEquals(" winner=4 loser=0 reportedMargin=0.2492  reportedMean=0.6246", firstAssertion.toString())
+        assertEquals(" winner=4 loser=0 reportedMargin=0.2492 reportedMean=0.6246", firstAssertion.toString())
 
         assertTrue(firstAssertion.checkEquals(firstAssertion).isEmpty())
         assertEquals(" assorter not equal cassorter not equal", firstAssertion.checkEquals(lastAssertion))

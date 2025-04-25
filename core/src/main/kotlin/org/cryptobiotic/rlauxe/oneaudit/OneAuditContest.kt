@@ -5,18 +5,26 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.min
 
 
-// PS email 3/27/25. (I think this is the case when theres no style info for the pooled cards)
+// PS email 3/27/25:
 // With ONEAudit, things get more complicated because you have to start by adding every contest that appears on any card
 // in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in
 // the contest appropriately. That's in the SHANGRLA codebase.
+//  (I think this is the case when theres no style info for the pooled cards)
 
 data class OneAuditContest (
     override val info: ContestInfo,
-    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    val cvrNc: Int,
+    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
+    val cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
     val pools: Map<Int, BallotPool>, // pool id -> pool
     override val Np: Int,
-) : ContestIF { // TODO why not subclass Contest ?
+) : ContestIF {
+    // TODO why not subclass Contest ? hard to get the voteInput into the constructor
+    // Contest(
+    //        override val info: ContestInfo,
+    //        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    //        override val Nc: Int,
+    //        override val Np: Int,
+    //    )
 
     override val id = info.id
     val name = info.name
@@ -32,16 +40,28 @@ data class OneAuditContest (
     val minMargin: Double
     val poolNc: Int
     val pctInPools: Double
+    val undervotes: Int
 
     init {
         // TODO add SUPERMAJORITY. What about IRV ??
         require(choiceFunction == SocialChoiceFunction.PLURALITY) { "OneAuditContest requires PLURALITY"}
 
         poolNc = pools.values.sumOf { it.ncards }
+
         Nc = poolNc + cvrNc + Np
         pctInPools = poolNc / Nc.toDouble()
 
-        //// construct total votes, adding 0 votes if needed
+        // how many undervotes are there ?
+        val poolVotes = pools.values.sumOf { it.votes.values.sum() }
+        require(poolNc >= poolVotes)
+        val poolUndervotes = poolNc - poolVotes
+
+        val cvrVotesTotal = cvrVotes.values.sumOf { it }
+        require(cvrNc >= cvrVotesTotal)
+        val cvrUndervotes = cvrNc - cvrVotesTotal
+        undervotes = poolUndervotes + cvrUndervotes
+
+        //// construct total votes
         val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
         cvrVotes.forEach { cand, votes ->
             val tvote = voteBuilder[cand] ?: 0
@@ -54,6 +74,7 @@ data class OneAuditContest (
                 voteBuilder[cand] = tvote + votes
             }
         }
+        // add 0 candidate votes if needed
         info.candidateIds.forEach {
             if (!voteBuilder.contains(it)) {
                 voteBuilder[it] = 0
@@ -105,7 +126,7 @@ data class OneAuditContest (
 
     override fun toString() = buildString {
         appendLine("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
-        appendLine("  npools= ${pools.size} cvrNc=$cvrNc poolNc=$poolNc pctInPools=${df(pctInPools)}")
+        appendLine("  cvrNc=$cvrNc npools= ${pools.size} poolNc=$poolNc pctInPools=${df(pctInPools)}")
     }
 }
 

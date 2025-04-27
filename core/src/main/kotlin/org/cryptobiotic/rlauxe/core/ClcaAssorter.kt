@@ -42,7 +42,7 @@ open class ClcaAssorter(
 
     init {
         // Define v ≡ 2Āc − 1, the assorter margin TODO just use reportedMArgin
-        cvrAssortMargin = if (assortValueFromCvrs != null) 2.0 * assortValueFromCvrs - 1.0 else assorter.reportedMargin()
+        cvrAssortMargin = assorter.reportedMargin()
         // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
         noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error
         // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,

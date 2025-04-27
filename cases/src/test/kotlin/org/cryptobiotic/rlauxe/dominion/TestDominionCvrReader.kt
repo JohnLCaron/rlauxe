@@ -434,7 +434,7 @@ class TestDominionCvrReader {
             "Brian Anthony Perry / Mark Sbani" to 0,
         )
 
-        val contestPrez = contests[0]
+        val contestPrez = contests.find { it.name.startsWith("President")}!!
         val candidatesById = contestPrez.info.candidateNames.map { (name, id) -> id to name }.toMap()
         val votesByCandidateName = contestPrez.votes.toSortedMap().map { (id, nvotes) ->
             Pair(candidatesById[id]!!, nvotes)

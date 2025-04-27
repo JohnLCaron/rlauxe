@@ -53,11 +53,11 @@ data class OneAuditContest (
 
         // how many undervotes are there ?
         val poolVotes = pools.values.sumOf { it.votes.values.sum() }
-        require(poolNc >= poolVotes)
+        require (poolNc * info.voteForN >= poolVotes)
         val poolUndervotes = poolNc - poolVotes
 
         val cvrVotesTotal = cvrVotes.values.sumOf { it }
-        require (cvrNc >= cvrVotesTotal)
+        require (cvrNc * info.voteForN >= cvrVotesTotal)
         val cvrUndervotes = cvrNc - cvrVotesTotal
         undervotes = poolUndervotes + cvrUndervotes
 

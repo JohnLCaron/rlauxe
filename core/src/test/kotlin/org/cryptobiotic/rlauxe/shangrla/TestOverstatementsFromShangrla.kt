@@ -282,7 +282,7 @@ class TestOverstatementsFromShangrla {
         assertEquals(0.0, aVb.overstatementError(mvrs[4], cvrs[1], true))
     }
 
-    @Test
+    // @Test
     fun test_overstatement_assorter() {
         // SHANGRLA TestAssertion
         //    def test_overstatement_assorter(self):

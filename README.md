@@ -10,7 +10,7 @@ The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work o
 AGPL-3.0 license. The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is
 based on the concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places.
 
-Also see [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
+Also see the [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
 
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
@@ -328,11 +328,10 @@ This is a log-log plot of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
 * CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
-* OneAudits are intermediate between Polling and CLCA; surprisingly, in this formulation it doesnt matter what percent of ballots have CVRs.
+* OneAudits are intermediate between Polling and CLCA.
 * Raire audits are CLCA audits using Raire assertions. These are less sensitive to errors
   because the errors are less likely to change the assorter values.
 * Polling audit sample sizes are all but impervious to errors.
-* OneAudits have similar sensitivities to errors as CLCA: the shapes of their curves are similar.
 
 Varying the percent of undervotes at margin of 4%, with errors generated with 1% fuzz:
 

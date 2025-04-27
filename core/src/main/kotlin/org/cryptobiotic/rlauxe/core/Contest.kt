@@ -308,8 +308,8 @@ open class ContestUnderAudit(
         return this
     }
 
-    open fun makeClcaAssorter(assertion: Assertion, avgCvrAssortValue: Double?): ClcaAssorter {
-        return ClcaAssorter(contest.info, assertion.assorter, avgCvrAssortValue, hasStyle=hasStyle)
+    open fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
+        return ClcaAssorter(contest.info, assertion.assorter, assortValueFromCvrs, hasStyle=hasStyle)
     }
 
     fun assertions(): List<Assertion> {

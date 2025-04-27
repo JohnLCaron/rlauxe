@@ -5,15 +5,14 @@ import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.math.log10
 import kotlin.test.Test
 
-class CompareAuditsNoErrors {
+class AuditsNoErrors {
     val name = "AuditsNoErrors"
     val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
 
-    val nruns = 10  // number of times to run workflow
+    val nruns = 500  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
 
@@ -43,7 +42,7 @@ class CompareAuditsNoErrors {
 
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, cvrPercent, 0.0,
+                    N, margin, 0.0, 0.0, cvrPercent, 0.0, skewPct = .05,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                         oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)

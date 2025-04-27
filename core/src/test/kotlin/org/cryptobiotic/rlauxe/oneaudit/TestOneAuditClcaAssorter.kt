@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.*
@@ -114,47 +115,208 @@ class TestOneAuditClcaAssorter {
         assertEquals(expect, cassorter.toString())
     }
 
-    /*
     @Test
-    fun testMakeContestUnderAudit() {
-        val contest = makeContestOA(2000, 1800, cvrPercent = .66, undervotePercent = .0, phantomPercent = .0)
+    fun testMakeContestOA() {
+        val contest = makeContestOA(20000, 18000, cvrPercent = .66,
+            undervotePercent = .0, phantomPercent = .0, skewPct = .03)
         val contestUA = contest.makeContestUnderAudit()
         println(contestUA)
+        showPct("  cvrs", contest.cvrVotes, contest.cvrNc)
+        contest.pools.values.forEach { pool -> showPct("  pool ${pool.name}", pool.votes, pool.ncards) }
+        showPct("  allVotes", contest.votes, contest.Nc)
+        println()
 
-        val winnerCvr = makeCvr(0, "noCvr")
-        val loserCvr = makeCvr(1, "noCvr")
-        val otherCvr = makeCvr(2, "noCvr")
-
+        // data class Cvr(
+        //    val id: String,
+        //    val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
+        //    val phantom: Boolean = false,
+        //    val poolId: Int? = null,
+        val winnerPool = Cvr("winner", mapOf(0 to intArrayOf(0)), poolId=1)
+        val loserPool = Cvr("loser", mapOf(0 to intArrayOf(1)), poolId=1)
+        val otherPool = Cvr("other", mapOf(0 to intArrayOf(2)), poolId=1)
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
 
         val assorterMargin = bassorter.cvrAssortMargin
         val assorterMean = margin2mean(assorterMargin)
 
-        //    mvr has loser vote = (1-assorter_mean_poll)/(2-v/u)
-        //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
-        val loserVote = (1.0 - assorterMean) / (2 - assorterMargin)
-        val winnerVote = (2.0 - assorterMean) / (2 - assorterMargin)
-        println("loserVote=$loserVote winner=$winnerVote ")
+        val poolMargin = contest.pools[1]!!.calcReportedMargin(0, 1)
+        val poolAverage = margin2mean(poolMargin)
+        println("assorterMargin=v=$assorterMargin poolMargin=$poolMargin poolAverage=pa=$poolAverage ")
+        println()
 
-        println(" mvr other bassort=${bassorter.bassort(otherCvr, winnerCvr)} ")
-        println(" mvr winner bassort=${bassorter.bassort(winnerCvr, winnerCvr)} ")
-        println(" mvr loser bassort=${bassorter.bassort(loserCvr, winnerCvr)} ")
+        println(" winner: (2 - pa) / (2 - v)  = ${(2.0 - poolAverage) / (2 - assorterMargin) } ") // voted for other
+        println(" other: (1.5 - pa) / (2 - v)  = ${(1.5 - poolAverage) / (2 - assorterMargin) } ") // voted for winner
+        println(" loser: (1 - pa) / (2 - v) = ${(1.0 - poolAverage) / (2 - assorterMargin) } ") // voted for loser
 
-        assertEquals(0.5, bassorter.bassort(otherCvr, winnerCvr), doublePrecision)
+        val min = (1.0 - poolAverage) / (2 - assorterMargin)
+        val max = (2.0 - poolAverage) / (2 - assorterMargin)
+        val at = OaAffine(min, max)
+
+        val loserVote = (1.0 - poolAverage) / (2 - assorterMargin)
+        val otherVote = (1.5 - poolAverage) / (2 - assorterMargin)
+        val winnerVote = (2.0 - poolAverage) / (2 - assorterMargin)
+        // println("  loserVote=$loserVote, otherVote=$otherVote, winnerVote=$winnerVote ")
+        // println("loserVoteAt=${at.trans(loserVote)}, otherVoteAt=${at.trans(otherVote)}, winnerVoteAt=${at.trans(winnerVote)} ")
+        println()
+
+        // bassort(mvr, cvr)
+        println("Pool")
+        println(" bassort(winnerPool, anyPool)=${bassorter.bassort(winnerPool, winnerPool)} ")
+        println(" bassort(otherPool, anyPool)=${bassorter.bassort(otherPool, winnerPool)} ")
+        println(" bassort(loserPool, anyPool)=${bassorter.bassort(loserPool, winnerPool)} ")
+        println("bassort = ([2, 1.5, 1] - poolAvg) / (2 - assorterMargin)} ")
+
+        println()
+        // it doesnt matter what the cvr is, it just matters that its in the pool, so cvr_assort always = poolAverage
+        // bassort(mvr: Cvr, cvr: Cvr)
+        assertEquals(otherVote, bassorter.bassort(otherPool, winnerPool), doublePrecision)
+        assertEquals(loserVote, bassorter.bassort(loserPool, winnerPool), doublePrecision)
+        assertEquals(winnerVote, bassorter.bassort(winnerPool, winnerPool), doublePrecision)
+
+        assertEquals(otherVote, bassorter.bassort(otherPool, loserPool), doublePrecision)
+        assertEquals(loserVote, bassorter.bassort(loserPool, loserPool), doublePrecision)
+        assertEquals(winnerVote, bassorter.bassort(winnerPool, loserPool), doublePrecision)
+
+        assertEquals(otherVote, bassorter.bassort(otherPool, otherPool), doublePrecision)
+        assertEquals(loserVote, bassorter.bassort(loserPool, otherPool), doublePrecision)
+        assertEquals(winnerVote, bassorter.bassort(winnerPool, otherPool), doublePrecision)
+
+        //////////
+
+        val winnerCvr = Cvr("winner", mapOf(0 to intArrayOf(0)))
+        val loserCvr = Cvr("loser", mapOf(0 to intArrayOf(1)))
+        val otherCvr = Cvr("other", mapOf(0 to intArrayOf(2)))
+
+        println("CVR pool")
+        println(" bassort(winnerCvr, winnerCvr)=${bassorter.bassort(winnerCvr, winnerCvr)} ")  // noerror
+        println(" bassort(otherCvr, winnerCvr)=${bassorter.bassort(otherCvr, winnerCvr)} ") // noerror/2
+        println(" bassort(loserCvr, winnerCvr)=${bassorter.bassort(loserCvr, winnerCvr)} ") // 0
+        println()
+        println(" bassort(winnerCvr, otherCvr)=${bassorter.bassort(winnerCvr, otherCvr)} ") // 1.5 * noerror
+        println(" bassort(otherCvr, otherCvr)=${bassorter.bassort(otherCvr, otherCvr)} ") // noerror
+        println(" bassort(loserCvr, otherCvr)=${bassorter.bassort(loserCvr, otherCvr)} ") // noerror/2
+        println()
+        println(" bassort(winnerCvr, loserCvr)=${bassorter.bassort(winnerCvr, loserCvr)} ") // 2 * noerror
+        println(" bassort(otherCvr, loserCvr)=${bassorter.bassort(otherCvr, loserCvr)} ") // 1.5 * noerror
+        println(" bassort(loserCvr, loserCvr)=${bassorter.bassort(loserCvr, loserCvr)} ") // noerror
+        println()
+        println("bassort = [0, .5, 1, 1.5, 2] * noerror=${bassorter.bassort(loserCvr, loserCvr)} ")
+    }
+
+    // makeContestOA (0) Nc=38000 Np=0 votes={0=20000, 1=18000}
+    //OneAuditComparisonAssorter for contest makeContestOA (0)
+    //  assorter= winner=0 loser=1 reportedMargin=0.0526 reportedMean=0.5263
+    //  cvrAssortMargin=0.05263157894736842 noerror=0.5135135135135135 upperBound=1.027027027027027 avgCvrAssortValue=null
+    //assorterMargin=v=0.05263157894736842 poolMargin=0.006493506493506494 poolAverage=pa=0.5032467532467533
+    //
+    // winner: (2 - pa) / (2 - v)  = 0.7686030186030186
+    // other: (1.5 - pa) / (2 - v)  = 0.5118462618462618
+    // loser: (1 - pa) / (2 - v) = 0.25508950508950506
+    //
+    //Pool
+    // bassort(winnerPool, anyPool)=0.7686030186030185
+    // bassort(otherPool, anyPool)=0.5118462618462618
+    // bassort(loserPool, anyPool)=0.25508950508950506
+    //bassort = ([2, 1.5, 1] - poolAvg) / (2 - assorterMargin)}
+    //
+    //CVR pool
+    // bassort(winnerCvr, winnerCvr)=0.5135135135135135
+    // bassort(otherCvr, winnerCvr)=0.25675675675675674
+    // bassort(loserCvr, winnerCvr)=0.0
+    //
+    // bassort(winnerCvr, otherCvr)=0.7702702702702702
+    // bassort(otherCvr, otherCvr)=0.5135135135135135
+    // bassort(loserCvr, otherCvr)=0.25675675675675674
+    //
+    // bassort(winnerCvr, loserCvr)=1.027027027027027
+    // bassort(otherCvr, loserCvr)=0.7702702702702702
+    // bassort(loserCvr, loserCvr)=0.5135135135135135
+    //
+    //bassort = [0, .5, 1, 1.5, 2] * noerror=0.5135135135135135
+
+    @Test
+    fun testMakeContestOAwithAffine() {
+        val contest = makeContestOA(20000, 18000, cvrPercent = .66, undervotePercent = .0, phantomPercent = .0, skewPct = .03)
+        val contestUA = contest.makeContestUnderAudit()
+        println(contestUA)
+
+        val winnerCvr = Cvr("winner", mapOf(0 to intArrayOf(0)), poolId=1)
+        val loserCvr = Cvr("loser", mapOf(0 to intArrayOf(1)), poolId=1)
+        val otherCvr = Cvr("other", mapOf(0 to intArrayOf(2)), poolId=1)
+
+        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        println(bassorter)
+
+        val assorterMargin = bassorter.cvrAssortMargin
+
+        val poolMargin = contest.pools[1]!!.calcReportedMargin(0, 1)
+        val poolAverage = margin2mean(poolMargin)
+        println("assorterMargin=v=$assorterMargin poolMargin=$poolMargin poolAverage=pa=$poolAverage ")
+        println()
+
+        // bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
+        // noerror = 1 / (2 - v/u) = u / (2u - v)
+
+        // let u = 1
+        // the possible values are
+        //   [1 - pa, 3/2 - pa, 2 - pa] * noerror
+
+        println(" loser: (1 - pa) / (2 - v) = ${(1.0 - poolAverage) / (2 - assorterMargin) } ") // voted for loser
+        println(" other: (1.5 - pa) / (2 - v)  = ${(1.5 - poolAverage) / (2 - assorterMargin) } ") // voted for winner
+        println(" winner: (2 - pa) / (2 - v)  = ${(2.0 - poolAverage) / (2 - assorterMargin) } ") // voted for other
+
+        val min = (1.0 - poolAverage) / (2 - assorterMargin)
+        val max = (2.0 - poolAverage) / (2 - assorterMargin)
+        val at = OaAffine(min, max)
+
+        val loserVote = at.trans((1.0 - poolAverage) / (2 - assorterMargin))
+        val otherVote = at.trans((1.5 - poolAverage) / (2 - assorterMargin))
+        val winnerVote = at.trans((2.0 - poolAverage) / (2 - assorterMargin))
+        println("  loserVote=$loserVote, otherVote=$otherVote, winnerVote=$winnerVote ")
+        println()
+
+
+        // bassort(mvr, cvr)
+        println(" bassort(other, winner)=${bassorter.bassort(otherCvr, winnerCvr)} ")
+        println(" bassort(winner, winner)=${bassorter.bassort(winnerCvr, winnerCvr)} ")
+        println(" bassort(loser, winner)=${bassorter.bassort(loserCvr, winnerCvr)} ")
+
+        // it doesnt matter what the cvr is, it just matters that its in the pool, so cvr_assort always = poolAverage
+        // bassort(mvr: Cvr, cvr: Cvr)
+        assertEquals(otherVote, bassorter.bassort(otherCvr, winnerCvr), doublePrecision)
         assertEquals(loserVote, bassorter.bassort(loserCvr, winnerCvr), doublePrecision)
         assertEquals(winnerVote, bassorter.bassort(winnerCvr, winnerCvr), doublePrecision)
 
-        assertEquals(0.5, bassorter.bassort(otherCvr, loserCvr), doublePrecision)
+        assertEquals(otherVote, bassorter.bassort(otherCvr, loserCvr), doublePrecision)
         assertEquals(loserVote, bassorter.bassort(loserCvr, loserCvr), doublePrecision)
         assertEquals(winnerVote, bassorter.bassort(winnerCvr, loserCvr), doublePrecision)
 
-        assertEquals(0.5, bassorter.bassort(otherCvr, otherCvr), doublePrecision)
+        assertEquals(otherVote, bassorter.bassort(otherCvr, otherCvr), doublePrecision)
         assertEquals(loserVote, bassorter.bassort(loserCvr, otherCvr), doublePrecision)
         assertEquals(winnerVote, bassorter.bassort(winnerCvr, otherCvr), doublePrecision)
+
     }
 
-     */
+
+    class OaAffine (val min: Double, max: Double) {
+        val ir = 1.0 / (max - min)
+        fun trans(x: Double): Double {
+            return (x - min) * ir
+        }
+    }
+
+    @Test
+    fun testPoolAssorterValues() {
+        val assorterMargin = .05
+        repeat(20) {
+            val poolAverage = (51.0 + it) / 100
+            println("poolAverage=$poolAverage assorterMargin=$assorterMargin ")
+            println("   (1 - pa) / (2 - v) = ${(1.0 - poolAverage) / (2 - assorterMargin)} ") // voted for loser
+            println("   (1.5 - pa) / (2 - v)  = ${(1.5 - poolAverage) / (2 - assorterMargin)} ") // voted for winner
+            println("   (2 - pa) / (2 - v)  = ${(2.0 - poolAverage) / (2 - assorterMargin)} ") // voted for other
+        }
+    }
 
     /*
     @Test

@@ -7,7 +7,7 @@ class RegenPlots {
 
     @Test
     fun regenPlots() {
-        val plotGen = GenVsMarginWithPhantoms()
+        val plotGen = OaPhantomAttack()
         plotGen.phantomPct = 0.0
         plotGen.name = "marginWithPhantoms0"
         plotGen.dirName = "/home/stormy/temp/attack/marginWithPhantoms0"

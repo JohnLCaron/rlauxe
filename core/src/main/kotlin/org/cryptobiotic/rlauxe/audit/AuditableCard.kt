@@ -75,10 +75,15 @@ data class AuditableCard (
         }
 
         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
-            // store the contest separate from the candidates
-            val sortedVotes = cvr.votes.toSortedMap()
-            val contests = sortedVotes.keys.toList()
-            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
+            return if (cvr.poolId == null) {
+                // store the contest separate from the candidates
+                val sortedVotes = cvr.votes.toSortedMap()
+                val contests = sortedVotes.keys.toList()
+                AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
+            } else {
+                val contests = cvr.votes.keys.toSortedSet().toList()
+                AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), null, cvr.poolId)
+            }
         }
 
         // there are no votes

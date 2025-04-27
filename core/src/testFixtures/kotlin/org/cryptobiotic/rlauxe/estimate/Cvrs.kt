@@ -66,12 +66,14 @@ fun makeFlippedMvrs(cvrs: List<Cvr>, N: Int, p2o: Double?, p1o: Double?): List<C
         add2voteOverstatements(mmvrs, needToChangeVotesFromA = roundUp(N * p2o))
     }
     val flippedVotes1 = if (p1o == null) 0 else {
+        require(p1o >= 0.0)
         add1voteOverstatements(mmvrs, needToChangeVotesFromA = roundUp(N * p1o))
     }
     return mmvrs.toList()
 }
 
 // change cvrs to add the given number of one-vote overstatements.
+// Note that we replace the Cvr in the list when we change it
 fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int): Int {
     if (needToChangeVotesFromA == 0) return 0
     val ncards = cvrs.size
@@ -82,8 +84,8 @@ fun add1voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
         val cvr = cvrs[cvrIdx]
         if (cvr.hasMarkFor(0, 0) == 1) {
             val votes = mutableMapOf<Int, IntArray>()
-            votes[0] = intArrayOf(2)
-            cvrs[cvrIdx] = Cvr(cvr.id, votes)
+            votes[0] = intArrayOf(2) // switch vote from 0 to other
+            cvrs[cvrIdx] = Cvr(cvr.id, votes, poolId = cvr.poolId)
             changed++
         }
     }
@@ -102,15 +104,15 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     val startingAvotes = cvrs.sumOf { it.hasMarkFor(0, 0) }
     var changed = 0
 
-    // we need more A votes, needToChangeVotesFromA < 0>
+    // we need more A votes, needToChangeVotesFromA < 0
     if (needToChangeVotesFromA < 0) {
         while (changed > needToChangeVotesFromA) {
             val cvrIdx = Random.nextInt(ncards)
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 1) == 1) {
                 val votes = mutableMapOf<Int, IntArray>()
-                votes[0] = intArrayOf(0)
-                cvrs[cvrIdx] = Cvr(cvr.id, votes)
+                votes[0] = intArrayOf(0) // switch vote from 1 to 0
+                cvrs[cvrIdx] = Cvr(cvr.id, votes, poolId = cvr.poolId)
                 changed--
             }
         }
@@ -121,8 +123,8 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
             val cvr = cvrs[cvrIdx]
             if (cvr.hasMarkFor(0, 0) == 1) {
                 val votes = mutableMapOf<Int, IntArray>()
-                votes[0] = intArrayOf(1)
-                cvrs[cvrIdx] = Cvr(cvr.id, votes)
+                votes[0] = intArrayOf(1) // switch vote from 0 to 1
+                cvrs[cvrIdx] = Cvr(cvr.id, votes, poolId = cvr.poolId)
                 changed++
             }
         }

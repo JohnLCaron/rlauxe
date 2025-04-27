@@ -8,12 +8,12 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 
-class CompareAuditsWithPhantoms {
+class AuditsWithPhantoms {
     val name = "AuditsWithPhantoms"
     val dirName = "/home/stormy/temp/audits/$name"
 
     val mvrFuzzPct = .01
-    val nruns = 100  // number of times to run workflow
+    val nruns = 500  // number of times to run workflow
     val nsimEst = 10  // number of times to run workflow
     val N = 50000
     val margin = .045
@@ -37,7 +37,7 @@ class CompareAuditsWithPhantoms {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, phantomPct=phantom, cvrPercent = .99, mvrsFuzzPct=mvrFuzzPct,
+                N, margin, 0.0, phantomPct=phantom, cvrPercent = .95, mvrsFuzzPct=mvrFuzzPct, skewPct = .05,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,

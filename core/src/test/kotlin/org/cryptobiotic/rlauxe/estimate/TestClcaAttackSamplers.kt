@@ -157,7 +157,7 @@ class TestClcaAttackSamplers {
     }
 
     @Test
-    fun testMakeFlippedMvrs() {
+    fun testMakeP2FlippedMvrs() {
         val N = 20000
         val margins = listOf(.0021, .0041, .011)
         val p2s = listOf(.015, .01, .005, .001, .000)
@@ -167,28 +167,53 @@ class TestClcaAttackSamplers {
 
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val orgMargin = showMargin("cvrs", cvrs)
+                val orgMargin = checkMargin("cvrs", cvrs)
                 assertEquals(margin, orgMargin, doublePrecision )
 
                 val mvrs = makeFlippedMvrs(cvrs, N, p2, null)
-                val newMargin = showMargin("mvrs", mvrs)
+                val newMargin = checkMargin("mvrs", mvrs)
                 assertEquals(orgMargin-2*p2, newMargin, doublePrecision )
                 assertEquals(margin2mean(orgMargin)-p2, margin2mean(newMargin), doublePrecision )
             }
         }
     }
+
+    @Test
+    fun testMakeP1FlippedMvrs() {
+        val N = 20000
+        val margins = listOf(.0021, .0041, .011)
+        val p1s = listOf(.015, .01, .005, .001, .000)
+        for (margin in margins) {
+            for (p1 in p1s) {
+                println("\nmargin=$margin p1 = $p1")
+
+                val theta = margin2mean(margin)
+                val cvrs = makeCvrsByExactMean(N, theta)
+                val orgMargin = checkMargin("cvrs", cvrs)
+                assertEquals(margin, orgMargin, doublePrecision )
+
+                val mvrs = makeFlippedMvrs(cvrs, N, null, p1)
+                val newMargin = checkMargin("mvrs", mvrs, skipSizeCheck = true)
+                assertEquals(orgMargin-p1, newMargin, doublePrecision )
+                assertEquals(margin2mean(orgMargin)-p1/2, margin2mean(newMargin), doublePrecision )
+            }
+        }
+    }
 }
 
-fun showMargin(what: String, cvrs: List<Cvr>): Double {
+fun checkMargin(what: String, cvrs: List<Cvr>, skipSizeCheck: Boolean = false): Double {
     val votes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
-    assertEquals(1, votes.size )
-    val contest0 =  votes[0]!!.toSortedMap()
-    assertEquals(2, contest0.size )
-    print(" $what votes=${contest0}")
+    assertEquals(1, votes.size)
+    val contest0 = votes[0]!!.toSortedMap()
+    require(skipSizeCheck || (2 == contest0.size)) {
+        print(" $what votes=${contest0}")
+    }
+    val nvotes = contest0.map { it.value }.sum()
+    val N = cvrs.size
+    assertEquals(N, nvotes )
+
     val vote0 = contest0[0]!!
     val vote1 = contest0[1]!!
-    val N = cvrs.size
-    assertEquals(N, vote0 + vote1 )
     val margin = (vote0-vote1)/N.toDouble()
     println("  margin=$margin")
     return margin

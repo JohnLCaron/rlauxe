@@ -57,7 +57,7 @@ data class OneAuditContest (
         val poolUndervotes = poolNc - poolVotes
 
         val cvrVotesTotal = cvrVotes.values.sumOf { it }
-        require(cvrNc >= cvrVotesTotal)
+        require (cvrNc >= cvrVotesTotal)
         val cvrUndervotes = cvrNc - cvrVotesTotal
         undervotes = poolUndervotes + cvrUndervotes
 
@@ -130,6 +130,13 @@ data class OneAuditContest (
     }
 }
 
+fun showPct(what: String, votes: Map<Int, Int>, Nc: Int) {
+    val winnerVotes = votes[0] ?: 0
+    val loserVotes = votes[1] ?: 0
+    val hasMargin = (winnerVotes - loserVotes) / Nc.toDouble()
+    println("$what winnerVotes = $winnerVotes loserVotes = $loserVotes diff=${winnerVotes-loserVotes} Nc=${Nc} hasMargin=$hasMargin ")
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 class OAContestUnderAudit(
@@ -137,8 +144,8 @@ class OAContestUnderAudit(
     hasStyle: Boolean = true
 ): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=hasStyle) {
 
-    override fun makeClcaAssorter(assertion: Assertion, avgCvrAssortValue: Double?): ClcaAssorter {
-        // dont use avgCvrAssortValue. TODO: consider different primitive assorter, that knows about pools.
+    override fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
+        // dont use assortValueFromCvrs. TODO: consider different primitive assorter, that knows about pools.
         return OneAuditClcaAssorter(this.contestOA, assertion.assorter, null)
     }
 
@@ -186,12 +193,15 @@ class OAContestUnderAudit(
  * If the reported tallies are correct, i.e., if Āc = Āb = (v + 1)/2, then
  *  B̄b = u /(2u − v)       (OA 9)
  */
+
 class OneAuditClcaAssorter(
     val contestOA: OneAuditContest,
     assorter: AssorterIF,   // A(mvr)
-    avgCvrAssortValue: Double?,    // Ā(c) = average CVR assorter value
-) : ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue) {
+    assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value
+) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs) {
+    var countAssort = 0
 
+    // TODO this is not accurate because not using Nc as the denominator
     // We assume we have a reported assorter total = Sum(i∈Gg A(ci))
     // from the voting system for the cards in the group Gg (e.g., reported precinct subtotals)
     // this agrees with the reportedMean from the total
@@ -210,33 +220,46 @@ class OneAuditClcaAssorter(
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
         if (cvr.poolId == null) {
-            return super.bassort(mvr, cvr)
+            val result =  super.bassort(mvr, cvr) // TODO doAffineTransform ??
+            if (countAssort < countAssortMax) {
+                println("bassort-cvr ${cvr.id} = $result")
+                countAssort++
+            }
+            return result
         }
         val pool = contestOA.pools[cvr.poolId]
-        if (pool == null) { throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}") }
+            ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}")
 
-        // TODO do you believe this is the same as if you ran the assorter on the cvrs? But we dont have the cvrs....
-        val avgBatchAssortValue = margin2mean(pool.calcReportedMargin(assorter.winner(), assorter.loser()))
-        val overstatement = overstatementPoolError(mvr, cvr, avgBatchAssortValue) // ωi
+        val poolAverage = margin2mean(pool.calcReportedMargin(assorter.winner(), assorter.loser()))
+        val overstatement = overstatementPoolError(mvr, cvr, poolAverage) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
 
-        //// had error using the pool margin (pool.calcReportedMargin) instead of the assorter margin (in noerror)
-        //val margin = 2.0 * avgBatchAssortValue - 1.0 // reported pool margin
-        //val noerror = 1.0 / (2.0 - margin / assorter.upperBound())  // assort value when there's no error
-
         // for pooled data (i in Gg):
-        //   A(ci) = 1/2 or poolAvg = 0 to 1 TODO assume 0 to u ??
+        //   A(ci) = 1/2 or poolAvg = [pa, pa-1/2, pa-1]
         //   A(bi) in [0, .5, u],
         //   so ωi ≡ A(ci) − A(bi) ranges from -u to u
         //   so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from [0, 2] * noerror
+
+        //// TODO which? had error using the pool margin (pool.calcReportedMargin) instead of the assorter margin (in noerror)
+        //     ONEAUDIT eq 6 has a denominator = 2u − v, which is the same for all ballots, so it cant be pool dependent.
+        //     v := 2Āc − 1
+        //     noerror = 1.0 / (2.0 - v / assorter.upperBound())  // assort value when there's no error
         val result =  tau * noerror()
         if (result > upperBound()) {
-            println("how?")
-            val poolMargin = pool.calcReportedMargin(assorter.winner(), assorter.loser())
-            val mean = margin2mean(poolMargin)
-            overstatementPoolError(mvr, cvr, avgBatchAssortValue)
+            throw RuntimeException("OneAuditClcaAssorter result $result > upper ${upperBound()}")
         }
-        return result
+        if (countAssort < countAssortMax) {
+            println("bassort-pool ${cvr.id} = $result")
+            countAssort++
+        }
+
+        // supposedly eq 10 of OneAudit. checking with PS.
+        return if (doAffineTransform) {
+            val min = (1.0 - poolAverage) / (2 - cvrAssortMargin)
+            val max = (2.0 - poolAverage) / (2 - cvrAssortMargin)
+            return (result - min) / (max - min)
+        }
+        else result
     }
 
     fun overstatementPoolError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
@@ -247,18 +270,25 @@ class OneAuditClcaAssorter(
                          else this.assorter.assort(mvr, usePhantoms = false)
 
         // for pooled data (i in Gg):
-        //   A(ci) = 1/2 or poolAvg = 0 to 1 TODO assume 0 to u ?? Note poolAvg may be less than 1/2
+        //   A(ci) = 1/2 or poolAvg in [0..u]
         //   A(bi) in [0, .5, u],
         //   so ωi ≡ A(ci) − A(bi) ranges from -u to u
 
-        val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue // TODO phantom not ever set?
+        // let u = 1, let poolAvg = pa, and pool margin = pv = 2*pa - 1
+        // so ωi ≡ A(ci) − A(bi)
+        //   1/2 - 0, 1/2 - 1/2, 1/2 - 1 = [1/2, 0, -1/2] (or)
+        //   poolAvg - 0, poolAvg - 1/2, poolAvg - 1 in [pa, pa-1/2,pa-1]
+
+        val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue
+
+        // println("   cvr_assort=$cvr_assort mvr_assort=$mvr_assort")
         return cvr_assort - mvr_assort
     }
 
     override fun toString() = buildString {
         appendLine("OneAuditComparisonAssorter for contest ${contestOA.name} (${contestOA.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound avgCvrAssortValue=$avgCvrAssortValue")
+        append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortValueFromCvrs")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -276,7 +306,45 @@ class OneAuditClcaAssorter(
         result = 31 * result + contestOA.hashCode()
         return result
     }
+
+    companion object {
+        var countAssortMax = 0
+        var doAffineTransform = false
+    }
 }
+
+/* Experimental. need to make PluralityAssorter open, not data class
+class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: Int, reportedMargin: Double):
+    PluralityAssorter(contestOA.info, winner, loser, reportedMargin) {
+
+    override fun assort(cvr: Cvr, usePhantoms: Boolean): Double {
+        if (cvr.poolId == null) {
+            return super.assort(cvr, usePhantoms = usePhantoms)
+        }
+
+        // TODO not sure of this
+        //     if (hasStyle and !cvr.hasContest(contestOA.id)) {
+        //            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${contestOA.name} (${contestOA.id})")
+        //        }
+        //        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(contestOA.id))) 0.0
+        //                         else this.assorter.assort(mvr, usePhantoms = false)
+
+        val pool = contestOA.pools[cvr.poolId]
+            ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}")
+        val avgBatchAssortValue = margin2mean(pool.calcReportedMargin(winner, loser))
+
+        return if (cvr.phantom) .5 else avgBatchAssortValue
+    }
+
+    companion object {
+        fun makeFromContestVotes(contest: OneAuditContest, winner: Int, loser: Int): OaPluralityAssorter {
+            val winnerVotes = contest.votes[winner] ?: 0
+            val loserVotes = contest.votes[loser] ?: 0
+            val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
+            return OaPluralityAssorter(contest, winner, loser, reportedMargin)
+        }
+    }
+} */
 
 // ONEAUDIT p 9
 // This algorithm be made more efficient statistically and logistically in a variety

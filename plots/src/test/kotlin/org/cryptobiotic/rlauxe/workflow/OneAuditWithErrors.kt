@@ -11,7 +11,7 @@ class OneAuditWithErrors {
     val name = "OneAuditWithErrors95"
     val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
 
-    val nruns = 100 // number of times to run workflow
+    val nruns = 500 // number of times to run workflow
     val nsimEst = 10
     val N = 50000
     val cvrPercent = 0.95
@@ -40,31 +40,31 @@ class OneAuditWithErrors {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGeneratorDefault = OneAuditSingleRoundAuditTaskGenerator(
-                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
-                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "default"),
+            val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGenerator(
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = .05,
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = 100,
+                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean)
                 )
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorDefault))
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorReportedMean))
 
             val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGenerator(
-                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = .05,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "bet99"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = 100,
+                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorBet99))
 
             val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGenerator(
-                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = .05,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "eta0Eps"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = 100,
+                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                 )
             )

@@ -91,32 +91,3 @@ fun OAContestUnderAuditJson.import(): OAContestUnderAudit {
     return result
 }
 
-/* stored as a subtype of ClcaAssorterJson
-//
-// data class OAClcaAssorter(
-//    val contestOA: OneAuditContest,
-//    val assorter: AssorterIF,
-//    val avgCvrAssortValue: Double,
-//) : ClcaAssorterIF
-@Serializable
-data class OAClcaAssorterJson(
-    val contestOA: OAContestJson,
-    val assorter: AssorterIFJson,
-    val avgCvrAssortValue: Double,
-)
-
-fun OAClcaAssorter.publishJson() = OAClcaAssorterJson(
-    this.contestOA.publishOAJson(),
-    this.assorter.publishJson(),
-    this.avgCvrAssortValue,
-)
-
-fun OAClcaAssorterJson.import(info: ContestInfo): OAClcaAssorter {
-    val contestOA = this.contestOA.import(info)
-    return OAClcaAssorter(
-        contestOA,
-        this.assorter.import(info),
-        this.avgCvrAssortValue,
-    )
-}
-*/

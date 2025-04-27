@@ -5,17 +5,15 @@ import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class CompareAuditsWithErrors {
-    val nruns = 200
+class AuditsWithErrors {
+    val nruns = 100
     val nsimEst = 10
-    val name = "AuditsWithErrors"
+    val name = "AuditsWithErrors4"
     val dirName = "/home/stormy/temp/audits/$name"
     val N = 50000
-    val margin = .02
-    val cvrPercent = .95
+    val margin = .04
 
     @Test
     fun genAuditWithFuzzPlots() {
@@ -42,7 +40,7 @@ class CompareAuditsWithErrors {
 
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
+                    N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = .05,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                         oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)

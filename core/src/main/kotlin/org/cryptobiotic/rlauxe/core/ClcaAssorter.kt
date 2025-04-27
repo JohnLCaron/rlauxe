@@ -28,7 +28,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val avgCvrAssortValue: Double?,    // Ā(c) = average CVR assort value; use reportedMargin if missing
+    val assortValueFromCvrs: Double?,    // Ā(c) = average assort value measured from CVRs
     val hasStyle: Boolean = true,
     val check: Boolean = true,
 ) {
@@ -41,15 +41,15 @@ open class ClcaAssorter(
     val upperBound: Double // upper bound of clca assorter
 
     init {
-        // Define v ≡ 2Āc − 1, the assorter margin
-        cvrAssortMargin = if (avgCvrAssortValue != null) 2.0 * avgCvrAssortValue - 1.0 else assorter.reportedMargin()
+        // Define v ≡ 2Āc − 1, the assorter margin TODO just use reportedMArgin
+        cvrAssortMargin = if (assortValueFromCvrs != null) 2.0 * assortValueFromCvrs - 1.0 else assorter.reportedMargin()
         // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
         noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error
         // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
         // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7)
         upperBound = 2.0 * noerror // upper bound of clca assorter
 
-        val cvrAssortAvg = if (avgCvrAssortValue != null) avgCvrAssortValue else assorter.reportedMean()
+        val cvrAssortAvg = if (assortValueFromCvrs != null) assortValueFromCvrs else assorter.reportedMean()
         if (cvrAssortAvg <= 0.5)
             println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5" )
         if (noerror <= 0.5)
@@ -158,7 +158,7 @@ open class ClcaAssorter(
 
         other as ClcaAssorter
 
-        if (avgCvrAssortValue != other.avgCvrAssortValue) return false
+        if (assortValueFromCvrs != other.assortValueFromCvrs) return false
         if (hasStyle != other.hasStyle) return false
         if (info != other.info) return false
         if (assorter != other.assorter) return false
@@ -167,7 +167,7 @@ open class ClcaAssorter(
     }
 
     override fun hashCode(): Int {
-        var result = avgCvrAssortValue?.hashCode() ?: 0
+        var result = assortValueFromCvrs?.hashCode() ?: 0
         result = 31 * result + hasStyle.hashCode()
         result = 31 * result + info.hashCode()
         result = 31 * result + assorter.hashCode()

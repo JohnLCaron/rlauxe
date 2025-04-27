@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
-class CompareAuditsWithUndervotes {
+class AuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10  // number of times to run simulation
     val name = "AuditsWithUndervotes"
@@ -38,7 +38,7 @@ class CompareAuditsWithUndervotes {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, undervote, 0.0, cvrPercent = .99, mvrsFuzzPct=mvrFuzzPct,
+                N, margin, undervote, 0.0, cvrPercent = .95, mvrsFuzzPct=mvrFuzzPct, skewPct = .05,
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,

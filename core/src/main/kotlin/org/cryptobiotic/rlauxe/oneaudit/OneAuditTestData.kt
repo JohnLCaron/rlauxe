@@ -7,13 +7,15 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.roundToInt
+import kotlin.math.max
+import kotlin.math.min
 
 // margin = (winner - loser) / Nc
 // (winner - loser) = margin * Nc
 // (winner + loser) = nvotes
 // 2 * winner = margin * Nc + nvotes
 // winner = (margin * Nc + nvotes) / 2
-fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
+fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double, skewPct: Double = 0.0): OneAuditContest {
     val nvotes = roundToInt(Nc * (1.0 - undervotePercent - phantomPercent))
     // margin = (winner - loser) / Nc
     // nvotes = winner + loser
@@ -23,18 +25,18 @@ fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, undervotePercent:
     val winner = roundToInt((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
     require(doubleIsClose(margin, (winner - loser) / Nc.toDouble()))
-    return makeContestOA(winner, loser, cvrPercent, undervotePercent, phantomPercent)
+    return makeContestOA(winner, loser, cvrPercent, undervotePercent, phantomPercent, skewPct)
 }
 
 // two contest, specified total votes
 // divide into two stratum based on cvrPercent
 // skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
-fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
+fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double, skewPct: Double = 0.0): OneAuditContest {
     require(cvrPercent > 0.0)
 
     // the candidates
     val info = ContestInfo(
-        "makeContestOA", 0,
+        "ContestOA", 0,
         mapOf(
             "winner" to 0,
             "loser" to 1,
@@ -55,15 +57,19 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
 
     // reported results for the two strata
     val nvotesCvr = nvotes * cvrPercent
+    val useSkewPct = minOf(skewPct, cvrPercent, 1.0 - cvrPercent)
+
     val winnerCvr = roundToInt(winnerVotes * cvrPercent)
     val loserCvr = roundToInt(nvotesCvr - winnerCvr)
-    val votesCvr = mapOf(0 to winnerCvr, 1 to loserCvr)
-    val votesNoCvr = mapOf(0 to (winnerVotes - winnerCvr), 1 to (loserVotes - loserCvr))
 
-    require(cvrSize  == votesCvr.values.sum()) {
-        println("nope")
-    }
-    require(noCvrSize  == votesNoCvr.values.sum())
+    val winnerPool = winnerVotes - winnerCvr
+    val loserPool = loserVotes - loserCvr
+    val skewVotes = max(0, roundToInt(winnerVotes * useSkewPct))
+
+    val votesCvr = mapOf(0 to winnerCvr + skewVotes, 1 to loserCvr)
+    val votesNoCvr = mapOf(0 to winnerPool - skewVotes, 1 to loserPool)
+    val votesCvrSum = votesCvr.values.sum()
+    val votesPoolSum = votesNoCvr.values.sum()
 
     val undervotes = undervotePercent * Nc
     val cvrUnderVotes = roundToInt(undervotes * cvrPercent)
@@ -76,21 +82,31 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
             "noCvr",
             1, // poolId
             0, // contestId
-            ncards = noCvrSize + poolUnderVotes,
+            ncards = votesPoolSum + poolUnderVotes,
             votes = votesNoCvr,
         )
     )
 
-
     val expectNc = noCvrSize + cvrSize + cvrUnderVotes + poolUnderVotes + Np
-    require(expectNc == Nc) {
+    if (expectNc != Nc) {
         println("nope")
     }
 
-    val result =  OneAuditContest(info, votesCvr, cvrSize + cvrUnderVotes, pools.associateBy { it.id }, Np = Np)
-    require(result.Nc == Nc) {
+    val cvrNc = votesCvrSum + cvrUnderVotes
+    if (cvrNc < votesCvrSum) {
         println("nope")
     }
+
+    val expectNc3 = pools.sumOf { it.ncards } + cvrNc + Np
+    if (expectNc3 != Nc) {
+        println("nope")
+    }
+
+    val result =  OneAuditContest(info, votesCvr, cvrNc, pools.associateBy { it.id }, Np = Np)
+    if (result.Nc != Nc) {
+        println("nope")
+    }
+
     return result
 }
 
@@ -108,9 +124,9 @@ fun OneAuditContest.makeTestCvrs(): List<Cvr> {
         val contestPool = Contest(this.info, pool.votes, Nc = pool.ncards, Np = 0)
         val poolSim = ContestSimulation(contestPool)
         val poolCvrs = poolSim.makeCvrs(pool.id)
-        if (pool.ncards != poolCvrs.size) {
-            poolSim.makeCvrs(pool.id)
-        }
+        //if (pool.ncards != poolCvrs.size) {
+        //    poolSim.makeCvrs(pool.id)
+        //}
         require(pool.ncards == poolCvrs.size) {
             println("why")
         }
@@ -129,7 +145,7 @@ fun OneAuditContest.makeTestCvrs(): List<Cvr> {
     return cvrs
 }
 
-fun OneAuditContest.makeTestCvrs(sampleLimit: Int): List<Cvr> {
+fun OneAuditContest.makeTestCvrs(sampleLimit: Int): List<Cvr> { // TODO fix this
     if (sampleLimit < 0 || this.Nc <= sampleLimit) return this.makeTestCvrs()
 
     // otherwise scale everything

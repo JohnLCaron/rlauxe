@@ -6,6 +6,10 @@ _last changed: 04/27/2026_
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
 
+The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the
+AGPL-3.0 license. The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is
+based on the concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places.
+
 Also see [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
 
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
@@ -97,10 +101,6 @@ If that hypothesis is rejected for every assertion, the audit concludes that the
 Otherwise, the audit expands, potentially to a full hand count. If every null is tested at risk level α, this results 
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
-
-The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the
-AGPL-3.0 license. The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is
-based on the concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places.
 
 | term          | definition                                                                                     |
 |---------------|------------------------------------------------------------------------------------------------|

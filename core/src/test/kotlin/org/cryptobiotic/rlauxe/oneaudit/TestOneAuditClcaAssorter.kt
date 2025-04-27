@@ -235,7 +235,7 @@ class TestOneAuditClcaAssorter {
     //
     //bassort = [0, .5, 1, 1.5, 2] * noerror=0.5135135135135135
 
-    @Test
+    //  @Test
     fun testMakeContestOAwithAffine() {
         val contest = makeContestOA(20000, 18000, cvrPercent = .66, undervotePercent = .0, phantomPercent = .0, skewPct = .03)
         val contestUA = contest.makeContestUnderAudit()

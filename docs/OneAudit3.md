@@ -43,7 +43,7 @@ When there are errors (parameterized by fuzzPct, the percent of ballots randomly
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
 * OneAudit results are much better in version 3. 
-* The spread among the OneAudit-cvrPercent audits follow the espectations that higher cvr percents look more like CLCA. 
+* The spread among the OneAudit-cvrPercent audits follow the expectation that higher cvr percents look more like CLCA. 
 * OneAudit results have similar sensitivities to errors as CLCA.
 * IRV (Raire) audits are less likely to have their outcomes altered due to random changes in the ballots.
 * Polling audit sample sizes are all but impervious to errors.

@@ -67,7 +67,6 @@ class TruncShrinkage(
     }
 }
 
-
 //        x: np.array
 //            input data
 //        attributes used:

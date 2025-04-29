@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 
 // PS email 3/27/25:
@@ -16,8 +18,8 @@ class OneAuditContest (
     Nc: Int,
     Np: Int,
 
-    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
-    val cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
+    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes (may be empty)
+    val cvrNc: Int,                // may be 0
     val pools: Map<Int, BallotPool>, // pool id -> pool
 ) : Contest(info, voteInput, Nc, Np) {
 
@@ -201,7 +203,27 @@ class OneAuditClcaAssorter(
     assorter: AssorterIF,   // A(mvr)
     assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value
 ) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs) {
-    var countAssort = 0
+    val doAffineTransform = (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
+    val affineMin: Double
+    val affineScale: Double
+
+    init {
+        // TODO test effect of this
+        if (doAffineTransform) {
+            var minAverage = Double.MAX_VALUE
+            var maxAverage = Double.MIN_VALUE
+            contestOA.pools.values.forEach { pool ->
+                val poolAverage = margin2mean(pool.calcReportedMargin(assorter.winner(), assorter.loser()))
+                minAverage = min(minAverage, (1.0 - poolAverage) / (2 - cvrAssortMargin))
+                maxAverage = max(maxAverage, (2.0 - poolAverage) / (2 - cvrAssortMargin))
+            }
+            affineMin = minAverage
+            affineScale = 1.0 / (maxAverage - minAverage)
+        } else {
+            affineMin = 0.0
+            affineScale = 1.0
+        }
+    }
 
     // TODO this is not accurate because not using Nc as the denominator
     // We assume we have a reported assorter total = Sum(i∈Gg A(ci))
@@ -220,9 +242,11 @@ class OneAuditClcaAssorter(
     }
 
     // B(bi, ci)
+    private var countAssort = 0 // debugging
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
         if (cvr.poolId == null) {
-            val result =  super.bassort(mvr, cvr) // TODO doAffineTransform ??
+            require(!doAffineTransform)
+            val result =  super.bassort(mvr, cvr)
             if (countAssort < countAssortMax) {
                 println("bassort-cvr ${cvr.id} = $result")
                 countAssort++
@@ -255,13 +279,8 @@ class OneAuditClcaAssorter(
             countAssort++
         }
 
-        // supposedly eq 10 of OneAudit. checking with PS.
-        return if (doAffineTransform) {
-            val min = (1.0 - poolAverage) / (2 - cvrAssortMargin)
-            val max = (2.0 - poolAverage) / (2 - cvrAssortMargin)
-            return (result - min) / (max - min)
-        }
-        else result
+        // eq 10 of OneAudit.
+        return if (doAffineTransform) return affineScale * (result - affineMin) else result
     }
 
     fun overstatementPoolError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
@@ -311,7 +330,6 @@ class OneAuditClcaAssorter(
 
     companion object {
         var countAssortMax = 0
-        var doAffineTransform = false
     }
 }
 

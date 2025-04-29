@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 04/27/2026_
+_last changed: 04/29/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -27,7 +27,9 @@ Click on plot images to get an interactive html plot. You can also read this doc
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
-  * [Hybrid Audits using OneAudit](#hybrid-audits-using-oneaudit)
+  * [OneAudit CLCA](#oneaudit-clca)
+    * [Auditing Batch level data with OneAudit](#auditing-batch-level-data-with-oneaudit)
+    * [Auditing heterogenous voting systems with OneAudit](#auditing-heterogenous-voting-systems-with-oneaudit)
 * [Comparing Samples Needed by Audit type](#comparing-samples-needed-by-audit-type)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
   * [Samples needed when there are errors](#samples-needed-when-there-are-errors)
@@ -260,8 +262,44 @@ are specified in SHANGRLA, section 2. See Assorter.kt for our implementation.
 
 See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart risk function.
 
+## OneAudit CLCA
 
-## Hybrid Audits using OneAudit
+OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit paper (see appendix). 
+It deals with 2 cases: 
+
+1. CVRS are not available, only subtotals by batch ("Batch level data"), for example by precincts.
+2. CVRS are available for some, but not all ballots. The remaining ballots are in one or more batches
+   for which subtotals are available. This is a "hybrid" or "heterogenous" audit.
+
+The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for each batch, and use the average assorter
+value in that batch as the value of the (missing) CVR in the CLCA overstatement.
+
+One of the advantages of OneAudit is that one only has to retrieve the physical ballots that are chosen for auditing, 
+rather than retieving all the physical ballots in a batch.
+
+Currently we only support PLURALITY contests with OneAudit.
+
+### Auditing Batch level data with OneAudit
+
+OneAudit "lets audits use batch-level data far more efficiently than traditional batch-level comparison RLAs (BLCAs) do:
+create ONE CVRs for each batch, then apply CLCA as if the voting system had provided those CVRs. For
+real and simulated data, this saves a large mount of work compared to manually
+tabulating the votes on every card in the batches selected for audit, as BLCAs
+require. If batches are sufficiently homogeneous, the workload approaches that
+of “pure” CLCA using linked CVRs from the voting system." ONEAudit p 13.
+
+The code in OneAuditContest handles BLCAs by setting cvrNc = 0 (and cvrVotes to empty). All CVRS must be part of a pool.
+
+In this case, we find the minimum assort value over all pools and create an
+affine transformation of the over-statement assorter values that subtracts the minimum assort value and
+rescales so that the null mean is 1/2. See ONEAudit eq (1), p 12.
+
+### Auditing heterogenous voting systems with OneAudit
+
+CVRS are available for some, but not all ballots. When a ballot has been chosen for hand audit:
+
+1. If it has a CVR, we use the standard CLCA over-statement assorter value for the ballot.
+2. If it has no CVR, we use the overstatement-net-equivalent (ONE) CVR from the batch that it belongs to.
 
 When the voting system can report CVRs for some but not all cards, a _OneAudit_ audit may be the best way to proceed.
 
@@ -269,8 +307,6 @@ When the voting system can report CVRs for some but not all cards, a _OneAudit_ 
 more efficient than BLCA (batch-level comparison RLAs) when batches are large. CLCA with OneAudit is
 more efficient than BPA when batches are more homogenous than the contest
 votes as a whole, i.e., when precincts are polarized in different directions." (OneAudit p 9)
-
-Currently we do not support IRV with One Audit.
 
 See [OneAudit version 3](docs/OneAudit3.md).
 

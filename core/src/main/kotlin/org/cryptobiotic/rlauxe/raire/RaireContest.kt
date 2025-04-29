@@ -10,16 +10,13 @@ import org.cryptobiotic.rlauxe.util.*
 // an IRV Contest that does not have votes (candidateId -> nvotes Map<Int, Int>)
 // this is the motivation for ContestIF
 data class RaireContest(
-    override val info: ContestInfo,
-    override val winners: List<Int>,
-    override val Nc: Int,
-    override val Np: Int,
+    val info: ContestInfo,
+    val winners: List<Int>,
+    val iNc: Int,
+    val Np: Int,
 ) : ContestIF {
-    override val winnerNames: List<String>
-    override val losers: List<Int>
-    override val ncandidates = info.candidateIds.size
-    override val id = info.id
-    override val choiceFunction = info.choiceFunction
+    val winnerNames: List<String>
+    val losers: List<Int>
 
     // added by makeIrvContests() during construction of RaireContestUnderAudit
     // there may be multiple paths through the elimination tree when there are ties
@@ -35,6 +32,13 @@ data class RaireContest(
         }
         losers = mlosers.toList()
     }
+
+    override fun Nc() = iNc
+    override fun Np() = Np
+    override fun info() = info
+    override fun winnerNames() = winnerNames
+    override fun winners() = winners
+    override fun losers() = losers
 }
 
 class RaireContestUnderAudit(
@@ -51,8 +55,8 @@ class RaireContestUnderAudit(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
-            val assorter = RaireAssorter(contest.info, rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
-            Assertion(contest.info, assorter)
+            val assorter = RaireAssorter(contest.info(), rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
+            Assertion(contest.info(), assorter)
         }
     }
 
@@ -75,7 +79,7 @@ class RaireContestUnderAudit(
     }
 
     override fun showShort() = buildString {
-        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
+        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -113,7 +117,7 @@ class RaireContestUnderAudit(
             val contest = RaireContest(
                 info,
                 listOf(winnerId),
-                Nc = Nc,
+                iNc = Nc,
                 Np = Np,
             )
             return RaireContestUnderAudit(contest, winnerId, assertions)

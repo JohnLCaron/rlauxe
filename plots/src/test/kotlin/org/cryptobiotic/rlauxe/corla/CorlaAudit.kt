@@ -156,7 +156,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        if (!quiet) println(" ${contest.info.name} ${assertionRound.auditResult}")
+        if (!quiet) println(" ${contest.name} ${assertionRound.auditResult}")
         return testH0Result
     }
 }

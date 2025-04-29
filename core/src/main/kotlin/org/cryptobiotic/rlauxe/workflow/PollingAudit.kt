@@ -122,6 +122,6 @@ fun auditPollingAssertion(
         measuredMean = testH0Result.tracker.mean(),
     )
 
-    if (!quiet) println(" ${contest.info.name} ${assertionRound.auditResult}")
+    if (!quiet) println(" ${contest.name} ${assertionRound.auditResult}")
     return testH0Result
 }

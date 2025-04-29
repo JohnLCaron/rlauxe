@@ -167,9 +167,9 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Doub
     if (fuzzPct == 0.0) return cvrs
     val limit = fac / fuzzPct
 
-    val isIRV = contests.associate { it.info.name to (it.choiceFunction == SocialChoiceFunction.IRV) }.toMap()
+    val isIRV = contests.associate { it.name to (it.choiceFunction == SocialChoiceFunction.IRV) }.toMap()
     var count = 0
-    val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
+    val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info() }, cvrs)
     cvrbs.filter { !it.phantom && (filter == null || filter(it)) }.forEach { cvrb: CvrBuilder ->
         val r = Random.nextDouble(limit)
         cvrb.contests.forEach { (_, cvb) ->

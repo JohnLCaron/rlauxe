@@ -233,8 +233,8 @@ fun Contest.show2() = buildString {
 }
 
 fun RaireContestUnderAudit.show2() = buildString {
-    val info = contest.info
-    appendLine("$id '$name': choiceFunction=${choiceFunction} nwinners=${info.nwinners}, Nc=$Nc, Np=$Np, winners=${contest.winners})")
+    val info = contest.info()
+    appendLine("$id '$name': choiceFunction=${choiceFunction} nwinners=${info.nwinners}, Nc=$Nc, Np=$Np, winners=${contest.winners()})")
     info.candidateNames.forEach { (name, id) ->
         appendLine("  $id '$name'") }
 }
@@ -252,9 +252,9 @@ fun parseContestName(name: String) : Pair<String, Int> {
 
     val tokens = name.split("(Vote For=")
     require(tokens.size == 2) { "unexpected contest name $name" }
-    val name = tokens[0].trim()
+    val namet = tokens[0].trim()
     val ncand = tokens[1].substringBefore(")").toInt()
-    return Pair(name, ncand)
+    return Pair(namet, ncand)
 }
 
 // City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)
@@ -263,9 +263,9 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
 
     val tokens = name.split("(Number of positions=")
     require(tokens.size == 2) { "unexpected contest name $name" }
-    val name = tokens[0].trim()
+    val namet = tokens[0].trim()
     val ncand = tokens[1].substringBefore(",").toInt()
-    return Pair(name, ncand)
+    return Pair(namet, ncand)
 }
 
 // use sov to define what contests are in the audit (?)

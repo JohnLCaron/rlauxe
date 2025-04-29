@@ -221,7 +221,7 @@ fun simulateSampleSizeClcaAssorter(
     val cassorter = cassertion.cassorter
     val contest = contestUA.contest
 
-    if (!quiet) println("simulateSampleSizeClcaAssorter ${contest.info.name} ${cassorter.assorter().desc()}")
+    if (!quiet) println("simulateSampleSizeClcaAssorter ${contest.name} ${cassorter.assorter().desc()}")
 
     // strategies to choose how much error there is
     var fuzzPct = 0.0

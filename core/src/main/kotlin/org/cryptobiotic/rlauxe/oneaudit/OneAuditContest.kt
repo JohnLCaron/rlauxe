@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import kotlin.math.min
 
 
 // PS email 3/27/25:
@@ -11,36 +10,19 @@ import kotlin.math.min
 // the contest appropriately. That's in the SHANGRLA codebase.
 //  (I think this is the case when theres no style info for the pooled cards)
 
-data class OneAuditContest (
-    override val info: ContestInfo,
+class OneAuditContest (
+    info: ContestInfo,
+    voteInput: Map<Int, Int>,
+    Nc: Int,
+    Np: Int,
+
     val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
     val cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
     val pools: Map<Int, BallotPool>, // pool id -> pool
-    override val Np: Int,
-) : ContestIF {
-    // TODO why not subclass Contest ? hard to get the voteInput into the constructor
-    // Contest(
-    //        override val info: ContestInfo,
-    //        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    //        override val Nc: Int,
-    //        override val Np: Int,
-    //    )
+) : Contest(info, voteInput, Nc, Np) {
 
-    override val id = info.id
-    val name = info.name
-    override val choiceFunction = info.choiceFunction
-    override val ncandidates = info.candidateIds.size
-
-    val votes: Map<Int, Int>  // cand -> vote
-    override val winnerNames: List<String>
-    override val winners: List<Int>
-    override val losers: List<Int>
-
-    override val Nc: Int  // upper limit on number of ballots for all strata for this contest
     val minMargin: Double
     val poolNc: Int
-    val pctInPools: Double
-    val undervotes: Int
 
     init {
         // TODO add SUPERMAJORITY. What about IRV ??
@@ -48,63 +30,19 @@ data class OneAuditContest (
 
         poolNc = pools.values.sumOf { it.ncards }
 
-        Nc = poolNc + cvrNc + Np
-        pctInPools = poolNc / Nc.toDouble()
-
         // how many undervotes are there ?
         val poolVotes = pools.values.sumOf { it.votes.values.sum() }
         require (poolNc * info.voteForN >= poolVotes)
-        val poolUndervotes = poolNc - poolVotes // TODO info.voteForN not correct
+        val poolUndervotes = poolNc * info.voteForN - poolVotes
 
         val cvrVotesTotal = cvrVotes.values.sumOf { it }
         require (cvrNc * info.voteForN >= cvrVotesTotal)
-        val cvrUndervotes = cvrNc - cvrVotesTotal
-        undervotes = poolUndervotes + cvrUndervotes
-
-        //// construct total votes
-        val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
-        cvrVotes.forEach { cand, votes ->
-            val tvote = voteBuilder[cand] ?: 0
-            voteBuilder[cand] = tvote + votes
-        }
-        pools.values.forEach { pool ->
-            require(pool.contest == info.id)
-            pool.votes.forEach { cand, votes ->
-                val tvote = voteBuilder[cand] ?: 0
-                voteBuilder[cand] = tvote + votes
-            }
-        }
-        // add 0 candidate votes if needed
-        info.candidateIds.forEach {
-            if (!voteBuilder.contains(it)) {
-                voteBuilder[it] = 0
-            }
-        }
-        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
-
-        //// find winners, check that the minimum value is satisfied
-        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV not supported
-        val useMin = info.minFraction ?: 0.0
-        val nvotes = votes.values.sum()
-        val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }.sortedBy{ it.second }.reversed()
-        val useNwinners = min(overTheMin.size, info.nwinners)
-        winners = overTheMin.subList(0, useNwinners).map { it.first }
-        val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
-        winnerNames = winners.map { mapIdToName[it]!! }
-
-        // find losers
-        val mlosers = mutableListOf<Int>()
-        info.candidateNames.forEach { (_, id) ->
-            if (!winners.contains(id)) mlosers.add(id)
-        }
-        losers = mlosers.toList()
+        val cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
+        val undervotes2 = poolUndervotes + cvrUndervotes
+        require (undervotes == undervotes2)
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
-    }
-
-    fun votesAndUndervotes(): Map<Int, Int> {
-        return (votes.map { Pair(it.key, it.value)}  + Pair(ncandidates, undervotes)).toMap()
     }
 
     fun makeContestUnderAudit() : OAContestUnderAudit {
@@ -130,7 +68,68 @@ data class OneAuditContest (
 
     override fun toString() = buildString {
         appendLine("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
-        appendLine("  cvrNc=$cvrNc npools= ${pools.size} poolNc=$poolNc pctInPools=${df(pctInPools)}")
+        appendLine("  cvrNc=$cvrNc npools= ${pools.size} poolNc=$poolNc pctInPools=${df(poolNc / Nc.toDouble())}")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as OneAuditContest
+
+        if (cvrNc != other.cvrNc) return false
+        if (minMargin != other.minMargin) return false
+        if (poolNc != other.poolNc) return false
+        if (cvrVotes != other.cvrVotes) return false
+        if (pools != other.pools) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + cvrNc
+        result = 31 * result + minMargin.hashCode()
+        result = 31 * result + poolNc
+        result = 31 * result + cvrVotes.hashCode()
+        result = 31 * result + pools.hashCode()
+        return result
+    }
+
+    companion object {
+        fun make(info: ContestInfo,
+                          cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
+                          cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
+                          pools: Map<Int, BallotPool>, // pool id -> pool
+                          Np: Int): OneAuditContest {
+
+            val poolNc = pools.values.sumOf { it.ncards }
+            val Nc = poolNc + cvrNc + Np
+
+            //// construct total votes
+            val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
+            cvrVotes.forEach { cand, votes ->
+                val tvote = voteBuilder[cand] ?: 0
+                voteBuilder[cand] = tvote + votes
+            }
+            pools.values.forEach { pool ->
+                require(pool.contest == info.id)
+                pool.votes.forEach { cand, votes ->
+                    val tvote = voteBuilder[cand] ?: 0
+                    voteBuilder[cand] = tvote + votes
+                }
+            }
+            // add 0 candidate votes if needed
+            info.candidateIds.forEach {
+                if (!voteBuilder.contains(it)) {
+                    voteBuilder[it] = 0
+                }
+            }
+            val voteInput = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
+
+            return OneAuditContest(info, voteInput, Nc, Np, cvrVotes, cvrNc, pools)
+        }
     }
 }
 
@@ -154,10 +153,9 @@ class OAContestUnderAudit(
     }
 
     override fun show() = buildString {
-        val votes = if (contest is Contest) contest.votes else emptyMap()
         appendLine("${contestOA.javaClass.simpleName} $contestOA")
         appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
-        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners}")
+        appendLine(" choiceFunction=${choiceFunction} nwinners=${contestOA.info.nwinners}, winners=${contest.winners()}")
         append(showCandidates())
     }
 

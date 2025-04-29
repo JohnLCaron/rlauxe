@@ -1,14 +1,11 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
-
-private val showPct = false
 
 /** pre-election information **/
 data class ContestInfo(
@@ -50,20 +47,23 @@ data class ContestInfo(
     }
 }
 
-// Needed to allow RaireContest as subclass, which does not have votes: Map<Int, Int>
+// Needed to allow RaireContest, which does not have votes: Map<Int, Int>
 interface ContestIF {
-    val info: ContestInfo
-    val id: Int
-    val Nc: Int
-    val Np: Int
-    val ncandidates: Int
-    val choiceFunction: SocialChoiceFunction
+    val id get() = info().id
+    val name get() = info().name
+    val ncandidates get() = info().candidateNames.size
+    val choiceFunction get() = info().choiceFunction
 
-    val winnerNames: List<String>
-    val winners: List<Int>
-    val losers: List<Int>
+    val Nc get() = Nc()
 
-    fun phantomRate() = Np / Nc.toDouble()
+    fun Nc(): Int
+    fun Np(): Int
+    fun info(): ContestInfo
+    fun winnerNames(): List<String>
+    fun winners(): List<Int>
+    fun losers(): List<Int>
+
+    fun phantomRate() = Np() / Nc().toDouble()
     fun isIRV() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
 }
@@ -89,21 +89,26 @@ interface ContestIF {
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  * @parameter Np: number of phantoms for this contest.
  */
-class Contest(
-        override val info: ContestInfo,
+open class Contest(
+        val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-        override val Nc: Int,
-        override val Np: Int,
+        val iNc: Int,
+        val Np: Int,
     ): ContestIF {
-    override val id = info.id
-    val name = info.name
-    override val choiceFunction = info.choiceFunction
-    override val ncandidates = info.candidateIds.size
+
+    override fun Nc() = iNc
+    override fun Np() = Np
+    override fun info() = info
+    override fun winnerNames() = winnerNames
+    override fun winners() = winners
+    override fun losers() = losers
+
+    val winnerNames: List<String>
+    val winners: List<Int>
+    val losers: List<Int>
 
     val votes: Map<Int, Int>  // candidateId -> nvotes; zero vote candidates have been added
-    override val winnerNames: List<String>
-    override val winners: List<Int>
-    override val losers: List<Int>
+    val undervotes: Int
 
     init {
         // construct votes, adding 0 votes if needed
@@ -121,25 +126,23 @@ class Contest(
         }
         votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
         val nvotes = votes.values.sum()
-        require(nvotes <= info.voteForN * (Nc - Np)) {
+        require(nvotes <= info.voteForN * (iNc - Np)) {
             "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
         }
-        val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
-        if (showPct) {
-            println("contest candidate pcts = $pct")
-        }
+        undervotes = info.voteForN * (iNc - Np) - nvotes
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
-        val useMin = info.minFraction ?: 0.0
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
+        val useMin = info.minFraction ?: 0.0
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }
         val useNwinners = min(overTheMin.size, info.nwinners)
         winners = overTheMin.subList(0, useNwinners).map { it.first }
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
         winnerNames = winners.map { mapIdToName[it]!! }
         if (winners.isEmpty()) {
+            val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
             println("*** there are no winners for minFraction=$useMin $pct")
         }
 
@@ -166,36 +169,43 @@ class Contest(
         return candVotes / Nc.toDouble()
     }
 
+    fun votesAndUndervotes(): Map<Int, Int> {
+        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, undervotes)).toMap()
+    }
+
+
+    override fun show(): String {
+        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as Contest
 
-        if (Nc != other.Nc) return false
+        if (iNc != other.iNc) return false
         if (Np != other.Np) return false
+        if (undervotes != other.undervotes) return false
         if (info != other.info) return false
-        if (votes != other.votes) return false
         if (winnerNames != other.winnerNames) return false
         if (winners != other.winners) return false
         if (losers != other.losers) return false
+        if (votes != other.votes) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = Nc
+        var result = iNc
         result = 31 * result + Np
+        result = 31 * result + undervotes
         result = 31 * result + info.hashCode()
-        result = 31 * result + votes.hashCode()
         result = 31 * result + winnerNames.hashCode()
         result = 31 * result + winners.hashCode()
         result = 31 * result + losers.hashCode()
+        result = 31 * result + votes.hashCode()
         return result
-    }
-
-    override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
     }
 
     companion object {
@@ -212,21 +222,21 @@ open class ContestUnderAudit(
     val isComparison: Boolean = true,
     val hasStyle: Boolean = true,
 ) {
-    val id = contest.info.id
-    val name = contest.info.name
-    val choiceFunction = contest.info.choiceFunction
-    val ncandidates = contest.info.candidateIds.size
-    val Nc = contest.Nc
-    val Np = contest.Np
+    val id = contest.id
+    val name = contest.name
+    val choiceFunction = contest.choiceFunction
+    val ncandidates = contest.ncandidates
+    val Nc = contest.Nc()
+    val Np = contest.Np()
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // TODO var for serialization. is that ok?
     var clcaAssertions: List<ClcaAssertion> = emptyList()
 
     init {
-        if (contest.losers.size == 0) {
+        if (contest.losers().size == 0) {
             preAuditStatus = TestH0Status.NoLosers
-        } else if (contest.winners.size == 0) {
+        } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init
@@ -238,7 +248,6 @@ open class ContestUnderAudit(
     fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes
-            is OneAuditContest -> contest.votes
             else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
         }
 
@@ -253,22 +262,22 @@ open class ContestUnderAudit(
     fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
         // test that every winner beats every loser. SHANGRLA 2.1
         val assertions = mutableListOf<Assertion>()
-        contest.winners.forEach { winner ->
-            contest.losers.forEach { loser ->
+        contest.winners().forEach { winner ->
+            contest.losers().forEach { loser ->
                 val assorter = PluralityAssorter.makeWithVotes(contest, winner, loser, votes)
-                assertions.add(Assertion(contest.info, assorter))
+                assertions.add(Assertion(contest.info(), assorter))
             }
         }
         return assertions
     }
 
     fun makeSuperMajorityAssertions(votes: Map<Int, Int>): List<Assertion> {
-        require(contest.info.minFraction != null)
+        require(contest.info().minFraction != null)
         // each winner generates 1 assertion. SHANGRLA 2.3
         val assertions = mutableListOf<Assertion>()
-        contest.winners.forEach { winner ->
-            val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!, votes)
-            assertions.add(Assertion(contest.info, assorter))
+        contest.winners().forEach { winner ->
+            val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info().minFraction!!, votes)
+            assertions.add(Assertion(contest.info(), assorter))
         }
         return assertions
     }
@@ -289,7 +298,7 @@ open class ContestUnderAudit(
         this.clcaAssertions = assertionMap.filter { it.first.info.id == this.id }
             .map { (assertion, welford) ->
                 val clcaAssorter = makeClcaAssorter(assertion, welford.mean)
-                ClcaAssertion(contest.info, clcaAssorter)
+                ClcaAssertion(contest.info(), clcaAssorter)
             }
         return this
     }
@@ -303,13 +312,13 @@ open class ContestUnderAudit(
 
         this.clcaAssertions = pollingAssertions.map { assertion ->
             val clcaAssorter = makeClcaAssorter(assertion, null)
-            ClcaAssertion(contest.info, clcaAssorter)
+            ClcaAssertion(contest.info(), clcaAssorter)
         }
         return this
     }
 
     open fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
-        return ClcaAssorter(contest.info, assertion.assorter, assortValueFromCvrs, hasStyle=hasStyle)
+        return ClcaAssorter(contest.info(), assertion.assorter, assortValueFromCvrs, hasStyle=hasStyle)
     }
 
     fun assertions(): List<Assertion> {
@@ -355,13 +364,13 @@ open class ContestUnderAudit(
         val votes = if (contest is Contest) contest.votes else emptyMap()
         appendLine("${contest.javaClass.simpleName} '$name' ($id) votes=${votes}")
         appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
-        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info.nwinners}, winners=${contest.winners}")
+        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info().nwinners}, winners=${contest.winners()}")
         append(showCandidates())
     }
 
     open fun showCandidates() = buildString {
         val votes = if (contest is Contest) contest.votes else emptyMap()
-        contest.info.candidateNames.forEach { (name, id) ->
+        contest.info().candidateNames.forEach { (name, id) ->
             appendLine("   $id '$name': votes=${votes[id]}") }
         append("    Total=${votes.values.sum()}")
     }

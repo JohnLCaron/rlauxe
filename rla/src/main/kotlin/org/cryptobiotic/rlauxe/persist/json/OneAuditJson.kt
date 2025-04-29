@@ -28,7 +28,7 @@ fun OneAuditContest.publishOAJson() = OAContestJson(
 
 fun OAContestJson.import(info: ContestInfo): OneAuditContest {
     val pools = this.pools.map { it.import() }
-    return OneAuditContest(
+    return OneAuditContest.make(
         info,
         this.cvrVotes,
         this.cvrNc,
@@ -83,7 +83,7 @@ fun OAContestUnderAudit.publishOAJson() = OAContestUnderAuditJson(
 fun OAContestUnderAuditJson.import(): OAContestUnderAudit {
     // val contestInfo = this.info.import()
     val contestUA = this.contestUA.import()
-    val contestOA = this.contestOA.import(contestUA.contest.info)
+    val contestOA = this.contestOA.import(contestUA.contest.info())
 
     val result = OAContestUnderAudit(contestOA, contestUA.hasStyle)
     // result.pollingAssertions = contestUA.pollingAssertions

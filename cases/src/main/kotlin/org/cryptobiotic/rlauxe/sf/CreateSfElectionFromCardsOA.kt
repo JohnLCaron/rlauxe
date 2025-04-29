@@ -242,7 +242,7 @@ fun createSfElectionFromCardsOA(
             println("*** NO votes for contest ${info}")
         } else {
             val pools = ballotPools.filter { it.contest == info.id }.associateBy { it.id }
-            val contestOA = OneAuditContest(info,
+            val contestOA = OneAuditContest.make(info,
                 cvrVotes = contestVotes.votes,
                 cvrNc = contestVotes.countBallots,
                 pools,

@@ -108,7 +108,7 @@ class TestSfElectionFromCvrs {
 
         contestsUA.forEach { contestUA ->
             println("$contestUA ${contestUA.contest.choiceFunction}")
-            contestUA.contest.info.candidateNames.forEach { println("  $it") }
+            contestUA.contest.info().candidateNames.forEach { println("  $it") }
         }
     }
 
@@ -122,7 +122,7 @@ class TestSfElectionFromCvrs {
         val irvCounters = mutableListOf<IrvCounter>()
         contestsUA.filter { it.choiceFunction == SocialChoiceFunction.IRV}.forEach { contestUA ->
             println("$contestUA")
-            println("   winners=${contestUA.contest.winnerNames}")
+            println("   winners=${contestUA.contest.winnerNames()}")
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
         }
 

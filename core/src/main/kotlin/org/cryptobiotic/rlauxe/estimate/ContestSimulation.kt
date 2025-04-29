@@ -134,7 +134,7 @@ class ContestSimulation(val contest: Contest) {
             val contest = Contest(
                 ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
                 mapOf(0 to winner, 1 to loser),
-                Nc = Nc,
+                iNc = Nc,
                 Np=Np,
             )
             return ContestSimulation(contest)
@@ -157,7 +157,7 @@ class ContestSimulation(val contest: Contest) {
             val contest = Contest(
                 contest.info,
                 svotes,
-                Nc=sampleLimit,
+                iNc=sampleLimit,
                 Np=sNp,
             )
             return ContestSimulation(contest)

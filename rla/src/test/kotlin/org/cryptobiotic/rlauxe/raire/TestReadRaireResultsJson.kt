@@ -25,7 +25,7 @@ class TestReadRaireResultsJson {
     @Test
     fun testRaireAssorter334() {
         val contest = 334
-        val rrContest = raireResults.contests.find { it.contest.info.name == "334" }!!
+        val rrContest = raireResults.contests.find { it.contest.name == "334" }!!
         val assorters = rrContest.makeAssorters() // adds assorts to the assertion
 
         ////            # winner only assertion
@@ -92,7 +92,7 @@ class TestReadRaireResultsJson {
     @Test
     fun testRaireAssorter361() {
         val contest = 361
-        val rrContest = raireResults.contests.find { it.contest.info.name == "361"}!!
+        val rrContest = raireResults.contests.find { it.contest.name == "361"}!!
         val assorters = rrContest.makeAssorters() // adds assorts to the assertion
         val wassorter = assorters.find { it.match(28, 50, true) }
         assertNotNull(wassorter)
@@ -202,6 +202,6 @@ class TestReadRaireResultsJson {
 
 fun RaireContestUnderAudit.makeAssorters(): List<RaireAssorter> {
     return this.rassertions.map {
-        RaireAssorter(contest.info, it, (it.marginInVotes.toDouble() / contest.Nc))
+        RaireAssorter(contest.info(), it, (it.marginInVotes.toDouble() / contest.Nc))
     }
 }

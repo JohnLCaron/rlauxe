@@ -79,7 +79,7 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
             val reportedMargin = (winnerVotes - loserVotes) / contest.Nc.toDouble()
-            return PluralityAssorter(contest.info, winner, loser, reportedMargin)
+            return PluralityAssorter(contest.info(), winner, loser, reportedMargin)
         }
     }
 }
@@ -127,7 +127,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
             val weight = 1 / (2 * minFraction)
             val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc.toDouble()
             val reportedMargin = mean2margin(mean)
-            return SuperMajorityAssorter(contest.info, winner, minFraction, reportedMargin)
+            return SuperMajorityAssorter(contest.info(), winner, minFraction, reportedMargin)
         }
     }
 }

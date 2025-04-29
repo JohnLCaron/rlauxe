@@ -1,7 +1,7 @@
 # OneAudit version 3 
-_last changed 04/27/2025_
+_last changed 04/28/2025_
 
-## Strategies
+## Strategies8
 
 We try different betting "strategies":
 
@@ -17,13 +17,13 @@ The OneAudit has CVRs for 95% of its cards, and 5% are in a single pool without 
 * Surprisingly, OneAudit (bet99 and eta0Eps) does better than CLCA when there are no errors, at low margins. This result needs to
   be investigated.
 
-Here we compare the same audit types when there are errors, as a function of fuzzPct, the percent  of ballots randomly changed, 
-for fixed margin of 2%:
+Here we compare the same audit types when there are errors, as a function of fuzzPct, for fixed margin of 2%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/OneAuditWithErrors95/OneAuditWithErrors95LogLog.html" rel="OneAuditNoErrorsLogLog">![OneAuditNoErrorsLogLog](plots/oneaudit3/OneAuditWithErrors95/OneAuditWithErrors95LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/OneAuditWithErrors02/OneAuditWithErrors02LogLinear.html" rel="OneAuditWithErrors02LogLinear">![OneAuditWithErrors02LogLinear](plots/oneaudit3/OneAuditWithErrors02/OneAuditWithErrors02LogLinear.png)</a>
 
-* The bet99 strategy does best when the fuzzPct is < .005 (5 in 1000 have a random error), then degrades quickly.
+* The bet99 strategy does best when the fuzzPct is < .01 (1 in 100 have a random error), then degrades quickly.
 * The eta0Eps strategy stays reletively flat, and does much better than bet99 when fuzzPct is > .01.
+* There is an interesting discontinuity going from 0.0 (no errors) to even a very small error (.0001 here). To be investigated.
 
 ## Compare Audit Types
 

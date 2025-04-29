@@ -104,7 +104,7 @@ class TestOneAuditKalamazoo {
         assertTrue(doublesAreClose(sam, expectedSam, doublePrecision))
 
         // do the same thing using real assorters
-        val testCvrs = contestOA.makeTestCvrs()
+        val testMvrs = contestOA.makeTestMvrs()
         val contestUA = contestOA.makeContestUnderAudit()
         val minAllAsserter = contestUA.minAssertion()
         assertNotNull(minAllAsserter)

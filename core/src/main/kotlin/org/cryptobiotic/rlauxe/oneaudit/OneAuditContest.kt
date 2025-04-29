@@ -54,7 +54,7 @@ data class OneAuditContest (
         // how many undervotes are there ?
         val poolVotes = pools.values.sumOf { it.votes.values.sum() }
         require (poolNc * info.voteForN >= poolVotes)
-        val poolUndervotes = poolNc - poolVotes
+        val poolUndervotes = poolNc - poolVotes // TODO info.voteForN not correct
 
         val cvrVotesTotal = cvrVotes.values.sumOf { it }
         require (cvrNc * info.voteForN >= cvrVotesTotal)
@@ -101,6 +101,10 @@ data class OneAuditContest (
 
         val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
         minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
+    }
+
+    fun votesAndUndervotes(): Map<Int, Int> {
+        return (votes.map { Pair(it.key, it.value)}  + Pair(ncandidates, undervotes)).toMap()
     }
 
     fun makeContestUnderAudit() : OAContestUnderAudit {

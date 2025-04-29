@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.roundToInt
 import kotlin.math.max
-import kotlin.math.min
 
 // margin = (winner - loser) / Nc
 // (winner - loser) = margin * Nc
@@ -111,42 +110,40 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
 }
 
 // used by simulateSampleSizeOneAuditAssorter()
-fun OneAuditContest.makeTestCvrs(): List<Cvr> {
+fun OneAuditContest.makeTestMvrs(): List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
 
     // add the regular cvrs
     val contestCvrs = Contest(this.info, voteInput=this.cvrVotes, Nc = this.cvrNc, Np = 0)
     val sim = ContestSimulation(contestCvrs)
-    cvrs.addAll(sim.makeCvrs()) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
+    val cvrCvrs = sim.makeCvrs()
+    cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     cvrs.forEach { require (it.poolId == null) }
+
     // TODO multiwinner contests
     this.pools.values.forEach { pool ->
         val contestPool = Contest(this.info, pool.votes, Nc = pool.ncards, Np = 0)
         val poolSim = ContestSimulation(contestPool)
         val poolCvrs = poolSim.makeCvrs(pool.id)
-        //if (pool.ncards != poolCvrs.size) {
-        //    poolSim.makeCvrs(pool.id)
-        //}
-        require(pool.ncards == poolCvrs.size) {
-            println("why")
-        }
-        poolCvrs.forEach { require (it.poolId != null) }
 
+        require(pool.ncards == poolCvrs.size)
+        poolCvrs.forEach { require (it.poolId != null) }
         cvrs.addAll(poolCvrs)
     }
+
     // add phantoms
     repeat(this.Np) {
         cvrs.add(Cvr("phantom$it", mapOf(info.id to intArrayOf()), phantom = true))
     }
-    require(this.Nc == cvrs.size) {
-        println("why")
-    }
+
+    require(this.Nc == cvrs.size)
     cvrs.shuffle()
     return cvrs
 }
 
-fun OneAuditContest.makeTestCvrs(sampleLimit: Int): List<Cvr> { // TODO fix this
-    if (sampleLimit < 0 || this.Nc <= sampleLimit) return this.makeTestCvrs()
+// TODO test this
+fun OneAuditContest.makeTestMvrs(sampleLimit: Int): List<Cvr> {
+    if (sampleLimit < 0 || this.Nc <= sampleLimit) return this.makeTestMvrs()
 
     // otherwise scale everything
     val scale = sampleLimit / this.Nc.toDouble()

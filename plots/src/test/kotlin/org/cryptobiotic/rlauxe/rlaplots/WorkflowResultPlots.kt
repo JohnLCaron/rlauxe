@@ -192,7 +192,7 @@ fun makeWrGroups(wrs: List<WorkflowResult>, catfld: List<String>): Map<String, L
 
 fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
                              catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "$name samples needed",
@@ -207,7 +207,7 @@ fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, sca
 }
 
 fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "$name samples needed",

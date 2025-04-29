@@ -53,7 +53,7 @@ class CompareCorlaNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=1)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -69,7 +69,7 @@ class CompareCorlaNoErrors {
 }
 
 fun showSampleSizes(name:String, dirName: String, subtitle: String, scaleType: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "Corla vs Rlauxe",

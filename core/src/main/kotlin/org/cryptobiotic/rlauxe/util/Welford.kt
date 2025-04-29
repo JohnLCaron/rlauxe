@@ -46,4 +46,8 @@ data class Welford(
     override fun toString(): String {
         return "(mean, variance, sampleVariance, stddev) = ${this.result()}, ${sqrt(variance())}"
     }
+
+    fun show(): String {
+        return "mean = ${dfn(mean, 4)} stddev = ${dfn(sqrt(variance()), 4)}"
+    }
 }

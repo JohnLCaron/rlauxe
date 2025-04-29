@@ -43,7 +43,7 @@ class CompareCorlaWithAttack {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -62,7 +62,7 @@ class CompareCorlaWithAttack {
     }
 
     fun showFailuresVsTheta(name: String, dir: String, write: String, subtitle: String, filter: (WorkflowResult) -> Boolean) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults().filter(filter)
 
         wrsPlot(

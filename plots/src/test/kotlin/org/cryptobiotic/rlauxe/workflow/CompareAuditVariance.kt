@@ -37,7 +37,7 @@ class CompareAuditVariance {
 
         val name = "pollingVariance"
         val dirName = "/home/stormy/temp/extra/$name"
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPolling()
@@ -80,7 +80,7 @@ class CompareAuditVariance {
 
         val name = "clcaVariance"
         val dirName = "/home/stormy/temp/extra/$name"
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenClca()
@@ -99,7 +99,7 @@ class CompareAuditVariance {
     }
 
     fun showSampleVarianceVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
 
         wrsPlotMultipleFields(
@@ -124,7 +124,7 @@ class CompareAuditVariance {
     }
 
     fun showNroundsVsMargin(dirName: String, name:String, subtitle: String, catName: String, catfld: (WorkflowResult) -> String) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
 
         wrsPlot(
@@ -139,7 +139,7 @@ class CompareAuditVariance {
     }
 
     fun showNmvrsVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType,) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
 
         wrsPlotMultipleFields(

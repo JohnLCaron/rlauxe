@@ -11,16 +11,16 @@ class OneAuditNoErrors {
     val name = "OneAuditNoErrors"
     val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
 
-    val nruns = 100  // number of times to run workflow
+    val nruns = 200  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
     val cvrPercent = 0.95
+    val fuzzPct = 0.0
 
     @Test
     fun oaNoErrorsPlots() {
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        val fuzzPct = 0.0
 
         val stopwatch = Stopwatch()
 
@@ -74,7 +74,7 @@ class OneAuditNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=40)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()

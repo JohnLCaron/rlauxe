@@ -51,7 +51,7 @@ class AuditsWithPhantoms {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -67,7 +67,7 @@ class AuditsWithPhantoms {
 
     fun showSampleSizesVsPhantomPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
                                       catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name samples needed",
@@ -114,7 +114,7 @@ class AuditsWithPhantoms {
         val name = "phantomMarginShift"
         val dirName = "/home/stormy/temp/samples/$name"
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenMarginShiftPlots()

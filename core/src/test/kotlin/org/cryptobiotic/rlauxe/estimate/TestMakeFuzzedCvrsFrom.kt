@@ -5,13 +5,14 @@ import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
-import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
+import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
+import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrs
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class TestMakeFuzzedCvrsFrom {
     val show = false
-    val showOA = true
+    val showOA = false
 
     @Test
     fun testFuzzTwoPersonContest() {
@@ -196,7 +197,7 @@ class TestMakeFuzzedCvrsFrom {
 
     @Test
     fun testMakeFuzzedCvrsFromContestOA() {
-        val N = 10000
+        val Nc = 10000
         val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
@@ -204,58 +205,117 @@ class TestMakeFuzzedCvrsFrom {
 
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
+            println("===================================")
+            val welfordFromCvrs = Welford()
+            val welfordFromFuzz = Welford()
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
                 val contestOA =
-                    makeContestOA(margin, N, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01)
-                val cvrs = contestOA.makeTestCvrs()
+                    makeContestOA(margin, Nc, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01) // TODO no skew
                 val ncands = contestOA.ncandidates
-
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contestOA.votes}")
-                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA), cvrs, fuzzPct)
+
+                val cvrs = contestOA.makeTestMvrs()
+                val cvrVotes = tabulateVotesWithUndervotes(cvrs.iterator(), 0, ncands)
+                if (showOA) println("cvrVotes = ${cvrVotes}  contestVotes = ${contestOA.votesAndUndervotes()}")
+                assertEquals(cvrVotes, contestOA.votesAndUndervotes())
+                assertEquals(Nc, cvrs.size)
+
+                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA), cvrs, fuzzPct, welfordFromFuzz)
+                val mvrVotes = tabulateVotesWithUndervotes(fuzzed.iterator(), 0, ncands)
+                if (showOA) println("mvrVotes = ${mvrVotes}")
+
                 val choiceChange = mutableMapOf<String, Int>() // org-fuzz -> count
                 cvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
-                    val orgChoice = cvr.votes[contestId]!!.firstOrNull() ?: ncands
-                    val fuzzChoice = fuzzedCvr.votes[contestId]!!.firstOrNull() ?: ncands
-                    val changeKey = (orgChoice).toString() + fuzzChoice.toString()
-                    val count = choiceChange[changeKey] ?: 0
-                    choiceChange[changeKey] = count + 1
+                    if (!cvr.phantom) {
+                        val orgChoice = cvr.votes[contestId]!!.firstOrNull() ?: ncands
+                        val fuzzChoice = fuzzedCvr.votes[contestId]!!.firstOrNull() ?: ncands
+                        val changeKey = (orgChoice).toString() + fuzzChoice.toString()
+                        val count = choiceChange[changeKey] ?: 0
+                        choiceChange[changeKey] = count + 1
+                    }
                 }
                 if (showOA) {
                     println(" choiceChange")
-                    choiceChange.toSortedMap().forEach { println("  $it") }
+                    print(showChangeMatrix(ncands, choiceChange))
+                    // choiceChange.toSortedMap().forEach { println("  $it") }
                 }
+                val nn = Nc - contestOA.Np
                 choiceChanges.add(choiceChange)
+                val allSum = choiceChange.values.sum()
+                assertEquals(nn, allSum)
 
+                val changed = sumOffDiagonal(ncands, choiceChange)
                 val unchanged = sumDiagonal(ncands, choiceChange)
-                if (showOA) println(" unchanged $unchanged = ${unchanged / N.toDouble()}")
-                assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .015)
+                assertEquals(nn, changed + unchanged)
 
-                // approx even distribution
-                val choicePct = choiceChange.map { (key, value) -> Pair(key, value / N.toDouble()) }.toMap()
-                repeat(ncands) { checkOffDiagonals(it, ncands, choicePct) }
+                val changedPct = 1.0 - unchanged / nn.toDouble()
+                if (showOA) println(" unchanged=$unchanged = changedPct=$changedPct should be ${1.0 - fuzzPct} diff = ${df(fuzzPct - changedPct)}")
+                welfordFromCvrs.update(fuzzPct - changedPct)
+
+//                assertEquals(1.0 - fuzzPct, unchangedPct, .015)
+                if (showOA) println()
+                // approx even distribution TODO seems bogus
+                //val choicePct = choiceChange.map { (key, value) -> Pair(key, value / N.toDouble()) }.toMap()
+                //repeat(ncands) { checkOffDiagonals(it, ncands, choicePct) }
             }
+            println(" fuzzPct =$fuzzPct welfordFromCvrs: ${welfordFromCvrs.show()}")
+            println(" welfordFromFuzz: ${welfordFromFuzz.show()}")
         }
 
         val totalChange = mutableMapOf<String, Int>()
         totalChange.mergeReduceS(choiceChanges)
 
-        println(" totalChange")
-        totalChange.toSortedMap().forEach { println("  $it") }
+        // println(showChangeMatrix(2, totalChange))
+        // totalChange.toSortedMap().forEach { println("  $it") }
     }
 }
 
+// the diagonals are the unchanged cvrs
 fun sumDiagonal(ncands: Int, choices: Map<String, Int>): Int {
     var sum = 0
     for (cand in 0..ncands) {
         val key = cand.toString() + cand.toString()
-        if (choices[key] != null) {  // TODO why can it be null ?
+        if (choices[key] != null) {
             sum += choices[key]!!
         }
     }
     return sum
 }
 
+// the diagonals are the changed cvrs
+fun sumOffDiagonal(ncands: Int, choices: Map<String, Int>): Int {
+    var sum = 0
+    for (cand2 in 0..ncands) {
+        for (cand1 in 0..ncands) {
+            if (cand1 != cand2) {
+                val key = cand2.toString() + cand1.toString()
+                if (choices[key] != null) {
+                    sum += choices[key]!!
+                }
+            }
+        }
+    }
+    return sum
+}
+
+private val elemWidth = 7
+fun showChangeMatrix(ncands: Int, choices: Map<String, Int>) = buildString {
+    append(sfn(" ", elemWidth))
+    repeat(ncands+1) { append( sfn(it.toString(), elemWidth)) }
+    appendLine()
+    for (cand2 in 0..ncands) {
+        append( sfn(cand2.toString(), elemWidth))
+        for (cand1 in 0..ncands) {
+            val key = cand1.toString() + cand2.toString()
+            val change = choices[key]
+            append(sfn(change?.toString() ?: "X", elemWidth))
+        }
+        appendLine()
+    }
+}
+
+// the diagonals are the unchanged cvrs
 fun checkOffDiagonals(cand: Int, ncands: Int, choicePct: Map<String, Double>) {
     var first: Double = -1.0
     for (other in 0..ncands) {

@@ -60,7 +60,7 @@ class ExtraVsMarginByStrategy {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -78,7 +78,7 @@ class ExtraVsMarginByStrategy {
     }
 
     fun showNmrsVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name number of mvrs used",
@@ -93,7 +93,7 @@ class ExtraVsMarginByStrategy {
     }
 
     fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name extra samples needed",
@@ -108,7 +108,7 @@ class ExtraVsMarginByStrategy {
     }
 
     fun showFailuresVsMargin(subtitle: String, ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -116,7 +116,7 @@ class ExtraVsMarginByStrategy {
     }
 
     fun showNroundsVsMargin(subtitle: String, ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)

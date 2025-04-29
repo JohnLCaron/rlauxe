@@ -183,7 +183,7 @@ data class ContestUnderAuditJson(
 
 fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
     return ContestUnderAuditJson(
-        this.contest.info.publishJson(),
+        this.contest.info().publishJson(),
         this.contest.publishJson(),
         this.isComparison,
         this.hasStyle,

@@ -17,7 +17,7 @@ class TestOneAuditJson {
         val target = contestUA.assertions().first().assorter
 
         val json = target.publishJson()
-        val roundtrip = json.import(contestUA.contest.info)
+        val roundtrip = json.import(contestUA.contest.info())
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -29,7 +29,7 @@ class TestOneAuditJson {
         val target = contestUA.assertions().first()
 
         val json = target.publishIFJson()
-        val roundtrip = json.import(contestUA.contest.info)
+        val roundtrip = json.import(contestUA.contest.info())
         assertNotNull(roundtrip)
         assert(roundtrip is ClcaAssertion)
         assertEquals(target, roundtrip)

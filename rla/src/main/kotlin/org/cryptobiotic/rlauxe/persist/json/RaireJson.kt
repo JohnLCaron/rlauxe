@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.raire.RaireContest
@@ -40,7 +39,7 @@ fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
 fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
     // val info = this.info.import()
     val contestUA = this.contestUA.import()
-    val raireContest = this.raireContest.import(contestUA.contest.info)
+    val raireContest = this.raireContest.import(contestUA.contest.info())
 
     val result = RaireContestUnderAudit(
         raireContest as RaireContest,

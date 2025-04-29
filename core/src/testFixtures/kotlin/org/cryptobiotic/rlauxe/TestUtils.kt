@@ -37,7 +37,7 @@ fun makeStandardContest(Nc: Int) =
     Contest(
         ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
             mapOf(0 to 3, 1 to 33),  // TODO BOGUS
-            Nc = Nc,
+            iNc = Nc,
             Np=0, // TODO
         )
 

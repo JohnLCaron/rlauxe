@@ -101,7 +101,7 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
         println("nope")
     }
 
-    val result =  OneAuditContest(info, votesCvr, cvrNc, pools.associateBy { it.id }, Np = Np)
+    val result =  OneAuditContest.make(info, votesCvr, cvrNc, pools.associateBy { it.id }, Np = Np)
     if (result.Nc != Nc) {
         println("nope")
     }
@@ -114,7 +114,7 @@ fun OneAuditContest.makeTestMvrs(): List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
 
     // add the regular cvrs
-    val contestCvrs = Contest(this.info, voteInput=this.cvrVotes, Nc = this.cvrNc, Np = 0)
+    val contestCvrs = Contest(this.info, voteInput=this.cvrVotes, iNc = this.cvrNc, Np = 0)
     val sim = ContestSimulation(contestCvrs)
     val cvrCvrs = sim.makeCvrs()
     cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
@@ -122,7 +122,7 @@ fun OneAuditContest.makeTestMvrs(): List<Cvr> {
 
     // TODO multiwinner contests
     this.pools.values.forEach { pool ->
-        val contestPool = Contest(this.info, pool.votes, Nc = pool.ncards, Np = 0)
+        val contestPool = Contest(this.info, pool.votes, iNc = pool.ncards, Np = 0)
         val poolSim = ContestSimulation(contestPool)
         val poolCvrs = poolSim.makeCvrs(pool.id)
 
@@ -154,7 +154,7 @@ fun OneAuditContest.makeTestMvrs(sampleLimit: Int): List<Cvr> {
 
     // add the pooled cvrs
     this.pools.values.forEach { pool: BallotPool ->
-        val contestPool = Contest(this.info, pool.votes, Nc = pool.ncards, Np = 0)
+        val contestPool = Contest(this.info, pool.votes, iNc = pool.ncards, Np = 0)
         cvrs.addAll(makeScaledCvrs(contestPool, scale, pool.id))
     }
 
@@ -169,7 +169,7 @@ fun makeScaledCvrs(org: Contest, scale: Double, poolId: Int?): List<Cvr> {
     val scaledVotes = org.votes.map { (id, nvotes) -> id to roundToInt(scale * nvotes) }.toMap()
 
     // add the regular cvrs
-    val contestCvrs = Contest(org.info, scaledVotes, Nc = sNc, Np = sNp)
+    val contestCvrs = Contest(org.info, scaledVotes, iNc = sNc, Np = sNp)
     val sim = ContestSimulation(contestCvrs)
     return sim.makeCvrs(poolId)
 }

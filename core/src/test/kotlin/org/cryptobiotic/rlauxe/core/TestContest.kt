@@ -96,7 +96,7 @@ class TestContest {
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
             SocialChoiceFunction.PLURALITY
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=1)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=1)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -111,17 +111,17 @@ class TestContest {
         )
 
         val mess1 = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), Nc=222, Np=0)
+            Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), iNc=222, Np=0)
         }.message
         assertEquals("'3' not found in contestInfo candidateIds [0, 1, 2]", mess1)
 
         val mess = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Np = 2)
+            Contest(info, mapOf(0 to 100, 1 to 116), iNc = 211, Np = 2)
         }.message
         assertNotNull(mess)
         assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
 
-        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=1)
+        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=1)
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
@@ -143,7 +143,7 @@ class TestContest {
             SocialChoiceFunction.SUPERMAJORITY,
             minFraction = .55,
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 125), Nc=227, Np=2)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 125), iNc=227, Np=2)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -172,7 +172,7 @@ class TestContest {
             SocialChoiceFunction.SUPERMAJORITY,
             minFraction = .55,
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Np=2)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), iNc=227, Np=2)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -206,7 +206,7 @@ class TestContest {
             minFraction = .55,
         )
         val mess = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Np = 2)
+            Contest(info, mapOf(0 to 100, 1 to 116), iNc = 211, Np = 2)
         }.message
         assertNotNull(mess)
         assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
@@ -222,7 +222,7 @@ class TestContest {
             minFraction = .33,
             nwinners = 2
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Np=2)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), iNc=227, Np=2)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -255,7 +255,7 @@ class TestContest {
     @Test
     fun testContestUnderAudit() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=0)
 
         val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
@@ -293,7 +293,7 @@ class TestContest {
     @Test
     fun testContestUnderAuditIrvException() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.IRV)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Np = 0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc = 211, Np = 0)
 
         val mess1 = assertFailsWith<RuntimeException> {
             ContestUnderAudit(contest, isComparison = false)
@@ -304,7 +304,7 @@ class TestContest {
     @Test
     fun testContestUnderAuditExceptions() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=0)
 
         val contestUAc = ContestUnderAudit(contest, isComparison = false)
         val mess4 = assertFailsWith<RuntimeException> {

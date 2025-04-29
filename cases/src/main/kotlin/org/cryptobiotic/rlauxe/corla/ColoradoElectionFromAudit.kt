@@ -148,7 +148,7 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
 
 // each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
 private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): List<Cvr> {
-    val contestsByName = contests.associateBy { it.info.name }
+    val contestsByName = contests.associateBy { it.name }
 
     // we are making the cvrs out of these votes.
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()

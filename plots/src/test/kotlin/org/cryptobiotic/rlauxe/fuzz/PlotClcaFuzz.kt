@@ -41,7 +41,7 @@ class PlotClcaFuzz {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns}"
@@ -51,7 +51,7 @@ class PlotClcaFuzz {
 }
 
 fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "$name samples needed",
@@ -66,7 +66,7 @@ fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scal
 }
 
 fun showFailuresVsMargin(dirName: String, name:String, subtitle: String, ) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
     wrsPlot(

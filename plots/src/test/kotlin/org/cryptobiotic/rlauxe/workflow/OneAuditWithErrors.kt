@@ -8,10 +8,10 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class OneAuditWithErrors {
-    val name = "OneAuditWithErrors95"
+    val name = "OneAuditWithErrors02"
     val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
 
-    val nruns = 500 // number of times to run workflow
+    val nruns = 200 // number of times to run workflow
     val nsimEst = 10
     val N = 50000
     val cvrPercent = 0.95
@@ -19,7 +19,7 @@ class OneAuditWithErrors {
 
     @Test
     fun oaWithErrorsPlots() {
-        val fuzzPcts = listOf(0.0, .0001, .00033, .00066, .001, .003, .005, .0075, .01, .02, .03, .04, .05)
+        val fuzzPcts = listOf(0.0, .0001, .0003, .001, .003, .005, .0075, .01, .015, .02,)
 
         val stopwatch = Stopwatch()
 
@@ -73,7 +73,7 @@ class OneAuditWithErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=40)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -91,7 +91,7 @@ class OneAuditWithErrors {
 }
 
 fun showSampleSizesVsFuzzPct(name: String, dirName: String, subtitle: String, yscale: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
     wrsPlot(
@@ -107,7 +107,7 @@ fun showSampleSizesVsFuzzPct(name: String, dirName: String, subtitle: String, ys
 }
 
 fun showFailuresVsFuzzPct(name: String, dirName: String, subtitle: String) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
     wrsPlot(

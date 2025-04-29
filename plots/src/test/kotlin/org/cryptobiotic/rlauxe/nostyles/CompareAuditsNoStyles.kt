@@ -72,7 +72,7 @@ class CompareAuditsNoStyles {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -87,7 +87,7 @@ class CompareAuditsNoStyles {
 }
 
 fun showNmvrsByAuditType(name: String, dirName: String, subtitle: String, scaleType: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
     wrsPlot(

@@ -52,7 +52,7 @@ class AuditsWithUndervotes {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/AuditsWithUndervotes.cvs")
+        val writer = WorkflowResultsIO("$dirName/AuditsWithUndervotes.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -68,7 +68,7 @@ class AuditsWithUndervotes {
 
     fun showSampleSizesVsUndervotePct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
                                  catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name samples needed",

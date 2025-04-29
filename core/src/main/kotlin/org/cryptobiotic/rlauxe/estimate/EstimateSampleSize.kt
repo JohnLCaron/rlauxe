@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
+import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrs
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.df
@@ -106,7 +106,7 @@ fun makeEstimationTasks(
         }
         AuditType.ONEAUDIT -> {
             val contestOA = (contestRound.contestUA as OAContestUnderAudit).contestOA
-            contestOA.makeTestCvrs(auditConfig.sampleLimit)
+            contestOA.makeTestMvrs(auditConfig.sampleLimit)
         }
     }
 

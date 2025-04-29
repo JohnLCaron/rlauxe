@@ -57,7 +57,7 @@ class AuditsNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -72,7 +72,7 @@ class AuditsNoErrors {
     }
 
     fun showSampleSizesVsMargin(name: String, dirName: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -112,7 +112,7 @@ class AuditsNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Linear)
@@ -138,7 +138,7 @@ class AuditsNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dir/${name}.cvs")
+        val writer = WorkflowResultsIO("$dir/${name}.csv")
         writer.writeResults(results)
 
         wrsPlotMultipleFields(
@@ -215,7 +215,7 @@ class AuditsNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         val subtitle = "Nc=${N} nruns=${nruns} cvrPercent=$cvrPercent"
@@ -226,7 +226,7 @@ class AuditsNoErrors {
     }
 
     fun showSampleSizesVsMarginByStrategy(name: String, dirName: String, subtitle: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -234,7 +234,7 @@ class AuditsNoErrors {
     }
 
     fun showFailuresVsMarginByStrategy(name: String, dirName: String, subtitle: String) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -245,7 +245,7 @@ class AuditsNoErrors {
 
 
 fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "$name samples needed",

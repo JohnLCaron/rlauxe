@@ -117,7 +117,7 @@ class CompareCorlaPlots {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -134,7 +134,7 @@ class CompareCorlaPlots {
 }
 
 fun showSampleSizesVsTheta(name:String, dirName: String, subtitle: String, scaleType: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "Corla vs Rlauxe",
@@ -150,7 +150,7 @@ fun showSampleSizesVsTheta(name:String, dirName: String, subtitle: String, scale
 }
 
 fun showFailuresVsMargin(name:String, dirName: String, subtitle: String) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
         titleS = "$name failurePct",

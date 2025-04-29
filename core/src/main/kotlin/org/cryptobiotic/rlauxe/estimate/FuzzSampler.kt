@@ -162,16 +162,18 @@ class OneAuditFuzzSampler(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO cant be used on approval?
 
-fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
+val fac = 10000.0
+fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
-    val isIRV = contests.associate { it.info.name to (it.choiceFunction == SocialChoiceFunction.IRV) }.toMap()
+    val limit = fac / fuzzPct
 
+    val isIRV = contests.associate { it.info.name to (it.choiceFunction == SocialChoiceFunction.IRV) }.toMap()
     var count = 0
     val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info }, cvrs)
     cvrbs.filter { !it.phantom && (filter == null || filter(it)) }.forEach { cvrb: CvrBuilder ->
-        val r = Random.nextDouble(1.0)
+        val r = Random.nextDouble(limit)
         cvrb.contests.forEach { (_, cvb) ->
-            if (r < fuzzPct) {
+            if (r < fac) {
                 val ccontest: CvrContest = cvb.contest
                 if (isIRV[ccontest.name]!!) {
                     switchCandidateRankings(cvb, ccontest.candidateIds)
@@ -184,10 +186,15 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Doub
                         cvb.votes.add(ncandId)
                     }
                 }
+                count++
             }
         }
-        count++
     }
+
+    val expect = cvrs.size * fuzzPct
+    val got = (count / cvrs.size.toDouble())
+    if (welford != null) { welford.update(fuzzPct - got) }
+    // println("   limit=$limit fuzzPct=$fuzzPct expect=$expect count: $count")
     return cvrbs.map { it.build() }
 }
 

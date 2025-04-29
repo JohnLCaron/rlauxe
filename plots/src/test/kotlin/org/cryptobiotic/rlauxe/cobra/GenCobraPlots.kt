@@ -44,7 +44,7 @@ class GenCobraPlots {
         // run tasks concurrently and average the results
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -61,7 +61,7 @@ class GenCobraPlots {
     }
 
     fun samplesVsTheta(name:String, dirName: String, writeto : String, subtitle: String, scaleType: ScaleType, filter: (WorkflowResult) -> Boolean) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults().filter(filter)
         if (data.isEmpty()) return
         wrsPlot(
@@ -78,7 +78,7 @@ class GenCobraPlots {
     }
 
     fun failureVsTheta(name:String, dirName: String, writeto : String, subtitle: String, scaleType: ScaleType, filter: (WorkflowResult) -> Boolean) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults().filter(filter)
         if (data.isEmpty()) return
         wrsPlot(

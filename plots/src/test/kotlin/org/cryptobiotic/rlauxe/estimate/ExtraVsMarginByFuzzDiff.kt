@@ -45,7 +45,7 @@ class ExtraVsMarginByFuzzDiff {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -63,7 +63,7 @@ class ExtraVsMarginByFuzzDiff {
 
     fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
                                  catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name extra samples",
@@ -78,7 +78,7 @@ class ExtraVsMarginByFuzzDiff {
     }
 
     fun showEstSizesVsMargin(subtitle: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -86,7 +86,7 @@ class ExtraVsMarginByFuzzDiff {
     }
 
     fun showFailuresVsMargin(subtitle: String, ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -94,7 +94,7 @@ class ExtraVsMarginByFuzzDiff {
     }
 
     fun showNroundsVsMargin(subtitle: String, ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)

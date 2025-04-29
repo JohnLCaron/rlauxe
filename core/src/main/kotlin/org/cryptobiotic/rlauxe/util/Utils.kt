@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.Cvr
 import java.security.SecureRandom
 import kotlin.enums.EnumEntries
 import kotlin.math.abs

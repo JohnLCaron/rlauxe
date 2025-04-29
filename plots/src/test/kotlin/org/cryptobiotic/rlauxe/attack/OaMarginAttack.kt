@@ -66,7 +66,7 @@ class OaMarginAttack {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -82,7 +82,7 @@ class OaMarginAttack {
     }
 
     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name samples needed",
@@ -97,7 +97,7 @@ class OaMarginAttack {
     }
 
     fun showFalsePositivesVsMargin(dirName: String, name:String, subtitle: String) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val data = io.readResults()
         wrsPlot(
             titleS = "$name successPct",

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
-import org.cryptobiotic.rlauxe.oneaudit.makeTestCvrs
+import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrs
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -28,7 +28,7 @@ class TestPersistentOneAudit {
         val contestOA = makeContestOA(N+100, N-100, cvrPercent = .95, undervotePercent=.0, phantomPercent = .0)
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
-        val testCvrs = contestOA.makeTestCvrs() // one for each ballot, with and without CVRS
+        val testCvrs = contestOA.makeTestMvrs() // one for each ballot, with and without CVRS
         val testMvrs = testCvrs
 
         // the order of the cvrs cannot be changed once the audit is initialized.

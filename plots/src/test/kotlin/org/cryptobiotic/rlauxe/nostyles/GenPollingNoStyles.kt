@@ -44,7 +44,7 @@ class GenPollingNoStyles {
         println(stopwatch.took())
 
 
-        val writer = WorkflowResultsIO("$dirName/${name}.cvs")
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
         regenPlots()
@@ -61,7 +61,7 @@ class GenPollingNoStyles {
 
     /*
     fun showNmvrsVsMargin(name: String, dirName: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -69,7 +69,7 @@ class GenPollingNoStyles {
     }
 
     fun showFailuresVsMargin(name: String, dirName: String, ) {
-        val io = WorkflowResultsIO("$dirName/${name}.cvs")
+        val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
         val plotter = WorkflowResultsPlotter(dirName, name)
@@ -83,7 +83,7 @@ class GenPollingNoStyles {
 }
 
 fun showNmvrsByNb(name: String, dirName: String, subtitle: String, scaleType: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
     wrsPlot(
@@ -99,7 +99,7 @@ fun showNmvrsByNb(name: String, dirName: String, subtitle: String, scaleType: Sc
 }
 
 fun showNmvrPctByNb(name: String, dirName: String, subtitle: String) {
-    val io = WorkflowResultsIO("$dirName/${name}.cvs")
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
     wrsPlot(

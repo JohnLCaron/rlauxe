@@ -1,5 +1,5 @@
 # OneAudit version 3 
-_last changed 04/28/2025_
+_last changed 04/29/2025_
 
 ## Strategies
 
@@ -54,4 +54,4 @@ When there are errors (parameterized by fuzzPct, the percent of ballots randomly
 * I dont think you can use IRV with OneAudit (?)
 * Seems like you might have some contests that need OneAudit and some not. So you want to make that contest specific. Or
   just run separate audits for each type? Same with no styles ??
-* TODO: try affine transformation as in ONEAUDIT eq 10.
+* TODO: test effects of affine transformation as in ONEAudit eq 10, for BLCA.

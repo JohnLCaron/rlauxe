@@ -24,25 +24,25 @@ class TestBoulderElectionFromCvrs {
         assertEquals(Pair("Number of positions=", 1), parseIrvContestName("Number of positions=    "))
     }
 
-    // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding.
+    // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
     // hand corrected "Claudia De la Cruz / Karina García"
     @Test
     fun createBoulder24() {
-        createElectionFromDominionCvrs(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "/home/stormy/temp/cases/boulder24",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/temp/cases/boulder24",
         )
     }
 
     @Test
     fun createBoulder24recount() {
-        createElectionFromDominionCvrs(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
-            "/home/stormy/temp/cases/boulder24recount",
             "src/test/data/Boulder2024/2024G-Boulder-County-Amended-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/temp/cases/boulder24recount",
             minRecountMargin = 0.0,
-            )
+        )
     }
 
     @Test
@@ -53,7 +53,7 @@ class TestBoulderElectionFromCvrs {
             "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
         val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
 
-        createElectionFromDominionCvrs(
+        createBoulderElectionWithSov(
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
             "/home/stormy/temp/cases/boulder23",
             combined,
@@ -64,11 +64,20 @@ class TestBoulderElectionFromCvrs {
     fun createBoulder23recount() {
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-Recount.csv", "Boulder2023")
-        createElectionFromDominionCvrs(
+        createBoulderElectionWithSov(
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
             "/home/stormy/temp/cases/boulder23recount",
             sovo,
             minRecountMargin = 0.0,
-            )
+        )
+    }
+
+    @Test
+    fun createBoulder24oa() {
+        createBoulderElectionOneAudit(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/temp/cases/boulder24oa",
+        )
     }
 }

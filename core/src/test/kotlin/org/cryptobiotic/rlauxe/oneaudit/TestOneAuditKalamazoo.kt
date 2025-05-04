@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,7 +33,7 @@ class TestOneAuditKalamazoo {
         val schuetteTotal = contestOA.votes[info.candidateNames["Schuette"]!!]!!
         assertEquals(20699, whitmerTotal)
         assertEquals(5569, schuetteTotal)
-        val assorterMeanAll = (whitmerTotal - schuetteTotal)/ contestOA.Nc.toDouble()
+        val assorterMeanAll = (whitmerTotal - schuetteTotal) / contestOA.Nc.toDouble()
         assertEquals(0.5468806477264513, assorterMeanAll, doublePrecision) // margin not mean
 
         // assorter_mean_poll=0.5682996602896477,
@@ -118,9 +120,49 @@ class TestOneAuditKalamazoo {
         // println(" calcAssorterMargin for min = $minAssorterMargin")
         // assertEquals(0.5468806477264513, minAssorterMargin, doublePrecision)
     }
+
+    @Test
+    fun testReportedMargins() {
+        val oaContest = makeContestKalamazoo()
+        val info = oaContest.info
+        println("oaContest = $oaContest  ncandidates = ${oaContest.ncandidates}")
+
+        val contestUA: OAContestUnderAudit = oaContest.makeContestUnderAudit()
+        val minAllAssertion = contestUA.minAssertion()
+        assertNotNull(minAllAssertion)
+        val minAllAssorter = minAllAssertion!!.assorter
+        println(minAllAssorter)
+        println()
+        assertEquals(0.5468806477264513, minAllAssorter.reportedMargin(), doublePrecision)
+
+        val mvrs = oaContest.makeTestMvrs()
+        val assortAvg = margin2mean(minAllAssorter.calcAssorterMargin(oaContest.id, mvrs))
+
+        val mvrVotes = tabulateVotesWithUndervotes(mvrs.iterator(), 0, contestUA.ncandidates)
+        println("mvrVotes = ${mvrVotes} assortAvg = $assortAvg reportedAvg = ${minAllAssorter.reportedMean()}")
+
+        val cvrs = mvrs.filter{ it.poolId == null}
+        val cvrAssortAvg = margin2mean(minAllAssorter.calcAssorterMargin(oaContest.id, cvrs))
+        val cvrReportedAvg = margin2mean(minAllAssorter.calcReportedMargin(oaContest.cvrVotes, oaContest.cvrNc))
+        println("cvrVotes = ${oaContest.cvrVotesAndUndervotes()} cvrAssortAvg = $cvrAssortAvg reportedAvg = $cvrReportedAvg")
+        assertEquals(cvrReportedAvg, cvrAssortAvg, doublePrecision)
+
+        oaContest.pools.forEach { (id, pool) ->
+            val poolCvrs = mvrs.filter{ it.poolId == id}
+            val poolAssortAvg = margin2mean(minAllAssorter.calcAssorterMargin(oaContest.id, poolCvrs))
+            val poolReportedAvg = margin2mean(minAllAssorter.calcReportedMargin(pool.votes, pool.ncards))
+            println(
+                "pool-${id} votes = ${pool.votesAndUndervotes(info.voteForN, contestUA.ncandidates)} " +
+                    "poolAssortAvg = $poolAssortAvg reportedAvg = $poolReportedAvg"
+            )
+            assertEquals(poolReportedAvg, poolAssortAvg, doublePrecision)
+        }
+
+        assertEquals(minAllAssorter.reportedMean(), assortAvg, doublePrecision)
+    }
 }
 
-// from oa_polling.ipynb
+    // from oa_polling.ipynb
 fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
 
     // the candidates
@@ -174,5 +216,5 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
     //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     //    cvrNc: Int,
     //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
-    return OneAuditContest.make(info, votesCvr, stratumSizes[0], pools.associateBy { it.id }, Np = 0)
+    return OneAuditContest.make(info, votesCvr, stratumSizes[0], pools, Np = 0)
 }

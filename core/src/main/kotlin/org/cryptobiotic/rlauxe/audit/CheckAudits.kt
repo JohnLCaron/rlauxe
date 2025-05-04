@@ -78,12 +78,12 @@ fun checkContestsWithCards(contestsUA: List<ContestUnderAudit>, cards: Iterator<
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         } else {
             if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
-                println("*** contest ${contestUA.contest} cvrVotes = $contestTab")
+                checkEquivilentVotes(contestVotes, contestTab.votes)
+                println("*** contest ${contestUA.contest} cvrVotes = $contestTab marking as ContestMisformed")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             } else if (show) {
                 println("    contest ${contestUA.contest} cvrVotes = $contestTab")
             }
-            require(checkEquivilentVotes(contestUA.contest.votes, contestVotes))
         }
     }
 }

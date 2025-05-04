@@ -34,7 +34,8 @@ data class Cvr(
     }
 
     override fun toString() = buildString {
-        append("$id ($phantom)")
+        append("$id ($phantom) ")
+        if (poolId != null) append(" poolId=$poolId: ")
         votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 

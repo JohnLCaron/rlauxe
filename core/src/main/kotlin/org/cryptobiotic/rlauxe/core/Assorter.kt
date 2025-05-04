@@ -22,14 +22,20 @@ interface AssorterIF {
     //    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
     //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
 
-    // TODO: This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms. ??
-    // TODO: assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ??
-
-    // TODO candidate for removal
-    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
-        val mean = cvrs.filter{ it.hasContest(contestId) }
-                        .map { assort(it, usePhantoms = usePhantoms) }.average()
+    // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
+    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
+        val mean = cvrs.filter{ it.hasContest(contestId) }.map {
+            val av = assort(it, usePhantoms = usePhantoms)
+            if (show) println("    cvr ${it} assortValue=$av")
+            av
+        }.average()
         return mean2margin(mean)
+    }
+
+    fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int): Double {
+        val winnerVotes = useVotes[winner()] ?: 0
+        val loserVotes = useVotes[loser()] ?: 0
+        return (winnerVotes - loserVotes) / Nc.toDouble()
     }
 
     // from SuperSimple:
@@ -53,7 +59,7 @@ interface AssorterIF {
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
-data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterIF {
+open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterIF {
 
     // If a ballot cannot be found (because the manifest is wrong—either because it lists a ballot that is not there, or
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
@@ -72,6 +78,29 @@ data class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin
+
+    override fun toString(): String = desc()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PluralityAssorter
+
+        if (winner != other.winner) return false
+        if (loser != other.loser) return false
+        if (reportedMargin != other.reportedMargin) return false
+        if (info != other.info) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = winner
+        result = 31 * result + loser
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + info.hashCode()
+        return result
+    }
 
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>? = null): PluralityAssorter {

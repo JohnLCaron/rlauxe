@@ -58,24 +58,25 @@ class ContestSimulation(val contest: Contest) {
     // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     // cvrs only contain this contest
     // ncvrs = voteCount + underCount + phantomCount = Nc
-    fun makeCvrs(poolId: Int?=null): List<Cvr> {
+    fun makeCvrs(prefix: String = "card", poolId: Int?=null): List<Cvr> {
         resetTracker()
+        var count = 0
         val cvrbs = CvrBuilders().addContests(listOf(contest.info))
         val result = mutableListOf<Cvr>()
         repeat(this.voteCount) {
-            val cvrb = cvrbs.addCvr()
+            val cvrb = cvrbs.addCvr("$prefix-${count++}")
             cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
             result.add(cvrb.build(poolId))
         }
         // add empty undervotes
         repeat(underCount) {
-            val cvrb = cvrbs.addCvr()
+            val cvrb = cvrbs.addCvr("$prefix-${count++}")
             cvrb.addContest(info.name).done()
             result.add(cvrb.build(poolId))
         }
         // add phantoms
         repeat(phantomCount) {
-            val cvrb = cvrbs.addPhantomCvr()
+            val cvrb = cvrbs.addPhantomCvr("$prefix-${count++}")
             cvrb.addContest(info.name).done()
             result.add(cvrb.build(poolId))
         }

@@ -8,9 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
@@ -19,6 +17,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+// this reads CvrExport_xxxxx.json files exported by Dominion.
+// we are getting these files from san francisco.
+// We derive CVRs from them.
 
 @Serializable
 data class DominionCvrExportJson(

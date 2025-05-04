@@ -2,7 +2,6 @@
 
 used in OneAudit example:  https://github.com/pbstark/SHANGRLA/blob/main/examples/ONEAudit-demo.ipynb
 
-
 https://sfelections.org/results/20241105w/detail.html
 https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip (296 Mb)
 CVR_Export_20241202143051.csv.zip (17 Mb)

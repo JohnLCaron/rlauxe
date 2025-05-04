@@ -32,7 +32,7 @@ fun OAContestJson.import(info: ContestInfo): OneAuditContest {
         info,
         this.cvrVotes,
         this.cvrNc,
-        pools.associateBy { it.id },
+        pools,
         this.Np ?: 0,
     )
 }
@@ -69,25 +69,23 @@ fun BallotPoolJson.import() = BallotPool(
 
 @Serializable
 data class OAContestUnderAuditJson(
-    // val info: ContestInfoJson,
     val contestOA: OAContestJson,
     val contestUA: ContestUnderAuditJson,
 )
 
 fun OAContestUnderAudit.publishOAJson() = OAContestUnderAuditJson(
-        // this.contestOA.info.publishJson(),
         this.contestOA.publishOAJson(),
         (this as ContestUnderAudit).publishJson(),
     )
 
 fun OAContestUnderAuditJson.import(): OAContestUnderAudit {
-    // val contestInfo = this.info.import()
     val contestUA = this.contestUA.import()
     val contestOA = this.contestOA.import(contestUA.contest.info())
 
     val result = OAContestUnderAudit(contestOA, contestUA.hasStyle)
-    // result.pollingAssertions = contestUA.pollingAssertions
+    result.pollingAssertions = contestUA.pollingAssertions
     result.clcaAssertions = contestUA.clcaAssertions
+    result.preAuditStatus = contestUA.preAuditStatus
     return result
 }
 

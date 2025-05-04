@@ -155,7 +155,7 @@ open class Contest(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=$Np votes=${votes}")
+        append("$name ($id) Nc=$Nc Np=$Np votesAndUndervotes=${votesAndUndervotes()}")
     }
 
     fun calcMargin(winner: Int, loser: Int): Double {
@@ -173,9 +173,8 @@ open class Contest(
         return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, undervotes)).toMap()
     }
 
-
     override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votes=$votes, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
+        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votesAndUndervotes=${votesAndUndervotes()}, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -240,7 +239,7 @@ open class ContestUnderAudit(
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init
-        if (contest !is RaireContest  ) {
+        if (contest !is RaireContest) {
             pollingAssertions = makePollingAssertions()
         }
     }
@@ -307,7 +306,7 @@ open class ContestUnderAudit(
     // no cvrs, use assertion.assorter.reportedMargin()
     // TODO  in some ways this is more robust than averaging cvrs, since cvrs have to be complete and accurate.
     //   OTOH, need complete and accurate CardLocation Manifest anyway!!
-    open fun makeClcaAssertionsFromReportedMargin(): ContestUnderAudit {
+    fun makeClcaAssertionsFromReportedMargin(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
         this.clcaAssertions = pollingAssertions.map { assertion ->
@@ -361,8 +360,8 @@ open class ContestUnderAudit(
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
-        val votes = if (contest is Contest) contest.votes else emptyMap()
-        appendLine("${contest.javaClass.simpleName} '$name' ($id) votes=${votes}")
+        val votes = if (contest is Contest) contest.votesAndUndervotes() else emptyMap()
+        appendLine("${contest.javaClass.simpleName} '$name' ($id) votesAndUndervotes=${votes}")
         appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info().nwinners}, winners=${contest.winners()}")
         append(showCandidates())
@@ -389,6 +388,7 @@ open class ContestUnderAudit(
         if (isComparison != other.isComparison) return false
         if (hasStyle != other.hasStyle) return false
         if (contest != other.contest) return false
+        if (preAuditStatus != other.preAuditStatus) return false
         if (pollingAssertions != other.pollingAssertions) return false
         if (clcaAssertions != other.clcaAssertions) return false
 
@@ -399,6 +399,7 @@ open class ContestUnderAudit(
         var result = isComparison.hashCode()
         result = 31 * result + hasStyle.hashCode()
         result = 31 * result + contest.hashCode()
+        result = 31 * result + preAuditStatus.hashCode()
         result = 31 * result + pollingAssertions.hashCode()
         result = 31 * result + clcaAssertions.hashCode()
         return result

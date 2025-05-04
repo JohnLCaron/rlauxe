@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import kotlin.test.Test
@@ -62,6 +63,7 @@ class TestOneAuditJson {
     fun makeTestContestOA(): OAContestUnderAudit {
         val contest = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01, phantomPercent=.01)
         val contestOA = contest.makeContestUnderAudit()
+        contestOA.preAuditStatus = TestH0Status.ContestMisformed
         val minAllAsserter = contestOA.minClcaAssertion()
         assertNotNull(minAllAsserter)
 

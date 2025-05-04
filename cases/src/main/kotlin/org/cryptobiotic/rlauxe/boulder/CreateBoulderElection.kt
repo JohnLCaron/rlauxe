@@ -1,15 +1,16 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
 import org.cryptobiotic.rlauxe.dominion.RedactedVotes
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExport
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
+import org.cryptobiotic.rlauxe.dominion.readDominionCvrExport
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Prng
@@ -30,7 +31,7 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
                 val candidateMap1 = mutableMapOf<String, Int>()
                 var candIdx = 0
                 for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                    if (columns[col].choice != "Write-in") {
+                    if (columns[col].choice != "Write-in") { // remove write-ins
                         candidateMap1[columns[col].choice] = candIdx
                     }
                     candIdx++
@@ -55,59 +56,8 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         }
     }
 
-    data class ContestCount(val contestId: Int, val Nc: Int, val candidateCounts: Map<Int, Int>)
-
-    fun countVotesOld() : List<ContestCount> { // contestId -> candidateId -> nvotes
-        val cvrCount = mutableMapOf<Int, Int>() // use the count for Nc until we have something better
-        val contestCount = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.cvrs.forEach { cvr ->
-            cvr.contestVotes.forEach { contestVote ->
-                cvrCount[contestVote.contestId] = cvrCount.getOrDefault(contestVote.contestId, 0) + 1
-                val candidateCount = contestCount.getOrPut(contestVote.contestId) { mutableMapOf() }
-                contestVote.candVotes.forEach { candidateCount[it] = candidateCount.getOrDefault(it, 0) + 1 }
-            }
-        }
-        export.redacted.forEach { redacted ->
-            redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
-                val candidateCount = contestCount.getOrPut(contestId) { mutableMapOf() }
-                contestVote.entries.forEach { (candidateId, nvotes) ->
-                    candidateCount[candidateId] = candidateCount.getOrDefault(candidateId, 0) + nvotes
-                }
-            }
-        }
-        return cvrCount.map { (contestId, cvrCount) ->
-            ContestCount(contestId, cvrCount, contestCount[contestId]!!)
-        }.sortedBy { it.contestId }
-    }
-
-    // make contest votes from the export.cvrs and export.redacted
-    fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulation>()
-
-        export.cvrs.forEach { cvr ->
-            cvr.contestVotes.forEach { contestVote ->
-                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation() }
-                tab.ncards++
-                tab.addVotes(contestVote.candVotes.toIntArray())
-            }
-        }
-        export.redacted.forEach { redacted ->
-            redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
-                val tab = votes.getOrPut(contestId) { ContestTabulation() }
-                // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
-                //   would be safer to make the cvrs first, then just use them to make the Contest
-                //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
-                //   one could also try to use OneAudit for the redacted cvrs.
-                //   but we still need to make an accuracte CardLocationManifest
-                tab.ncards += contestVote.map { it.value }.sum()
-                contestVote.forEach { cand, nvotes -> tab.addVote(cand, nvotes) }
-            }
-        }
-        return votes
-    }
-
     fun makeContests(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
-        val infos = makeContestInfo()
+        val infos = makeContestInfo().sortedBy{ it.id }
         if (!quiet) println("ncontests with info = ${infos.size}")
 
         val countVotes = countVotes()
@@ -121,7 +71,7 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
                 println("*** cant find '${info.name}' in BoulderStatementOfVotes")
             } else {
                 val diff = sovContest.totalBallots - contestCount.ncards
-                println(" makeContest ${info.id} cvrCount = ${contestCount.ncards} sovContest.totalBallots = ${sovContest.totalBallots} diff=$diff" )
+                println(" makeContest ${info.id} cvrCount = ${contestCount.ncards} sovContest.totalBallots = ${sovContest.totalBallots} undercount=$diff" )
                 // TODO undervotes, phantoms to deal with diff?
             }
             // remove Write-Ins
@@ -149,6 +99,32 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
             }
         }
         return Pair(regContests, irvContests)
+    }
+
+    // make contest votes from the export.cvrs and export.redacted
+    fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
+        val votes = mutableMapOf<Int, ContestTabulation>()
+
+        export.cvrs.forEach { cvr ->
+            cvr.contestVotes.forEach { contestVote ->
+                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation() }
+                tab.ncards++
+                tab.addVotes(contestVote.candVotes.toIntArray())
+            }
+        }
+        export.redacted.forEach { redacted ->
+            redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
+                val tab = votes.getOrPut(contestId) { ContestTabulation() }
+                // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
+                //   would be safer to make the cvrs first, then just use them to make the Contest
+                //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
+                //   one could also try to use OneAudit for the redacted cvrs.
+                //   but we still need to make an accurate CardLocationManifest
+                tab.ncards += contestVote.map { it.value }.sum()
+                contestVote.forEach { cand, nvotes -> tab.addVote(cand, nvotes) }
+            }
+        }
+        return votes
     }
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
@@ -268,11 +244,13 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     return Pair(namet, ncand)
 }
 
-// use sov to define what contests are in the audit (?)
-fun createElectionFromDominionCvrs(
+////////////////////////////////////////////////////////////////////
+
+// read in the sov file
+fun createBoulderElection(
     cvrExportFile: String,
-    auditDir: String,
     sovoFile: String,
+    auditDir: String,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .01,
     auditConfigIn: AuditConfig? = null) {
@@ -280,11 +258,11 @@ fun createElectionFromDominionCvrs(
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
 
-    createElectionFromDominionCvrs(cvrExportFile, auditDir, sovo, riskLimit, minRecountMargin, auditConfigIn)
+    createBoulderElectionWithSov(cvrExportFile, auditDir, sovo, riskLimit, minRecountMargin, auditConfigIn)
 }
 
-// use sov to define what contests are in the audit
-fun createElectionFromDominionCvrs(
+// the sov is already read in
+fun createBoulderElectionWithSov(
     cvrExportFile: String,
     auditDir: String,
     sovo: BoulderStatementOfVotes,

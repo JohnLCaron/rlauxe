@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import kotlin.math.max
 import kotlin.math.min
 
 
@@ -24,13 +24,11 @@ class OneAuditContest (
 ) : Contest(info, voteInput, Nc, Np) {
 
     val minMargin: Double
-    val poolNc: Int
+    val poolNc = pools.values.sumOf { it.ncards }
 
     init {
         // TODO add SUPERMAJORITY. What about IRV ??
         require(choiceFunction == SocialChoiceFunction.PLURALITY) { "OneAuditContest requires PLURALITY"}
-
-        poolNc = pools.values.sumOf { it.ncards }
 
         // how many undervotes are there ?
         val poolVotes = pools.values.sumOf { it.votes.values.sum() }
@@ -43,8 +41,13 @@ class OneAuditContest (
         val undervotes2 = poolUndervotes + cvrUndervotes
         require (undervotes == undervotes2)
 
-        val sortedVotes = votes.toList().sortedBy{ it.second }.reversed()
-        minMargin = (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
+        // not sure about where undervotes and phantoms live
+        require(Nc == cvrNc + poolNc + Np)
+
+        minMargin = if (votes.size < 2) 0.0 else {
+            val sortedVotes = votes.toList().sortedBy { it.second }.reversed()
+            (sortedVotes[0].second - sortedVotes[1].second) / Nc.toDouble()
+        }
     }
 
     fun makeContestUnderAudit() : OAContestUnderAudit {
@@ -68,9 +71,34 @@ class OneAuditContest (
         return (winnerVotes - loserVotes) / cvrNc.toDouble()
     }
 
+    fun cvrVotesAndUndervotes(): Map<Int, Int> {
+        val cvrVotesTotal = cvrVotes.values.sumOf { it }
+        val cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
+        return (cvrVotes.map { Pair(it.key, it.value)} + Pair(this.ncandidates, cvrUndervotes)).toMap()
+    }
+
+    fun poolVotesAndUnderVotes() : Map<Int, Int> { // contestId -> candidateId -> nvotes
+        val poolVotes = mutableMapOf<Int, Int>()
+
+        // TODO general Map merge
+        pools.values.forEach { pool ->
+            pool.votes.entries.forEach { (cand, vote) ->
+                val candAccum = poolVotes.getOrPut(cand) { 0 }
+                poolVotes[cand] = candAccum + vote
+            }
+        }
+
+        val poolVotesTotal = poolVotes.values.sumOf { it }
+        val poolUndervotes = poolNc * info.voteForN - poolVotesTotal
+
+        val result =  (poolVotes.map { Pair(it.key, it.value) } + Pair(this.ncandidates, poolUndervotes)).toMap()
+        return result
+    }
+
     override fun toString() = buildString {
-        appendLine("$name ($id) Nc=$Nc Np=$Np votes=${votes} minMargin=${df(minMargin)}")
-        appendLine("  cvrNc=$cvrNc npools= ${pools.size} poolNc=$poolNc pctInPools=${df(poolNc / Nc.toDouble())}")
+        appendLine("$name ($id) Nc=$Nc Np=$Np votesAndUnderVotes=${votesAndUndervotes()} minMargin=${df(minMargin)}")
+        appendLine("  cvrNc=$cvrNc cvrVotesAndUndervotes()=${cvrVotesAndUndervotes()}")
+        appendLine("  poolNc=$poolNc poolVotesAndUnderVotes= ${poolVotesAndUnderVotes()} npools= ${pools.size} pctInPools=${df(poolNc / Nc.toDouble())}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -103,21 +131,21 @@ class OneAuditContest (
         fun make(info: ContestInfo,
                           cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
                           cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
-                          pools: Map<Int, BallotPool>, // pool id -> pool
+                          pools: List<BallotPool>,   // pools for this contest
                           Np: Int): OneAuditContest {
 
-            val poolNc = pools.values.sumOf { it.ncards }
+            val poolNc = pools.sumOf { it.ncards }
             val Nc = poolNc + cvrNc + Np
 
             //// construct total votes
             val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
-            cvrVotes.forEach { cand, votes ->
+            cvrVotes.forEach { (cand, votes) ->
                 val tvote = voteBuilder[cand] ?: 0
                 voteBuilder[cand] = tvote + votes
             }
-            pools.values.forEach { pool ->
+            pools.forEach { pool ->
                 require(pool.contest == info.id)
-                pool.votes.forEach { cand, votes ->
+                pool.votes.forEach { (cand, votes) ->
                     val tvote = voteBuilder[cand] ?: 0
                     voteBuilder[cand] = tvote + votes
                 }
@@ -130,7 +158,7 @@ class OneAuditContest (
             }
             val voteInput = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
 
-            return OneAuditContest(info, voteInput, Nc, Np, cvrVotes, cvrNc, pools)
+            return OneAuditContest(info, voteInput, Nc, Np, cvrVotes, cvrNc, pools.associateBy { it.id })
         }
     }
 }
@@ -203,25 +231,27 @@ class OneAuditClcaAssorter(
     assorter: AssorterIF,   // A(mvr)
     assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value
 ) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs) {
-    val doAffineTransform = (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
-    val affineMin: Double
-    val affineScale: Double
+    private val doAffineTransform = (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
+    private val affineMin: Double
+    private val affineIScale: Double
+
+    // we need this to test the assorter average calculation
+    val oaAssorter = OaPluralityAssorter.makeFromContestVotes(contestOA, assorter.winner(), assorter.loser())
 
     init {
         // TODO test effect of this
         if (doAffineTransform) {
             var minAverage = Double.MAX_VALUE
-            var maxAverage = Double.MIN_VALUE
             contestOA.pools.values.forEach { pool ->
                 val poolAverage = margin2mean(pool.calcReportedMargin(assorter.winner(), assorter.loser()))
                 minAverage = min(minAverage, (1.0 - poolAverage) / (2 - cvrAssortMargin))
-                maxAverage = max(maxAverage, (2.0 - poolAverage) / (2 - cvrAssortMargin))
             }
             affineMin = minAverage
-            affineScale = 1.0 / (maxAverage - minAverage)
+            // make af(1/2) = 1/2; (1/2 - m)/scale = 1/2; scale = (1 - 2m)
+            affineIScale = 1.0 / (1.0 - 2 * minAverage)
         } else {
             affineMin = 0.0
-            affineScale = 1.0
+            affineIScale = 1.0
         }
     }
 
@@ -242,16 +272,10 @@ class OneAuditClcaAssorter(
     }
 
     // B(bi, ci)
-    private var countAssort = 0 // debugging
     override fun bassort(mvr: Cvr, cvr: Cvr): Double {
         if (cvr.poolId == null) {
             require(!doAffineTransform)
-            val result =  super.bassort(mvr, cvr)
-            if (countAssort < countAssortMax) {
-                println("bassort-cvr ${cvr.id} = $result")
-                countAssort++
-            }
-            return result
+            return super.bassort(mvr, cvr) // here we use the standard assorter
         }
         val pool = contestOA.pools[cvr.poolId]
             ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}")
@@ -274,13 +298,9 @@ class OneAuditClcaAssorter(
         if (result > upperBound()) {
             throw RuntimeException("OneAuditClcaAssorter result $result > upper ${upperBound()}")
         }
-        if (countAssort < countAssortMax) {
-            println("bassort-pool ${cvr.id} = $result")
-            countAssort++
-        }
 
         // eq 10 of OneAudit.
-        return if (doAffineTransform) return affineScale * (result - affineMin) else result
+        return if (doAffineTransform) affineIScale * (result - affineMin) else result
     }
 
     fun overstatementPoolError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
@@ -327,19 +347,15 @@ class OneAuditClcaAssorter(
         result = 31 * result + contestOA.hashCode()
         return result
     }
-
-    companion object {
-        var countAssortMax = 0
-    }
 }
 
-/* Experimental. need to make PluralityAssorter open, not data class
+// Experimental. need to make PluralityAssorter open, not data, class
 class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: Int, reportedMargin: Double):
     PluralityAssorter(contestOA.info, winner, loser, reportedMargin) {
 
-    override fun assort(cvr: Cvr, usePhantoms: Boolean): Double {
-        if (cvr.poolId == null) {
-            return super.assort(cvr, usePhantoms = usePhantoms)
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+        if (mvr.poolId == null) {
+            return super.assort(mvr, usePhantoms = usePhantoms)
         }
 
         // TODO not sure of this
@@ -349,11 +365,11 @@ class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: In
         //        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(contestOA.id))) 0.0
         //                         else this.assorter.assort(mvr, usePhantoms = false)
 
-        val pool = contestOA.pools[cvr.poolId]
-            ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}")
+        val pool = contestOA.pools[mvr.poolId]
+            ?: throw IllegalStateException("Dont have pool ${mvr.poolId} in contest ${contestOA.id}")
         val avgBatchAssortValue = margin2mean(pool.calcReportedMargin(winner, loser))
 
-        return if (cvr.phantom) .5 else avgBatchAssortValue
+        return if (mvr.phantom) .5 else avgBatchAssortValue
     }
 
     companion object {
@@ -364,7 +380,7 @@ class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: In
             return OaPluralityAssorter(contest, winner, loser, reportedMargin)
         }
     }
-} */
+}
 
 // ONEAUDIT p 9
 // This algorithm be made more efficient statistically and logistically in a variety

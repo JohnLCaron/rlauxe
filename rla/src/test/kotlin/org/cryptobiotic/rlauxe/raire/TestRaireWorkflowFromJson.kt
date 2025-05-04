@@ -20,7 +20,8 @@ class TestRaireWorkflowFromJson {
     fun testRaireWorkflow(auditConfig: AuditConfig) {
         val stopwatch = Stopwatch()
 
-         // This single contest cvr file is the only real cvr data in SHANGRLA
+        // This single contest cvr file is the only real cvr data in SHANGRLA
+        // not sure who generates it, is it raire specific?
         val cvrFile = "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs = readRaireBallotsCsv(cvrFile)
         val rcontests = raireCvrs.contests

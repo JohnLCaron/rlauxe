@@ -182,7 +182,8 @@ One only needs one assorter for each winner, not one for each winner/loser pair.
 Notes
 * "minimum fraction of the valid votes": so use V-c, not N_c as the denominator.
 * Someone has to enforce that each CVR has <= number of allowed votes.
-* TODO test when there are no winners.
+
+**TODO** test when there are no winners.
 
 ### Instant Runoff Voting (IRV)
 
@@ -294,7 +295,7 @@ In this case, we find the minimum assort value over all pools and create an
 affine transformation of the over-statement assorter values that subtracts the minimum assort value and
 rescales so that the null mean is 1/2. See ONEAudit eq (1), p 12.
 
-TODO: Test how much the affine transformation helps the sample size.
+**TODO**: Test how much the affine transformation helps the sample size.
 
 ### Auditing heterogenous voting systems with OneAudit
 
@@ -339,7 +340,7 @@ reported assorter mean = (winner - loser) / Npool <=  actual assorter mean =  (w
 reported assorter margin =  2 * (reported assorter mean) - 1 <= actual assorter margin = 2 * (actual assorter mean) - 1, since reported assorter mean <= actual assorter mean)
 ````
 
-TODO: understand why Philip's "add every contest that appears on any card in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in the contest appropriately" works.
+**TODO**: understand why Philip's "add every contest that appears on any card in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in the contest appropriately" works.
 
 
 ### OneAudit for Redacted data
@@ -350,12 +351,12 @@ CreateBoulderElectionOneAudit explores creating a OneAudit and making the redact
 
 Findings so far:
 
-1. Boulder County apparently does publish the number of ballots in each pool. 
-2. Also does it publish the number of ballots for each contest in each pool, ie, the undervotes. 
+1. Boulder County apparently does not publish the number of ballots in each pool. 
+2. Also does not publish the number of ballots for each contest in each pool, ie, the undervotes. 
 3. While we still can do a simulation with CreateBoulderElectionOneAudit, we probably cant do a real audit with existing published data.
-4. At a minimum we need (1). Im inclined to insist on (2).
+4. At a minimum we need (1). 
 
-TODO: Assuming we have (1), whats the consequences of not having (2) ??
+**TODO**: Assuming we have (1), whats the consequences of not having (2) ??
 
 
 # Comparing Samples Needed by Audit type

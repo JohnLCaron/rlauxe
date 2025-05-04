@@ -258,7 +258,6 @@ class TestContest {
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=0)
 
         val contestUAp = ContestUnderAudit(contest, isComparison = false)
-        val cvrs = listOf(makeCvr(1), makeCvr(1), makeCvr(0))
         val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
 
         assertNotEquals(contestUAp, contestUAc)

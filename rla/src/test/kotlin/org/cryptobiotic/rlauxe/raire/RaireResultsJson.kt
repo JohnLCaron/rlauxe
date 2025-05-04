@@ -14,7 +14,6 @@ import java.nio.file.StandardOpenOption
 
 // reading RAIRE JSON assertion files
 // TestReadRaireResultsJson reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json"
-// TestRaireWorkflowFromJson reads   "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheetsAssertions.json"
 
 // The output of RAIRE assertion generator, read from JSON files
 data class RaireResults(

@@ -4,7 +4,7 @@ data class BallotPool(
     val name: String,
     val id: Int,
     val contest:Int,
-    val ncards: Int,
+    val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
     val votes: Map<Int, Int>, // candid -> nvotes // the diff from ncards tell you the undervotes
 ) {
 
@@ -15,6 +15,12 @@ data class BallotPool(
         val winnerVote = votes[winner] ?: 0
         val loserVote = votes[loser] ?: 0
         return (winnerVote - loserVote) / ncards.toDouble()
+    }
+
+    fun votesAndUndervotes(voteForN: Int, ncandidates: Int): Map<Int, Int> {
+        val poolVotes = votes.values.sum()
+        val poolUndervotes = ncards * voteForN - poolVotes
+        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, poolUndervotes)).toMap()
     }
 
 }

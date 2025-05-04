@@ -5,6 +5,9 @@ import org.apache.commons.csv.CSVParser
 import java.io.File
 import java.nio.charset.Charset
 
+// Not used, probably not needed
+// only tested on "../rla/src/test/data/raire/SFDA2019/N19-manifest.csv"
+
 data class DominionBallotManifest(
     val countyId: Long,
     val batches: List<DominionBallotBatch>,

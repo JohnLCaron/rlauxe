@@ -8,11 +8,10 @@ import java.nio.charset.Charset
 import kotlin.text.appendLine
 
 // parses Boulder County "statement of votes" csv files, eg from
-// Colorado Election Results
 // https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Statement-of-Votes.xlsx
 
 // variations
-//(2023R) "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
+// (2023R) "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
 // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
 // (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
 
@@ -26,7 +25,7 @@ data class BoulderStatementOfVotes(val filename: String, val contests: List<Boul
     fun show() = buildString{
         appendLine("Boulder Statement of Votes")
         appendLine(filename)
-        appendLine(contests.size)
+        appendLine("ncontests = ${contests.size}")
         appendLine()
         appendLine(BoulderContestVotes.header)
         contests.forEach {

@@ -275,7 +275,7 @@ The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for 
 value in that batch as the value of the (missing) CVR in the CLCA overstatement.
 
 One of the advantages of OneAudit is that one only has to retrieve the physical ballots that are chosen for auditing, 
-rather than retieving all the physical ballots in a batch.
+rather than retrieving all the physical ballots in a batch.
 
 Currently we only support PLURALITY contests with OneAudit.
 
@@ -300,13 +300,6 @@ CVRS are available for some, but not all ballots. When a ballot has been chosen 
 
 1. If it has a CVR, we use the standard CLCA over-statement assorter value for the ballot.
 2. If it has no CVR, we use the overstatement-net-equivalent (ONE) CVR from the batch that it belongs to.
-
-When the voting system can report CVRs for some but not all cards, a _OneAudit_ audit may be the best way to proceed.
-
-"BPA (ballot-polling audits) and CLCA (card-level comparison audits) using OneAudit are generally much
-more efficient than BLCA (batch-level comparison RLAs) when batches are large. CLCA with OneAudit is
-more efficient than BPA when batches are more homogenous than the contest
-votes as a whole, i.e., when precincts are polarized in different directions." (OneAudit p 9)
 
 See [OneAudit version 3](docs/OneAudit3.md).
 
@@ -641,10 +634,10 @@ the percent of false positives stays below the risk limit (here its 5%):
 ````
 P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
 
-RAIRE       Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
+RAIRE        Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
     https://arxiv.org/abs/1903.08804
 
-SHANGRLA	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
+SHANGRLA     Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
     https://github.com/pbstark/SHANGRLA
 
 MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. Glazer, Spertus, Stark; 6 Dec 2020

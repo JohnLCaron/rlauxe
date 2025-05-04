@@ -30,12 +30,12 @@ fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, undervotePercent:
 // two contest, specified total votes
 // divide into two stratum based on cvrPercent
 // skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
-fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double, skewPct: Double = 0.0): OneAuditContest {
+fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double, skewPct: Double = 0.0, contestId: Int = 0): OneAuditContest {
     require(cvrPercent > 0.0)
 
     // the candidates
     val info = ContestInfo(
-        "ContestOA", 0,
+        "ContestOA", contestId,
         mapOf(
             "winner" to 0,
             "loser" to 1,
@@ -80,7 +80,7 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
         BallotPool(
             "noCvr",
             1, // poolId
-            0, // contestId
+            contestId, // contestId
             ncards = votesPoolSum + poolUnderVotes,
             votes = votesNoCvr,
         )
@@ -101,7 +101,7 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
         println("nope")
     }
 
-    val result =  OneAuditContest.make(info, votesCvr, cvrNc, pools.associateBy { it.id }, Np = Np)
+    val result =  OneAuditContest.make(info, votesCvr, cvrNc, pools, Np = Np)
     if (result.Nc != Nc) {
         println("nope")
     }
@@ -110,13 +110,13 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
 }
 
 // used by simulateSampleSizeOneAuditAssorter()
-fun OneAuditContest.makeTestMvrs(): List<Cvr> {
+fun OneAuditContest.makeTestMvrs(prefix: String = "card"): List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
 
     // add the regular cvrs
     val contestCvrs = Contest(this.info, voteInput=this.cvrVotes, iNc = this.cvrNc, Np = 0)
     val sim = ContestSimulation(contestCvrs)
-    val cvrCvrs = sim.makeCvrs()
+    val cvrCvrs = sim.makeCvrs(prefix)
     cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     cvrs.forEach { require (it.poolId == null) }
 
@@ -124,7 +124,7 @@ fun OneAuditContest.makeTestMvrs(): List<Cvr> {
     this.pools.values.forEach { pool ->
         val contestPool = Contest(this.info, pool.votes, iNc = pool.ncards, Np = 0)
         val poolSim = ContestSimulation(contestPool)
-        val poolCvrs = poolSim.makeCvrs(pool.id)
+        val poolCvrs = poolSim.makeCvrs("${prefix}P", pool.id)
 
         require(pool.ncards == poolCvrs.size)
         poolCvrs.forEach { require (it.poolId != null) }
@@ -171,7 +171,7 @@ fun makeScaledCvrs(org: Contest, scale: Double, poolId: Int?): List<Cvr> {
     // add the regular cvrs
     val contestCvrs = Contest(org.info, scaledVotes, iNc = sNc, Np = sNp)
     val sim = ContestSimulation(contestCvrs)
-    return sim.makeCvrs(poolId)
+    return sim.makeCvrs("scaled", poolId)
 }
 
 // data class BallotPool(

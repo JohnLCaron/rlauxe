@@ -24,8 +24,6 @@ data class RaireContestInfo(val candidates: List<String>, val winner: String, va
 
 // Raire CVR file in csv .raire format.
 
-// TestReadRaireBallotsCsv,AssertionRLAipynb  reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json"
-
 fun readRaireBallotsCsv(fileName: String): RaireCvrs {
 
 //  A map between ballot id and the relevant CVR.

@@ -2,11 +2,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.max
-
-// TODO use VotesAndUndervotes
 
 // margin = (winner - loser) / Nc
 // (winner - loser) = margin * Nc
@@ -108,106 +105,40 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
     return result
 }
 
-// used by simulateSampleSizeOneAuditAssorter()
-fun OneAuditContest.makeTestMvrs(prefix: String = "card"): List<Cvr> {
-    val cvrs = mutableListOf<Cvr>()
-
-    // add the regular cvrs
-    if (this.cvrNc > 0) { // blca has cvrNc == 0
-        val contestCvrs = Contest(this.info, voteInput = this.cvrVotes, iNc = this.cvrNc, Np = 0)
-        val sim = ContestSimulation(contestCvrs)
-        val cvrCvrs = sim.makeCvrs(prefix)
-        cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
-        cvrs.forEach { require(it.poolId == null) }
-    }
-
-    // TODO multiwinner contests
-    this.pools.values.forEach { pool ->
-        val contestPool = Contest(this.info, pool.votes, iNc = pool.ncards, Np = 0)
-        val poolSim = ContestSimulation(contestPool)
-        val poolCvrs = poolSim.makeCvrs("${prefix}P", pool.poolId)
-
-        if (pool.ncards != poolCvrs.size) {
-            println("why")
-        }
-        poolCvrs.forEach { require (it.poolId != null) }
-        cvrs.addAll(poolCvrs)
-    }
-
-    // add phantoms
-    repeat(this.Np) {
-        cvrs.add(Cvr("phantom$it", mapOf(info.id to intArrayOf()), phantom = true))
-    }
-
-    if (this.Nc != cvrs.size) {
-        println("why")
-    }
-    require(this.Nc == cvrs.size)
-    cvrs.shuffle()
-    return cvrs
-}
-
-// TODO test this
-fun OneAuditContest.makeTestMvrs(sampleLimit: Int): List<Cvr> {
-    if (sampleLimit < 0 || this.Nc <= sampleLimit) return this.makeTestMvrs()
+fun makeTestMvrsScaled(oaContest: OneAuditContest, sampleLimit: Int, show: Boolean = false): List<Cvr> {
+    if (sampleLimit < 0 || oaContest.Nc <= sampleLimit) return makeTestMvrs(oaContest)
 
     // otherwise scale everything
-    val scale = sampleLimit / this.Nc.toDouble()
+    val scale = sampleLimit / oaContest.Nc.toDouble()
 
     // add the regular cvrs
+    val id = oaContest.id
+    val voteForN = oaContest.info.voteForN
     val cvrs = mutableListOf<Cvr>()
-    cvrs.addAll(makeScaledCvrs(this, scale, null)) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
+    cvrs.addAll(makeScaledCvrs(id, oaContest.cvrNc, oaContest.Np, oaContest.cvrVotes, scale, voteForN, poolId = null))
 
     // add the pooled cvrs
-    this.pools.values.forEach { pool: BallotPool ->
-        val contestPool = Contest(this.info, pool.votes, iNc = pool.ncards, Np = 0)
-        cvrs.addAll(makeScaledCvrs(contestPool, scale, pool.poolId))
+    oaContest.pools.values.forEach { pool: BallotPool ->
+        cvrs.addAll(makeScaledCvrs(id, Nc = pool.ncards, Np = 0, pool.votes, scale, voteForN,  poolId = pool.poolId))
     }
 
-    // require(this.Nc == cvrs.size)
+    // the whole point is that cvrs.size != Nc
+    if (show) {
+        println("  want scale = $scale have scale = ${cvrs.size / oaContest.Nc.toDouble()}")
+    }
     cvrs.shuffle()
     return cvrs
 }
 
-fun makeScaledCvrs(org: Contest, scale: Double, poolId: Int?): List<Cvr> {
-    val sNc = roundToInt(scale * org.Nc)
-    val sNp = roundToInt(scale * org.Np)
-    val scaledVotes = org.votes.map { (id, nvotes) -> id to roundToInt(scale * nvotes) }.toMap()
+fun makeScaledCvrs(contestId: Int, Nc: Int, Np: Int, votes: Map<Int, Int>, scale: Double, voteForN: Int, poolId: Int?): List<Cvr> {
+    val sNc = roundToInt(scale * Nc)
+    val sNp = roundToInt(scale * Np)
+    val scaledVotes = votes.map { (id, nvotes) -> id to roundToInt(scale * nvotes) }.toMap()
 
-    // add the regular cvrs
-    val contestCvrs = Contest(org.info, scaledVotes, iNc = sNc, Np = sNp)
-    val sim = ContestSimulation(contestCvrs)
-    return sim.makeCvrs("scaled", poolId)
-}
-
-// data class BallotPool(
-//    val name: String,
-//    val id: Int,
-//    val contest:Int,
-//    val ncards: Int,
-//    val votes: Map<Int, Int>, // candid-> nvotes
-//)
-/* fun makePoolCvrs(pool: BallotPool): List<Cvr> {
-    val cvrs = mutableListOf<Cvr>()
-    pool.votes.forEach { (candId, nvotes) ->
-        repeat(nvotes) { cvrs.add(makeCvr(info.id, candId)) }
-    }
-    // undervotes
-    repeat(contest.undervotes) {
-        cvrs.add(makeCvr(info.id))
-    }
-    // phantoms
-    // TODO if dont know Np, assume Np = Nc = nvotes ??
-    repeat(this.Np) {
-        cvrs.add(Cvr(strataName, mapOf(info.id to IntArray(0)), phantom = true))
-    }
-    return cvrs
-} */
-
-fun makeCvr(contestId: Int, winner: Int?, phantom: Boolean, poolId: Int?): Cvr {
-    val votes = mutableMapOf<Int, IntArray>()
-    votes[contestId] = if (winner != null) intArrayOf(winner) else IntArray(0)
-    return Cvr("pool $poolId", votes, phantom, poolId)
+    val scaledVotesTotal = scaledVotes.values.sumOf { it }
+    val scaledUndervotes = (sNc - sNp) * voteForN - scaledVotesTotal
+    val vunderCvrs = VotesAndUndervotes(scaledVotes, scaledUndervotes, voteForN)
+    return makeVunderCvrs(mapOf(contestId to vunderCvrs), poolId = poolId)
 }
 
 ////////////////////////////////////////
@@ -229,7 +160,7 @@ fun makeTestMvrs(oaContest: OneAuditContest): List<Cvr> {
     }
 
     // add the pooled cvrs
-    oaContest.pools.forEach { (contestId, pool) ->
+    oaContest.pools.values.forEach { pool ->
         val vunderPool = pool.votesAndUndervotes(info.voteForN)
         val vunderCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), poolId = pool.poolId)
         cvrs.addAll(vunderCvrs)

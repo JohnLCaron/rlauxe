@@ -76,26 +76,11 @@ class BoulderElectionOneAuditFromCvrs(
             }
             if (sovContest == null) {
                 println("*** cant find '${info.name}' in BoulderStatementOfVotes")
-            } /* else {
-                val redactedCount = countRedactedVotes[info.id]!!
-                val cvrCount = contestTabulation ?.ncards ?: 0
-                val diff = sovContest.totalBallots - cvrCount - redactedCount.ncards
-                println(" makeContest ${info.id} redactedCount = ${redactedCount.ncards} cvrCount = ${cvrCount} " +
-                        "sovContest.totalBallots = ${sovContest.totalBallots} undervotes=$diff" )
-                // TODO undervotes, phantoms to deal with diff?
-            } */
-
-            // BallotPool is specific to a Contest
-
+            }
             // remove Write-Ins
             // val votesIn = contestCount.votes.filter { info.candidateIds.contains(it.key) }
 
             val pools = poolsByContest[info.id]!!
-            // val poolCount = pools.sumOf { it.ncards }
-            //val redactedCount = countRedactedVotes[info.id]!!
-            //if (poolCount != redactedCount.ncards )
-            //    println()
-
             OneAuditContest.make(info,
                 contestTabulation ?.votes ?: emptyMap(),
                 contestTabulation ?.ncards ?: 0,

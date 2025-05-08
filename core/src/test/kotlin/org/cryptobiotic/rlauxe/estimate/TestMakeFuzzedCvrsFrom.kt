@@ -215,7 +215,7 @@ class TestMakeFuzzedCvrsFrom {
                 val ncands = contestOA.ncandidates
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contestOA.votes}")
 
-                val cvrs = contestOA.makeTestMvrs()
+                val cvrs = makeTestMvrs(contestOA)
                 val cvrVotes = tabulateVotesWithUndervotes(cvrs.iterator(), 0, ncands)
                 if (showOA) println("cvrVotes = ${cvrVotes}  contestVotes = ${contestOA.votesAndUndervotes()}")
                 assertEquals(cvrVotes, contestOA.votesAndUndervotes())

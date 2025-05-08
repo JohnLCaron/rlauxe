@@ -55,6 +55,7 @@ class ContestSimulation(val contest: Contest) {
         votesLeft = voteCount
     }
 
+    // TODO replace with VotesAndUndervotes ??
     // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     // cvrs only contain this contest
     // ncvrs = voteCount + underCount + phantomCount = Nc

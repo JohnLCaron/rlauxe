@@ -27,7 +27,7 @@ class OneAuditContestAuditTaskGenerator(
         )
 
         val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
-        val oaCvrs = contestOA2.makeTestMvrs() // TODO
+        val oaCvrs = makeTestMvrs(contestOA2)
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2),
@@ -67,7 +67,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
 
         val contestOA = makeContestOA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct,
             phantomPercent=phantomPct, skewPct = skewPct)
-        val oaCvrs = contestOA.makeTestMvrs()
+        val oaCvrs = makeTestMvrs(contestOA)
         val oaMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(oaCvrs, Nc, p2flips, p1flips)
         } else {

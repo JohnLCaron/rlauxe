@@ -109,7 +109,7 @@ class TestOneAuditKalamazoo {
         assertTrue(doublesAreClose(sam, expectedSam, doublePrecision))
 
         // do the same thing using real assorters
-        val testMvrs = contestOA.makeTestMvrs()
+        val testMvrs = makeTestMvrs(contestOA)
         val contestUA = contestOA.makeContestUnderAudit()
         val minAllAsserter = contestUA.minAssertion()
         assertNotNull(minAllAsserter)
@@ -138,7 +138,7 @@ class TestOneAuditKalamazoo {
         println()
         assertEquals(0.5468806477264513, minAllAssorter.reportedMargin(), doublePrecision)
 
-        val mvrs = oaContest.makeTestMvrs()
+        val mvrs = makeTestMvrs(oaContest)
         val assortAvg = margin2mean(minAllAssorter.calcAssorterMargin(oaContest.id, mvrs))
 
         val mvrVotes = tabulateVotesWithUndervotes(mvrs.iterator(), 0, contestUA.ncandidates)

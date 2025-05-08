@@ -28,7 +28,7 @@ class TestPersistentOneAudit {
         val contestOA = makeContestOA(N+100, N-100, cvrPercent = .95, undervotePercent=.0, phantomPercent = .0)
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
-        val testCvrs = contestOA.makeTestMvrs() // one for each ballot, with and without CVRS
+        val testCvrs = makeTestMvrs(contestOA) // one for each ballot, with and without CVRS
         val testMvrs = testCvrs
 
         // the order of the cvrs cannot be changed once the audit is initialized.

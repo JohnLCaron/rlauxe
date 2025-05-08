@@ -123,6 +123,7 @@ data class MultiContestTestData(
 
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
+    // TODO replace with VotesAndUndervotes ??
     fun makeCvrsFromContests(): List<Cvr> {
         fcontests.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(fcontests.map { it.info })
@@ -159,6 +160,7 @@ data class MultiContestTestData(
     }
 }
 
+// TODO replace with VotesAndUndervotes ??
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
 // The cvrs are not multicontest.

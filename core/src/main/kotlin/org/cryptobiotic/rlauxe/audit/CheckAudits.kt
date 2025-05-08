@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
@@ -77,12 +78,18 @@ fun checkContestsWithCards(contestsUA: List<ContestUnderAudit>, cards: Iterator<
             println("*** contest ${contestUA.contest} not found in tabulated Cvrs")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         } else {
+            // add in the pool votes
+            if (contestUA.contest is OneAuditContest) {
+                contestUA.contest.pools.values.forEach { pool ->
+                    contestTab.addVotes(pool.votes)
+                }
+            }
+
             if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
-                checkEquivilentVotes(contestVotes, contestTab.votes)
-                println("*** contest ${contestUA.contest} cvrVotes = $contestTab marking as ContestMisformed")
+                println("*** contest ${contestUA.contest} votes disagree with cvrs = $contestTab marking as ContestMisformed")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             } else if (show) {
-                println("    contest ${contestUA.contest} cvrVotes = $contestTab")
+                println("contest ${contestUA.contest} cvrVotes = $contestTab")
             }
         }
     }
@@ -127,15 +134,15 @@ fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     return votes
 }
 
-fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int): Map<Int, Int> {
+fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): Map<Int, Int> {
     val result = mutableMapOf<Int, Int>()
     cvrs.forEach{ cvr ->
         if (cvr.hasContest(contestId) && !cvr.phantom) {
             val candVotes = cvr.votes[contestId] // should always succeed
             if (candVotes != null) {
-                if (candVotes.size == 0) {  // undervote
+                if (candVotes.size < voteForN) {  // undervote
                     val count = result[ncands] ?: 0
-                    result[ncands] = count + 1
+                    result[ncands] = count + (voteForN - candVotes.size)
                 }
                 for (cand in candVotes) {
                     val count = result[cand] ?: 0
@@ -171,6 +178,17 @@ class ContestTabulation {
 
     fun addVotes(cands: IntArray) {
         cands.forEach { addVote(it, 1) }
+    }
+
+    fun addVotes(cands: Map<Int, Int>) {
+        cands.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
+    }
+
+    // undervotes = info.voteForN * ncards - nvotes
+    // undervotes / ncards = info.voteForN - nvotes / ncards
+    fun undervotePct(voteForN: Int): Double {
+        val nvotes = votes.map { it.value }.sum()
+        return (voteForN * ncards - nvotes) / ncards.toDouble()
     }
 
     override fun toString(): String {

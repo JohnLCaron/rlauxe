@@ -49,7 +49,7 @@ data class BallotPoolJson(
 
 fun BallotPool.publishJson() = BallotPoolJson(
     this.name,
-    this.id,
+    this.poolId,
     this.contest,
     this.ncards,
     this.votes,

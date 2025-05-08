@@ -44,7 +44,7 @@ data class DominionCvrExport(
     val filename: String,
     val schema: Schema,
     val cvrs: List<CastVoteRecord>,
-    val redacted: List<RedactedVotes>,
+    val redacted: List<RedactedGroup>,
 ) {
     fun show() = buildString {
         appendLine("filename = $filename")
@@ -133,10 +133,11 @@ data class CastVoteRecord(
 // use colIdx to eliminate write-ins.
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
-data class RedactedVotes(val ballotType: String) {
+// unfortunately, we dont know how many ballots this group represents, nor the number of ballots with contest c in the group
+data class RedactedGroup(val ballotType: String) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
 
-    fun addVotes(schema: Schema, line: CSVRecord): RedactedVotes {
+    fun addVotes(schema: Schema, line: CSVRecord): RedactedGroup {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
             if (line.get(colidx).isNotEmpty()) {
@@ -147,7 +148,7 @@ data class RedactedVotes(val ballotType: String) {
                     // "RCV Redacted & Randomly Sorted",,,,,"DS-01",0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
                     println("*** IRV RedactedVotes shouldnt get here!")
                 } else {
-                    val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf<Int, Int>() })
+                    val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf() })
                     for (candIdx in 0 until useContest.ncols) {
                         val nvotes = line.get(useContest.startCol + candIdx).toInt()
                         val prev = candidateVotes[candIdx] ?: 0
@@ -214,14 +215,14 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
     val ballotTypeIdx = if (schema.nheaders == 6) 5 else 6 // TODO see if BallotType == header 6
 
     val cvrs = mutableListOf<CastVoteRecord>()
-    val redacted = mutableListOf<RedactedVotes>()
+    val redacted = mutableListOf<RedactedGroup>()
 
     var rcvRedacted = 0
     while (records.hasNext()) {
         val line = records.next()
         // showLine("line", line)
         if (line.get(0).startsWith("Redacted")) { // but not "RCV Redacted ..." which can be treated like a normal CVR
-            redacted.add(RedactedVotes(line.get(ballotTypeIdx)).addVotes(schema, line))
+            redacted.add(RedactedGroup(line.get(ballotTypeIdx)).addVotes(schema, line))
         } else if (line.get(0).startsWith("RCV Redacted")) {
             val cvr = CastVoteRecord(
                 rcvRedacted,

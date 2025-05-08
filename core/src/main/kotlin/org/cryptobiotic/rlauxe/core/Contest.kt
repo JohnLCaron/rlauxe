@@ -43,7 +43,7 @@ data class ContestInfo(
     }
 
     override fun toString() = buildString {
-        append("'$name' ($id) candidates=${candidateNames}")
+        append("'$name' ($id) candidates=${candidateNames} voteForN=${voteForN}")
     }
 }
 
@@ -92,8 +92,8 @@ interface ContestIF {
 open class Contest(
         val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-        val iNc: Int,
-        val Np: Int,
+        val iNc: Int,               // number of voters who cast ballots containing this Contest
+        val Np: Int,                // number of phantoms
     ): ContestIF {
 
     override fun Nc() = iNc
@@ -124,7 +124,12 @@ open class Contest(
                 voteBuilder[it] = 0
             }
         }
-        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
+        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by votes recieved
+        votes.forEach { (candId, candVotes) ->
+            require(candVotes <= (iNc - Np)) {
+                "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Np)=${Nc - Np}"
+            }
+        }
         val nvotes = votes.values.sum()
         require(nvotes <= info.voteForN * (iNc - Np)) {
             "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
@@ -143,7 +148,7 @@ open class Contest(
         winnerNames = winners.map { mapIdToName[it]!! }
         if (winners.isEmpty()) {
             val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
-            println("*** there are no winners for minFraction=$useMin $pct")
+            println("*** there are no winners for minFraction=$useMin vote% = $pct")
         }
 
         // find losers

@@ -6,7 +6,10 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.roundToInt
+import org.cryptobiotic.rlauxe.util.roundUp
 import org.junit.jupiter.api.Assertions.assertNotNull
+import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -163,7 +166,7 @@ class TestOneAuditKalamazoo {
 }
 
     // from oa_polling.ipynb
-fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
+fun makeContestKalamazoo(nwinners:Int = 1): OneAuditContest { // TODO set margin
 
     // the candidates
     val info = ContestInfo(
@@ -177,7 +180,7 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
             "Whitmer" to 5,
         ),
         SocialChoiceFunction.PLURALITY,
-        nwinners = 1,
+        nwinners = nwinners,
     )
 
     // reported results for the two strata
@@ -189,32 +192,28 @@ fun makeContestKalamazoo(): OneAuditContest { // TODO set margin
         "Kurland" to listOf(23, 284),
         "Butkovich" to listOf(6, 66)
     )
-    // val votes0: Map<Int, Int> = candidates.map { (key: String, value: List<Int>) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
 
     // The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest
     // the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
     val stratumSizes = listOf(5294, 22372) // hasCvr, noCvr
-    val Nc = stratumSizes.sum()
 
     // reported results for the two strata
     val votesCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
     val votesNoCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[1]) }.toMap()
+    val ncCvr = max(roundUp(stratumSizes[0] / nwinners.toDouble()), votesCvr.values.max())
+    val ncNocvr = max(roundUp(stratumSizes[1] / nwinners.toDouble()), votesNoCvr.values.max())
 
     val pools = mutableListOf<BallotPool>()
     pools.add(
         // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
         BallotPool(
             "noCvr",
-            1, // poolId
-            0, // contestId
-            stratumSizes[1],
+            poolId = 1,
+            contest = 0,
+            ncards = ncNocvr,
             votes = votesNoCvr,
         )
     )
 
-    //    override val info: ContestInfo,
-    //    cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    //    cvrNc: Int,
-    //    val pools: Map<Int, OneAuditPool>, // pool id -> pool
-    return OneAuditContest.make(info, votesCvr, stratumSizes[0], pools, Np = 0)
+    return OneAuditContest.make(info, votesCvr, ncCvr, pools, Np = 0)
 }

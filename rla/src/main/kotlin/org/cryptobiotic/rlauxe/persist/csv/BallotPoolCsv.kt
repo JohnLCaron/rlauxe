@@ -8,7 +8,7 @@ import java.io.*
 val BallotPoolCsvHeader = "Pool, Id, Contest, ncards, candidate:nvotes, ...\n"
 
 fun writeBallotPoolCSV(pool: BallotPool) = buildString {
-    append("${pool.name}, ${pool.id}, ${pool.contest}, ${pool.ncards}, ")
+    append("${pool.name}, ${pool.poolId}, ${pool.contest}, ${pool.ncards}, ")
     pool.votes.forEach { (cand, vote) -> append("$cand: $vote, ") }
     appendLine()
 }

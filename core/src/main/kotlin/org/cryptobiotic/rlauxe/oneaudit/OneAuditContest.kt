@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.min
@@ -55,8 +54,6 @@ class OneAuditContest (
         contestUA.makeClcaAssertionsFromReportedMargin()
         return contestUA
     }
-
-    fun makeContest() = Contest(info, votes, Nc, Np)
 
     // candidate for removal
     fun reportedMargin(winner: Int, loser:Int): Double {
@@ -158,7 +155,7 @@ class OneAuditContest (
             }
             val voteInput = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
 
-            return OneAuditContest(info, voteInput, Nc, Np, cvrVotes, cvrNc, pools.associateBy { it.id })
+            return OneAuditContest(info, voteInput, Nc, Np, cvrVotes, cvrNc, pools.associateBy { it.poolId })
         }
     }
 }
@@ -175,7 +172,7 @@ fun showPct(what: String, votes: Map<Int, Int>, Nc: Int) {
 class OAContestUnderAudit(
     val contestOA: OneAuditContest,
     hasStyle: Boolean = true
-): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=hasStyle) {
+): ContestUnderAudit(contestOA, isComparison=true, hasStyle=hasStyle) {
 
     override fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
         // dont use assortValueFromCvrs. TODO: consider different primitive assorter, that knows about pools.
@@ -187,6 +184,21 @@ class OAContestUnderAudit(
         appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
         appendLine(" choiceFunction=${choiceFunction} nwinners=${contestOA.info.nwinners}, winners=${contest.winners()}")
         append(showCandidates())
+    }
+
+
+    fun showPools(mvrs: List<Cvr>) {
+        val minAllAssorter = minClcaAssertion()!!.assorter
+        contestOA.pools.forEach { (id, pool) ->
+            val poolCvrs = mvrs.filter{ it.poolId == id}
+            val poolAssortAvg = margin2mean(minAllAssorter.calcAssorterMargin(contestOA.id, poolCvrs))
+            val poolReportedAvg = margin2mean(minAllAssorter.calcReportedMargin(pool.votes, pool.ncards))
+            if (!doubleIsClose(poolReportedAvg, poolAssortAvg)) print(" **** ")
+            println(
+                "pool-${id} votes = ${pool.votesAndUndervotes(contestOA.info.voteForN, contestOA.ncandidates)} " +
+                        "poolAssortAvg = $poolAssortAvg reportedAvg = $poolReportedAvg"
+            )
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -228,14 +240,15 @@ class OAContestUnderAudit(
 
 class OneAuditClcaAssorter(
     val contestOA: OneAuditContest,
-    assorter: AssorterIF,   // A(mvr)
-    assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value
+    assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs
+    assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value. TODO wrong ??
 ) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs) {
     private val doAffineTransform = (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
     private val affineMin: Double
     private val affineIScale: Double
 
     // we need this to test the assorter average calculation
+    // same calculation is embodied in overstatementPoolError. TODO test this more
     val oaAssorter = OaPluralityAssorter.makeFromContestVotes(contestOA, assorter.winner(), assorter.loser())
 
     init {
@@ -277,6 +290,9 @@ class OneAuditClcaAssorter(
             require(!doAffineTransform)
             return super.bassort(mvr, cvr) // here we use the standard assorter
         }
+
+        // if (hasStyle && !mvr.hasContest(contestOA.id)) return 0.5   TODO does this solve the undervote problem ??
+
         val pool = contestOA.pools[cvr.poolId]
             ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}")
 
@@ -349,7 +365,23 @@ class OneAuditClcaAssorter(
     }
 }
 
-// Experimental. need to make PluralityAssorter open, not data, class
+// OneAuditComparisonAssorter for contest St. Vrain and Left Hand Water Conservancy District Ballot Issue 7C (64)
+//  assorter= winner=0 loser=1 reportedMargin=0.6556 reportedMean=0.8278
+//  cvrAssortMargin=0.6555896614618087 noerror=0.7438205221534695 upperBound=1.487641044306939 assortValueFromCvrs=null
+//  mvrVotes = {0=51846, 1=8841, 2=6750} NC=67437
+//     pAssorter reportedMargin=0.6555896614618087 reportedAvg=0.8277948307309044 assortAvg = 0.8188531518305975 ******
+//     oaAssorter reportedMargin=0.6555896614618087 reportedAvg=0.8277948307309044 assortAvg = 0.827794830730896
+// ****** passortAvg != oassortAvg
+//
+// OneAuditClcaAssorter.assorter = pAssorter reportedMargin agrees with oAassortAvg
+// OaPluralityAssorter = oaAssorter reportedMargin agrees with OaPluralityAssorter.assort(cvrs).mean
+// pAssorter reportedMargin does not agree with pAssortAvg, because pAssorter doesnt use the average pool values. ****
+//
+// why are we using reqular pAssort instead of OaPluralityAssorter in the OneAuditClcaAssorter?
+// because its the assorter you have to use for the cvrs
+
+// This is the primitive assorter whose average assort values agrees with the reportedMargin.
+// TODO check against SHANGRLA
 class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: Int, reportedMargin: Double):
     PluralityAssorter(contestOA.info, winner, loser, reportedMargin) {
 

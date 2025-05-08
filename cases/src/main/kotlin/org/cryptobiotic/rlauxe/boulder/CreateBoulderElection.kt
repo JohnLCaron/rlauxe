@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.RedactedVotes
+import org.cryptobiotic.rlauxe.dominion.RedactedGroup
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExport
@@ -135,7 +135,7 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         return rcvrs
     }
 
-    fun makeRedactedCvrs(redacted: RedactedVotes, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
+    fun makeRedactedCvrs(redacted: RedactedGroup, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
 
         if (show) {

@@ -25,7 +25,7 @@ class TestAvgAssortValues {
         //println("  mvrs1.size=${mvrs1.size}")
         //mvrs1.forEach{ println("   $it")}
         println("\noaContest1 with mvrs")
-        show(oaContest1, mvrs1)
+        compareAssortAvg(oaContest1, mvrs1)
 
         val oaContest2 = makeContestOA(
             5, 3, cvrPercent = .50,
@@ -43,20 +43,20 @@ class TestAvgAssortValues {
         println("oaContest1.Nc=${oaContest1.Nc} count=$Nc1")
 
         println("\noaContest1 with merged")
-        show(oaContest1, allCvrs, show = true)
+        compareAssortAvg(oaContest1, allCvrs, show = true)
 
         println("=========================================")
         //println("  mvrs2.size=${mvrs2.size}")
         //mvrs2.forEach{ println("   $it")}
         println("oaContest2 = $oaContest2")
         println("oaContest2 with mvrs")
-        show(oaContest2, mvrs2)
+        compareAssortAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
         println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
 
         println("oaContest2 with merged")
-        show(oaContest2, allCvrs)
+        compareAssortAvg(oaContest2, allCvrs)
     }
 
     @Test
@@ -78,18 +78,18 @@ class TestAvgAssortValues {
         val allCvrs = merge(mvrs1, mvrs2)
 
         println("\noaContest1 with merged")
-        show(oaContest1, allCvrs)
+        compareAssortAvg(oaContest1, allCvrs)
 
         println("=========================================")
         println("oaContest2 = $oaContest2")
         println("oaContest2 with mvrs")
-        show(oaContest2, mvrs2)
+        compareAssortAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
         println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
 
         println("oaContest2 with merged")
-        show(oaContest2, allCvrs)
+        compareAssortAvg(oaContest2, allCvrs)
     }
 
     @Test
@@ -111,18 +111,18 @@ class TestAvgAssortValues {
         val allCvrs = merge(mvrs1, mvrs2)
 
         println("\noaContest1 with merged")
-        show(oaContest1, allCvrs)
+        compareAssortAvg(oaContest1, allCvrs)
 
         println("=========================================")
         println("oaContest2 = $oaContest2")
         println("oaContest2 with mvrs")
-        show(oaContest2, mvrs2)
+        compareAssortAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
         println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
 
         println("oaContest2 with merged")
-        show(oaContest2, allCvrs)
+        compareAssortAvg(oaContest2, allCvrs)
     }
 
     @Test
@@ -144,21 +144,21 @@ class TestAvgAssortValues {
         val allCvrs = merge(mvrs1, mvrs2)
 
         println("\noaContest1 with merged")
-        show(oaContest1, allCvrs)
+        compareAssortAvg(oaContest1, allCvrs)
 
         println("=========================================")
         println("oaContest2 = $oaContest2")
         println("oaContest2 with mvrs")
-        show(oaContest2, mvrs2)
+        compareAssortAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
         println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
 
         println("oaContest2 with merged")
-        show(oaContest2, allCvrs)
+        compareAssortAvg(oaContest2, allCvrs)
     }
 
-    fun show(oaContest: OneAuditContest, mvrs: List<Cvr>, show: Boolean = false) {
+    fun compareAssortAvg(oaContest: OneAuditContest, mvrs: List<Cvr>, show: Boolean = false) {
         val contestUA: OAContestUnderAudit = oaContest.makeContestUnderAudit()
         val clcaAssertion = contestUA.minAssertion() as ClcaAssertion
         assertNotNull(clcaAssertion)

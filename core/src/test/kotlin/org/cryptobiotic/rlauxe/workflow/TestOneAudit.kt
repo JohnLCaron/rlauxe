@@ -44,7 +44,7 @@ class TestOneAudit {
         println(contestOA)
 
         val testCvrs = contestOA.makeTestMvrs()  // one for each ballot, with and without CVRS
-        val testMvrs = makeFuzzedCvrsFrom(listOf(contestOA.makeContest()), testCvrs, mvrFuzzPct)
+        val testMvrs = makeFuzzedCvrsFrom(listOf(contestOA), testCvrs, mvrFuzzPct)
         val workflow = OneAudit(auditConfig, listOf(contestOA),
             MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
 

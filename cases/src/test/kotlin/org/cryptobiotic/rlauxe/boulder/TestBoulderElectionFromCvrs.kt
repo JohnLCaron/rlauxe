@@ -80,4 +80,15 @@ class TestBoulderElectionFromCvrs {
             auditDir = "/home/stormy/temp/cases/boulder24oa",
         )
     }
+
+    // pooled votes only, simulating a "batch level comparison audit"
+    @Test
+    fun createBoulder24blca() {
+        createBoulderElectionOneAudit(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/temp/cases/boulder24blca",
+            includeCvrs = false,
+        )
+    }
 }

@@ -24,6 +24,7 @@ class OneAuditContest (
 
     val minMargin: Double
     val poolNc = pools.values.sumOf { it.ncards }
+    val cvrUndervotes: Int
 
     init {
         // TODO add SUPERMAJORITY. What about IRV ??
@@ -36,7 +37,7 @@ class OneAuditContest (
 
         val cvrVotesTotal = cvrVotes.values.sumOf { it }
         require (cvrNc * info.voteForN >= cvrVotesTotal)
-        val cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
+        cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
         val undervotes2 = poolUndervotes + cvrUndervotes
         require (undervotes == undervotes2)
 
@@ -69,8 +70,6 @@ class OneAuditContest (
     }
 
     fun cvrVotesAndUndervotes(): Map<Int, Int> {
-        val cvrVotesTotal = cvrVotes.values.sumOf { it }
-        val cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
         return (cvrVotes.map { Pair(it.key, it.value)} + Pair(this.ncandidates, cvrUndervotes)).toMap()
     }
 
@@ -158,13 +157,6 @@ class OneAuditContest (
             return OneAuditContest(info, voteInput, Nc, Np, cvrVotes, cvrNc, pools.associateBy { it.poolId })
         }
     }
-}
-
-fun showPct(what: String, votes: Map<Int, Int>, Nc: Int) {
-    val winnerVotes = votes[0] ?: 0
-    val loserVotes = votes[1] ?: 0
-    val hasMargin = (winnerVotes - loserVotes) / Nc.toDouble()
-    println("$what winnerVotes = $winnerVotes loserVotes = $loserVotes diff=${winnerVotes-loserVotes} Nc=${Nc} hasMargin=$hasMargin ")
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +283,7 @@ class OneAuditClcaAssorter(
             return super.bassort(mvr, cvr) // here we use the standard assorter
         }
 
-        // if (hasStyle && !mvr.hasContest(contestOA.id)) return 0.5   TODO does this solve the undervote problem ??
+        // if (hasStyle && mvr.hasContest(contestOA.id)) return 0.5   TODO does this solve the undervote problem ??
 
         val pool = contestOA.pools[cvr.poolId]
             ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${contestOA.id}")

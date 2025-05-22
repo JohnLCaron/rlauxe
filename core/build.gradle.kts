@@ -12,9 +12,11 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
-    testFixturesImplementation(libs.bundles.egtest)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.egtest)
+    testFixturesImplementation(libs.bundles.jvmtest)
+    testFixturesImplementation(libs.kotest.property)
+
+    testImplementation(libs.bundles.jvmtest)
+    testImplementation(libs.kotest.property)
 }
 
 tasks.test {

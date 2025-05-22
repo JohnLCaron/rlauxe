@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.Prng
 
 data class AuditableCard (
     val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
@@ -101,4 +102,9 @@ data class AuditableCard (
 class CvrIteratorAdapter(val cardIterator: Iterator<AuditableCard>) : Iterator<Cvr> {
     override fun hasNext() = cardIterator.hasNext()
     override fun next() = cardIterator.next().cvr()
+}
+
+fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
+    val prng = Prng(seed)
+    return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
 }

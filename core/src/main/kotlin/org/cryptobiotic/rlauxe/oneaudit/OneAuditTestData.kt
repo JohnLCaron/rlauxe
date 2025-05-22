@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -10,7 +13,14 @@ import kotlin.math.max
 // (winner + loser) = nvotes
 // 2 * winner = margin * Nc + nvotes
 // winner = (margin * Nc + nvotes) / 2
-fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double, skewPct: Double = 0.0): OneAuditContest {
+fun makeContestOA(
+    margin: Double,
+    Nc: Int,
+    cvrPercent: Double,
+    undervotePercent: Double,
+    phantomPercent: Double,
+    skewPct: Double = 0.0,
+): OneAuditContest {
     val nvotes = roundToInt(Nc * (1.0 - undervotePercent - phantomPercent))
     // margin = (winner - loser) / Nc
     // nvotes = winner + loser
@@ -26,7 +36,15 @@ fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, undervotePercent:
 // two contest, specified total votes
 // divide into two stratum based on cvrPercent
 // skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
-fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double, skewPct: Double = 0.0, contestId: Int = 0): OneAuditContest {
+fun makeContestOA(
+    winnerVotes: Int,
+    loserVotes: Int,
+    cvrPercent: Double,
+    undervotePercent: Double,
+    phantomPercent: Double,
+    skewPct: Double = 0.0,
+    contestId: Int = 0,
+): OneAuditContest {
     require(cvrPercent > 0.0)
 
     // the candidates
@@ -97,7 +115,7 @@ fun makeContestOA(winnerVotes: Int, loserVotes: Int, cvrPercent: Double, undervo
         println("nope")
     }
 
-    val result =  OneAuditContest.make(info, votesCvr, cvrNc, pools, Np = Np)
+    val result = OneAuditContest.make(info, votesCvr, cvrNc, pools, Np = Np)
     if (result.Nc != Nc) {
         println("nope")
     }
@@ -119,7 +137,7 @@ fun makeTestMvrsScaled(oaContest: OneAuditContest, sampleLimit: Int, show: Boole
 
     // add the pooled cvrs
     oaContest.pools.values.forEach { pool: BallotPool ->
-        cvrs.addAll(makeScaledCvrs(id, Nc = pool.ncards, Np = 0, pool.votes, scale, voteForN,  poolId = pool.poolId))
+        cvrs.addAll(makeScaledCvrs(id, Nc = pool.ncards, Np = 0, pool.votes, scale, voteForN, poolId = pool.poolId))
     }
 
     // the whole point is that cvrs.size != Nc
@@ -130,7 +148,15 @@ fun makeTestMvrsScaled(oaContest: OneAuditContest, sampleLimit: Int, show: Boole
     return cvrs
 }
 
-fun makeScaledCvrs(contestId: Int, Nc: Int, Np: Int, votes: Map<Int, Int>, scale: Double, voteForN: Int, poolId: Int?): List<Cvr> {
+fun makeScaledCvrs(
+    contestId: Int,
+    Nc: Int,
+    Np: Int,
+    votes: Map<Int, Int>,
+    scale: Double,
+    voteForN: Int,
+    poolId: Int?,
+): List<Cvr> {
     val sNc = roundToInt(scale * Nc)
     val sNp = roundToInt(scale * Np)
     val scaledVotes = votes.map { (id, nvotes) -> id to roundToInt(scale * nvotes) }.toMap()
@@ -149,12 +175,7 @@ fun makeTestMvrs(oaContest: OneAuditContest): List<Cvr> {
 
     // add the regular cvrs
     if (oaContest.cvrNc > 0) {
-        val cvrVotes = oaContest.cvrVotes
-        val cvrNc = oaContest.cvrNc
-        val cvrVotesTotal = cvrVotes.values.sumOf { it }
-        val cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
-        val vunderCvrs = VotesAndUndervotes(cvrVotes, cvrUndervotes, info.voteForN)
-
+        val vunderCvrs = VotesAndUndervotes(oaContest.cvrVotes, oaContest.cvrUndervotes, info.voteForN)
         val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
@@ -179,7 +200,75 @@ fun makeTestMvrs(oaContest: OneAuditContest): List<Cvr> {
     return cvrs
 }
 
-fun checkAssorterAvg(oaContest: OneAuditContest, mvrs: List<Cvr>, show: Boolean = true, check: Boolean = true) {
+// lets say all the pools have to be the same poolId
+fun makeTestNonPooledMvrs(oaContests: List<OneAuditContest>): List<Cvr> {
+
+    val contestVunders = mutableMapOf<Int, VotesAndUndervotes>()
+    oaContests.forEach { oaContest ->
+        contestVunders[oaContest.id] = VotesAndUndervotes(oaContest.cvrVotes, oaContest.cvrUndervotes, oaContest.info.voteForN)
+    }
+
+    val cvrs = makeVunderCvrs(contestVunders, poolId = null)
+    // println("makeRedactedCvrs cvrs=${cvrs.size}")
+    val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+
+    contestVunders.forEach { (contestId, vunders) ->
+        val tv = tabVotes[contestId] ?: emptyMap()
+        if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+            println("  tabVotes=${tv}")
+            println("  vunders.candVotesSorted ${vunders.candVotesSorted}")
+            require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+        }
+
+        val tabsWith =
+            tabulateVotesWithUndervotes(cvrs.iterator(), contestId, vunders.votes.size, vunders.voteForN).toSortedMap()
+        if (!checkEquivilentVotes(vunders.votesAndUndervotes(), tabsWith)) {
+            println("  tabsWith=${tabsWith}")
+            println("  vunders.votesAndUndervotes()= ${vunders.votesAndUndervotes()}")
+            require(checkEquivilentVotes(vunders.votesAndUndervotes(), tabsWith))
+        }
+    }
+    return cvrs
+}
+
+// lets say all the pools have to be the same poolId
+fun makeTestPooledMvrs(oaContests: List<OneAuditContest>, poolId: Int): List<Cvr> {
+
+    val contestVotes = mutableMapOf<Int, VotesAndUndervotes>()
+    oaContests.forEach { oaContest ->
+        oaContest.pools.values.forEach { pool ->
+            contestVotes[oaContest.id] = pool.votesAndUndervotes(oaContest.info.voteForN)
+        }
+    }
+
+    val cvrs = makeVunderCvrs(contestVotes, poolId = poolId)
+    // println("makeRedactedCvrs cvrs=${cvrs.size}")
+    val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+
+    contestVotes.forEach { (contestId, vunders) ->
+        val tv = tabVotes[contestId] ?: emptyMap()
+        if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+            println("  tabVotes=${tv}")
+            println("  vunders.candVotesSorted ${vunders.candVotesSorted}")
+            require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+        }
+
+        val tabsWith =
+            tabulateVotesWithUndervotes(cvrs.iterator(), contestId, vunders.votes.size, vunders.voteForN).toSortedMap()
+        if (!checkEquivilentVotes(vunders.votesAndUndervotes(), tabsWith)) {
+            println("  tabsWith=${tabsWith}")
+            println("  vunders.votesAndUndervotes()= ${vunders.votesAndUndervotes()}")
+            require(checkEquivilentVotes(vunders.votesAndUndervotes(), tabsWith))
+        }
+    }
+    return cvrs
+}
+
+fun checkAssorterAvgFromCards(oaContest: OneAuditContest, cards: Iterable<AuditableCard>, show: Boolean = true, check: Boolean = true) {
+    return checkAssorterAvg(oaContest, cards.map{ it.cvr() }, show, check)
+}
+
+fun checkAssorterAvg(oaContest: OneAuditContest, mvrs: Iterable<Cvr>, show: Boolean = true, check: Boolean = true) {
     val contestUA: OAContestUnderAudit = oaContest.makeContestUnderAudit()
     val clcaAssertion = contestUA.minAssertion() as ClcaAssertion
     val clcaAssorter = clcaAssertion.cassorter as OneAuditClcaAssorter
@@ -197,7 +286,11 @@ fun checkAssorterAvg(oaContest: OneAuditContest, mvrs: List<Cvr>, show: Boolean 
         if (doubleIsClose(pAssorter.reportedMean(), passortAvg)) println() else println(" ******")
         print("     oaAssorter reportedMargin=${oaAssorter.reportedMargin()} reportedAvg=${oaAssorter.reportedMean()} assortAvg = $oassortAvg")
         if (doubleIsClose(oaAssorter.reportedMean(), oassortAvg)) println() else println(" ******")
-        if (doubleIsClose(oaAssorter.reportedMean(), pAssorter.reportedMean())) println() else println(" ****** oaAssorter.reportedMean() != pAssorter.reportedMean()")
+        if (doubleIsClose(
+                oaAssorter.reportedMean(),
+                pAssorter.reportedMean()
+            )
+        ) println() else println(" ****** oaAssorter.reportedMean() != pAssorter.reportedMean()")
     }
 
     if (check) {

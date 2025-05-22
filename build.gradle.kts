@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.cryptobiotic.rlauxe"
-version = "1.0-SNAPSHOT"
+version = libs.versions.rlauxe.get()
 
 subprojects {
     repositories {

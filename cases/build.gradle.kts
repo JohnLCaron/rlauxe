@@ -21,8 +21,8 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.4")
     implementation(libs.bundles.xmlutil)
 
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.egtest)
+    testImplementation(libs.bundles.jvmtest)
+    testImplementation(libs.kotest.property)
     testImplementation(testFixtures(project(":core")))
 }
 

@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 05/04/2025_
+_last changed: 05/22/2025_
 
 A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
 for the purpose of making a reusable and maintainable library.
@@ -328,7 +328,7 @@ Even though we dont have CVRs for pooled ballots, we still have to have a ballot
 
 When a pooled ballot is selected for sampling, we use the ballot manifest to retrieve the paper ballot and create an MVR. The MVR always has the complete set of contests and votes for that ballot. So when we calculate the assort value for a particular contest and assertion, we always know whether the contest appears on the ballot on not.
 
-For each pool we always have a pool count, which has a list of contests and their votes in the pool, and the number of ballots in the pool. However, we may not know the number of cards for each contest in each pool, that is, we may not know how manu undervotes there are by contest. If we do know the undervotes by contest, we than know Nc_g for each contest and can accurately calculate the assorter mean of the pool. This assumes you can modify the OneAudit over-statement assorted to return 
+For each pool we always have a pool count, which has a list of contests and their votes in the pool, and the number of ballots in the pool. However, we may not know the number of cards for each contest in each pool, that is, we may not know how many undervotes there are by contest. If we do know the undervotes by contest, we then know Nc_g for each contest and can accurately calculate the assorter mean of the pool.
 
 The case that Philip is talking about I think is when we dont know how many cards in each pool contain a given contest (or equivilently the number of undervotes by contest by pool). It is analogous to hasStyles = false in regular audits, although in that case, since we know Nc, the total ballots for a contest, we can correctly calculate the reported margin and the average assort value. The main effect of hasStyles = false is when it comes to sampling: we have to sample with a factor of (Nb / Nc) more ballots, where Nb is the number of physical ballots the contest might be in, and Nc in the number of ballots its actually in. (However, note this only comes into play when doing rounds of sampling; one can ignore this issue for the "one-mvr at a time" audit.)
 

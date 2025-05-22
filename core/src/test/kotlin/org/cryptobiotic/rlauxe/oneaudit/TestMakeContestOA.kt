@@ -8,7 +8,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestMakeOneAudit {
+class TestMakeContestOA {
     val N = 50000
 
     @Test
@@ -130,4 +130,11 @@ class TestMakeOneAudit {
                 " rel=${abs(underPct - undervotePercent) /underPct}")
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
     }
+}
+
+fun showPct(what: String, votes: Map<Int, Int>, Nc: Int, winner: Int = 0, loser: Int = 1) {
+    val winnerVotes = votes[winner] ?: 0
+    val loserVotes = votes[loser] ?: 0
+    val hasMargin = (winnerVotes - loserVotes) / Nc.toDouble()
+    println("$what winnerVotes = $winnerVotes loserVotes = $loserVotes diff=${winnerVotes-loserVotes} Nc=${Nc} hasMargin=$hasMargin ")
 }

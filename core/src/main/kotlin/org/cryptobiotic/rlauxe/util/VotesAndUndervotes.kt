@@ -104,6 +104,7 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
 
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
+// contestId -> VotesAndUndervotes typically from a pool
 fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolId: Int?): List<Cvr> {
     val rcvrs = mutableListOf<Cvr>()
 

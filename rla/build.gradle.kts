@@ -18,8 +18,8 @@ dependencies {
     implementation(libs.oshai.logging)
     implementation("org.apache.commons:commons-csv:1.4")
 
-    testImplementation(kotlin("test"))
-    testImplementation(libs.bundles.egtest)
+    testImplementation(libs.bundles.jvmtest)
+    testImplementation(libs.kotest.property)
     testImplementation(testFixtures(project(":core")))
 }
 

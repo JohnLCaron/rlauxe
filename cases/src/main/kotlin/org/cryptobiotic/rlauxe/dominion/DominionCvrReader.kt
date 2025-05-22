@@ -43,7 +43,7 @@ data class DominionCvrExport(
     val versionName: String,
     val filename: String,
     val schema: Schema,
-    val cvrs: List<CastVoteRecord>,
+    val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes
     val redacted: List<RedactedGroup>,
 ) {
     fun show() = buildString {
@@ -222,7 +222,8 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
         val line = records.next()
         // showLine("line", line)
         if (line.get(0).startsWith("Redacted")) { // but not "RCV Redacted ..." which can be treated like a normal CVR
-            redacted.add(RedactedGroup(line.get(ballotTypeIdx)).addVotes(schema, line))
+            redacted.add(RedactedGroup(line.get(ballotTypeIdx)).addVotes(schema, line)) // "redacted" group of votes
+
         } else if (line.get(0).startsWith("RCV Redacted")) {
             val cvr = CastVoteRecord(
                 rcvRedacted,
@@ -233,7 +234,8 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
                 line.get(ballotTypeIdx),
             )
             rcvRedacted++
-            cvrs.add(cvr.addVotes(schema, line))
+            cvrs.add(cvr.addVotes(schema, line))  // IRV redacted vote
+
         } else {
             val cvr = CastVoteRecord(
                 line.get(0).toInt(),
@@ -243,7 +245,7 @@ fun readDominionCvrExport(filename: String, countyId: String): DominionCvrExport
                 line.get(4),
                 line.get(ballotTypeIdx),
             )
-            cvrs.add(cvr.addVotes(schema, line))
+            cvrs.add(cvr.addVotes(schema, line)) // regular vote
         }
     }
     if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")

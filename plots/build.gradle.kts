@@ -20,8 +20,8 @@ dependencies {
     implementation(libs.lets.plot)
     implementation(libs.lets.plot.statistics)
 
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.bundles.egtest)
+    testImplementation(libs.bundles.jvmtest)
+    testImplementation(libs.kotest.property)
     testImplementation(testFixtures(project(":core")))
 }
 

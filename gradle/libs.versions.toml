@@ -6,14 +6,13 @@ kotlin-version = "2.1.10"
 
 # libraries version
 dataframe = "0.14.1"
-serialization = "1.7.1"
 datetime = "0.6.0"
 html = "0.11.0"
 letsPlot = "0.8.0"
 letsPlotStatistics = "0.4.0"
 letsPlotImage = "4.3.3"
 logback = "1.5.15"
-mockk = "1.13.10"
+serialization = "1.7.1"
 statistics = "0.4.0"
 
 # coroutines-version = "1.8.0-RC2"
@@ -82,7 +81,7 @@ mockk = { module = "io.mockk:mockk", version = "1.13.12" }
 [bundles]
 eglib = ["bull-result", "kotlinx-cli", "kotlinx-coroutines-core", "kotlinx-datetime", "kotlinx-serialization-json", "oshai-logging"]
 egtest = ["test-common", "test-annotations-common", "kotlinx-coroutines-test", "kotest-runner", "kotest-property", "kotest-datatest"]
-jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk"]
+jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk", "kotest-runner", "kotest-property"]
 logging = ["oshai-logging", "logback-classic"]
 # kotest = ["kotest-runner", "kotest-assertions", "kotest-property", "kotest-datatest"]
 

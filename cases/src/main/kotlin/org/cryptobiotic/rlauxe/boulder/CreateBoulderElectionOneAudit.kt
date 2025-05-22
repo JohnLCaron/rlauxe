@@ -138,6 +138,7 @@ class BoulderElectionOneAuditFromCvrs(
                     //    val contest:Int,
                     //    val ncards: Int,          // ncards for this contest in this pool
                     //    val votes: Map<Int, Int>, // candid -> nvotes // the diff from ncards tell you the undervotes
+
                     //                 undervotes = info.voteForN * (iNc - Np) - nvotes
                     val nvotes = votes.values.sum()
                     val contestTab = cvrCounts[contestId]!!
@@ -150,6 +151,7 @@ class BoulderElectionOneAuditFromCvrs(
                     // ncards (1 - undervotesPct / voteForN ) =  nvotes / voteForN
                     // ncards = (nvotes / voteForN ) / (1 - undervotesPct / voteForN )
                     // ncards = nvotes / (voteForN - undervotesPct)
+
                     val packedCards = roundToInt( nvotes / (info.voteForN - undervotePct))
                     val ncards = max(packedCards, votes.values.max()) // cant have less cards than votes
                     if (ncards > packedCards)

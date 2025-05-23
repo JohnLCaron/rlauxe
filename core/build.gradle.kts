@@ -9,7 +9,7 @@ version = libs.versions.rlauxe.get()
 dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))
     implementation(libs.kotlinx.coroutines.core)
-    implementation("org.apache.commons:commons-math3:3.6.1")
+    implementation(libs.commons.math)
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
     testFixturesImplementation(libs.bundles.jvmtest)

@@ -21,7 +21,6 @@ import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 //)
 @Serializable
 data class RaireContestUnderAuditJson(
-        // val info: ContestInfoJson,
         val raireContest: ContestIFJson,
         val winner: Int,
         val rassertions: List<RaireAssertionJson>,
@@ -29,7 +28,6 @@ data class RaireContestUnderAuditJson(
     )
 
 fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
-        // this.contest.info.publishJson(),
         this.contest.publishJson(),
         this.winner,
         this.rassertions.map { it.publishJson() },
@@ -37,7 +35,6 @@ fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
     )
 
 fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
-    // val info = this.info.import()
     val contestUA = this.contestUA.import()
     val raireContest = this.raireContest.import(contestUA.contest.info())
 
@@ -45,10 +42,8 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
         raireContest as RaireContest,
         this.winner,
         this.rassertions.map { it.import() },
-        // contestUA.isComparison,
         contestUA.hasStyle,
     )
-    // result.pollingAssertions = contestUA.pollingAssertions
     result.clcaAssertions = contestUA.clcaAssertions
     return result
 }

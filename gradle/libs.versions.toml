@@ -1,123 +1,61 @@
 [versions]
 rlauxe = "0.5.1"
 
-# kotlin-version = "1.9.23"
-kotlin-version = "2.1.10"
+# main dependency versions
+kotlin = "2.1.10"
+kotlinx-cli = "0.3.6"
+kotlinx-coroutines = "1.8.1"
+oshai-version = "7.0.0"
 
-# libraries version
-dataframe = "0.14.1"
+# library versions
+bull-result = "1.1.18"
+commons-csv = "1.4"
+commons-math = "3.6.1"
 datetime = "0.6.0"
-html = "0.11.0"
 letsPlot = "0.8.0"
 letsPlotStatistics = "0.4.0"
-letsPlotImage = "4.3.3"
-logback = "1.5.15"
 serialization = "1.7.1"
-statistics = "0.4.0"
+xmlutil-version = "0.91.1"
 
-# coroutines-version = "1.8.0-RC2"
-kotlinx-coroutines = "1.8.1"
-# coroutines-version = "1.9.0" // kobweb not using
-kotest-version = "5.9.1"
-ktor-version = "3.0.3"
-xmlutil-version = "0.91.0-RC1"
+# test only dependency versions
+junit-jupiter-params = "5.10.0"
+logback = "1.5.15"
+mockk = "1.13.12"
+kotest = "5.9.1"
 
 [libraries]
+
 # Kotlinx libraries
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version = "0.3.6" }
-kotlinx-dataframe = { group = "org.jetbrains.kotlinx", name = "dataframe", version.ref = "dataframe" }
+kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version.ref = "kotlinx-cli" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "datetime" }
-kotlinx-html = { group = "org.jetbrains.kotlinx", name = "kotlinx-html-jvm", version.ref = "html" }
-kotlinx-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statistics-jvm", version.ref = "statistics" }
 
 # Lets-Plot
 lets-plot = { group = "org.jetbrains.kotlinx", name = "kandy-lets-plot", version.ref = "letsPlot" }
 lets-plot-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statistics-jvm", version.ref = "letsPlotStatistics" }
-lets-plot-image = { group = "org.jetbrains.lets-plot", name = "lets-plot-image-export", version.ref = "letsPlotImage" }
-lets-plot-awt = { group = "org.jetbrains.lets-plot", name = "platf-awt-jvm", version.ref = "letsPlotImage" }
 
-# Libraries
-bull-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.18" }
-
-# implementation("io.github.pdvrieze.xmlutil:core-jvmcommon:0.91.0-RC1")
+# Other
+bull-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "bull-result" }
+commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "commons-csv" }
+commons-math = { module = "org.apache.commons:commons-math3", version.ref = "commons-math" }
 pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvmcommon", version.ref = "xmlutil-version" }
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
-oshai-logging = { module = "io.github.oshai:kotlin-logging", version = "7.0.0" }
+
+# Logging
+oshai-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "oshai-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
-#Ktor
-ktor-server-core-jvm = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor-version" }
-ktor-server-auth-jvm = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor-version" }
-ktor-server-content-negotiation-jvm = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor-version" }
-ktor-server-netty-jvm = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor-version" }
-ktor-network-tls-certificates = { module = "io.ktor:ktor-network-tls-certificates", version.ref = "ktor-version" }
-ktor-serialization-kotlinx-json-jvm = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor-version" }
-ktor-server-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor-version" }
-
-ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor-version" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor-version" }
-ktor-client-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-version" }
-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor-version" }
-
-#Test
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-version" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin-version" }
-kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin-version" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-
-test-common = { module = "org.jetbrains.kotlin:kotlin-test-common", version.ref = "kotlin-version" }
-test-annotations-common = { module = "org.jetbrains.kotlin:kotlin-test-annotations-common", version.ref = "kotlin-version" }
-ktor-server-tests-jvm = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor-version" }
-ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "kotlin-version" }
-junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version = "5.10.0" }
-kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest-version" }
-kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest-version" }
-kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest-version" }
-kotest-datatest = { module = "io.kotest:kotest-framework-datatest", version.ref = "kotest-version" }
-mockk = { module = "io.mockk:mockk", version = "1.13.12" }
+# Test
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter-params" }
+kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [bundles]
-eglib = ["bull-result", "kotlinx-cli", "kotlinx-coroutines-core", "kotlinx-datetime", "kotlinx-serialization-json", "oshai-logging"]
-egtest = ["test-common", "test-annotations-common", "kotlinx-coroutines-test", "kotest-runner", "kotest-property", "kotest-datatest"]
 jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk", "kotest-runner", "kotest-property"]
-logging = ["oshai-logging", "logback-classic"]
-# kotest = ["kotest-runner", "kotest-assertions", "kotest-property", "kotest-datatest"]
-
-ktor-server = [
-    "ktor-server-core-jvm",
-    "ktor-server-auth-jvm",
-    "ktor-server-content-negotiation-jvm",
-    "ktor-server-netty-jvm",
-    "ktor-network-tls-certificates",
-    "ktor-serialization-kotlinx-json-jvm",
-    "ktor-server-logging",
-    "logback-classic"
-]
-ktor-client = [
-    "ktor-client-java",
-    "ktor-client-content-negotiation",
-    "ktor-serialization-kotlinx-json-jvm",
-    "ktor-client-logging",
-    "logback-classic",
-]
-ktor-server-test = [
-    "kotlin-test",
-    "ktor-server-tests-jvm",
-    "ktor-server-test-host",
-    "ktor-client-content-negotiation",
-]
-ktor-client-test = [
-    "kotlin-test",
-    "mockk",
-]
-xmlutil = [
-    "pdvrieze-xmlutil-core-xml",
-    "pdvrieze-xmlutil-serialization-xml",
-]
+xmlutil = ["pdvrieze-xmlutil-core-xml", "pdvrieze-xmlutil-serialization-xml", ]
 
 [plugins]
-ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

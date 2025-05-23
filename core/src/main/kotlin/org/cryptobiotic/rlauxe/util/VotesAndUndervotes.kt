@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
+// This is a way to create test Cvrs that match known vote totals and undervotes for a contest
+// Also used in OneAudit estimation of sample sizes
 class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
     val candVotesSorted = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
     val votes: IntArray = candVotesSorted.map { it.value }.toIntArray()

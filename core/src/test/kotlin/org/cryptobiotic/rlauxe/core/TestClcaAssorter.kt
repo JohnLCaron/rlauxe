@@ -56,7 +56,7 @@ class TestClcaAssorter {
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         val cassorter = ClcaAssorter(info, assorter, awinnerAvg)
-        assertEquals(.01, mean2margin(cassorter.assortValueFromCvrs!!), doublePrecision)
+        assertEquals(.01, mean2margin(cassorter.assortAverageFromCvrs!!), doublePrecision)
         assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr, true))
         assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr, true))
         assertEquals(-0.5, cassorter.overstatementError(winnerCvr, otherCvr, true))
@@ -354,7 +354,7 @@ class TestClcaAssorter {
         // so assort in {0, .5, 1}
 
         val cassorter = ClcaAssorter(info, assorter, awinnerAvg)
-        assertEquals(margin, mean2margin(cassorter.assortValueFromCvrs!!), doublePrecision)
+        assertEquals(margin, mean2margin(cassorter.assortAverageFromCvrs!!), doublePrecision)
 
         assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr, true))
         assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr, true))

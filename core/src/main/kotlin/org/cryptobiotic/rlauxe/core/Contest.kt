@@ -13,8 +13,8 @@ data class ContestInfo(
     val id: Int,
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
     val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
-    val nwinners: Int = 1,          // eg "numberElected"
-    val voteForN: Int = nwinners,   // eg "contestSelectionLimit" or maybe "optionSelectionLimit"
+    val nwinners: Int = 1,          // aka "numberElected"
+    val voteForN: Int = nwinners,   // aka "contestSelectionLimit" or "optionSelectionLimit"
     val minFraction: Double? = null, // supermajority only.
 ) {
     val candidateIds: List<Int>
@@ -85,6 +85,7 @@ interface ContestIF {
 
 /**
  * Contest with the reported results.
+ * Immutable.
  * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be omitted.
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
  * @parameter Np: number of phantoms for this contest.
@@ -241,8 +242,8 @@ open class ContestUnderAudit(
     val Np = contest.Np()
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
-    var pollingAssertions: List<Assertion> = emptyList() // TODO var for serialization. is that ok?
-    var clcaAssertions: List<ClcaAssertion> = emptyList()
+    var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
+    var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
 
     init {
         if (contest.losers().size == 0) {
@@ -250,13 +251,13 @@ open class ContestUnderAudit(
         } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
-        // should really be called after init
+        // should really be called after init is done
         if (contest !is RaireContest) {
             pollingAssertions = makePollingAssertions()
         }
     }
 
-    fun makePollingAssertions(): List<Assertion> {
+    private fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes
             else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
@@ -270,7 +271,7 @@ open class ContestUnderAudit(
         }
     }
 
-    fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
+    private fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
         // test that every winner beats every loser. SHANGRLA 2.1
         val assertions = mutableListOf<Assertion>()
         contest.winners().forEach { winner ->
@@ -282,7 +283,7 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    fun makeSuperMajorityAssertions(votes: Map<Int, Int>): List<Assertion> {
+    private fun makeSuperMajorityAssertions(votes: Map<Int, Int>): List<Assertion> {
         require(contest.info().minFraction != null)
         // each winner generates 1 assertion. SHANGRLA 2.3
         val assertions = mutableListOf<Assertion>()
@@ -293,6 +294,7 @@ open class ContestUnderAudit(
         return assertions
     }
 
+    // TODO could move to test
     fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
         cvrs.filter { it.hasContest(id) }.forEach { cvr ->
@@ -314,10 +316,8 @@ open class ContestUnderAudit(
         return this
     }
 
-    // when does assertion.assorter.calcAssorterMargin(id, cvrs) == reportedMargin ?? only when voteForN = 1 ???
-    // no cvrs, use assertion.assorter.reportedMargin()
-    // TODO  in some ways this is more robust than averaging cvrs, since cvrs have to be complete and accurate.
-    //   OTOH, need complete and accurate CardLocation Manifest anyway!!
+    // This is more robust than averaging cvrs, since cvrs have to be complete and accurate.
+    // OTOH, need complete and accurate CardLocation Manifest anyway!!
     fun makeClcaAssertionsFromReportedMargin(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
@@ -419,14 +419,15 @@ open class ContestUnderAudit(
 
 }
 
-fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>) {
+// make ClcaAssertions for multiple Contests from one iteration over the Cvrs
+// The Cvrs must have the undervotes recorded
+fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
     val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
     contestsUA.forEach { contestUA ->
         contestUA.pollingAssertions.forEach { assertion ->
             assertionMap.add(Pair(assertion, Welford()))
         }
     }
-    println("assertions = ${assertionMap.size}")
 
     cvrs.forEach { cvr ->
         assertionMap.map { (assertion, welford) ->
@@ -435,7 +436,9 @@ fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>)
             }
         }
     }
-    assertionMap.forEach { (assert, welford) -> println("contest $assert : ${welford.mean}")}
+    if (show) {
+        assertionMap.forEach { (assert, welford) -> println("contest $assert : ${welford.mean}") }
+    }
 
     contestsUA.forEach { it.makeClcaAssertions(assertionMap) }
 }

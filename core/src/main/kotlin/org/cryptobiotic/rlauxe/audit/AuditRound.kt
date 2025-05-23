@@ -18,7 +18,7 @@ data class AuditRound(
 ) {
     fun show() =
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
-                " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.filter { it.done }.count()}"
+                " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
     fun createNextRound() : AuditRound {
         val nextContests = contestRounds.filter { !it.status.complete }.map{ it.createNextRound() }

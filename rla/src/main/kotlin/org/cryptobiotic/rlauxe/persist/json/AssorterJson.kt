@@ -34,7 +34,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             "OAClcaAssorter",
             this.contestOA.publishOAJson(),
             this.assorter.publishJson(),
-            this.assortValueFromCvrs,
+            this.assortAverageFromCvrs,
             true, // TODO
         )
 
@@ -43,7 +43,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             "ClcaAssorter",
             null,
             this.assorter.publishJson(),
-            this.assortValueFromCvrs,
+            this.assortAverageFromCvrs,
             this.hasStyle,
         )
     }

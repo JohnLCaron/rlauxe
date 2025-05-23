@@ -8,7 +8,7 @@ group = "org.cryptobiotic.rlauxe"
 version = libs.versions.rlauxe.get()
 
 repositories {
-    maven("https://packages.jetbrains.team/maven/p/kds/kotlin-ds-maven")  // why?? for raire-java ??
+    maven("https://packages.jetbrains.team/maven/p/kds/kotlin-ds-maven")  // for lets-plot
 }
 
 dependencies {

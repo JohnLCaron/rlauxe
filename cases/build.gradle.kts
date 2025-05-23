@@ -18,7 +18,7 @@ dependencies {
     implementation(libs.kotlinx.cli)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.oshai.logging)
-    implementation("org.apache.commons:commons-csv:1.4")
+    implementation(libs.commons.csv)
     implementation(libs.bundles.xmlutil)
 
     testImplementation(libs.bundles.jvmtest)

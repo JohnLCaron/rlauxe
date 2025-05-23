@@ -75,13 +75,13 @@ class TestOverstatementsFromShangrla {
 
     fun overstatement_assorter_margin(cassort: ClcaAssorter, error_rate_1: Double = 0.0, error_rate_2: Double = 0.0): Double {
         val assort = cassort.assorter
-        val cmargin = mean2margin(cassort.assortValueFromCvrs!!)
+        val cmargin = mean2margin(cassort.assortAverageFromCvrs!!)
         return (1 - (error_rate_2 + error_rate_1 / 2) * assort.upperBound() / cmargin) / (2 * assort.upperBound() / cmargin - 1)
     }
 
     fun overstatement_assorter_mean(cassort: ClcaAssorter, error_rate_1: Double = 0.0, error_rate_2: Double = 0.0): Double {
         val assort = cassort.assorter
-        val cmargin = mean2margin(cassort.assortValueFromCvrs!!)
+        val cmargin = mean2margin(cassort.assortAverageFromCvrs!!)
         return (1 - error_rate_1 / 2 - error_rate_2) / (2 - cmargin / assort.upperBound())
     }
 

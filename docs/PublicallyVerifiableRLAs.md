@@ -1,7 +1,7 @@
 # Publicly Verifiable RLAs
 5/23/2020
 
-1. Introduction
+## 1. Introduction
 
 * The electoral authority takes the role of _prover_.
 * The public takes the role of _verifier_.
@@ -12,8 +12,7 @@
 * The _risk-limiting property_ is an upper bound on the probability that the verifier accepts an apparent outcome that
 is actually wrong.
 
-
-2. Interactive Proofs
+## 2. Interactive Proofs
 
 A _ballot_ is the physical evidence of one voter’s choices. A ballot may be split into multiple _cards_, each of which 
 may have several _contests_. A cast vote record (CVR) is an electronic record of all the choices on one card. 
@@ -29,7 +28,7 @@ The instance x is a multiset with elements being (card, ID) pairs.
 (LOOK why is it a multiset? because ID might be duplicated? Can the card be duplicated?)
 
 
-3. Definitions
+## 3. Definitions
 
 * _U_ is an upper bound on the total number of cards that contain the contest.
 * _N_ is an upper bound on the total number of cards.
@@ -37,13 +36,13 @@ The instance x is a multiset with elements being (card, ID) pairs.
 * _PROBLEM_ is the set of problem card values (including absent, disputed, etc).
 * A _Manual Vote Record_ (MVR) is the version of a cast vote record uploaded when the card is sampled for audit.
 
-Definition 1. An assertion A is a predicate on the set of votes, including PROBLEM ones.
+**Definition 1**. An assertion A is a predicate on the set of votes, including PROBLEM ones.
 
     A(V) = true | false
 
 Each assertion has a corresponding assorter, a:
 
-Definition 3. An _assorter_ translates data from audited votes (and optionally CVRs) into an output
+**Definition 3**. An _assorter_ translates data from audited votes (and optionally CVRs) into an output
 that is appropriate for a P-value calculation. It is a function
 
      a : STYLE(i) × [0, u_a] × (V(i) ∪ PROBLEM) → [0, u_a].
@@ -54,9 +53,9 @@ that is appropriate for a P-value calculation. It is a function
         u_a is the _upper bound_ of a
         V(i) are the valid votes for this contest on card i, as seen on an MVR.
 
-3.3.1. The prover needs to commit to which ID will be retrieved when a given value in [1, N] is sampled.
+### 3.3.1. The prover needs to commit to which ID will be retrieved when a given value in [1, N] is sampled.
 
-Definition 4. The prover’s ID commitment is a function:
+**Definition 4**. The prover’s ID commitment is a function:
 
     FIND : [1, N] → (I ∪ ⊥).
 
@@ -65,9 +64,9 @@ where
     ⊥ indicates no ballot will be retrieved.
 
 
-3.4 Ballot Styles
+### 3.4 Ballot Styles
 
-Definition 5. The prover’s style commitment is a function
+**Definition 5**. The prover’s style commitment is a function
 
   STYLE : [1, N] → [0, 1].
 
@@ -75,9 +74,9 @@ A value x with 0 < x < 1 means that the card is being treated as part of a colle
 contains the contest. LOOK MAYBE WRONG?
 
 
-3.5 Assorter Reference values
+### 3.5 Assorter Reference values
 
-Definition 6. The prover’s assorter reference values are provided, for each index, as a list of reference values, one
+**Definition 6**. The prover’s assorter reference values are provided, for each index, as a list of reference values, one
 for each assertion in ASSERTIONS. ASSORTER-REF inputs a value i in [1, N] and outputs a list (r1, r2, . . . , r|ASSORTERS|).
 
 These reference values are ignored for polling audits. -> These reference values only exist for comparison audits.
@@ -86,11 +85,11 @@ It would be (mostly) equivalent to let the prover commit to a CVR, and then let 
 LOOK Doesnt V need to have the CVRs , not just the reference values as supplied by P?
 
 
-3.6 Connecting Assertions and Assorters
+### 3.6 Connecting Assertions and Assorters
 
 For a valid audit, an assorter mean greater than 1/2 must imply that the assertion is true:
 
-Definition 7. Assorter aj _corresponds_ to assertion Aj when, for all possible votes V : [1, N] → (V(i) ∪ PROBLEM),
+**Definition 7**. Assorter aj _corresponds_ to assertion Aj when, for all possible votes V : [1, N] → (V(i) ∪ PROBLEM),
 
     Avg( aj(STYLE(i), r(i)_j, V(i)) > 1/2 ⇒ Aj(V) = true
 
@@ -100,13 +99,13 @@ Definition 7. Assorter aj _corresponds_ to assertion Aj when, for all possible v
         V(i) are the valid votes for this contest on card i
 
 
-Definition 8. Define the ballot polling assorter aPOLL as follows.
+**Definition 8**. Define the ballot polling assorter aPOLL as follows.
   aPOLL(i)= 0 if FIND(i) = (⊥, ⊥), i.e. there is no ballotID corresponding to i,
             0 if FIND(i) = (id, ⊥) and either no card was returned or a card with a different ID was returned,
             a(MVR_id) if FIND(i) = (id, ⊥) and card containing MVR_id was returned.
 
 
-Definition 10. Define the ballot-level comparison assorter aCOMP as follows:
+**Definition 10**. Define the ballot-level comparison assorter aCOMP as follows:
 aCOMP(i) = 1 / ( 2u − ν) × 1/2 − aPOLL(i)      if FIND(i) = (x, ⊥) (including x = ⊥), i.e. there is no CVR corresponding to i,
                            a(CVR_id) − aPOLL(i) if FIND(i) = (x, CVRid) (including x = ⊥),
 

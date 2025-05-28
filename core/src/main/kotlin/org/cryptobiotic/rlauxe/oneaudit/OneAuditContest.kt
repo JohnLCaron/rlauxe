@@ -234,7 +234,8 @@ class OneAuditClcaAssorter(
     val contestOA: OneAuditContest,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs
     assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value. TODO wrong ??
-) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs) {
+    hasStyle: Boolean = true,
+) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs, hasStyle) {
     private val doAffineTransform = (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
     private val affineMin: Double
     private val affineIScale: Double
@@ -277,10 +278,10 @@ class OneAuditClcaAssorter(
     }
 
     // B(bi, ci)
-    override fun bassort(mvr: Cvr, cvr: Cvr): Double {
+    override fun bassort(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
         if (cvr.poolId == null) {
             require(!doAffineTransform)
-            return super.bassort(mvr, cvr) // here we use the standard assorter
+            return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
         }
 
         // if (hasStyle && mvr.hasContest(contestOA.id)) return 0.5   TODO does this solve the undervote problem ??

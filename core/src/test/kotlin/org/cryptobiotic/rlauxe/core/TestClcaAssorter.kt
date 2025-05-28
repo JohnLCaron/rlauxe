@@ -422,12 +422,14 @@ class TestClcaAssorter {
         val loserCvr = makeCvr(1)
         val otherCvr = makeCvr(2)
         val phantomCvr = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
-        val cvrs = listOf(winnerCvr, loserCvr, otherCvr, phantomCvr)
+        val cvrs = listOf(winnerCvr, winnerCvr, loserCvr, otherCvr, phantomCvr)
         val contest = makeContestFromCvrs(info, cvrs)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val awinnerAvg = .51
+        val awinnerAvg = .55
         val cassorter = ClcaAssorter(info, assorter, awinnerAvg)
+        val noerror = cassorter.noerror()
+        println("  noerror = $noerror")
 
         val differentContest = Cvr("diff", mapOf(1 to IntArray(0)))
 
@@ -438,8 +440,22 @@ class TestClcaAssorter {
         }.message!!
         assertTrue(mess.contains("does not contain contest"))
 
+        // contest does not appear on the mvr
         assertEquals(0.5, cassorter.overstatementError(differentContest, winnerCvr, false))
+        assertEquals(-0.5, cassorter.overstatementError(differentContest, loserCvr, false))
+        assertEquals(0.0, cassorter.overstatementError(differentContest, otherCvr, false))
+
         assertEquals(1.0, cassorter.overstatementError(differentContest, winnerCvr, true))
+        assertEquals(0.0, cassorter.overstatementError(differentContest, loserCvr, true))
+        assertEquals(0.5, cassorter.overstatementError(differentContest, otherCvr, true))
+
+        assertEquals(0.5 * noerror, cassorter.bassort(differentContest, winnerCvr, false))
+        assertEquals(1.5 * noerror, cassorter.bassort(differentContest, loserCvr, false))
+        assertEquals(1.0 * noerror, cassorter.bassort(differentContest, otherCvr, false))
+
+        assertEquals(0.0 * noerror, cassorter.bassort(differentContest, winnerCvr, true))
+        assertEquals(1.0 * noerror, cassorter.bassort(differentContest, loserCvr, true))
+        assertEquals(0.5 * noerror, cassorter.bassort(differentContest, otherCvr, true))
     }
 
     @Test
@@ -462,5 +478,4 @@ class TestClcaAssorter {
         val calcMean = margin2mean(calcMargin)
         assertEquals(expected, calcMean, doublePrecision)
     }
-
 }

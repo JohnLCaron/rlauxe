@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
  * Then (u/v) * (1 − τ̄) < 1/2 == (-u/v) τ̄ < 1/2 - (u/v) == τ̄ > (-v/u)/2 - (-v/u)(u/v) == 1 - v/2u == (2u - v) / 2u
  *    τ̄ * u / (2u - v)  > 1/2  ==   τ̄ / (2 - v/u) > 1/2     (6)
  * Define B(bi, ci) ≡ τi /(2 − v/u) =  (1 − (ωi / u)) / (2 − v/u)    (7)
- *   Āb > 1/2  iff  Avg(B(bi, ci)) < 1/2      (8)
+ *   Āb > 1/2  iff  Avg(B(bi, ci)) > 1/2      (8)
  * which makes B(bi, ci) an assorter.
  */
 open class ClcaAssorter(
@@ -41,26 +41,32 @@ open class ClcaAssorter(
     val upperBound: Double // upper bound of clca assorter
 
     init {
+        if (info.choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
+            require(assorter is SuperMajorityAssorter) { "assorter must be SuperMajorityAssorter" }
+        }
+
         // Define v ≡ 2Āc − 1, the assorter margin TODO just use reportedMArgin
-        cvrAssortMargin = assorter.reportedMargin()
+        cvrAssortMargin = assorter.reportedMargin() // (0, 1)
         // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
-        noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error
+        noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
         // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
         // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7) above
         upperBound = 2.0 * noerror // upper bound of clca assorter
 
         val cvrAssortAvg = if (assortAverageFromCvrs != null) assortAverageFromCvrs else assorter.reportedMean()
-        if (cvrAssortAvg <= 0.5)
-            println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5" )
+        /* if (cvrAssortAvg <= 0.5) {
+            println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5")
+        }
         if (noerror <= 0.5)
             println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: noerror ($noerror) must be > .5" )
-        /* if (check) { // TODO suspend checking for some tests that expect to fail
-            require(avgCvrAssortValue > 0.5) {
-                "${info.name} (${info.id}) ${assorter.desc()}: avgCvrAssortValue ($avgCvrAssortValue)  must be > .5"
+         */
+        if (check) { // TODO suspend checking for some tests that expect to fail
+            require(cvrAssortAvg > 0.5) {
+                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5"
             }
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
-        } */
+        }
     }
 
     fun id() = info.id
@@ -94,8 +100,8 @@ open class ClcaAssorter(
     //      [2,         1.875,      1.125,      1,  .875,       .125,       0] * noerror  for u = 4
     //      [2,         1.666,      1.333,      1,  .666,       .333,       0] * noerror  for u = .75
 
-    open fun bassort(mvr: Cvr, cvr:Cvr): Double {
-        val overstatement = overstatementError(mvr, cvr, this.hasStyle) // ωi eq (1)
+    open fun bassort(mvr: Cvr, cvr:Cvr, hasStyle: Boolean = this.hasStyle): Double {
+        val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
     }

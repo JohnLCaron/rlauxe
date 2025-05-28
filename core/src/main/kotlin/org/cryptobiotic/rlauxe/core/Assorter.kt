@@ -33,8 +33,8 @@ interface AssorterIF {
     fun desc(): String
     fun winner(): Int  // candidate id
     fun loser(): Int   // candidate id
-    fun reportedMargin(): Double // this is mostly for seeing what assertions are close. Could be calculated onthefly.
-    fun reportedMean() = margin2mean(reportedMargin())
+    fun reportedMargin(): Double // in (0, 1)
+    fun reportedMean() = margin2mean(reportedMargin())  // in (.5, 1]
 
     // Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
     //    by treating the phantom CVRs as if they contain no valid vote in the contest

@@ -1,26 +1,21 @@
 # Verifier for comparison audit with complete contest info on the CVRs
 
-1. Committing to Information About Cards
+## 1. Committing to Information About Cards
 
-( not needed: The Prover must supply an ordered list of Ids which constitutes the Find function. Find : 1..N → I   (I is an ID or ⊥)
-If Find(i) == ⊥ the Prover does not claim to be able to retrieve i.)
-
-The Prover must supply an ordered list of CVRs which constitutes the Find, CVR and Style function. 
+The Prover must supply an ordered list of CVRs which constitutes the Find, CVR and Style functions: 
 
     CVR : 1..N → (V ∪ *bad* ∪ ⊥)
     If CVR(i) == ⊥ the Prover does not claim to be able to retrieve i.
 
-THe CVRs have the identifier.
-The order of the CVRs may not be changed.
-The ⊥ must agree with the Find function.
-The CVRS may have multiple contests.
-The CVR comittment must be made before the seed is drawn.
+* The CVRs have the identifier.
+* The order of the CVRs may not be changed.
+* The CVRS may have multiple contests.
+* The CVR comittment must be made before the seed is drawn.
+* When we have CVRs, the style commitment is assumed to be zero when CVR(i) = notPresent, and one otherwise.
 
-Verification 1. The Verifier must verify the identifiers are unique.
+**Verification 1. The Verifier must verify the identifiers are unique.**
 
-( When we have CVRs, the style commitment is assumed to be zero when CVR(i) = notPresent, and one otherwise)
-
-2. Proof Parameters
+## 2. Proof Parameters
 
 The proof parameters define values and algorithms that are used by both the Prover and the
 Verifier. These must be committed to before the election starts.
@@ -31,7 +26,7 @@ Verifier. These must be committed to before the election starts.
 * A stopping condition Stop (see Section 1.9).
 
 
-3. Sampling function
+## 3. Sampling function
 
 A random seed is chosen. The process of creating the seed is publically visible, so all parties are ensured 
 that it is both random and was created after the CVR committmwnt was made.
@@ -41,12 +36,12 @@ It uses this to create a random ordering of the CVRs, which is used to tell the 
 
 All verifiers use the same PRG. The Verifier publishes the ordered list of ballot ids that were audited.
 
-Verification 2. The Verifier verifies the list of ballot ids are the ones created by the PRG with the given seed.
+**Verification 2. The Verifier verifies the list of ballot ids are the ones created by the PRG with the given seed.**
 
 Note: In this formulation, we verify another Verifier, not the Prover.
 
 
-4. P-value calculator
+## 4. P-value calculator
 
 A p-value calculator inputs a sequence of values calculated by an assorter from
 votes that are assumed to derive from some sampling strategy. It assesses the
@@ -57,9 +52,9 @@ A p-value function is sequentially valid if when it is evaluated repeatedly
 over a telescoping sample, the chance that it is ever below q is at most q.
 
 
-5. Ballot auditing workflow
+## 5. Ballot auditing workflow
 
-5.1 Ballot auditing (sequential, single contest)
+### 5.1 Ballot auditing (sequential, single contest)
 
 A sequential audit, or "one ballot at a time" makes things simple. Here we assume all ballots have
 the same single contest, but there may be multiple assertions to test.
@@ -84,7 +79,7 @@ sortedBallots.forEach { ballot ->
 }
 ````
 
-5.2 Ballot auditing (sequential, multicontest)
+### 5.2 Ballot auditing (sequential, multicontest)
 
 Here we allow multiple contests per ballot. To avoid sampling bias, its necessary that ballots are examined
 in sorted order and only skip ballots that have no contests needing auditing.
@@ -114,7 +109,7 @@ sortedBallots.forEach { ballot ->
 }
 ````
 
-5.3 Ballot auditing (batch, single contest)
+### 5.3 Ballot auditing (batch, single contest)
 
 More realistic is a batch process. We estimate, based on the vote margin, how many ballots are needed to
 prove the assertions, then audit all those in one batch. If the batchSize turns out to be too small, we do another round, up 
@@ -144,7 +139,7 @@ for (idx : 0 until batchSize) {
 }
 ````
 
-5.4 Ballot auditing (batch, multicontest)
+### 5.4 Ballot auditing (batch, multicontest)
 
 Here we allow multiple contests per ballot using batches. Each contest has its own estimated batchSize.
 We first run through the ballots, and select ballots that have contests needing auditing,

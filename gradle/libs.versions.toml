@@ -2,25 +2,24 @@
 rlauxe = "0.5.1"
 
 # main dependency versions
-kotlin = "2.1.10"
+kotlin = "2.1.21"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines = "1.8.1"
+kotlinx-coroutines = "1.10.2"
 oshai-version = "7.0.0"
 
 # library versions
 bull-result = "1.1.18"
 commons-csv = "1.4"
 commons-math = "3.6.1"
-datetime = "0.6.0"
 letsPlot = "0.8.0"
 letsPlotStatistics = "0.4.0"
 serialization = "1.7.1"
 xmlutil-version = "0.91.1"
 
 # test only dependency versions
-junit-jupiter-params = "5.10.0"
+junit-jupiter-params = "5.13.1"
 logback = "1.5.18"
-mockk = "1.13.12"
+mockk = "1.14.2"
 kotest = "5.9.1"
 
 [libraries]

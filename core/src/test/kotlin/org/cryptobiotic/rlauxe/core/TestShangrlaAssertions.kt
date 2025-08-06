@@ -267,8 +267,105 @@ class TestShangrlaAssertions {
         assertEquals(0.0, cassorter.overstatementError(mvr4, cvr1, hasStyle = false))
     }
 
+    // plurality assort = {1, 0, .5} if vote is for { winner, loser, neither}
+    //
+    //overstatement = cvr_assort - mvr_assort  = { -1, -.5, 0, .5, 1 }  = "how much was vote overstated?"
+    //
+    //overstatement(MVR, CVR) with alice as winner, bob as loser:
+    //
+    //       overstatement(bob, alice) = 1 = overstated by one vote
+    //       overstatement(bob, other) = .5 = overstated by half vote
+    //       overstatement(other, alice) = .5 = overstated by half vote
+    //       overstatement(alice, alice) = 0
+    //       overstatement(alice, other) = -.5 = understated by half vote
+    //       overstatement(other, bob) = -.5 = understated by half vote
+    //       overstatement(alice, bob) = -1 = understated by one vote
+    //
+    ////// 1 contest does not appear on the CVR, hasStyle = false, same as when CVR = other
+    //       overstatement(bob, none) = .5
+    //       overstatement(alice, none) = -.5
+    //       overstatement(other, none) = 0
+    //
+    ////// 2 contest does not appear on the MVR, hasStyle = false, same as when MVR = other
+    //       overstatement(none, bob) = -.5
+    //       overstatement(none, alice) = .5
+    //       overstatement(none, other) = 0
+    //
+    ////// 3 contest does not appear on the MVR, hasStyle = true, same as when MVR = bob (worst case)
+    //       overstatement(none, bob) = 0
+    //       overstatement(none, alice) = 1
+    //       overstatement(none, other) = .5
+
     @Test
     fun test_overstatement_plurality() { // agrees with SHANGRLA
+        // winner = alice, loser = bob
+        val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1, reportedMargin = 0.2)
+        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, null)
+
+        // mvr == cvr, always get noerror
+        assertEquals(0.0, aliceVsBob.overstatementError(aliceMvr, aliceMvr, hasStyle = true)) // 1
+        assertEquals(0.0, aliceVsBob.overstatementError(bobMvr, bobMvr, hasStyle = true))
+        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, candyMvr, hasStyle = true))
+        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, undervoteMvr, hasStyle = true))
+
+        // the overstatemnt is 0, but i think assort needs to be 1/2, not noerror
+        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
+        val mess = assertFailsWith<RuntimeException>{
+            aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
+        }.message
+        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+
+        assertEquals(1.0, aliceVsBob.overstatementError(bobMvr, aliceMvr, hasStyle = true)) // 2
+        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, candyMvr, hasStyle = true))
+        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, undervoteMvr, hasStyle = true))
+        assertEquals(-1.0, aliceVsBob.overstatementError(aliceMvr, bobMvr, hasStyle = true))
+        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, candyMvr, hasStyle = true))
+        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, undervoteMvr, hasStyle = true))
+        assertEquals(-0.5, aliceVsBob.overstatementError(candyMvr, bobMvr, hasStyle = true))
+        assertEquals(0.5, aliceVsBob.overstatementError(candyMvr, aliceMvr, hasStyle = true))
+        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, danMvr, hasStyle = true))
+        assertEquals(-0.5, aliceVsBob.overstatementError(undervoteMvr, bobMvr, hasStyle = true)) // none = other
+        assertEquals(0.5, aliceVsBob.overstatementError(undervoteMvr, aliceMvr, hasStyle = true))
+        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, danMvr, hasStyle = true))
+
+        // exaclty the same as above, since hasStyle only has an effect when the contest is not in the MVR or CVR
+        assertEquals(1.0, aliceVsBob.overstatementError(bobMvr, aliceMvr, hasStyle = false)) // 3
+        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, candyMvr, hasStyle = false))
+        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, undervoteMvr, hasStyle = false))
+        assertEquals(-1.0, aliceVsBob.overstatementError(aliceMvr, bobMvr, hasStyle = false))
+        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, candyMvr, hasStyle = false))
+        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, undervoteMvr, hasStyle = false))
+        assertEquals(-0.5, aliceVsBob.overstatementError(candyMvr, bobMvr, hasStyle = false))
+        assertEquals(0.5, aliceVsBob.overstatementError(candyMvr, aliceMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, danMvr, hasStyle = false))
+        assertEquals(-0.5, aliceVsBob.overstatementError(undervoteMvr, bobMvr, hasStyle = false))
+        assertEquals(0.5, aliceVsBob.overstatementError(undervoteMvr, aliceMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, danMvr, hasStyle = false))
+
+        //// contest does not appear on the MVR, hasStyle = true
+        // we get an overstatementError of {1, 0, 1/2} depending if the CVR showed a vote for the {winner, loser, other}
+        assertEquals(1.0, aliceVsBob.overstatementError(wrongContestMvr, aliceMvr, hasStyle = true)) // 4
+        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, bobMvr, hasStyle = true))
+        assertEquals(0.5, aliceVsBob.overstatementError(wrongContestMvr, candyMvr, hasStyle = true))
+        assertEquals(0.5, aliceVsBob.overstatementError(wrongContestMvr, undervoteMvr, hasStyle = true)) // none = other
+
+        //// contest does not appear on the MVR, hasStyle = false
+        // we get an overstatementError of {1/2, -1/2, 0} depending if the CVR showed a vote for the {winner, loser, other}
+        assertEquals(0.5, aliceVsBob.overstatementError(wrongContestMvr, aliceMvr, hasStyle = false)) // 5
+        assertEquals(-0.5, aliceVsBob.overstatementError(wrongContestMvr, bobMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, candyMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, undervoteMvr, hasStyle = false)) // none = other
+
+        //// contest does not appear on the CVR, hasStyle = false
+        // we get an overstatementError of {-1/2, 1/2, 0} depending if the MVR showed a vote for the {winner, loser, other}
+        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, wrongContestMvr, hasStyle = false)) // 6
+        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, wrongContestMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, wrongContestMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, wrongContestMvr, hasStyle = false)) // none = other
+    }
+
+    @Test
+    fun test_overstatement_plurality_assort() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1, reportedMargin = 0.2)
         val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, null)
@@ -321,22 +418,9 @@ class TestShangrlaAssertions {
     // the SHANGRLA test is with the supermajority contest. blah
     @Test
     fun test_overstatement_assorter() {
-        //     def test_overstatement_assorter_fixed(self):
-        //        '''
-        //        (1-o/u)/(2-v/u)
-        //        '''
-        //        mvr_dict = [{'id': 1, 'votes': {'AvB': {'Alice':True}}},
-        //                    {'id': 2, 'votes': {'AvB': {'Bob':True}}},
-        //                    {'id': 3, 'votes': {'AvB': {'Candy':True}}}]
-        //        mvrs = CVR.from_dict(mvr_dict)
         val mvr0 = aliceMvr
         val mvr1 = bobMvr
         val mvr2 = wrongContestMvr
-
-        //
-        //        cvr_dict = [{'id': 1, 'votes': {'AvB': {'Alice':True}}},
-        //                    {'id': 2, 'votes': {'AvB': {'Bob':True}}}]
-        //        cvrs = CVR.from_dict(cvr_dict)
         val cvr0 = aliceMvr
         val cvr1 = bobMvr
 

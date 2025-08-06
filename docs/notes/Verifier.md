@@ -7,13 +7,12 @@ The Prover must supply an ordered list of CVRs which constitutes the Find, CVR a
     CVR : 1..N → (V ∪ *bad* ∪ ⊥)
     If CVR(i) == ⊥ the Prover does not claim to be able to retrieve i.
 
-* The CVRs have the identifier.
-* The order of the CVRs may not be changed.
+* The CVRs have the ballot identifier.
+* The CVRs may not be changed in any way after committment.
 * The CVRS may have multiple contests.
 * The CVR comittment must be made before the seed is drawn.
-* When we have CVRs, the style commitment is assumed to be zero when CVR(i) = notPresent, and one otherwise.
 
-**Verification 1. The Verifier must verify the identifiers are unique.**
+**Verification 1. The Verifier must verify the ballot identifiers are unique.**
 
 ## 2. Proof Parameters
 
@@ -22,7 +21,7 @@ Verifier. These must be committed to before the election starts.
 
 * A risk limit α ∈ [0, 1]
 * A sampling function.
-* A p-value calculator P-val (see Section 1.8).
+* A p-value calculator ProbVal (see Section 1.8).
 * A stopping condition Stop (see Section 1.9).
 
 
@@ -54,7 +53,7 @@ over a telescoping sample, the chance that it is ever below q is at most q.
 
 ## 5. Ballot auditing workflow
 
-### 5.1 Ballot auditing (sequential, single contest)
+### 5.1 Sequential, single contest
 
 A sequential audit, or "one ballot at a time" makes things simple. Here we assume all ballots have
 the same single contest, but there may be multiple assertions to test.
@@ -79,7 +78,7 @@ sortedBallots.forEach { ballot ->
 }
 ````
 
-### 5.2 Ballot auditing (sequential, multicontest)
+### 5.2 Sequential, multicontest
 
 Here we allow multiple contests per ballot. To avoid sampling bias, its necessary that ballots are examined
 in sorted order and only skip ballots that have no contests needing auditing.
@@ -109,7 +108,7 @@ sortedBallots.forEach { ballot ->
 }
 ````
 
-### 5.3 Ballot auditing (batch, single contest)
+### 5.3 Batch, single contest
 
 More realistic is a batch process. We estimate, based on the vote margin, how many ballots are needed to
 prove the assertions, then audit all those in one batch. If the batchSize turns out to be too small, we do another round, up 
@@ -139,7 +138,7 @@ for (idx : 0 until batchSize) {
 }
 ````
 
-### 5.4 Ballot auditing (batch, multicontest)
+### 5.4 Batch, multicontest
 
 Here we allow multiple contests per ballot using batches. Each contest has its own estimated batchSize.
 We first run through the ballots, and select ballots that have contests needing auditing,

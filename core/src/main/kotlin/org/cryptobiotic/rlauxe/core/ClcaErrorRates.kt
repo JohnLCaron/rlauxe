@@ -78,7 +78,7 @@ object ClcaErrorTable {
     init {
         // GenerateClcaErrorTable.generateErrorTable()
         // N=100000 ntrials = 200
-        // generated 1/26/2026
+        // generated 1/26/2025
         rrates[2] = listOf(0.2623686, 0.2625469, 0.2371862, 0.2370315,)
         rrates[3] = listOf(0.1400744, 0.3492912, 0.3168304, 0.1245060,)
         rrates[4] = listOf(0.1277999, 0.3913025, 0.3519773, 0.1157800,)

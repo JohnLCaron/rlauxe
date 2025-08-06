@@ -1,7 +1,6 @@
 # AlphaMart risk function for Polling Audits
 last updated Mar 19, 2025
 
-**Table of Contents**
 <!-- TOC -->
 * [AlphaMart risk function for Polling Audits](#alphamart-risk-function-for-polling-audits)
   * [AlphaMart](#alphamart)

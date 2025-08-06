@@ -110,7 +110,7 @@ in a risk-limiting audit with risk limit α:
 | risk	         | we want to confirm or reject the null hypothesis with risk level α.                            |
 | assorter      | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
 | assertion     | the mean of assorter values is > 1/2: "half-average assertion"                                 |
-| estimator     | estimates the true population mean from the sampled assorter values. (AlphaMart)               |
+| estimator     | estimates the true population mean from the sampled assorter values.                           |
 | bettingFn     | decides how much to bet for each sample. (BettingMart)                                         |
 | riskTestingFn | is the statistical method to test if the assertion is true.                                    |
 | audit         | iterative process of choosing ballots and checking if all the assertions are true.             |
@@ -235,7 +235,7 @@ The requirements for CLCA audits:
 * Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
-For the _risk function_, rlaux uses the **BettingMart** function with the **AdaptiveBetting** _betting function_. 
+For the _risk function_, rlauxe uses the **BettingMart** function with the **AdaptiveBetting** _betting function_. 
 AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
 AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 

@@ -29,7 +29,7 @@ class TestRaireContest {
         assertEquals(listOf(0, 2, 3, 4, 42), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "RaireContest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2, cand3=3, cand4=4, cand42=42}, winners=[1], iNc=211, Np=1)",
+            "RaireContest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2, cand3=3, cand4=4, cand42=42} voteForN=1, winners=[1], iNc=211, Np=1)",
             contest.toString()
         )
 

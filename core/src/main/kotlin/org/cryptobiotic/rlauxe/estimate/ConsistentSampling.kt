@@ -98,8 +98,8 @@ fun consistentSampling(
     val sortedBorcIter = mvrManager.sortedCards()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
-        contestsIncluded.any { contestWantsMoreSamples(it) } &&
-        sortedBorcIter.hasNext()) {
+            contestsIncluded.any { contestWantsMoreSamples(it) } &&
+            sortedBorcIter.hasNext()) {
 
         // get the next sorted cvr
         val boc = sortedBorcIter.next()

@@ -11,7 +11,7 @@ class TestContest {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         assertEquals(listOf(0, 1), info.candidateIds)
         assertEquals(1, info.nwinners)
-        assertEquals("'testContestInfo' (0) candidates={cand0=0, cand1=1}", info.toString())
+        assertEquals("'testContestInfo' (0) candidates={cand0=0, cand1=1} voteForN=1", info.toString())
 
         val mess = assertFailsWith<IllegalArgumentException> {
             ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.SUPERMAJORITY)
@@ -106,7 +106,7 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0}",
+            "testContestInfo (0) Nc=211 Np=1 votesAndUndervotes={1=108, 0=100, 2=0, 3=2}",
             contest.toString()
         )
 
@@ -125,8 +125,8 @@ class TestContest {
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
-        assertEquals("testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0}", contest.toString())
-        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2}, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votes={1=108, 0=100, 2=0}, winnerNames=[cand1], winners=[1], losers=[0, 2])",
+        assertEquals("testContestInfo (0) Nc=211 Np=1 votesAndUndervotes={1=108, 0=100, 2=0, 3=2}", contest.toString())
+        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2} voteForN=1, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votesAndUndervotes={1=108, 0=100, 2=0, 3=2}, winnerNames=[cand1], winners=[1], losers=[0, 2])",
             contest.show())
 
 
@@ -154,7 +154,7 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=227 Np=2 votes={1=125, 0=100, 2=0}",
+            "testContestInfo (0) Nc=227 Np=2 votesAndUndervotes={1=125, 0=100, 2=0, 3=0}",
             contest.toString()
         )
         println("margin(1,0) = ${contest.calcMargin(1,0)}")
@@ -183,7 +183,7 @@ class TestContest {
         assertEquals(listOf(0, 1, 2), contest.losers)
         assertEquals(emptyList(), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2}",
+            "testContestInfo (0) Nc=227 Np=2 votesAndUndervotes={1=123, 0=100, 2=2, 3=0}",
             contest.toString()
         )
         println("margin(1,0) = ${contest.calcMargin(1,0)}")
@@ -277,7 +277,7 @@ class TestContest {
         """.replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.showCandidates())
 
-        val expectedShow = """Contest 'testContestInfo' (0) votes={1=108, 0=100, 2=0}
+        val expectedShow = """Contest 'testContestInfo' (0) votesAndUndervotes={1=108, 0=100, 2=0, 3=3}
  margin=0.0379 recount=0.0741 Nc=211 Np=0
  choiceFunction=PLURALITY nwinners=1, winners=[1]
    0 'cand0': votes=100

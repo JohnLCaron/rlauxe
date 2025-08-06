@@ -3,16 +3,11 @@
 
 ## Polling Audits
 
-When CVRs are not available, a Polling audit can be done instead. A Polling audit  
-creates an MVR for each ballot card selected for sampling, just as with a CLCA, except without the CVR.
-
 The requirements for Polling audits:
 
 * There must be a BallotManifest defining the population of ballots, that contains a unique identifier that can be matched
   to the corresponding physical ballot.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
-
-
 
 Define the assorter function `A_wk(bi)` for winner w and loser ℓ operating on the ith ballot bi.
 The following Social Choice functions are supported.
@@ -23,8 +18,8 @@ The following Social Choice functions are supported.
 The rules may allow the voter to vote for one candidate, k candidates or some other number, including n, which
 makes it approval voting.
 
-A contest has K ≥ 1 winners and C > K candidates. Let wk be the kth winner, and ℓj be the jth loser.
-For each pair of winner and loser, let H_wk,ℓj be the assertion that wk is really the winner over ℓj.
+A contest has K ≥ 1 winners and C > K candidates. Let w be the winner, and ℓ be the loser.
+For each pair of winner and loser, let H_wℓ be the assertion that w is really the winner over ℓ.
 There are K(C − K) assertions. 
 
 **Plurality**: there is exactly one winner, then there are C - 1 assertions, pairing the winner with each loser.
@@ -32,7 +27,7 @@ For a two candidate election, there is only one assertion. See SHANGRLA, section
 
 **Approval**:  voters may vote for as many candidates as they like. The top K candidates are elected. See SHANGRLA, section 2.2.
 
-The assorter function `A_wk(bi)` for winner w and loser ℓ operating on the ith ballot bi is
+The assorter function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
 
 ````
     assign 0 if (usePhantoms && mvr.isPhantom)
@@ -47,16 +42,16 @@ The upper bound is 1.
 "Top k candidates are elected, whose percent vote is above a fraction, f." See SHANGRLA, section 2.3.
 
 A winning candidate must have a minimum fraction f in the open interval (0, 1) of the valid votes to win.
-Note that we use valid votes for the contest (Vc) instead of all notes (Nc) in the denominator when calculating
-the percent vote for a candidate..
+Note that we use valid votes for the contest (Vc) instead of all ballots (Nc) in the denominator when calculating
+the percent vote for a candidate.
 
 Currently we only support 1 winner.
 For supermajorrity, we only need one assorter for each winner, not one for each winner/loser pair.
 
-For the ith ballot, calculate `A_wk` as
+For the ith ballot, calculate `A_wℓ` as
 
 ````
-    assign the value “1/(2*f)” if it has a mark for wkbut no one else; 
+    assign the value “1/(2*f)” if it has a mark for w but no one else; 
     assign the value “0” if it has a mark for exactly one candidate and not w
     assign the value 1/2, otherwise.
 ````
@@ -65,52 +60,41 @@ The upper bound is 1/(2*f).
 
 ## Card Level Comparison Audits (CLCA)
 
-When the election system produces an electronic record for each ballot card, known as a Cast Vote Record (CVR), then
-Card Level Comparison Audits can be done that compare sampled CVRs with the corresponding ballot card that has been
-hand audited to produce a Manual Vote Record (MVR). A CLCA typically needs many fewer sampled ballots to validate contest
-results than other methods.
-
 The requirements for CLCA audits:
 
 * The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot.
 * Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
-Rlauxe uses the **BettingMart** risk function with the **AdaptiveBetting** _betting function_.
-This is also called the _p-value calculators_
-
-AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
-AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
-
-
 ### The ClcaAssorter for CLCA
 
 The ClcaAssorter for CLCA uses the assorter functions for Plurality, Approval, and SuperMajority social choice
 functions `A_wℓ` as defined above. We will continue to use _assorter function_ to mean these functions, and use
-_clcaAssorter function_ to refer to the function used by Card Level Comparison Audits.
+_clcaAssorter function_ to refer to the assorter used by Card Level Comparison Audits.
 
 CLCAs have the same number of assertions as in the Polling Audit case, with the same meaning.
 
-Define the ClcaAssorter function `B(A_wℓ, bi, ci)` for winner w and loser ℓ operating on the ith ballot bi and the ith
+Define the ClcaAssorter function `B(A_wℓ, bi, ci)` for winner w and loser ℓ operating on the ith mvr bi and the ith
 CVR ci as:
 
-    B(A_wℓ, ci) = (1-o/u)/(2-v/u), where
+    B(A_wℓ, mvr, cvr) = (1-o/u)/(2-v/u), where
         A_wℓ is the assorter function for winner w and loser ℓ.
         u is the upper bound on the value the assorter function assigns to any ballot, given above
-        v is the assorter margin = 2 * (reported assorter mean) - 1
+        v is the cvrAssortMargin = 2 * (reported assorter mean) - 1
         o is the overstatement
 
 The reported assorter mean for A_wℓ is calculated as `(winnerVotes - loserVotes) / Nc`, where Nc is the maximum ballots for contest c.
 
 The overstatement is calculated as
 
-        val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
-        val tau = (1.0 - overstatement / u)                        // τi eq (6)
-        return tau * noerror                                       // Bi eq (7)
+        val noerror = 1.0 / (2.0 - cvrAssortMargin / u)             // clca assort value when no error
+        val overstatement = overstatementError(mvr, cvr, hasStyle)  // ωi eq (1)
+        val tau = (1.0 - overstatement / u)                         // τi eq (6)
+        return tau * noerror                                        // Bi eq (7)
 
 The overstatementError(mvr, cvr) is
 
-        val mvr_assort = if (mvr.isPhantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
+        val mvr_assort = if (mvr.isPhantom || (hasStyle && !mvr.hasContest(contest.id))) 0.0
                          else A_wℓ(mvr, usePhantoms = false)
         val cvr_assort = if (cvr.isPhantom) .5 else A_wℓ(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
@@ -153,10 +137,11 @@ See SHANGRLA Section 3.2.
 
 ### Polling Audits
 
-AlphaMart (aka ALPHA) is a risk-measuring function that adapts to the drawn sample as it is made.
-It estimates the reported winner’s share of the vote before the jth card is drawn from the j-1 cards already in the sample.
-The estimator can be any measurable function of the first j − 1 draws, for example a simple truncated shrinkage estimate, described below.
 See ALPHA paper, section 2.2.
+
+For the risk function, Rlaux uses the **AlphaMart** risk function with the **ShrinkTrunkage** estimation of the true
+population mean (theta).  AlphaMart is a risk-measuring function that adapts to the drawn sample as it is made.
+It estimates the reported winner’s share of the jth vote from the j-1 cards already in the sample.
 
 Define:
 
@@ -177,7 +162,7 @@ X^j         (X1 , . . . , Xj) is the jth sequence of samples.
 
 Let ηj = ηj (X^j−1 ), j = 1, . . ., be a "predictable sequence": ηj may depend on X^j−1, but not on Xk for k ≥ j.
 
-Tj          ALPHA nonnegative supermartingale (Tj)_j∈N  starting at 1
+Tj is the ALPHA nonnegative supermartingale (Tj)_j∈N  starting at 1
 
 	E(Tj | X^j-1 ) = Tj-1, under the null hypothesis that θj = µj (7)
 
@@ -186,17 +171,14 @@ Tj          ALPHA nonnegative supermartingale (Tj)_j∈N  starting at 1
 	P{∃j : Tj ≥ α−1 } ≤ α, if θ < µ (9) (follows from Ville's inequality)
 ````
 
-
-For the risk function, Rlaux uses the **AlphaMart** (aka ALPHA) function with the **ShrinkTrunkage** estimation of the true
-population mean (theta). ShrinkTrunkage uses a weighted average of an initial estimate of the mean with the measured mean
-of the mvrs as they are sampled. The reported mean is used as the initial estimate of the mean. The assort values
-are specified in SHANGRLA, section 2. See Assorter.kt for our implementation.
-
-See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart risk function.
+See [AlphaMart risk function](docs/AlphaMart.md) for more details.
 
 #### Truncated shrinkage estimate of the population mean
 
 See ALPHA paper, section 2.5.2.
+
+ShrinkTrunkage uses a weighted average of an initial estimate of the mean with the measured mean
+of the MVRs as they are sampled. The reported mean is used as the initial estimate of the mean. 
 
 The only settable parameter for the TruncShrink funcition function is d, which is the weighting between the initial guess
 at the population mean (eta0) and the running mean of the sampled data:
@@ -207,6 +189,10 @@ This trades off smaller sample sizes when theta = eta0 (large d) vs quickly adap
 
 
 ### CLCA Audits
+
+Rlauxe uses the **BettingMart** risk function with the **AdaptiveBetting** _betting function_.
+AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
+AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
 
 In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using
 betting martingales of the form
@@ -264,7 +250,7 @@ EF[Ti] = p0 [1 + λ(a − mu_i)] + p1 [1 + λ(a/2 − mu_i)] + p2 [1 − λ*mu_i
 ````
 
 We follow the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R, to
-find the value of lamda that maximizes EF[Ti], using org.apache.commons.math3.optim.univariate.BrentOptimizer.
+find the value of lamda that maximizes EF\[Ti], using org.apache.commons.math3.optim.univariate.BrentOptimizer.
 See [OptimalComparison implementation](../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/OptimalComparison.kt).
 
 See [CLCA AdaptiveBetting](docs/AdaptiveBetting.md) for details on the AdaptiveBetting function.

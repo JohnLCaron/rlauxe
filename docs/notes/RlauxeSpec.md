@@ -13,12 +13,13 @@ See [references](papers.txt) for reference sources.
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
     * [The clcaAssorter for CLCA](#the-clcaassorter-for-clca)
     * [Proof that B is an assorter](#proof-that-b-is-an-assorter)
+    * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
+      * [RaireAssorter](#raireassorter)
   * [Risk functions (p-value calculators)](#risk-functions-p-value-calculators)
     * [Polling Audits](#polling-audits-1)
       * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
     * [CLCA Audits](#clca-audits)
       * [The CLCA betting function](#the-clca-betting-function)
-  * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
 <!-- TOC -->
 
 ## Missing Ballots
@@ -121,7 +122,7 @@ Note that we use valid votes for the contest (Vc) instead of all ballots (Nc) in
 the percent vote for a candidate.
 
 Currently we only support 1 winner.
-For supermajorrity, we only need one assorter for each winner, not one for each winner/loser pair.
+For SuperMajority, we only need one assorter for each winner, not one for each winner/loser pair.
 
 For the ith ballot, calculate `A_wℓ` as
 
@@ -209,6 +210,93 @@ See SHANGRLA Section 3.2.
        Āb > 1/2  iff  Avg(B(bi, ci)) > 1/2                            (8)
 
      which makes B(bi, ci) an assorter.
+
+
+### Instant Runoff Voting (IRV)
+
+Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
+In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated.
+This continues until only one candidate is left. Only 1 winner is allowed.
+
+In principle one could use polling audits for IRV, but the information
+needed to create the Raire Assertions all but necessitates CVRs.
+So currently we only support IRV with CLCA audits.
+
+
+#### RaireAssorter
+
+We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate assertions that fit into the SHANGRLA framework. 
+We convert the output of the raire library into RaireAssorters, which assigns the assort values. The clcaAssorter then can be used with
+RaireAssorter transparently.
+
+(Should i document the RaireAssorter assort function as above?)
+
+The RaireAssorters function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
+
+````
+if (usePhantoms && mvr.isPhantom) return 0.5
+
+for winner_only assertions:
+        val awinner = if (raire_get_vote_for(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
+        // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
+        val aloser = raire_rcv_lfunc_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
+        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
+        
+for irv_elimination assertions:    
+        // Context is that all candidates in "already_eliminated" have been eliminated and their votes distributed to later preferences
+        val awinner = raire_rcv_votefor_cand(rcvr, contestId, rassertion.winnerId, remaining)
+        val aloser = raire_rcv_votefor_cand(rcvr, contestId, rassertion.loserId, remaining)
+        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
+            
+    /** if candidate not ranked, return 0, else rank (1 based) */
+    fun raire_get_vote_for(cvr: Cvr, contest: Int, candidate: Int): Int {
+        val rankedChoices = cvr.votes[contest]
+        return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
+               else rankedChoices.indexOf(candidate) + 1
+    }
+
+    /**
+     * Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
+     * Its a vote for the loser if they appear and the winner does not, or they appear before the winner
+     * @return 1 if the given vote is a vote for 'loser' and 0 otherwise
+     */
+    fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
+        val rank_winner = raire_get_vote_for(cvr, contest, winner)
+        val rank_loser = raire_get_vote_for(cvr, contest, loser)
+    
+        return when {
+            rank_winner == 0 && rank_loser != 0 -> 1
+            rank_winner != 0 && rank_loser != 0 && rank_loser < rank_winner -> 1
+            else -> 0
+        }
+    }
+
+    /**
+     * If you reduce the ballot down to only those candidates in 'remaining',
+     * and 'cand' is the first preference, return 1; otherwise return 0.
+     */
+    fun raire_rcv_votefor_cand(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
+        if (cand !in remaining) {
+            return 0
+        }
+    
+        val rank_cand = raire_get_vote_for(cvr, contest, cand)
+        if (rank_cand == 0) return 0
+    
+        for (altc in remaining) {
+            if (altc == cand) continue
+    
+            val rank_altc = raire_get_vote_for(cvr, contest, altc)
+            if (rank_altc != 0 && rank_altc <= rank_cand) {
+                return 0
+            }
+        }
+        return 1
+    }
+
+````
+The upper bound is 1.
+
 
 ## Risk functions (p-value calculators)
 
@@ -319,23 +407,4 @@ See [OptimalComparison implementation](../core/src/main/kotlin/org/cryptobiotic/
 for details on the AdaptiveBetting implementation.
 
 See [CLCA AdaptiveBetting](docs/AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
-
-
-## Instant Runoff Voting (IRV)
-
-Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
-In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated.
-This continues until only one candidate is left. Only 1 winner is allowed.
-
-In principle one could use polling audits for IRV, but the information
-needed to create the Raire Assertions all but necessitates CVRs.
-So currently we only support IRV with CLCA audits.
-
-We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions
-that fit into the SHANGRLA framewok, and makes IRV contests amenable to risk limiting auditing, just like plurality contests.
-
-See the RAIRE guides for details:
-* [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)
-* [Part 2: Generating Assertions with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_2.pdf)
-
 

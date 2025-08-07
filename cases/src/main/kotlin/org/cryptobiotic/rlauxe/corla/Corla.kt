@@ -1,11 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.*
-import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
 import kotlin.math.max
-import kotlin.math.min
 
 // main Corla RiskTestingFn is in plots module
     /**

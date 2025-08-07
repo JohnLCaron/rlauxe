@@ -1,7 +1,8 @@
 **Rlauxe Implementation Specification**
+
 _8/7/25_
 
-See [references](papers.txt) for reference sources.
+See [references](papers.txt) for reference papers.
 
 <!-- TOC -->
 * [Missing Ballots](#missing-ballots)
@@ -107,9 +108,6 @@ The assorter function `A_wℓ(bi)` for winner w and loser ℓ operating on the i
 ````
 The upper bound is 1.
 
-The assorter function takes a parameter _usePhantoms_, so a more complete definition is `A_wℓ(bi, usePhantoms)`.
-Polling audits always have usePhantoms = true, while CLCA have usePhantoms = false.
-
 ## SuperMajority
 
 "Top k candidates are elected, whose percent vote is above a fraction, f." See SHANGRLA, section 2.3.
@@ -152,32 +150,30 @@ The RaireAssorters function `A_wℓ(bi)` for winner w and loser ℓ operating on
 if (usePhantoms && mvr.isPhantom) return 0.5
 
 for winner_only assertions:
-        val awinner = if (raire_get_vote_for(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
+        val awinner = if (raire_get_rank(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = raire_rcv_lfunc_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
+        val aloser = raire_loser_vote_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
         
 for irv_elimination assertions:    
         // Context is that all candidates in "already_eliminated" have been eliminated and their votes distributed to later preferences
-        val awinner = raire_rcv_votefor_cand(rcvr, contestId, rassertion.winnerId, remaining)
-        val aloser = raire_rcv_votefor_cand(rcvr, contestId, rassertion.loserId, remaining)
+        val awinner = raire_votefor_elim(rcvr, contestId, rassertion.winnerId, remaining)
+        val aloser = raire_votefor_elim(rcvr, contestId, rassertion.loserId, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
             
-/** if candidate not ranked, return 0, else rank (1 based) */
-fun raire_get_vote_for(cvr: Cvr, contest: Int, candidate: Int): Int {
+// if candidate not ranked, return 0, else rank (1 based)
+fun raire_get_rank(cvr: Cvr, contest: Int, candidate: Int): Int {
     val rankedChoices = cvr.votes[contest]
     return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
-           else rankedChoices.indexOf(candidate) + 1
+    else rankedChoices.indexOf(candidate) + 1
 }
 
-/**
- * Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
- * Its a vote for the loser if they appear and the winner does not, or they appear before the winner
- * @return 1 if the given vote is a vote for 'loser' and 0 otherwise
- */
-fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
-    val rank_winner = raire_get_vote_for(cvr, contest, winner)
-    val rank_loser = raire_get_vote_for(cvr, contest, loser)
+// Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
+// Its a vote for the loser if they appear and the winner does not, or they appear before the winner
+// return 1 if the given vote is a vote for 'loser' and 0 otherwise
+fun raire_loser_vote_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
+    val rank_winner = raire_get_rank(cvr, contest, winner)
+    val rank_loser = raire_get_rank(cvr, contest, loser)
 
     return when {
         rank_winner == 0 && rank_loser != 0 -> 1
@@ -187,22 +183,22 @@ fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
 }
 
 /**
- * If you reduce the ballot down to only those candidates in 'remaining',
- * and 'cand' is the first preference, return 1; otherwise return 0.
+ * Check whether 'vote' is a vote for the given candidate in the context where only candidates in 'remaining' remain standing.
+ * If you reduce the ballot down to only those candidates in 'remaining', and 'cand' is the first preference, return 1; otherwise return 0.
+ * @param cand identifier for candidate
+ * @param remaining list of identifiers of candidates still standing
+ * @return 1 if the given vote for the contest counts as a vote for 'cand' and 0 otherwise.
  */
-fun raire_rcv_votefor_cand(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
-    if (cand !in remaining) {
-        return 0
-    }
-    val rank_cand = raire_get_vote_for(cvr, contest, cand)
+fun raire_votefor_elim(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
+    if (cand !in remaining) return 0
+    
+    val rank_cand = raire_get_rank(cvr, contest, cand)
     if (rank_cand == 0) return 0
 
     for (altc in remaining) {
         if (altc == cand) continue
-        val rank_altc = raire_get_vote_for(cvr, contest, altc)
-        if (rank_altc != 0 && rank_altc <= rank_cand) {
-            return 0
-        }
+        val rank_altc = raire_get_rank(cvr, contest, altc)
+        if (rank_altc != 0 && rank_altc <= rank_cand) return 0
     }
     return 1
 }
@@ -306,7 +302,7 @@ For the risk function, Rlauxe uses the **AlphaMart** risk function with the **Sh
 population mean (theta).  AlphaMart is a risk-measuring function that adapts to the drawn sample as it is made.
 It estimates the reported winner’s share of the jth vote from the j-1 cards already in the sample.
 
-See ALPHA paper, section 2.2, for a decription of the AlphaMart algorithm. 
+See ALPHA paper, section 2.2, for a description of the AlphaMart algorithm. 
 
 We use BettingMart to implement AlphaMart, by setting the betting function
 
@@ -403,8 +399,8 @@ EF[Ti] = p0 [1 + λ(a − mu_i)] + p1 [1 + λ(a/2 − mu_i)] + p2 [1 − λ*mu_i
 We follow the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R, to
 find the value of lamda that maximizes EF\[Ti], using org.apache.commons.math3.optim.univariate.BrentOptimizer.
 
-See [OptimalComparison implementation](../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/OptimalComparison.kt)
+See [OptimalComparison implementation](../../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/OptimalComparison.kt)
 for details on the AdaptiveBetting implementation.
 
-See [CLCA AdaptiveBetting](docs/AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
+See [CLCA AdaptiveBetting](../AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
 

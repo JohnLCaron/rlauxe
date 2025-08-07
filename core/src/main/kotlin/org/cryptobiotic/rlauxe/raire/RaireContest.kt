@@ -252,9 +252,9 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     // aka NEB
     fun assortWinnerOnly(rcvr: Cvr): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
-        val awinner = if (raire_get_vote_for(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
+        val awinner = if (raire_get_rank(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = raire_rcv_lfunc_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
+        val aloser = raire_loser_vote_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
@@ -266,8 +266,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     fun assortIrvElimination(rcvr: Cvr): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
-        val awinner = raire_rcv_votefor_cand(rcvr, contestId, rassertion.winnerId, remaining)
-        val aloser = raire_rcv_votefor_cand(rcvr, contestId, rassertion.loserId, remaining)
+        val awinner = raire_votefor_elim(rcvr, contestId, rassertion.winnerId, remaining)
+        val aloser = raire_votefor_elim(rcvr, contestId, rassertion.loserId, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 }
@@ -281,8 +281,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
 //            else self.votes[contest_id][candidate]
 //        )
 
-/** if candidate not ranked, return 0, else rank (1 based) */
-fun raire_get_vote_for(cvr: Cvr, contest: Int, candidate: Int): Int {
+// if candidate not ranked, return 0, else rank (1 based)
+fun raire_get_rank(cvr: Cvr, contest: Int, candidate: Int): Int {
     val rankedChoices = cvr.votes[contest]
     return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
     else rankedChoices.indexOf(candidate) + 1
@@ -297,17 +297,13 @@ fun raire_get_vote_for(cvr: Cvr, contest: Int, candidate: Int): Int {
 //            return 1
 //        else:
 //            return 0
-/**
- * Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
- * Its a vote for the loser if they appear and the winner does not, or they appear before the winner
- *
- * @param winner identifier for winning candidate
- * @param loser identifier for losing candidate
- * @return 1 if the given vote is a vote for 'loser' and 0 otherwise
- */
-fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
-    val rank_winner = raire_get_vote_for(cvr, contest, winner)
-    val rank_loser = raire_get_vote_for(cvr, contest, loser)
+
+// Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
+// Its a vote for the loser if they appear and the winner does not, or they appear before the winner
+// return 1 if the given vote is a vote for 'loser' and 0 otherwise
+fun raire_loser_vote_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
+    val rank_winner = raire_get_rank(cvr, contest, winner)
+    val rank_loser = raire_get_rank(cvr, contest, loser)
 
     return when {
         rank_winner == 0 && rank_loser != 0 -> 1
@@ -330,30 +326,22 @@ fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
 //                    return 0
 //            return 1
 /**
- * Check whether 'vote' is a vote for the given candidate in the context
- * where only candidates in 'remaining' remain standing.
- *
+ * Check whether 'vote' is a vote for the given candidate in the context where only candidates in 'remaining' remain standing.
+ * If you reduce the ballot down to only those candidates in 'remaining', and 'cand' is the first preference, return 1; otherwise return 0.
  * @param cand identifier for candidate
  * @param remaining list of identifiers of candidates still standing
  * @return 1 if the given vote for the contest counts as a vote for 'cand' and 0 otherwise.
- * Essentially, if you reduce the ballot down to only those candidates in 'remaining',
- * and 'cand' is the first preference, return 1; otherwise return 0.
  */
-fun raire_rcv_votefor_cand(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
-    if (cand !in remaining) {
-        return 0
-    }
+fun raire_votefor_elim(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
+    if (cand !in remaining) return 0
 
-    val rank_cand = raire_get_vote_for(cvr, contest, cand)
+    val rank_cand = raire_get_rank(cvr, contest, cand)
     if (rank_cand == 0) return 0
 
     for (altc in remaining) {
         if (altc == cand) continue
-
-        val rank_altc = raire_get_vote_for(cvr, contest, altc)
-        if (rank_altc != 0 && rank_altc <= rank_cand) {
-            return 0
-        }
+        val rank_altc = raire_get_rank(cvr, contest, altc)
+        if (rank_altc != 0 && rank_altc <= rank_cand) return 0
     }
     return 1
 }

@@ -189,8 +189,8 @@ data class RaireContestTestData(
             val cvr = testCvrs[cvrIdx]
             val votes: IntArray = cvr.votes[contestId]!!
             if (votes.contains(winner) && votes.contains(loser)) {
-                val rank_winner = raire_get_vote_for(cvr, contestId, winner)
-                val rank_loser = raire_get_vote_for(cvr, contestId, loser)
+                val rank_winner = raire_get_rank(cvr, contestId, winner)
+                val rank_loser = raire_get_rank(cvr, contestId, loser)
                 if (rank_winner > rank_loser) {
                     // switch winner and loser TODO Mutable votes!!
                     votes[rank_winner - 1] = loser

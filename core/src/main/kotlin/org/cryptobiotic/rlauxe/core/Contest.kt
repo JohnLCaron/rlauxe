@@ -228,7 +228,7 @@ open class Contest(
     }
 }
 
-/** Contest with assertions, some mutability. */
+/** COuld rename to "Contest with assertions". note mutability. */
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true,

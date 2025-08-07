@@ -222,12 +222,12 @@ data class RaireAssertion(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This is a primitive assorter.
+// This is a "primitive" assorter.
 data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, val reportedMargin: Double): AssorterIF {
     val contestId = info.id
     val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) } // // TODO this is index ??
 
-    override fun upperBound() = 1.0 // TODO check this
+    override fun upperBound() = 1.0
     override fun winner() = rassertion.winnerId // candidate id, not index
     override fun loser() = rassertion.loserId   // candidate id, not index
     override fun reportedMargin() = reportedMargin

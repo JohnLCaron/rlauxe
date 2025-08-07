@@ -1,28 +1,28 @@
-# Rlauxe Implementation
-8/7/25
+**Rlauxe Implementation Specification**
+_8/7/25_
 
 See [references](papers.txt) for reference sources.
 
 <!-- TOC -->
-* [Rlauxe Implementation](#rlauxe-implementation)
-  * [Missing Ballots](#missing-ballots)
-  * [Missing Contests](#missing-contests)
+* [Missing Ballots](#missing-ballots)
+* [Missing Contests](#missing-contests)
+* [Assorters](#assorters)
+  * [Plurality and Approval](#plurality-and-approval)
+  * [SuperMajority](#supermajority)
+  * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
+* [Audits](#audits)
   * [Polling Audits](#polling-audits)
-    * [Plurality and Approval](#plurality-and-approval)
-    * [SuperMajority](#supermajority)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
-    * [The clcaAssorter for CLCA](#the-clcaassorter-for-clca)
+    * [The clcaAssorter](#the-clcaassorter)
     * [Proof that B is an assorter](#proof-that-b-is-an-assorter)
-    * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
-      * [RaireAssorter](#raireassorter)
-  * [Risk functions (p-value calculators)](#risk-functions-p-value-calculators)
-    * [Polling Audits](#polling-audits-1)
-      * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
-    * [CLCA Audits](#clca-audits)
-      * [The CLCA betting function](#the-clca-betting-function)
+* [Risk functions (p-value calculators)](#risk-functions-p-value-calculators)
+  * [Polling Audits](#polling-audits-1)
+    * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
+  * [CLCA Audits](#clca-audits)
+    * [The CLCA betting function](#the-clca-betting-function)
 <!-- TOC -->
 
-## Missing Ballots
+# Missing Ballots
 
 From "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" (P2Z) paper:
 
@@ -45,7 +45,7 @@ All the algorithms can then proceed normally.
 
 TODO: discuss where this is implemented.
 
-## Missing Contests
+# Missing Contests
 
 See "More style, less work: card-style data decrease risk-limiting audit sample sizes" (MoreStyle) paper.
 
@@ -73,19 +73,17 @@ So:
 
 TODO: expain this.
 
-
-## Polling Audits
-
-The requirements for Polling audits:
-
-* There must be a BallotManifest defining the population of ballots, that contains a unique identifier that can be matched
-  to the corresponding physical ballot.
-* There must be an independently determined upper bound on the number of cast cards/ballots that contain each contest (Nc).
+# Assorters
 
 Define the assorter function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi.
-The following Social Choice functions are supported.
 
-### Plurality and Approval
+The assorter function takes a parameter _usePhantoms_, so a more complete definition is `A_wℓ(bi, usePhantoms)`, but we
+will use the simpler notation.
+Polling audits always have usePhantoms = true, while CLCA have usePhantoms = false.
+
+The following Social Choice functions are supported:
+
+## Plurality and Approval
 
 "Top k candidates are elected."
 The rules may allow the voter to vote for one candidate, k candidates or some other number, including n, which
@@ -93,10 +91,10 @@ makes it approval voting.
 
 A contest has K ≥ 1 winners and C > K candidates. Let w be the winner, and ℓ be the loser.
 For each pair of winner and loser, let H_wℓ be the assertion that w is really the winner over ℓ.
-There are K(C − K) assertions. 
+There are K(C − K) assertions.
 
 **Plurality**: there is exactly one winner, and C - 1 assertions, pairing the winner with each loser.
-For a two candidate election, there is only one assertion. See SHANGRLA, section 2.1. 
+For a two candidate election, there is only one assertion. See SHANGRLA, section 2.1.
 
 **Approval**:  voters may vote for as many candidates as they like. The top K candidates are elected. See SHANGRLA, section 2.2.
 
@@ -113,7 +111,7 @@ The upper bound is 1.
 The assorter function takes a parameter _usePhantoms_, so a more complete definition is `A_wℓ(bi, usePhantoms)`.
 Polling audits always have usePhantoms = true, while CLCA have usePhantoms = false.
 
-### SuperMajority
+## SuperMajority
 
 "Top k candidates are elected, whose percent vote is above a fraction, f." See SHANGRLA, section 2.3.
 
@@ -133,6 +131,96 @@ For the ith ballot, calculate `A_wℓ` as
 ````
 The upper bound is 1/(2*f).
 
+## Instant Runoff Voting (IRV)
+
+Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
+In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated.
+This continues until only one candidate is left. Only 1 winner is allowed.
+
+In principle one could use polling audits for IRV, but the information
+needed to create the Raire Assertions all but necessitates CVRs.
+So currently we only support IRV with CLCA audits.
+
+We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate assertions that fit into the SHANGRLA framework.
+We convert the output of the raire library into RaireAssorters, which assigns the assort values. The clcaAssorter then can be used with
+RaireAssorter transparently.
+
+(Should i document the RaireAssorter assort function as above?)
+
+The RaireAssorters function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
+
+````
+if (usePhantoms && mvr.isPhantom) return 0.5
+
+for winner_only assertions:
+        val awinner = if (raire_get_vote_for(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
+        // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
+        val aloser = raire_rcv_lfunc_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
+        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
+        
+for irv_elimination assertions:    
+        // Context is that all candidates in "already_eliminated" have been eliminated and their votes distributed to later preferences
+        val awinner = raire_rcv_votefor_cand(rcvr, contestId, rassertion.winnerId, remaining)
+        val aloser = raire_rcv_votefor_cand(rcvr, contestId, rassertion.loserId, remaining)
+        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
+            
+/** if candidate not ranked, return 0, else rank (1 based) */
+fun raire_get_vote_for(cvr: Cvr, contest: Int, candidate: Int): Int {
+    val rankedChoices = cvr.votes[contest]
+    return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
+           else rankedChoices.indexOf(candidate) + 1
+}
+
+/**
+ * Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
+ * Its a vote for the loser if they appear and the winner does not, or they appear before the winner
+ * @return 1 if the given vote is a vote for 'loser' and 0 otherwise
+ */
+fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
+    val rank_winner = raire_get_vote_for(cvr, contest, winner)
+    val rank_loser = raire_get_vote_for(cvr, contest, loser)
+
+    return when {
+        rank_winner == 0 && rank_loser != 0 -> 1
+        rank_winner != 0 && rank_loser != 0 && rank_loser < rank_winner -> 1
+        else -> 0
+    }
+}
+
+/**
+ * If you reduce the ballot down to only those candidates in 'remaining',
+ * and 'cand' is the first preference, return 1; otherwise return 0.
+ */
+fun raire_rcv_votefor_cand(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
+    if (cand !in remaining) {
+        return 0
+    }
+    val rank_cand = raire_get_vote_for(cvr, contest, cand)
+    if (rank_cand == 0) return 0
+
+    for (altc in remaining) {
+        if (altc == cand) continue
+        val rank_altc = raire_get_vote_for(cvr, contest, altc)
+        if (rank_altc != 0 && rank_altc <= rank_cand) {
+            return 0
+        }
+    }
+    return 1
+}
+
+````
+The upper bound is 1.
+
+# Audits
+
+## Polling Audits
+
+The requirements for Polling audits:
+
+* There must be a BallotManifest defining the population of ballots, that contains a unique identifier that can be matched
+  to the corresponding physical ballot.
+* There must be an independently determined upper bound on the number of cast cards/ballots that contain each contest (Nc).
+
 
 ## Card Level Comparison Audits (CLCA)
 
@@ -142,11 +230,11 @@ The requirements for CLCA audits:
 * Unique identifiers must be assigned to each physical ballot, and recorded on the CVR, in order to find the physical ballot that matches the sampled CVR.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest (Nc).
 
-### The clcaAssorter for CLCA
+### The clcaAssorter
 
 We will use the term *_assorter function_* to refer to the Plurality, Approval, and SuperMajority social choice
 functions `A_wℓ` as defined above. We use *_clcaAssorter function_ *to refer to the assorter used by Card Level Comparison Audits.
-So, a clcaAssorter function has an assorter function, and by composing them, only one  clcaAssorter implementation is needed.
+So, a clcaAssorter function has an assorter function, and by composing them, only one clcaAssorter implementation is needed.
 
 CLCAs have the same number of assertions as in the Polling Audit case, with the same meaning.
 
@@ -211,96 +299,9 @@ See SHANGRLA Section 3.2.
 
      which makes B(bi, ci) an assorter.
 
+# Risk functions (p-value calculators)
 
-### Instant Runoff Voting (IRV)
-
-Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
-In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated.
-This continues until only one candidate is left. Only 1 winner is allowed.
-
-In principle one could use polling audits for IRV, but the information
-needed to create the Raire Assertions all but necessitates CVRs.
-So currently we only support IRV with CLCA audits.
-
-
-#### RaireAssorter
-
-We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate assertions that fit into the SHANGRLA framework. 
-We convert the output of the raire library into RaireAssorters, which assigns the assort values. The clcaAssorter then can be used with
-RaireAssorter transparently.
-
-(Should i document the RaireAssorter assort function as above?)
-
-The RaireAssorters function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
-
-````
-if (usePhantoms && mvr.isPhantom) return 0.5
-
-for winner_only assertions:
-        val awinner = if (raire_get_vote_for(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
-        // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
-        val aloser = raire_rcv_lfunc_wo( rcvr, contestId, rassertion.winnerId, rassertion.loserId)
-        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
-        
-for irv_elimination assertions:    
-        // Context is that all candidates in "already_eliminated" have been eliminated and their votes distributed to later preferences
-        val awinner = raire_rcv_votefor_cand(rcvr, contestId, rassertion.winnerId, remaining)
-        val aloser = raire_rcv_votefor_cand(rcvr, contestId, rassertion.loserId, remaining)
-        return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
-            
-    /** if candidate not ranked, return 0, else rank (1 based) */
-    fun raire_get_vote_for(cvr: Cvr, contest: Int, candidate: Int): Int {
-        val rankedChoices = cvr.votes[contest]
-        return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
-               else rankedChoices.indexOf(candidate) + 1
-    }
-
-    /**
-     * Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
-     * Its a vote for the loser if they appear and the winner does not, or they appear before the winner
-     * @return 1 if the given vote is a vote for 'loser' and 0 otherwise
-     */
-    fun raire_rcv_lfunc_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
-        val rank_winner = raire_get_vote_for(cvr, contest, winner)
-        val rank_loser = raire_get_vote_for(cvr, contest, loser)
-    
-        return when {
-            rank_winner == 0 && rank_loser != 0 -> 1
-            rank_winner != 0 && rank_loser != 0 && rank_loser < rank_winner -> 1
-            else -> 0
-        }
-    }
-
-    /**
-     * If you reduce the ballot down to only those candidates in 'remaining',
-     * and 'cand' is the first preference, return 1; otherwise return 0.
-     */
-    fun raire_rcv_votefor_cand(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
-        if (cand !in remaining) {
-            return 0
-        }
-    
-        val rank_cand = raire_get_vote_for(cvr, contest, cand)
-        if (rank_cand == 0) return 0
-    
-        for (altc in remaining) {
-            if (altc == cand) continue
-    
-            val rank_altc = raire_get_vote_for(cvr, contest, altc)
-            if (rank_altc != 0 && rank_altc <= rank_cand) {
-                return 0
-            }
-        }
-        return 1
-    }
-
-````
-The upper bound is 1.
-
-
-## Risk functions (p-value calculators)
-
-### Polling Audits
+## Polling Audits
 
 For the risk function, Rlauxe uses the **AlphaMart** risk function with the **ShrinkTrunkage** estimation of the true
 population mean (theta).  AlphaMart is a risk-measuring function that adapts to the drawn sample as it is made.
@@ -321,7 +322,7 @@ See [AlphaMart risk function](../AlphaMart.md) for more details.
 See [AlphaMart implementation](../../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/AlphaMart.kt).
 
 
-#### Truncated shrinkage estimate of the population mean
+### Truncated shrinkage estimate of the population mean
 
 See ALPHA paper, section 2.5.2.
 
@@ -337,7 +338,7 @@ This trades off smaller sample sizes when theta = eta0 (large d) vs quickly adap
 Our implementation uses d=100 as default, and is settable in the PollingConfig class.
 
 
-### CLCA Audits
+## CLCA Audits
 
 Rlauxe uses the **BettingMart** risk function with the **AdaptiveBetting** _betting function_ for CLCA.
 AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
@@ -366,7 +367,7 @@ See [BettingRiskFunction implementation](../../core/src/main/kotlin/org/cryptobi
 implementation details.
 
 
-#### The CLCA betting function
+### The CLCA betting function
 
 The "Estimating means of bounded random variables by betting" paper (BETTING) presents general techniques for estimating an unknown mean from bounded observations.
 

@@ -29,8 +29,7 @@ From "Limiting Risk by Turning Manifest Phantoms into Evil Zombies" (P2Z) paper:
 "A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
 What if the ballot manifest is not accurate?
 It suffices to make worst-case assumptions about the individual randomly selected ballots
-that the audit cannot find. This ensures that the true risk limit remains smaller than
-the nominal risk limit.
+that the audit cannot find. This ensures that the true risk limit remains smaller than the nominal risk limit.
 The dead (not found, phantom) ballots are re-animated as evil zombies:
 We suppose that they reflect whatever would increase the P-value most:
 a 2-vote overstatement for a ballot-level comparison audit,

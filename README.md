@@ -1,12 +1,15 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 05/22/2025_
+_last changed: 08/07/2025_
 
-A port of Philip Stark's SHANGRLA framework and related code to kotlin, 
-for the purpose of making a reusable and maintainable library.
+A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code. 
 
-The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license. The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is based on the concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places.
+The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license. 
+The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is based on the 
+concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places. 
+It also has design and implementation differences, which are not necessarily vetted by
+the SHANGRLA authors.
 
 Also see the [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
 
@@ -537,7 +540,7 @@ no style information, no errors, for Nb/Nc = 1, 2, 5 and 10.
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLinear.html" rel="pollingNoStyleLinear">![pollingNoStyleLinear](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLinear.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStyleLogLinear.html" rel="pollingNoStyleLogLinear">![pollingNoStyleLogLinear](./docs/plots/nostyle/pollingNoStyle/pollingNoStyleLogLinear.png)</a>
 
-* The increases number of nmvrs is simply Nc/Nb, and has a strong absolute effect as the margin gets smaller.
+* The increased number of nmvrs is simply Nc/Nb, and has a strong absolute effect as the margin gets smaller.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/pollingNoStyle/pollingNoStylePct.html" rel="pollingNoStylePct">![pollingNoStylePct](./docs/plots/nostyle/pollingNoStyle/pollingNoStylePct.png)</a>
 
@@ -713,6 +716,7 @@ STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16
 VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague (being written)
 
 ````
+Also see (reference notes)[docs/notes/papers.txt].
 
 ## Differences with SHANGRLA
 

@@ -1,7 +1,7 @@
 **RLAUXE ("relax")**
 
 WORK IN PROGRESS
-_last changed: 08/07/2025_
+_last changed: 08/12/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code. 
 
@@ -75,7 +75,7 @@ The purpose of the audit is to determine whether the reported winner(s) are corr
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
 - Contests are removed from the audit if:
   - The contest has no losers (e.g. the number of candidate <= number of winners); the contest is marked NoLosers.
-  - The contest has no winners (e.g. no candidates recieve minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
+  - The contest has no winners (e.g. no candidates receive minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
   - The contest is a tie, or its reported margin is less than _auditConfig.minMargin_; the contest is marked MinMargin.
   - The contest's reported margin is less than its phantomPct (Np/Nc); the audit is marked TooManyPhantoms.
   - The contest internal fields are inconsistent; the audit is marked ContestMisformed.
@@ -87,14 +87,14 @@ For each audit round:
 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited. 
 This may be done with an automated algorithm, or the Auditor may make individual contest choices.
 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
-4. _Manual Audit_: find the chosen paper ballots that were selected and do a manual audit of each.
+4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
 7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
 
 # SHANGRLA framework
 
-SHANGRLA is a framework for running [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA) for elections.
+SHANGRLA is a framework for running Risk Limiting Audits for elections.
 It uses a _statistical risk testing function_ that allows an audit to statistically
 prove that an election outcome is correct (or not) to within a _risk level α_. For example, a risk limit of 5% means that
 the election outcome (i.e. the winner(s)) is correct with 95% probability.
@@ -483,7 +483,7 @@ This step depends whether the audit has Card Style Data (CSD, see MoreStyle, p.2
 have which contests. 
 
 For CLCA audits, the generated Cast Vote Records (CVRs) comprise the CSD, as long as the CVR has the information which contests are
-on it, even when a contest recieves no votes. For Polling audits, the BallotManifest (may) contain BallotStyles which comprise the CSD.
+on it, even when a contest receives no votes. For Polling audits, the BallotManifest (may) contain BallotStyles which comprise the CSD.
 
 If we have CSD, then Consistent Sampling is used to select the ballots to sample, otherwise Uniform Sampling is used.
 
@@ -792,6 +792,7 @@ balllots are used.
 
 ## Developer Notes
 
+* [Implementation Specificaton](docs/notes/RlauxeSpec.md)
 * [Developer Notes](docs/Development.md)
 * [Notes on Colorado RLA](docs/Corla.md)
 * [RLA Options](docs/RlaOptions.md)

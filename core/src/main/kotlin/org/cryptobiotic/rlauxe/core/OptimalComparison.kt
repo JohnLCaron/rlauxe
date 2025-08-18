@@ -71,7 +71,7 @@ class AdaptiveBetting(
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
     errorRates: ClcaErrorRates, // ? = null,  // a priori estimate of the error rates
-    val eps: Double = .00001
+    val eps: Double = .00001    // TODO I think we picked this number out of a hat.
 ): BettingFn {
     val p2o: Double = if (errorRates == null) -1.0 else errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
     val p1o: Double = if (errorRates == null) -1.0 else errorRates.p1o // apriori rate of 1-vote overstatements; set < 0 to remove consideration

@@ -1,8 +1,8 @@
 **Rlauxe Implementation Specification**
 
-_8/7/25_
+_8/12/25_
 
-See [references](papers.txt) for reference papers.
+See [references](../papers/papers.txt) for reference papers.
 
 <!-- TOC -->
 * [Missing Ballots](#missing-ballots)
@@ -16,11 +16,18 @@ See [references](papers.txt) for reference papers.
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
     * [The clcaAssorter](#the-clcaassorter)
     * [Proof that B is an assorter](#proof-that-b-is-an-assorter)
+  * [OneAudit](#oneaudit)
 * [Risk functions (p-value calculators)](#risk-functions-p-value-calculators)
   * [Polling Audits](#polling-audits-1)
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
   * [CLCA Audits](#clca-audits)
     * [The CLCA betting function](#the-clca-betting-function)
+* [Attacks](#attacks)
+  * [Category A. CLCA with styles](#category-a-clca-with-styles)
+    * [Case 1. Prover changes CVR votes for A to B.](#case-1-prover-changes-cvr-votes-for-a-to-b)
+    * [Case 2. Prover changes CVR votes for A to undervotes.](#case-2-prover-changes-cvr-votes-for-a-to-undervotes)
+    * [Case 3. Prover removes CVR ballots.](#case-3-prover-removes-cvr-ballots)
+    * [Case 4. Prover removes CVR ballots and modifies Nc.](#case-4-prover-removes-cvr-ballots-and-modifies-nc)
 <!-- TOC -->
 
 # Missing Ballots
@@ -71,7 +78,7 @@ So:
 
 * When a CVR has a contest on it that the MVR does not, the overstatementError uses an assort value of 0 for the MVR.
 
-TODO: expain this.
+TODO: expain this. WHat if Prover is misrepresenting / wrong about which ballots have which contests?
 
 # Assorters
 
@@ -294,6 +301,10 @@ See SHANGRLA Section 3.2.
 
      which makes B(bi, ci) an assorter.
 
+## OneAudit
+
+We do not support OneAudit at this time.
+
 # Risk functions (p-value calculators)
 
 ## Polling Audits
@@ -342,7 +353,7 @@ AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of
 In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using
 betting martingales of the form
 
-    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
+    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq 10)
 
     where 
         M_j is the martingal after the jth sample
@@ -397,10 +408,99 @@ EF[Ti] = p0 [1 + λ(a − mu_i)] + p1 [1 + λ(a/2 − mu_i)] + p2 [1 − λ*mu_i
 ````
 
 We follow the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R, to
-find the value of lamda that maximizes EF\[Ti], using org.apache.commons.math3.optim.univariate.BrentOptimizer.
+find the value of lamda that maximizes EF\[Ti], _using org.apache.commons.math3.optim.univariate.BrentOptimizer_.
 
 See [OptimalComparison implementation](../../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/OptimalComparison.kt)
 for details on the AdaptiveBetting implementation.
 
 See [CLCA AdaptiveBetting](../AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
+
+# Attacks
+
+## Category A. CLCA with styles
+
+The CVRs are the manifest. Nc=1000 ballots for contest C for candidates A and B. A=525, B=475. The margin of victory for A is 50.
+
+        val mvr_assort = if (mvr.isPhantom || (hasStyle && !mvr.hasContest(contest.id))) 0.0
+                         else A_wℓ(mvr, usePhantoms = false)
+        val cvr_assort = if (cvr.isPhantom) .5 else A_wℓ(cvr, usePhantoms = false)
+        overstatement = cvr_assort - mvr_assort
+        assort = (1.0 - overstatement / u) * noerror
+
+### Case 1. Prover changes CVR votes for A to B.
+
+Prover changes 50 CVRs that voted for A to voting for B.  A=475, B=525.
+
+Sample a changed ballot:
+    
+    cvr_assort = 1
+    mvr_assort = 0
+    overstatement = 1
+    assort = 0
+
+Audit detects this with probability 1 - risk.
+
+### Case 2. Prover changes CVR votes for A to undervotes.
+
+Prover changes 100 CVRs that voted for A to undervotes.  A=425, B=475.
+
+Sample a changed ballot:
+
+    cvr_assort = 1
+    mvr_assort = if (hasStyle && !mvr.hasContest(contest.id)) 0.0
+    overstatement = 1
+    assort = 0
+
+Audit detects this with probability 1 - risk.
+
+### Case 3. Prover removes CVR ballots.
+
+Prover removes 100 CVRs that voted for A. A=425, B=475.
+Since Nc = 1000, we add 100 phantoms. 
+
+Sample a removed ballot:
+
+    cvr_assort = 1
+    mvr_assort = if (isPhantom) 0.0
+    overstatement = 1
+    assort = 0
+
+Audit detects this with probability 1 - risk.
+
+### Case 4. Prover removes CVR ballots and modifies Nc.
+
+Prover removes 100 ballots that voted for A from the CVRs. A=425, B=475. Prover changes Nc to 900.
+
+We cannot detect this.
+
+
+=============
+
+SHANGRLA
+An assorter A assigns a nonnegative value to each ballot card, depending on the marks
+the voter made on that ballot card.
+
+SHANGRLA also “plays nice” with the phantoms-to-zombies approach [3] for dealing
+with missing ballot cards and missing cast-vote records, which has two benefits: (i) it
+makes it easy to treat missing ballots rigorously, and (ii) it can substantially improve the
+efficiency of auditing contests that do not appear on every ballot card, by allowing the
+sample to be drawn just from cards that the voting system claims contain the contest,
+without having to trust that the voting system correctly identified which cards contain
+the contest.assorter
+
+half-average assertions, each of
+which claims that the mean of a finite list of numbers between 0 and u is greater than 1/2
+
+The core, canonical statistical problem in SHANGRLA is to test the hypothesis that
+x̄ ≤ 1/2 using a sample from a finite population {xi }N i=1 , where each xi ∈ [0, u], with u
+known.
+
+ALPHA 11
+The domain of assorter j is Dj , which could comprise all ballot cards
+cast in the election or a smaller set, provided Dj includes every card that contains the contest
+that assorter Aj is relevant for. Targeting audit sampling using information about which ballot
+cards purport to contain which contests (card style data) can vastly improve audit efficiency
+while rigorously maintaining the risk limit even if the voting system misidentifies which
+cards contain which contests (Glazer, Spertus and Stark, 2021). There are also techniques for
+dealing with missing ballot cards (Bañuelos and Stark, 2012; Stark, 2020).
 

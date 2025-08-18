@@ -88,6 +88,9 @@ RLA papers
 2024	Sequential stratified inference for the mean		Jacob V. Spertus, Mayuri Sridhar, Philip B. Stark		September 11, 2024
 	https://github.com/spertus/UI-NNSMs
 
+2025 Dice, but don’t slice: Optimizing the efficiency of ONEAudit,   Spertus, Glazer and Clark,       July 25 2025
+    https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
+
 ============================================
 online
 

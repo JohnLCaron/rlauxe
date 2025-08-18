@@ -10,6 +10,7 @@ dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.commons.math)
+    implementation(libs.oshai.logging)
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
     testFixturesImplementation(libs.bundles.jvmtest)

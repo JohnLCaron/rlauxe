@@ -31,7 +31,7 @@ class TestSfPrimaryOA {
         val zipFilename = "$sfDir/CVR_Export_20240322103409.zip"
         val manifestFile = "ContestManifest.json"
         val topDir = "/home/stormy/rla/cases/sf2024Poa"
-        createAuditableCardsWithPools(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
+        createAuditableCardsWithPools(topDir, zipFilename, manifestFile, 2) // write to "$topDir/cards.csv"
         println("that took $stopwatch")
         //   createAuditableCards 8957 files totalCards=467063 group1=55810 + group2=411253 = 467063
         // countingContests

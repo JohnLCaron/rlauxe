@@ -32,7 +32,7 @@ class TestSfMayorOA {
     fun createSfMayorOA() {
         val stopwatch = Stopwatch()
         val manifestFile = "ContestManifest.json"
-        createAuditableCardsWithPools(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
+        createAuditableCardsWithPools(topDir, zipFilename, manifestFile, 18) // write to "$topDir/cards.csv"
         println("that took $stopwatch")
         //   createAuditableCards 8957 files totalCards=467063 group1=55810 + group2=411253 = 467063
         // countingContests
@@ -64,7 +64,7 @@ class TestSfMayorOA {
             "CandidateManifest.json",
             "$topDir/cards.csv",
             "$topDir/ballotPools.csv",
-            emptyList()
+            listOf(18)
         )
 
         // create sorted cards

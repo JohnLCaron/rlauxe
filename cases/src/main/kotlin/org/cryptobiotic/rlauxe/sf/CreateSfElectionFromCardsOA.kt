@@ -31,7 +31,8 @@ import java.io.FileOutputStream
 fun createAuditableCardsWithPools(
     topDir: String,
     castVoteRecordZip: String,
-    manifestFile: String): Int {
+    manifestFile: String,
+    contestId: Int): Int {
 
     val cardsOutputFilename = "$topDir/cards.csv"
     val cardsOutputStream = FileOutputStream(cardsOutputFilename)

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
@@ -117,12 +118,13 @@ class TestOAShangrla {
 
     @Test
     fun testMakeContestOA() {
-        val contest = makeContestOA(20000, 18000, cvrPercent = .66,
+        val contestOA = makeContestOA(20000, 18000, cvrPercent = .66,
             undervotePercent = .0, phantomPercent = .0, skewPct = .03)
-        val contestUA = contest.makeContestUnderAudit()
+        val contestUA = contestOA.makeContestUnderAudit()
         println(contestUA)
-        showPct("  cvrs", contest.cvrVotes, contest.cvrNc)
-        contest.pools.values.forEach { pool -> showPct("  pool ${pool.name}", pool.votes, pool.ncards) }
+        showPct("  cvrs", contestOA.cvrVotes, contestOA.cvrNc)
+        contestOA.pools.values.forEach { pool -> showPct("  pool ${pool.name}", pool.votes, pool.ncards) }
+        val contest = contestOA.contest as Contest
         showPct("  allVotes", contest.votes, contest.Nc)
         println()
 
@@ -140,7 +142,7 @@ class TestOAShangrla {
         val assorterMargin = bassorter.cvrAssortMargin
         val assorterMean = margin2mean(assorterMargin)
 
-        val poolMargin = contest.pools[1]!!.calcReportedMargin(0, 1)
+        val poolMargin = contestOA.pools[1]!!.calcReportedMargin(0, 1)
         val poolAverage = margin2mean(poolMargin)
         println("assorterMargin=v=$assorterMargin poolMargin=$poolMargin poolAverage=pa=$poolAverage ")
         println()

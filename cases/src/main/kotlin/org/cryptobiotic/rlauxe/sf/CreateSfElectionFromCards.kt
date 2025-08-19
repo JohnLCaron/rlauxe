@@ -28,7 +28,7 @@ fun createAuditableCards(topDir: String, castVoteRecordZip: String, contestManif
     cardsOutputStream.write(AuditableCardHeader.toByteArray())
 
     val irvIds = readContestManifestForIRVids(castVoteRecordZip, contestManifestFilename)
-    // val irvIds = readContestManifestForIRV(contestManifestFile)
+    val manifest = readBallotTypeContestManifestJsonFromZip(castVoteRecordZip, "BallotTypeContestManifest.json").unwrap()
 
     println("IRV contests = $irvIds")
 
@@ -38,7 +38,7 @@ fun createAuditableCards(topDir: String, castVoteRecordZip: String, contestManif
         castVoteRecordZip, silent = true, sort = true,
         filter = { path -> path.toString().contains("CvrExport_") },
         visitor = { inputStream ->
-            countCards += convertCvrExportToCard(inputStream, cardsOutputStream, irvIds)
+            countCards += convertCvrExportToCard(inputStream, cardsOutputStream, irvIds, manifest)
             countFiles++
         },
     )

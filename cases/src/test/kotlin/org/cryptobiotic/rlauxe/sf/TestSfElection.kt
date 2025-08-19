@@ -28,7 +28,7 @@ class TestSfElection {
     // write sf2024 cvrs
     @Test
     fun createSF2024cards() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "/home/stormy/rla/cases/sf2024m"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "ContestManifest.json"
         createAuditableCards(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
@@ -38,7 +38,7 @@ class TestSfElection {
 
     @Test
     fun createSF2024() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "/home/stormy/rla/cases/sf2024m"
         val auditDir = "$topDir/audit"
         clearDirectory(Path.of(auditDir))
 

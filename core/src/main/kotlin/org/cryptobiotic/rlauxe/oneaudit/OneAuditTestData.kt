@@ -133,7 +133,7 @@ fun makeTestMvrsScaled(oaContest: OneAuditContest, sampleLimit: Int, show: Boole
     val id = oaContest.id
     val voteForN = oaContest.info.voteForN
     val cvrs = mutableListOf<Cvr>()
-    cvrs.addAll(makeScaledCvrs(id, oaContest.cvrNc, oaContest.Np, oaContest.cvrVotes, scale, voteForN, poolId = null))
+    cvrs.addAll(makeScaledCvrs(id, oaContest.cvrNc, oaContest.Np(), oaContest.cvrVotes, scale, voteForN, poolId = null))
 
     // add the pooled cvrs
     oaContest.pools.values.forEach { pool: BallotPool ->
@@ -188,7 +188,7 @@ fun makeTestMvrs(oaContest: OneAuditContest): List<Cvr> {
     }
 
     // add phantoms
-    repeat(oaContest.Np) {
+    repeat(oaContest.Np()) {
         cvrs.add(Cvr("phantom$it", mapOf(oaContest.info.id to intArrayOf()), phantom = true))
     }
 
@@ -275,7 +275,8 @@ fun checkAssorterAvg(oaContest: OneAuditContest, mvrs: Iterable<Cvr>, show: Bool
     println(clcaAssorter)
 
     val pAssorter = clcaAssorter.assorter()
-    val oaAssorter = clcaAssorter.oaAssorter
+    val oaAssorter = OaPluralityAssorter.makeFromClcaAssorter(clcaAssorter)
+
     val passortAvg = margin2mean(pAssorter.calcAssorterMargin(contestUA.id, mvrs))
     val oassortAvg = margin2mean(oaAssorter.calcAssorterMargin(contestUA.id, mvrs))
 

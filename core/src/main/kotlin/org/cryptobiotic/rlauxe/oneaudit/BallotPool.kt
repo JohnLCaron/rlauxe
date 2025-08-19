@@ -10,6 +10,8 @@ data class BallotPool(
     val votes: Map<Int, Int>, // candid -> nvotes // the diff from ncards tell you the undervotes
 ) {
 
+    // TODO different for IRV
+
     // TODO does this really agree with the average assorter?
     // this could go from -1 to 1. TODO shouldnt that be -u to u ??
     fun calcReportedMargin(winner: Int, loser: Int): Double {

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
@@ -43,7 +43,7 @@ data class ContestInfo(
     }
 
     override fun toString() = buildString {
-        append("'$name' ($id) candidates=${candidateNames} voteForN=${voteForN}")
+        append("'$name' ($id) candidates=${candidateIds} choiceFunction=$choiceFunction nwinners=$nwinners voteForN=${voteForN}")
     }
 }
 
@@ -114,7 +114,7 @@ open class Contest(
     init {
         // construct votes, adding 0 votes if needed
         voteInput.forEach {
-            require(info.candidateIds.contains(it.key)) {
+            require(info().candidateIds.contains(it.key)) {
                 "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
             }
         }
@@ -132,8 +132,10 @@ open class Contest(
             }
         }
         val nvotes = votes.values.sum()
-        require(nvotes <= info.voteForN * (iNc - Np)) {
-            "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
+        if (info.choiceFunction != SocialChoiceFunction.IRV) {
+            require(nvotes <= info.voteForN * (iNc - Np)) {
+                "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
+            }
         }
         undervotes = info.voteForN * (iNc - Np) - nvotes   // C1
         // (undervotes + nvotes) = voteForN * (Nc - Np)
@@ -252,7 +254,7 @@ open class ContestUnderAudit(
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init is done
-        if (contest !is RaireContest) {
+        if (contest is Contest) {
             pollingAssertions = makePollingAssertions()
         }
     }
@@ -260,6 +262,7 @@ open class ContestUnderAudit(
     private fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes
+            is OneAuditContest -> (contest.contest as Contest).votes
             else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
         }
 

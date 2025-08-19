@@ -25,7 +25,7 @@ class TestPoolUndervotes {
         val contestUA = contest.makeContestUnderAudit()
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         val pAssorter = bassorter.assorter
-        val oaAssorter = bassorter.oaAssorter
+        val oaAssorter = OaPluralityAssorter.makeFromClcaAssorter(bassorter as OneAuditClcaAssorter)
         println("pool calcReportedMargin = ${pool.calcReportedMargin(pAssorter.winner(), pAssorter.loser())}")
         checkAssorterAvgFromCards(contest, cards)
 
@@ -52,7 +52,7 @@ class TestPoolUndervotes {
         val contestUA = contest1.makeContestUnderAudit()
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         val pAssorter = bassorter.assorter
-        val oaAssorter = bassorter.oaAssorter
+        val oaAssorter = OaPluralityAssorter.makeFromClcaAssorter(bassorter)
 
         val pool = contest1.pools.values.first()
         println("pool calcReportedMargin = ${pool.calcReportedMargin(pAssorter.winner(), pAssorter.loser())}")
@@ -87,7 +87,7 @@ class TestPoolUndervotes {
         val contestUA = contest1.makeContestUnderAudit()
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         val pAssorter = bassorter.assorter
-        val oaAssorter = bassorter.oaAssorter
+        val oaAssorter = OaPluralityAssorter.makeFromClcaAssorter(bassorter)
 
         val pool = contest1.pools.values.first()
         println("pool calcReportedMargin = ${pool.calcReportedMargin(pAssorter.winner(), pAssorter.loser())}")

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
@@ -32,8 +33,9 @@ class TestOneAuditKalamazoo {
         assertEquals(290, strataNocvr.ncards - strataNocvr.votes.values.sum())
 
         // whitmer=20699, schuette=5569, assorter_mean_all=0.5468806477264513
-        val whitmerTotal = contestOA.votes[info.candidateNames["Whitmer"]!!]!!
-        val schuetteTotal = contestOA.votes[info.candidateNames["Schuette"]!!]!!
+        val contest = contestOA.contest as Contest
+        val whitmerTotal = contest.votes[info.candidateNames["Whitmer"]!!]!!
+        val schuetteTotal = contest.votes[info.candidateNames["Schuette"]!!]!!
         assertEquals(20699, whitmerTotal)
         assertEquals(5569, schuetteTotal)
         val assorterMeanAll = (whitmerTotal - schuetteTotal) / contestOA.Nc.toDouble()

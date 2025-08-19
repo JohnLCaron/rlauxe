@@ -66,7 +66,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripIO() {
-        val filename = "/home/stormy/temp/tests/scratch/TestAuditStateJson.json"
+        val filename = "/home/stormy/rla/tests/scratch/TestAuditStateJson.json"
 
         val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
@@ -104,7 +104,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithRounds() {
-        val filename = "/home/stormy/temp/tests/scratch/TestAuditStateJson2.json"
+        val filename = "/home/stormy/rla/tests/scratch/TestAuditStateJson2.json"
 
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
@@ -155,7 +155,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithRaire() {
-        val filename = "/home/stormy/temp/tests/scratch/TestAuditStateJson3.json"
+        val filename = "/home/stormy/rla/tests/scratch/TestAuditStateJson3.json"
 
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(

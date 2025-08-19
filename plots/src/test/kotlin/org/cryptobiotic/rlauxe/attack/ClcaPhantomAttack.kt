@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 class ClcaPhantomAttack {
     var name = "clcaPhantomAttack"
-    var dirName = "/home/stormy/temp/attack/$name"
+    var dirName = "/home/stormy/rla/attack/$name"
     var phantomPct = 0.02
 
     val N = 100000

@@ -15,7 +15,7 @@ class ExtraVsMarginByFuzzDiff {
     val nruns = 100
     val nsimEst = 100
     val name = "extraVsMarginByFuzzDiff"
-    val dirName = "/home/stormy/temp/extra/$name"
+    val dirName = "/home/stormy/rla/extra/$name"
     val fuzzMvrs = .02
 
     // Used in docs

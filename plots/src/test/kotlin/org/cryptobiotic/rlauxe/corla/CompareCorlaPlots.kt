@@ -17,7 +17,7 @@ class CompareCorlaPlots {
     val nruns = 100
     val nsimEst = 100
     val name = "corlaWithPhantoms2"
-    val dirName = "/home/stormy/temp/corla/$name"
+    val dirName = "/home/stormy/rla/corla/$name"
     val N = 100000
 
     @Test

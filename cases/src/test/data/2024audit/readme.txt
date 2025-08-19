@@ -10,7 +10,7 @@ contests = 295
 County, Precinct, Contest, Choice, Party, Total Votes
 precincts = 3199
    total cvrs = 3191197
-   writeContestsJsonFile /home/stormy/temp/corla/election2/contests.json
+   writeContestsJsonFile /home/stormy/rla/corla/election2/contests.json
 took = 32.32 s
 
  cvrs has 3191197 cvrs

@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class PlotClcaFuzz {
     val name = "clcaByMvrFuzzPct"
-    val dirName = "/home/stormy/temp/fuzz"
+    val dirName = "/home/stormy/rla/fuzz"
 
     // Used in docs
 

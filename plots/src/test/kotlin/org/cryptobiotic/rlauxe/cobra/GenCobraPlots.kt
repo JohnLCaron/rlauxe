@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenCobraPlots {
-    val dirName = "/home/stormy/temp/corba"
+    val dirName = "/home/stormy/rla/corba"
     val name = "corba"
 
     val N = 10000

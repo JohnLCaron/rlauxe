@@ -113,7 +113,7 @@ class GenBettingPayoff {
             }
         }
 
-        val plotter = PlotBettingPayoffData("/home/stormy/temp/betting/", "bettingPayoff.csv")
+        val plotter = PlotBettingPayoffData("/home/stormy/rla/betting/", "bettingPayoff.csv")
         errorRates.forEach { error ->
             plotter.plotOneErrorRate(results, error)
         }

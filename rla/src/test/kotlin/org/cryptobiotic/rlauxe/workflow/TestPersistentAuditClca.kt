@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 class TestPersistentWorkflowClca {
-    val auditDir = "/home/stormy/temp/persist/testPersistentWorkflowClca"
+    val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
     // val topdir = kotlin.io.path.createTempDirectory().toString()
 
     @Test

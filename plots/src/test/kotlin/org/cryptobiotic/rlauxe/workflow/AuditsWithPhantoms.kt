@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class AuditsWithPhantoms {
     val name = "AuditsWithPhantoms"
-    val dirName = "/home/stormy/temp/audits/$name"
+    val dirName = "/home/stormy/rla/audits/$name"
 
     val mvrFuzzPct = .01
     val nruns = 500  // number of times to run workflow
@@ -112,7 +112,7 @@ class AuditsWithPhantoms {
         println(stopwatch.took())
 
         val name = "phantomMarginShift"
-        val dirName = "/home/stormy/temp/samples/$name"
+        val dirName = "/home/stormy/rla/samples/$name"
 
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
@@ -123,7 +123,7 @@ class AuditsWithPhantoms {
     @Test
     fun regenMarginShiftPlots() {
         val name = "phantomMarginShift"
-        val dirName = "/home/stormy/temp/samples/$name"
+        val dirName = "/home/stormy/rla/samples/$name"
 
         val subtitle = "margin=${df(.045)} Nc=${N} nruns=${300} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")

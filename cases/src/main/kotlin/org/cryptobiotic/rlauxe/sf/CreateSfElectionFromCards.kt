@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corla.readColoradoPrecinctLevelResults
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCard
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
@@ -17,13 +18,18 @@ import java.io.FileOutputStream
 
 private val quiet = false
 
-fun createAuditableCards(topDir: String, castVoteRecordZip: String, manifestFile: String) {
+// read the CvrExport_* files out of the castVoteRecord JSON zip file, convert them to CSV file.
+// read the contestManifest file out of the castVoteRecord to find the IRV contests, because their CVRs look different
+// write "$topDir/cards.csv"
+fun createAuditableCards(topDir: String, castVoteRecordZip: String, contestManifestFilename: String) {
     val stopwatch = Stopwatch()
     val outputFilename = "$topDir/cards.csv"
     val cardsOutputStream = FileOutputStream(outputFilename)
     cardsOutputStream.write(AuditableCardHeader.toByteArray())
 
-    val irvIds = readContestManifestForIRV(manifestFile)
+    val irvIds = readContestManifestForIRVids(castVoteRecordZip, contestManifestFilename)
+    // val irvIds = readContestManifestForIRV(contestManifestFile)
+
     println("IRV contests = $irvIds")
 
     var countFiles = 0
@@ -42,9 +48,11 @@ fun createAuditableCards(topDir: String, castVoteRecordZip: String, manifestFile
     println("took = $stopwatch")
 }
 
+
 fun createSfElectionFromCards(
     auditDir: String,
-    contestManifestFile: String,
+    castVoteRecordZip: String,
+    contestManifestFilename: String,
     candidateManifestFile: String,
     cardFile: String,
     auditConfigIn: AuditConfig? = null,
@@ -52,12 +60,12 @@ fun createSfElectionFromCards(
 ) {
     val stopwatch = Stopwatch()
 
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(contestManifestFile)
+    val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(castVoteRecordZip, contestManifestFilename)
     val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from ${contestManifestFile} err = $resultContestM")
+        else throw RuntimeException("Cannot read ContestManifestJson from $castVoteRecordZip/$contestManifestFilename err = $resultContestM")
     if (show) println("contestManifest = $contestManifest")
 
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(candidateManifestFile)
+    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
     val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
     else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
 

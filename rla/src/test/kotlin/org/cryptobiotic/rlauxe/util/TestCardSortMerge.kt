@@ -8,7 +8,7 @@ class TestCardSortMerge {
 
     @Test
     fun testCardSortMerge() {
-        val topDir = "/home/stormy/temp/cases/sf2024Poa"
+        val topDir = "/home/stormy/rla/cases/sf2024Poa"
         sortMergeCards("$topDir/audit",
             "$topDir/cards.csv",
             "$topDir/sortChunkTest",

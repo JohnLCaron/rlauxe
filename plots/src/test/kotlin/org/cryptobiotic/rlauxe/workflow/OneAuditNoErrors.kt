@@ -9,7 +9,7 @@ import kotlin.test.Test
 
 class OneAuditNoErrors {
     val name = "OneAuditNoErrors"
-    val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
+    val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
     val nruns = 200  // number of times to run workflow
     val nsimEst = 10

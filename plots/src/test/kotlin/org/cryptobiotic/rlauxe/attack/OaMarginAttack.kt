@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class OaMarginAttack {
     val name = "oaMarginAttack0"
-    var dirName = "/home/stormy/temp/attack/$name"
+    var dirName = "/home/stormy/rla/attack/$name"
 
     val N = 100000
     val nruns = 10

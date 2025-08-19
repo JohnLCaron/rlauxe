@@ -11,7 +11,7 @@ import kotlin.test.Test
 
 class GenPollingNoStyles {
     val name = "pollingNoStyle"
-    val dirName = "/home/stormy/temp/nostyle/$name"
+    val dirName = "/home/stormy/rla/nostyle/$name"
 
     val Nc = 10000
     val nruns = 100

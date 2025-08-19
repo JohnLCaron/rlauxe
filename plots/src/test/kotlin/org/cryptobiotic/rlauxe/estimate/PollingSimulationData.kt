@@ -39,7 +39,7 @@ class TestPollingSimulationData {
             }
         }
 
-        val plotter = PlotPollingSimulationData("/home/stormy/temp/polling/", "pollingSimulation")
+        val plotter = PlotPollingSimulationData("/home/stormy/rla/polling/", "pollingSimulation")
         plotter.plotData(results, Nc, underVotePct)
     }
 }

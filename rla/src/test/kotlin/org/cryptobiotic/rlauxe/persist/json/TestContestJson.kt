@@ -12,7 +12,7 @@ class TestContestJson {
 
     @Test
     fun testReadContests() {
-        val filename = "/home/stormy/temp/cases/boulder23/contests.json"
+        val filename = "/home/stormy/rla/cases/boulder23/contests.json"
         val contestsResults = readContestsJsonFile(filename)
         val contests = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${filename} err = $contestsResults")

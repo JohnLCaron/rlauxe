@@ -13,7 +13,7 @@ import kotlin.test.Test
 
 class GenVsFuzzByStrategy {
     val name = "clcaVsFuzzByStrategy2"
-    val dirName = "/home/stormy/temp/strategy"
+    val dirName = "/home/stormy/rla/strategy"
 
     val N = 50000
     val margin = .02

@@ -31,7 +31,7 @@ class TestBoulderElectionFromCvrs {
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/temp/cases/boulder24",
+            auditDir = "/home/stormy/rla/cases/boulder24",
         )
     }
 
@@ -40,7 +40,7 @@ class TestBoulderElectionFromCvrs {
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
             "src/test/data/Boulder2024/2024G-Boulder-County-Amended-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/temp/cases/boulder24recount",
+            auditDir = "/home/stormy/rla/cases/boulder24recount",
             minRecountMargin = 0.0,
         )
     }
@@ -55,7 +55,7 @@ class TestBoulderElectionFromCvrs {
 
         createBoulderElectionWithSov(
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
-            "/home/stormy/temp/cases/boulder23",
+            "/home/stormy/rla/cases/boulder23",
             combined,
         )
     }
@@ -66,7 +66,7 @@ class TestBoulderElectionFromCvrs {
             "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-Recount.csv", "Boulder2023")
         createBoulderElectionWithSov(
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
-            "/home/stormy/temp/cases/boulder23recount",
+            "/home/stormy/rla/cases/boulder23recount",
             sovo,
             minRecountMargin = 0.0,
         )
@@ -77,7 +77,7 @@ class TestBoulderElectionFromCvrs {
         createBoulderElectionOneAudit(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/temp/cases/boulder24oa",
+            auditDir = "/home/stormy/rla/cases/boulder24oa",
         )
     }
 
@@ -87,7 +87,7 @@ class TestBoulderElectionFromCvrs {
         createBoulderElectionOneAudit(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/temp/cases/boulder24blca",
+            auditDir = "/home/stormy/rla/cases/boulder24blca",
             includeCvrs = false,
         )
     }

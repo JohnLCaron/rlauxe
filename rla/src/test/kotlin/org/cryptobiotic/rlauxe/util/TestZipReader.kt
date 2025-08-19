@@ -46,7 +46,7 @@ class TestZipReader {
 
     @Test
     fun testZipReaderTour() {
-        val filename = "/home/stormy/temp/cases/sf2024P/CVR_Export_20240322103409.zip"
+        val filename = "/home/stormy/rla/cases/sf2024P/CVR_Export_20240322103409.zip"
         var countFiles = 0
         // ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
         //    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit)

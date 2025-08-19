@@ -36,7 +36,7 @@ class CompareAuditVariance {
         println(stopwatch.took())
 
         val name = "pollingVariance"
-        val dirName = "/home/stormy/temp/extra/$name"
+        val dirName = "/home/stormy/rla/extra/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -46,7 +46,7 @@ class CompareAuditVariance {
     @Test
     fun regenPolling() {
         val name = "pollingVariance"
-        val dirName = "/home/stormy/temp/extra/$name"
+        val dirName = "/home/stormy/rla/extra/$name"
         val subtitle = "Nc=${N} nruns=${nruns} fuzzPct=$fuzzPct"
         showSampleVarianceVsMargin(dirName, name, subtitle, ScaleType.Linear)
         showSampleVarianceVsMargin(dirName, name, subtitle, ScaleType.LogLinear)
@@ -79,7 +79,7 @@ class CompareAuditVariance {
         println(stopwatch.took())
 
         val name = "clcaVariance"
-        val dirName = "/home/stormy/temp/extra/$name"
+        val dirName = "/home/stormy/rla/extra/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -89,7 +89,7 @@ class CompareAuditVariance {
     @Test
     fun regenClca() {
         val name = "clcaVariance"
-        val dirName = "/home/stormy/temp/extra/$name"
+        val dirName = "/home/stormy/rla/extra/$name"
         val subtitle = "Nc=${N} nruns=${nruns} fuzzPct=$fuzzPct"
         showSampleVarianceVsMargin(dirName, name, subtitle, ScaleType.Linear)
         showSampleVarianceVsMargin(dirName, name, subtitle, ScaleType.LogLinear)

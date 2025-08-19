@@ -19,7 +19,7 @@ class TestColoradoElectionFromAudit {
 
     @Test
     fun testCvrsAreComplete() {
-        val topDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/rla/cases/corla"
         val precinctCvrReader = TreeReaderIterator(
             "$topDir/cards/",
             fileFilter = { true },
@@ -33,7 +33,7 @@ class TestColoradoElectionFromAudit {
     // and precinctFile for cvrs
     @Test
     fun createElectionFromDetailXmlAndPrecincts() {
-        val topDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/rla/cases/corla"
         val tabulateFile = "src/test/data/2024audit/tabulate.csv"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
@@ -56,7 +56,7 @@ class TestColoradoElectionFromAudit {
     // out of memory sort by sampleNum()
     // @Test
     fun testSortMergeCvrs() {
-        val topDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/rla/cases/corla"
         // out of memory sort by sampleNum()
         sortCardsInDirectoryTree(topDir, "$topDir/cards/", "$topDir/sortChunks")
         mergeCards(topDir, "$topDir/sortChunks")
@@ -70,7 +70,7 @@ class TestColoradoElectionFromAudit {
     // @Test
     fun testTreeReader() {
         val stopwatch = Stopwatch()
-        val topDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/rla/cases/corla"
         val precinctReader = TreeReaderIterator(
             "$topDir/cards/",
             fileFilter = { true },
@@ -87,7 +87,7 @@ class TestColoradoElectionFromAudit {
 
     // @Test
     fun makePrecinctTree() {
-        val cvrsDir = "/home/stormy/temp/cases/corla/cards"
+        val cvrsDir = "/home/stormy/rla/cases/corla/cards"
         val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }
         println("county, precinct")
         tour.tourFiles()
@@ -106,7 +106,7 @@ class TestColoradoElectionFromAudit {
     fun makeCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
-        val topDir = "/home/stormy/temp/cases/corla"
+        val topDir = "/home/stormy/rla/cases/corla"
         val precinctReader = TreeReaderIterator(
             "$topDir/cards/",
             fileFilter = { true },

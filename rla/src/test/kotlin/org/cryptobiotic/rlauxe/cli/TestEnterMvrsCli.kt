@@ -7,7 +7,7 @@ class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsClca() {
-        val auditDir = "/home/stormy/temp/persist/testPersistentWorkflowClca"
+        val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
         EnterMvrsCli.main(
             arrayOf(
                 "-in", auditDir,
@@ -29,7 +29,7 @@ class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsError2() {
-        val auditDir = "/home/stormy/temp/persist/testPersistentWorkflowClca"
+        val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
         EnterMvrsCli.main(
             arrayOf(
                 "-in", auditDir,

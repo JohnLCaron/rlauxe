@@ -8,7 +8,7 @@ class TestRunRlaStartFuzz {
 
     @Test
     fun testRlaPollingFuzz() {
-        val topdir = "/home/stormy/temp/persist/testRlaPollingFuzz"
+        val topdir = "/home/stormy/rla/persist/testRlaPollingFuzz"
         clearDirectory(Path.of(topdir))
 
         RunRlaStartFuzz.main(
@@ -22,7 +22,7 @@ class TestRunRlaStartFuzz {
 
     @Test
     fun testRlaClcaFuzz() {
-        val topdir = "/home/stormy/temp/persist/testRlaClcaFuzz"
+        val topdir = "/home/stormy/rla/persist/testRlaClcaFuzz"
         clearDirectory(Path.of(topdir))
         RunRlaStartFuzz.main(
             arrayOf(
@@ -37,7 +37,7 @@ class TestRunRlaStartFuzz {
 
     @Test
     fun testRlaRaire() {
-        val topdir = "/home/stormy/temp/persist/testRlaRaire"
+        val topdir = "/home/stormy/rla/persist/testRlaRaire"
         clearDirectory(Path.of(topdir))
 
         RunRlaStartFuzz.main(
@@ -56,7 +56,7 @@ class TestRunRlaStartFuzz {
     /*
     @Test
     fun testRlaOA() {
-        val topdir = "/home/stormy/temp/persist/testRlaOA"
+        val topdir = "/home/stormy/rla/persist/testRlaOA"
         clearDirectory(Path.of(topdir))
 
         RunRlaStartFuzz.main(

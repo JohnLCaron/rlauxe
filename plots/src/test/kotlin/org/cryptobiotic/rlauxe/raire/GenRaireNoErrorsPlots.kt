@@ -18,7 +18,7 @@ class GenRaireNoErrorsPlots {
     val nsimEst = 100
     val N = 20000
     val name = "raireNoErrors"
-    val dirName = "/home/stormy/temp/$name"
+    val dirName = "/home/stormy/rla/$name"
 
     @Test
     fun raireNoErrorsPlots() {

@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class AuditsNoErrors {
     val name = "AuditsNoErrors"
-    val dirName = "/home/stormy/temp/audits/$name" // you need to make this directory first
+    val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
     val nruns = 500  // number of times to run workflow
     val nsimEst = 10
@@ -92,7 +92,7 @@ class AuditsNoErrors {
     @Test
     fun clcaNoErrorsPlots() {
         val name = "clcaNoErrors"
-        val dirName = "/home/stormy/temp/workflow/$name"
+        val dirName = "/home/stormy/rla/workflow/$name"
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
@@ -123,7 +123,7 @@ class AuditsNoErrors {
     @Test
     fun pollingNoErrorsPlots() {
         val name = "pollingNoErrors"
-        val dir = "/home/stormy/temp/workflow/$name"
+        val dir = "/home/stormy/rla/workflow/$name"
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
         val stopwatch = Stopwatch()
 
@@ -181,7 +181,7 @@ class AuditsNoErrors {
     @Test
     fun oaNoErrorsPlots() {
         val name = "oaNoErrors2"
-        val dirName = "/home/stormy/temp/workflow/$name"
+        val dirName = "/home/stormy/rla/workflow/$name"
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         val fuzzPct = 0.0

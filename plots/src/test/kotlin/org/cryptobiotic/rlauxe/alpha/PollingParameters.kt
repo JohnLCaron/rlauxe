@@ -32,7 +32,7 @@ class PollingParameters {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/sim/pollingAlpha.csv")
+        val writer = SRTcsvWriter("/home/stormy/rla/sim/pollingAlpha.csv")
 
         val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)
@@ -73,7 +73,7 @@ class PollingParameters {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/sim/pollingBravo.csv")
+        val writer = SRTcsvWriter("/home/stormy/rla/sim/pollingBravo.csv")
 
         val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)

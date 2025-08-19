@@ -11,7 +11,7 @@ import kotlin.test.Test
 
 class PlotPollingFuzz {
     val name = "pollByMvrFuzzPct"
-    val dirName = "/home/stormy/temp/fuzz"
+    val dirName = "/home/stormy/rla/fuzz"
     val N = 10000
     val nruns = 100
 

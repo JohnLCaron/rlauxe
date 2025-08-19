@@ -20,20 +20,24 @@ import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import java.io.FileOutputStream
 
+// read the CvrExport_* files out of the castVoteRecord JSON zip file, convert them to CSV file.
+// use the contestManifestFile to find the IRV contests, because their CVR looks diffrent
+// fun createAuditableCards(topDir: String, castVoteRecordZip: String, contestManifestFile: String) {
+
 // This is to write ballotPools.csv for SHANGRLA comparison
 // read Dominion "cvr export" json file
 // write "$topDir/cards.csv", "$topDir/ballotPools.csv"
 // return number of cards written into the csv pool
 fun createAuditableCardsWithPools(
     topDir: String,
-    dominionCvrJson: String, // DominionCvrJson
+    castVoteRecordZip: String,
     manifestFile: String): Int {
 
     val cardsOutputFilename = "$topDir/cards.csv"
     val cardsOutputStream = FileOutputStream(cardsOutputFilename)
     cardsOutputStream.write(AuditableCardHeader.toByteArray())
 
-    val irvIds = readContestManifestForIRV(manifestFile)
+    val irvIds = readContestManifestForIRVids(castVoteRecordZip, manifestFile)
 
     val countingContestsByGroup = mutableMapOf<Int, ContestCount>()
     val batches = mutableMapOf<String, BallotManifest>()
@@ -44,7 +48,7 @@ fun createAuditableCardsWithPools(
     var countCvrs1 = 0
     var countCvrs2 = 0
     val zipReader = ZipReaderTour(
-        dominionCvrJson,
+        castVoteRecordZip,
         silent = true,
         filter = { path -> path.toString().contains("CvrExport_") },
         visitor = { inputStream ->
@@ -198,7 +202,8 @@ data class ContestCount(var ncards: Int = 0, val counts: MutableMap<Int, Int> = 
 // write ""$topdir/contests.json"", ""$topdir/auditConfig.json""
 fun createSfElectionFromCardsOA(
     auditDir: String,
-    contestManifestFile: String,
+    castVoteRecordZip: String,
+    contestManifestFilename: String,
     candidateManifestFile: String,
     cardFile: String,
     ballotPoolFile: String,
@@ -207,11 +212,11 @@ fun createSfElectionFromCardsOA(
 ) {
     val stopwatch = Stopwatch()
 
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(contestManifestFile)
+    val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(castVoteRecordZip, contestManifestFilename)
     val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from ${contestManifestFile} err = $resultContestM")
+    else throw RuntimeException("Cannot read ContestManifestJson from $castVoteRecordZip/$contestManifestFilename err = $resultContestM")
 
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(candidateManifestFile)
+    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
     val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
     else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
 

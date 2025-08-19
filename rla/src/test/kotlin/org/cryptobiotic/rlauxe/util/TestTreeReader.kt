@@ -8,7 +8,7 @@ class TestTreeReader {
 
     @Test
     fun testTreeReaderIterator() {
-        val topDir = "/home/stormy/temp/cases/corla/cards"
+        val topDir = "/home/stormy/rla/cases/corla/cards"
         // class TreeReaderIterator <T> (
         //    topDir: String,
         //    val fileFilter: (Path) -> Boolean,
@@ -36,7 +36,7 @@ class TestTreeReader {
 
     @Test
     fun testTreeReaderTour() {
-        val dirname = "/home/stormy/temp/cases/sf2024P/CVR_Export_20240322103409"
+        val dirname = "/home/stormy/rla/cases/sf2024P/CVR_Export_20240322103409"
         var countFiles = 0
         val tour = TreeReaderTour(dirname, visitor = { countFiles++ })
         tour.tourFiles()

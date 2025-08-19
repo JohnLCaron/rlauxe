@@ -15,7 +15,7 @@ class ExtraVsMarginByStrategy {
     val nruns = 10
     val nsimEst = 100
     val name = "extraVsMarginByStrategy"
-    val dirName = "/home/stormy/temp/extra/$name"
+    val dirName = "/home/stormy/rla/extra/$name"
     val fuzzMvrs = .01
     var phantomPct = .01
 

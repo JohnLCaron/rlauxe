@@ -12,7 +12,7 @@ import java.nio.file.Path
 import kotlin.test.Test
 
 class TestPersistentOneAudit {
-    val auditDir = "/home/stormy/temp/persist/testPersistentOneAudit"
+    val auditDir = "/home/stormy/rla/persist/testPersistentOneAudit"
     // val topdir = kotlin.io.path.createTempDirectory().toString()
 
     @Test

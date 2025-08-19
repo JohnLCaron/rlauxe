@@ -35,7 +35,7 @@ class Dvalues {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/pollingAlpha.csv")
+        val writer = SRTcsvWriter("/home/stormy/rla/sim/dvalues/pollingAlpha.csv")
 
         val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)
@@ -76,7 +76,7 @@ class Dvalues {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/temp/sim/dvalues/pollingBravo.csv")
+        val writer = SRTcsvWriter("/home/stormy/rla/sim/dvalues/pollingBravo.csv")
 
         val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)

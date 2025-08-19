@@ -11,7 +11,7 @@ class AuditsWithErrors {
     val nruns = 100
     val nsimEst = 10
     val name = "AuditsWithErrors4"
-    val dirName = "/home/stormy/temp/audits/$name"
+    val dirName = "/home/stormy/rla/audits/$name"
     val N = 50000
     val margin = .04
 

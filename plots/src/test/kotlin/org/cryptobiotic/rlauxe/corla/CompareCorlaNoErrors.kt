@@ -17,7 +17,7 @@ class CompareCorlaNoErrors {
     val nruns = 10
     val nsimEst = 10
     val name = "corlaNoErrors2"
-    val dirName = "/home/stormy/temp/corla/$name"
+    val dirName = "/home/stormy/rla/corla/$name"
     val N = 100000
     val risk = .03
 

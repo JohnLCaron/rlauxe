@@ -17,7 +17,7 @@ class CompareCorlaWithAttack {
     val nruns = 10  // number of times to run workflow
     val N = 100000
     val name = "corlaWithAttack"
-    val dirName = "/home/stormy/temp/corla/$name"
+    val dirName = "/home/stormy/rla/corla/$name"
 
     @Test
     fun corlaWithAttack() {

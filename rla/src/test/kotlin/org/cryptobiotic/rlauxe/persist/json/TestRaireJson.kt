@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class TestRaireJson {
-    val filename = "/home/stormy/temp/persist/test/TestRaireAssertion.json"
+    val filename = "/home/stormy/rla/persist/test/TestRaireAssertion.json"
 
     // data class RaireContestJson(
     //    val info: ContestInfoJson,

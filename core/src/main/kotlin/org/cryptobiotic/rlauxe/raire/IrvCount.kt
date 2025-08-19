@@ -88,7 +88,7 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
     var roundWinners = IrvWinners()
 
     init {
-        candVotes = count(votes)
+        candVotes = countLeadingVote(votes)
 
         // check if theres 2 or less candidates
         if (viable.size <= 2) {
@@ -98,7 +98,8 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
 
     fun name() = if (elimination.isEmpty()) "root" else "elimPath=${elimination}"
 
-    fun count(votes: Array<Vote>): MutableMap<Int, Int> {
+    // get first vote that  if for a viable candidate
+    fun countLeadingVote(votes: Array<Vote>): MutableMap<Int, Int> {
         val working = mutableMapOf<Int, Int>()
         votes.forEach { vote ->
             for (cand in vote.prefs) {
@@ -161,6 +162,8 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
 
     // return true if theres a tie
     fun removeLeastCandidate(): Boolean {
+        if (candVotes.isEmpty())
+            println("huh")
         val minValue = candVotes.map { it.value }.min()
         val minKeys = candVotes.filter { it.value == minValue }.keys
         if (minKeys.size == 1) {
@@ -168,7 +171,7 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
             elimination.add(last)
             viable.remove(last)
             candVotes.remove(last)
-            candVotes = count(votes)
+            candVotes = countLeadingVote(votes)
             return false
         }
         // otherwise create a path for each
@@ -182,7 +185,7 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
 
     fun checkForWinner(): IrvWinners {
         if (subpaths.isEmpty()) {
-            val down2two = viable.size == 2
+            val down2two = viable.size <= 2
             if (down2two) {
                 this.roundWinners = IrvWinners(true, findWinningCandidates())
             }

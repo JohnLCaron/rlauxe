@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.simulateSampleSizeBetaMart
+import org.cryptobiotic.rlauxe.estimate.simulateSampleSizeBettingMart
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.junit.jupiter.api.Test
@@ -71,7 +71,7 @@ fun runWithComparisonFuzzSampler(
         ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct),
     )
 
-    return simulateSampleSizeBetaMart(
+    return simulateSampleSizeBettingMart(
         auditConfig,
         sampler,
         optimal,

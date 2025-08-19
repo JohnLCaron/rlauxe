@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrs
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -210,15 +211,15 @@ class TestMakeFuzzedCvrsFrom {
             val welfordFromFuzz = Welford()
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-                val contestOA =
-                    makeContestOA(margin, Nc, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01) // TODO no skew
+                val contestOA = makeContestOA(margin, Nc, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01) // TODO no skew
                 val ncands = contestOA.ncandidates
-                if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contestOA.votes}")
+                val contest = contestOA.contest as Contest
+                if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
 
                 val cvrs = makeTestMvrs(contestOA)
                 val cvrVotes = tabulateVotesWithUndervotes(cvrs.iterator(), 0, ncands)
-                if (showOA) println("cvrVotes = ${cvrVotes}  contestVotes = ${contestOA.votesAndUndervotes()}")
-                assertEquals(cvrVotes, contestOA.votesAndUndervotes())
+                if (showOA) println("cvrVotes = ${cvrVotes}  contestVotes = ${contest.votesAndUndervotes()}")
+                assertEquals(cvrVotes, contest.votesAndUndervotes())
                 assertEquals(Nc, cvrs.size)
 
                 val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA), cvrs, fuzzPct, welfordFromFuzz)
@@ -240,7 +241,7 @@ class TestMakeFuzzedCvrsFrom {
                     print(showChangeMatrix(ncands, choiceChange))
                     // choiceChange.toSortedMap().forEach { println("  $it") }
                 }
-                val nn = Nc - contestOA.Np
+                val nn = Nc - contestOA.Np()
                 choiceChanges.add(choiceChange)
                 val allSum = choiceChange.values.sum()
                 assertEquals(nn, allSum)

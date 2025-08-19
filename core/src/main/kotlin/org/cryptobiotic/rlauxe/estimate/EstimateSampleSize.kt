@@ -275,7 +275,7 @@ fun simulateSampleSizeClcaAssorter(
     sampler.reset()
 
     // run the simulation ntrials (=auditConfig.nsimEst) times
-    val result: RunTestRepeatedResult = simulateSampleSizeBetaMart(
+    val result: RunTestRepeatedResult = simulateSampleSizeBettingMart(
         auditConfig,
         sampler,
         bettingFn,
@@ -299,7 +299,7 @@ fun simulateSampleSizeClcaAssorter(
     return result
 }
 
-fun simulateSampleSizeBetaMart(
+fun simulateSampleSizeBettingMart(
     auditConfig: AuditConfig,
     sampleFn: Sampler,
     bettingFn: BettingFn,

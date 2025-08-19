@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -16,8 +17,9 @@ class TestMakeContestOA {
         val margin = .02
         val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 1.0, undervotePercent = 0.0, phantomPercent = 0.0)
         assertEquals(N, contestOA.Nc)
-        assertEquals(contestOA.cvrVotes, contestOA.votes)
-        assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
+        val contest = contestOA.contest as Contest
+        assertEquals(contestOA.cvrVotes, contest.votes)
+        assertEquals(margin, contest.calcMargin(0, 1), doublePrecision)
 
         assertEquals(1, contestOA.pools.size)
         val pool = contestOA.pools[1]!!
@@ -93,8 +95,9 @@ class TestMakeContestOA {
         assertEquals(roundToInt(nvotes*(1.0 - cvrPercent)), pool.ncards)
 
         assertEquals(N, contestOA.Nc)
-        assertEquals(margin, contestOA.reportedMargin(0, 1), doublePrecision)
-        showPct("allVotes", contestOA.votes, contestOA.Nc)
+        val contest = contestOA.contest as Contest
+        assertEquals(margin, contest.calcMargin(0, 1), doublePrecision)
+        showPct("allVotes", contest.votes, contestOA.Nc)
         println()
     }
 
@@ -117,7 +120,7 @@ class TestMakeContestOA {
         assertEquals(noCount, contest.pools[1]!!.ncards)
 
         val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
-        assertEquals(contest.Np, nphantom)
+        assertEquals(contest.Np(), nphantom)
         val phantomPct = nphantom/ contestOA.Nc.toDouble()
         println("  nphantom=$nphantom pct= $phantomPct =~ ${phantomPct} abs=${abs(phantomPct - phantomPercent)} " +
                 " rel=${abs(phantomPct - phantomPercent) /phantomPercent}")

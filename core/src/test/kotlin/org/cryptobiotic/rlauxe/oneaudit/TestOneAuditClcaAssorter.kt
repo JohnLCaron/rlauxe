@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.*
@@ -32,13 +33,14 @@ class TestOneAuditClcaAssorter {
 
     @Test
     fun testOneAuditClcaAssorter() {
-        val contest = makeContestOA(20000, 18000, cvrPercent = .66,
+        val contestOA = makeContestOA(20000, 18000, cvrPercent = .66,
             undervotePercent = .11, phantomPercent = .0, skewPct = .06)
-        val contestUA = contest.makeContestUnderAudit()
+        val contestUA = contestOA.makeContestUnderAudit()
         println(contestUA)
-        showPct(" cvrs", contest.cvrVotes, contest.cvrNc)
-        contest.pools.values.forEach { pool -> showPct(" pool ${pool.name}", pool.votes, pool.ncards) }
-        showPct(" allVotes", contest.votes, contest.Nc)
+        showPct(" cvrs", contestOA.cvrVotes, contestOA.cvrNc)
+        contestOA.pools.values.forEach { pool -> showPct(" pool ${pool.name}", pool.votes, pool.ncards) }
+        val contest = contestOA.contest as Contest
+        showPct(" allVotes", contest.votes, contestOA.Nc)
         println()
 
         val winnerPool = Cvr("winner", mapOf(0 to intArrayOf(0)), poolId=1)
@@ -52,7 +54,7 @@ class TestOneAuditClcaAssorter {
         println("cvrAssortMargin=v=$assorterMargin cvrAssortMean=$cvrAssortMean reportedMean=${bassorter.assorter.reportedMean()} ")
         assertEquals(cvrAssortMean, bassorter.assorter.reportedMean(), doublePrecision)
 
-        val poolMargin = contest.pools[1]!!.calcReportedMargin(0, 1)
+        val poolMargin = contestOA.pools[1]!!.calcReportedMargin(0, 1)
         val poolAverage = margin2mean(poolMargin)
         println("poolMargin=$poolMargin poolAverage=pa=$poolAverage ")
         println()
@@ -117,15 +119,16 @@ class TestOneAuditClcaAssorter {
 
     @Test
     fun testUndervote() {
-        val contest = makeContestOA(
+        val contestOA = makeContestOA(
             20000, 18000, cvrPercent = .66,
             undervotePercent = 0.11, phantomPercent = .0, skewPct = .06
         )
-        val contestUA = contest.makeContestUnderAudit()
+        val contestUA = contestOA.makeContestUnderAudit()
         println(contestUA)
-        showPct(" cvrs", contest.cvrVotes, contest.cvrNc)
-        contest.pools.values.forEach { pool -> showPct(" pool ${pool.name}", pool.votes, pool.ncards) }
-        showPct(" allVotes", contest.votes, contest.Nc)
+        showPct(" cvrs", contestOA.cvrVotes, contestOA.cvrNc)
+        contestOA.pools.values.forEach { pool -> showPct(" pool ${pool.name}", pool.votes, pool.ncards) }
+        val contest = contestOA.contest as Contest
+        showPct(" allVotes", contest.votes, contestOA.Nc)
         println()
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)

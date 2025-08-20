@@ -73,7 +73,6 @@ class TestSfPrimaryOA {
         // create sorted cards
         sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
         mergeCards(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCards.csv"
-        // manually zip (TODO)
         println("that took $stopwatch")
         //  read 411253 cards contest1=ContestVotes(contestId=1, countBallots=155705, votes={5=126942, 7=5058, 6=5262, 3=975, 234=4851, 1=813, 2=546, 4=893, 8=464}, nvotes=145804, underVotes=9901)
         //PRESIDENT OF THE UNITED STATES-DEM (1) Nc=176637 Np=0 votes={5=142814, 7=5761, 6=6374, 3=1185, 234=5923, 1=952, 2=617, 4=987, 8=584, 245=0, 246=0, 247=0, 248=0, 249=0, 250=0} minMargin=0.7724

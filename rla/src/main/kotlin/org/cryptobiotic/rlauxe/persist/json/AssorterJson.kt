@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 @Serializable
 data class ClcaAssorterJson(
     val className: String,
-    val contestOA: OAContestJson?, // duplicate storage, argghh
+    val contestOA: ContestIFJson?, // duplicate storage, argghh; TODO why arent we using ContestIF ??
     val assorter: AssorterIFJson,
     val avgCvrAssortValue: Double?,
     val hasStyle: Boolean,
@@ -32,7 +32,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
     return if (this is OneAuditClcaAssorter) {
         ClcaAssorterJson(
             "OAClcaAssorter",
-            this.contestOA.publishOAJson(),
+            this.contestOA.publishJson(),
             this.assorter.publishJson(),
             this.assortAverageFromCvrs,
             true, // TODO
@@ -58,12 +58,16 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 this.avgCvrAssortValue,
                 this.hasStyle,
             )
-        "OAClcaAssorter" ->
+
+        "OAClcaAssorter" -> {
+            // val innerContest = (contest as OneAuditContest).contest
             OneAuditClcaAssorter(
-                this.contestOA!!.import(info),
+                // this.contestOA!!.import(innerContest),
+                this.contestOA!!.import(info) as OneAuditContest,
                 this.assorter.import(info),
                 this.avgCvrAssortValue,
             )
+        }
         else -> throw RuntimeException()
     }
 }

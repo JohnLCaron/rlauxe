@@ -25,9 +25,10 @@ class TestAssertionJson {
         val assertion = makeAssertion()
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, .52, false, true)
         val target = ClcaAssertion(assertion.info, cassorter)
+        // val fakeContest = Contest(target.info, emptyMap(), 0, 0)
 
         val json = target.publishJson()
-        val roundtrip = json.import(target.info)
+        val roundtrip = json.import(assertion.info)
         assertNotNull(roundtrip)
         assertTrue(roundtrip.equals(target))
     }
@@ -58,7 +59,7 @@ class TestAssertionJson {
         val winnerCvr = makeCvr(0)
         val loserCvr = makeCvr(1)
         val otherCvr = makeCvr(2)
-        val contest = makeContestFromCvrs(info, listOf(winnerCvr, loserCvr, otherCvr))
+        val contest = makeContestFromCvrs(info, listOf(winnerCvr, winnerCvr, loserCvr, otherCvr))
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         val target = Assertion(info, assorter)

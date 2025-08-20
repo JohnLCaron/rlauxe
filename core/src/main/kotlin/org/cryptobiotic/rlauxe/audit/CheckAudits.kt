@@ -29,8 +29,12 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
 
 // check winners are correctly formed
 fun checkWinners(contestUA: ContestUnderAudit, ) {
-    val sortedVotes: List<Map.Entry<Int, Int>> = (contestUA.contest as Contest).votes.entries.sortedByDescending { it.value } // TODO wtf?
-    val contest = contestUA.contest
+    val contest = if (contestUA.contest is Contest) contestUA.contest
+        else if (contestUA.contest is OneAuditContest && contestUA.contest.contest is Contest) contestUA.contest.contest
+        else null
+    if (contest == null) return
+
+    val sortedVotes: List<Map.Entry<Int, Int>> = contest.votes.entries.sortedByDescending { it.value } // TODO wtf?
     val nwinners = contest.winners.size
 
     // make sure that the winners are unique

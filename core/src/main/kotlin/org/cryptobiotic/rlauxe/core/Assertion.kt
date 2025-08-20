@@ -41,22 +41,6 @@ class ClcaAssertion(
 
     override fun toString() = cassorter.assorter().desc()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
-
-        other as ClcaAssertion
-
-        return cassorter == other.cassorter
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + cassorter.hashCode()
-        return result
-    }
-
     override fun show() = buildString {
         appendLine(" cassorter: ${cassorter}")
     }
@@ -71,5 +55,21 @@ class ClcaAssertion(
         if (cassorter != other.cassorter) {
             append(" cassorter not equal")
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as ClcaAssertion
+
+        return cassorter == other.cassorter
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + cassorter.hashCode()
+        return result
     }
 }

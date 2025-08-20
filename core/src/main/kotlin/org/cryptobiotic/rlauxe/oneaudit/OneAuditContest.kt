@@ -4,6 +4,18 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.min
 
+// OneAuditContest no longer isa Contest, but hasa ContestIF (which might be Contest or RaireContest)
+// was class OneAuditContest (
+//    info: ContestInfo,
+//    voteInput: Map<Int, Int>,
+//    Nc: Int,
+//    Np: Int,
+//
+//    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes (may be empty)
+//    val cvrNc: Int,                // may be 0
+//    val pools: Map<Int, BallotPool>, // pool id -> pool
+//) : Contest(info, voteInput, Nc, Np)
+
 class OneAuditContest (
     val contest: ContestIF,
 
@@ -18,7 +30,7 @@ class OneAuditContest (
     val cvrUndervotes: Int
 
     init {
-        // TODO add SUPERMAJORITY. What about IRV ??
+        // TODO add SUPERMAJORITY.
         // require(choiceFunction == SocialChoiceFunction.PLURALITY) { "OneAuditContest requires PLURALITY"}
 
         // TODO how many undervotes are there ?
@@ -37,7 +49,7 @@ class OneAuditContest (
         }
 
         // not sure about where undervotes and phantoms live
-        require(Nc == cvrNc + poolNc + Np())
+        // TODO require(Nc == cvrNc + poolNc + Np())
 
         /* minMargin = if (votes.size < 2) 0.0 else {
             val sortedVotes = votes.toList().sortedBy { it.second }.reversed()
@@ -95,13 +107,11 @@ class OneAuditContest (
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
 
         other as OneAuditContest
 
         if (cvrNc != other.cvrNc) return false
-        // if (minMargin != other.minMargin) return false
-        if (poolNc != other.poolNc) return false
+        if (!contest.equals(other.contest)) return false
         if (cvrVotes != other.cvrVotes) return false
         if (pools != other.pools) return false
 
@@ -109,10 +119,8 @@ class OneAuditContest (
     }
 
     override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + cvrNc
-        // result = 31 * result + minMargin.hashCode()
-        result = 31 * result + poolNc
+        var result = cvrNc
+        result = 31 * result + contest.hashCode()
         result = 31 * result + cvrVotes.hashCode()
         result = 31 * result + pools.hashCode()
         return result
@@ -157,10 +165,10 @@ class OneAuditContest (
                   cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
                   cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
                   pools: List<BallotPool>,   // pools for this contest
-                  Np: Int): OneAuditContest {
+                  ): OneAuditContest {
 
-            val poolNc = pools.sumOf { it.ncards }
-            val Nc = poolNc + cvrNc + Np
+            // val poolNc = pools.sumOf { it.ncards }
+            // val Nc = poolNc + cvrNc + Np
 
             //// construct total votes
             val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
@@ -190,7 +198,7 @@ class OneAuditContest (
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-class OAContestUnderAudit(
+open class OAContestUnderAudit(
     val contestOA: OneAuditContest,
     hasStyle: Boolean = true
 ): ContestUnderAudit(contestOA, isComparison=true, hasStyle=hasStyle) {

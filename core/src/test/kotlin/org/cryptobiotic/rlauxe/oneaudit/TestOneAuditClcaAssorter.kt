@@ -28,7 +28,6 @@ import kotlin.test.assertEquals
 //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
 //    otherwise = 1/2
 
-// TODO fix tests
 class TestOneAuditClcaAssorter {
 
     @Test
@@ -148,7 +147,7 @@ class TestOneAuditClcaAssorter {
     }
 
 
-    // @Test TODO
+    // @Test TODO fix
     fun testMakeContestOAwithAffine() {
         val contest = makeContestOA(20000, 18000, cvrPercent = .66, undervotePercent = .0, phantomPercent = .0, skewPct = .03)
         val contestUA = contest.makeContestUnderAudit()

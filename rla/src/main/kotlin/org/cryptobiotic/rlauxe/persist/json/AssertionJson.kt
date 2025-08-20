@@ -27,7 +27,8 @@ fun Assertion.publishIFJson(): AssertionIFJson {
     }
 }
 
-fun AssertionIFJson.import(info: ContestInfo): Assertion {
+fun AssertionIFJson.import(contest: ContestIF): Assertion {
+    val info = contest.info()
     return when (this.className) {
         "ClcaAssertion" ->
             ClcaAssertion(

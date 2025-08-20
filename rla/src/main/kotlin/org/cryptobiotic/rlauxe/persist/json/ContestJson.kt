@@ -11,6 +11,8 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditIrvContest
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
@@ -69,11 +71,26 @@ fun ContestInfoJson.import(): ContestInfo {
 //        override val Nc: Int,
 //        override val Np: Int,
 //    ): ContestIF {
+//
 // data class RaireContest(
 //    override val info: ContestInfo,
 //    override val winners: List<Int>,
 //    override val Nc: Int,
 //    override val Np: Int,
+//)
+// class OneAuditContest (
+//    val contest: ContestIF,
+//
+//    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes (may be empty) from the crvs
+//    val cvrNc: Int,                // may be 0
+//    val pools: Map<Int, BallotPool>, // pool id -> pool
+//) : ContestIF {
+
+// data class OAContestJson(
+//    // val contestJson : ContestIFJson,
+//    val cvrVotes: Map<Int, Int>,
+//    val cvrNc: Int,
+//    val pools: List<BallotPoolJson>,
 //)
 @Serializable
 data class ContestIFJson(
@@ -83,6 +100,8 @@ data class ContestIFJson(
     val Nc: Int,
     val Np: Int,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
+    val contestJson: ContestIFJson? = null,
+    val pools: List<BallotPoolJson>? = null,
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -90,7 +109,6 @@ fun ContestIF.publishJson() : ContestIFJson {
         is Contest ->
             ContestIFJson(
                 "Contest",
-                // this.info.publishJson(),
                 this.votes,
                 null,
                 this.Nc,
@@ -105,7 +123,18 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.Np,
                 this.roundsPaths.map { it.publishJson() },
             )
-        else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
+        is OneAuditContest ->
+            ContestIFJson(
+                "OneAuditContest",
+                this.cvrVotes,
+                null, // TODO why dont we have winners ??
+                this.cvrNc,
+                0,
+                null,
+                this.contest.publishJson(),
+                this.pools.values.map { it.publishJson()},
+            )
+        else -> throw RuntimeException("unknown contest type ${this.javaClass.simpleName} = $this")
     }
 }
 
@@ -129,6 +158,15 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 rcontest.roundsPaths.addAll(this.irvRoundsPaths.map { it.import() })
             }
             rcontest
+        }
+        "OneAuditContest" -> {
+            val contest = this.contestJson!!.import(info)
+            OneAuditContest.make(
+                contest,
+                this.votes!!,
+                this.Nc,
+                this.pools!!.map { it.import() },
+            )
         }
         else -> throw RuntimeException()
     }
@@ -172,7 +210,7 @@ fun IrvRoundsPathJson.import() = IrvRoundsPath(
 //    var clcaAssertions: List<ClcaAssertion> = emptyList()
 @Serializable
 data class ContestUnderAuditJson(
-    val info: ContestInfoJson,
+    val info: ContestInfoJson, // TODO why? Is this where the infos are kept ??
     val contest: ContestIFJson,
     val isComparison: Boolean,
     val hasStyle: Boolean,
@@ -221,6 +259,8 @@ fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
     this.forEach {
         if (it is RaireContestUnderAudit) {
             rcontests.add( it.publishRaireJson())
+        } else if (it is OneAuditIrvContest) {
+            oacontests.add( it.publishOAJson())
         } else if (it is OAContestUnderAudit) {
             oacontests.add( it.publishOAJson())
         } else {

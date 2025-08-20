@@ -47,32 +47,6 @@ fun OAContestJson1.import(info: ContestInfo): OneAuditContest1 {
     )
 }
 
-// data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
-@Serializable
-data class BallotPoolJson(
-    val name: String,
-    val id: Int,
-    val contest: Int,
-    val ncards: Int,
-    val votes: Map<Int, Int>,
-)
-
-fun BallotPool.publishJson() = BallotPoolJson(
-    this.name,
-    this.poolId,
-    this.contest,
-    this.ncards,
-    this.votes,
-)
-
-fun BallotPoolJson.import() = BallotPool(
-    this.name,
-    this.id,
-    this.contest,
-    this.ncards,
-    this.votes,
-)
-
 // class OAContestUnderAudit(
 //    val contestOA: OneAuditContest,
 //): ContestUnderAudit(contestOA.makeContest(), isComparison=true, hasStyle=true) {

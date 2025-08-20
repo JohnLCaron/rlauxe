@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
@@ -20,8 +21,9 @@ data class ContestInfo(
     val candidateIds: List<Int>
 
     init {
-        require(choiceFunction == SocialChoiceFunction.PLURALITY || choiceFunction == SocialChoiceFunction.APPROVAL ||
-                (nwinners == 1 && voteForN == 1)) { "Only PLURALITY and APPROVAL can have voteForN > 1"}
+        if (choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
+            require((nwinners == 1 && voteForN == 1)) { "SUPERMAJORITY must have nwinners == 1, and voteForN == 1" }
+        }
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null) { "SUPERMAJORITY requires minFraction"}
         require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || minFraction == null) { "only SUPERMAJORITY can have minFraction"}
         require(minFraction == null || minFraction in (0.0..1.0)) { "minFraction between 0 and 1"}
@@ -132,11 +134,11 @@ open class Contest(
             }
         }
         val nvotes = votes.values.sum()
-        if (info.choiceFunction != SocialChoiceFunction.IRV) {
+       /* if (info.choiceFunction != SocialChoiceFunction.IRV) {
             require(nvotes <= info.voteForN * (iNc - Np)) {
                 "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
             }
-        }
+        } */
         undervotes = info.voteForN * (iNc - Np) - nvotes   // C1
         // (undervotes + nvotes) = voteForN * (Nc - Np)
         // Np + (undervotes + nvotes) / voteForN = Nc     // C2
@@ -230,7 +232,7 @@ open class Contest(
     }
 }
 
-/** COuld rename to "Contest with assertions". note mutability. */
+/** Could rename to "Contest with assertions". note mutability. */
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true,
@@ -254,9 +256,10 @@ open class ContestUnderAudit(
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init is done
-        if (contest is Contest) {
+        if (contest is Contest || (contest is OneAuditContest && (contest.contest is Contest))) {
             pollingAssertions = makePollingAssertions()
         }
+        // So Raire has to add its own asserttions
     }
 
     private fun makePollingAssertions(): List<Assertion> {
@@ -391,7 +394,7 @@ open class ContestUnderAudit(
 
     open fun showShort() = buildString {
         val votes = if (contest is Contest) contest.votes.toString() else "N/A"
-        appendLine("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
+        append("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -402,7 +405,7 @@ open class ContestUnderAudit(
 
         if (isComparison != other.isComparison) return false
         if (hasStyle != other.hasStyle) return false
-        if (contest != other.contest) return false
+        if (!contest.equals(other.contest)) return false
         if (preAuditStatus != other.preAuditStatus) return false
         if (pollingAssertions != other.pollingAssertions) return false
         if (clcaAssertions != other.clcaAssertions) return false

@@ -15,10 +15,8 @@ fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cv
             if (irvContests.contains(contestId)) {
                 val irvContest = irvContests[contestId]!!
                 val irvVote = irvVotes.getOrPut(contestId) { IrvContestVotes(irvContest) }
-                irvVote.countBallots++
-                if (!candidateRanks.isEmpty()) {
-                    irvVote.addVote(candidateRanks)
-                }
+                irvVote.addVote(candidateRanks)
+
                 count++
                 if (count % 10000 == 0) print("$count ")
                 if (count % 100000 == 0) println()
@@ -34,7 +32,7 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
     val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
     var countBallots = 0
 
-    // TODO The candidate Ids must go From 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
+    // The candidate Ids must go From 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
     val candidateIdToIndex = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()
 
     init {
@@ -49,13 +47,13 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
         }
         // convert to index for Raire
         val mappedVotes = candidateRanks.map { candidateIdToIndex[it] }
-        vc.addVote(mappedVotes.filterNotNull().toIntArray())
+        if (mappedVotes.isNotEmpty()) vc.addVote(mappedVotes.filterNotNull().toIntArray())
+        countBallots++
     }
 }
 
-
 // called from cases module to create RaireContestUnderAudit from ContestInfo and IrvContestVotes
-fun makeIrvContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvContestVotes>): List<RaireContestUnderAudit> {
+fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvContestVotes>): List<RaireContestUnderAudit> {
     val contests = mutableListOf<RaireContestUnderAudit>()
     contestInfos.forEach { info: ContestInfo ->
         val irvContestVotes = contestVotes[info.id] // candidate indexes

@@ -46,7 +46,7 @@ class TestPersistentOneAudit {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, oaWorkflow.contestsUA())
-        checkContestsWithCards(oaWorkflow.contestsUA(), readCardsCsvIterator(publisher.cardsCsvFile()))
+        checkContestsWithCvrs(oaWorkflow.contestsUA(), CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvFile())))
 
         writeContestsJsonFile(oaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

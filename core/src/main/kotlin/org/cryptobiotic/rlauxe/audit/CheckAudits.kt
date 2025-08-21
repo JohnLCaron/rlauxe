@@ -67,8 +67,8 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     }
 }
 
-fun checkContestsWithCards(contestsUA: List<ContestUnderAudit>, cards: Iterator<AuditableCard>, show: Boolean = false) {
-    val votes = tabulateCvrs(CvrIteratorAdapter(cards))
+fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
+    val votes = tabulateCvrs(cvrs)
     if (show) {
         println("tabulateCvrs")
         votes.toSortedMap().forEach { (key, value) ->

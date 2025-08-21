@@ -50,7 +50,7 @@ class TestPersistentAuditPolling {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, pollingWorkflow.contestsUA())
-        checkContestsWithCards(pollingWorkflow.contestsUA(), readCardsCsvIterator(publisher.cardsCsvFile()))
+        checkContestsWithCvrs(pollingWorkflow.contestsUA(), CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvFile())))
 
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

@@ -7,37 +7,26 @@ class TestSfPrimaryElection {
 
     @Test
     fun createSfPrimaryElection() {
-        // write sf2024P cvr
         val stopwatch = Stopwatch()
-        val sfDir = "/home/stormy/rla/cases/sf2024P"
-        val zipFilename = "$sfDir/CVR_Export_20240322103409.zip"
-        val manifestFile = "ContestManifest.json"
         val topDir = "/home/stormy/rla/cases/sf2024P"
-        createAuditableCards(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
-
-        // create sf2024 election audit
+        val zipFilename = "$topDir/CVR_Export_20240322103409.zip"
+        val manifestFile = "ContestManifest.json"
         val auditDir = "$topDir/audit"
-        createSfElectionFromCards(
+        val cvrCsv = "$topDir/$cvrExportCsvFile"
+
+        createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"
+
+        // create sf2024 primary audit
+        createSfElectionFromCsvExport(
             auditDir,
             zipFilename,
             manifestFile,
             "CandidateManifest.json",
-            "$topDir/cards.csv",
+            cvrCsv,
+            show = false,
         )
 
-        sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
-        mergeCards(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCards.csv"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true) // write to "$auditDir/sortedCards.csv"
         println("that took $stopwatch")
-    }
-
-    // out of memory sort by sampleNum()
-    // @Test
-    fun testSortMergeCvrs() {
-        val topDir = "/home/stormy/rla/cases/sf2024P"
-        val auditDir = "$topDir/audit"
-        // val zipFilename = "$auditDir/CVR_Export_20241202143051.zip"
-
-        sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
-        mergeCards(auditDir, "$topDir/sortChunks")
     }
 }

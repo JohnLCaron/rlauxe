@@ -10,9 +10,8 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
+import org.cryptobiotic.rlauxe.persist.csv.CvrExport
 import org.cryptobiotic.rlauxe.sf.BallotTypeContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
@@ -112,9 +111,10 @@ data class Mark(
     }
 }
 
-fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeContestManifest?) : List<Cvr> {
-    val result = mutableListOf<Cvr>()
+fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeContestManifest) : List<CvrExport> {
+    val result = mutableListOf<CvrExport>()
     Sessions.forEach { session ->
+        val sessionKey = "${session.TabulatorId}-${session.BatchId}"
         val cards = if (session.Original.IsCurrent) session.Original else session.Modified
         if (cards != null) {
             cards.Cards.forEach { card ->
@@ -140,18 +140,30 @@ fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeConte
                         votes[contest.Id] = contestVotes.toIntArray()
                     }
                 }
-                if (manifest != null) { // add undervotes
-                    val ballotStyles = manifest.ballotStyles[cards.BallotTypeId]!!
-                    ballotStyles.forEach { contestId ->
-                        if (votes[contestId] == null) votes[contestId] = IntArray(0)
-                    }
+                val ballotStyles = manifest.ballotStyles[cards.BallotTypeId]!!
+                ballotStyles.forEach { contestId ->
+                    if (votes[contestId] == null) votes[contestId] = IntArray(0)
                 }
-                result.add(Cvr("${session.TabulatorId}-${session.BatchId}-${card.Id}", votes, false))
+                val poolId = if (session.CountingGroupId == 1) sessionKey else ""
+                result.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${card.Id}", session.CountingGroupId, votes))
             }
         }
     }
     return result
 }
+
+fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>, manifest: BallotTypeContestManifest): Int {
+    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
+    val dominionCvrs = if (result is Ok) result.unwrap()
+    else throw RuntimeException("Cannot read DominionCvrJson err = $result")
+
+    val cvrs = dominionCvrs.import(irvIds, manifest)
+    cvrs.forEach {
+        outputStream.write(it.toCsv().toByteArray()) // UTF-8
+    }
+    return cvrs.size
+}
+
 
 fun Session.import(irvContests: Set<Int>): List<Cvr> {
     val result = mutableListOf<Cvr>()
@@ -179,21 +191,6 @@ fun Session.import(irvContests: Set<Int>): List<Cvr> {
     }
     return result
 }
-
-fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>, manifest: BallotTypeContestManifest?): Int {
-    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-    val dominionCvrs = if (result is Ok) result.unwrap()
-    else throw RuntimeException("Cannot read DominionCvrJson err = $result")
-    // println(dominionCvrs)
-
-    val cvrs = dominionCvrs.import(irvIds, manifest)
-    cvrs.forEach {
-        val card = AuditableCard.fromCvrWithZeros(it)
-        outputStream.write(writeAuditableCardCsv(card).toByteArray()) // UTF-8
-    }
-    return cvrs.size
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 fun readDominionCvrJsonFile(filename: String): Result<DominionCvrExportJson, ErrorMessages> {

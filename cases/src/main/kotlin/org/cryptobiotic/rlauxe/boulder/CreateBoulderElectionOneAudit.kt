@@ -261,7 +261,7 @@ fun createBoulderElectionOneAudit(
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${allCvrs.size}")
 
-    checkContestsWithCards(contestsUA, cards.iterator(), show = false)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = false)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")

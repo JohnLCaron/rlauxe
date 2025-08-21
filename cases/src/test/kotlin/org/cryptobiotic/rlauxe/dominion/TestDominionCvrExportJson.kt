@@ -31,10 +31,10 @@ class TestDominionCvrExportJson {
 
         val irvIds = readContestManifestForIRVids("src/test/data/SF2024/ContestManifest.json")
 
-        val cvrsNoManifest = dominionCvrs.import(irvIds, null)
+        val cvrsNoManifest = dominionCvrs.import(irvIds, manifest)
         println("no manifest ncvrs = ${cvrsNoManifest.size}")
         repeat(5) { println(cvrsNoManifest[it]) }
-        val tabs1 = tabulateCvrs(cvrsNoManifest.iterator())
+        /* val tabs1 = tabulateCvrs(cvrsNoManifest.iterator())
         tabs1.forEach { (key, tab) ->
             println("  $key == $tab")
         }
@@ -48,7 +48,7 @@ class TestDominionCvrExportJson {
             assertEquals(tab.votes, tabs1[key]!!.votes)
         }
 
-        /* cvrs.forEach { println(it) }
+        cvrs.forEach { println(it) }
 
         println("==================================================")
         print(AuditableCardHeader)

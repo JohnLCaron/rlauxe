@@ -89,7 +89,7 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         val irvInfos = infos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
         val irvContests = if (irvInfos.isEmpty()) emptyList() else {
             val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrs.iterator())
-            makeIrvContests(irvInfos, irvVoteMap)
+            makeRaireContests(irvInfos, irvVoteMap)
         }
 
         if (!quiet) {
@@ -303,7 +303,7 @@ fun createBoulderElectionWithSov(
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${allCvrs.size}")
 
-    checkContestsWithCards(contestsUA, cards.iterator(), show = true)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = true)
     checkVotesVsSovo(contests, sovo)
 
     writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())

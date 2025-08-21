@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.core
 // TODO immutable except for the IntArray (!) Consider https://github.com/daniel-rusu/pods4k/tree/main/immutable-arrays
 // assumes that a vote is 0 or 1.
 // compact form in AuditableCard is (contests: IntArray, val votes: List<IntArray>?)
+// TODO switch to AuditableCard?
 data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
@@ -48,17 +49,17 @@ data class Cvr(
 
         if (phantom != other.phantom) return false
         if (id != other.id) return false
+        if (votes.size != other.votes.size) return false
         for ((contestId, candidates) in votes) {
             if (!candidates.contentEquals(other.votes[contestId])) return false
         }
-
         return true
     }
 
     override fun hashCode(): Int {
         var result = phantom.hashCode()
         result = 31 * result + id.hashCode()
-        result = 31 * result + votes.hashCode()
+        votes.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
     }
 

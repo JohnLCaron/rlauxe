@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 
+
 // data class AuditableCard (
 //    val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
 //    val index: Int,  // index into the original, canonical (committed-to) list of cards

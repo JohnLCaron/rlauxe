@@ -4,24 +4,27 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import java.nio.file.*
 
 private val maxChunk = 100000
 
-fun sortMergeCards(
-    auditDir: String,
-    cardFile: String,
-    workingDir: String,
-    outputFile: String,
-) {
-    // out of memory sort by sampleNum()
-    sortCards(auditDir, cardFile, workingDir)
-    mergeCards(auditDir, workingDir, outputFile)
-}
+// assume auditCOnfig is alread in the auditDir
+class SortMerge(
+    val auditDir: String,
+    val cardFile: String,
+    val workingDir: String,
+    val outputFile: String) {
 
-// out of memory sorting from directory
+    fun run() {
+        // out of memory sort by sampleNum()
+        sortCards(auditDir, cardFile, workingDir)
+        mergeCards(auditDir, workingDir, outputFile)
+    }
+
+    /* out of memory sorting from directory
 fun sortCardsInDirectoryTree(
     auditDir: String,
     cardDirectory: String,
@@ -47,49 +50,53 @@ fun sortCardsInDirectoryTree(
     cardSorter.writeSortedChunk()
     println("writeSortedChunk took $stopwatch")
 }
+ */
 
-// out of memory sorting
-fun sortCards(
-    auditDir: String,
-    cardFile: String, // may be zipped or not
-    workingDirectory: String,
-) {
-    val stopwatch = Stopwatch()
-    val publisher = Publisher(auditDir)
-    val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
+    // out of memory sorting
+    fun sortCards(
+        auditDir: String,
+        cvrCsvFilename: String, // may be zipped or not
+        workingDirectory: String,
+    ) {
+        val stopwatch = Stopwatch()
+        val publisher = Publisher(auditDir)
+        val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
 
-    val prng = Prng(auditConfig.seed)
-    val cardSorter = CardSorter(workingDirectory, prng, maxChunk)
+        clearDirectory(Path.of(workingDirectory))
+        validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
 
-    //// the reading and sorted chunks
-    val cardIter: Iterator<AuditableCard> = readCardsCsvIterator(cardFile)
-    while (cardIter.hasNext()) {
-        cardSorter.add(cardIter.next())
-    }
-    cardSorter.writeSortedChunk()
-    println("writeSortedChunk took $stopwatch")
-}
+        val prng = Prng(auditConfig.seed)
+        val cardSorter = CardSorter(workingDirectory, prng, maxChunk)
 
-fun mergeCards(
-    auditDir: String,
-    workingDirectory: String,
-    outputFile: String = "$auditDir/sortedCards.csv",
-) {
-    val stopwatch = Stopwatch()
-
-    //// the merging of the sorted chunks, and writing the completely sorted file
-    val writer = AuditableCardCsvWriter(outputFile)
-
-    val paths = mutableListOf<String>()
-    Files.newDirectoryStream(Path.of(workingDirectory)).use { stream ->
-        for (path in stream) {
-            paths.add(path.toString())
+        //// reading CvrExport and sorted chunks
+        val cardIter: Iterator<CvrExport> = cvrExportCsvIterator(cvrCsvFilename)
+        while (cardIter.hasNext()) {
+            cardSorter.add(cardIter.next())
         }
+        cardSorter.writeSortedChunk()
+        println("writeSortedChunk took $stopwatch")
     }
-    val merger = CardMerger(paths, writer)
-    merger.merge()
-    println("mergeSortedChunk took $stopwatch")
+
+    fun mergeCards(
+        auditDir: String,
+        workingDirectory: String,
+        outputFile: String = "$auditDir/sortedCards.csv",
+    ) {
+        val stopwatch = Stopwatch()
+
+        //// the merging of the sorted chunks, and writing the completely sorted file
+        val writer = AuditableCardCsvWriter(outputFile)
+
+        val paths = mutableListOf<String>()
+        Files.newDirectoryStream(Path.of(workingDirectory)).use { stream ->
+            for (path in stream) {
+                paths.add(path.toString())
+            }
+        }
+        val merger = CardMerger(paths, writer)
+        merger.merge()
+        println("mergeSortedChunk took $stopwatch")
+    }
 }
 
 class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int) {
@@ -98,7 +105,9 @@ class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int) {
     val cards = mutableListOf<AuditableCard>()
     var countChunks = 0
 
-    fun add(card: AuditableCard) {
+    fun add(card: CvrExport) {
+        // TODO phantoms
+        val card = card.toAuditableCard(index=index, prn=prng.next(), false)
         cards.add(card.copy(index=index, prn=prng.next()))
         index++
         count++

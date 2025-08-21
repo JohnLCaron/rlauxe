@@ -8,65 +8,53 @@ import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
-import org.cryptobiotic.rlauxe.util.*
-import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 
 class TestSfElection {
 
-    // @Test
-    fun testCopyFile() {
-        val auditDir = "/home/stormy/rla/cases/sf2024"
-        val fromFile = File("src/test/data/SF2024/sortedCvrs.zip")
-        val targetFile = File("$auditDir/sortedCvrs.zip")
-        fromFile.copyTo(targetFile)
-    }
-
-    // write sf2024 cvrs
+    // extract the cvrs from json
     @Test
-    fun createSF2024cards() {
-        val topDir = "/home/stormy/rla/cases/sf2024m"
+    fun createSF2024cvrs() {
+        val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "ContestManifest.json"
-        createAuditableCards(topDir, zipFilename, manifestFile) // write to "$topDir/cards.csv"
-
-        createSF2024()
+        createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"
     }
 
+    // create the audit contests using the cvrExport
     @Test
-    fun createSF2024() {
-        val topDir = "/home/stormy/rla/cases/sf2024m"
+    fun createSF2024contests() {
+        val topDir = "/home/stormy/rla/cases/sf2024"
         val auditDir = "$topDir/audit"
         clearDirectory(Path.of(auditDir))
 
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
 
-        createSfElectionFromCards(
+        createSfElectionFromCsvExport(
             auditDir,
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
-            "$topDir/cards.csv",
+            "$topDir/$cvrExportCsvFile",
             show = false,
         )
-
-        sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
-        mergeCards(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCards.csv"
     }
 
-    // @Test
-    fun sortSF2024() {
+    // create sorted cards, assumes auditDir/auditConfig already exists
+    @Test
+    fun createSF2024cards() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val auditDir = "$topDir/audit"
-        sortCards(auditDir, "$topDir/cards.csv", "$topDir/sortChunks")
-        mergeCards(auditDir, "$topDir/sortChunks") // merge to "$auditDir/sortedCards.csv"
-        // manually zip (TODO)
+        val cvrCsv = "$topDir/cvrExport.csv"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true) // write to "$auditDir/sortedCards.csv"
     }
 
-    // @Test
+    @Test
     fun showSfElectionContests() {
         val publisher = Publisher("/home/stormy/rla/cases/sf2024/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
@@ -79,9 +67,10 @@ class TestSfElection {
         }
     }
 
-    // @Test
+    @Test
     fun showIrvCounts() {
-        val publisher = Publisher("/home/stormy/rla/cases/sf2024/audit")
+        val topDir = "/home/stormy/rla/cases/sf2024"
+        val publisher = Publisher("$topDir/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
@@ -93,7 +82,8 @@ class TestSfElection {
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
         }
 
-        val cvrIter = CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvFile()))
+        val cvrCsv = "$topDir/cvrExport.csv"
+        val cvrIter = CvrExportAdapter(cvrExportCsvIterator(cvrCsv))
         var count = 0
         while (cvrIter.hasNext()) {
             irvCounters.forEach { it.addCvr(cvrIter.next())}

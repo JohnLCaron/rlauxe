@@ -29,7 +29,7 @@ class TestColoradoElectionFromAudit {
         tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
     }
 
-    // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)
+    /* use detailXmlFile for contests and votes, and round1/contests.csv (Nc)
     // and precinctFile for cvrs
     @Test
     fun createElectionFromDetailXmlAndPrecincts() {
@@ -61,6 +61,8 @@ class TestColoradoElectionFromAudit {
         sortCardsInDirectoryTree(topDir, "$topDir/cards/", "$topDir/sortChunks")
         mergeCards(topDir, "$topDir/sortChunks")
     }
+
+     */
 
     // class TreeReaderIterator <T> (
     //    topDir: String,

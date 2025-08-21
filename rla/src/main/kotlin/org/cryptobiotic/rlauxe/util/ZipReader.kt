@@ -38,7 +38,7 @@ class ZipReader(val zipFilename: String) {
 }
 
 // depth first tour of all files in the directory tree
-class ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
+class ZipReaderTour(zipFile: String, val silent: Boolean = true, val sortPaths: Boolean = true,
                     val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit) {
     var count = 0
     val zipReader = ZipReader(zipFile)
@@ -58,7 +58,7 @@ class ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boole
                 paths.add(path)
             }
         }
-        if (sort) paths.sort()
+        if (sortPaths) paths.sort()
         paths.forEach { path ->
             if (Files.isDirectory(path)) {
                 readDirectory(indent.incr(), provider, path)

@@ -79,7 +79,7 @@ fun coloradoElectionFromDetailXmlAndPrecincts(
         fileFilter = { true },
         reader = { path -> readCardsCsvIterator(path.toString()) }
     )
-    checkContestsWithCards(contestsUA, precinctCvrReader2)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(precinctCvrReader2))
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")

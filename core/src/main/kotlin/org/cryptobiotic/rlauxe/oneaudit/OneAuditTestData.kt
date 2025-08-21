@@ -233,7 +233,6 @@ fun makeTestNonPooledMvrs(oaContests: List<OneAuditContest>): List<Cvr> {
 
 // lets say all the pools have to be the same poolId
 fun makeTestPooledMvrs(oaContests: List<OneAuditContest>, poolId: Int): List<Cvr> {
-
     val contestVotes = mutableMapOf<Int, VotesAndUndervotes>()
     oaContests.forEach { oaContest ->
         oaContest.pools.values.forEach { pool ->

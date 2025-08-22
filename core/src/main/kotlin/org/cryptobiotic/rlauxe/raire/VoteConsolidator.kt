@@ -24,6 +24,12 @@ class VoteConsolidator {
         votes[key] = votes.getOrPut(key) { 0 } + 1
     }
 
+    fun addVotes(other: VoteConsolidator) {
+        other.votes.forEach { key, count ->
+            votes[key] = votes.getOrPut(key) { 0 } + count
+        }
+    }
+
     fun makeVotes(): Array<Vote> {
         val voteList = votes.map { Vote(it.value, it.key.array) }  //n, IntArray
         return Array(voteList.size) { voteList[it] }

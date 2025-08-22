@@ -85,7 +85,8 @@ class BoulderElectionOneAuditFromCvrs(
                 contestTabulation ?.votes ?: emptyMap(),
                 contestTabulation ?.ncards ?: 0,
                 pools ?: emptyList(),
-                Np = 0)
+                Nc = 0,
+                Ncast = 0)// TODO
         }
 
         if (!quiet) {

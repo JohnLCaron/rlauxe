@@ -1,0 +1,46 @@
+{
+  "Version": "5.10.50.85",
+  "List": [
+    {
+      "Description": "SF November 2024 Consolidated General Election",
+      "Id": 1,
+      "ExternalId": "",
+      "Jurisdiction": "San Francisco",
+      "ElectionDate": "20241105",
+      "ElectionSignature": [
+        109,
+        75,
+        36,
+        51,
+        89,
+        54,
+        98,
+        37,
+        93,
+        87,
+        53,
+        107,
+        48,
+        94,
+        108,
+        72,
+        115,
+        50,
+        88,
+        91,
+        68,
+        118,
+        33,
+        52,
+        113,
+        57,
+        67,
+        63,
+        74,
+        122,
+        38,
+        49
+      ]
+    }
+  ]
+}

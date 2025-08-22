@@ -69,8 +69,9 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestUnderAudi
             SocialChoiceFunction.IRV,
         ),
         listOf(winner),
-        iNc = Nc,
-        Np = Np,
+        Nc = Nc,
+        Ncast = Nc,
+        0,
     )
     return RaireContestUnderAudit(contest, winner, assertions)
 }

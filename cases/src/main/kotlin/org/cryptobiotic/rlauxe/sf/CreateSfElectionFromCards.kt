@@ -48,10 +48,11 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
     zipReader.tourFiles()
     cvrExportCsvStream.close()
 
-    println("read $countCards cards in $countFiles files took $stopwatch")
+    println("read $countCards cvrs in $countFiles files; took $stopwatch")
     println("took = $stopwatch")
 }
 
+// TODO add phantoms here
 fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, auditConfigIn: AuditConfig? = null, zip: Boolean = true) {
     SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile").run()
     if (zip) {

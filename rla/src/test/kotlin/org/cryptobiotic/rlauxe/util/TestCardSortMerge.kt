@@ -9,11 +9,11 @@ class TestCardSortMerge {
     @Test
     fun testCardSortMerge() {
         val topDir = "/home/stormy/rla/cases/sf2024Poa"
-        sortMergeCards("$topDir/audit",
+        SortMerge("$topDir/audit",
             "$topDir/cards.csv",
             "$topDir/sortChunkTest",
             "$topDir/sortChunkTest/sortedCards.csv",
-            )
+            ).run()
         val cardIter = readCardsCsvIterator("$topDir/sortChunkTest/sortedCards.csv")
         var count = 0
         cardIter.forEach { count++ }

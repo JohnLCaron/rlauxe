@@ -154,12 +154,12 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         } else {
-            AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         }
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
-            Nc = contest.Nc,
+            Nc = contest.Nc(),
             noerror = cassorter.noerror(),
             upperBound = cassorter.upperBound(),
             riskLimit = auditConfig.riskLimit,

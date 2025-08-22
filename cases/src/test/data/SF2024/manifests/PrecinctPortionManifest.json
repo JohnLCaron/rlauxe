@@ -1,0 +1,3089 @@
+{
+  "Version": "5.10.50.85",
+  "List": [
+    {
+      "Description": "PCT 1101",
+      "Id": 1,
+      "ExternalId": "1101-1",
+      "PrecinctId": 1
+    },
+    {
+      "Description": "PCT 1102",
+      "Id": 2,
+      "ExternalId": "1102-1",
+      "PrecinctId": 2
+    },
+    {
+      "Description": "PCT 1103 MB",
+      "Id": 3,
+      "ExternalId": "1103-1",
+      "PrecinctId": 3
+    },
+    {
+      "Description": "PCT 1104",
+      "Id": 4,
+      "ExternalId": "1104-2",
+      "PrecinctId": 4
+    },
+    {
+      "Description": "PCT 1105",
+      "Id": 5,
+      "ExternalId": "1105-2",
+      "PrecinctId": 5
+    },
+    {
+      "Description": "PCT 1106",
+      "Id": 6,
+      "ExternalId": "1106-2",
+      "PrecinctId": 6
+    },
+    {
+      "Description": "PCT 1107",
+      "Id": 7,
+      "ExternalId": "1107-2",
+      "PrecinctId": 7
+    },
+    {
+      "Description": "PCT 1108",
+      "Id": 8,
+      "ExternalId": "1108-1",
+      "PrecinctId": 8
+    },
+    {
+      "Description": "PCT 1109",
+      "Id": 9,
+      "ExternalId": "1109-2",
+      "PrecinctId": 9
+    },
+    {
+      "Description": "PCT 1111",
+      "Id": 10,
+      "ExternalId": "1111-2",
+      "PrecinctId": 10
+    },
+    {
+      "Description": "PCT 1112",
+      "Id": 11,
+      "ExternalId": "1112-2",
+      "PrecinctId": 11
+    },
+    {
+      "Description": "PCT 1113",
+      "Id": 12,
+      "ExternalId": "1113-2",
+      "PrecinctId": 12
+    },
+    {
+      "Description": "PCT 1114",
+      "Id": 13,
+      "ExternalId": "1114-2",
+      "PrecinctId": 13
+    },
+    {
+      "Description": "PCT 1115",
+      "Id": 14,
+      "ExternalId": "1115-2",
+      "PrecinctId": 14
+    },
+    {
+      "Description": "PCT 1116 MB",
+      "Id": 15,
+      "ExternalId": "1116-1",
+      "PrecinctId": 15
+    },
+    {
+      "Description": "PCT 1117",
+      "Id": 16,
+      "ExternalId": "1117-2",
+      "PrecinctId": 16
+    },
+    {
+      "Description": "PCT 1118",
+      "Id": 17,
+      "ExternalId": "1118-2",
+      "PrecinctId": 17
+    },
+    {
+      "Description": "PCT 1119",
+      "Id": 18,
+      "ExternalId": "1119-2",
+      "PrecinctId": 18
+    },
+    {
+      "Description": "PCT 1121",
+      "Id": 19,
+      "ExternalId": "1121-2",
+      "PrecinctId": 19
+    },
+    {
+      "Description": "PCT 1122",
+      "Id": 20,
+      "ExternalId": "1122-2",
+      "PrecinctId": 20
+    },
+    {
+      "Description": "PCT 1123",
+      "Id": 21,
+      "ExternalId": "1123-2",
+      "PrecinctId": 21
+    },
+    {
+      "Description": "PCT 1124",
+      "Id": 22,
+      "ExternalId": "1124-2",
+      "PrecinctId": 22
+    },
+    {
+      "Description": "PCT 1125",
+      "Id": 23,
+      "ExternalId": "1125-2",
+      "PrecinctId": 23
+    },
+    {
+      "Description": "PCT 1126",
+      "Id": 24,
+      "ExternalId": "1126-2",
+      "PrecinctId": 24
+    },
+    {
+      "Description": "PCT 1127",
+      "Id": 25,
+      "ExternalId": "1127-2",
+      "PrecinctId": 25
+    },
+    {
+      "Description": "PCT 1128",
+      "Id": 26,
+      "ExternalId": "1128-2",
+      "PrecinctId": 26
+    },
+    {
+      "Description": "PCT 1129",
+      "Id": 27,
+      "ExternalId": "1129-2",
+      "PrecinctId": 27
+    },
+    {
+      "Description": "PCT 1131",
+      "Id": 28,
+      "ExternalId": "1131-3",
+      "PrecinctId": 28
+    },
+    {
+      "Description": "PCT 1132",
+      "Id": 29,
+      "ExternalId": "1132-3",
+      "PrecinctId": 29
+    },
+    {
+      "Description": "PCT 1133",
+      "Id": 30,
+      "ExternalId": "1133-3",
+      "PrecinctId": 30
+    },
+    {
+      "Description": "PCT 1134",
+      "Id": 31,
+      "ExternalId": "1134-3",
+      "PrecinctId": 31
+    },
+    {
+      "Description": "PCT 1135",
+      "Id": 32,
+      "ExternalId": "1135-3",
+      "PrecinctId": 32
+    },
+    {
+      "Description": "PCT 1136",
+      "Id": 33,
+      "ExternalId": "1136-3",
+      "PrecinctId": 33
+    },
+    {
+      "Description": "PCT 1137",
+      "Id": 34,
+      "ExternalId": "1137-3",
+      "PrecinctId": 34
+    },
+    {
+      "Description": "PCT 1138",
+      "Id": 35,
+      "ExternalId": "1138-3",
+      "PrecinctId": 35
+    },
+    {
+      "Description": "PCT 1139",
+      "Id": 36,
+      "ExternalId": "1139-3",
+      "PrecinctId": 36
+    },
+    {
+      "Description": "PCT 1141",
+      "Id": 37,
+      "ExternalId": "1141-3",
+      "PrecinctId": 37
+    },
+    {
+      "Description": "PCT 1142",
+      "Id": 38,
+      "ExternalId": "1142-3",
+      "PrecinctId": 38
+    },
+    {
+      "Description": "PCT 1143",
+      "Id": 39,
+      "ExternalId": "1143-3",
+      "PrecinctId": 39
+    },
+    {
+      "Description": "PCT 1144",
+      "Id": 40,
+      "ExternalId": "1144-3",
+      "PrecinctId": 40
+    },
+    {
+      "Description": "PCT 1145",
+      "Id": 41,
+      "ExternalId": "1145-3",
+      "PrecinctId": 41
+    },
+    {
+      "Description": "PCT 1146",
+      "Id": 42,
+      "ExternalId": "1146-3",
+      "PrecinctId": 42
+    },
+    {
+      "Description": "PCT 1147",
+      "Id": 43,
+      "ExternalId": "1147-3",
+      "PrecinctId": 43
+    },
+    {
+      "Description": "PCT 1148",
+      "Id": 44,
+      "ExternalId": "1148-3",
+      "PrecinctId": 44
+    },
+    {
+      "Description": "PCT 1149",
+      "Id": 45,
+      "ExternalId": "1149-3",
+      "PrecinctId": 45
+    },
+    {
+      "Description": "PCT 7001",
+      "Id": 46,
+      "ExternalId": "7001-4",
+      "PrecinctId": 46
+    },
+    {
+      "Description": "PCT 7002",
+      "Id": 47,
+      "ExternalId": "7002-4",
+      "PrecinctId": 47
+    },
+    {
+      "Description": "PCT 7003",
+      "Id": 48,
+      "ExternalId": "7003-4",
+      "PrecinctId": 48
+    },
+    {
+      "Description": "PCT 7004",
+      "Id": 49,
+      "ExternalId": "7004-4",
+      "PrecinctId": 49
+    },
+    {
+      "Description": "PCT 7005",
+      "Id": 50,
+      "ExternalId": "7005-4",
+      "PrecinctId": 50
+    },
+    {
+      "Description": "PCT 7006",
+      "Id": 51,
+      "ExternalId": "7006-4",
+      "PrecinctId": 51
+    },
+    {
+      "Description": "PCT 7007",
+      "Id": 52,
+      "ExternalId": "7007-4",
+      "PrecinctId": 52
+    },
+    {
+      "Description": "PCT 7008",
+      "Id": 53,
+      "ExternalId": "7008-4",
+      "PrecinctId": 53
+    },
+    {
+      "Description": "PCT 7009",
+      "Id": 54,
+      "ExternalId": "7009-4",
+      "PrecinctId": 54
+    },
+    {
+      "Description": "PCT 7011",
+      "Id": 55,
+      "ExternalId": "7011-4",
+      "PrecinctId": 55
+    },
+    {
+      "Description": "PCT 7012",
+      "Id": 56,
+      "ExternalId": "7012-4",
+      "PrecinctId": 56
+    },
+    {
+      "Description": "PCT 7013",
+      "Id": 57,
+      "ExternalId": "7013-4",
+      "PrecinctId": 57
+    },
+    {
+      "Description": "PCT 7014",
+      "Id": 58,
+      "ExternalId": "7014-4",
+      "PrecinctId": 58
+    },
+    {
+      "Description": "PCT 7015",
+      "Id": 59,
+      "ExternalId": "7015-4",
+      "PrecinctId": 59
+    },
+    {
+      "Description": "PCT 7016",
+      "Id": 60,
+      "ExternalId": "7016-5",
+      "PrecinctId": 60
+    },
+    {
+      "Description": "PCT 7017",
+      "Id": 61,
+      "ExternalId": "7017-5",
+      "PrecinctId": 61
+    },
+    {
+      "Description": "PCT 7018",
+      "Id": 62,
+      "ExternalId": "7018-5",
+      "PrecinctId": 62
+    },
+    {
+      "Description": "PCT 7019",
+      "Id": 63,
+      "ExternalId": "7019-5",
+      "PrecinctId": 63
+    },
+    {
+      "Description": "PCT 7021",
+      "Id": 64,
+      "ExternalId": "7021-5",
+      "PrecinctId": 64
+    },
+    {
+      "Description": "PCT 7022",
+      "Id": 65,
+      "ExternalId": "7022-5",
+      "PrecinctId": 65
+    },
+    {
+      "Description": "PCT 7023",
+      "Id": 66,
+      "ExternalId": "7023-5",
+      "PrecinctId": 66
+    },
+    {
+      "Description": "PCT 7024",
+      "Id": 67,
+      "ExternalId": "7024-5",
+      "PrecinctId": 67
+    },
+    {
+      "Description": "PCT 7025",
+      "Id": 68,
+      "ExternalId": "7025-5",
+      "PrecinctId": 68
+    },
+    {
+      "Description": "PCT 7026",
+      "Id": 69,
+      "ExternalId": "7026-5",
+      "PrecinctId": 69
+    },
+    {
+      "Description": "PCT 7027",
+      "Id": 70,
+      "ExternalId": "7027-5",
+      "PrecinctId": 70
+    },
+    {
+      "Description": "PCT 7028",
+      "Id": 71,
+      "ExternalId": "7028-5",
+      "PrecinctId": 71
+    },
+    {
+      "Description": "PCT 7029",
+      "Id": 72,
+      "ExternalId": "7029-5",
+      "PrecinctId": 72
+    },
+    {
+      "Description": "PCT 7031",
+      "Id": 73,
+      "ExternalId": "7031-5",
+      "PrecinctId": 73
+    },
+    {
+      "Description": "PCT 7032",
+      "Id": 74,
+      "ExternalId": "7032-5",
+      "PrecinctId": 74
+    },
+    {
+      "Description": "PCT 7033",
+      "Id": 75,
+      "ExternalId": "7033-5",
+      "PrecinctId": 75
+    },
+    {
+      "Description": "PCT 7034",
+      "Id": 76,
+      "ExternalId": "7034-5",
+      "PrecinctId": 76
+    },
+    {
+      "Description": "PCT 7035",
+      "Id": 77,
+      "ExternalId": "7035-5",
+      "PrecinctId": 77
+    },
+    {
+      "Description": "PCT 7036",
+      "Id": 78,
+      "ExternalId": "7036-5",
+      "PrecinctId": 78
+    },
+    {
+      "Description": "PCT 7037",
+      "Id": 79,
+      "ExternalId": "7037-5",
+      "PrecinctId": 79
+    },
+    {
+      "Description": "PCT 7038",
+      "Id": 80,
+      "ExternalId": "7038-5",
+      "PrecinctId": 80
+    },
+    {
+      "Description": "PCT 7039",
+      "Id": 81,
+      "ExternalId": "7039-6",
+      "PrecinctId": 81
+    },
+    {
+      "Description": "PCT 7041",
+      "Id": 82,
+      "ExternalId": "7041-6",
+      "PrecinctId": 82
+    },
+    {
+      "Description": "PCT 7042",
+      "Id": 83,
+      "ExternalId": "7042-6",
+      "PrecinctId": 83
+    },
+    {
+      "Description": "PCT 7043",
+      "Id": 84,
+      "ExternalId": "7043-6",
+      "PrecinctId": 84
+    },
+    {
+      "Description": "PCT 7044",
+      "Id": 85,
+      "ExternalId": "7044-6",
+      "PrecinctId": 85
+    },
+    {
+      "Description": "PCT 7045",
+      "Id": 86,
+      "ExternalId": "7045-6",
+      "PrecinctId": 86
+    },
+    {
+      "Description": "PCT 7046",
+      "Id": 87,
+      "ExternalId": "7046-6",
+      "PrecinctId": 87
+    },
+    {
+      "Description": "PCT 7047",
+      "Id": 88,
+      "ExternalId": "7047-6",
+      "PrecinctId": 88
+    },
+    {
+      "Description": "PCT 7048",
+      "Id": 89,
+      "ExternalId": "7048-6",
+      "PrecinctId": 89
+    },
+    {
+      "Description": "PCT 7049",
+      "Id": 90,
+      "ExternalId": "7049-6",
+      "PrecinctId": 90
+    },
+    {
+      "Description": "PCT 7051",
+      "Id": 91,
+      "ExternalId": "7051-5",
+      "PrecinctId": 91
+    },
+    {
+      "Description": "PCT 7052",
+      "Id": 92,
+      "ExternalId": "7052-7",
+      "PrecinctId": 92
+    },
+    {
+      "Description": "PCT 7053",
+      "Id": 93,
+      "ExternalId": "7053-5",
+      "PrecinctId": 93
+    },
+    {
+      "Description": "PCT 7054",
+      "Id": 94,
+      "ExternalId": "7054-5",
+      "PrecinctId": 94
+    },
+    {
+      "Description": "PCT 7055",
+      "Id": 95,
+      "ExternalId": "7055-5",
+      "PrecinctId": 95
+    },
+    {
+      "Description": "PCT 7056",
+      "Id": 96,
+      "ExternalId": "7056-5",
+      "PrecinctId": 96
+    },
+    {
+      "Description": "PCT 7201",
+      "Id": 97,
+      "ExternalId": "7201-8",
+      "PrecinctId": 97
+    },
+    {
+      "Description": "PCT 7202",
+      "Id": 98,
+      "ExternalId": "7202-9",
+      "PrecinctId": 98
+    },
+    {
+      "Description": "PCT 7203 MB",
+      "Id": 99,
+      "ExternalId": "7203-9",
+      "PrecinctId": 99
+    },
+    {
+      "Description": "PCT 7204 MB",
+      "Id": 100,
+      "ExternalId": "7204-9",
+      "PrecinctId": 100
+    },
+    {
+      "Description": "PCT 7205",
+      "Id": 101,
+      "ExternalId": "7205-8",
+      "PrecinctId": 101
+    },
+    {
+      "Description": "PCT 7206 MB",
+      "Id": 102,
+      "ExternalId": "7206-8",
+      "PrecinctId": 102
+    },
+    {
+      "Description": "PCT 7207",
+      "Id": 103,
+      "ExternalId": "7207-9",
+      "PrecinctId": 103
+    },
+    {
+      "Description": "PCT 7208",
+      "Id": 104,
+      "ExternalId": "7208-9",
+      "PrecinctId": 104
+    },
+    {
+      "Description": "PCT 7301",
+      "Id": 105,
+      "ExternalId": "7301-10",
+      "PrecinctId": 105
+    },
+    {
+      "Description": "PCT 7302",
+      "Id": 106,
+      "ExternalId": "7302-10",
+      "PrecinctId": 106
+    },
+    {
+      "Description": "PCT 7303",
+      "Id": 107,
+      "ExternalId": "7303-10",
+      "PrecinctId": 107
+    },
+    {
+      "Description": "PCT 7304",
+      "Id": 108,
+      "ExternalId": "7304-10",
+      "PrecinctId": 108
+    },
+    {
+      "Description": "PCT 7305",
+      "Id": 109,
+      "ExternalId": "7305-10",
+      "PrecinctId": 109
+    },
+    {
+      "Description": "PCT 7306",
+      "Id": 110,
+      "ExternalId": "7306-10",
+      "PrecinctId": 110
+    },
+    {
+      "Description": "PCT 7307",
+      "Id": 111,
+      "ExternalId": "7307-10",
+      "PrecinctId": 111
+    },
+    {
+      "Description": "PCT 7308",
+      "Id": 112,
+      "ExternalId": "7308-10",
+      "PrecinctId": 112
+    },
+    {
+      "Description": "PCT 7309",
+      "Id": 113,
+      "ExternalId": "7309-10",
+      "PrecinctId": 113
+    },
+    {
+      "Description": "PCT 7311",
+      "Id": 114,
+      "ExternalId": "7311-10",
+      "PrecinctId": 114
+    },
+    {
+      "Description": "PCT 7312",
+      "Id": 115,
+      "ExternalId": "7312-10",
+      "PrecinctId": 115
+    },
+    {
+      "Description": "PCT 7313",
+      "Id": 116,
+      "ExternalId": "7313-10",
+      "PrecinctId": 116
+    },
+    {
+      "Description": "PCT 7314",
+      "Id": 117,
+      "ExternalId": "7314-10",
+      "PrecinctId": 117
+    },
+    {
+      "Description": "PCT 7315",
+      "Id": 118,
+      "ExternalId": "7315-10",
+      "PrecinctId": 118
+    },
+    {
+      "Description": "PCT 7316",
+      "Id": 119,
+      "ExternalId": "7316-10",
+      "PrecinctId": 119
+    },
+    {
+      "Description": "PCT 7317",
+      "Id": 120,
+      "ExternalId": "7317-10",
+      "PrecinctId": 120
+    },
+    {
+      "Description": "PCT 7318",
+      "Id": 121,
+      "ExternalId": "7318-10",
+      "PrecinctId": 121
+    },
+    {
+      "Description": "PCT 7319",
+      "Id": 122,
+      "ExternalId": "7319-10",
+      "PrecinctId": 122
+    },
+    {
+      "Description": "PCT 7321",
+      "Id": 123,
+      "ExternalId": "7321-10",
+      "PrecinctId": 123
+    },
+    {
+      "Description": "PCT 7322",
+      "Id": 124,
+      "ExternalId": "7322-10",
+      "PrecinctId": 124
+    },
+    {
+      "Description": "PCT 7323",
+      "Id": 125,
+      "ExternalId": "7323-10",
+      "PrecinctId": 125
+    },
+    {
+      "Description": "PCT 7324",
+      "Id": 126,
+      "ExternalId": "7324-10",
+      "PrecinctId": 126
+    },
+    {
+      "Description": "PCT 7325",
+      "Id": 127,
+      "ExternalId": "7325-10",
+      "PrecinctId": 127
+    },
+    {
+      "Description": "PCT 7326",
+      "Id": 128,
+      "ExternalId": "7326-10",
+      "PrecinctId": 128
+    },
+    {
+      "Description": "PCT 7327",
+      "Id": 129,
+      "ExternalId": "7327-10",
+      "PrecinctId": 129
+    },
+    {
+      "Description": "PCT 7328",
+      "Id": 130,
+      "ExternalId": "7328-10",
+      "PrecinctId": 130
+    },
+    {
+      "Description": "PCT 7329",
+      "Id": 131,
+      "ExternalId": "7329-10",
+      "PrecinctId": 131
+    },
+    {
+      "Description": "PCT 7331",
+      "Id": 132,
+      "ExternalId": "7331-10",
+      "PrecinctId": 132
+    },
+    {
+      "Description": "PCT 7332",
+      "Id": 133,
+      "ExternalId": "7332-10",
+      "PrecinctId": 133
+    },
+    {
+      "Description": "PCT 7333",
+      "Id": 134,
+      "ExternalId": "7333-10",
+      "PrecinctId": 134
+    },
+    {
+      "Description": "PCT 7334",
+      "Id": 135,
+      "ExternalId": "7334-10",
+      "PrecinctId": 135
+    },
+    {
+      "Description": "PCT 7335",
+      "Id": 136,
+      "ExternalId": "7335-10",
+      "PrecinctId": 136
+    },
+    {
+      "Description": "PCT 7336",
+      "Id": 137,
+      "ExternalId": "7336-10",
+      "PrecinctId": 137
+    },
+    {
+      "Description": "PCT 7337",
+      "Id": 138,
+      "ExternalId": "7337-10",
+      "PrecinctId": 138
+    },
+    {
+      "Description": "PCT 7338 MB",
+      "Id": 139,
+      "ExternalId": "7338-11",
+      "PrecinctId": 139
+    },
+    {
+      "Description": "PCT 7501",
+      "Id": 140,
+      "ExternalId": "7501-12",
+      "PrecinctId": 140
+    },
+    {
+      "Description": "PCT 7502",
+      "Id": 141,
+      "ExternalId": "7502-12",
+      "PrecinctId": 141
+    },
+    {
+      "Description": "PCT 7503",
+      "Id": 142,
+      "ExternalId": "7503-12",
+      "PrecinctId": 142
+    },
+    {
+      "Description": "PCT 7504",
+      "Id": 143,
+      "ExternalId": "7504-13",
+      "PrecinctId": 143
+    },
+    {
+      "Description": "PCT 7505",
+      "Id": 144,
+      "ExternalId": "7505-12",
+      "PrecinctId": 144
+    },
+    {
+      "Description": "PCT 7506",
+      "Id": 145,
+      "ExternalId": "7506-12",
+      "PrecinctId": 145
+    },
+    {
+      "Description": "PCT 7507",
+      "Id": 146,
+      "ExternalId": "7507-12",
+      "PrecinctId": 146
+    },
+    {
+      "Description": "PCT 7508",
+      "Id": 147,
+      "ExternalId": "7508-12",
+      "PrecinctId": 147
+    },
+    {
+      "Description": "PCT 7509",
+      "Id": 148,
+      "ExternalId": "7509-12",
+      "PrecinctId": 148
+    },
+    {
+      "Description": "PCT 7511",
+      "Id": 149,
+      "ExternalId": "7511-12",
+      "PrecinctId": 149
+    },
+    {
+      "Description": "PCT 7512",
+      "Id": 150,
+      "ExternalId": "7512-12",
+      "PrecinctId": 150
+    },
+    {
+      "Description": "PCT 7513",
+      "Id": 151,
+      "ExternalId": "7513-12",
+      "PrecinctId": 151
+    },
+    {
+      "Description": "PCT 7514",
+      "Id": 152,
+      "ExternalId": "7514-12",
+      "PrecinctId": 152
+    },
+    {
+      "Description": "PCT 7515",
+      "Id": 153,
+      "ExternalId": "7515-12",
+      "PrecinctId": 153
+    },
+    {
+      "Description": "PCT 7516",
+      "Id": 154,
+      "ExternalId": "7516-12",
+      "PrecinctId": 154
+    },
+    {
+      "Description": "PCT 7517",
+      "Id": 155,
+      "ExternalId": "7517-12",
+      "PrecinctId": 155
+    },
+    {
+      "Description": "PCT 7518",
+      "Id": 156,
+      "ExternalId": "7518-12",
+      "PrecinctId": 156
+    },
+    {
+      "Description": "PCT 7519",
+      "Id": 157,
+      "ExternalId": "7519-12",
+      "PrecinctId": 157
+    },
+    {
+      "Description": "PCT 7521",
+      "Id": 158,
+      "ExternalId": "7521-12",
+      "PrecinctId": 158
+    },
+    {
+      "Description": "PCT 7522",
+      "Id": 159,
+      "ExternalId": "7522-12",
+      "PrecinctId": 159
+    },
+    {
+      "Description": "PCT 7523",
+      "Id": 160,
+      "ExternalId": "7523-12",
+      "PrecinctId": 160
+    },
+    {
+      "Description": "PCT 7524",
+      "Id": 161,
+      "ExternalId": "7524-13",
+      "PrecinctId": 161
+    },
+    {
+      "Description": "PCT 7525",
+      "Id": 162,
+      "ExternalId": "7525-13",
+      "PrecinctId": 162
+    },
+    {
+      "Description": "PCT 7526",
+      "Id": 163,
+      "ExternalId": "7526-12",
+      "PrecinctId": 163
+    },
+    {
+      "Description": "PCT 7527",
+      "Id": 164,
+      "ExternalId": "7527-12",
+      "PrecinctId": 164
+    },
+    {
+      "Description": "PCT 7528",
+      "Id": 165,
+      "ExternalId": "7528-12",
+      "PrecinctId": 165
+    },
+    {
+      "Description": "PCT 7529",
+      "Id": 166,
+      "ExternalId": "7529-12",
+      "PrecinctId": 166
+    },
+    {
+      "Description": "PCT 7531",
+      "Id": 167,
+      "ExternalId": "7531-12",
+      "PrecinctId": 167
+    },
+    {
+      "Description": "PCT 7532",
+      "Id": 168,
+      "ExternalId": "7532-12",
+      "PrecinctId": 168
+    },
+    {
+      "Description": "PCT 7533",
+      "Id": 169,
+      "ExternalId": "7533-12",
+      "PrecinctId": 169
+    },
+    {
+      "Description": "PCT 7534",
+      "Id": 170,
+      "ExternalId": "7534-12",
+      "PrecinctId": 170
+    },
+    {
+      "Description": "PCT 7601",
+      "Id": 171,
+      "ExternalId": "7601-14",
+      "PrecinctId": 171
+    },
+    {
+      "Description": "PCT 7602",
+      "Id": 172,
+      "ExternalId": "7602-14",
+      "PrecinctId": 172
+    },
+    {
+      "Description": "PCT 7603",
+      "Id": 173,
+      "ExternalId": "7603-14",
+      "PrecinctId": 173
+    },
+    {
+      "Description": "PCT 7604",
+      "Id": 174,
+      "ExternalId": "7604-14",
+      "PrecinctId": 174
+    },
+    {
+      "Description": "PCT 7605",
+      "Id": 175,
+      "ExternalId": "7605-14",
+      "PrecinctId": 175
+    },
+    {
+      "Description": "PCT 7606",
+      "Id": 176,
+      "ExternalId": "7606-14",
+      "PrecinctId": 176
+    },
+    {
+      "Description": "PCT 7607",
+      "Id": 177,
+      "ExternalId": "7607-14",
+      "PrecinctId": 177
+    },
+    {
+      "Description": "PCT 7608",
+      "Id": 178,
+      "ExternalId": "7608-14",
+      "PrecinctId": 178
+    },
+    {
+      "Description": "PCT 7609",
+      "Id": 179,
+      "ExternalId": "7609-14",
+      "PrecinctId": 179
+    },
+    {
+      "Description": "PCT 7611",
+      "Id": 180,
+      "ExternalId": "7611-14",
+      "PrecinctId": 180
+    },
+    {
+      "Description": "PCT 7612",
+      "Id": 181,
+      "ExternalId": "7612-14",
+      "PrecinctId": 181
+    },
+    {
+      "Description": "PCT 7613",
+      "Id": 182,
+      "ExternalId": "7613-14",
+      "PrecinctId": 182
+    },
+    {
+      "Description": "PCT 7614",
+      "Id": 183,
+      "ExternalId": "7614-14",
+      "PrecinctId": 183
+    },
+    {
+      "Description": "PCT 7615",
+      "Id": 184,
+      "ExternalId": "7615-14",
+      "PrecinctId": 184
+    },
+    {
+      "Description": "PCT 7616",
+      "Id": 185,
+      "ExternalId": "7616-14",
+      "PrecinctId": 185
+    },
+    {
+      "Description": "PCT 7617",
+      "Id": 186,
+      "ExternalId": "7617-14",
+      "PrecinctId": 186
+    },
+    {
+      "Description": "PCT 7618",
+      "Id": 187,
+      "ExternalId": "7618-14",
+      "PrecinctId": 187
+    },
+    {
+      "Description": "PCT 7619",
+      "Id": 188,
+      "ExternalId": "7619-14",
+      "PrecinctId": 188
+    },
+    {
+      "Description": "PCT 7621",
+      "Id": 189,
+      "ExternalId": "7621-14",
+      "PrecinctId": 189
+    },
+    {
+      "Description": "PCT 7622",
+      "Id": 190,
+      "ExternalId": "7622-14",
+      "PrecinctId": 190
+    },
+    {
+      "Description": "PCT 7623",
+      "Id": 191,
+      "ExternalId": "7623-14",
+      "PrecinctId": 191
+    },
+    {
+      "Description": "PCT 7624",
+      "Id": 192,
+      "ExternalId": "7624-14",
+      "PrecinctId": 192
+    },
+    {
+      "Description": "PCT 7625",
+      "Id": 193,
+      "ExternalId": "7625-14",
+      "PrecinctId": 193
+    },
+    {
+      "Description": "PCT 7626",
+      "Id": 194,
+      "ExternalId": "7626-14",
+      "PrecinctId": 194
+    },
+    {
+      "Description": "PCT 7627",
+      "Id": 195,
+      "ExternalId": "7627-14",
+      "PrecinctId": 195
+    },
+    {
+      "Description": "PCT 7628",
+      "Id": 196,
+      "ExternalId": "7628-14",
+      "PrecinctId": 196
+    },
+    {
+      "Description": "PCT 7629",
+      "Id": 197,
+      "ExternalId": "7629-14",
+      "PrecinctId": 197
+    },
+    {
+      "Description": "PCT 7631",
+      "Id": 198,
+      "ExternalId": "7631-14",
+      "PrecinctId": 198
+    },
+    {
+      "Description": "PCT 7632",
+      "Id": 199,
+      "ExternalId": "7632-14",
+      "PrecinctId": 199
+    },
+    {
+      "Description": "PCT 7633",
+      "Id": 200,
+      "ExternalId": "7633-14",
+      "PrecinctId": 200
+    },
+    {
+      "Description": "PCT 7634",
+      "Id": 201,
+      "ExternalId": "7634-14",
+      "PrecinctId": 201
+    },
+    {
+      "Description": "PCT 7635",
+      "Id": 202,
+      "ExternalId": "7635-14",
+      "PrecinctId": 202
+    },
+    {
+      "Description": "PCT 7636 MB",
+      "Id": 203,
+      "ExternalId": "7636-15",
+      "PrecinctId": 203
+    },
+    {
+      "Description": "PCT 7637",
+      "Id": 204,
+      "ExternalId": "7637-14",
+      "PrecinctId": 204
+    },
+    {
+      "Description": "PCT 7638",
+      "Id": 205,
+      "ExternalId": "7638-14",
+      "PrecinctId": 205
+    },
+    {
+      "Description": "PCT 7639",
+      "Id": 206,
+      "ExternalId": "7639-14",
+      "PrecinctId": 206
+    },
+    {
+      "Description": "PCT 7641",
+      "Id": 207,
+      "ExternalId": "7641-14",
+      "PrecinctId": 207
+    },
+    {
+      "Description": "PCT 7642",
+      "Id": 208,
+      "ExternalId": "7642-14",
+      "PrecinctId": 208
+    },
+    {
+      "Description": "PCT 7643",
+      "Id": 209,
+      "ExternalId": "7643-14",
+      "PrecinctId": 209
+    },
+    {
+      "Description": "PCT 7644",
+      "Id": 210,
+      "ExternalId": "7644-14",
+      "PrecinctId": 210
+    },
+    {
+      "Description": "PCT 7645",
+      "Id": 211,
+      "ExternalId": "7645-16",
+      "PrecinctId": 211
+    },
+    {
+      "Description": "PCT 7701",
+      "Id": 212,
+      "ExternalId": "7701-17",
+      "PrecinctId": 212
+    },
+    {
+      "Description": "PCT 7702",
+      "Id": 213,
+      "ExternalId": "7702-17",
+      "PrecinctId": 213
+    },
+    {
+      "Description": "PCT 7703",
+      "Id": 214,
+      "ExternalId": "7703-18",
+      "PrecinctId": 214
+    },
+    {
+      "Description": "PCT 7704",
+      "Id": 215,
+      "ExternalId": "7704-18",
+      "PrecinctId": 215
+    },
+    {
+      "Description": "PCT 7705",
+      "Id": 216,
+      "ExternalId": "7705-18",
+      "PrecinctId": 216
+    },
+    {
+      "Description": "PCT 7706",
+      "Id": 217,
+      "ExternalId": "7706-18",
+      "PrecinctId": 217
+    },
+    {
+      "Description": "PCT 7707",
+      "Id": 218,
+      "ExternalId": "7707-18",
+      "PrecinctId": 218
+    },
+    {
+      "Description": "PCT 7708",
+      "Id": 219,
+      "ExternalId": "7708-18",
+      "PrecinctId": 219
+    },
+    {
+      "Description": "PCT 7709",
+      "Id": 220,
+      "ExternalId": "7709-18",
+      "PrecinctId": 220
+    },
+    {
+      "Description": "PCT 7711",
+      "Id": 221,
+      "ExternalId": "7711-18",
+      "PrecinctId": 221
+    },
+    {
+      "Description": "PCT 7712",
+      "Id": 222,
+      "ExternalId": "7712-18",
+      "PrecinctId": 222
+    },
+    {
+      "Description": "PCT 7713",
+      "Id": 223,
+      "ExternalId": "7713-18",
+      "PrecinctId": 223
+    },
+    {
+      "Description": "PCT 7714",
+      "Id": 224,
+      "ExternalId": "7714-18",
+      "PrecinctId": 224
+    },
+    {
+      "Description": "PCT 7715",
+      "Id": 225,
+      "ExternalId": "7715-18",
+      "PrecinctId": 225
+    },
+    {
+      "Description": "PCT 7716",
+      "Id": 226,
+      "ExternalId": "7716-18",
+      "PrecinctId": 226
+    },
+    {
+      "Description": "PCT 7717",
+      "Id": 227,
+      "ExternalId": "7717-18",
+      "PrecinctId": 227
+    },
+    {
+      "Description": "PCT 7718",
+      "Id": 228,
+      "ExternalId": "7718-18",
+      "PrecinctId": 228
+    },
+    {
+      "Description": "PCT 7719",
+      "Id": 229,
+      "ExternalId": "7719-18",
+      "PrecinctId": 229
+    },
+    {
+      "Description": "PCT 7801",
+      "Id": 230,
+      "ExternalId": "7801-19",
+      "PrecinctId": 230
+    },
+    {
+      "Description": "PCT 7802",
+      "Id": 231,
+      "ExternalId": "7802-19",
+      "PrecinctId": 231
+    },
+    {
+      "Description": "PCT 7803",
+      "Id": 232,
+      "ExternalId": "7803-19",
+      "PrecinctId": 232
+    },
+    {
+      "Description": "PCT 7804",
+      "Id": 233,
+      "ExternalId": "7804-19",
+      "PrecinctId": 233
+    },
+    {
+      "Description": "PCT 7805",
+      "Id": 234,
+      "ExternalId": "7805-19",
+      "PrecinctId": 234
+    },
+    {
+      "Description": "PCT 7806",
+      "Id": 235,
+      "ExternalId": "7806-19",
+      "PrecinctId": 235
+    },
+    {
+      "Description": "PCT 7807",
+      "Id": 236,
+      "ExternalId": "7807-19",
+      "PrecinctId": 236
+    },
+    {
+      "Description": "PCT 7808",
+      "Id": 237,
+      "ExternalId": "7808-19",
+      "PrecinctId": 237
+    },
+    {
+      "Description": "PCT 7809",
+      "Id": 238,
+      "ExternalId": "7809-19",
+      "PrecinctId": 238
+    },
+    {
+      "Description": "PCT 7811",
+      "Id": 239,
+      "ExternalId": "7811-19",
+      "PrecinctId": 239
+    },
+    {
+      "Description": "PCT 7812",
+      "Id": 240,
+      "ExternalId": "7812-19",
+      "PrecinctId": 240
+    },
+    {
+      "Description": "PCT 7813",
+      "Id": 241,
+      "ExternalId": "7813-19",
+      "PrecinctId": 241
+    },
+    {
+      "Description": "PCT 7814",
+      "Id": 242,
+      "ExternalId": "7814-19",
+      "PrecinctId": 242
+    },
+    {
+      "Description": "PCT 7815",
+      "Id": 243,
+      "ExternalId": "7815-19",
+      "PrecinctId": 243
+    },
+    {
+      "Description": "PCT 7816",
+      "Id": 244,
+      "ExternalId": "7816-19",
+      "PrecinctId": 244
+    },
+    {
+      "Description": "PCT 7817",
+      "Id": 245,
+      "ExternalId": "7817-19",
+      "PrecinctId": 245
+    },
+    {
+      "Description": "PCT 7818",
+      "Id": 246,
+      "ExternalId": "7818-19",
+      "PrecinctId": 246
+    },
+    {
+      "Description": "PCT 7819",
+      "Id": 247,
+      "ExternalId": "7819-19",
+      "PrecinctId": 247
+    },
+    {
+      "Description": "PCT 7821",
+      "Id": 248,
+      "ExternalId": "7821-19",
+      "PrecinctId": 248
+    },
+    {
+      "Description": "PCT 7822",
+      "Id": 249,
+      "ExternalId": "7822-19",
+      "PrecinctId": 249
+    },
+    {
+      "Description": "PCT 7823",
+      "Id": 250,
+      "ExternalId": "7823-19",
+      "PrecinctId": 250
+    },
+    {
+      "Description": "PCT 7824",
+      "Id": 251,
+      "ExternalId": "7824-19",
+      "PrecinctId": 251
+    },
+    {
+      "Description": "PCT 7825",
+      "Id": 252,
+      "ExternalId": "7825-19",
+      "PrecinctId": 252
+    },
+    {
+      "Description": "PCT 7826",
+      "Id": 253,
+      "ExternalId": "7826-19",
+      "PrecinctId": 253
+    },
+    {
+      "Description": "PCT 7827",
+      "Id": 254,
+      "ExternalId": "7827-19",
+      "PrecinctId": 254
+    },
+    {
+      "Description": "PCT 7828",
+      "Id": 255,
+      "ExternalId": "7828-19",
+      "PrecinctId": 255
+    },
+    {
+      "Description": "PCT 7829",
+      "Id": 256,
+      "ExternalId": "7829-19",
+      "PrecinctId": 256
+    },
+    {
+      "Description": "PCT 7831",
+      "Id": 257,
+      "ExternalId": "7831-19",
+      "PrecinctId": 257
+    },
+    {
+      "Description": "PCT 7832",
+      "Id": 258,
+      "ExternalId": "7832-19",
+      "PrecinctId": 258
+    },
+    {
+      "Description": "PCT 7833",
+      "Id": 259,
+      "ExternalId": "7833-19",
+      "PrecinctId": 259
+    },
+    {
+      "Description": "PCT 7834",
+      "Id": 260,
+      "ExternalId": "7834-19",
+      "PrecinctId": 260
+    },
+    {
+      "Description": "PCT 7835",
+      "Id": 261,
+      "ExternalId": "7835-19",
+      "PrecinctId": 261
+    },
+    {
+      "Description": "PCT 7836",
+      "Id": 262,
+      "ExternalId": "7836-19",
+      "PrecinctId": 262
+    },
+    {
+      "Description": "PCT 7837",
+      "Id": 263,
+      "ExternalId": "7837-19",
+      "PrecinctId": 263
+    },
+    {
+      "Description": "PCT 7838",
+      "Id": 264,
+      "ExternalId": "7838-19",
+      "PrecinctId": 264
+    },
+    {
+      "Description": "PCT 7839",
+      "Id": 265,
+      "ExternalId": "7839-19",
+      "PrecinctId": 265
+    },
+    {
+      "Description": "PCT 7841",
+      "Id": 266,
+      "ExternalId": "7841-19",
+      "PrecinctId": 266
+    },
+    {
+      "Description": "PCT 7842",
+      "Id": 267,
+      "ExternalId": "7842-19",
+      "PrecinctId": 267
+    },
+    {
+      "Description": "PCT 7843",
+      "Id": 268,
+      "ExternalId": "7843-19",
+      "PrecinctId": 268
+    },
+    {
+      "Description": "PCT 7844",
+      "Id": 269,
+      "ExternalId": "7844-19",
+      "PrecinctId": 269
+    },
+    {
+      "Description": "PCT 7845",
+      "Id": 270,
+      "ExternalId": "7845-19",
+      "PrecinctId": 270
+    },
+    {
+      "Description": "PCT 7846",
+      "Id": 271,
+      "ExternalId": "7846-19",
+      "PrecinctId": 271
+    },
+    {
+      "Description": "PCT 7847",
+      "Id": 272,
+      "ExternalId": "7847-19",
+      "PrecinctId": 272
+    },
+    {
+      "Description": "PCT 7848",
+      "Id": 273,
+      "ExternalId": "7848-19",
+      "PrecinctId": 273
+    },
+    {
+      "Description": "PCT 7849",
+      "Id": 274,
+      "ExternalId": "7849-19",
+      "PrecinctId": 274
+    },
+    {
+      "Description": "PCT 7851",
+      "Id": 275,
+      "ExternalId": "7851-19",
+      "PrecinctId": 275
+    },
+    {
+      "Description": "PCT 7852",
+      "Id": 276,
+      "ExternalId": "7852-19",
+      "PrecinctId": 276
+    },
+    {
+      "Description": "PCT 7853",
+      "Id": 277,
+      "ExternalId": "7853-19",
+      "PrecinctId": 277
+    },
+    {
+      "Description": "PCT 7854",
+      "Id": 278,
+      "ExternalId": "7854-19",
+      "PrecinctId": 278
+    },
+    {
+      "Description": "PCT 7901",
+      "Id": 279,
+      "ExternalId": "7901-20",
+      "PrecinctId": 279
+    },
+    {
+      "Description": "PCT 7902",
+      "Id": 280,
+      "ExternalId": "7902-20",
+      "PrecinctId": 280
+    },
+    {
+      "Description": "PCT 7903",
+      "Id": 281,
+      "ExternalId": "7903-20",
+      "PrecinctId": 281
+    },
+    {
+      "Description": "PCT 7904",
+      "Id": 282,
+      "ExternalId": "7904-20",
+      "PrecinctId": 282
+    },
+    {
+      "Description": "PCT 7905",
+      "Id": 283,
+      "ExternalId": "7905-20",
+      "PrecinctId": 283
+    },
+    {
+      "Description": "PCT 7906",
+      "Id": 284,
+      "ExternalId": "7906-20",
+      "PrecinctId": 284
+    },
+    {
+      "Description": "PCT 7907",
+      "Id": 285,
+      "ExternalId": "7907-20",
+      "PrecinctId": 285
+    },
+    {
+      "Description": "PCT 7908",
+      "Id": 286,
+      "ExternalId": "7908-20",
+      "PrecinctId": 286
+    },
+    {
+      "Description": "PCT 7909",
+      "Id": 287,
+      "ExternalId": "7909-20",
+      "PrecinctId": 287
+    },
+    {
+      "Description": "PCT 7911",
+      "Id": 288,
+      "ExternalId": "7911-20",
+      "PrecinctId": 288
+    },
+    {
+      "Description": "PCT 7912",
+      "Id": 289,
+      "ExternalId": "7912-20",
+      "PrecinctId": 289
+    },
+    {
+      "Description": "PCT 7913",
+      "Id": 290,
+      "ExternalId": "7913-20",
+      "PrecinctId": 290
+    },
+    {
+      "Description": "PCT 7914",
+      "Id": 291,
+      "ExternalId": "7914-20",
+      "PrecinctId": 291
+    },
+    {
+      "Description": "PCT 7915",
+      "Id": 292,
+      "ExternalId": "7915-20",
+      "PrecinctId": 292
+    },
+    {
+      "Description": "PCT 7916",
+      "Id": 293,
+      "ExternalId": "7916-20",
+      "PrecinctId": 293
+    },
+    {
+      "Description": "PCT 7917",
+      "Id": 294,
+      "ExternalId": "7917-20",
+      "PrecinctId": 294
+    },
+    {
+      "Description": "PCT 7918",
+      "Id": 295,
+      "ExternalId": "7918-20",
+      "PrecinctId": 295
+    },
+    {
+      "Description": "PCT 7919",
+      "Id": 296,
+      "ExternalId": "7919-20",
+      "PrecinctId": 296
+    },
+    {
+      "Description": "PCT 7921",
+      "Id": 297,
+      "ExternalId": "7921-20",
+      "PrecinctId": 297
+    },
+    {
+      "Description": "PCT 7922",
+      "Id": 298,
+      "ExternalId": "7922-20",
+      "PrecinctId": 298
+    },
+    {
+      "Description": "PCT 7923",
+      "Id": 299,
+      "ExternalId": "7923-20",
+      "PrecinctId": 299
+    },
+    {
+      "Description": "PCT 7924",
+      "Id": 300,
+      "ExternalId": "7924-20",
+      "PrecinctId": 300
+    },
+    {
+      "Description": "PCT 7925",
+      "Id": 301,
+      "ExternalId": "7925-20",
+      "PrecinctId": 301
+    },
+    {
+      "Description": "PCT 7926",
+      "Id": 302,
+      "ExternalId": "7926-20",
+      "PrecinctId": 302
+    },
+    {
+      "Description": "PCT 7927",
+      "Id": 303,
+      "ExternalId": "7927-20",
+      "PrecinctId": 303
+    },
+    {
+      "Description": "PCT 7928",
+      "Id": 304,
+      "ExternalId": "7928-20",
+      "PrecinctId": 304
+    },
+    {
+      "Description": "PCT 7929",
+      "Id": 305,
+      "ExternalId": "7929-20",
+      "PrecinctId": 305
+    },
+    {
+      "Description": "PCT 7931",
+      "Id": 306,
+      "ExternalId": "7931-20",
+      "PrecinctId": 306
+    },
+    {
+      "Description": "PCT 7932",
+      "Id": 307,
+      "ExternalId": "7932-20",
+      "PrecinctId": 307
+    },
+    {
+      "Description": "PCT 7933",
+      "Id": 308,
+      "ExternalId": "7933-20",
+      "PrecinctId": 308
+    },
+    {
+      "Description": "PCT 7934",
+      "Id": 309,
+      "ExternalId": "7934-20",
+      "PrecinctId": 309
+    },
+    {
+      "Description": "PCT 7935",
+      "Id": 310,
+      "ExternalId": "7935-20",
+      "PrecinctId": 310
+    },
+    {
+      "Description": "PCT 7936",
+      "Id": 311,
+      "ExternalId": "7936-20",
+      "PrecinctId": 311
+    },
+    {
+      "Description": "PCT 7937",
+      "Id": 312,
+      "ExternalId": "7937-20",
+      "PrecinctId": 312
+    },
+    {
+      "Description": "PCT 7938",
+      "Id": 313,
+      "ExternalId": "7938-20",
+      "PrecinctId": 313
+    },
+    {
+      "Description": "PCT 7939",
+      "Id": 314,
+      "ExternalId": "7939-20",
+      "PrecinctId": 314
+    },
+    {
+      "Description": "PCT 7941",
+      "Id": 315,
+      "ExternalId": "7941-20",
+      "PrecinctId": 315
+    },
+    {
+      "Description": "PCT 7942",
+      "Id": 316,
+      "ExternalId": "7942-21",
+      "PrecinctId": 316
+    },
+    {
+      "Description": "PCT 7943",
+      "Id": 317,
+      "ExternalId": "7943-21",
+      "PrecinctId": 317
+    },
+    {
+      "Description": "PCT 7944",
+      "Id": 318,
+      "ExternalId": "7944-21",
+      "PrecinctId": 318
+    },
+    {
+      "Description": "PCT 7945",
+      "Id": 319,
+      "ExternalId": "7945-21",
+      "PrecinctId": 319
+    },
+    {
+      "Description": "PCT 7946",
+      "Id": 320,
+      "ExternalId": "7946-21",
+      "PrecinctId": 320
+    },
+    {
+      "Description": "PCT 7947",
+      "Id": 321,
+      "ExternalId": "7947-21",
+      "PrecinctId": 321
+    },
+    {
+      "Description": "PCT 7948",
+      "Id": 322,
+      "ExternalId": "7948-21",
+      "PrecinctId": 322
+    },
+    {
+      "Description": "PCT 7949",
+      "Id": 323,
+      "ExternalId": "7949-21",
+      "PrecinctId": 323
+    },
+    {
+      "Description": "PCT 9101",
+      "Id": 324,
+      "ExternalId": "9101-22",
+      "PrecinctId": 324
+    },
+    {
+      "Description": "PCT 9102",
+      "Id": 325,
+      "ExternalId": "9102-22",
+      "PrecinctId": 325
+    },
+    {
+      "Description": "PCT 9103",
+      "Id": 326,
+      "ExternalId": "9103-22",
+      "PrecinctId": 326
+    },
+    {
+      "Description": "PCT 9104",
+      "Id": 327,
+      "ExternalId": "9104-22",
+      "PrecinctId": 327
+    },
+    {
+      "Description": "PCT 9105",
+      "Id": 328,
+      "ExternalId": "9105-22",
+      "PrecinctId": 328
+    },
+    {
+      "Description": "PCT 9106",
+      "Id": 329,
+      "ExternalId": "9106-22",
+      "PrecinctId": 329
+    },
+    {
+      "Description": "PCT 9107",
+      "Id": 330,
+      "ExternalId": "9107-22",
+      "PrecinctId": 330
+    },
+    {
+      "Description": "PCT 9108",
+      "Id": 331,
+      "ExternalId": "9108-22",
+      "PrecinctId": 331
+    },
+    {
+      "Description": "PCT 9109",
+      "Id": 332,
+      "ExternalId": "9109-22",
+      "PrecinctId": 332
+    },
+    {
+      "Description": "PCT 9111",
+      "Id": 333,
+      "ExternalId": "9111-22",
+      "PrecinctId": 333
+    },
+    {
+      "Description": "PCT 9112",
+      "Id": 334,
+      "ExternalId": "9112-22",
+      "PrecinctId": 334
+    },
+    {
+      "Description": "PCT 9113",
+      "Id": 335,
+      "ExternalId": "9113-22",
+      "PrecinctId": 335
+    },
+    {
+      "Description": "PCT 9114",
+      "Id": 336,
+      "ExternalId": "9114-22",
+      "PrecinctId": 336
+    },
+    {
+      "Description": "PCT 9115",
+      "Id": 337,
+      "ExternalId": "9115-22",
+      "PrecinctId": 337
+    },
+    {
+      "Description": "PCT 9116",
+      "Id": 338,
+      "ExternalId": "9116-22",
+      "PrecinctId": 338
+    },
+    {
+      "Description": "PCT 9117",
+      "Id": 339,
+      "ExternalId": "9117-22",
+      "PrecinctId": 339
+    },
+    {
+      "Description": "PCT 9118",
+      "Id": 340,
+      "ExternalId": "9118-22",
+      "PrecinctId": 340
+    },
+    {
+      "Description": "PCT 9119",
+      "Id": 341,
+      "ExternalId": "9119-22",
+      "PrecinctId": 341
+    },
+    {
+      "Description": "PCT 9121",
+      "Id": 342,
+      "ExternalId": "9121-22",
+      "PrecinctId": 342
+    },
+    {
+      "Description": "PCT 9122",
+      "Id": 343,
+      "ExternalId": "9122-22",
+      "PrecinctId": 343
+    },
+    {
+      "Description": "PCT 9123",
+      "Id": 344,
+      "ExternalId": "9123-22",
+      "PrecinctId": 344
+    },
+    {
+      "Description": "PCT 9124",
+      "Id": 345,
+      "ExternalId": "9124-22",
+      "PrecinctId": 345
+    },
+    {
+      "Description": "PCT 9125",
+      "Id": 346,
+      "ExternalId": "9125-22",
+      "PrecinctId": 346
+    },
+    {
+      "Description": "PCT 9126",
+      "Id": 347,
+      "ExternalId": "9126-22",
+      "PrecinctId": 347
+    },
+    {
+      "Description": "PCT 9127",
+      "Id": 348,
+      "ExternalId": "9127-22",
+      "PrecinctId": 348
+    },
+    {
+      "Description": "PCT 9128",
+      "Id": 349,
+      "ExternalId": "9128-22",
+      "PrecinctId": 349
+    },
+    {
+      "Description": "PCT 9129",
+      "Id": 350,
+      "ExternalId": "9129-22",
+      "PrecinctId": 350
+    },
+    {
+      "Description": "PCT 9131",
+      "Id": 351,
+      "ExternalId": "9131-22",
+      "PrecinctId": 351
+    },
+    {
+      "Description": "PCT 9132",
+      "Id": 352,
+      "ExternalId": "9132-22",
+      "PrecinctId": 352
+    },
+    {
+      "Description": "PCT 9133",
+      "Id": 353,
+      "ExternalId": "9133-22",
+      "PrecinctId": 353
+    },
+    {
+      "Description": "PCT 9134",
+      "Id": 354,
+      "ExternalId": "9134-22",
+      "PrecinctId": 354
+    },
+    {
+      "Description": "PCT 9135",
+      "Id": 355,
+      "ExternalId": "9135-22",
+      "PrecinctId": 355
+    },
+    {
+      "Description": "PCT 9136",
+      "Id": 356,
+      "ExternalId": "9136-22",
+      "PrecinctId": 356
+    },
+    {
+      "Description": "PCT 9137",
+      "Id": 357,
+      "ExternalId": "9137-22",
+      "PrecinctId": 357
+    },
+    {
+      "Description": "PCT 9138",
+      "Id": 358,
+      "ExternalId": "9138-22",
+      "PrecinctId": 358
+    },
+    {
+      "Description": "PCT 9139",
+      "Id": 359,
+      "ExternalId": "9139-22",
+      "PrecinctId": 359
+    },
+    {
+      "Description": "PCT 9141",
+      "Id": 360,
+      "ExternalId": "9141-22",
+      "PrecinctId": 360
+    },
+    {
+      "Description": "PCT 9142",
+      "Id": 361,
+      "ExternalId": "9142-22",
+      "PrecinctId": 361
+    },
+    {
+      "Description": "PCT 9143",
+      "Id": 362,
+      "ExternalId": "9143-22",
+      "PrecinctId": 362
+    },
+    {
+      "Description": "PCT 9144",
+      "Id": 363,
+      "ExternalId": "9144-22",
+      "PrecinctId": 363
+    },
+    {
+      "Description": "PCT 9145",
+      "Id": 364,
+      "ExternalId": "9145-22",
+      "PrecinctId": 364
+    },
+    {
+      "Description": "PCT 9146",
+      "Id": 365,
+      "ExternalId": "9146-22",
+      "PrecinctId": 365
+    },
+    {
+      "Description": "PCT 9147 MB",
+      "Id": 366,
+      "ExternalId": "9147-23",
+      "PrecinctId": 366
+    },
+    {
+      "Description": "PCT 9201",
+      "Id": 367,
+      "ExternalId": "9201-24",
+      "PrecinctId": 367
+    },
+    {
+      "Description": "PCT 9202",
+      "Id": 368,
+      "ExternalId": "9202-24",
+      "PrecinctId": 368
+    },
+    {
+      "Description": "PCT 9203",
+      "Id": 369,
+      "ExternalId": "9203-24",
+      "PrecinctId": 369
+    },
+    {
+      "Description": "PCT 9204",
+      "Id": 370,
+      "ExternalId": "9204-24",
+      "PrecinctId": 370
+    },
+    {
+      "Description": "PCT 9205",
+      "Id": 371,
+      "ExternalId": "9205-24",
+      "PrecinctId": 371
+    },
+    {
+      "Description": "PCT 9206",
+      "Id": 372,
+      "ExternalId": "9206-24",
+      "PrecinctId": 372
+    },
+    {
+      "Description": "PCT 9207",
+      "Id": 373,
+      "ExternalId": "9207-24",
+      "PrecinctId": 373
+    },
+    {
+      "Description": "PCT 9208",
+      "Id": 374,
+      "ExternalId": "9208-24",
+      "PrecinctId": 374
+    },
+    {
+      "Description": "PCT 9209",
+      "Id": 375,
+      "ExternalId": "9209-24",
+      "PrecinctId": 375
+    },
+    {
+      "Description": "PCT 9211",
+      "Id": 376,
+      "ExternalId": "9211-24",
+      "PrecinctId": 376
+    },
+    {
+      "Description": "PCT 9212",
+      "Id": 377,
+      "ExternalId": "9212-24",
+      "PrecinctId": 377
+    },
+    {
+      "Description": "PCT 9213",
+      "Id": 378,
+      "ExternalId": "9213-24",
+      "PrecinctId": 378
+    },
+    {
+      "Description": "PCT 9214",
+      "Id": 379,
+      "ExternalId": "9214-24",
+      "PrecinctId": 379
+    },
+    {
+      "Description": "PCT 9215",
+      "Id": 380,
+      "ExternalId": "9215-24",
+      "PrecinctId": 380
+    },
+    {
+      "Description": "PCT 9216",
+      "Id": 381,
+      "ExternalId": "9216-24",
+      "PrecinctId": 381
+    },
+    {
+      "Description": "PCT 9217",
+      "Id": 382,
+      "ExternalId": "9217-24",
+      "PrecinctId": 382
+    },
+    {
+      "Description": "PCT 9218",
+      "Id": 383,
+      "ExternalId": "9218-24",
+      "PrecinctId": 383
+    },
+    {
+      "Description": "PCT 9219",
+      "Id": 384,
+      "ExternalId": "9219-24",
+      "PrecinctId": 384
+    },
+    {
+      "Description": "PCT 9221",
+      "Id": 385,
+      "ExternalId": "9221-24",
+      "PrecinctId": 385
+    },
+    {
+      "Description": "PCT 9222",
+      "Id": 386,
+      "ExternalId": "9222-24",
+      "PrecinctId": 386
+    },
+    {
+      "Description": "PCT 9223",
+      "Id": 387,
+      "ExternalId": "9223-24",
+      "PrecinctId": 387
+    },
+    {
+      "Description": "PCT 9224",
+      "Id": 388,
+      "ExternalId": "9224-24",
+      "PrecinctId": 388
+    },
+    {
+      "Description": "PCT 9225",
+      "Id": 389,
+      "ExternalId": "9225-24",
+      "PrecinctId": 389
+    },
+    {
+      "Description": "PCT 9226",
+      "Id": 390,
+      "ExternalId": "9226-24",
+      "PrecinctId": 390
+    },
+    {
+      "Description": "PCT 9227",
+      "Id": 391,
+      "ExternalId": "9227-24",
+      "PrecinctId": 391
+    },
+    {
+      "Description": "PCT 9228",
+      "Id": 392,
+      "ExternalId": "9228-24",
+      "PrecinctId": 392
+    },
+    {
+      "Description": "PCT 9229",
+      "Id": 393,
+      "ExternalId": "9229-24",
+      "PrecinctId": 393
+    },
+    {
+      "Description": "PCT 9231",
+      "Id": 394,
+      "ExternalId": "9231-24",
+      "PrecinctId": 394
+    },
+    {
+      "Description": "PCT 9232",
+      "Id": 395,
+      "ExternalId": "9232-24",
+      "PrecinctId": 395
+    },
+    {
+      "Description": "PCT 9233",
+      "Id": 396,
+      "ExternalId": "9233-24",
+      "PrecinctId": 396
+    },
+    {
+      "Description": "PCT 9234",
+      "Id": 397,
+      "ExternalId": "9234-24",
+      "PrecinctId": 397
+    },
+    {
+      "Description": "PCT 9235",
+      "Id": 398,
+      "ExternalId": "9235-24",
+      "PrecinctId": 398
+    },
+    {
+      "Description": "PCT 9236",
+      "Id": 399,
+      "ExternalId": "9236-24",
+      "PrecinctId": 399
+    },
+    {
+      "Description": "PCT 9237",
+      "Id": 400,
+      "ExternalId": "9237-24",
+      "PrecinctId": 400
+    },
+    {
+      "Description": "PCT 9238",
+      "Id": 401,
+      "ExternalId": "9238-25",
+      "PrecinctId": 401
+    },
+    {
+      "Description": "PCT 9239",
+      "Id": 402,
+      "ExternalId": "9239-25",
+      "PrecinctId": 402
+    },
+    {
+      "Description": "PCT 9241",
+      "Id": 403,
+      "ExternalId": "9241-25",
+      "PrecinctId": 403
+    },
+    {
+      "Description": "PCT 9242",
+      "Id": 404,
+      "ExternalId": "9242-25",
+      "PrecinctId": 404
+    },
+    {
+      "Description": "PCT 9243",
+      "Id": 405,
+      "ExternalId": "9243-25",
+      "PrecinctId": 405
+    },
+    {
+      "Description": "PCT 9301",
+      "Id": 406,
+      "ExternalId": "9301-26",
+      "PrecinctId": 406
+    },
+    {
+      "Description": "PCT 9302",
+      "Id": 407,
+      "ExternalId": "9302-26",
+      "PrecinctId": 407
+    },
+    {
+      "Description": "PCT 9303",
+      "Id": 408,
+      "ExternalId": "9303-26",
+      "PrecinctId": 408
+    },
+    {
+      "Description": "PCT 9304",
+      "Id": 409,
+      "ExternalId": "9304-26",
+      "PrecinctId": 409
+    },
+    {
+      "Description": "PCT 9305",
+      "Id": 410,
+      "ExternalId": "9305-26",
+      "PrecinctId": 410
+    },
+    {
+      "Description": "PCT 9306",
+      "Id": 411,
+      "ExternalId": "9306-26",
+      "PrecinctId": 411
+    },
+    {
+      "Description": "PCT 9401",
+      "Id": 412,
+      "ExternalId": "9401-27",
+      "PrecinctId": 412
+    },
+    {
+      "Description": "PCT 9402",
+      "Id": 413,
+      "ExternalId": "9402-27",
+      "PrecinctId": 413
+    },
+    {
+      "Description": "PCT 9403",
+      "Id": 414,
+      "ExternalId": "9403-27",
+      "PrecinctId": 414
+    },
+    {
+      "Description": "PCT 9404",
+      "Id": 415,
+      "ExternalId": "9404-27",
+      "PrecinctId": 415
+    },
+    {
+      "Description": "PCT 9405",
+      "Id": 416,
+      "ExternalId": "9405-27",
+      "PrecinctId": 416
+    },
+    {
+      "Description": "PCT 9406",
+      "Id": 417,
+      "ExternalId": "9406-27",
+      "PrecinctId": 417
+    },
+    {
+      "Description": "PCT 9407",
+      "Id": 418,
+      "ExternalId": "9407-27",
+      "PrecinctId": 418
+    },
+    {
+      "Description": "PCT 9408",
+      "Id": 419,
+      "ExternalId": "9408-27",
+      "PrecinctId": 419
+    },
+    {
+      "Description": "PCT 9409",
+      "Id": 420,
+      "ExternalId": "9409-27",
+      "PrecinctId": 420
+    },
+    {
+      "Description": "PCT 9411",
+      "Id": 421,
+      "ExternalId": "9411-27",
+      "PrecinctId": 421
+    },
+    {
+      "Description": "PCT 9412",
+      "Id": 422,
+      "ExternalId": "9412-27",
+      "PrecinctId": 422
+    },
+    {
+      "Description": "PCT 9413",
+      "Id": 423,
+      "ExternalId": "9413-27",
+      "PrecinctId": 423
+    },
+    {
+      "Description": "PCT 9414",
+      "Id": 424,
+      "ExternalId": "9414-27",
+      "PrecinctId": 424
+    },
+    {
+      "Description": "PCT 9415",
+      "Id": 425,
+      "ExternalId": "9415-27",
+      "PrecinctId": 425
+    },
+    {
+      "Description": "PCT 9416",
+      "Id": 426,
+      "ExternalId": "9416-27",
+      "PrecinctId": 426
+    },
+    {
+      "Description": "PCT 9417",
+      "Id": 427,
+      "ExternalId": "9417-27",
+      "PrecinctId": 427
+    },
+    {
+      "Description": "PCT 9418",
+      "Id": 428,
+      "ExternalId": "9418-27",
+      "PrecinctId": 428
+    },
+    {
+      "Description": "PCT 9419",
+      "Id": 429,
+      "ExternalId": "9419-27",
+      "PrecinctId": 429
+    },
+    {
+      "Description": "PCT 9421",
+      "Id": 430,
+      "ExternalId": "9421-27",
+      "PrecinctId": 430
+    },
+    {
+      "Description": "PCT 9422",
+      "Id": 431,
+      "ExternalId": "9422-27",
+      "PrecinctId": 431
+    },
+    {
+      "Description": "PCT 9423",
+      "Id": 432,
+      "ExternalId": "9423-27",
+      "PrecinctId": 432
+    },
+    {
+      "Description": "PCT 9424",
+      "Id": 433,
+      "ExternalId": "9424-27",
+      "PrecinctId": 433
+    },
+    {
+      "Description": "PCT 9425",
+      "Id": 434,
+      "ExternalId": "9425-27",
+      "PrecinctId": 434
+    },
+    {
+      "Description": "PCT 9426",
+      "Id": 435,
+      "ExternalId": "9426-27",
+      "PrecinctId": 435
+    },
+    {
+      "Description": "PCT 9427",
+      "Id": 436,
+      "ExternalId": "9427-27",
+      "PrecinctId": 436
+    },
+    {
+      "Description": "PCT 9428",
+      "Id": 437,
+      "ExternalId": "9428-27",
+      "PrecinctId": 437
+    },
+    {
+      "Description": "PCT 9429",
+      "Id": 438,
+      "ExternalId": "9429-27",
+      "PrecinctId": 438
+    },
+    {
+      "Description": "PCT 9431",
+      "Id": 439,
+      "ExternalId": "9431-27",
+      "PrecinctId": 439
+    },
+    {
+      "Description": "PCT 9432",
+      "Id": 440,
+      "ExternalId": "9432-27",
+      "PrecinctId": 440
+    },
+    {
+      "Description": "PCT 9433",
+      "Id": 441,
+      "ExternalId": "9433-27",
+      "PrecinctId": 441
+    },
+    {
+      "Description": "PCT 9434",
+      "Id": 442,
+      "ExternalId": "9434-27",
+      "PrecinctId": 442
+    },
+    {
+      "Description": "PCT 9435",
+      "Id": 443,
+      "ExternalId": "9435-27",
+      "PrecinctId": 443
+    },
+    {
+      "Description": "PCT 9436",
+      "Id": 444,
+      "ExternalId": "9436-27",
+      "PrecinctId": 444
+    },
+    {
+      "Description": "PCT 9437",
+      "Id": 445,
+      "ExternalId": "9437-27",
+      "PrecinctId": 445
+    },
+    {
+      "Description": "PCT 9438",
+      "Id": 446,
+      "ExternalId": "9438-27",
+      "PrecinctId": 446
+    },
+    {
+      "Description": "PCT 9439",
+      "Id": 447,
+      "ExternalId": "9439-27",
+      "PrecinctId": 447
+    },
+    {
+      "Description": "PCT 9441",
+      "Id": 448,
+      "ExternalId": "9441-27",
+      "PrecinctId": 448
+    },
+    {
+      "Description": "PCT 9442",
+      "Id": 449,
+      "ExternalId": "9442-27",
+      "PrecinctId": 449
+    },
+    {
+      "Description": "PCT 9443",
+      "Id": 450,
+      "ExternalId": "9443-27",
+      "PrecinctId": 450
+    },
+    {
+      "Description": "PCT 9444",
+      "Id": 451,
+      "ExternalId": "9444-27",
+      "PrecinctId": 451
+    },
+    {
+      "Description": "PCT 9445",
+      "Id": 452,
+      "ExternalId": "9445-27",
+      "PrecinctId": 452
+    },
+    {
+      "Description": "PCT 9446",
+      "Id": 453,
+      "ExternalId": "9446-27",
+      "PrecinctId": 453
+    },
+    {
+      "Description": "PCT 9447",
+      "Id": 454,
+      "ExternalId": "9447-27",
+      "PrecinctId": 454
+    },
+    {
+      "Description": "PCT 9448",
+      "Id": 455,
+      "ExternalId": "9448-27",
+      "PrecinctId": 455
+    },
+    {
+      "Description": "PCT 9449",
+      "Id": 456,
+      "ExternalId": "9449-27",
+      "PrecinctId": 456
+    },
+    {
+      "Description": "PCT 9451",
+      "Id": 457,
+      "ExternalId": "9451-27",
+      "PrecinctId": 457
+    },
+    {
+      "Description": "PCT 9452",
+      "Id": 458,
+      "ExternalId": "9452-27",
+      "PrecinctId": 458
+    },
+    {
+      "Description": "PCT 9501",
+      "Id": 459,
+      "ExternalId": "9501-28",
+      "PrecinctId": 459
+    },
+    {
+      "Description": "PCT 9502",
+      "Id": 460,
+      "ExternalId": "9502-28",
+      "PrecinctId": 460
+    },
+    {
+      "Description": "PCT 9503",
+      "Id": 461,
+      "ExternalId": "9503-28",
+      "PrecinctId": 461
+    },
+    {
+      "Description": "PCT 9504",
+      "Id": 462,
+      "ExternalId": "9504-28",
+      "PrecinctId": 462
+    },
+    {
+      "Description": "PCT 9505",
+      "Id": 463,
+      "ExternalId": "9505-28",
+      "PrecinctId": 463
+    },
+    {
+      "Description": "PCT 9506",
+      "Id": 464,
+      "ExternalId": "9506-28",
+      "PrecinctId": 464
+    },
+    {
+      "Description": "PCT 9507",
+      "Id": 465,
+      "ExternalId": "9507-28",
+      "PrecinctId": 465
+    },
+    {
+      "Description": "PCT 9508",
+      "Id": 466,
+      "ExternalId": "9508-28",
+      "PrecinctId": 466
+    },
+    {
+      "Description": "PCT 9509",
+      "Id": 467,
+      "ExternalId": "9509-28",
+      "PrecinctId": 467
+    },
+    {
+      "Description": "PCT 9511",
+      "Id": 468,
+      "ExternalId": "9511-29",
+      "PrecinctId": 468
+    },
+    {
+      "Description": "PCT 9512",
+      "Id": 469,
+      "ExternalId": "9512-28",
+      "PrecinctId": 469
+    },
+    {
+      "Description": "PCT 9513 MB",
+      "Id": 470,
+      "ExternalId": "9513-28",
+      "PrecinctId": 470
+    },
+    {
+      "Description": "PCT 9701",
+      "Id": 471,
+      "ExternalId": "9701-30",
+      "PrecinctId": 471
+    },
+    {
+      "Description": "PCT 9702",
+      "Id": 472,
+      "ExternalId": "9702-30",
+      "PrecinctId": 472
+    },
+    {
+      "Description": "PCT 9703",
+      "Id": 473,
+      "ExternalId": "9703-31",
+      "PrecinctId": 473
+    },
+    {
+      "Description": "PCT 9704",
+      "Id": 474,
+      "ExternalId": "9704-31",
+      "PrecinctId": 474
+    },
+    {
+      "Description": "PCT 9705",
+      "Id": 475,
+      "ExternalId": "9705-30",
+      "PrecinctId": 475
+    },
+    {
+      "Description": "PCT 9706",
+      "Id": 476,
+      "ExternalId": "9706-30",
+      "PrecinctId": 476
+    },
+    {
+      "Description": "PCT 9707",
+      "Id": 477,
+      "ExternalId": "9707-30",
+      "PrecinctId": 477
+    },
+    {
+      "Description": "PCT 9708",
+      "Id": 478,
+      "ExternalId": "9708-31",
+      "PrecinctId": 478
+    },
+    {
+      "Description": "PCT 9709",
+      "Id": 479,
+      "ExternalId": "9709-30",
+      "PrecinctId": 479
+    },
+    {
+      "Description": "PCT 9711",
+      "Id": 480,
+      "ExternalId": "9711-30",
+      "PrecinctId": 480
+    },
+    {
+      "Description": "PCT 9712",
+      "Id": 481,
+      "ExternalId": "9712-30",
+      "PrecinctId": 481
+    },
+    {
+      "Description": "PCT 9713",
+      "Id": 482,
+      "ExternalId": "9713-30",
+      "PrecinctId": 482
+    },
+    {
+      "Description": "PCT 9714",
+      "Id": 483,
+      "ExternalId": "9714-31",
+      "PrecinctId": 483
+    },
+    {
+      "Description": "PCT 9715",
+      "Id": 484,
+      "ExternalId": "9715-30",
+      "PrecinctId": 484
+    },
+    {
+      "Description": "PCT 9716",
+      "Id": 485,
+      "ExternalId": "9716-30",
+      "PrecinctId": 485
+    },
+    {
+      "Description": "PCT 9717",
+      "Id": 486,
+      "ExternalId": "9717-30",
+      "PrecinctId": 486
+    },
+    {
+      "Description": "PCT 9718",
+      "Id": 487,
+      "ExternalId": "9718-30",
+      "PrecinctId": 487
+    },
+    {
+      "Description": "PCT 9719",
+      "Id": 488,
+      "ExternalId": "9719-30",
+      "PrecinctId": 488
+    },
+    {
+      "Description": "PCT 9721",
+      "Id": 489,
+      "ExternalId": "9721-30",
+      "PrecinctId": 489
+    },
+    {
+      "Description": "PCT 9722",
+      "Id": 490,
+      "ExternalId": "9722-30",
+      "PrecinctId": 490
+    },
+    {
+      "Description": "PCT 9723",
+      "Id": 491,
+      "ExternalId": "9723-30",
+      "PrecinctId": 491
+    },
+    {
+      "Description": "PCT 9724",
+      "Id": 492,
+      "ExternalId": "9724-30",
+      "PrecinctId": 492
+    },
+    {
+      "Description": "PCT 9725",
+      "Id": 493,
+      "ExternalId": "9725-30",
+      "PrecinctId": 493
+    },
+    {
+      "Description": "PCT 9726",
+      "Id": 494,
+      "ExternalId": "9726-30",
+      "PrecinctId": 494
+    },
+    {
+      "Description": "PCT 9727",
+      "Id": 495,
+      "ExternalId": "9727-30",
+      "PrecinctId": 495
+    },
+    {
+      "Description": "PCT 9728",
+      "Id": 496,
+      "ExternalId": "9728-30",
+      "PrecinctId": 496
+    },
+    {
+      "Description": "PCT 9729",
+      "Id": 497,
+      "ExternalId": "9729-30",
+      "PrecinctId": 497
+    },
+    {
+      "Description": "PCT 9731",
+      "Id": 498,
+      "ExternalId": "9731-32",
+      "PrecinctId": 498
+    },
+    {
+      "Description": "PCT 9732",
+      "Id": 499,
+      "ExternalId": "9732-30",
+      "PrecinctId": 499
+    },
+    {
+      "Description": "PCT 9733",
+      "Id": 500,
+      "ExternalId": "9733-30",
+      "PrecinctId": 500
+    },
+    {
+      "Description": "PCT 9734",
+      "Id": 501,
+      "ExternalId": "9734-30",
+      "PrecinctId": 501
+    },
+    {
+      "Description": "PCT 9735",
+      "Id": 502,
+      "ExternalId": "9735-30",
+      "PrecinctId": 502
+    },
+    {
+      "Description": "PCT 9801",
+      "Id": 503,
+      "ExternalId": "9801-33",
+      "PrecinctId": 503
+    },
+    {
+      "Description": "PCT 9802",
+      "Id": 504,
+      "ExternalId": "9802-33",
+      "PrecinctId": 504
+    },
+    {
+      "Description": "PCT 9803",
+      "Id": 505,
+      "ExternalId": "9803-33",
+      "PrecinctId": 505
+    },
+    {
+      "Description": "PCT 9804",
+      "Id": 506,
+      "ExternalId": "9804-33",
+      "PrecinctId": 506
+    },
+    {
+      "Description": "PCT 9805",
+      "Id": 507,
+      "ExternalId": "9805-33",
+      "PrecinctId": 507
+    },
+    {
+      "Description": "PCT 9806",
+      "Id": 508,
+      "ExternalId": "9806-33",
+      "PrecinctId": 508
+    },
+    {
+      "Description": "PCT 9807",
+      "Id": 509,
+      "ExternalId": "9807-33",
+      "PrecinctId": 509
+    },
+    {
+      "Description": "PCT 9808",
+      "Id": 510,
+      "ExternalId": "9808-34",
+      "PrecinctId": 510
+    },
+    {
+      "Description": "PCT 9901 MB",
+      "Id": 511,
+      "ExternalId": "9901-35",
+      "PrecinctId": 511
+    },
+    {
+      "Description": "PCT 9902 MB",
+      "Id": 512,
+      "ExternalId": "9902-36",
+      "PrecinctId": 512
+    },
+    {
+      "Description": "PCT 9903 MB",
+      "Id": 513,
+      "ExternalId": "9903-37",
+      "PrecinctId": 513
+    },
+    {
+      "Description": "PCT 9904 MB",
+      "Id": 514,
+      "ExternalId": "9904-38",
+      "PrecinctId": 514
+    }
+  ]
+}

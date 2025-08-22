@@ -64,7 +64,8 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
                 info,
                 irvContestVotes.vc, // candidate indexes
                 Nc = irvContestVotes.countBallots, // TODO get this elsewhere?
-                Np = 0,
+                Ncast = 0,
+                Nundervotes = 0, // TODO
             )
             contests.add(rcontestUA)
 
@@ -83,7 +84,7 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
                 val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
                 IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
             }
-            (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
+            rcontestUA.contest.roundsPaths.addAll(roundPathsById)
         }
     }
     return contests

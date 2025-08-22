@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 private val quiet = true
 
 // gets RaireAssertions from raire-java libray
-fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Np: Int): RaireContestUnderAudit {
+fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int, Nundervotes: Int): RaireContestUnderAudit {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes
     val startingVotes = voteConsolidator.makeVoteList()
@@ -91,11 +91,20 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
         RaireAssertion.convertAssertion(info.candidateIds, aand, votes)
     }
 
+    //          fun makeFromInfo(
+    //                 info: ContestInfo,
+    //                 winnerIndex: Int,
+    //                 Nc: Int,
+    //                 Ncast: Int,
+    //                 Nundervotes: Int,
+    //                 assertions: List<RaireAssertion>
+    //         )
     val rcontestUA = RaireContestUnderAudit.makeFromInfo(
         info,
         winnerIndex = raireResult.winner,
         Nc = Nc,
-        Np = Np,
+        Ncast = Ncast,
+        Nundervotes = Nundervotes,
         raireAssertions,
     )
     // rcontestUA.makeClcaAssertions()

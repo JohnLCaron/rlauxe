@@ -19,21 +19,21 @@ class TestDominionCvrExportJson {
 
     @Test
     fun testReadDominionCvrJsonFile() {
-        val filename1 = "src/test/data/SF2024/CvrExport_15.json"
-        val filename = "/home/stormy/rla/cases/sf2024/CvrExport_23049.json"
+        val filename = "src/test/data/SF2024/CvrExport_15.json"
+        val filename2 = "/home/stormy/rla/cases/sf2024/CvrExport_23049.json"
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
         val dominionCvrs = if (result is Ok) result.unwrap()
             else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
         // println(dominionCvrs)
 
-        val manifestFile = "src/test/data/SF2024/BallotTypeContestManifest.json"
+        val manifestFile = "src/test/data/SF2024/manifests/BallotTypeContestManifest.json"
         val manifest = readBallotTypeContestManifestJson(manifestFile).unwrap()
 
-        val irvIds = readContestManifestForIRVids("src/test/data/SF2024/ContestManifest.json")
+        val irvIds = readContestManifestForIRVids("src/test/data/SF2024/manifests/ContestManifest.json")
 
-        val cvrsNoManifest = dominionCvrs.import(irvIds, manifest)
-        println("no manifest ncvrs = ${cvrsNoManifest.size}")
-        repeat(5) { println(cvrsNoManifest[it]) }
+        val cvrs = dominionCvrs.import(irvIds, manifest)
+        println("number of cvrs = ${cvrs.size}")
+        repeat(5) { println(cvrs[it]) }
         /* val tabs1 = tabulateCvrs(cvrsNoManifest.iterator())
         tabs1.forEach { (key, tab) ->
             println("  $key == $tab")

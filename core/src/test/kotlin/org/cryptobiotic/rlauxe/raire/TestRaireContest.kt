@@ -21,7 +21,7 @@ class TestRaireContest {
         //    override val winners: List<Int>,
         //    override val Nc: Int,
         //    override val Np: Int,
-        val contest = RaireContest(info, winners=listOf(1), iNc=211, Np=1)
+        val contest = RaireContest(info, winners=listOf(1), Nc=211, Ncast=210, 0)
         assertEquals(info.id, contest.id)
         assertEquals(info.choiceFunction, contest.choiceFunction)
         assertEquals(211, contest.Nc)

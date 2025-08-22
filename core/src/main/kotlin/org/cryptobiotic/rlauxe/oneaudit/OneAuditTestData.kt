@@ -115,8 +115,8 @@ fun makeContestOA(
         println("nope")
     }
 
-    val result = OneAuditContest.make(info, votesCvr, cvrNc, pools, Np = Np)
-    if (result.Nc != Nc) {
+    val result = OneAuditContest.make(info, votesCvr, cvrNc, pools, 0, 0) // TODO
+    if (result.contest.Nc() != Nc) {
         println("nope")
     }
 
@@ -124,16 +124,16 @@ fun makeContestOA(
 }
 
 fun makeTestMvrsScaled(oaContest: OneAuditContest, sampleLimit: Int, show: Boolean = false): List<Cvr> {
-    if (sampleLimit < 0 || oaContest.Nc <= sampleLimit) return makeTestMvrs(oaContest)
+    if (sampleLimit < 0 || oaContest.Nc() <= sampleLimit) return makeTestMvrs(oaContest)
 
     // otherwise scale everything
-    val scale = sampleLimit / oaContest.Nc.toDouble()
+    val scale = sampleLimit / oaContest.Nc().toDouble()
 
     // add the regular cvrs
     val id = oaContest.id
     val voteForN = oaContest.info.voteForN
     val cvrs = mutableListOf<Cvr>()
-    cvrs.addAll(makeScaledCvrs(id, oaContest.cvrNc, oaContest.Np(), oaContest.cvrVotes, scale, voteForN, poolId = null))
+    cvrs.addAll(makeScaledCvrs(id, oaContest.cvrNcards, oaContest.Np(), oaContest.cvrVotes, scale, voteForN, poolId = null))
 
     // add the pooled cvrs
     oaContest.pools.values.forEach { pool: BallotPool ->
@@ -142,7 +142,7 @@ fun makeTestMvrsScaled(oaContest: OneAuditContest, sampleLimit: Int, show: Boole
 
     // the whole point is that cvrs.size != Nc
     if (show) {
-        println("  want scale = $scale have scale = ${cvrs.size / oaContest.Nc.toDouble()}")
+        println("  want scale = $scale have scale = ${cvrs.size / oaContest.Nc().toDouble()}")
     }
     cvrs.shuffle()
     return cvrs
@@ -174,8 +174,8 @@ fun makeTestMvrs(oaContest: OneAuditContest): List<Cvr> {
     val info = oaContest.info
 
     // add the regular cvrs
-    if (oaContest.cvrNc > 0) {
-        val vunderCvrs = VotesAndUndervotes(oaContest.cvrVotes, oaContest.cvrUndervotes, info.voteForN)
+    if (oaContest.cvrNcards > 0) {
+        val vunderCvrs = VotesAndUndervotes(oaContest.cvrVotes, oaContest.Nundervotes(), info.voteForN)
         val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
@@ -192,10 +192,10 @@ fun makeTestMvrs(oaContest: OneAuditContest): List<Cvr> {
         cvrs.add(Cvr("phantom$it", mapOf(oaContest.info.id to intArrayOf()), phantom = true))
     }
 
-    if (oaContest.Nc != cvrs.size) {
+    if (oaContest.Nc() != cvrs.size) {
         println("why")
     }
-    require(oaContest.Nc == cvrs.size)
+    require(oaContest.Nc() == cvrs.size)
     cvrs.shuffle()
     return cvrs
 }
@@ -205,7 +205,7 @@ fun makeTestNonPooledMvrs(oaContests: List<OneAuditContest>): List<Cvr> {
 
     val contestVunders = mutableMapOf<Int, VotesAndUndervotes>()
     oaContests.forEach { oaContest ->
-        contestVunders[oaContest.id] = VotesAndUndervotes(oaContest.cvrVotes, oaContest.cvrUndervotes, oaContest.info.voteForN)
+        contestVunders[oaContest.id] = VotesAndUndervotes(oaContest.cvrVotes, oaContest.Nundervotes(), oaContest.info.voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVunders, poolId = null)
@@ -281,7 +281,7 @@ fun checkAssorterAvg(oaContest: OneAuditContest, mvrs: Iterable<Cvr>, show: Bool
 
     if (show) {
         val mvrVotes = tabulateVotesWithUndervotes(mvrs.iterator(), oaContest.id, contestUA.ncandidates)
-        println("  mvrVotes = ${mvrVotes} NC=${oaContest.Nc}")
+        println("  mvrVotes = ${mvrVotes} NC=${oaContest.Nc()}")
         print("     pAssorter reportedMargin=${pAssorter.reportedMargin()} reportedAvg=${pAssorter.reportedMean()} assortAvg = $passortAvg")
         if (doubleIsClose(pAssorter.reportedMean(), passortAvg)) println() else println(" ******")
         print("     oaAssorter reportedMargin=${oaAssorter.reportedMargin()} reportedAvg=${oaAssorter.reportedMean()} assortAvg = $oassortAvg")

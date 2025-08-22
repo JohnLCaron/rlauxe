@@ -24,9 +24,11 @@ class TestSfElection {
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "ContestManifest.json"
         createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"
+        // IRV contests = [18, 23, 24, 25, 26, 27, 28, 19, 21, 22, 20]
+        // read 1603908 cards in 27554 files took 55.13 s
     }
 
-    // create the audit contests using the cvrExport
+    // create the audit contests using the cvrExport records
     @Test
     fun createSF2024contests() {
         val topDir = "/home/stormy/rla/cases/sf2024"

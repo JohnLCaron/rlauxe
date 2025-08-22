@@ -63,3 +63,9 @@ tasks.register<Jar>("uberJar") {
         configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
     })
 }
+
+tasks {
+    withType<JavaCompile>() {
+        options.release.set(21)
+    }
+}

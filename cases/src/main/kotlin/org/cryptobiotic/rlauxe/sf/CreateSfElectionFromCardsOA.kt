@@ -97,12 +97,14 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, ballotPools: Map<Strin
                 ballotPools[it]!!.ballotPoolForContest(info.id)
             }
             val cardPoolsNotNull = cardPools.filterNotNull()
+            val pooledCast = cardPoolsNotNull.sumOf{ it.ncards }
             val contestOA = OneAuditContest.make(
                 info,
                 cvrVotes = cvrTabulation.votes,
-                cvrNc = cvrTabulation.ncards,
+                cvrNcards = cvrTabulation.ncards,
                 cardPoolsNotNull,
-                Np = 0) // TODO what should Np be?
+                Nc = 0, // where ??
+                Ncast = pooledCast + cvrTabulation.ncards)
             println(contestOA)
             contestsUAs.add( OAContestUnderAudit(contestOA) )
         }
@@ -121,12 +123,14 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, ballotPools: Map<St
                 ballotPools[it]!!.ballotPoolForContest(info.id)
             }
             val cardPoolsNotNull = cardPools.filterNotNull()
+            val pooledCast = cardPoolsNotNull.sumOf{ it.ncards }
             val contestOA = OneAuditContest.make(
                 info,
                 cvrVotes = cvrTabulation.votes,
-                cvrNc = cvrTabulation.ncards,
+                cvrNcards = cvrTabulation.ncards,
                 cardPoolsNotNull,
-                Np = 0) // TODO what should Np be?
+                Nc = 0, // where ??
+                Ncast = pooledCast + cvrTabulation.ncards)
             println(contestOA)
 
             val totalVoteConsolidator = VoteConsolidator()
@@ -137,7 +141,13 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, ballotPools: Map<St
                 }
             }
 
-            val rau : RaireContestUnderAudit = makeRaireContestUA(info, totalVoteConsolidator, contestOA.contest.Nc(), contestOA.contest.Np())
+            // fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int, Nundervotes: Int): RaireContestUnderAudit {
+            val rau : RaireContestUnderAudit = makeRaireContestUA(
+                info,
+                totalVoteConsolidator,
+                contestOA.Nc(),
+                contestOA.Nc(),
+                0)
 
             // class OneAuditIrvContest(
             //    contestOA: OneAuditContest,

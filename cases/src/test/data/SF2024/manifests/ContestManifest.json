@@ -1,0 +1,482 @@
+{
+  "Version": "5.10.50.85",
+  "List": [
+    {
+      "Description": "PRESIDENT AND VICE PRESIDENT",
+      "Id": 1,
+      "ExternalId": "110",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "UNITED STATES SENATOR",
+      "Id": 2,
+      "ExternalId": "1010",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "UNITED STATES SENATOR PARTIAL TERM",
+      "Id": 3,
+      "ExternalId": "1012",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "UNITED STATES REPRESENTATIVE, DISTRICT 2",
+      "Id": 4,
+      "ExternalId": "1019",
+      "DistrictId": 102,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "UNITED STATES REPRESENTATIVE, DISTRICT 11",
+      "Id": 5,
+      "ExternalId": "1021",
+      "DistrictId": 103,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "UNITED STATES REPRESENTATIVE, DISTRICT 12",
+      "Id": 6,
+      "ExternalId": "1022",
+      "DistrictId": 104,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "UNITED STATES REPRESENTATIVE, DISTRICT 15",
+      "Id": 7,
+      "ExternalId": "1023",
+      "DistrictId": 105,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "STATE SENATOR, DISTRICT 7",
+      "Id": 8,
+      "ExternalId": "1129",
+      "DistrictId": 107,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "STATE SENATOR, DISTRICT 11",
+      "Id": 9,
+      "ExternalId": "1130",
+      "DistrictId": 108,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "STATE ASSEMBLY MEMBER, DISTRICT 12",
+      "Id": 10,
+      "ExternalId": "1212",
+      "DistrictId": 109,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "STATE ASSEMBLY MEMBER, DISTRICT 17",
+      "Id": 11,
+      "ExternalId": "1217",
+      "DistrictId": 110,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "STATE ASSEMBLY MEMBER, DISTRICT 18",
+      "Id": 12,
+      "ExternalId": "1218",
+      "DistrictId": 111,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "STATE ASSEMBLY MEMBER, DISTRICT 19",
+      "Id": 13,
+      "ExternalId": "1219",
+      "DistrictId": 112,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF EDUCATION",
+      "Id": 14,
+      "ExternalId": "6100",
+      "DistrictId": 126,
+      "VoteFor": 4,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "TRUSTEE, COMMUNITY COLLEGE BOARD",
+      "Id": 15,
+      "ExternalId": "8530",
+      "DistrictId": 126,
+      "VoteFor": 4,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "BART BOARD OF DIRECTORS, DISTRICT 7",
+      "Id": 16,
+      "ExternalId": "6000",
+      "DistrictId": 127,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "BART BOARD OF DIRECTORS, DISTRICT 9",
+      "Id": 17,
+      "ExternalId": "6030",
+      "DistrictId": 129,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MAYOR",
+      "Id": 18,
+      "ExternalId": "5000",
+      "DistrictId": 126,
+      "VoteFor": 1,
+      "NumOfRanks": 10,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF SUPERVISORS, DISTRICT 1",
+      "Id": 23,
+      "ExternalId": "5101",
+      "DistrictId": 115,
+      "VoteFor": 1,
+      "NumOfRanks": 5,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF SUPERVISORS, DISTRICT 3",
+      "Id": 24,
+      "ExternalId": "5103",
+      "DistrictId": 117,
+      "VoteFor": 1,
+      "NumOfRanks": 6,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF SUPERVISORS, DISTRICT 5",
+      "Id": 25,
+      "ExternalId": "5105",
+      "DistrictId": 119,
+      "VoteFor": 1,
+      "NumOfRanks": 5,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF SUPERVISORS, DISTRICT 7",
+      "Id": 26,
+      "ExternalId": "5107",
+      "DistrictId": 121,
+      "VoteFor": 1,
+      "NumOfRanks": 4,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF SUPERVISORS, DISTRICT 9",
+      "Id": 27,
+      "ExternalId": "5109",
+      "DistrictId": 123,
+      "VoteFor": 1,
+      "NumOfRanks": 7,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEMBER, BOARD OF SUPERVISORS, DISTRICT 11",
+      "Id": 28,
+      "ExternalId": "5111",
+      "DistrictId": 125,
+      "VoteFor": 1,
+      "NumOfRanks": 7,
+      "Disabled": 0
+    },
+    {
+      "Description": "CITY ATTORNEY",
+      "Id": 19,
+      "ExternalId": "5010",
+      "DistrictId": 126,
+      "VoteFor": 1,
+      "NumOfRanks": 3,
+      "Disabled": 0
+    },
+    {
+      "Description": "DISTRICT ATTORNEY",
+      "Id": 21,
+      "ExternalId": "5040",
+      "DistrictId": 126,
+      "VoteFor": 1,
+      "NumOfRanks": 3,
+      "Disabled": 0
+    },
+    {
+      "Description": "SHERIFF",
+      "Id": 22,
+      "ExternalId": "5050",
+      "DistrictId": 126,
+      "VoteFor": 1,
+      "NumOfRanks": 3,
+      "Disabled": 0
+    },
+    {
+      "Description": "TREASURER",
+      "Id": 20,
+      "ExternalId": "5020",
+      "DistrictId": 126,
+      "VoteFor": 1,
+      "NumOfRanks": 3,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 2",
+      "Id": 29,
+      "ExternalId": "215",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 3",
+      "Id": 30,
+      "ExternalId": "216",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 4",
+      "Id": 31,
+      "ExternalId": "217",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 5",
+      "Id": 32,
+      "ExternalId": "218",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 6",
+      "Id": 33,
+      "ExternalId": "219",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 32",
+      "Id": 34,
+      "ExternalId": "220",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 33",
+      "Id": 35,
+      "ExternalId": "221",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 34",
+      "Id": 36,
+      "ExternalId": "222",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 35",
+      "Id": 37,
+      "ExternalId": "223",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "PROPOSITION 36",
+      "Id": 38,
+      "ExternalId": "224",
+      "DistrictId": 101,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE A",
+      "Id": 39,
+      "ExternalId": "200",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE B",
+      "Id": 40,
+      "ExternalId": "201",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE C",
+      "Id": 41,
+      "ExternalId": "202",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE D",
+      "Id": 42,
+      "ExternalId": "203",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE E",
+      "Id": 43,
+      "ExternalId": "204",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE F",
+      "Id": 44,
+      "ExternalId": "205",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE G",
+      "Id": 45,
+      "ExternalId": "206",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE H",
+      "Id": 46,
+      "ExternalId": "207",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE I",
+      "Id": 47,
+      "ExternalId": "208",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE J",
+      "Id": 48,
+      "ExternalId": "209",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE K",
+      "Id": 49,
+      "ExternalId": "210",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE L",
+      "Id": 50,
+      "ExternalId": "211",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE M",
+      "Id": 51,
+      "ExternalId": "212",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE N",
+      "Id": 52,
+      "ExternalId": "213",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    },
+    {
+      "Description": "MEASURE O",
+      "Id": 53,
+      "ExternalId": "214",
+      "DistrictId": 114,
+      "VoteFor": 1,
+      "NumOfRanks": 0,
+      "Disabled": 0
+    }
+  ]
+}

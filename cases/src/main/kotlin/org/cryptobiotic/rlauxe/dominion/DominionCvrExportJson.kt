@@ -112,14 +112,19 @@ data class Mark(
 }
 
 fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeContestManifest) : List<CvrExport> {
+    var ncontests = 0
+    var undervotes = 0
     val result = mutableListOf<CvrExport>()
     Sessions.forEach { session ->
         val sessionKey = "${session.TabulatorId}-${session.BatchId}"
+        val votes = mutableMapOf<Int, IntArray>()
         val cards = if (session.Original.IsCurrent) session.Original else session.Modified
         if (cards != null) {
             cards.Cards.forEach { card ->
-                val votes = mutableMapOf<Int, IntArray>()
                 card.Contests.forEach { contest ->
+                    ncontests++
+                    if (contest.Marks.size == 0) undervotes++
+
                     if (irvContests.contains(contest.Id)) {
                         val contestVoteAndRank = mutableListOf<Pair<Int, Int>>()
                         contest.Marks.forEach { mark ->
@@ -129,7 +134,9 @@ fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeConte
                         }
                         // sort candidate ids by rank
                         val sortedVotes = contestVoteAndRank.sortedBy { it.first }.map { it.second }
-                        votes[contest.Id] = sortedVotes.toIntArray()
+                        // remove duplicates
+                        val sortedNoDups = removeDuplicates(sortedVotes)
+                        votes[contest.Id] = sortedNoDups.toIntArray()
                     } else {
                         val contestVotes = mutableListOf<Int>()
                         contest.Marks.forEach { mark ->
@@ -140,15 +147,33 @@ fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeConte
                         votes[contest.Id] = contestVotes.toIntArray()
                     }
                 }
-                val ballotStyles = manifest.ballotStyles[cards.BallotTypeId]!!
-                ballotStyles.forEach { contestId ->
-                    if (votes[contestId] == null) votes[contestId] = IntArray(0)
-                }
-                val poolId = if (session.CountingGroupId == 1) sessionKey else ""
-                result.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${card.Id}", session.CountingGroupId, votes))
             }
+            /*
+            var undervotes = 0
+            val ballotStyles = manifest.ballotStyles[cards.BallotTypeId]!!
+            ballotStyles.forEach { contestId ->
+                if (votes[contestId] == null) {
+                    undervotes++
+                    votes[contestId] = IntArray(0)
+                }
+            }
+            println("Ballot $recordId undervotes = $undervotes out of ${ballotStyles.size}")
+            */
+            val recordId = if (session.RecordId != "X") session.RecordId else {
+                val startIdx = session.ImageMask.lastIndexOf("Images") + 6 + 1 // + 1 for the directory character
+                val endIdx = session.ImageMask.lastIndexOf("*.*")
+                session.ImageMask.substring(startIdx, endIdx)
+            }
+            result.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${recordId}", session.CountingGroupId, votes))
         }
     }
+    // println("undervotes = $undervotes out of $ncontests")
+    return result
+}
+
+fun removeDuplicates(svotes : List<Int> ) : List<Int> {
+    val result = mutableListOf<Int>()
+    svotes.forEach { if (!result.contains(it)) result.add(it) }
     return result
 }
 

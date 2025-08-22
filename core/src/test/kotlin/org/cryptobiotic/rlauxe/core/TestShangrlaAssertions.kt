@@ -43,7 +43,7 @@ class TestShangrlaAssertions {
             ),
             votesByName = mapOf("Alice" to 3, "Bob" to 1),
             Nc = 4,
-            Np = 0,
+            Ncast = 4,
         )
 
         //
@@ -85,7 +85,7 @@ class TestShangrlaAssertions {
             ),
             votesByName = mapOf("Alice" to 3, "Bob" to 1),
             Nc = 4,
-            Np = 0,
+            Ncast = 4,
         )
     }
 

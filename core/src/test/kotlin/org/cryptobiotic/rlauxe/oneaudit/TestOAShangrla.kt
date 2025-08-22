@@ -122,7 +122,7 @@ class TestOAShangrla {
             undervotePercent = .0, phantomPercent = .0, skewPct = .03)
         val contestUA = contestOA.makeContestUnderAudit()
         println(contestUA)
-        showPct("  cvrs", contestOA.cvrVotes, contestOA.cvrNc)
+        showPct("  cvrs", contestOA.cvrVotes, contestOA.cvrNcards)
         contestOA.pools.values.forEach { pool -> showPct("  pool ${pool.name}", pool.votes, pool.ncards) }
         val contest = contestOA.contest as Contest
         showPct("  allVotes", contest.votes, contest.Nc)

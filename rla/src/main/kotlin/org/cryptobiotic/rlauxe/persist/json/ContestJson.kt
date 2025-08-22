@@ -98,7 +98,7 @@ data class ContestIFJson(
     val votes: Map<Int, Int>?, // candidate name -> candidate id
     val winners: List<Int>?,
     val Nc: Int,
-    val Np: Int,
+    val Ncast: Int,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
     val contestJson: ContestIFJson? = null,
     val pools: List<BallotPoolJson>? = null,
@@ -112,7 +112,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.votes,
                 null,
                 this.Nc,
-                this.Np,
+                this.Ncast,
             )
         is RaireContest ->
             ContestIFJson(
@@ -120,7 +120,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 null,
                 this.winners,
                 this.Nc,
-                this.Np,
+                this.Ncast,
                 this.roundsPaths.map { it.publishJson() },
             )
         is OneAuditContest ->
@@ -128,7 +128,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 "OneAuditContest",
                 this.cvrVotes,
                 null, // TODO why dont we have winners ??
-                this.cvrNc,
+                this.cvrNcards,
                 0,
                 null,
                 this.contest.publishJson(),
@@ -145,14 +145,15 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 info,
                 this.votes!!,
                 this.Nc,
-                this.Np,
+                this.Ncast,
             )
         "RaireContest" -> {
             val rcontest = RaireContest(
                 info,
                 this.winners!!,
                 this.Nc,
-                this.Np,
+                this.Ncast,
+                0, // TODO
             )
             if (this.irvRoundsPaths != null) {
                 rcontest.roundsPaths.addAll(this.irvRoundsPaths.map { it.import() })

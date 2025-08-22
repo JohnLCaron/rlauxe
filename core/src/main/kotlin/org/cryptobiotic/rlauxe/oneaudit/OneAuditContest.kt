@@ -18,35 +18,34 @@ import kotlin.math.min
 
 class OneAuditContest (
     val contest: ContestIF,
-
     val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes (may be empty) from the crvs
-    val cvrNc: Int,                // may be 0
+    val cvrNcards: Int,
     val pools: Map<Int, BallotPool>, // pool id -> pool
 ) : ContestIF {
     val info = contest.info()
 
     // val minMargin: Double
     val poolNc = pools.values.sumOf { it.ncards }
-    val cvrUndervotes: Int
+    // val cvrUndervotes: Int
 
     init {
         // TODO add SUPERMAJORITY.
         // require(choiceFunction == SocialChoiceFunction.PLURALITY) { "OneAuditContest requires PLURALITY"}
 
-        // TODO how many undervotes are there ?
+        /* TODO how many undervotes are there ?
         if (choiceFunction == SocialChoiceFunction.PLURALITY) {
             val poolVotes = pools.values.sumOf { it.votes.values.sum() }
             require(poolNc * info.voteForN >= poolVotes) { "OneAuditContest ${poolNc * info.voteForN} < $poolVotes" }
             val poolUndervotes = poolNc * info.voteForN - poolVotes
 
             val cvrVotesTotal = cvrVotes.values.sumOf { it }
-            require(cvrNc * info.voteForN >= cvrVotesTotal)
+            //require(cvrNc * info.voteForN >= cvrVotesTotal)
             cvrUndervotes = cvrNc * info.voteForN - cvrVotesTotal
             val undervotes2 = poolUndervotes + cvrUndervotes
             // require(undervotes == undervotes2)
         } else {
             cvrUndervotes = 0
-        }
+        } */
 
         // not sure about where undervotes and phantoms live
         // TODO require(Nc == cvrNc + poolNc + Np())
@@ -59,6 +58,7 @@ class OneAuditContest (
 
     override fun Nc() = contest.Nc()
     override fun Np() = contest.Np()
+    override fun Nundervotes() = contest.Nundervotes()
     override fun info() = contest.info()
     override fun winnerNames() = contest.winnerNames()
     override fun winners() = contest.winners()
@@ -70,14 +70,15 @@ class OneAuditContest (
         return contestUA
     }
 
+    /*
     fun reportedMarginNonPooled(winner: Int, loser:Int): Double {
         val winnerVotes = cvrVotes[winner] ?: 0
         val loserVotes = cvrVotes[loser] ?: 0
         return (winnerVotes - loserVotes) / cvrNc.toDouble()
-    }
+    } */
 
     fun cvrVotesAndUndervotes(): Map<Int, Int> {
-        return (cvrVotes.map { Pair(it.key, it.value)} + Pair(this.ncandidates, cvrUndervotes)).toMap()
+        return (cvrVotes.map { Pair(it.key, it.value)} + Pair(this.ncandidates, contest.Nundervotes())).toMap()
     }
 
     fun poolVotesAndUnderVotes() : Map<Int, Int> { // contestId -> candidateId -> nvotes
@@ -99,9 +100,10 @@ class OneAuditContest (
     }
 
     override fun toString() = buildString {
-        appendLine("$name ($id) Nc=${Nc()} Np=${Np()}") //  votesAndUnderVotes=${votesAndUndervotes()} minMargin=${df(minMargin)}")
-        appendLine("  cvrNc=$cvrNc cvrVotesAndUndervotes()=${cvrVotesAndUndervotes()}")
-        appendLine("  poolNc=$poolNc poolVotesAndUnderVotes= ${poolVotesAndUnderVotes()} npools= ${pools.size} pctInPools=${df(poolNc / Nc.toDouble())}")
+        appendLine("$contest") //  votesAndUnderVotes=${votesAndUndervotes()} minMargin=${df(minMargin)}")
+        appendLine("  cvrVotesAndUndervotes()=${cvrVotesAndUndervotes()}")
+        appendLine("  poolNc=$poolNc poolVotesAndUnderVotes= ${poolVotesAndUnderVotes()} npools= ${pools.size} " +
+                "pctInPools=${df(poolNc / Nc().toDouble())}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -110,7 +112,6 @@ class OneAuditContest (
 
         other as OneAuditContest
 
-        if (cvrNc != other.cvrNc) return false
         if (!contest.equals(other.contest)) return false
         if (cvrVotes != other.cvrVotes) return false
         if (pools != other.pools) return false
@@ -119,7 +120,7 @@ class OneAuditContest (
     }
 
     override fun hashCode(): Int {
-        var result = cvrNc
+        var result = 31
         result = 31 * result + contest.hashCode()
         result = 31 * result + cvrVotes.hashCode()
         result = 31 * result + pools.hashCode()
@@ -129,12 +130,10 @@ class OneAuditContest (
     companion object {
         fun make(info: ContestInfo,
                  cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
-                 cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
+                 cvrNcards: Int,
                  pools: List<BallotPool>,   // pools for this contest
-                 Np: Int): OneAuditContest {
-
-            val poolNc = pools.sumOf { it.ncards }
-            val Nc = poolNc + cvrNc + Np
+                 Nc: Int,
+                 Ncast: Int): OneAuditContest {
 
             //// construct total votes
             val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
@@ -157,14 +156,14 @@ class OneAuditContest (
             }
             val voteInput = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
 
-            val contest = Contest(info, voteInput, Nc, Np)
-            return OneAuditContest(contest,  cvrVotes, cvrNc, pools.associateBy { it.poolId })
+            val contest = Contest(info, voteInput, Nc = Nc, Ncast = Ncast)
+            return OneAuditContest(contest,  cvrVotes, cvrNcards, pools.associateBy { it.poolId })
         }
 
         fun make(contest: ContestIF,
                   cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
-                  cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
-                  pools: List<BallotPool>,   // pools for this contest
+                 cvrNcards: Int,
+                 pools: List<BallotPool>,   // pools for this contest
                   ): OneAuditContest {
 
             // val poolNc = pools.sumOf { it.ncards }
@@ -191,7 +190,7 @@ class OneAuditContest (
             }
             val voteInput = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
 
-            return OneAuditContest(contest,  cvrVotes, cvrNc, pools.associateBy { it.poolId })
+            return OneAuditContest(contest,  cvrVotes, cvrNcards, pools.associateBy { it.poolId })
         }
     }
 }
@@ -273,7 +272,7 @@ class OneAuditClcaAssorter(
     assortValueFromCvrs: Double?,    // Ā(c) = average CVR assorter value. TODO wrong ??
     hasStyle: Boolean = true,
 ) : ClcaAssorter(contestOA.info, assorter, assortValueFromCvrs, hasStyle) {
-    private val doAffineTransform = (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
+    private val doAffineTransform = false // (contestOA.cvrNc == 0) // this is a "batch level comparison audit" (BLCA)
     private val affineMin: Double
     private val affineIScale: Double
 
@@ -298,7 +297,7 @@ class OneAuditClcaAssorter(
     // We assume we have a reported assorter total = Sum(i∈Gg A(ci))
     // from the voting system for the cards in the group Gg (e.g., reported precinct subtotals)
     // this agrees with the reportedMean from the total
-    // however, we might want to do an affine transform to set range to [0, max]
+    /* however, we might want to do an affine transform to set range to [0, max]
     fun calcAssortMeanFromPools(): Double {
         val welford = Welford()
         val cvrMargin = contestOA.reportedMarginNonPooled(assorter.winner(), assorter.loser())
@@ -308,7 +307,7 @@ class OneAuditClcaAssorter(
             welford.update(margin2mean(poolMargin), pool.ncards)
         }
         return welford.mean
-    }
+    } */
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {

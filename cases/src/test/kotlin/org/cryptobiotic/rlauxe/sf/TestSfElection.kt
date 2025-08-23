@@ -14,6 +14,8 @@ import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
 import java.nio.file.Path
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class TestSfElection {
 
@@ -23,7 +25,39 @@ class TestSfElection {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "ContestManifest.json"
-        createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"
+        val summary = createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"
+        println(summary)
+
+        // check that the cvrs agree with the summary XML
+        val xmlFile = "src/test/data/SF2024/summary.xml"
+        val reader = StaxReader()
+        val staxContests = reader.read(xmlFile)
+        // staxContests.forEach { println(it) }
+
+        val contestManifest = readContestManifestFromZip(zipFilename, manifestFile)
+        summary.contestSums.forEach { (id, contest) ->
+            val contestName = contestManifest.contests[id]!!.Description
+            val staxContest: StaxReader.StaxContest? = staxContests.find { it.id == contestName}
+            assertNotNull(staxContest)
+            assertEquals(staxContest.ncards(), contest.ncards)
+            assertEquals(staxContest.undervotes(), contest.undervotes)
+            if (contest.overvotes != contest.isOvervote) {
+                println("cvrSummary $contestName ($id) has overvotes = ${contest.overvotes} not equal to isOvervote = ${contest.isOvervote} ")
+                // assertEquals(contest.overvotes, contest.isOvervote)
+            }
+            assertEquals(staxContest.overvotes(), contest.overvotes)
+            if (staxContest.blanks() != contest.isBlank) {
+                println("staxContest $contestName ($id) has blanks = ${staxContest.blanks()} not equal to cvr summary = ${contest.isBlank} ")
+                // assertEquals(staxContest.blanks(), contest.blanks)
+            }
+        }
+
+        // TODO serialize summary so can use in contest creation?
+        //   or just use staxContests, since the ncards agree?
+
+        // IRV contests = [18, 23, 24, 25, 26, 27, 28, 19, 21, 22, 20]
+        // read 1603908 cvrs in 27554 files; took 55.16 s
+
         // IRV contests = [18, 23, 24, 25, 26, 27, 28, 19, 21, 22, 20]
         // read 1603908 cards in 27554 files took 55.13 s
     }

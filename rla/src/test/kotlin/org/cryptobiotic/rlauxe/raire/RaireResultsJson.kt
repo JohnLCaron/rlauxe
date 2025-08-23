@@ -70,8 +70,7 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestUnderAudi
         ),
         listOf(winner),
         Nc = Nc,
-        Ncast = Nc,
-        0,
+        Ncast = Nc - Np,
     )
     return RaireContestUnderAudit(contest, winner, assertions)
 }

@@ -9,6 +9,7 @@ class Indent(val level: Int) {
     }
 
     fun incr() = Indent(level+1)
+    fun decr() = Indent(level-1)
 
     private fun makeBlanks(len: Int) : String {
         val blanks = StringBuilder(len)

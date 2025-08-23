@@ -14,12 +14,12 @@ data class RaireContest(
     val winners: List<Int>,
     val Nc: Int,
     val Ncast: Int,
-    val Nundervotes: Int,
 ) : ContestIF {
     val winnerNames: List<String>
     val losers: List<Int>
 
-    // added by makeIrvContests() during construction of RaireContestUnderAudit
+    // debug / visibility (see rlauxe-viewer)
+    // added by makeRaireContests() during construction of RaireContestUnderAudit
     // there may be multiple paths through the elimination tree when there are ties
     val roundsPaths = mutableListOf<IrvRoundsPath>()
 
@@ -36,7 +36,7 @@ data class RaireContest(
 
     override fun Nc() = Nc
     override fun Np() = Nc - Ncast
-    override fun Nundervotes() = Nundervotes
+    override fun Nundervotes() = 0
     override fun info() = info
     override fun winnerNames() = winnerNames
     override fun winners() = winners
@@ -114,23 +114,15 @@ class RaireContestUnderAudit(
                  winnerIndex: Int,
                  Nc: Int,
                  Ncast: Int,
-                 Nundervotes: Int,
                  assertions: List<RaireAssertion>
          ): RaireContestUnderAudit {
 
             val winnerId = info.candidateIds[winnerIndex]
-             // data class RaireContest(
-             //    val info: ContestInfo,
-             //    val winners: List<Int>,
-             //    val Nc: Int,
-             //    val Ncast: Int,
-             //    val Nundervotes: Int,
             val contest = RaireContest(
                 info,
                 listOf(winnerId),
                 Nc = Nc,
                 Ncast = Ncast,
-                Nundervotes = Nundervotes,
             )
             return RaireContestUnderAudit(contest, winnerId, assertions)
         }

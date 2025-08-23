@@ -64,8 +64,7 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
                 info,
                 irvContestVotes.vc, // candidate indexes
                 Nc = irvContestVotes.countBallots, // TODO get this elsewhere?
-                Ncast = 0,
-                Nundervotes = 0, // TODO
+                Ncast = irvContestVotes.countBallots,
             )
             contests.add(rcontestUA)
 
@@ -73,7 +72,6 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
 
             // The candidate Ids go from 0 ... ncandidates-1 because of Raire; use the ordering from ContestInfo.candidateIds
             // this just makes the candidateIds the sequential indexes (0..ncandidates-1)
-            val rcontest = rcontestUA.contest as RaireContest
             val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
             val cvotes = irvContestVotes.vc.makeVotes()
             val irvCount = IrvCount(cvotes, candidateIdxs)
@@ -84,7 +82,7 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
                 val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
                 IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
             }
-            rcontestUA.contest.roundsPaths.addAll(roundPathsById)
+            (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
         }
     }
     return contests

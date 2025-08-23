@@ -3,10 +3,8 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.tabulateCvrs
-import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJson
 import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJsonFromZip
-import org.cryptobiotic.rlauxe.sf.readContestManifestForIRVids
+import org.cryptobiotic.rlauxe.sf.readContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import java.io.FileOutputStream
@@ -26,14 +24,10 @@ class TestDominionCvrExportJson {
             else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
         // println(dominionCvrs)
 
-        val manifestFile = "src/test/data/SF2024/manifests/BallotTypeContestManifest.json"
-        val manifest = readBallotTypeContestManifestJson(manifestFile).unwrap()
+        val contestManifest = readContestManifest("src/test/data/SF2024/manifests/ContestManifest.json")
 
-        val irvIds = readContestManifestForIRVids("src/test/data/SF2024/manifests/ContestManifest.json")
-
-        val cvrs = dominionCvrs.import(irvIds, manifest)
-        println("number of cvrs = ${cvrs.size}")
-        repeat(5) { println(cvrs[it]) }
+        val summary = dominionCvrs.import(contestManifest)
+        println("number of cvrs = ${summary.ncvrs}")
         /* val tabs1 = tabulateCvrs(cvrsNoManifest.iterator())
         tabs1.forEach { (key, tab) ->
             println("  $key == $tab")

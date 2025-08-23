@@ -23,7 +23,7 @@ fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString 
         appendLine()
 
         info.candidateNames.forEach { (name, candId) ->
-            append(sfn(name, 30))
+            append(sfn("$candId $name", 30))
             rounds.forEachIndexed { idx, round ->
                 append("${nfn(round.countFor(candId), 8)} ")
             }

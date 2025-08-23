@@ -13,6 +13,7 @@ import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.csv.CvrExport
 import org.cryptobiotic.rlauxe.sf.BallotTypeContestManifest
+import org.cryptobiotic.rlauxe.sf.ContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
 import java.io.OutputStream
@@ -23,6 +24,52 @@ import java.nio.file.StandardOpenOption
 // this reads CvrExport_xxxxx.json files exported by Dominion.
 // we are getting these files from san francisco.
 // We derive CVRs from them.
+
+class DominionCvrSummary(
+    var ncvrs: Int,
+    var ncards: Int,
+    val contestSums: MutableMap<Int, ContestSummary>,
+    val cvrs: List<CvrExport>,
+) {
+    constructor(): this(0, 0, mutableMapOf<Int, ContestSummary>(), emptyList())
+
+    fun add(other: DominionCvrSummary) {
+        ncvrs += other.ncvrs
+        ncards += other.ncards
+        other.contestSums.forEach { id, osumm ->
+            val csumm = contestSums.getOrPut(id) { ContestSummary(id) }
+            csumm.add(osumm)
+        }
+    }
+
+    override fun toString() = buildString {
+        appendLine("DominionCvrSummary ncvrs=$ncvrs ncards=$ncards cvrs=$cvrs")
+        contestSums.toSortedMap().forEach { (id, summary) ->
+            appendLine("  $summary")
+        }
+    }
+}
+
+data class ContestSummary(val id: Int) {
+    var ncards = 0
+    var undervotes = 0
+    var overvotes = 0
+    var isOvervote = 0
+    var isBlank = 0
+
+    fun add(other: ContestSummary) {
+        require(id == other.id)
+        ncards += other.ncards
+        undervotes += other.undervotes
+        overvotes += other.overvotes
+        isOvervote += other.isOvervote
+        isBlank += other.isBlank
+    }
+
+    override fun toString() = buildString {
+        append("ContestSummary $id ncards=$ncards undervotes=$undervotes overvotes=$overvotes isOvervote=$isOvervote isBlank = $isBlank")
+    }
+}
 
 @Serializable
 data class DominionCvrExportJson(
@@ -111,64 +158,75 @@ data class Mark(
     }
 }
 
-fun DominionCvrExportJson.import(irvContests:Set<Int>, manifest: BallotTypeContestManifest) : List<CvrExport> {
-    var ncontests = 0
-    var undervotes = 0
-    val result = mutableListOf<CvrExport>()
+// remove duplicates or overvotes??
+// "... a CVR is supposed to reflect what the ballot shows, even if the ballot does not contain a valid vote in one or more contests."
+// argues to wait until processing.
+// OTOH, you could show the auditors the JSON. Let the CVRS reflect what rlauxe uses.
+
+fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvrSummary {
+    val irvContests = contestManifest.irvContests
+    var ncards = 0
+    val cvrs = mutableListOf<CvrExport>()
+    val contestSums = mutableMapOf<Int, ContestSummary>()
+
     Sessions.forEach { session ->
-        val sessionKey = "${session.TabulatorId}-${session.BatchId}"
         val votes = mutableMapOf<Int, IntArray>()
         val cards = if (session.Original.IsCurrent) session.Original else session.Modified
         if (cards != null) {
             cards.Cards.forEach { card ->
+                ncards++
                 card.Contests.forEach { contest ->
-                    ncontests++
-                    if (contest.Marks.size == 0) undervotes++
+                    val contestM = contestManifest.contests[contest.Id]!!
+                    val contestSum = contestSums.getOrPut(contest.Id) { ContestSummary(contest.Id) }
+                    contestSum.ncards++
+                    contestSum.undervotes += contest.Undervotes
+                    contestSum.overvotes += contest.Overvotes
 
+                    var isBlank = true
+                    var validMarks = 0
                     if (irvContests.contains(contest.Id)) {
                         val contestVoteAndRank = mutableListOf<Pair<Int, Int>>()
                         contest.Marks.forEach { mark ->
                             if (mark.IsVote) {
                                 contestVoteAndRank.add(Pair(mark.Rank, mark.CandidateId))
+                                isBlank = false
                             }
                         }
-                        // sort candidate ids by rank
+                        // sort candidate ids by rank, remove duplicates
                         val sortedVotes = contestVoteAndRank.sortedBy { it.first }.map { it.second }
-                        // remove duplicates
                         val sortedNoDups = removeDuplicates(sortedVotes)
                         votes[contest.Id] = sortedNoDups.toIntArray()
+                        validMarks = sortedNoDups.toIntArray().size
                     } else {
                         val contestVotes = mutableListOf<Int>()
                         contest.Marks.forEach { mark ->
                             if (mark.IsVote) {
                                 contestVotes.add(mark.CandidateId)
+                                isBlank = false
                             }
                         }
                         votes[contest.Id] = contestVotes.toIntArray()
+                        validMarks = contestVotes.toIntArray().size
+
+                    }
+                    if (isBlank) contestSum.isBlank++
+                    if (contestM.NumOfRanks > 0) {
+                        if (validMarks > contestM.NumOfRanks) contestSum.isOvervote++ // NumOfRanks not accurate I think, should use NumCandidates
+                    } else {
+                        if (validMarks > contestM.VoteFor) contestSum.isOvervote++
                     }
                 }
             }
-            /*
-            var undervotes = 0
-            val ballotStyles = manifest.ballotStyles[cards.BallotTypeId]!!
-            ballotStyles.forEach { contestId ->
-                if (votes[contestId] == null) {
-                    undervotes++
-                    votes[contestId] = IntArray(0)
-                }
-            }
-            println("Ballot $recordId undervotes = $undervotes out of ${ballotStyles.size}")
-            */
+
             val recordId = if (session.RecordId != "X") session.RecordId else {
                 val startIdx = session.ImageMask.lastIndexOf("Images") + 6 + 1 // + 1 for the directory character
                 val endIdx = session.ImageMask.lastIndexOf("*.*")
                 session.ImageMask.substring(startIdx, endIdx)
             }
-            result.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${recordId}", session.CountingGroupId, votes))
+            cvrs.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${recordId}", session.CountingGroupId, votes))
         }
     }
-    // println("undervotes = $undervotes out of $ncontests")
-    return result
+    return DominionCvrSummary(cvrs.size, ncards, contestSums, cvrs)
 }
 
 fun removeDuplicates(svotes : List<Int> ) : List<Int> {
@@ -177,18 +235,17 @@ fun removeDuplicates(svotes : List<Int> ) : List<Int> {
     return result
 }
 
-fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream, irvIds: Set<Int>, manifest: BallotTypeContestManifest): Int {
+fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result is Ok) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")
 
-    val cvrs = dominionCvrs.import(irvIds, manifest)
-    cvrs.forEach {
+    val summary = dominionCvrs.import(contestManifest)
+    summary.cvrs.forEach {
         outputStream.write(it.toCsv().toByteArray()) // UTF-8
     }
-    return cvrs.size
+    return summary
 }
-
 
 fun Session.import(irvContests: Set<Int>): List<Cvr> {
     val result = mutableListOf<Cvr>()

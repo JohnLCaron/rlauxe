@@ -107,7 +107,6 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         winnerIndex = solution.first,
         Nc = testContest.Nc,
         Ncast = testContest.phantomCount,
-        Nundervotes = 0, // TODO
         raireAssertions,
     )
 

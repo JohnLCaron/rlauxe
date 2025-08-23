@@ -153,7 +153,6 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.winners!!,
                 this.Nc,
                 this.Ncast,
-                0, // TODO
             )
             if (this.irvRoundsPaths != null) {
                 rcontest.roundsPaths.addAll(this.irvRoundsPaths.map { it.import() })

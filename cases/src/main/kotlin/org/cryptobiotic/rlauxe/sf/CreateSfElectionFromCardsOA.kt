@@ -41,18 +41,7 @@ fun createSfElectionFromCsvExportOA(
     show: Boolean = false
 ) {
     val stopwatch = Stopwatch()
-
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(castVoteRecordZip, contestManifestFilename)
-    val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from $castVoteRecordZip/$contestManifestFilename err = $resultContestM")
-    if (show) println("contestManifest = $contestManifest")
-
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
-    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
-    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
-
-    val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
-    if (show) contestInfos.forEach { println("   ${it} nwinners = ${it.nwinners} choiceFunction = ${it.choiceFunction}") }
+    val contestInfos = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
     val ballotPools: Map<String, CardPool> = createBallotPools(
         auditDir,
@@ -103,7 +92,7 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, ballotPools: Map<Strin
                 cvrVotes = cvrTabulation.votes,
                 cvrNcards = cvrTabulation.ncards,
                 cardPoolsNotNull,
-                Nc = 0, // where ??
+                Nc = pooledCast + cvrTabulation.ncards, // TODO where do we get this??
                 Ncast = pooledCast + cvrTabulation.ncards)
             println(contestOA)
             contestsUAs.add( OAContestUnderAudit(contestOA) )
@@ -129,7 +118,7 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, ballotPools: Map<St
                 cvrVotes = cvrTabulation.votes,
                 cvrNcards = cvrTabulation.ncards,
                 cardPoolsNotNull,
-                Nc = 0, // where ??
+                Nc = pooledCast + cvrTabulation.ncards, // TODO where do we get this??
                 Ncast = pooledCast + cvrTabulation.ncards)
             println(contestOA)
 
@@ -146,8 +135,7 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, ballotPools: Map<St
                 info,
                 totalVoteConsolidator,
                 contestOA.Nc(),
-                contestOA.Nc(),
-                0)
+                contestOA.Nc())
 
             // class OneAuditIrvContest(
             //    contestOA: OneAuditContest,
@@ -258,15 +246,15 @@ fun createBallotPools(
     ): Map<String, CardPool>
 {
 
-    val irvIds = readContestManifestForIRVids(castVoteRecordZip, contestManifestFilename)
-    val manifest = readBallotTypeContestManifestJsonFromZip(castVoteRecordZip, "BallotTypeContestManifest.json").unwrap()
+    val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
+    println("IRV contests = ${contestManifest.irvContests}")
 
     val cardPools: MutableMap<String, CardPool> = mutableMapOf<String, CardPool>()
 
     val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
-        val pool = cardPools.getOrPut(cvrExport.poolKey() ) { CardPool(cvrExport.poolKey(), cardPools.size + 1, irvIds) }
+        val pool = cardPools.getOrPut(cvrExport.poolKey() ) { CardPool(cvrExport.poolKey(), cardPools.size + 1, contestManifest.irvContests) }
         pool.addPooledVotes(cvrExport)
     }
 

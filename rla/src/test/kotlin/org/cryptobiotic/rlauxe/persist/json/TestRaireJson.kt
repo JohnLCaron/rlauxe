@@ -26,7 +26,7 @@ class TestRaireJson {
             choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
-        val target = RaireContest(info, listOf(3), 42, 33, 0)
+        val target = RaireContest(info, listOf(3), 42, 33)
 
         val json = target.publishJson()
         val roundtrip = json.import(info)
@@ -48,7 +48,7 @@ class TestRaireJson {
             choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
-        val contest = RaireContest(info, listOf(1), 42, 33, 0)
+        val contest = RaireContest(info, listOf(1), 42, 33)
 
         val assert1 = RaireAssertion(1, 0, 42, RaireAssertionType.winner_only)
         val assert2 = RaireAssertion(1, 2, 422, RaireAssertionType.irv_elimination,

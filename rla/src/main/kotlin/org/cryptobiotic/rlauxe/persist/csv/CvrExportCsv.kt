@@ -12,7 +12,7 @@ const val unpooled = "unpooled"
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
 
     fun poolKey(): String {
-        if (group == 1) return unpooled
+        if (group == 2) return unpooled
         val lastIdx = id.lastIndexOf('-')
         return id.substring(0, lastIdx)
     }
@@ -34,11 +34,7 @@ data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArra
     }
 
     fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
-        val poolId = if (pools == null || group != 1) null else {
-            val lastIdx = id.lastIndexOf('-')
-            val poolDesc = id.substring(0, lastIdx)
-            pools[poolDesc]
-        }
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]
         return Cvr(id, votes, phantom, poolId)
     }
 

@@ -1,0 +1,60 @@
+{
+  "Version": "5.10.50.85",
+  "List": [
+    {
+      "Description": "Countywide",
+      "Id": "f92d02b4-af65-436a-8ebf-c2dc25d637dd",
+      "ExternalId": ""
+    },
+    {
+      "Description": "STATE",
+      "Id": "c0639b94-b75c-462f-8398-577d431ccbfb",
+      "ExternalId": "CA"
+    },
+    {
+      "Description": "United States Representative",
+      "Id": "385cbaa3-3038-417b-9b55-280042cb4f48",
+      "ExternalId": ""
+    },
+    {
+      "Description": "State Senator",
+      "Id": "18e28a63-f8d9-4bd3-ab28-0a45892674c2",
+      "ExternalId": ""
+    },
+    {
+      "Description": "Member of the State Assembly",
+      "Id": "80c59da7-8e4d-4580-ab64-8a97c9c348b6",
+      "ExternalId": ""
+    },
+    {
+      "Description": "Board of Equalization (State)",
+      "Id": "9b6b202b-9f1d-49b7-8132-b50f26654f72",
+      "ExternalId": ""
+    },
+    {
+      "Description": "County",
+      "Id": "4a937981-629a-4f57-b025-62fd0249da38",
+      "ExternalId": ""
+    },
+    {
+      "Description": "County Supervisor",
+      "Id": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": ""
+    },
+    {
+      "Description": "City",
+      "Id": "0724141f-93ff-4c34-84a7-f2d04d8b2408",
+      "ExternalId": ""
+    },
+    {
+      "Description": "BART",
+      "Id": "d8d0bc46-894c-4c17-b296-97364dae90ad",
+      "ExternalId": ""
+    },
+    {
+      "Description": "Neighborhood",
+      "Id": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    }
+  ]
+}

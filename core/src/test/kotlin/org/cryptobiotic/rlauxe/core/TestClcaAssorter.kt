@@ -39,7 +39,7 @@ class TestClcaAssorter {
         val loserCvr = makeCvr(1)
         val otherCvr = makeCvr(2)
         val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
-        val contest =  Contest(info, votes, 2000, Np=0)
+        val contest =  Contest(info, votes, 2000, Ncast=2000)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         assertEquals(20/2000.toDouble(), assorter.reportedMargin, doublePrecision)
@@ -336,7 +336,7 @@ class TestClcaAssorter {
         val phantomCvr = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
 
         val votes = mapOf(0 to 1000, 1 to 990) // Map<Int, Int>
-        val contest =  Contest(info, votes, 2000, Np=10)
+        val contest =  Contest(info, votes, 2000, Ncast=1990)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         assertEquals(10/2000.toDouble(), assorter.reportedMargin, doublePrecision)

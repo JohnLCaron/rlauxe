@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.roundToInt
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.math.max
@@ -29,7 +28,7 @@ class TestOneAuditKalamazoo {
         // votes_cvr=5218.0 votes_poll=22082.0 diff cvr: 76.0, diff poll: 290.0
         assertEquals(5218, strataCvr.values.sum())
         assertEquals(22082, strataNocvr.votes.values.sum())
-        assertEquals(76, contestOA.cvrNc - strataCvr.values.sum())
+        assertEquals(76, contestOA.cvrNcards - strataCvr.values.sum())
         assertEquals(290, strataNocvr.ncards - strataNocvr.votes.values.sum())
 
         // whitmer=20699, schuette=5569, assorter_mean_all=0.5468806477264513
@@ -38,7 +37,7 @@ class TestOneAuditKalamazoo {
         val schuetteTotal = contest.votes[info.candidateNames["Schuette"]!!]!!
         assertEquals(20699, whitmerTotal)
         assertEquals(5569, schuetteTotal)
-        val assorterMeanAll = (whitmerTotal - schuetteTotal) / contestOA.Nc.toDouble()
+        val assorterMeanAll = (whitmerTotal - schuetteTotal) / contestOA.Nc().toDouble()
         assertEquals(0.5468806477264513, assorterMeanAll, doublePrecision) // margin not mean
 
         // assorter_mean_poll=0.5682996602896477,
@@ -148,7 +147,7 @@ class TestOneAuditKalamazoo {
 
         val cvrs = mvrs.filter{ it.poolId == null}
         val cvrAssortAvg = margin2mean(minAllAssorter.calcAssorterMargin(oaContest.id, cvrs))
-        val cvrReportedAvg = margin2mean(minAllAssorter.calcReportedMargin(oaContest.cvrVotes, oaContest.cvrNc))
+        val cvrReportedAvg = margin2mean(minAllAssorter.calcReportedMargin(oaContest.cvrVotes, oaContest.cvrNcards))
         println("cvrVotes = ${oaContest.cvrVotesAndUndervotes()} cvrAssortAvg = $cvrAssortAvg reportedAvg = $cvrReportedAvg")
         assertEquals(cvrReportedAvg, cvrAssortAvg, doublePrecision)
 
@@ -217,5 +216,5 @@ fun makeContestKalamazoo(nwinners:Int = 1): OneAuditContest { // TODO set margin
         )
     )
 
-    return OneAuditContest.make(info, votesCvr, ncCvr, pools, Np = 0)
+    return OneAuditContest.make(info, votesCvr, ncCvr, pools, 0, 0) // TODO
 }

@@ -12,13 +12,14 @@ import org.cryptobiotic.rlauxe.util.*
 data class RaireContest(
     val info: ContestInfo,
     val winners: List<Int>,
-    val iNc: Int,
-    val Np: Int,
+    val Nc: Int,
+    val Ncast: Int,
 ) : ContestIF {
     val winnerNames: List<String>
     val losers: List<Int>
 
-    // added by makeIrvContests() during construction of RaireContestUnderAudit
+    // debug / visibility (see rlauxe-viewer)
+    // added by makeRaireContests() during construction of RaireContestUnderAudit
     // there may be multiple paths through the elimination tree when there are ties
     val roundsPaths = mutableListOf<IrvRoundsPath>()
 
@@ -33,8 +34,9 @@ data class RaireContest(
         losers = mlosers.toList()
     }
 
-    override fun Nc() = iNc
-    override fun Np() = Np
+    override fun Nc() = Nc
+    override fun Np() = Nc - Ncast
+    override fun Nundervotes() = 0
     override fun info() = info
     override fun winnerNames() = winnerNames
     override fun winners() = winners
@@ -55,12 +57,14 @@ class RaireContestUnderAudit(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
-            val assorter = RaireAssorter(contest.info(), rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
+            val assorter = RaireAssorter(contest.info(), rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc()))
             Assertion(contest.info(), assorter)
         }
     }
 
     override fun recountMargin(): Double {
+        return -1.0
+        /*
         val pctDefault = -1.0
         val rcontest = (contest as RaireContest)
         if (rcontest.roundsPaths.isEmpty()) return pctDefault
@@ -70,7 +74,7 @@ class RaireContestUnderAudit(
         val count = rounds.last().count // the last round should have two nonzero candidates
         val winner = count.filter { it.value > 0.0 }.maxBy { it.value }
         val loser = count.filter { it.value > 0.0 && it.key != winner.key }.maxBy { it.value }
-        return (winner.value - loser.value) / (winner.value.toDouble())
+        return (winner.value - loser.value) / (winner.value.toDouble()) */
     }
 
     override fun showCandidates() = buildString {
@@ -109,7 +113,7 @@ class RaireContestUnderAudit(
                  info: ContestInfo,
                  winnerIndex: Int,
                  Nc: Int,
-                 Np: Int,
+                 Ncast: Int,
                  assertions: List<RaireAssertion>
          ): RaireContestUnderAudit {
 
@@ -117,8 +121,8 @@ class RaireContestUnderAudit(
             val contest = RaireContest(
                 info,
                 listOf(winnerId),
-                iNc = Nc,
-                Np = Np,
+                Nc = Nc,
+                Ncast = Ncast,
             )
             return RaireContestUnderAudit(contest, winnerId, assertions)
         }

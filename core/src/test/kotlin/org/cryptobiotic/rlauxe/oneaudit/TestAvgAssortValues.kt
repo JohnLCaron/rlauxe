@@ -33,7 +33,7 @@ class TestAvgAssortValues {
         //allCvrs.forEach{ println("   $it")}
 
         val Nc1 = allCvrs.filter { it.hasContest(1) }.count()
-        println("oaContest1.Nc=${oaContest1.Nc} count=$Nc1")
+        println("oaContest1.Nc=${oaContest1.Nc()} count=$Nc1")
 
         println("\noaContest1 with merged")
         checkAssorterAvg(oaContest1, allCvrs, show = true)
@@ -46,7 +46,7 @@ class TestAvgAssortValues {
         checkAssorterAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
-        println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
+        println("\noaContest2.Nc=${oaContest2.Nc()} count=$Nc2")
 
         println("oaContest2 with merged")
         checkAssorterAvg(oaContest2, allCvrs)
@@ -79,7 +79,7 @@ class TestAvgAssortValues {
         checkAssorterAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
-        println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
+        println("\noaContest2.Nc=${oaContest2.Nc()} count=$Nc2")
 
         println("oaContest2 with merged")
         checkAssorterAvg(oaContest2, allCvrs)
@@ -112,7 +112,7 @@ class TestAvgAssortValues {
         checkAssorterAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
-        println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
+        println("\noaContest2.Nc=${oaContest2.Nc()} count=$Nc2")
 
         println("oaContest2 with merged")
         checkAssorterAvg(oaContest2, allCvrs)
@@ -145,7 +145,7 @@ class TestAvgAssortValues {
         checkAssorterAvg(oaContest2, mvrs2)
 
         val Nc2 = allCvrs.filter { it.hasContest(2) }.count()
-        println("\noaContest2.Nc=${oaContest2.Nc} count=$Nc2")
+        println("\noaContest2.Nc=${oaContest2.Nc()} count=$Nc2")
 
         println("oaContest2 with merged")
         checkAssorterAvg(oaContest2, allCvrs)

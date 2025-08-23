@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
-import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
@@ -56,10 +55,9 @@ interface ContestIF {
     val ncandidates get() = info().candidateNames.size
     val choiceFunction get() = info().choiceFunction
 
-    val Nc get() = Nc()
-
-    fun Nc(): Int
-    fun Np(): Int
+    fun Nc(): Int  // independent contest bound
+    fun Np(): Int  // number of phantoms
+    fun Nundervotes(): Int  // number of undervotes
     fun info(): ContestInfo
     fun winnerNames(): List<String>
     fun winners(): List<Int>
@@ -95,12 +93,13 @@ interface ContestIF {
 open class Contest(
         val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-        val iNc: Int,               // number of voters who cast ballots containing this Contest
-        val Np: Int,                // number of phantoms
+        val Nc: Int,               // maximum ballots/cards that contain this contest
+        val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
     ): ContestIF {
 
-    override fun Nc() = iNc
-    override fun Np() = Np
+    override fun Nc() = Nc
+    override fun Np() = Nc - Ncast
+    override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames
     override fun winners() = winners
@@ -129,8 +128,8 @@ open class Contest(
         }
         votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by votes recieved
         votes.forEach { (candId, candVotes) ->
-            require(candVotes <= (iNc - Np)) {
-                "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Np)=${Nc - Np}"
+            require(candVotes <= (Nc - Np())) { // LOOK
+                "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Np) = ${Nc - Np()}"
             }
         }
         val nvotes = votes.values.sum()
@@ -139,7 +138,8 @@ open class Contest(
                 "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
             }
         } */
-        undervotes = info.voteForN * (iNc - Np) - nvotes   // C1
+        undervotes = info.voteForN * (Nc - Np()) - nvotes   // C1
+
         // (undervotes + nvotes) = voteForN * (Nc - Np)
         // Np + (undervotes + nvotes) / voteForN = Nc     // C2
         // But if you calculate Nc from some random numbers, you have to ensure that there are enough ballots for the winner:
@@ -172,7 +172,7 @@ open class Contest(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=$Np votesAndUndervotes=${votesAndUndervotes()}")
+        append("$name ($id) Nc=$Nc Np=${Np()} votesAndUndervotes=${votesAndUndervotes()}")
     }
 
     fun calcMargin(winner: Int, loser: Int): Double {
@@ -191,7 +191,7 @@ open class Contest(
     }
 
     override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=$Np, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votesAndUndervotes=${votesAndUndervotes()}, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
+        return "Contest(info=$info, Nc=$Nc, Np=${Np()}, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votesAndUndervotes=${votesAndUndervotes()}, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -200,9 +200,8 @@ open class Contest(
 
         other as Contest
 
-        if (iNc != other.iNc) return false
-        if (Np != other.Np) return false
-        if (undervotes != other.undervotes) return false
+        if (Nc != other.Nc) return false
+        if (Ncast != other.Ncast) return false
         if (info != other.info) return false
         if (winnerNames != other.winnerNames) return false
         if (winners != other.winners) return false
@@ -213,9 +212,8 @@ open class Contest(
     }
 
     override fun hashCode(): Int {
-        var result = iNc
-        result = 31 * result + Np
-        result = 31 * result + undervotes
+        var result = Nc
+        result = 31 * result + Ncast
         result = 31 * result + info.hashCode()
         result = 31 * result + winnerNames.hashCode()
         result = 31 * result + winners.hashCode()
@@ -225,9 +223,9 @@ open class Contest(
     }
 
     companion object {
-        fun makeWithCandidateNames(info: ContestInfo, votesByName: Map<String, Int>, Nc: Int, Np: Int): Contest {
+        fun makeWithCandidateNames(info: ContestInfo, votesByName: Map<String, Int>, Nc: Int, Ncast: Int): Contest {
             val votesById = votesByName.map { (key, value) -> Pair(info.candidateNames[key]!!, value) }.toMap()
-            return Contest(info, votesById, Nc, Np)
+            return Contest(info, votesById, Nc, Ncast)
         }
     }
 }

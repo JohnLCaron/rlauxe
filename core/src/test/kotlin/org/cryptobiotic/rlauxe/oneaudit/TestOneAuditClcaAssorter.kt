@@ -36,10 +36,10 @@ class TestOneAuditClcaAssorter {
             undervotePercent = .11, phantomPercent = .0, skewPct = .06)
         val contestUA = contestOA.makeContestUnderAudit()
         println(contestUA)
-        showPct(" cvrs", contestOA.cvrVotes, contestOA.cvrNc)
+        showPct(" cvrs", contestOA.cvrVotes, contestOA.cvrNcards)
         contestOA.pools.values.forEach { pool -> showPct(" pool ${pool.name}", pool.votes, pool.ncards) }
         val contest = contestOA.contest as Contest
-        showPct(" allVotes", contest.votes, contestOA.Nc)
+        showPct(" allVotes", contest.votes, contestOA.Nc())
         println()
 
         val winnerPool = Cvr("winner", mapOf(0 to intArrayOf(0)), poolId=1)
@@ -124,10 +124,10 @@ class TestOneAuditClcaAssorter {
         )
         val contestUA = contestOA.makeContestUnderAudit()
         println(contestUA)
-        showPct(" cvrs", contestOA.cvrVotes, contestOA.cvrNc)
+        showPct(" cvrs", contestOA.cvrVotes, contestOA.cvrNcards)
         contestOA.pools.values.forEach { pool -> showPct(" pool ${pool.name}", pool.votes, pool.ncards) }
         val contest = contestOA.contest as Contest
-        showPct(" allVotes", contest.votes, contestOA.Nc)
+        showPct(" allVotes", contest.votes, contestOA.Nc())
         println()
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)

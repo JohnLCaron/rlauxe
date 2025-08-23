@@ -227,5 +227,5 @@ fun makeSmallContest(name: String, id:Int, Nc: Int, nwinners:Int = 1): OneAuditC
         )
     )
 
-    return OneAuditContest.make(info, votesCvr, ncCvr, pools, Np = 0)
+    return OneAuditContest.make(info, votesCvr, ncCvr, pools, 0, 0) // TODO
 }

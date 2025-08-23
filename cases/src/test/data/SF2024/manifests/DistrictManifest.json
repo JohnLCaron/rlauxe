@@ -1,0 +1,437 @@
+{
+  "Version": "5.10.50.85",
+  "List": [
+    {
+      "Description": "Electionwide",
+      "Id": 172,
+      "DistrictTypeId": "f92d02b4-af65-436a-8ebf-c2dc25d637dd",
+      "ExternalId": ""
+    },
+    {
+      "Description": "CALIFORNIA",
+      "Id": 101,
+      "DistrictTypeId": "c0639b94-b75c-462f-8398-577d431ccbfb",
+      "ExternalId": "CA"
+    },
+    {
+      "Description": "2ND CONG",
+      "Id": 102,
+      "DistrictTypeId": "385cbaa3-3038-417b-9b55-280042cb4f48",
+      "ExternalId": "CON002"
+    },
+    {
+      "Description": "11TH CONG",
+      "Id": 103,
+      "DistrictTypeId": "385cbaa3-3038-417b-9b55-280042cb4f48",
+      "ExternalId": "CON011"
+    },
+    {
+      "Description": "12TH CONG",
+      "Id": 104,
+      "DistrictTypeId": "385cbaa3-3038-417b-9b55-280042cb4f48",
+      "ExternalId": "CON012"
+    },
+    {
+      "Description": "15TH CONG",
+      "Id": 105,
+      "DistrictTypeId": "385cbaa3-3038-417b-9b55-280042cb4f48",
+      "ExternalId": "CON015"
+    },
+    {
+      "Description": "2ND SENATE",
+      "Id": 106,
+      "DistrictTypeId": "18e28a63-f8d9-4bd3-ab28-0a45892674c2",
+      "ExternalId": ""
+    },
+    {
+      "Description": "7TH SENATE",
+      "Id": 107,
+      "DistrictTypeId": "18e28a63-f8d9-4bd3-ab28-0a45892674c2",
+      "ExternalId": ""
+    },
+    {
+      "Description": "11TH SENATE",
+      "Id": 108,
+      "DistrictTypeId": "18e28a63-f8d9-4bd3-ab28-0a45892674c2",
+      "ExternalId": ""
+    },
+    {
+      "Description": "12TH ASMBLY",
+      "Id": 109,
+      "DistrictTypeId": "80c59da7-8e4d-4580-ab64-8a97c9c348b6",
+      "ExternalId": "ASM012"
+    },
+    {
+      "Description": "17TH ASMBLY",
+      "Id": 110,
+      "DistrictTypeId": "80c59da7-8e4d-4580-ab64-8a97c9c348b6",
+      "ExternalId": "ASM017"
+    },
+    {
+      "Description": "18TH ASMBLY",
+      "Id": 111,
+      "DistrictTypeId": "80c59da7-8e4d-4580-ab64-8a97c9c348b6",
+      "ExternalId": "ASM018"
+    },
+    {
+      "Description": "19TH ASMBLY",
+      "Id": 112,
+      "DistrictTypeId": "80c59da7-8e4d-4580-ab64-8a97c9c348b6",
+      "ExternalId": "ASM019"
+    },
+    {
+      "Description": "BD EQ, DIST 2",
+      "Id": 113,
+      "DistrictTypeId": "9b6b202b-9f1d-49b7-8132-b50f26654f72",
+      "ExternalId": "BOE002"
+    },
+    {
+      "Description": "County Wide",
+      "Id": 114,
+      "DistrictTypeId": "4a937981-629a-4f57-b025-62fd0249da38",
+      "ExternalId": "SF"
+    },
+    {
+      "Description": "SUP DIST 1",
+      "Id": 115,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP001"
+    },
+    {
+      "Description": "SUP DIST 2",
+      "Id": 116,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP002"
+    },
+    {
+      "Description": "SUP DIST 3",
+      "Id": 117,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP003"
+    },
+    {
+      "Description": "SUP DIST 4",
+      "Id": 118,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP004"
+    },
+    {
+      "Description": "SUP DIST 5",
+      "Id": 119,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP005"
+    },
+    {
+      "Description": "SUP DIST 6",
+      "Id": 120,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP006"
+    },
+    {
+      "Description": "SUP DIST 7",
+      "Id": 121,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP007"
+    },
+    {
+      "Description": "SUP DIST 8",
+      "Id": 122,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP008"
+    },
+    {
+      "Description": "SUP DIST 9",
+      "Id": 123,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP009"
+    },
+    {
+      "Description": "SUP DIST 10",
+      "Id": 124,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP010"
+    },
+    {
+      "Description": "SUP DIST 11",
+      "Id": 125,
+      "DistrictTypeId": "a0b8d960-5b62-47bb-8310-f758336909c2",
+      "ExternalId": "SUP011"
+    },
+    {
+      "Description": "CITY OF S.F.",
+      "Id": 126,
+      "DistrictTypeId": "0724141f-93ff-4c34-84a7-f2d04d8b2408",
+      "ExternalId": "SF"
+    },
+    {
+      "Description": "BART AREA 7",
+      "Id": 127,
+      "DistrictTypeId": "d8d0bc46-894c-4c17-b296-97364dae90ad",
+      "ExternalId": ""
+    },
+    {
+      "Description": "BART AREA 8",
+      "Id": 128,
+      "DistrictTypeId": "d8d0bc46-894c-4c17-b296-97364dae90ad",
+      "ExternalId": ""
+    },
+    {
+      "Description": "BART AREA 9",
+      "Id": 129,
+      "DistrictTypeId": "d8d0bc46-894c-4c17-b296-97364dae90ad",
+      "ExternalId": ""
+    },
+    {
+      "Description": "BAYVIEW HUNTERS POINT",
+      "Id": 130,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "BERNAL HEIGHTS",
+      "Id": 131,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "CASTRO/UPPER MARKET",
+      "Id": 132,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "CHINATOWN",
+      "Id": 133,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "EXCELSIOR",
+      "Id": 134,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "FINANCIAL DISTRICT/SOUTH BEACH",
+      "Id": 135,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "GLEN PARK",
+      "Id": 136,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "HAIGHT ASHBURY",
+      "Id": 137,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "HAYES VALLEY",
+      "Id": 138,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "INNER RICHMOND",
+      "Id": 139,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "INNER SUNSET",
+      "Id": 140,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "JAPANTOWN",
+      "Id": 141,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "LAKESHORE",
+      "Id": 142,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "LONE MOUNTAIN/USF",
+      "Id": 143,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "MARINA",
+      "Id": 144,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "MCLAREN PARK",
+      "Id": 145,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "MISSION",
+      "Id": 146,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "MISSION BAY",
+      "Id": 147,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "NOB HILL",
+      "Id": 148,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "NOE VALLEY",
+      "Id": 149,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "NORTH BEACH",
+      "Id": 150,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "OCEANVIEW/MERCED/INGLESIDE",
+      "Id": 151,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "OUTER MISSION",
+      "Id": 152,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "OUTER RICHMOND",
+      "Id": 153,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "PACIFIC HEIGHTS",
+      "Id": 154,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "PORTOLA",
+      "Id": 155,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "PRESIDIO",
+      "Id": 156,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "PRESIDIO HEIGHTS",
+      "Id": 157,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "RUSSIAN HILL",
+      "Id": 158,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "SEACLIFF",
+      "Id": 159,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "SUNSET/PARKSIDE",
+      "Id": 160,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "TENDERLOIN",
+      "Id": 161,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "TREASURE ISLAND",
+      "Id": 162,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "TWIN PEAKS",
+      "Id": 163,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "VISITACION VALLEY",
+      "Id": 164,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "WEST OF TWIN PEAKS",
+      "Id": 165,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "WESTERN ADDITION",
+      "Id": 166,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "SOUTH OF MARKET",
+      "Id": 167,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "POTRERO HILL",
+      "Id": 168,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "LINCOLN PARK",
+      "Id": 169,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "ANGEL ISLAND",
+      "Id": 170,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    },
+    {
+      "Description": "ALAMEDA ISLAND",
+      "Id": 171,
+      "DistrictTypeId": "6011b461-c470-45f3-97e1-2f1e9bec107a",
+      "ExternalId": ""
+    }
+  ]
+}

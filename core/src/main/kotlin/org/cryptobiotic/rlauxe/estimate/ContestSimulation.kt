@@ -35,8 +35,8 @@ class ContestSimulation(val contest: Contest) {
     val info = contest.info
     val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
-    val phantomCount = contest.Np //  - underCount - voteCount // Np_c
-    val underCount = contest.Nc * info.voteForN - contest.Np - voteCount // U_c
+    val phantomCount = contest.Np() //  - underCount - voteCount // Np_c
+    val underCount = contest.Nc * info.voteForN - contest.Np() - voteCount // U_c
 
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0
@@ -107,7 +107,7 @@ class ContestSimulation(val contest: Contest) {
     }
 
     fun makeBallotManifest(hasStyle: Boolean): CardLocationManifest {
-        val ncards: Int = contest.Nc - contest.Np
+        val ncards: Int = contest.Nc - contest.Np()
         val contests = listOf("contest0")
         val contestIds = listOf(0)
         val bs = CardStyle.make(0, contests, listOf(0), ncards)
@@ -117,7 +117,7 @@ class ContestSimulation(val contest: Contest) {
             cardLocations.add(CardLocation("ballot$it", false, if (hasStyle) bs else null))
         }
         // add phantoms
-        repeat(contest.Np) {
+        repeat(contest.Np()) {
             cardLocations.add(CardLocation("phantom$it", true, null, contestIds))
         }
         return CardLocationManifest(cardLocations, listOf(bs))
@@ -133,11 +133,12 @@ class ContestSimulation(val contest: Contest) {
             val winner = roundToInt((margin * Nc + nvotes) / 2)
             val loser = roundToInt(nvotes - winner)
             val Np = roundToInt(Nc * phantomPct)
+            val Nu = roundToInt(Nc * undervotePct)
             val contest = Contest(
                 ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
                 mapOf(0 to winner, 1 to loser),
-                iNc = Nc,
-                Np=Np,
+                Nc = Nc,
+                Ncast = roundToInt(nvotes + Nu)
             )
             return ContestSimulation(contest)
         }
@@ -147,7 +148,8 @@ class ContestSimulation(val contest: Contest) {
 
             // otherwise scale everything
             val sNc = sampleLimit / contest.Nc.toDouble()
-            val sNp = roundToInt(sNc * contest.Np)
+            val sNp = roundToInt(sNc * contest.Np())
+            val sNu = roundToInt(sNc * contest.Nundervotes())
             val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
             val svotes = contest.votes.map { (id, nvotes) -> id to roundToInt(sNc * nvotes) }.toMap()
             val voteCount = svotes.map { it.value }.sum() // V_c
@@ -159,9 +161,10 @@ class ContestSimulation(val contest: Contest) {
             val contest = Contest(
                 contest.info,
                 svotes,
-                iNc=sampleLimit,
-                Np=sNp,
+                Nc=sampleLimit,
+                Ncast = voteCount + sNu,
             )
+
             return ContestSimulation(contest)
         }
     }

@@ -239,7 +239,7 @@ class KalamazooExample {
                     "Whitmer" to 3765,
                 ),
                 Nc = Nc,
-                Np = 0, // assume all undervotes I guess
+                Ncast = Nc, // assume all undervotes I guess
             )
 
         // The sample included 32 cards were drawn from the no-CVR stratum and 8 from the CVR stratum.

@@ -41,7 +41,7 @@ fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
-fun sfn(s: String, n: Int) = "%${n}s".format(s)
+fun sfn(s: String, n: Int) = "%${n}s".format(s)  // right justify in windth n
 
 fun Double.sigfig(minSigfigs: Int = 4): String {
     val df = "%.${minSigfigs}G".format(this)

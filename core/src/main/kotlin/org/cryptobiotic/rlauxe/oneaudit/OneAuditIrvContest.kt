@@ -16,7 +16,7 @@ class OneAuditIrvContest(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
-            val assorter = RaireAssorter(contest.info(), rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc))
+            val assorter = RaireAssorter(contest.info(), rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc()))
             Assertion(contest.info(), assorter)
         }
     }

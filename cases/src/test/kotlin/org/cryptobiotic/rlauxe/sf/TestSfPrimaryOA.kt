@@ -189,7 +189,7 @@ class TestSfPrimaryOA {
         val expectedMargin = (11530 - 5801)/19175.toDouble()
         println("contest: ${contest2.show()}")
         println("cassort:  ${cassort911}")
-        println("  calcAssortMeanFromPools = ${cassort911.calcAssortMeanFromPools()}")
+        // println("  calcAssortMeanFromPools = ${cassort911.calcAssortMeanFromPools()}")
         println("  expectedAssorterMargin=$expectedMargin")
         //  cassort  OneAuditComparisonAssorter for contest PRESIDENT OF THE UNITED STATES-REP (2)
         //  assorter= winner=11 loser=9 reportedMargin=0.2988 reportedMean=0.6494

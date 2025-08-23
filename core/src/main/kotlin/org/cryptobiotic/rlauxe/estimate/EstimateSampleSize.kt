@@ -15,7 +15,6 @@ import kotlin.math.min
 private val debug = false
 private val debugErrorRates = false
 private val debugSampleDist = false
-private val debugSizeNudge = true
 private val debugSampleSmall = false
 
 // TODO: always one contest, always the minimum-margin assertion (?)
@@ -106,7 +105,7 @@ fun makeEstimationTasks(
         }
         AuditType.ONEAUDIT -> {
             val contestOA = (contestRound.contestUA as OAContestUnderAudit).contestOA
-            makeTestMvrsScaled(contestOA, auditConfig.sampleLimit)
+            makeTestMvrsScaled(contestOA, auditConfig.sampleLimit) // TODO
         }
     }
 
@@ -257,17 +256,17 @@ fun simulateSampleSizeClcaAssorter(
     // optional fuzzing of the cvrs
     val isIrvFzz = (contest.isIRV() && clcaConfig.simFuzzPct != null)
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
-        if (isIrvFzz) fuzzPct = clcaConfig.simFuzzPct!!
+        if (isIrvFzz) fuzzPct = clcaConfig.simFuzzPct
         Pair(
-            if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contest, cassorter)
+            if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrs, contest, cassorter)
             else ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
-            AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )
     } else {
         // this is noerrors
         Pair(
             makeClcaNoErrorSampler(contest.id, auditConfig.hasStyles, cvrs, cassorter),
-            AdaptiveBetting(Nc = contest.Nc, a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
+            AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
         )
     }
 
@@ -282,7 +281,7 @@ fun simulateSampleSizeClcaAssorter(
         cassorter.assorter().reportedMargin(),
         cassorter.noerror(),
         cassorter.upperBound(),
-        contest.Nc,
+        contest.Nc(),
         startingTestStatistic,
         moreParameters
     )
@@ -364,7 +363,7 @@ fun simulateSampleSizePollingAssorter(
         null,
         eta0 = eta0,
         upperBound = assorter.upperBound(),
-        Nc = contest.Nc,
+        Nc = contest.Nc(),
         startingTestStatistic = startingTestStatistic,
         moreParameters = moreParameters,
     )

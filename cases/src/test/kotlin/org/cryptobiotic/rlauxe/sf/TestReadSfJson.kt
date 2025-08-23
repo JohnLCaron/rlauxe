@@ -11,7 +11,7 @@ class TestReadSfJson {
 
     @Test
     fun testContestManifestJsonFile() {
-        val filename = "src/test/data/SF2024/ContestManifest.json"
+        val filename = "src/test/data/SF2024/manifests/ContestManifest.json"
         val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(filename)
         val contestManifest = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from ${filename} err = $result")
@@ -20,7 +20,7 @@ class TestReadSfJson {
 
     @Test
     fun testCandidateManifestJsonFile() {
-        val filename = "src/test/data/SF2024/CandidateManifest.json"
+        val filename = "src/test/data/SF2024/manifests/CandidateManifest.json"
         val result: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(filename)
         val candidateManifest = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read CandidateManifestJson from ${filename} err = $result")
@@ -48,7 +48,7 @@ class TestReadSfJson {
 
     @Test
     fun testBallotTypeContestManifestJsonFile() {
-        val filename = "src/test/data/SF2024/BallotTypeContestManifest.json"
+        val filename = "src/test/data/SF2024/manifests/BallotTypeContestManifest.json"
         val result: Result<BallotTypeContestManifest, ErrorMessages> = readBallotTypeContestManifestJson(filename)
         val manifest1 = if (result is Ok) result.unwrap()
             else throw RuntimeException("Cannot read BallotTypeContestManifest from ${filename} err = $result")

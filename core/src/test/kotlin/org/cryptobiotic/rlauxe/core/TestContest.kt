@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.estimate.makeCvr
 import kotlin.test.*
 
 class TestContest {
@@ -96,7 +95,7 @@ class TestContest {
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
             SocialChoiceFunction.PLURALITY
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=1)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast = 210)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
@@ -111,17 +110,17 @@ class TestContest {
         )
 
         val mess1 = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), iNc=222, Np=0)
+            Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), Nc=222, Ncast=222)
         }.message
         assertEquals("'3' not found in contestInfo candidateIds [0, 1, 2]", mess1)
 
         val mess = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 116), iNc = 211, Np = 2)
+            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=219)
         }.message
         assertNotNull(mess)
         assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
 
-        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=1)
+        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211,Ncast=220)
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
@@ -143,13 +142,13 @@ class TestContest {
             SocialChoiceFunction.SUPERMAJORITY,
             minFraction = .55,
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 125), iNc=227, Np=2)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 125), Nc=227, Ncast=225)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
         assertEquals(mapOf(0 to 100, 1 to 125, 2 to 0), contest.votes)
         assertEquals(227, contest.Nc)
-        assertEquals(2, contest.Np)
+        assertEquals(2, contest.Np())
         assertEquals(listOf(1), contest.winners)
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
@@ -172,13 +171,13 @@ class TestContest {
             SocialChoiceFunction.SUPERMAJORITY,
             minFraction = .55,
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), iNc=227, Np=2)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Ncast=225)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
         assertEquals(mapOf(0 to 100, 1 to 123, 2 to 2), contest.votes)
         assertEquals(227, contest.Nc)
-        assertEquals(2, contest.Np)
+        assertEquals(2, contest.Np())
         assertEquals(emptyList(), contest.winners)
         assertEquals(listOf(0, 1, 2), contest.losers)
         assertEquals(emptyList(), contest.winnerNames)
@@ -206,7 +205,7 @@ class TestContest {
             minFraction = .55,
         )
         val mess = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 116), iNc = 211, Np = 2)
+            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=209)
         }.message
         assertNotNull(mess)
         assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
@@ -222,13 +221,13 @@ class TestContest {
             minFraction = .33,
             nwinners = 2
         )
-        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), iNc=227, Np=2)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Ncast=225)
         assertEquals(info.id, contest.id)
         assertEquals(info.name, contest.name)
         assertEquals(info.choiceFunction, contest.choiceFunction)
         assertEquals(mapOf(0 to 100, 1 to 123, 2 to 2), contest.votes)
         assertEquals(227, contest.Nc)
-        assertEquals(2, contest.Np)
+        assertEquals(2, contest.Np())
         assertEquals(listOf(1, 0), contest.winners)
         assertEquals(listOf(2), contest.losers)
         assertEquals(listOf("cand1", "cand0"), contest.winnerNames)
@@ -255,7 +254,7 @@ class TestContest {
     @Test
     fun testContestUnderAudit() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=209)
 
         val contestUAp = ContestUnderAudit(contest, isComparison = false)
         val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
@@ -292,7 +291,7 @@ class TestContest {
     @Test
     fun testContestUnderAuditIrvException() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.IRV)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc = 211, Np = 0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Ncast=211)
 
         val mess1 = assertFailsWith<RuntimeException> {
             ContestUnderAudit(contest, isComparison = false)
@@ -303,7 +302,7 @@ class TestContest {
     @Test
     fun testContestUnderAuditExceptions() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), iNc=211, Np=0)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=222)
 
         val contestUAc = ContestUnderAudit(contest, isComparison = false)
         val mess4 = assertFailsWith<RuntimeException> {
@@ -340,7 +339,7 @@ class TestContest {
                 "Schuette" to 1349,
             ),
             Nc = 42000,
-            Np = 0, // assume all undervotes I guess
+            Ncast=42000, // assume all undervotes I guess
         )
 
         println("contest = $contest")

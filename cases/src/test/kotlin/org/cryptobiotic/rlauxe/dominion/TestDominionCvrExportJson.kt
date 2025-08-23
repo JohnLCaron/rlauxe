@@ -3,10 +3,8 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.tabulateCvrs
-import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJson
 import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJsonFromZip
-import org.cryptobiotic.rlauxe.sf.readContestManifestForIRVids
+import org.cryptobiotic.rlauxe.sf.readContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import java.io.FileOutputStream
@@ -19,21 +17,17 @@ class TestDominionCvrExportJson {
 
     @Test
     fun testReadDominionCvrJsonFile() {
-        val filename1 = "src/test/data/SF2024/CvrExport_15.json"
-        val filename = "/home/stormy/rla/cases/sf2024/CvrExport_23049.json"
+        val filename = "src/test/data/SF2024/CvrExport_15.json"
+        val filename2 = "/home/stormy/rla/cases/sf2024/CvrExport_23049.json"
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
         val dominionCvrs = if (result is Ok) result.unwrap()
             else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
         // println(dominionCvrs)
 
-        val manifestFile = "src/test/data/SF2024/BallotTypeContestManifest.json"
-        val manifest = readBallotTypeContestManifestJson(manifestFile).unwrap()
+        val contestManifest = readContestManifest("src/test/data/SF2024/manifests/ContestManifest.json")
 
-        val irvIds = readContestManifestForIRVids("src/test/data/SF2024/ContestManifest.json")
-
-        val cvrsNoManifest = dominionCvrs.import(irvIds, manifest)
-        println("no manifest ncvrs = ${cvrsNoManifest.size}")
-        repeat(5) { println(cvrsNoManifest[it]) }
+        val summary = dominionCvrs.import(contestManifest)
+        println("number of cvrs = ${summary.ncvrs}")
         /* val tabs1 = tabulateCvrs(cvrsNoManifest.iterator())
         tabs1.forEach { (key, tab) ->
             println("  $key == $tab")

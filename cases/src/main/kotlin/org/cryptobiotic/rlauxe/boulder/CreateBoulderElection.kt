@@ -203,7 +203,7 @@ fun ContestInfo.show() = buildString {
 }
 
 fun Contest.show2() = buildString {
-    appendLine("$id '$name': choiceFunction=${choiceFunction} nwinners=${info.nwinners}, Nc=$Nc, Np=$Np, winners=$winners)")
+    appendLine("$id '$name': choiceFunction=${choiceFunction} nwinners=${info.nwinners}, Nc=$Nc, Np=${Np()}, winners=$winners)")
     info.candidateNames.forEach { (name, id) ->
         appendLine("  $id '$name': votes=${votes[id]}") }
 }

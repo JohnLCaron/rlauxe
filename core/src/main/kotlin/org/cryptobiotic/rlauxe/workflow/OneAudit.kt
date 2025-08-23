@@ -65,7 +65,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             FixedEstimFn(.99 * cassorter.upperBound())
         } else {
             TruncShrinkage(
-                N = contest.Nc,
+                N = contest.Nc(),
                 withoutReplacement = true,
                 upperBound = cassorter.upperBound(),
                 d = auditConfig.pollingConfig.d,
@@ -75,7 +75,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         val testFn = AlphaMart(
             estimFn = estimFn,
-            N = contest.Nc,
+            N = contest.Nc(),
             withoutReplacement = true,
             riskLimit = auditConfig.riskLimit,
             upperBound = cassorter.upperBound(),

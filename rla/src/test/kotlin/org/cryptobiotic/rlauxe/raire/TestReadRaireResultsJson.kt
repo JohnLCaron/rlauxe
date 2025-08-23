@@ -202,6 +202,6 @@ class TestReadRaireResultsJson {
 
 fun RaireContestUnderAudit.makeAssorters(): List<RaireAssorter> {
     return this.rassertions.map {
-        RaireAssorter(contest.info(), it, (it.marginInVotes.toDouble() / contest.Nc))
+        RaireAssorter(contest.info(), it, (it.marginInVotes.toDouble() / contest.Nc()))
     }
 }

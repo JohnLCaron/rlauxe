@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportToCard
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CvrExport
@@ -25,34 +26,36 @@ const val sortedCardsFile = "sortedCards.csv"
 // read the CvrExport_* files out of the castVoteRecord JSON zip file, convert them to "CvrExport" CSV file.
 // use the contestManifestFile to add the undervotes, and to identify the IRV contests
 // write to "$topDir/$cvrExportCsvFile"
-fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestManifestFilename: String) {
+fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestManifestFilename: String): DominionCvrSummary {
     val stopwatch = Stopwatch()
     val outputFilename = "$topDir/$cvrExportCsvFile"
     val cvrExportCsvStream = FileOutputStream(outputFilename)
     cvrExportCsvStream.write(CvrExportCsvHeader.toByteArray())
 
-    val irvIds = readContestManifestForIRVids(castVoteRecordZip, contestManifestFilename)
-    val manifest = readBallotTypeContestManifestJsonFromZip(castVoteRecordZip, "BallotTypeContestManifest.json").unwrap()
-    println("IRV contests = $irvIds")
+    val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
+    println("IRV contests = ${contestManifest.irvContests}")
 
     var countFiles = 0
-    var countCards = 0
+    val summaryTotal = DominionCvrSummary()
     val zipReader = ZipReaderTour(
         castVoteRecordZip, silent = true, sortPaths = true,
         filter = { path -> path.toString().contains("CvrExport_") },
         visitor = { inputStream ->
-            countCards += convertCvrExportToCard(inputStream, cvrExportCsvStream, irvIds, manifest)
+            val summary = convertCvrExportToCard(inputStream, cvrExportCsvStream, contestManifest)
+            summaryTotal.add(summary)
             countFiles++
         },
     )
     zipReader.tourFiles()
     cvrExportCsvStream.close()
 
-    println("read $countCards cards in $countFiles files took $stopwatch")
+    println("read ${summaryTotal.ncvrs} cvrs in $countFiles files; took $stopwatch")
     println("took = $stopwatch")
+    return summaryTotal
 }
 
-fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, auditConfigIn: AuditConfig? = null, zip: Boolean = true) {
+// TODO add phantoms here
+fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true) {
     SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile").run()
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
@@ -72,17 +75,7 @@ fun createSfElectionFromCsvExport(
 ) {
     val stopwatch = Stopwatch()
 
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(castVoteRecordZip, contestManifestFilename)
-    val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-        else throw RuntimeException("Cannot read ContestManifestJson from $castVoteRecordZip/$contestManifestFilename err = $resultContestM")
-    if (show) println("contestManifest = $contestManifest")
-
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
-    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
-    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
-
-    val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
-    if (show) contestInfos.forEach { println("   ${it} nwinners = ${it.nwinners} choiceFunction = ${it.choiceFunction}") }
+    val contestInfos = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
     val regularVoteMap = makeContestVotesFromCsvExport(cvrCsvFilename)
     val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap)
@@ -122,8 +115,29 @@ fun createSfElectionFromCsvExport(
     println("took = $stopwatch")
 }
 
+fun makeContestInfos(
+    castVoteRecordZip: String,
+    contestManifestFilename: String,
+    candidateManifestFile: String,
+    show: Boolean = false
+): List<ContestInfo> {
+
+    val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(castVoteRecordZip, contestManifestFilename)
+    val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
+    else throw RuntimeException("Cannot read ContestManifestJson from $castVoteRecordZip/$contestManifestFilename err = $resultContestM")
+    if (show) println("contestManifest = $contestManifest")
+
+    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
+    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
+    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
+
+    val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
+    if (show) contestInfos.forEach { println("   ${it} nwinners = ${it.nwinners} choiceFunction = ${it.choiceFunction}") }
+    return contestInfos
+}
+
 fun makeContestInfos(contestManifest: ContestManifestJson, candidateManifest: CandidateManifestJson): List<ContestInfo> {
-    return contestManifest.List.map { contestM: ContestM ->
+    return contestManifest.List.map { contestM: ContestMJson ->
         val candidateNames =
             candidateManifest.List.filter { it.ContestId == contestM.Id }.associate { candidateM: CandidateM ->
                 Pair(candidateM.Description, candidateM.Id)
@@ -149,7 +163,7 @@ fun makeContestVotesFromCsvExport(cvrCsvFilename: String): Map<Int, ContestVotes
         val cvrExport: CvrExport = cvrIter.next()
         cvrExport.votes.forEach { (contestId, choiceIds) ->
             val contestVote = contestVotes.getOrPut(contestId) { ContestVotes(contestId) }
-            contestVote.countBallots++
+            contestVote.countBallots++  // each cvr is a cast ballot
             choiceIds.forEach {
                 val nvotes = contestVote.votes[it] ?: 0
                 contestVote.votes[it] = nvotes + 1
@@ -177,9 +191,10 @@ fun makeRegularContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, 
     contestInfos.forEach { info: ContestInfo ->
         val contestVote = contestVotes[info.id]
         if (contestVote == null) {
-            println("*** Contest '${info}' has no contestVotes") // TODO why ?
+            println("*** Contest '${info}' has no contestVotes")
         } else {
-            contests.add( Contest(info, contestVote.votes, contestVote.countBallots, 0)) // TODO phantoms
+            // TODO another source of Nc ? Currently the ElectionSummary StaxContest agrees with the cvr list
+            contests.add( Contest(info, contestVote.votes, contestVote.countBallots, contestVote.countBallots))
         }
     }
     return contests

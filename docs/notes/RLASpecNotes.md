@@ -28,6 +28,27 @@ For the contest under audit, a CVR or MVR either
 1. contains a (possibly invalid) vote in the contest (an element of V ∪ *bad*), which may be a null vote, or
 2. does not contain the contest, which is represented by notPresent
 
+### 1.3 Assertions and Assorters
+
+Definition 4. An assertion is a predicate on a multi-set of votes, including bad ones.
+
+Definition 5. An assorter is a mapping  
+
+        a : {0, 1} × (V ∪ bad) × (V ∪ bad) → [0, ua].
+
+        where a(i, c, m) is the assorter value of MVR m with claimed ballot style information i and CVR c
+
+### 1.4   Connecting Assertions and Election Outcomes
+
+Definition 6. An assertion validation function for a social choice function
+tally inputs
+
+        • an outcome O ∈ O and
+        • a set of assertions A,
+
+and outputs
+        true, if O is the unique outcome implied by A, given tally
+        false, otherwise.
 
 ### 1.5 Committing to Information About Cards
 
@@ -53,8 +74,7 @@ The Prover makes several commitments to untrusted data about the cards under aud
 
 First, Prover must commit to which ID will be retrieved when a given value in $\intrange{1}{\cardUpperBound}$ is sampled.
 
-Definition 7.
-The Prover's **ID commitment** is a function
+Definition 7.  The Prover's **ID commitment** is a function
 
     Find : 1..N → I   (I is an ID or ⊥)
 
@@ -118,8 +138,7 @@ But it is not trustworthy if cards can be added or altered.}
 In card-level comparison audits, the Prover makes an ID commitment and a **CVR commitment} in which it commits to reference vote for some or all IDs in the ID commitment.
 (The exposition here can be generalized from commitments about CVRs to commitments about reference values of assorters, which makes it possible to use the ONEAudit approach of \cite{stark2023overstatement} to leverage batch-level information.)
 
-Definition 8
-The Prover's **CVR commitment** is a function
+Definition 8. The Prover's **CVR commitment** is a function
 
     CVR : 1..N → (V ∪ *bad*)
 
@@ -135,8 +154,7 @@ In ballot-polling audits, the Prover may make untrusted claims about whether the
 This is called "card-style" information, and is indicated using a bit value.
 A one indicates that the contest is on the card; zero indicates that it is not.
 
-Definition 9
-The Prover's **style commitment** is a function
+Definition 9 The Prover's **style commitment** is a function
 
     style : 1..N → {0, 1}
 
@@ -150,3 +168,28 @@ When we have CVRs, this commitment can be left implicit because it can be assume
 %\begin{defn} \label{def:assorter-ref-commitment} The Prover's **assorter reference values} are provided, for each index, as a list of reference values, one for each assertion in $\assertions{}$.
 %   $\assorterRefs$ inputs a value $i$ in $[1,N]$ and outputs a list $(\refVal_1, \refVal_2, \ldots, \refVal_{|\assorters{}|} ).$
 %\end{defn}
+
+1.6 Connecting Assertions and Assorters
+
+Definition 10. Assorter a expresses assertion A under specific style and CVR
+commitments style and CVR when, for all possible sequences of vote_seq := (MVR(i)) i=1..N  drawn from (V ∪ bad),
+
+        1/N * Sigma( a(style(i), CVR(i), MVR(i)) ) > 1/2  implies A {vote_seq} is true  (eq 1)
+
+1.6.1 Assorters for style-based sampling
+
+A different way of dealing with style information is to consider only those
+cards that the prover claims to have the contest, but to take a worst-case assorter
+value if the card does not in fact contain the contest. This is appropriate for
+sampling strategies that depend on which ballots the prover claims to contain
+the contest. It is important to understand that these strategies do not sample
+only from those ballots, since the prover’s claims about style are untrusted, but
+rather from U ballots (U is the trusted upper bound on the total number of
+cards that contain the contest).
+
+Definition 11. Assorter a expresses-with-style assertion A under specific style and CVR commitments style and CVR
+when, for all possible sequences of vote_seq that respect the contest upper bound U, for all index sets I of size U that contain all
+the indices i s.t. style(i) = 1,
+
+        1/U * Sigma( a(style(i), CVR(i), MVR(i)) ) > 1/2  implies A {vote_seq} is true  (eq 2)
+

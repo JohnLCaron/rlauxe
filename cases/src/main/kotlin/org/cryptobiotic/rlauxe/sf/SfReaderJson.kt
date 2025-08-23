@@ -14,10 +14,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+data class ContestManifest(val contests: Map<Int, ContestMJson>, val irvContests: Set<Int>)
+
+
 @Serializable
 data class ContestManifestJson(
     val Version: String,
-    val List: List<ContestM>,
+    val List: List<ContestMJson>,
 ) {
     override fun toString() = buildString {
         appendLine("ContestManifestJson(Version='$Version')")
@@ -26,7 +29,7 @@ data class ContestManifestJson(
 }
 
 @Serializable
-data class ContestM(
+data class ContestMJson(
     val Description: String,
     val Id: Int,
     val ExternalId: Int,
@@ -72,28 +75,34 @@ fun readContestManifestJsonFromZip(zipFilename: String, contestManifestFilename:
     return readContestManifestJson(input, contestManifestFilename)
 }
 
-fun readContestManifestForIRVids(filename: String): Set<Int>{
+fun readContestManifest(filename: String): ContestManifest {
     val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(filename)
-    val contestManifest = if (result is Ok) result.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from ${filename} err = $result")
-    var irvIds = mutableSetOf<Int>()
-    contestManifest.List.forEach {
+    val contestManifestJson = if (result is Ok) result.unwrap()
+        else throw RuntimeException("Cannot read ContestManifestJson from ${filename} err = $result")
+
+    val contests = mutableMapOf<Int, ContestMJson>()
+    val irvIds = mutableSetOf<Int>()
+    contestManifestJson.List.forEach {
+        contests[it.Id] = it
         if (it.NumOfRanks > 1) irvIds.add(it.Id)
     }
-    return irvIds
+    return ContestManifest(contests, irvIds)
 }
 
-fun readContestManifestForIRVids(zipFilename: String, contestManifestFilename: String): Set<Int>{
+fun readContestManifestFromZip(zipFilename: String, contestManifestFilename: String): ContestManifest {
     val reader = ZipReader(zipFilename)
     val input = reader.inputStream(contestManifestFilename)
     val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(input, contestManifestFilename)
-    val contestManifest = if (result is Ok) result.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from inputStream err = $result")
-    var irvIds = mutableSetOf<Int>()
-    contestManifest.List.forEach {
+    val contestManifestJson = if (result is Ok) result.unwrap()
+        else throw RuntimeException("Cannot read ContestManifestJson from inputStream err = $result")
+
+    val contests = mutableMapOf<Int, ContestMJson>()
+    val irvIds = mutableSetOf<Int>()
+    contestManifestJson.List.forEach {
+        contests[it.Id] = it
         if (it.NumOfRanks > 1) irvIds.add(it.Id)
     }
-    return irvIds
+    return ContestManifest(contests, irvIds)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

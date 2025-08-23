@@ -21,7 +21,7 @@ class TestOneAuditIrvContest {
         )
         val Nc = 212
         val Np = 1
-        val contest = RaireContest(info, winners=listOf(1), iNc=Nc, Np=Np)
+        val contest = RaireContest(info, winners=listOf(1), Nc=Nc, Ncast=Nc-Np)
 
         // val contestOA = OneAuditContest.make(contest, cvrVotes, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
         val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?

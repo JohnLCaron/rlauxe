@@ -14,8 +14,8 @@ fun makeContestFromCvrs(
     return Contest(
         info,
         votes[info.id] ?: emptyMap(),
-        iNc=ncards[info.id] ?: 0,
-        Np=0
+        Nc=ncards[info.id] ?: 0,
+        Ncast=0 // TODO
     )
 }
 
@@ -82,8 +82,8 @@ fun makeContestsFromCvrs(
                     nwinners=1,
                 ),
                 voteInput = votes[contestId]!!,
-                iNc = cards[contestId]!!,
-                Np=0, // TODO
+                Nc = cards[contestId]!!,
+                Ncast=0, // TODO
             )
         )
     }

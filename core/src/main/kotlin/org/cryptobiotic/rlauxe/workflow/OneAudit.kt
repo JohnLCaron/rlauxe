@@ -3,20 +3,18 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 class OneAudit(
     val auditConfig: AuditConfig,
-    contestsToAudit: List<OneAuditContest>, // the contests you want to audit
+    val contestsUA: List<OAContestUnderAudit>, // the contests you want to audit
     val mvrManager: MvrManagerClcaIF,
 ): RlauxAuditIF {
-    private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-        contestsUA = contestsToAudit.map { it.makeContestUnderAudit() }
 
         // check contests well formed etc
         // check(auditConfig, contests)

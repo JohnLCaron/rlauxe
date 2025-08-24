@@ -10,7 +10,7 @@ class TestContest {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         assertEquals(listOf(0, 1), info.candidateIds)
         assertEquals(1, info.nwinners)
-        assertEquals("'testContestInfo' (0) candidates={cand0=0, cand1=1} voteForN=1", info.toString())
+        assertEquals("'testContestInfo' (0) candidates=[0, 1] choiceFunction=PLURALITY nwinners=1 voteForN=1", info.toString())
 
         val mess = assertFailsWith<IllegalArgumentException> {
             ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.SUPERMAJORITY)
@@ -109,25 +109,30 @@ class TestContest {
             contest.toString()
         )
 
+        val mess0 = assertFailsWith<IllegalArgumentException> {
+            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=219)
+        }.message
+        assertNotNull(mess0)
+        assertEquals("contest 0 Ncast= 219 must be <= Nc=211", mess0)
+
         val mess1 = assertFailsWith<IllegalArgumentException> {
             Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), Nc=222, Ncast=222)
         }.message
         assertEquals("'3' not found in contestInfo candidateIds [0, 1, 2]", mess1)
 
-        val mess = assertFailsWith<IllegalArgumentException> {
-            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=219)
+        val mess2 = assertFailsWith<IllegalArgumentException> {
+            Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=209)
         }.message
-        assertNotNull(mess)
-        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
+        assertNotNull(mess2)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess2)
 
-        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211,Ncast=220)
+        val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211,Ncast=210)
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
         assertEquals("testContestInfo (0) Nc=211 Np=1 votesAndUndervotes={1=108, 0=100, 2=0, 3=2}", contest.toString())
-        assertEquals("Contest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2} voteForN=1, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votesAndUndervotes={1=108, 0=100, 2=0, 3=2}, winnerNames=[cand1], winners=[1], losers=[0, 2])",
+        assertEquals( "Contest(info='testContestInfo' (0) candidates=[0, 1, 2] choiceFunction=PLURALITY nwinners=1 voteForN=1, Nc=211, Np=1, id=0, name='testContestInfo', choiceFunction=PLURALITY, ncandidates=3, votesAndUndervotes={1=108, 0=100, 2=0, 3=2}, winnerNames=[cand1], winners=[1], losers=[0, 2])",
             contest.show())
-
 
         // assertEquals((211-208-1)/211.toDouble(), contest.undervoteRate())
         assertEquals(1/211.toDouble(), contest.phantomRate())
@@ -276,8 +281,8 @@ class TestContest {
         """.replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.showCandidates())
 
-        val expectedShow = """Contest 'testContestInfo' (0) votesAndUndervotes={1=108, 0=100, 2=0, 3=3}
- margin=0.0379 recount=0.0741 Nc=211 Np=0
+        val expectedShow = """Contest 'testContestInfo' (0) votesAndUndervotes={1=108, 0=100, 2=0, 3=1}
+ margin=0.0379 recount=0.0741 Nc=211 Np=2
  choiceFunction=PLURALITY nwinners=1, winners=[1]
    0 'cand0': votes=100
    1 'cand1': votes=108
@@ -302,7 +307,7 @@ class TestContest {
     @Test
     fun testContestUnderAuditExceptions() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=222)
+        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=210)
 
         val contestUAc = ContestUnderAudit(contest, isComparison = false)
         val mess4 = assertFailsWith<RuntimeException> {

@@ -1,8 +1,11 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.*
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import kotlin.Int
 
 /*
 // class OneAuditContest (
@@ -67,59 +70,84 @@ fun BallotPoolJson.import() = BallotPool(
 )
 
 // open class OAContestUnderAudit(
-//    val contestOA: OneAuditContest,
+//    contest: ContestIF,
 //    hasStyle: Boolean = true
-//): ContestUnderAudit(contestOA, isComparison=true, hasStyle=hasStyle) {
+//): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle) {
 
+/*
 @Serializable
 data class OAContestUnderAuditJson(
-    val contestUA: ContestUnderAuditJson,
+    val contest: ContestIFJson,
     val contestOA: ContestIFJson,
 )
 
 fun OAContestUnderAudit.publishOAJson() = OAContestUnderAuditJson(
-    (this as ContestUnderAudit).publishJson(),
+    this.contest.publishJson(),
         this.contestOA.publishJson(),
     )
 
 fun OAContestUnderAuditJson.import(): OAContestUnderAudit {
-    val contestUA = this.contestUA.import()
+    val contest = this.contest.import()
     val contestOA = this.contestOA.import(contestUA.contest.info()) as OneAuditContest
 
-    val result = OAContestUnderAudit(contestOA, contestUA.hasStyle)
+    val result = OAContestUnderAudit(contest, contestUA.hasStyle)
     result.pollingAssertions = contestUA.pollingAssertions
     result.clcaAssertions = contestUA.clcaAssertions
     result.preAuditStatus = contestUA.preAuditStatus
     return result
-}
+} */
 
 //////////////////
-// class OneAuditIrvContest(
-//    contestOA: OneAuditContest,
+// class OAIrvContestUA(
+//    contest: RaireContest,
 //    hasStyle: Boolean = true,
 //    val rassertions: List<RaireAssertion>,
-//): OAContestUnderAudit(contestOA, hasStyle=hasStyle) {
+//): OAContestUnderAudit(contest, hasStyle=hasStyle) {
+
 @Serializable
 data class OAIrvJson(
-    val contestUA: ContestUnderAuditJson,
-    val contestOA: ContestIFJson,
+    val raireContest: ContestIFJson,
     val rassertions: List<RaireAssertionJson>,
+    val contestOA: ContestUnderAuditJson,
 )
 
-fun OneAuditIrvContest.publishOAIrvJson() = OAIrvJson(
+fun OAIrvContestUA.publishOAIrvJson() = OAIrvJson(
+    this.contest.publishJson(),
+    rassertions.map { it.publishJson() },
     (this as ContestUnderAudit).publishJson(),
-    this.contestOA.publishJson(),
-    rassertions.map { it.publishJson() }
 )
 
-fun OAIrvJson.import(): OneAuditIrvContest {
-    val contestUA = this.contestUA.import()
-    val contestOA = this.contestOA.import(contestUA.contest.info()) as OneAuditContest
+fun OAIrvJson.import(): OAIrvContestUA {
+    val contestOA = this.contestOA.import(isOA = true) as OAContestUnderAudit
+    val info = contestOA.contest.info()
+    val raireContest = this.raireContest.import(info) as RaireContest
 
-    val result = OneAuditIrvContest(contestOA, contestUA.hasStyle, rassertions.map { it.import() })
-    result.pollingAssertions = contestUA.pollingAssertions
-    result.clcaAssertions = contestUA.clcaAssertions
-    result.preAuditStatus = contestUA.preAuditStatus
+    val result = OAIrvContestUA(raireContest, contestOA.hasStyle, rassertions.map { it.import() })
+    result.pollingAssertions = contestOA.pollingAssertions
+    result.clcaAssertions = contestOA.clcaAssertions
+    result.preAuditStatus = contestOA.preAuditStatus
     return result
 }
+
+// data class AssortAvgsInPools (
+//    val contest:Int,
+//    val assortAverage: Map<Int, Double>, // poolId -> average assort value
+//)
+@Serializable
+data class AssortAvgsInPoolsJson(
+    val contest: Int,
+    val assortAverage: Map<Int, Double>,
+)
+
+fun AssortAvgsInPools.publishJson() = AssortAvgsInPoolsJson(
+    contest,
+    assortAverage,
+)
+
+fun AssortAvgsInPoolsJson.import() = AssortAvgsInPools(
+    contest,
+    assortAverage,
+)
+
+
 

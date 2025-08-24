@@ -5,12 +5,12 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 
-//open class ClcaAssorter(
+// open class ClcaAssorter(
 //    val info: ContestInfo,
 //    val assorter: AssorterIF,   // A
-//    val avgCvrAssortValue: Double,    // Ā(c) = average CVR assort value
+//    val assortAverageFromCvrs: Double?,    // Ā(c) = average assort value measured from CVRs
 //    val hasStyle: Boolean = true,
-//    val check: Boolean = true, // TODO get rid of
+//    val check: Boolean = true,
 //)
 
 // class OAClcaAssorter(
@@ -19,32 +19,39 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 //    avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
 //) : ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue)
 
+// class OneAuditClcaAssorter(
+//    info: ContestInfo,
+//    assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
+//    hasStyle: Boolean = true,
+//    val poolAverages: AssortAvgsInPools,
+//) : ClcaAssorter(info, assorter, null, hasStyle = hasStyle) {
+
 @Serializable
 data class ClcaAssorterJson(
     val className: String,
-    val contestOA: ContestIFJson?, // duplicate storage, argghh; TODO why arent we using ContestIF ??
     val assorter: AssorterIFJson,
     val avgCvrAssortValue: Double?,
     val hasStyle: Boolean,
+    val poolAverages: AssortAvgsInPoolsJson?,
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
     return if (this is OneAuditClcaAssorter) {
         ClcaAssorterJson(
             "OAClcaAssorter",
-            this.contestOA.publishJson(),
             this.assorter.publishJson(),
             this.assortAverageFromCvrs,
-            true, // TODO
+            true,
+            poolAverages.publishJson()
         )
 
     } else {
         ClcaAssorterJson(
             "ClcaAssorter",
-            null,
             this.assorter.publishJson(),
             this.assortAverageFromCvrs,
             this.hasStyle,
+            null,
         )
     }
 }
@@ -52,22 +59,21 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
 fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
     return when (this.className) {
         "ClcaAssorter" ->
-            return ClcaAssorter(
+            ClcaAssorter(
                 info,
                 this.assorter.import(info),
                 this.avgCvrAssortValue,
                 this.hasStyle,
             )
 
-        "OAClcaAssorter" -> {
-            // val innerContest = (contest as OneAuditContest).contest
+        "OAClcaAssorter" ->
             OneAuditClcaAssorter(
-                // this.contestOA!!.import(innerContest),
-                this.contestOA!!.import(info) as OneAuditContest,
+                info,
                 this.assorter.import(info),
-                this.avgCvrAssortValue,
+                this.hasStyle,
+                poolAverages!!.import()
             )
-        }
+
         else -> throw RuntimeException()
     }
 }

@@ -42,19 +42,7 @@ class TestRaireJson {
     //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     @Test
     fun testContestUARoundtrip() {
-        val info = ContestInfo(
-            name = "AvB",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.IRV,
-            candidateNames = listToMap("A", "B", "C", "D"),
-        )
-        val contest = RaireContest(info, listOf(1), 42, 33)
-
-        val assert1 = RaireAssertion(1, 0, 42, RaireAssertionType.winner_only)
-        val assert2 = RaireAssertion(1, 2, 422, RaireAssertionType.irv_elimination,
-            listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
-
-        val target = RaireContestUnderAudit(contest, 1, listOf(assert1, assert2))
+        val target = makeRaireUA()
 
         val json = target.publishRaireJson()
         val roundtrip = json.import()
@@ -93,5 +81,21 @@ class TestRaireJson {
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
     }
+}
 
+
+fun makeRaireUA(): RaireContestUnderAudit {
+    val info = ContestInfo(
+        name = "AvB",
+        id = 0,
+        choiceFunction = SocialChoiceFunction.IRV,
+        candidateNames = listToMap("A", "B", "C", "D"),
+    )
+    val contest = RaireContest(info, listOf(1), 42, 33)
+
+    val assert1 = RaireAssertion(1, 0, 42, RaireAssertionType.winner_only)
+    val assert2 = RaireAssertion(1, 2, 422, RaireAssertionType.irv_elimination,
+        listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
+
+    return RaireContestUnderAudit(contest, 1, listOf(assert1, assert2))
 }

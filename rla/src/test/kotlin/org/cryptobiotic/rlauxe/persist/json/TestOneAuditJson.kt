@@ -4,13 +4,14 @@ import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditIrvContest
-import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
+import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -43,7 +44,7 @@ class TestOneAuditJson {
         assertNotNull(roundtrip)
         assert(roundtrip is ClcaAssertion)
         println((target as ClcaAssertion).checkEquals(roundtrip as ClcaAssertion))
-        assertEquals((target.cassorter as OneAuditClcaAssorter).contestOA, (roundtrip.cassorter as OneAuditClcaAssorter).contestOA)
+        assertEquals((target.cassorter as OneAuditClcaAssorter).info, (roundtrip.cassorter as OneAuditClcaAssorter).info)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
     }
@@ -51,10 +52,10 @@ class TestOneAuditJson {
     @Test
     fun testContestRoundtrip() {
         val contestUA = makeTestContestOA()
-        val target = contestUA.contestOA
+        val target = contestUA.contest
 
         val json = target.publishJson()
-        val roundtrip = json.import(target.contest.info())
+        val roundtrip = json.import(target.info())
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -64,16 +65,15 @@ class TestOneAuditJson {
     fun testContestUARoundtrip() {
         val target: OAContestUnderAudit = makeTestContestOA()
 
-        val json = target.publishOAJson()
-        val roundtrip = json.import()
+        val json = target.publishJson()
+        val roundtrip = json.import(isOA = true)
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
     }
 
     fun makeTestContestOA(): OAContestUnderAudit {
-        val contest = makeContestOA(23000, 21000, cvrPercent = .70, undervotePercent=.01, phantomPercent=.01)
-        val contestOA = contest.makeContestUnderAudit()
+        val (contestOA, testCvrs) = makeOneContestUA(23000, 21000, cvrPercent = .70, undervotePercent=.01, phantomPercent=.01)
         contestOA.preAuditStatus = TestH0Status.ContestMisformed
         val minAllAsserter = contestOA.minClcaAssertion()
         assertNotNull(minAllAsserter)
@@ -81,9 +81,13 @@ class TestOneAuditJson {
         return contestOA
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+
+
     @Test
-    fun testContestOAIrvRoundtrip() {
-        val target = makeTestContestOAIrv()
+    fun testOAIrvRoundtrip() {
+        val raireContestUA = makeTestContestOAIrv()
+        val target = OAIrvContestUA(raireContestUA.contest as RaireContest, true,  raireContestUA.rassertions)
 
         val json = target.publishOAIrvJson()
         val roundtrip = json.import()
@@ -92,7 +96,8 @@ class TestOneAuditJson {
         assertTrue(roundtrip.equals(target))
     }
 
-    fun makeTestContestOAIrv(): OneAuditIrvContest {
+    fun makeTestContestOAIrv(): OAIrvContestUA {
+
         val info = ContestInfo(
             "TestOneAuditIrvContest",
             0,
@@ -102,19 +107,34 @@ class TestOneAuditJson {
         )
         val Nc = 212
         val Np = 1
-        val contest = RaireContest(info, winners=listOf(1), Nc=Nc, Ncast=Nc-Np)
+        val rcontest = RaireContest(info, winners=listOf(1), Nc=Nc, Ncast=Nc-Np)
+
+        val assert1 = RaireAssertion(1, 0, 42, RaireAssertionType.winner_only)
+        val assert2 = RaireAssertion(1, 2, 422, RaireAssertionType.irv_elimination,
+            listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
+
+        val oaIrv =  OAIrvContestUA(rcontest, true, listOf(assert1, assert2))
+
+        // add pools
 
         // val contestOA = OneAuditContest.make(contest, cvrVotes, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
-        val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?
-        val cvrNc = 200
-
+        //val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?
+        //val cvrNc = 200
         val pool = BallotPool("swim", 42, 0, 11, mapOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 0))
-        val contestOA = OneAuditContest.make(contest, cvrVotes, cvrNc, listOf(pool))
+        val pools = listOf(pool)
 
-        val contestOAIrv =  OneAuditIrvContest(contestOA, true, emptyList<RaireAssertion>())
-        contestOAIrv.makeClcaAssertionsFromReportedMargin()
+        val clcaAssertions = oaIrv.pollingAssertions.map { assertion ->
+            val passort = assertion.assorter
+            val pairs = pools.map { pool ->
+                Pair(pool.poolId, 0.55)
+            }
+            val poolAvgs = AssortAvgsInPools(assertion.info.id, pairs.toMap())
+            val clcaAssertion = OneAuditClcaAssorter(assertion.info, passort, true, poolAvgs)
+            ClcaAssertion(assertion.info, clcaAssertion)
+        }
+        oaIrv.clcaAssertions = clcaAssertions
 
-        return contestOAIrv
+        return oaIrv
     }
 
 }

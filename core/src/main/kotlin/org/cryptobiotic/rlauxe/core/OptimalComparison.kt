@@ -10,6 +10,7 @@ import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import kotlin.math.ln
 import kotlin.math.max
+import kotlin.math.min
 
 // betting functions that use Kelly optimization of lambda parameter for the BettingFn
 
@@ -98,7 +99,8 @@ class AdaptiveBetting(
     fun estimateRate(d: Int, apriori: Double, sampleRate: Double, sampleNum: Int, eps: Double): Double {
         //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
         val est = (d * apriori + sampleNum * sampleRate) / (d + sampleNum - 1)
-        return max(est, eps) // lower bound on the estimated rate
+        val lower =  max(est, eps) // lower bound on the estimated rate
+        return min(1.0, lower) // upper bound on the estimated rate
     }
 }
 

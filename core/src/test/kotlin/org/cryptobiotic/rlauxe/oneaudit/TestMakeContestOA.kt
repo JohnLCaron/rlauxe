@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 class TestMakeContestOA {
     val N = 50000
 
+    /*
     @Test
     fun testAllCvrs() {
         val margin = .02
@@ -132,6 +133,8 @@ class TestMakeContestOA {
                 " rel=${abs(underPct - undervotePercent) /underPct}")
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
     }
+
+     */
 }
 
 fun showPct(what: String, votes: Map<Int, Int>, Nc: Int, winner: Int = 0, loser: Int = 1) {

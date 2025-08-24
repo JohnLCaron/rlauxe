@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+// import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
@@ -30,7 +30,7 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
 // check winners are correctly formed
 fun checkWinners(contestUA: ContestUnderAudit, ) {
     val contest = if (contestUA.contest is Contest) contestUA.contest
-        else if (contestUA.contest is OneAuditContest && contestUA.contest.contest is Contest) contestUA.contest.contest
+        // else if (contestUA.contest is OneAuditContest && contestUA.contest.contest is Contest) contestUA.contest.contest
         else null
     if (contest == null) return
 
@@ -69,6 +69,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
     val votes = tabulateCvrs(cvrs)
+
     if (show) {
         println("tabulateCvrs")
         votes.toSortedMap().forEach { (key, value) ->
@@ -76,24 +77,26 @@ fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cv
         }
     }
     contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
-        val contestVotes = (contestUA.contest as Contest).votes
+        val contestVotes = contestUA.contest.votes()!!
         val contestTab = votes[contestUA.id]
         if (contestTab == null) {
-            println("*** contest ${contestUA.contest} not found in tabulated Cvrs")
+            println("*** contest ${contestUA.id} not found in tabulated Cvrs")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         } else {
-            // add in the pool votes
+            /* add in the pool votes
             if (contestUA.contest is OneAuditContest) {
                 contestUA.contest.pools.values.forEach { pool ->
                     contestTab.addVotes(pool.votes)
                 }
-            }
+            } */
 
             if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
-                println("*** contest ${contestUA.contest} votes disagree with cvrs = $contestTab marking as ContestMisformed")
+                println("*** contest ${contestUA.id} votes disagree with cvrs = $contestTab marking as ContestMisformed")
+                println("contestVotes = $contestVotes")
+                println("tabulation   = ${contestTab.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             } else if (show) {
-                println("contest ${contestUA.contest} cvrVotes = $contestTab")
+                println("contest ${contestUA.id} cvrVotes = $contestTab")
             }
         }
     }

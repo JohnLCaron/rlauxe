@@ -11,8 +11,8 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditIrvContest
+// import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
+import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
@@ -123,7 +123,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.Ncast,
                 this.roundsPaths.map { it.publishJson() },
             )
-        is OneAuditContest ->
+        /* is OneAuditContest ->
             ContestIFJson(
                 "OneAuditContest",
                 this.cvrVotes,
@@ -133,7 +133,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 null,
                 this.contest.publishJson(),
                 this.pools.values.map { it.publishJson()},
-            )
+            ) */
         else -> throw RuntimeException("unknown contest type ${this.javaClass.simpleName} = $this")
     }
 }
@@ -159,7 +159,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
             }
             rcontest
         }
-        "OneAuditContest" -> {
+        /* "OneAuditContest" -> {
             val contest = this.contestJson!!.import(info)
             OneAuditContest.make(
                 contest,
@@ -167,7 +167,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.Nc,
                 this.pools!!.map { it.import() },
             )
-        }
+        } */
         else -> throw RuntimeException()
     }
 }
@@ -199,18 +199,13 @@ fun IrvRoundsPathJson.import() = IrvRoundsPath(
 //    val isComparison: Boolean = true,
 //    val hasStyle: Boolean = true,
 //) {
-//    val id = contest.info.id
-//    val name = contest.info.name
-//    val choiceFunction = contest.info.choiceFunction
-//    val ncandidates = contest.info.candidateIds.size
-//    val Nc = contest.Nc
-//    val Np = contest.Np
-//
-//    var pollingAssertions: List<Assertion> = emptyList()
-//    var clcaAssertions: List<ClcaAssertion> = emptyList()
+//    var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
+//    var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
+//    var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
+
 @Serializable
 data class ContestUnderAuditJson(
-    val info: ContestInfoJson, // TODO why? Is this where the infos are kept ??
+    val info: ContestInfoJson, // This is where the infos are kept. TODO store separate ??
     val contest: ContestIFJson,
     val isComparison: Boolean,
     val hasStyle: Boolean,
@@ -231,13 +226,10 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
     )
 }
 
-fun ContestUnderAuditJson.import(): ContestUnderAudit {
+fun ContestUnderAuditJson.import(isOA: Boolean): ContestUnderAudit {
     val info = this.info.import()
-    val contestUA = ContestUnderAudit(
-        this.contest.import(info),
-        this.isComparison,
-        this.hasStyle,
-    )
+    val contestUA = if (isOA) OAContestUnderAudit(this.contest.import(info), this.hasStyle)
+            else ContestUnderAudit(this.contest.import(info), this.isComparison, this.hasStyle)
     contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
     contestUA.preAuditStatus = this.status
@@ -249,31 +241,34 @@ fun ContestUnderAuditJson.import(): ContestUnderAudit {
 data class ContestsUnderAuditJson(
     val contestsUnderAudit: List<ContestUnderAuditJson>,
     val rcontestsUnderAudit: List<RaireContestUnderAuditJson>,
-    val oacontestsUnderAudit: List<OAContestUnderAuditJson>,
+    val oacontestsUnderAudit: List<ContestUnderAuditJson>,
+    val oarcontestsUnderAudit: List<OAIrvJson>,
 )
 
 fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
     val contests = mutableListOf<ContestUnderAuditJson>()
     val rcontests = mutableListOf<RaireContestUnderAuditJson>()
-    val oacontests = mutableListOf<OAContestUnderAuditJson>()
+    val oacontests = mutableListOf<ContestUnderAuditJson>()
+    val oarcontests = mutableListOf<OAIrvJson>()
     this.forEach {
         if (it is RaireContestUnderAudit) {
             rcontests.add( it.publishRaireJson())
-        } else if (it is OneAuditIrvContest) {
-            oacontests.add( it.publishOAJson())
+        } else if (it is OAIrvContestUA) {
+            oarcontests.add( it.publishOAIrvJson())
         } else if (it is OAContestUnderAudit) {
-            oacontests.add( it.publishOAJson())
+            oacontests.add( it.publishJson())
         } else {
             contests.add( it.publishJson())
         }
     }
-    return ContestsUnderAuditJson(contests, rcontests, oacontests)
+    return ContestsUnderAuditJson(contests, rcontests, oacontests, oarcontests)
 }
 
 fun ContestsUnderAuditJson.import() : List<ContestUnderAudit> {
-    return this.contestsUnderAudit.map { it.import() } +
+    return this.contestsUnderAudit.map { it.import(isOA = false) } +
             this.rcontestsUnderAudit.map { it.import() } +
-            this.oacontestsUnderAudit.map { it.import() }
+            this.oacontestsUnderAudit.map { it.import(isOA = true) } +
+            this.oarcontestsUnderAudit.map { it.import() }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

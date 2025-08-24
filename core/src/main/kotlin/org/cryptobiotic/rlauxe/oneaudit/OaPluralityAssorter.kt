@@ -5,8 +5,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
 
-class OneAuditPluralityAssorter {
-}
+// not used but for testing
 
 // OneAuditComparisonAssorter for contest St. Vrain and Left Hand Water Conservancy District Ballot Issue 7C (64)
 //  assorter= winner=0 loser=1 reportedMargin=0.6556 reportedMean=0.8278
@@ -26,7 +25,7 @@ class OneAuditPluralityAssorter {
 // This is the primitive assorter whose average assort values agrees with the reportedMargin.
 // TODO check against SHANGRLA
 // TODO not really used
-class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: Int, reportedMargin: Double):
+class OaPluralityAssorter(val contestOA: OneAuditContest1, winner: Int, loser: Int, reportedMargin: Double):
     PluralityAssorter(contestOA.info, winner, loser, reportedMargin) {
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
@@ -49,7 +48,7 @@ class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: In
     }
 
     companion object {
-        fun makeFromContestVotes(contestOA: OneAuditContest, winner: Int, loser: Int): OaPluralityAssorter {
+        fun makeFromContestVotes(contestOA: OneAuditContest1, winner: Int, loser: Int): OaPluralityAssorter {
             val contest = contestOA.contest as Contest
             val winnerVotes = contest.votes[winner] ?: 0
             val loserVotes = contest.votes[loser] ?: 0
@@ -57,7 +56,7 @@ class OaPluralityAssorter(val contestOA: OneAuditContest, winner: Int, loser: In
             return OaPluralityAssorter(contestOA, winner, loser, reportedMargin)
         }
 
-        fun makeFromClcaAssorter(oaClcaAssorter: OneAuditClcaAssorter) =
+        fun makeFromClcaAssorter(oaClcaAssorter: OneAuditClcaAssorter1) =
             makeFromContestVotes(
                 oaClcaAssorter.contestOA,
                 oaClcaAssorter.assorter.winner(),

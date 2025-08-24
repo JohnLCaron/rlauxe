@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
@@ -66,6 +65,12 @@ interface ContestIF {
     fun phantomRate() = Np() / Nc().toDouble()
     fun isIRV() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
+
+    fun votes() : Map<Int, Int>? {
+        if (this is Contest) return this.votes
+        // if (this is OneAuditContest) return this.contest.votes()
+        return null
+    }
 }
 
 //    When we have styles and a complete CardLocationManifest, we can calculate Nb_c = physical ballots containing contest C.
@@ -113,6 +118,8 @@ open class Contest(
     val undervotes: Int
 
     init {
+        require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc=$Nc" }
+
         // construct votes, adding 0 votes if needed
         voteInput.forEach {
             require(info().candidateIds.contains(it.key)) {
@@ -133,11 +140,11 @@ open class Contest(
             }
         }
         val nvotes = votes.values.sum()
-       /* if (info.choiceFunction != SocialChoiceFunction.IRV) {
-            require(nvotes <= info.voteForN * (iNc - Np)) {
-                "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=$Np) = ${info.voteForN * (Nc - Np)}"
+       if (info.choiceFunction != SocialChoiceFunction.IRV) {
+            require(nvotes <= info.voteForN * (Nc - Np())) {
+                "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=${Np()}) = ${info.voteForN * (Nc - Np())}"
             }
-        } */
+        }
         undervotes = info.voteForN * (Nc - Np()) - nvotes   // C1
 
         // (undervotes + nvotes) = voteForN * (Nc - Np)
@@ -254,7 +261,7 @@ open class ContestUnderAudit(
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init is done
-        if (contest is Contest || (contest is OneAuditContest && (contest.contest is Contest))) {
+        if (contest is Contest) { // || (contest is OneAuditContest && (contest.contest is Contest))) {
             pollingAssertions = makePollingAssertions()
         }
         // So Raire has to add its own asserttions
@@ -263,7 +270,7 @@ open class ContestUnderAudit(
     private fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes
-            is OneAuditContest -> (contest.contest as Contest).votes
+            // is OneAuditContest -> (contest.contest as Contest).votes
             else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
         }
 
@@ -364,8 +371,8 @@ open class ContestUnderAudit(
     open fun recountMargin(): Double {
         var pct = -1.0
         val minAssertion: Assertion = minAssertion() ?: return pct
-        if (contest is Contest) {
-            val votes = contest.votes
+        if (contest.votes() != null) {
+            val votes = contest.votes()!!
             val winner = votes[minAssertion.assorter.winner()]!!
             val loser = votes[minAssertion.assorter.loser()]!!
             pct = (winner - loser) / (winner.toDouble())
@@ -384,14 +391,21 @@ open class ContestUnderAudit(
     }
 
     open fun showCandidates() = buildString {
-        val votes = if (contest is Contest) contest.votes else emptyMap()
-        contest.info().candidateNames.forEach { (name, id) ->
-            appendLine("   $id '$name': votes=${votes[id]}") }
-        append("    Total=${votes.values.sum()}")
+        if (contest.votes() != null) {
+            val votes = contest.votes()!!
+            contest.info().candidateNames.forEach { (name, id) ->
+                appendLine("   $id '$name': votes=${votes[id]}")
+            }
+            append("    Total=${votes.values.sum()}")
+        } else {
+            contest.info().candidateNames.forEach { (name, id) ->
+                appendLine("   $id '$name'")
+            }
+        }
     }
 
     open fun showShort() = buildString {
-        val votes = if (contest is Contest) contest.votes.toString() else "N/A"
+        val votes = contest.votes() ?: "N/A"
         append("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
     }
 

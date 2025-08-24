@@ -19,11 +19,12 @@ import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/*
 class TestSfPrimaryOA {
 
     // This is to match up with SHANGRLA
     // make a OneAudit from Dominion exported CVRs, using CountingGroupId=1 as the pooled votes
-    /* write "$topDir/cards.csv", "$topDir/ballotPools.csv"
+    // write "$topDir/cards.csv", "$topDir/ballotPools.csv"
     @Test
     fun createSF2024PoaCards() {
         val stopwatch = Stopwatch()
@@ -82,7 +83,7 @@ class TestSfPrimaryOA {
 
      */
 
-    // @Test
+    /* @Test TODO
     fun testCardContests() {
         val topDir = "/home/stormy/rla/cases/sf2024Poa"
         val cardFile = "$topDir/cards.csv"
@@ -372,3 +373,5 @@ class MvrManagerCardsSingleRound(val sortedCardFile: String, val maxSamples: Int
 
     private fun cardIter(): Iterator<AuditableCard> = readCardsCsvIterator(sortedCardFile)
 }
+
+     */

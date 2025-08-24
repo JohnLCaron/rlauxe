@@ -164,7 +164,7 @@ data class ContestTestDataNWinners(
         println("    nvotes = ${nvotes} undervotes= ${2*contestTab.ncards-nvotes-2*phantomCount}")
 
         val votesFiltered = contestTab.votes.filter { it.key != ncands }
-        val contest = Contest(this.info, votesFiltered, contestTab.ncards, this.phantomCount)
+        val contest = Contest(this.info, votesFiltered, contestTab.ncards, contestTab.ncards - this.phantomCount)
 
         return Pair(cvrs, contest)
     }

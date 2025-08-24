@@ -209,7 +209,7 @@ data class ContestTestData(
             svotes = svotes.sortedBy { it.second }.reversed().toMutableList()
             if (debugAdjust) println()
         }
-        val contest = Contest(this.info, svotes.toMap(), Nc, this.phantomCount)
+        val contest = Contest(this.info, svotes.toMap(), Nc, Nc - this.phantomCount)
 
         svotes.add(Pair(ncands, underCount)) // the adjusted votes include the undervotes TODO check this
         this.adjustedVotes = svotes // includes the undervotes

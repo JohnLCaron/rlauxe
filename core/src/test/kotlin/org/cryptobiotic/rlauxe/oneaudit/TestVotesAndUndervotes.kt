@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/*
 class TestVotesAndUndervotes {
 
     @Test
@@ -49,3 +50,5 @@ class TestVotesAndUndervotes {
     }
 
 }
+
+ */

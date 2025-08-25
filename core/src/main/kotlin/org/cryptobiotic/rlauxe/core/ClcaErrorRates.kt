@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.util.df
 
 data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
     init {
+        if (p1o > 1.0)
+            println("wtf")
         require(p2o in 0.0..1.0) {"p2o out of range $p2o"}
         require(p1o in 0.0..1.0) {"p1o out of range $p1o"}
         require(p1u in 0.0..1.0) {"p1u out of range $p1u"}

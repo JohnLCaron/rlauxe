@@ -29,9 +29,7 @@ class TestSfElection {
         println(summary)
 
         // check that the cvrs agree with the summary XML
-        val xmlFile = "src/test/data/SF2024/summary.xml"
-        val reader = StaxReader()
-        val staxContests = reader.read(xmlFile)
+        val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
         // staxContests.forEach { println(it) }
 
         val contestManifest = readContestManifestFromZip(zipFilename, manifestFile)

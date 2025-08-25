@@ -15,7 +15,7 @@ fun makeContestFromCvrs(
         info,
         votes[info.id] ?: emptyMap(),
         Nc=ncards[info.id] ?: 0,
-        Ncast=0 // TODO
+        Ncast=ncards[info.id] ?: 0,
     )
 }
 
@@ -83,7 +83,7 @@ fun makeContestsFromCvrs(
                 ),
                 voteInput = votes[contestId]!!,
                 Nc = cards[contestId]!!,
-                Ncast=0, // TODO
+                Ncast=cards[contestId]!!,
             )
         )
     }

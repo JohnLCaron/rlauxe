@@ -106,7 +106,7 @@ class PollingFuzzSampler(
     override fun next(): Double = sample()
 }
 
-// used in simulateSampleSizeOneAuditAssorter
+// TODO used in simulateSampleSizeOneAuditAssorter
 class OneAuditFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
@@ -122,7 +122,7 @@ class OneAuditFuzzSampler(
     var idx = 0
 
     init {
-        stratumNames = contestUA.contestOA.pools.values.map { it.name }.toSet() // TODO
+        stratumNames = emptySet() // TODO contestUA.contest.pools.values.map { it.name }.toSet() // TODO
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(cvrs)
     }
@@ -148,7 +148,7 @@ class OneAuditFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contestUA.contestOA), cvrs, fuzzPct) { !stratumNames.contains(it.id) }
+        return makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct) { !stratumNames.contains(it.id) }
     }
 
     override fun maxSamples() = maxSamples

@@ -3,8 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.oneaudit.makeContestOA
-import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrs
+import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 
 // mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
 class OneAuditContestAuditTaskGenerator(
@@ -26,11 +25,10 @@ class OneAuditContestAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
-        val contestOA2 = makeContestOA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
-        val oaCvrs = makeTestMvrs(contestOA2)
-        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA2), oaCvrs, mvrsFuzzPct)
+        val (contestOA, oaCvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
+        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA2),
+        val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA),
             MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed))
         return ContestAuditTask(
             name(),
@@ -65,13 +63,12 @@ class OneAuditSingleRoundAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
-        val contestOA = makeContestOA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct,
+        val (contestOA, oaCvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct,
             phantomPercent=phantomPct, skewPct = skewPct)
-        val oaCvrs = makeTestMvrs(contestOA)
         val oaMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(oaCvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsFrom(listOf(contestOA), oaCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
         }
 
         val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA), MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed))

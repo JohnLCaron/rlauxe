@@ -28,8 +28,7 @@ class TestRaireContest {
         assertEquals(listOf(1), contest.winners)
         assertEquals(listOf(0, 2, 3, 4, 42), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
-        assertEquals(
-            "RaireContest(info='testContestInfo' (0) candidates={cand0=0, cand1=1, cand2=2, cand3=3, cand4=4, cand42=42} voteForN=1, winners=[1], iNc=211, Np=1)",
+        assertEquals( "RaireContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210)",
             contest.toString()
         )
 
@@ -58,7 +57,7 @@ class TestRaireContest {
         assertEquals(expectedShowCandidates, rcontestUA.showCandidates()) */
 
         assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner0 losers [1, 2] minMargin="))
-        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25\n choiceFunction=IRV nwinners=1, winners=[0]"))
+        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25\n choiceFunction=IRV nwinners=1, winners=[0]"), rcontestUA.show())
         assertEquals(-1.0, rcontestUA.recountMargin(), doublePrecision)
     }
 

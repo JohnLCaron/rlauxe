@@ -64,6 +64,7 @@ class BoulderElectionOneAuditFromCvrs(
         }
     }
 
+    /* TODO
     fun makeContests(): List<OneAuditContest> {
         if (!quiet) println("ncontests with info = ${infos.size}")
         val sortedInfos = infos.values.sortedBy { it.id }
@@ -98,6 +99,8 @@ class BoulderElectionOneAuditFromCvrs(
 
         return oaContests
     }
+
+     */
 
     // make contest votes from the export.cvrs
     fun cvrCounts() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
@@ -219,6 +222,7 @@ class BoulderElectionOneAuditFromCvrs(
     }
 }
 
+/*
 ////////////////////////////////////////////////////////////////////
 // Create a OneAudit where pools are from the redacted cvrs
 // Optionally only has pools (ie "batch level comparison audit") includeCvrs = false
@@ -297,3 +301,5 @@ fun checkAssortAvgs(contests: List<OAContestUnderAudit>, cards: List<AuditableCa
 fun checkAssortAvg(contestUA: OAContestUnderAudit, cards: List<AuditableCard>, check: Boolean = true, show: Boolean = false) {
     checkAssorterAvg(contestUA.contestOA, cards.map { it.cvr() }, check = check, show = show)
 }
+
+ */

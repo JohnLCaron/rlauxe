@@ -30,7 +30,7 @@ fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cv
 data class IrvContestVotes(val irvContestInfo: ContestInfo) {
     val vc = VoteConsolidator() // candidate indexes
     val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
-    var countBallots = 0
+    var ncards = 0
 
     // The candidate Ids must go From 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
     val candidateIdToIndex = irvContestInfo.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap()
@@ -48,7 +48,7 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
         // convert to index for Raire
         val mappedVotes = candidateRanks.map { candidateIdToIndex[it] }
         if (mappedVotes.isNotEmpty()) vc.addVote(mappedVotes.filterNotNull().toIntArray())
-        countBallots++
+        ncards++
     }
 }
 
@@ -63,8 +63,8 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
             val rcontestUA = makeRaireContestUA(
                 info,
                 irvContestVotes.vc, // candidate indexes
-                Nc = irvContestVotes.countBallots, // TODO get this elsewhere?
-                Ncast = irvContestVotes.countBallots,
+                Nc = irvContestVotes.ncards, // TODO get this elsewhere?
+                Ncast = irvContestVotes.ncards,
             )
             contests.add(rcontestUA)
 

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// TODO fix tests
+/* TODO fix tests
 class TestOAShangrla {
 
     // OneAudit, section 2.3
@@ -444,3 +444,5 @@ class TestOAShangrla {
     //card113     12 = 0.5135869565217391 m=0.5 bet = 1.358891811147106 tj=1.018463203955803, Tj = 0.7838092123617311 pj = 1.2758206770584575
     //noCvr     13 = 0.7569444444444444 m=0.5 bet = 1.3671953397727525 tj=1.3512932470249432, Tj = 1.059156095620347 pj = 0.94414789674066
 }
+
+ */

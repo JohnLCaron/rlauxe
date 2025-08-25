@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
 import au.org.democracydevelopers.raire.irv.Vote
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import kotlin.collections.getOrPut
 
 /**
@@ -20,8 +21,8 @@ class VoteConsolidator {
     private val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
 
     fun addVote(pref: IntArray) {
-        val key = HashableIntArray(pref)
-        votes[key] = votes.getOrPut(key) { 0 } + 1
+            val key = HashableIntArray(pref)
+            votes[key] = votes.getOrPut(key) { 0 } + 1
     }
 
     fun addVotes(other: VoteConsolidator) {
@@ -37,6 +38,12 @@ class VoteConsolidator {
 
     fun makeVoteList(): List<VoteList> {
         return votes.map { VoteList(it.value, it.key.array.toList()) }
+    }
+
+    override fun toString() = buildString {
+        votes.forEach { (key, value) ->
+            appendLine(  "  ${key.array.contentToString()} == $value ")
+        }
     }
 }
 

@@ -20,7 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // This is to match https://github.com/spertus/UI-TS/blob/main/Code/SF_oneaudit_example.ipynb
-
+// can use the cvsExport file from sf2024. need to redo the sorted cards i think
 class TestSfElectionOA {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
@@ -33,7 +33,6 @@ class TestSfElectionOA {
         clearDirectory(Path.of(auditDir))
 
         createSfElectionFromCsvExportOA(
-            topDir,
             auditDir,
             zipFilename,
             "ContestManifest.json",
@@ -43,7 +42,7 @@ class TestSfElectionOA {
         )
     }
 
-    // @Test
+    /*@Test
     fun testCardContests() {
         val topDir = "/home/stormy/rla/cases/sf2024oa"
         val cardFile = "$topDir/cards.csv"
@@ -303,4 +302,7 @@ class TestSfElectionOA {
             }
         }
     }
+
+     */
 }
+

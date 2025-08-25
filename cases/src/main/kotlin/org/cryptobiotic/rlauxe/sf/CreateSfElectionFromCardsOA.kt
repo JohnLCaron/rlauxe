@@ -1,37 +1,35 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.AssorterIF
+import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.core.makeClcaAssertions
+import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditIrvContest
+import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
+import org.cryptobiotic.rlauxe.raire.IrvContestVotes
+import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.*
-import java.io.FileOutputStream
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 
-
 // use the contestManifest and candidateManifest to create the contestInfo, both regular and IRV.
 // Use "CvrExport" CSV file to tally the votes and create the assertions.
 fun createSfElectionFromCsvExportOA(
-    topDir: String,
     auditDir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -43,255 +41,196 @@ fun createSfElectionFromCsvExportOA(
     val stopwatch = Stopwatch()
     val contestInfos = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
-    val ballotPools: Map<String, CardPool> = createBallotPools(
-        auditDir,
+    val publisher = Publisher(auditDir) // creates auditDir
+
+    // pass 1 through cvrs, make card pools
+    val cardPools: Map<String, CardPool> = createCardPools(
+        contestInfos.associateBy { it.id},
         castVoteRecordZip,
         contestManifestFilename,
         cvrCsvFilename,
     )
 
-    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, ballotPools)
-    val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, ballotPools)
+    // make contests based on cardPools
+    val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools)
+    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools)
+    val allContests = irvContests + contests
 
-    val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
-    )
-    val allContests = contests + irvContests
-
-    // make all the clca assertions in one go
-    val auditableContests = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    makeClcaAssertions(auditableContests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
+    // pass 2 through cvrs, create all the clca assertions in one go
+    val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
+    addOAClcaAssorters(auditableContests, cvrExportCsvIterator(cvrCsvFilename), cardPools)
 
     // these checks may modify the contest status; dont call until clca assertions are created
-    checkContestsCorrectlyFormed(auditConfig, contests)
-    checkContestsWithCvrs(contests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), show = true)
-
-    val publisher = Publisher(auditDir)
-    writeContestsJsonFile(allContests, publisher.contestsFile())
-    println("   writeContestsJsonFile ${publisher.contestsFile()}")
-    writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
-    println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
-
-    println("took = $stopwatch")
-}
-
-fun makeOneAuditContests(contestInfos: List<ContestInfo>, ballotPools: Map<String, CardPool>): List<ContestUnderAudit> {
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
-    contestInfos.map { info ->
-        val cvrTabulation: ContestTabulation? = ballotPools[unpooled] ?.contestMap[info.id]
-        if (cvrTabulation == null) {
-            println("*** NO votes for contest ${info}")
-        } else {
-            val cardPools = ballotPools.keys.filter{ it != unpooled }.map {
-                ballotPools[it]!!.ballotPoolForContest(info.id)
-            }
-            val cardPoolsNotNull = cardPools.filterNotNull()
-            val pooledCast = cardPoolsNotNull.sumOf{ it.ncards }
-            val contestOA = OneAuditContest.make(
-                info,
-                cvrVotes = cvrTabulation.votes,
-                cvrNcards = cvrTabulation.ncards,
-                cardPoolsNotNull,
-                Nc = pooledCast + cvrTabulation.ncards, // TODO where do we get this??
-                Ncast = pooledCast + cvrTabulation.ncards)
-            println(contestOA)
-            contestsUAs.add( OAContestUnderAudit(contestOA) )
-        }
-    }
-    return contestsUAs
-}
-
-fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, ballotPools: Map<String, CardPool>): List<ContestUnderAudit> {
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
-    contestInfos.map { info ->
-        val cvrTabulation: ContestTabulation? = ballotPools[unpooled] ?.contestMap[info.id]
-        if (cvrTabulation == null) {
-            println("*** NO votes for contest ${info}")
-        } else {
-            val cardPools = ballotPools.keys.filter{ it != unpooled }.map {
-                ballotPools[it]!!.ballotPoolForContest(info.id)
-            }
-            val cardPoolsNotNull = cardPools.filterNotNull()
-            val pooledCast = cardPoolsNotNull.sumOf{ it.ncards }
-            val contestOA = OneAuditContest.make(
-                info,
-                cvrVotes = cvrTabulation.votes,
-                cvrNcards = cvrTabulation.ncards,
-                cardPoolsNotNull,
-                Nc = pooledCast + cvrTabulation.ncards, // TODO where do we get this??
-                Ncast = pooledCast + cvrTabulation.ncards)
-            println(contestOA)
-
-            val totalVoteConsolidator = VoteConsolidator()
-            ballotPools.values.forEach { cardPool ->
-                val vc = cardPool.irvMap[info.id]
-                if (vc != null) {
-                    totalVoteConsolidator.addVotes(vc)
-                }
-            }
-
-            // fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int, Nundervotes: Int): RaireContestUnderAudit {
-            val rau : RaireContestUnderAudit = makeRaireContestUA(
-                info,
-                totalVoteConsolidator,
-                contestOA.Nc(),
-                contestOA.Nc())
-
-            // class OneAuditIrvContest(
-            //    contestOA: OneAuditContest,
-            //    hasStyle: Boolean = true,
-            //    val rassertions: List<RaireAssertion>,
-            //)
-            contestsUAs.add( OneAuditIrvContest(contestOA,  true, rau.rassertions) )
-        }
-    }
-    return contestsUAs
-}
-
-/* write ""$topdir/contests.json"", ""$topdir/auditConfig.json""
-fun createSfElectionFromCsvExportOA2(
-    auditDir: String,
-    castVoteRecordZip: String,
-    contestManifestFilename: String,
-    candidateManifestFile: String,
-    cvrCsvFilename: String,
-    auditConfigIn: AuditConfig? = null,
-    show: Boolean = false
-) {
-    val stopwatch = Stopwatch()
-
-    val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(castVoteRecordZip, contestManifestFilename)
-    val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-    else throw RuntimeException("Cannot read ContestManifestJson from $castVoteRecordZip/$contestManifestFilename err = $resultContestM")
-
-    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
-    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
-    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
-
-    val contestInfos = makeContestInfos(contestManifest, candidateManifest)
-    println("contests = ${contestInfos.size}")
-
-    val regularVoteMap = makeContestVotesFromCsvExport(cardFile) // contest -> ContestVotes
-    // val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap)
-
-    val irvInfos = contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
-    /* val irvContests = emptyList() // if (irvInfos.isEmpty()) emptyList() else {
-        val cvrIter = CvrIteratorAdapter(readCardsCsvIterator(cardFile))
-        val irvVoteMap = makeIrvContestVotes( irvInfos.associateBy { it.id }, cvrIter)
-        if (show) {
-            irvVoteMap.values.forEach { println("IrvVotes( ${it.irvContestInfo.id} ${it.irvContestInfo.choiceFunction} ${it.irvContestInfo}")
-                it.notfound.forEach { (cand, count) -> println("  candidate $cand not found $count times")}
-            }
-        }
-        // makeOneAuditIrvContests(irvInfos, irvVoteMap)
-    } */
-
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
     )
 
-    // read in ballotPools
-    val ballotPools: List<BallotPool> =  readBallotPoolCsvFile(ballotPoolFile)
+    checkContestsCorrectlyFormed(auditConfig, contests)
 
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
-    contestInfos.filter { onlyContests.isEmpty() || onlyContests.contains(it.id) }.forEach { info ->
-        // class OneAuditContest (
-        //    override val info: ContestInfo,
-        //    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-        //    val cvrNc: Int,
-        //    val pools: Map<Int, BallotPool>, // pool id -> pool
-        //)
-        val contestVotes = regularVoteMap[info.id]
-        if (contestVotes == null) {
-            println("*** NO votes for contest ${info}")
-        } else {
-            val pools = ballotPools.filter { it.contest == info.id }
-            val contestOA = OneAuditContest.make(info,
-                cvrVotes = contestVotes.votes,
-                cvrNc = contestVotes.countBallots,
-                pools,
-                Np = 0) // TODO what should Np be?
-            println(contestOA)
-            contestsUAs.add(OAContestUnderAudit(contestOA, auditConfig.hasStyles))
+    // TODO check that the sum of pooled and unpooled votes is correct
+    /*  check that the votes agree with the summary XML
+    val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
+    val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
+
+    val votes = tabulateCvrs(CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
+    votes.forEach { (id, ct) ->
+        val contestName = contestManifest.contests[id]!!.Description
+        val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
+        if (staxContest.ncards() != ct.ncards) {
+            println("staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${ct.ncards} ")
+            // assertEquals(staxContest.blanks(), contest.blanks)
         }
     }
 
-    /*
-    val allContests = contestsUAs + irvContests
+    //  check that the contests agree with the summary XML
+    contests.forEach { contest ->
+        val contestName = contestManifest.contests[contest.id]!!.Description
+        val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
+        val ncards = staxContest.ncards()
+        if (ncards != contest.Nc) {
+            println("staxContest $contestName ($contest.id) has ncards = ${staxContest.ncards()} not equal to contest Nc = ${contest.Nc} ")
+            // assertEquals(staxContest.blanks(), contest.blanks)
+        }
+    }
 
-    // make all the clca assertions in one go
-    // TODO: the card file only has the cvrs, not the non-cvrs....
-    makeClcaAssertions(allContests, CvrIteratorAdapter(readCardsCsvIterator(cardFile)))
+     */
 
-    // these checks may modify the contest status
-    checkContestsCorrectlyFormed(auditConfig, allContests)
-    checkContestsWithCards(allContests, readCardsCsvIterator(cardFile), show = true)
+    checkContestsWithCvrs(contests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), show = true)
 
-    val publisher = Publisher(auditDir)
     writeContestsJsonFile(allContests, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
     println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
-*/
+
     println("took = $stopwatch")
-} */
+}
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// non-IRV
+fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<String, CardPool>): List<OAContestUnderAudit> {
+    val contestsUAs = mutableListOf<OAContestUnderAudit>()
+    contestInfos.map { info ->
+        // get a complete tabulation over all the pools
+        val allPools = ContestTabulation()
+        var ncards = 0
+        cardPools.values.forEach { pool ->
+            val poolTab = pool.contestMap[info.id]
+            if (poolTab != null) {
+                allPools.addVotes(poolTab.votes)
+                ncards += poolTab.ncards
+            }
+        }
 
-fun createBallotPools(
-    auditDir: String,
+        // voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+        //        val Nc: Int,               // maximum ballots/cards that contain this contest
+        //        val Ncast: Int,
+        val contest = Contest(info, allPools.votes, ncards, ncards)
+        contestsUAs.add( OAContestUnderAudit(contest) )
+    }
+    return contestsUAs
+}
+
+// IRV
+fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<String, CardPool>): List<OAIrvContestUA> {
+    val contestsUAs = mutableListOf<OAIrvContestUA>()
+    contestInfos.map { info ->
+        // get a complete tabulation over all the pools
+        val allPools = VoteConsolidator()
+        var ncards = 0
+        cardPools.values.forEach { pool ->
+            val poolVC = pool.irvMap[info.id]
+            if (poolVC != null) {
+                allPools.addVotes(poolVC.vc)
+                ncards += poolVC.ncards
+            }
+        }
+
+        // fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int, Nundervotes: Int): RaireContestUnderAudit {
+        val rau : RaireContestUnderAudit = makeRaireContestUA(
+            info,
+            allPools,
+            ncards,
+            ncards,
+        )
+        contestsUAs.add( OAIrvContestUA(rau.contest as RaireContest,  true, rau.rassertions) )
+    }
+    return contestsUAs
+}
+
+fun createCardPools(
+    contestInfos: Map<Int, ContestInfo>,
     castVoteRecordZip: String,
     contestManifestFilename: String,
     cvrCsvFilename: String,
     ): Map<String, CardPool>
 {
-
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
     println("IRV contests = ${contestManifest.irvContests}")
 
-    val cardPools: MutableMap<String, CardPool> = mutableMapOf<String, CardPool>()
+    val cardPools: MutableMap<String, CardPool> = mutableMapOf()
 
     val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
-        val pool = cardPools.getOrPut(cvrExport.poolKey() ) { CardPool(cvrExport.poolKey(), cardPools.size + 1, contestManifest.irvContests) }
-        pool.addPooledVotes(cvrExport)
+        val pool = cardPools.getOrPut(cvrExport.poolKey() ) {
+            CardPool(cvrExport.poolKey(), cardPools.size + 1, contestManifest.irvContests, contestInfos)
+        }
+        pool.accumulateVotes(cvrExport)
     }
 
-    // BallotPools
+    /* BallotPools
     val poolFilename = "$auditDir/ballotPools.csv"
     println(" writing to $poolFilename with ${cardPools.size} pools")
     val poutputStream = FileOutputStream(poolFilename)
     poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
 
+    // write the ballot pool file
     var poolCount = 0
-    var pcount1 = 0
-    var pcount2 = 0
     val sortedPools = cardPools.toSortedMap()
     sortedPools.forEach { (poolName, pool) ->
         val bpools = pool.toBallotPools() // one for each contest
         bpools.forEach { poutputStream.write(writeBallotPoolCSV(it).toByteArray()) }
         poolCount += bpools.size
-        pcount1 += pool.contestMap[1]?.ncards ?: 0
-        pcount2 += pool.contestMap[2]?.ncards ?: 0
     }
     poutputStream.close()
     println(" total ${sortedPools.size} pools")
-    println(" total contest1 cards in pools = $pcount1")
-    println(" total contest2 cards in pools = $pcount2")
+
+    // check that the cardPools agree with the summary XML
+    val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
+
+    val contestCount = mutableMapOf<Int, ContestTabulation>()
+    sortedPools.forEach { (_poolName, pool) ->
+        pool.contestMap.forEach { id, poolCt ->
+            val ct = contestCount.getOrPut(id) { ContestTabulation() }
+            ct.addVotes( poolCt.votes)
+            ct.ncards += poolCt.ncards
+        }
+    }
+
+    contestCount.forEach { (id, ct) ->
+        val contestName = contestManifest.contests[id]!!.Description
+        val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
+        if (staxContest.ncards() != ct.ncards) {
+            println("staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${ct.ncards} ")
+            // assertEquals(staxContest.blanks(), contest.blanks)
+        }
+    }
+     */
 
     return cardPools
 }
 
-class CardPool(val poolName: String, val poolId: Int, val irvIds: Set<Int>) {
+// record the ContestTabulation (regular) or VoteConsolidator (IRV)
+class CardPool(val poolName: String, val poolId: Int, val irvIds: Set<Int>, val contestInfos: Map<Int, ContestInfo>) {
     val contestMap = mutableMapOf<Int, ContestTabulation>()
-    val irvMap = mutableMapOf<Int, VoteConsolidator>()
+    val irvMap = mutableMapOf<Int, IrvContestVotes>()  // TODO i think you dont need this by pool
+    var assortAvg : MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>? = null // contest -> assorter -> AssortAvg
 
-    fun addPooledVotes(cvr : CvrExport) {
+    fun accumulateVotes(cvr : CvrExport) {
         cvr.votes.forEach { (contestId, candIds) ->
             if (irvIds.contains(contestId)) {
-                val irvContest = irvMap.getOrPut(contestId) { VoteConsolidator() }
-                irvContest.addVote(candIds) // TODO not switching to index space !!
+                val irvContestVotes = irvMap.getOrPut(contestId) { IrvContestVotes(contestInfos[contestId]!!) }
+                irvContestVotes.ncards++
+                irvContestVotes.addVote(candIds) // TODO not switching to index space !!
             } else {
                 val contestTab = contestMap.getOrPut(contestId) { ContestTabulation() }
                 contestTab.ncards++
@@ -316,6 +255,53 @@ class CardPool(val poolName: String, val poolId: Int, val irvIds: Set<Int>) {
     }
 }
 
+// create the ClcaAssorters for OneAudit
+fun addOAClcaAssorters(
+    oaContests: List<OAContestUnderAudit>,
+    cvrIter: Iterator<CvrExport>,
+    cardPools: Map<String, CardPool>
+) {
+
+    cardPools.values.forEach { it.assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>() }
+
+    // sum all the assorters values in one pass across all the cvrs
+    while (cvrIter.hasNext()) {
+        val cvrExport: CvrExport = cvrIter.next()
+        val cardPool = cardPools[cvrExport.poolKey()]!!
+        val cvr = cvrExport.toCvr()
+
+        oaContests.forEach { contest ->
+            val avg = cardPool.assortAvg!!.getOrPut(contest.id) { mutableMapOf() }
+            contest.pollingAssertions.forEach { assertion ->
+                val passort = assertion.assorter
+                val assortAvg = avg.getOrPut(passort) { AssortAvg() }
+                assortAvg.ncards++
+                assortAvg.totalAssort += passort.assort(cvr, usePhantoms = false) // TODO usePhantoms correct ??
+            }
+        }
+    }
+
+    // create the clcaAssertions and add them to the oaContests
+    oaContests.forEach { oaContest ->
+        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
+            val assortAverage = mutableMapOf<Int, Double>() // poolId -> average assort value
+            cardPools.values.forEach { cardPool ->
+                val avg = cardPool.assortAvg!![oaContest.id]!![assertion.assorter]!!
+                assortAverage[cardPool.poolId] = if (avg.ncards == 0) 0.0 else avg.totalAssort / avg.ncards
+            }
+
+            val poolAvgs = AssortAvgsInPools(assertion.info.id, assortAverage)
+            val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAvgs)
+            ClcaAssertion(assertion.info, clcaAssorter)
+        }
+        oaContest.clcaAssertions = clcaAssertions
+    }
+}
+
+class AssortAvg() {
+    var ncards = 0
+    var totalAssort = 0.0
+}
 
 // class ContestTabulation {
 //    val votes = mutableMapOf<Int, Int>()

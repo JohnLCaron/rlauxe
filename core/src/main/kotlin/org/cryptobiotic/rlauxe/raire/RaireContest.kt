@@ -3,9 +3,12 @@ package org.cryptobiotic.rlauxe.raire
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
+
+private val logger = KotlinLogging.logger("RaireContest")
 
 // an IRV Contest that does not have votes (candidateId -> nvotes Map<Int, Int>)
 // this is the motivation for ContestIF
@@ -63,18 +66,21 @@ class RaireContestUnderAudit(
     }
 
     override fun recountMargin(): Double {
-        return -1.0
-        /*
-        val pctDefault = -1.0
-        val rcontest = (contest as RaireContest)
-        if (rcontest.roundsPaths.isEmpty()) return pctDefault
-        val rounds = rcontest.roundsPaths.first().rounds // common case is only one
-        if (rounds.isEmpty()) return pctDefault
+        try {
+            val pctDefault = -1.0
+            val rcontest = (contest as RaireContest)
+            if (rcontest.roundsPaths.isEmpty()) return pctDefault
+            val rounds = rcontest.roundsPaths.first().rounds // common case is only one
+            if (rounds.isEmpty()) return pctDefault
 
-        val count = rounds.last().count // the last round should have two nonzero candidates
-        val winner = count.filter { it.value > 0.0 }.maxBy { it.value }
-        val loser = count.filter { it.value > 0.0 && it.key != winner.key }.maxBy { it.value }
-        return (winner.value - loser.value) / (winner.value.toDouble()) */
+            val count = rounds.last().count // the last round should have two nonzero candidates
+            val winner = count.filter { it.value > 0.0 }.maxBy { it.value }
+            val loser = count.filter { it.value > 0.0 && it.key != winner.key }.maxBy { it.value }
+            return (winner.value - loser.value) / (winner.value.toDouble())
+        } catch (e : Throwable) {
+            logger.error(e) { "recountMargin" }
+            return -1.0
+        }
     }
 
     override fun showCandidates() = buildString {

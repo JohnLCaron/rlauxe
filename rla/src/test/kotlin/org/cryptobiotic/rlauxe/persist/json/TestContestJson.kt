@@ -12,7 +12,7 @@ class TestContestJson {
 
     @Test
     fun testReadContests() {
-        val filename = "/home/stormy/rla/cases/boulder23/contests.json"
+        val filename = "/home/stormy/rla/cases/sf2024/audit/contests.json"
         val contestsResults = readContestsJsonFile(filename)
         val contests = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${filename} err = $contestsResults")
@@ -32,7 +32,7 @@ class TestContestJson {
         assertTrue(contestUAc.clcaAssertions.isNotEmpty())
 
         val json = contestUAc.publishJson()
-        val roundtrip = json.import()
+        val roundtrip = json.import(isOA = false)
         assertNotNull(roundtrip)
         assertEquals(roundtrip, contestUAc)
         assertTrue(roundtrip.equals(contestUAc))

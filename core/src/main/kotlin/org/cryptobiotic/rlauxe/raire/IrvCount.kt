@@ -1,12 +1,14 @@
 package org.cryptobiotic.rlauxe.raire
 
 import au.org.democracydevelopers.raire.irv.Vote
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.collections.getOrPut
 
 private val quiet = true
+private val logger = KotlinLogging.logger("IrvCount")
 
 // recreate raire's elimination paths, so that we can display to the user
 
@@ -111,8 +113,8 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
         }
         val sworking = working.toList().sortedBy { (_, v) -> v }.reversed().toMap()
         if (!quiet) {
-            println(" ${name()} round $round count: ${sworking}")
-            println("   viable: ${viable}")
+            logger.debug{" ${name()} round $round count: ${sworking}"}
+                logger.debug{"   viable: ${viable}"}
         }
         rounds.add(IrvRound(sworking))
         return working
@@ -162,8 +164,6 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
 
     // return true if theres a tie
     fun removeLeastCandidate(): Boolean {
-        if (candVotes.isEmpty())
-            println("huh")
         val minValue = candVotes.map { it.value }.min()
         val minKeys = candVotes.filter { it.value == minValue }.keys
         if (minKeys.size == 1) {
@@ -175,10 +175,7 @@ class EliminationPath(startingRound: Int, startingElimination: List<Int>, starti
             return false
         }
         // otherwise create a path for each
-        println("*** tie score: $minKeys isRoot=$isRoot")
-        if (!isRoot) {
-            println("hey two ties")
-        }
+        logger.debug{"*** tie score: $minKeys isRoot=$isRoot"}
         subpaths = minKeys.map { EliminationPath(round, elimination.addNew(it), viable.removeNew(it), votes) }
         return true
     }

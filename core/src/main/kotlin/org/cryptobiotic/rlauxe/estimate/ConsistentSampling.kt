@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.roundToInt
@@ -8,6 +9,7 @@ private val debug = false
 private val debugConsistent = false
 private val debugUniform = false
 private val debugSizeNudge = true
+private val logger = KotlinLogging.logger("ConsistentSampling")
 
 /**
  * Select the samples to audit.
@@ -35,7 +37,7 @@ fun sampleCheckLimits(
         // find the contest with the largest estimation size eligible for removal, remove it
         val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
         val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
-        println(" ***too many samples, remove contest ${maxContest.id} with status FailMaxSamplesAllowed")
+        logger.warn{" ***too many samples, remove contest ${maxContest.id} with status FailMaxSamplesAllowed"}
 
         // information we want in the persisted record
         maxContest.done = true
@@ -54,13 +56,13 @@ fun sample(
     quiet: Boolean = true
 ) {
     if (auditConfig.hasStyles) {
-        if (!quiet) println("consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}")
+        if (!quiet) logger.info{"consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
         consistentSampling(auditRound, mvrManager, previousSamples)
-        if (!quiet) println(" consistentSamplingSize= ${auditRound.samplePrns.size}")
+        if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
     } else {
-        if (!quiet) println("\nuniformSampling round ${auditRound.roundIdx}")
+        if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
         uniformSampling(auditRound, mvrManager, previousSamples, auditConfig.sampleLimit, auditRound.roundIdx)
-        if (!quiet) println(" uniformSamplingSize= ${auditRound.samplePrns.size}")
+        if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"}
     }
 }
 
@@ -129,11 +131,11 @@ fun consistentSampling(
         if (countSamples % 10000 == 0) print("$countSamples ")
         if (countSamples % 100000 == 0) {
             val wants = contestsIncluded.filter { contestWantsMoreSamples(it) }.map { "${it.id}:${contestWants(it)}" }
-            println("\nsampledCards = ${sampledCards.size} newMvrs=$newMvrs wants = $wants")
+            logger.info{"\nsampledCards = ${sampledCards.size} newMvrs=$newMvrs wants = $wants"}
         }
     }
 
-    if (debugConsistent) println("**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs")
+    if (debugConsistent) logger.info{"**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
     val contestIdMap = contestsNotDone.associate { it.id to it }
     contestIdMap.values.forEach { // defaults to 0
         it.actualMvrs = 0
@@ -171,7 +173,7 @@ fun uniformSampling(
         contestRound.estSampleSizeNoStyles = estWithFactor
         // val estPct = estWithFactor / Nb.toDouble()
         if (sampleLimit > 0 && estWithFactor > sampleLimit) { // might as well test it here, since it will happen a lot
-            if (debugUniform) println("uniformSampling sampleLimit for ${contestRound.id} estWithFactor $estWithFactor > $sampleLimit round $roundIdx")
+            if (debugUniform) logger.info{"uniformSampling sampleLimit for ${contestRound.id} estWithFactor $estWithFactor > $sampleLimit round $roundIdx"}
             contestRound.done = true // TODO dont do this here?
             contestRound.status = TestH0Status.FailMaxSamplesAllowed
         }
@@ -184,7 +186,7 @@ fun uniformSampling(
         val prevSampleSize = previousSamples.size
         val prevNudged = (1.25 * prevSampleSize).toInt()
         if (prevNudged > nmvrs) {
-            if (debugSizeNudge) println(" ** uniformSampling prevNudged $prevNudged > $nmvrs; round=${auditRound.roundIdx}")
+            if (debugSizeNudge) logger.info{" ** uniformSampling prevNudged $prevNudged > $nmvrs; round=${auditRound.roundIdx}"}
             nmvrs = prevNudged
         }
     }

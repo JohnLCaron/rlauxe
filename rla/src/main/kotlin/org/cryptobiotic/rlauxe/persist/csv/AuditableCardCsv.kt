@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 
+private val logger = KotlinLogging.logger("AuditableCardCsv")
 
 // data class AuditableCard (
 //    val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
@@ -53,7 +54,7 @@ class AuditableCardCsvWriter(filename: String) {
     }
 
     fun close() {
-        println("wrote $countCards cards")
+        logger.info{ "wrote $countCards cards"}
         writer.close()
     }
 }
@@ -132,7 +133,7 @@ class IteratorCardsCsvStream(input: InputStream): Iterator<AuditableCard> {
     }
 
     fun close() {
-        println("read $countLines lines")
+        logger.info{"read $countLines lines"}
         reader.close()
     }
 }
@@ -153,7 +154,7 @@ class IteratorCardsCsvFile(filename: String): Iterator<AuditableCard> {
     }
 
     fun close() {
-        println("read $countLines lines")
+        logger.info{"read $countLines lines"}
         reader.close()
     }
 }

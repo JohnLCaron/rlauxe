@@ -9,9 +9,11 @@ import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMa
 import au.org.democracydevelopers.raire.irv.IRVResult
 import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 
 private val quiet = true
+private val logger = KotlinLogging.logger("MakeRaireContest")
 
 // gets RaireAssertions from raire-java libray
 fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int): RaireContestUnderAudit {
@@ -25,7 +27,7 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
     //      then we could add annotation here, currently in makeIrvContests
     // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
     val irvResult: IRVResult = votes.runElection(TimeOut.never())
-    if (!quiet) println(" runElection: possibleWinners=${irvResult.possibleWinners.contentToString()} eliminationOrder=${irvResult.eliminationOrder.contentToString()}")
+    if (!quiet) logger.debug{" runElection: possibleWinners=${irvResult.possibleWinners.contentToString()} eliminationOrder=${irvResult.eliminationOrder.contentToString()}"}
 
     if (1 != irvResult.possibleWinners.size) {
         throw RuntimeException("nwinners ${irvResult.possibleWinners.size} must be 1")
@@ -74,7 +76,6 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
             val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
             val nenChoices = voteSeq.nenFirstChoices(nen.winner, nen.loser)
             val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
-            // println("    nenChoices = $nenChoices margin=$margin\n")
             require(aand.margin == margin)
             nenChoices
 
@@ -83,7 +84,6 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
             val voteSeq = VoteSequences(startingVotes)
             val nebChoices = voteSeq.nebFirstChoices(neb.winner, neb.loser)
             val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
-            // println("    nebChoices = $nebChoices margin=$margin\n")
             require(aand.margin == margin)
             nebChoices
         }

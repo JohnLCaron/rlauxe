@@ -56,6 +56,7 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
 data class RaireAssertionJson(
     val winner: Int,
     val loser: Int,
+    val difficulty: Double,
     val margin: Int,
     val assertion_type: String,
     val eliminated: List<Int>,
@@ -65,6 +66,7 @@ data class RaireAssertionJson(
 fun RaireAssertion.publishJson() = RaireAssertionJson(
     this.winnerId,
     this.loserId,
+    this.difficulty,
     this.marginInVotes,
     this.assertionType.name,
     this.eliminated,
@@ -75,6 +77,7 @@ fun RaireAssertionJson.import(): RaireAssertion {
     return RaireAssertion(
         this.winner,
         this.loser,
+        this.difficulty,
         this.margin,
         RaireAssertionType.fromString(this.assertion_type),
         this.eliminated,

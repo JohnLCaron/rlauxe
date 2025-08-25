@@ -16,11 +16,12 @@ class SortMerge(
     val auditDir: String,
     val cardFile: String,
     val workingDir: String,
-    val outputFile: String) {
+    val outputFile: String,
+    val pools: Map<String, Int>?) {
 
     fun run() {
         // out of memory sort by sampleNum()
-        sortCards(auditDir, cardFile, workingDir)
+        sortCards(auditDir, cardFile, workingDir, pools = pools)
         mergeCards(auditDir, workingDir, outputFile)
     }
 
@@ -57,6 +58,7 @@ fun sortCardsInDirectoryTree(
         auditDir: String,
         cvrCsvFilename: String, // may be zipped or not
         workingDirectory: String,
+        pools: Map<String, Int>?
     ) {
         val stopwatch = Stopwatch()
         val publisher = Publisher(auditDir)
@@ -66,7 +68,7 @@ fun sortCardsInDirectoryTree(
         validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
 
         val prng = Prng(auditConfig.seed)
-        val cardSorter = CardSorter(workingDirectory, prng, maxChunk)
+        val cardSorter = CardSorter(workingDirectory, prng, maxChunk, pools = pools)
 
         //// reading CvrExport and sorted chunks
         val cardIter: Iterator<CvrExport> = cvrExportCsvIterator(cvrCsvFilename)
@@ -99,7 +101,7 @@ fun sortCardsInDirectoryTree(
     }
 }
 
-class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int) {
+class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int, val pools: Map<String, Int>?) {
     var index = 0
     var count = 0
     val cards = mutableListOf<AuditableCard>()
@@ -107,7 +109,7 @@ class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int) {
 
     fun add(card: CvrExport) {
         // TODO phantoms
-        val card = card.toAuditableCard(index=index, prn=prng.next(), false)
+        val card = card.toAuditableCard(index=index, prn=prng.next(), false, pools = pools)
         cards.add(card.copy(index=index, prn=prng.next()))
         index++
         count++

@@ -13,6 +13,7 @@ class TestCardSortMerge {
             "$topDir/cards.csv",
             "$topDir/sortChunkTest",
             "$topDir/sortChunkTest/sortedCards.csv",
+            pools = null,
             ).run()
         val cardIter = readCardsCsvIterator("$topDir/sortChunkTest/sortedCards.csv")
         var count = 0

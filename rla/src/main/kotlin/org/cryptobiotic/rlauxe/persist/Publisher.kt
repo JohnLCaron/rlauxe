@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.persist
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+
+private val logger = KotlinLogging.logger("Publisher")
 
 /*
     topdir/
@@ -28,7 +31,7 @@ class Publisher(val topdir: String) {
     fun auditConfigFile() = "$topdir/auditConfig.json"
     fun contestsFile() = "$topdir/contests.json"
     fun cardsCsvFile() = "$topdir/sortedCards.csv"
-    fun cardsCsvZipFile() = "$topdir/sortedCards.zip"
+    fun cardsCsvZipFile() = "$topdir/sortedCards.csv.zip"
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$topdir/round$round"
@@ -49,7 +52,7 @@ class Publisher(val topdir: String) {
     }
 
     // what round are we on?
-    fun rounds(): Int {
+    fun currentRound(): Int {
         var roundIdx = 1
         while (Files.exists(Path.of("$topdir/round$roundIdx"))) {
             roundIdx++
@@ -60,7 +63,7 @@ class Publisher(val topdir: String) {
     fun validateOutputDirOfFile(filename: String) {
         val parentDir = Path.of(filename).parent
         if (!validateOutputDir(parentDir, errs)) {
-            println(errs)
+            logger.error{errs}
         }
     }
 }

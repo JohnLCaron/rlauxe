@@ -1,13 +1,15 @@
 package org.cryptobiotic.rlauxe.raire
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
+
+private val logger = KotlinLogging.logger("IrvContestVotes")
 
 // called from cases module to extract vote info from Cvrs
 // do all the contests in one iteration
 fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cvr>): Map<Int, IrvContestVotes> {
     val irvVotes = mutableMapOf<Int, IrvContestVotes>() // contestId -> contestVotes
 
-    println("makeIrvContestVotes")
     var count = 0
     while (cvrIter.hasNext()) {
         val cvr: Cvr = cvrIter.next()
@@ -23,7 +25,7 @@ fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cv
             }
         }
     }
-    println(" read ${count} cvrs")
+    logger.debug{" read ${count} cvrs"}
     return irvVotes
 }
 
@@ -58,7 +60,7 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
     contestInfos.forEach { info: ContestInfo ->
         val irvContestVotes = contestVotes[info.id] // candidate indexes
         if (irvContestVotes == null) {
-            println("*** Cant find contest '${info.id}' in irvContestVotes")
+            logger.warn{"*** Cant find contest '${info.id}' in irvContestVotes"}
         } else {
             val rcontestUA = makeRaireContestUA(
                 info,

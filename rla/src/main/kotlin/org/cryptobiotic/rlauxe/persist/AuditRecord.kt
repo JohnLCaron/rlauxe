@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -12,6 +13,8 @@ import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import java.nio.file.Files
 import java.nio.file.Path
+
+private val logger = KotlinLogging.logger("AuditRecord")
 
 class AuditRecord(
     val location: String,
@@ -37,7 +40,7 @@ class AuditRecord(
         var missing = false
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
         if (sampledPrnsResult is Err) {
-            println(sampledPrnsResult)
+            logger.error{ "$sampledPrnsResult" }
         }
         val sampledPrns = sampledPrnsResult.unwrap()
         sampledPrns.forEach { sampleNumber ->
@@ -45,7 +48,7 @@ class AuditRecord(
             if (mvr == null) {
                 mvr = mvrMap[sampleNumber]
                 if (mvr == null) {
-                    println("Missing MVR for sampleNumber $sampleNumber")
+                    logger.error{ "Missing MVR for sampleNumber $sampleNumber"}
                     missing = true
                 } else {
                     previousMvrs[sampleNumber] = mvr
@@ -56,7 +59,7 @@ class AuditRecord(
 
         val sampledMvrs = sampledPrns.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
         writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
-        println("    write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx")
+        logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx"}
 
         sampledMvrs.forEach { previousMvrs[it.prn] = it } // cumulative
         return true
@@ -76,7 +79,7 @@ class AuditRecord(
             val sampledMvrsAll = mutableListOf<AuditableCard>()
 
             val rounds = mutableListOf<AuditRound>()
-            for (roundIdx in 1..publisher.rounds()) {
+            for (roundIdx in 1..publisher.currentRound()) {
                 val sampledNumbers = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx)).unwrap()
 
                 // may not exist yet

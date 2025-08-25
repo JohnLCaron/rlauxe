@@ -85,7 +85,7 @@ class TestSfElection {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val auditDir = "$topDir/audit"
         val cvrCsv = "$topDir/cvrExport.csv"
-        createSortedCards(topDir, auditDir, cvrCsv, zip = true) // write to "$auditDir/sortedCards.csv"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile = null) // write to "$auditDir/sortedCards.csv"
     }
 
     @Test

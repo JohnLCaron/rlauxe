@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
+
+private val logger = KotlinLogging.logger("PollingAudit")
 
 class PollingAudit(
     val auditConfig: AuditConfig,
@@ -60,7 +63,7 @@ fun runPollingAudit(
         return true
     }
 
-    if (!quiet) println("runAudit round $roundIdx")
+    if (!quiet) logger.debug{"runAudit round $roundIdx"}
     var allDone = true
     contestsNotDone.forEach { contest ->
         val contestAssertionStatus = mutableListOf<TestH0Status>()
@@ -122,6 +125,6 @@ fun auditPollingAssertion(
         measuredMean = testH0Result.tracker.mean(),
     )
 
-    if (!quiet) println(" ${contest.name} ${assertionRound.auditResult}")
+    if (!quiet) logger.debug{" ${contest.name} ${assertionRound.auditResult}"}
     return testH0Result
 }

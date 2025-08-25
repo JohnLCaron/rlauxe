@@ -32,7 +32,6 @@ data class SimulateIrvTestData(
             count++
             cvrs.add(pcvr)
         }
-        // println("makeCvrs: excess=$excess phantoms=${this.phantomCount}")
         cvrs.shuffle()
         return cvrs
     }

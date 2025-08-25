@@ -13,6 +13,8 @@ import org.cryptobiotic.rlauxe.persist.csv.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.toPoolMap
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
@@ -22,6 +24,7 @@ private val quiet = false
 
 const val cvrExportCsvFile = "cvrExport.csv"
 const val sortedCardsFile = "sortedCards.csv"
+const val ballotPoolsFile = "ballotPools.csv"
 
 // read the CvrExport_* files out of the castVoteRecord JSON zip file, convert them to "CvrExport" CSV file.
 // use the contestManifestFile to add the undervotes, and to identify the IRV contests
@@ -55,8 +58,11 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
 }
 
 // TODO add phantoms here
-fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true) {
-    SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile").run()
+fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, ballotPoolFile: String?) {
+    val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
+    val pools = ballotPools?.toPoolMap()
+
+    SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run()
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }

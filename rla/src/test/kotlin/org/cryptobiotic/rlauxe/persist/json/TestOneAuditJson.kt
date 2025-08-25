@@ -109,8 +109,8 @@ class TestOneAuditJson {
         val Np = 1
         val rcontest = RaireContest(info, winners=listOf(1), Nc=Nc, Ncast=Nc-Np)
 
-        val assert1 = RaireAssertion(1, 0, 42, RaireAssertionType.winner_only)
-        val assert2 = RaireAssertion(1, 2, 422, RaireAssertionType.irv_elimination,
+        val assert1 = RaireAssertion(1, 0, 0.0, 42, RaireAssertionType.winner_only)
+        val assert2 = RaireAssertion(1, 2, 0.0,422, RaireAssertionType.irv_elimination,
             listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
 
         val oaIrv =  OAIrvContestUA(rcontest, true, listOf(assert1, assert2))

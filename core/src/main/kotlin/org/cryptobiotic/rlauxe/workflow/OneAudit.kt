@@ -1,10 +1,13 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+
+private val logger = KotlinLogging.logger("OneAudit")
 
 class OneAudit(
     val auditConfig: AuditConfig,
@@ -91,7 +94,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             measuredMean = testH0Result.tracker.mean(),
         )
 
-        if (!quiet) println(" ${contest.name} ${assertionRound.auditResult}")
+        if (!quiet) logger.debug{" ${contest.name} ${assertionRound.auditResult}"}
         return testH0Result
     }
 }

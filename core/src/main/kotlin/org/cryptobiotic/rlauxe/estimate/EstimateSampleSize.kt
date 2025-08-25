@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
@@ -16,6 +17,8 @@ private val debugErrorRates = false
 private val debugSampleDist = false
 private val debugSampleSmall = false
 
+private val logger = KotlinLogging.logger("EstimateSampleSizes")
+
 // TODO: always one contest, always the minimum-margin assertion (?)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,11 +34,12 @@ fun estimateSampleSizes(
 
     // create the estimation tasks
     val tasks = mutableListOf<EstimateSampleSizeTask>()
-    auditRound.contestRounds.filter { !it.done }.forEach { contest ->
-        tasks.addAll(makeEstimationTasks(auditConfig, contest, auditRound.roundIdx))
+    auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
+        tasks.addAll(makeEstimationTasks(auditConfig, contestRound, auditRound.roundIdx))
     }
 
     // run tasks concurrently
+    logger.info{ "ConcurrentTaskRunnerG run ${tasks.size} tasks"}
     val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=nthreads)
 
     // put results into assertionRounds
@@ -69,7 +73,7 @@ fun estimateSampleSizes(
         val newSampleSizes = estResults.filter { it.task.contest.id == contest.id }
             .map { it.task.assertionRound.estNewSampleSize }
         contest.estNewSamples = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
-        // if (!quiet) println(" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}")
+        if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}"}
     }
 
     // return repeatedResult for debugging and diagnostics
@@ -86,9 +90,12 @@ fun makeEstimationTasks(
 ): List<EstimateSampleSizeTask> {
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
+    // logger.debug{ "makeEstimationTask for contest ${contestRound.contestUA.id} round $roundIdx"}
+
     // make the cvrs once for all the assertions for this contest
     val contest = contestRound.contestUA.contest
     val cvrs: List<Cvr> = when (auditConfig.auditType) {
+        AuditType.ONEAUDIT,
         AuditType.CLCA -> {
             // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             if (contest.isIRV()) {
@@ -102,12 +109,13 @@ fun makeEstimationTasks(
             // TODO what about supermajority?
             ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
         }
-        AuditType.ONEAUDIT -> {
-            emptyList()
-            //val contestOA = (contestRound.contestUA as OAContestUnderAudit).contest
-            //makeTestMvrsScaled(contestOA, auditConfig.sampleLimit) // TODO
-        }
+        //AuditType.ONEAUDIT -> {
+       //     val contestOA = (contestRound.contestUA as OAContestUnderAudit).contest
+        //    makeTestMvrsScaled(contestOA, auditConfig.sampleLimit)
+        //}
     }
+
+    // logger.debug{ "add assertionRounds for contest ${contestRound.contestUA.id} round $roundIdx"}
 
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -116,7 +124,7 @@ fun makeEstimationTasks(
             if (roundIdx > 1) {
                 val prevAuditResult = assertionRound.prevAuditResult!!
                 if (prevAuditResult.samplesUsed == contestRound.Nc) {   // TODO or pct of ?
-                    println("***LimitReached $contestRound")
+                    logger.info{"***LimitReached $contestRound"}
                     contestRound.done = true
                     contestRound.status = TestH0Status.LimitReached
                 }
@@ -220,7 +228,7 @@ fun simulateSampleSizeClcaAssorter(
     val cassorter = cassertion.cassorter
     val contest = contestUA.contest
 
-    if (!quiet) println("simulateSampleSizeClcaAssorter ${contest.name} ${cassorter.assorter().desc()}")
+    // logger.debug{"simulateSampleSizeClcaAssorter ${contest.name} ${cassorter.assorter().desc()}"}
 
     // strategies to choose how much error there is
     var fuzzPct = 0.0
@@ -434,7 +442,7 @@ fun simulateSampleSizeOneAuditAssorter(
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 
-    println("simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${oaCassorter.assorter().desc()} ${cvrs.size} ")
+    // logger.debug{"simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${oaCassorter.assorter().desc()} ${cvrs.size} "}
 
     // the sampler is specific to the assertion
     val sampler = if (oaConfig.simFuzzPct == null) {

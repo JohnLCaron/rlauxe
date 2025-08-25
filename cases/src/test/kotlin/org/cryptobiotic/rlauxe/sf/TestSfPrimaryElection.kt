@@ -26,7 +26,7 @@ class TestSfPrimaryElection {
             show = false,
         )
 
-        createSortedCards(topDir, auditDir, cvrCsv, zip = true) // write to "$auditDir/sortedCards.csv"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile = null) // write to "$auditDir/sortedCards.csv"
         println("that took $stopwatch")
     }
 }

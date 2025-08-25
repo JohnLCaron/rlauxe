@@ -47,7 +47,6 @@ interface AssorterIF {
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }.map {
             val av = assort(it, usePhantoms = usePhantoms)
-            if (show) println("    cvr ${it} assortValue=$av")
             av
         }.average()
         return mean2margin(mean)

@@ -1,13 +1,15 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 
 const val CvrExportCsvHeader = "id, group, contests, candidates0, candidates1, ...\n"
-
 const val unpooled = "unpooled"
+
+private val logger = KotlinLogging.logger("CvrExport")
 
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
 
@@ -114,7 +116,7 @@ class IteratorCvrExportStream(input: InputStream): Iterator<CvrExport> {
     }
 
     fun close() {
-        println("read $countLines lines")
+        logger.info{"read $countLines lines"}
         reader.close()
     }
 }
@@ -135,7 +137,7 @@ class IteratorCvrExportFile(filename: String): Iterator<CvrExport> {
     }
 
     fun close() {
-        println("read $countLines lines")
+        logger.info{"read $countLines lines"}
         reader.close()
     }
 }

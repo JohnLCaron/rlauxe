@@ -73,12 +73,16 @@ class RaireContestUnderAudit(
             val rounds = rcontest.roundsPaths.first().rounds // common case is only one
             if (rounds.isEmpty()) return pctDefault
 
-            val count = rounds.last().count // the last round should have two nonzero candidates
-            val winner = count.filter { it.value > 0.0 }.maxBy { it.value }
-            val loser = count.filter { it.value > 0.0 && it.key != winner.key }.maxBy { it.value }
+            // find the latest round with two candidates
+            var latestRound : IrvRound? = null
+            rounds.forEach{ if (it.count.size == 2) latestRound = it}
+            if (latestRound == null) return pctDefault
+
+            val winner = latestRound.count.maxBy { it.value }
+            val loser = latestRound.count.minBy { it.value }
             return (winner.value - loser.value) / (winner.value.toDouble())
         } catch (e : Throwable) {
-            logger.error(e) { "recountMargin" }
+            logger.error(e) { "recountMargin for contest ${contest.id}" }
             return -1.0
         }
     }
@@ -190,13 +194,14 @@ enum class RaireAssertionType(val aname:String) {
 data class RaireAssertion(
     val winnerId: Int, // this must be the candidate ID, in order to match with Cvr.votes
     val loserId: Int,  // ditto
+    var difficulty: Double,
     var marginInVotes: Int,
     val assertionType: RaireAssertionType,
     val eliminated: List<Int> = emptyList(), // candidate Ids; NEN only; already eliminated for the purpose of this assertion
     val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
 ) {
     fun show() = buildString {
-        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated")
+        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated difficulty=$difficulty, marginInVotes=$marginInVotes")
     }
 
     fun remaining(candidateIds: List<Int>) = candidateIds.filter { !eliminated.contains(it) }
@@ -208,7 +213,7 @@ data class RaireAssertion(
             return if (assertion is NotEliminatedBefore) {
                 val winner = candidateIds[assertion.winner]
                 val loser = candidateIds[assertion.loser]
-                RaireAssertion(winner, loser, aandd.margin, RaireAssertionType.winner_only, votes = votes)
+                RaireAssertion(winner, loser, aandd.difficulty, aandd.margin, RaireAssertionType.winner_only, votes = votes)
             } else if (assertion is NotEliminatedNext) {
                 val winner = candidateIds[assertion.winner]
                 val loser = candidateIds[assertion.loser]
@@ -218,6 +223,7 @@ data class RaireAssertion(
                 return RaireAssertion(
                     winner,
                     loser,
+                    aandd.difficulty,
                     aandd.margin,
                     RaireAssertionType.irv_elimination,
                     eliminated,
@@ -242,7 +248,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
     override fun loser() = rassertion.loserId   // candidate id, not index
     override fun reportedMargin() = reportedMargin
     override fun desc() = buildString {
-        append("winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes}")
+        append("winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }

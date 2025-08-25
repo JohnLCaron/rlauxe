@@ -212,7 +212,6 @@ fun mergeCvrsWithPools(mvrs1: List<Cvr>, mvrs2: List<Cvr>): List<Cvr> {
         }
     }
     for (i in mvr2count until mvrs2.size) allCvrs.add(mvrs2[mvr2count++])
-    // println("  allCvrs.size=${allCvrs.size}")
     return allCvrs
 }
 

@@ -11,7 +11,6 @@ fun quantile(data: List<Int>, quantile: Double): Int {
 
     val sortedData = data.sorted()
     if (quantile == 100.0) return sortedData.last()
-    // println(showDeciles(sortedData))
 
     // rounding down
     val p = min((quantile * data.size).toInt(), data.size-1)

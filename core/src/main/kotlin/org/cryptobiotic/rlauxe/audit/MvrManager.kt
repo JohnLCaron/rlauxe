@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.audit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
+
+private val logger = KotlinLogging.logger("MvrManager")
 
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
@@ -77,11 +80,11 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
     }
     if (debug) {
         val prevContestCountsById = prevContestCounts.entries.map { it.key.id to it.value }.toMap()
-        println("**wantSampleSize prevContestCountsById = ${prevContestCountsById}")
+        logger.debug{"**wantSampleSize prevContestCountsById = ${prevContestCountsById}"}
     }
     // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
     val wantSampleSizeMap = prevContestCounts.entries.map { it.key.id to it.key.wantSampleSize(it.value) }.toMap()
-    if (debug) println("**wantSampleSize = $wantSampleSizeMap")
+    logger.debug{"**wantSampleSize = $wantSampleSizeMap"}
 
     return wantSampleSizeMap
 }

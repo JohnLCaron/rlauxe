@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.persist
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
@@ -7,6 +8,8 @@ import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.workflow.*
 import java.nio.file.Files
 import java.nio.file.Path
+
+private val logger = KotlinLogging.logger("PersistentAudit")
 
 /** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
 class PersistentAudit(
@@ -33,16 +36,16 @@ class PersistentAudit(
         val nextRound = super.startNewRound(quiet)
 
         if (nextRound.samplePrns.isEmpty()) {
-            println("*** FAILED TO GET ANY SAMPLES (PersistentAudit)")
+            logger.warn {"*** FAILED TO GET ANY SAMPLES (PersistentAudit)"}
             nextRound.auditIsComplete = true
         } else {
             val publisher = Publisher(auditDir)
 
             writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
-            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}")
+            logger.info {"   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}"}
 
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
-            println("   writeSampleIndicesJsonFile ${publisher.samplePrnsFile(nextRound.roundIdx)}")
+            logger.info {"   writeSampleIndicesJsonFile ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
         }
 
         return nextRound
@@ -58,7 +61,7 @@ class PersistentAudit(
         //   in a test audit, the test mvrs are in "private/testMvrs.csv"
         if (mvrManager is MvrManagerTestFromRecord) {
             val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)
-            if (!quiet) println("  added ${sampledMvrs.size} mvrs to mvrManager")
+            if (!quiet) logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
         }
 
         val complete =  when (auditConfig.auditType) {
@@ -72,7 +75,7 @@ class PersistentAudit(
 
         val publisher = Publisher(auditDir)
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(roundIdx))
-        if (!quiet) println("    writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'")
+        logger.info {"    writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'"}
 
         return complete
     }

@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
+
+private val logger = KotlinLogging.logger("RlauxAuditIF")
 
 interface RlauxAuditIF {
     fun auditConfig() : AuditConfig
@@ -27,7 +30,7 @@ interface RlauxAuditIF {
         }
         auditRounds.add(auditRound)
 
-        if (!quiet) println("Estimate round ${roundIdx}")
+        if (!quiet) logger.info{"Estimate round ${roundIdx}"}
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig(),

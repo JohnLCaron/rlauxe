@@ -42,6 +42,18 @@ class TestSfElectionOA {
         )
     }
 
+    // create sorted cards, assumes auditDir/auditConfig already exists
+    // do this after createSF2024OA, so ballotPools have been created
+    @Test
+    fun createSF2024cards() {
+        val sfDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "/home/stormy/rla/cases/sf2024oa"
+        val auditDir = "$topDir/audit"
+        val cvrCsv = "$sfDir/cvrExport.csv"
+        val ballotPoolFile = "$auditDir/$ballotPoolsFile"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+    }
+
     /*@Test
     fun testCardContests() {
         val topDir = "/home/stormy/rla/cases/sf2024oa"

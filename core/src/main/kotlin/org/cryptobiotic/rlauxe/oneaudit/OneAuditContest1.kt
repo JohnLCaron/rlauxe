@@ -381,8 +381,6 @@ class OneAuditClcaAssorter1(
         //   poolAvg - 0, poolAvg - 1/2, poolAvg - 1 in [pa, pa-1/2,pa-1]
 
         val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue
-
-        // println("   cvr_assort=$cvr_assort mvr_assort=$mvr_assort")
         return cvr_assort - mvr_assort
     }
 

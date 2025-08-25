@@ -20,18 +20,6 @@ open class OAContestUnderAudit(
         append(showCandidates())
     }
 
-    override fun recountMargin(): Double {
-        var pct = -1.0
-        val minAssertion: Assertion = minAssertion() ?: return pct
-        if (contest.votes() != null) {
-            val votes = contest.votes()!!
-            val winner = votes[minAssertion.assorter.winner()]!!
-            val loser = votes[minAssertion.assorter.loser()]!!
-            pct = (winner - loser) / (winner.toDouble())
-        }
-        return pct
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -124,8 +112,6 @@ class OneAuditClcaAssorter(
         //   poolAvg - 0, poolAvg - 1/2, poolAvg - 1 in [pa, pa-1/2,pa-1]
 
         val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue
-
-        // println("   cvr_assort=$cvr_assort mvr_assort=$mvr_assort")
         return cvr_assort - mvr_assort
     }
 

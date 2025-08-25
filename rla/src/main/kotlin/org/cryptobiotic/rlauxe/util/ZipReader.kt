@@ -31,7 +31,7 @@ class ZipReader(val zipFilename: String) {
     // special case when the name of the file you want is the same as the zip file, but with .csv extension
     fun inputStream() : InputStream {
         val lastPart = zipFilename.substringAfterLast("/")
-        val innerFilename = lastPart.replace(".zip", ".csv")
+        val innerFilename = lastPart.replace(".zip", "")
         return inputStream(innerFilename)
     }
 

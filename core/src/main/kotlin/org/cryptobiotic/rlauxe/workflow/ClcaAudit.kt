@@ -1,11 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+
+private val logger = KotlinLogging.logger("ClcaAudit")
 
 class ClcaAudit(
     val auditConfig: AuditConfig,
@@ -181,7 +184,7 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        if (!quiet) println(" (${contest.id}) ${contest.name} ${cassertion} ${assertionRound.auditResult}")
+        if (!quiet) logger.debug{" (${contest.id}) ${contest.name} ${cassertion} ${assertionRound.auditResult}"}
         return testH0Result
     }
 }

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.persist
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -8,6 +9,7 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import java.nio.file.Files
 import java.nio.file.Path
 
+private val logger = KotlinLogging.logger("MvrManagerFromRecord")
 private val checkValidity = true
 
 // assumes that the mvrs have been set externally into the election record.
@@ -21,6 +23,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
         } else if (Files.exists(Path.of(publisher.cardsCsvFile()))) {
             publisher.cardsCsvFile()
         } else {
+            logger.error{ "No cvr file found in $auditDir" }
             throw IllegalArgumentException("No cvr file found in $auditDir")
         }
     }
@@ -60,7 +63,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
 
     private fun readMvrsForRound(): List<AuditableCard> {
         val publisher = Publisher(auditDir)
-        return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.rounds()))
+        return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))
     }
 
     private fun auditableCards(): Iterator<AuditableCard> = readCardsCsvIterator(cardFile)

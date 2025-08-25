@@ -2,6 +2,7 @@
 
 package org.cryptobiotic.rlauxe.estimate
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +19,8 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
+private val logger = KotlinLogging.logger("ConcurrentTaskRunnerG")
+
 interface ConcurrentTaskG<T> {
     fun name() : String
     fun run() : T
@@ -31,7 +34,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
     // run all the tasks concurrently
     fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int = 30): List<T> {
         val stopwatch = Stopwatch()
-        if (show) println("\nConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads")
+        logger.info{"ConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads"}
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -43,7 +46,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
         }
 
         // doesnt return until all tasks are done
-        if (show) println("that took $stopwatch")
+        logger.info{"took $stopwatch"}
         // println("that ${stopwatch.tookPer(tasks.size, "task")}")
         return results
     }

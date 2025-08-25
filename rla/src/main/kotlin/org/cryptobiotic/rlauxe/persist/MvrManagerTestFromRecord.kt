@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
@@ -12,6 +13,7 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import java.nio.file.Files
 import java.nio.file.Path
 
+private val logger = KotlinLogging.logger("MvrManagerTestFromRecord")
 private val checkValidity = true
 
 // stores the testMvrs in "$auditDir/private/testMvrs.csv"
@@ -25,6 +27,7 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
         } else if (Files.exists(Path.of(publisher.cardsCsvFile()))) {
             publisher.cardsCsvFile()
         } else {
+            logger.error{ "No cvr file found in $auditDir" }
             throw IllegalArgumentException("No cvr file found in $auditDir")
         }
     }
@@ -84,7 +87,8 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
             }
         }
         val publisher = Publisher(auditDir)
-        writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(publisher.rounds()))
+        writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(publisher.currentRound()))
+        logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(publisher.currentRound())}"}
         return sampledMvrs
     }
 
@@ -92,12 +96,12 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
     fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard> {
         val publisher = Publisher(auditDir)
         val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
-        if (resultSamples is Err) println(resultSamples)
+        if (resultSamples is Err) logger.error{"$resultSamples"}
         require(resultSamples is Ok)
         val sampleNumbers = resultSamples.unwrap() // these are the samples we are going to audit.
 
         return if (sampleNumbers.isEmpty()) {
-            println("***Error sampled Indices are empty for round $roundIdx")
+            logger.error{"***Error sampled Indices are empty for round $roundIdx"}
             emptyList()
         } else {
             setMvrsBySampleNumber(sampleNumbers)
@@ -106,6 +110,6 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
 
     private fun readMvrsForRound(): List<AuditableCard> {
         val publisher = Publisher(auditDir)
-        return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.rounds()))
+        return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))
     }
 }

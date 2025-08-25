@@ -114,9 +114,6 @@ data class ContestRoundJson(
 )
 
 fun ContestRound.publishJson() : ContestRoundJson {
-    if (this.contestUA is RaireContestUnderAudit)
-        println()
-
     return ContestRoundJson(
         // if (!isRaire) this.contestUA.publishJson() else null,
         // if (isRaire) (this.contestUA as RaireContestUnderAudit).publishRaireJson() else null,
@@ -136,12 +133,6 @@ fun ContestRound.publishJson() : ContestRoundJson {
 }
 
 fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
-    if (contestUA is RaireContestUnderAudit)
-        println()
-
-    //val contest = if (this.contestUA != null) this.contestUA.import()
-    //else this.raireContestUA!!.import()
-
     // not exactly type safe TODO fails on Raire
     val assertionMap = contestUA.assertions().associateBy { it.assorter.desc() }
     val assertionRounds = assertionRounds.map {

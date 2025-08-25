@@ -132,7 +132,10 @@ class OneAuditClcaAssorter(
     override fun toString() = buildString {
         appendLine("OneAuditComparisonAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
+        appendLine("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
+        poolAverages.assortAverage.forEach {
+            appendLine("  pool=${it.key} average=${it.value}")
+        }
     }
 
     override fun equals(other: Any?): Boolean {

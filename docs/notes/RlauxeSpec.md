@@ -1,6 +1,6 @@
 **Rlauxe Implementation Specification**
 
-_8/12/25_
+_8/28/25_
 
 See [references](../papers/papers.txt) for reference papers.
 
@@ -114,6 +114,16 @@ The assorter function `A_wℓ(bi)` for winner w and loser ℓ operating on the i
     1/2, otherwise.
 ````
 The upper bound is 1.
+
+````
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+        if (!mvr.hasContest(info.id)) return 0.5
+        if (usePhantoms && mvr.phantom) return 0.0 // worst case
+        val w = mvr.hasMarkFor(info.id, winner)
+        val l = mvr.hasMarkFor(info.id, loser)
+        return (w - l + 1) * 0.5
+    }
+````
 
 ## SuperMajority
 
@@ -235,7 +245,7 @@ The requirements for CLCA audits:
 ### The clcaAssorter
 
 We will use the term *_assorter function_* to refer to the Plurality, Approval, and SuperMajority social choice
-functions `A_wℓ` as defined above. We use *_clcaAssorter function_ *to refer to the assorter used by Card Level Comparison Audits.
+functions `A_wℓ` as defined above. We use *_clcaAssorter function_* to refer to the assorter used by Card Level Comparison Audits.
 So, a clcaAssorter function has an assorter function, and by composing them, only one clcaAssorter implementation is needed.
 
 CLCAs have the same number of assertions as in the Polling Audit case, with the same meaning.
@@ -249,7 +259,8 @@ CVR ci as:
         v is the cvrAssortMargin = 2 * (reported assorter mean) - 1
         o is the overstatement
 
-The reported assorter mean for A_wℓ is calculated as `(winnerVotes - loserVotes) / Nc`, where Nc is the maximum ballots for contest c.
+The reported assorter mean for A_wℓ is calculated as `(winnerVotes - loserVotes) / Nc`, where Nc is the trusted maximum ballots for contest c.
+TODO: relationship to Ā(cvr)
 
 The overstatement is calculated as
 

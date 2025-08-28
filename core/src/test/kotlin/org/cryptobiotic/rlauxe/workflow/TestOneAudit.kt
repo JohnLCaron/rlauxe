@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrs
-import org.cryptobiotic.rlauxe.oneaudit.makeTestMvrsScaled1
 import kotlin.test.Test
 
 class TestOneAudit {

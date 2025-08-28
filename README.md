@@ -1,15 +1,13 @@
-**RLAUXE ("relax")**
+**RLAUXE ("rlux")**
 
 WORK IN PROGRESS
-_last changed: 08/12/2025_
+_last changed: 08/28/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code. 
 
 The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license. 
-The Rlauxe library is a rewritten version of the SHANGRLA python library. It does not share any code, but is based on the 
-concepts expressed there (and in the papers cited below), as well as follows the SHANGRLA design in many places. 
-It also has design and implementation differences, which are not necessarily vetted by
-the SHANGRLA authors.
+The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the 
+[published papers](#reference-papers) of Stark et al.
 
 Also see the [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
 
@@ -107,16 +105,17 @@ Otherwise, the audit expands, potentially to a full hand count. If every null is
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
-| term          | definition                                                                                     |
-|---------------|------------------------------------------------------------------------------------------------|
-| Nc            | the number of ballot cards validly cast in the contest                                         |
-| risk	         | we want to confirm or reject the null hypothesis with risk level α.                            |
-| assorter      | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
-| assertion     | the mean of assorter values is > 1/2: "half-average assertion"                                 |
-| estimator     | estimates the true population mean from the sampled assorter values.                           |
-| bettingFn     | decides how much to bet for each sample. (BettingMart)                                         |
-| riskTestingFn | is the statistical method to test if the assertion is true.                                    |
-| audit         | iterative process of choosing ballots and checking if all the assertions are true.             |
+| term       | definition                                                                                     |
+|------------|------------------------------------------------------------------------------------------------|
+| Nc         | a trusted, independent bound on the number of valid ballots cast in the contest c.             |
+| Ncards     | the number of ballot cards validly cast in the contest                                         |
+| risk	      | we want to confirm or reject the null hypothesis with risk level α.                            |
+| assorter   | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
+| assertion  | the mean of assorter values is > 1/2: "half-average assertion"                                 |
+| estimator  | estimates the true population mean from the sampled assorter values.                           |
+| bettingFn  | decides how much to bet for each sample. (BettingMart)                                         |
+| riskFn     | the statistical method to test if the assertion is true.                                       |
+| audit      | iterative process of choosing ballots and checking if all the assertions are true.             |
 
 
 ## Assorters and supported SocialChoices
@@ -713,7 +712,8 @@ ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
 STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
   https://github.com/pbstark/SHANGRLA
 
-VERIFIABLE  Publicly Verifiable RLAs. Alexander Ek, Aresh Mirzaei, Alex Ozdemir, Olivier Pereira, Philip Stark, Vanessa Teague (being written)
+SliceDice   Dice, but don’t slice: Optimizing the efficiency of ONEAudit. Spertus, Glazer and Stark, Aug 18 2025
+    https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
 
 ````
 Also see (reference notes)[docs/notes/papers.txt].

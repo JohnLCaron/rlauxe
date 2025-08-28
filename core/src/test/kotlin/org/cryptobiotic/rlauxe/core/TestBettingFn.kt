@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestBetaFn {
+class TestBettingFn {
 
     @Test
     fun testOptimalComparison() {

@@ -33,7 +33,7 @@ interface AssorterIF {
     fun desc(): String
     fun winner(): Int  // candidate id
     fun loser(): Int   // candidate id
-    fun reportedMargin(): Double // in (0, 1)
+    fun reportedMargin(): Double // in (0, 1]
     fun reportedMean() = margin2mean(reportedMargin())  // in (.5, 1]
 
     // Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
@@ -44,6 +44,7 @@ interface AssorterIF {
     //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
 
     // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
+    // Note that we rely on it.hasContest(contestId), assumes undervotes are in the cvr, ie hasStyle = true.
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
         val mean = cvrs.filter{ it.hasContest(contestId) }.map {
             val av = assort(it, usePhantoms = usePhantoms)
@@ -69,9 +70,11 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
 
     // assort in {0, .5, 1}
+    // usePhantoms = true for polling, but when this is the "primitive assorter" in clca, usePhantoms = false so that
+    //   clcaAssorter can handle the phantoms.
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
+        if (usePhantoms && mvr.phantom) return 0.0 // worst case
         val w = mvr.hasMarkFor(info.id, winner)
         val l = mvr.hasMarkFor(info.id, loser)
         return (w - l + 1) * 0.5
@@ -82,6 +85,8 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin
+
+    fun shortName() = " winner/loser= $winner/$loser"
 
     override fun toString(): String = desc()
     override fun equals(other: Any?): Boolean {

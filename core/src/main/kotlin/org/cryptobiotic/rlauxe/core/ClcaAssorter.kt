@@ -138,7 +138,7 @@ open class ClcaAssorter(
         //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
         //            else self.assort(mvr)
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
-        else this.assorter.assort(mvr, usePhantoms = false)
+            else this.assorter.assort(mvr, usePhantoms = false)
 
         //        If not use_style, then if the CVR contains the contest but the MVR does not,
         //        the MVR is considered to be a non-vote in the contest (assort()=1/2).

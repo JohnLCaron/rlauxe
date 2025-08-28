@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
 
-// not used but for testing
+/* not used but for testing
 
 // OneAuditComparisonAssorter for contest St. Vrain and Left Hand Water Conservancy District Ballot Issue 7C (64)
 //  assorter= winner=0 loser=1 reportedMargin=0.6556 reportedMean=0.8278
@@ -63,3 +63,5 @@ class OaPluralityAssorter(val contestOA: OneAuditContest1, winner: Int, loser: I
                 oaClcaAssorter.assorter.loser())
     }
 }
+
+ */

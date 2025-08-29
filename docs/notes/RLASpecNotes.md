@@ -28,6 +28,14 @@ For the contest under audit, a CVR or MVR either
 1. contains a (possibly invalid) vote in the contest (an element of V ∪ *bad*), which may be a null vote, or
 2. does not contain the contest, which is represented by notPresent
 
+### 1.2 Social Choice Functions and Election Outcomes
+
+A social choice function maps sets of votes to an election outcome. 
+
+Definition 3. Let O be a set of possible election outcomes and V be the set
+of valid votes. A social choice function tally maps a multiset of elements of
+V ∪ bad to an element of O.
+
 ### 1.3 Assertions and Assorters
 
 Definition 4. An assertion is a predicate on a multi-set of votes, including bad ones.
@@ -46,18 +54,17 @@ tally inputs
         • an outcome O ∈ O and
         • a set of assertions A,
 
-and outputs
+    and outputs
         true, if O is the unique outcome implied by A, given tally
         false, otherwise.
 
-### 1.5 Committing to Information About Cards
+### 1.5 comments
 
 % We do not need manifests per se (the Prover might need them to help retrieve sampled ballots, but the verifier doesn't).
 %The Prover is responsible to assign an identifier to every voting card.
 %As discussed above, we do assume that whatever technology used to assign the identifiers to the cards is "indelible"" for the purpose of the audit.
 %This might comprise printing the ID on the card in ink, or specifying the location of the card in a particular physical batch of cards---provided that location cannot be altered during the audit without the verifier's knowledge. Similarly, after the identifiers have been assigned to voting cards, we assume that no voting card can be added without the verifier's knowledge.
 
-The Prover makes several commitments to untrusted data about the cards under audit.
 %\todo{PBS:
 %    I've been thinking about this inside out:
 %    the identifiers really are primary; a manifest is a way to **generate} those IDs, and helps with the retrieval.
@@ -72,7 +79,9 @@ The Prover makes several commitments to untrusted data about the cards under aud
 %    the risk limit for sampling methods that rely on selecting from the set.
 %}
 
-First, Prover must commit to which ID will be retrieved when a given value in $\intrange{1}{\cardUpperBound}$ is sampled.
+### 1.5 Committing to Information About Cards
+
+The Prover makes several commitments to untrusted data about the cards under audit. First, Prover must commit to which ID will be retrieved when a given value in 1..N is sampled.
 
 Definition 7.  The Prover's **ID commitment** is a function
 
@@ -80,75 +89,34 @@ Definition 7.  The Prover's **ID commitment** is a function
 
     If Find(i) == ⊥ the Prover does not claim to be able to retrieve i.
 
-\AO{
-Using $\bot$ to denote a distinguished ID (as is done at my prior comment)
-becomes problematic here, where $\bot$ is used to denote a failure to retrieve.
-Also, the $\bot$ next to $\cup$ should be in a set.
-}
-\VTNote{Agree - I meant it to mean "not committing to an ID", which I hope is now more consistent throughout. This is meant to be analogous to the situation where the voter didn't write a vote. The Prover isn't claiming that there's any card out there that will be fetched if this number is sampled. (It can still refuse to retrieve things it has committed to, but it can't retrieve something acceptable when no commitment has been made. Possibly we should use 'null' for both or $\bot$ for both---feel free to change.}
-
 The Prover is free to define the ID commitment in any way it likes and, in particular, to lie about the identifiers that have been actually assigned to the voting cards.
 We make no assumption regarding the faithfulness of that commitment.
 In particular, it is fine if:
+
+could be 
+
+The prover is not trusted and may lie about the identifiers that are assigned to
+the voting cards. In particular, we need to detect if:
 
 * there are more physical cards than indicated IDs,
 * some cards were not assigned IDs in $\ballotIDSet{}$,
 * some IDs the Prover claimed to use were not in fact assigned to any physical card, or
 * more than one card was assigned the same ID.
 
-Verifying the basic consistency properties of $\map$ (e.g., that it is injective except for values mapping to $\bot$) is part of the verification algorithm---see \autoref{subsec:verification} for details.
+Verifying the basic consistency properties of find (e.g., that it is injective except for values mapping to $\bot$) is part of the verification algorithm---see Section 22.6 for details.
 
-% \JCNote{Not sure why "x is a multiset". When you define this function, cant you check that there are no duplicate Ids? }
-% \VTNote{Yes, this is just a way of making that check part of the verification algorithm. We let the Prover write duplicates, then we tell the verifier to check that there are no duplicates. It would also be valid to just say that the Prover's only option is to make a list with no duplicates, but I think this formulation makes it easier for people to write a good verifier. Either would be fine though.}
-
-%    None, some, or all cards in $x$ are imprinted with identifiers.
-%    (Don't really need "printing" per se; just immutable [including blanks] once the audit starts.)
-%    The identifiers might not be unique and might not be among the IDs the Prover commits to.
-%    We do not assume that the Prover tells the truth about the ballot IDs, or properly puts a distinct one on each card, but we will assume that they cannot be altered on the physical ballots once committed to, and that the verifier can see whether the right one was retrieved.
-
-\todo{
-PBS: To guarantee that Bernoulli sampling will work,
-verifier needs to know that Prover has in effect tossed a $p$-coin for each card and if the coin landed heads, revealed the votes on the card.
-(Can gain efficiency if you keep track of the styles of the cards as you toss the coin.)
-Suffices to know that you've tossed a coin for every card the Prover produces (all the containers), provided you know how many cards that is in all, and have the trustworthy upper bound on the number of cards that contain each contests, as before.
-Still need to account for the difference between the number of cards "found" (the number of cards for which a coin was tossed, for each contest) and the upper bounds by (conceptually) creating phantom ballots
-    to account for the difference and tossing a $p$-coin for each of them.
-    This set up allows cards to be "lost,"
-both for the Bernoulli sampling and the other sampling schemes:
-lost, unaccounted for, or unretrieved cards are replaced with phantoms.
-But it is not trustworthy if cards can be added or altered.}
-\VTNote{I think our sampling function is generic enough to cover Bernoulli sampling, unless I'm misunderstanding something...}
-
-%Each identifier might include additional claims about the card it claims to point to, such as contests the card is supposed to contain, where the card can be found (scanner, batch, card in batch), vote subtotals for the batch the card is in, or the votes on that card (CVR). \VTNote{At the moment, the bulleted list above includes an assignment of $\ballotStyle$ (which contests were on the card) and $\ballotClass$ (which class it was in for the purposes of sampling, e.g. which stratum for stratified sampling, or which county for CO-style sampling). We don't currently have any description of batches or batch subtotals, but we probably should add those.}
-% VT: have moved the above para up.
-% VT: there was an example transformation here, relating to filling in zombies, but I've moved that to the section on transformations.
-
-%Verifier picks a sampling design that works logistically. VT: See sampling design discussion above.
-%Verifier constructs SHANGRLA assertions for each contest. VT: I think at the moment this is rolled into the definition of $R$.
-
-%For each assertion, verifier selects a risk-measuring function that can be computed from
-%the initial message, i.e., the ID+claims list, and cards retrieved using the stipulated sampling design.
-%\VTNote{I've commented the rest of this section out because I think it's now superseded by stuff I've written above. However, I'm leaving in this paragraph about having a risk-measuring function for each assertion, because I think we could have done it that way rather than the per-audit way I've defined it above. I was thinking about super-simple and thinking that in that scheme there's really only one risk-measuring function for all of the assertions. But I think either way would make sense---what does everyone else think?}
-
-
-%(Grouping the IDs and ancillary claims seems quite clean here: the risk needs to be computable from those things and audited ballots.  That's flexible enough to cover polling audits, ballot-level comparison audits,
-%batch-level comparison audits, and ONEAudit, all with or without stratification.)
-% \VTNote{Agree.}
-
-In card-level comparison audits, the Prover makes an ID commitment and a **CVR commitment} in which it commits to reference vote for some or all IDs in the ID commitment.
-(The exposition here can be generalized from commitments about CVRs to commitments about reference values of assorters, which makes it possible to use the ONEAudit approach of \cite{stark2023overstatement} to leverage batch-level information.)
+In card-level comparison audits, the Prover makes an ID commitment and a **CVR commitment** in which it commits to reference vote for some or all IDs in the ID commitment.
+(The exposition here can be generalized from commitments about CVRs to commitments about reference values of assorters, which makes it possible to use the ONEAudit approach to leverage batch-level information.)
 
 Definition 8. The Prover's **CVR commitment** is a function
 
     CVR : 1..N → (V ∪ *bad*)
 
 Definitions 7 and 8 together model the Prover's initial declaration about the cards.
-The Prover is declaring that if the sampling function chooses $i$, the Prover will retrieve a card with ID $\map{}(i)$, and that applying \tally{} to the set of CVRs in the commitment will produce the same outcome as applying \tally{} to $x$.
+The Prover is declaring that if the sampling function chooses $i$, the Prover will retrieve a card with ID FIND(i), and that applying TALLY to the set of CVRs in the commitment will produce the same outcome as applying TALLY to $x$.
 Of course, these two tables need to be checked for consistency with each other and with the rest of the election data.
-In particular, the verifier should check that applying \tally{} to the CVRs yields the reported outcome.
-See \autoref{subsec:verification} for details.
-
-\VTNote{And note that the CVR should not just be null, because that means that the [card presumably exists and can be retrieved but the] voter didn't write anything.}
+In particular, the verifier should check that applying TALLY to the CVRs yields the reported outcome.
+See Section 2.6 for details.
 
 In ballot-polling audits, the Prover may make untrusted claims about whether the contest is on the cards---these are optionally used for auditing.
 This is called "card-style" information, and is indicated using a bit value.
@@ -157,17 +125,6 @@ A one indicates that the contest is on the card; zero indicates that it is not.
 Definition 9 The Prover's **style commitment** is a function
 
     style : 1..N → {0, 1}
-
-When we have CVRs, this commitment can be left implicit because it can be assumed to be zero when $\CVR(i) = \notPresent{}$, and one otherwise.
-(Card style information can reduce audit sample sizes by orders of magnitude \cite{glazerEtal21,glazerEtal23}.) %However, we make it explicit here to allow for general kinds of audits including those that do not use CVRs.
-
-%\subsection{Assorter reference values}
-%Finally, for use in comparison audits, the Prover can make a claim about the **reference value} for each assorter.
-%This fills the role of a CVR in a comparison audit---it is a claim about what the election data says about that vote. It would be (mostly) equivalent to let the Prover commit to a CVR, and then let the verifier apply the assorter. This formulation allows for the same functionality, but also allows for some more general values (such as ways of treating absent CVRs) and slightly simpler verification. These reference values are ignored for polling audits.
-
-%\begin{defn} \label{def:assorter-ref-commitment} The Prover's **assorter reference values} are provided, for each index, as a list of reference values, one for each assertion in $\assertions{}$.
-%   $\assorterRefs$ inputs a value $i$ in $[1,N]$ and outputs a list $(\refVal_1, \refVal_2, \ldots, \refVal_{|\assorters{}|} ).$
-%\end{defn}
 
 1.6 Connecting Assertions and Assorters
 
@@ -254,6 +211,7 @@ Proposition 27.
     -((2 * Ā(cvr) - 1))/2 < -Ā(cvr) + Ā(mvr) , because v = (2 * Ā(cvr) - 1)
     -Ā(cvr) + 1/2 < -Ā(cvr) + Ā(mvr)
     1/2 < Ā(mvr)
+
 =====================================================================================================
 
 Does Ā = (winner - loser) / N  ?

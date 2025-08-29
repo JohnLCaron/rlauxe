@@ -7,9 +7,8 @@ data class CardLocationManifest(
     val cardStyles: List<CardStyle> // empty if style info not available
 )
 
-// if hasStyles, then either cardStyle or contestIds is non null, otherwise both are null
-// essentially, CardStyle factors out the contestIds, which the CardLocation references
-// so its a form of normalization
+// if hasStyles, then either cardStyle or contestIds is non null; if !hasStyles then both are null
+// essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
 data class CardLocation(
     val id: String,
     val phantom: Boolean = false,

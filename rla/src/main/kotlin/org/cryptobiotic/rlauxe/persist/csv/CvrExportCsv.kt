@@ -11,6 +11,7 @@ const val unpooled = "unpooled"
 
 private val logger = KotlinLogging.logger("CvrExport")
 
+// for DominionCvrSummary
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
 
     fun poolKey(): String {

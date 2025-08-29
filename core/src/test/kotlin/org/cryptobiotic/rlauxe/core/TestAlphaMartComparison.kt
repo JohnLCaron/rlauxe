@@ -17,7 +17,6 @@ class TestAlphaMartComparison {
         val contest = makeContestsFromCvrs(cvrs).first()
         val contestUA = ContestUnderAudit(contest).makeClcaAssertions(cvrs)
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
-        val calcMargin = compareAssorter.calcClcaAssorterMargin(cvrs.zip(cvrs))
 
         val theta = compareAssorter.noerror()
         val expected = 1.0 / (3 - 2 * cvrMean)

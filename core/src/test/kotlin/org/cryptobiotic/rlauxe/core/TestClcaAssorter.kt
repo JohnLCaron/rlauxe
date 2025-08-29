@@ -479,3 +479,9 @@ class TestClcaAssorter {
         assertEquals(expected, calcMean, doublePrecision)
     }
 }
+
+fun ClcaAssorter.calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
+    val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
+        .map { bassort(it.first, it.second) }.average()
+    return mean2margin(mean)
+}

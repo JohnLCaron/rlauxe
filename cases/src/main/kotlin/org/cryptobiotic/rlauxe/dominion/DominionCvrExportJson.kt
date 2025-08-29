@@ -23,7 +23,7 @@ import java.nio.file.StandardOpenOption
 
 // this reads CvrExport_xxxxx.json files exported by Dominion.
 // we are getting these files from san francisco.
-// We derive CVRs from them.
+// We derive CvrExports from them, and serialze to csv files.
 
 class DominionCvrSummary(
     var ncvrs: Int,
@@ -158,10 +158,8 @@ data class Mark(
     }
 }
 
-// remove duplicates or overvotes??
-// "... a CVR is supposed to reflect what the ballot shows, even if the ballot does not contain a valid vote in one or more contests."
-// argues to wait until processing.
-// OTOH, you could show the auditors the JSON. Let the CVRS reflect what rlauxe uses.
+// Convert Dominion CvrExport_xxxxx.json files to CvrExport.csv.
+// remove candidate duplicates on IRV contests.
 
 fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvrSummary {
     val irvContests = contestManifest.irvContests

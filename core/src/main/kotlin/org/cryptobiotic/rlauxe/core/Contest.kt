@@ -98,7 +98,7 @@ interface ContestIF {
 open class Contest(
         val info: ContestInfo,
         voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-        val Nc: Int,               // maximum ballots/cards that contain this contest
+        val Nc: Int,               // trusted maximum ballots/cards that contain this contest
         val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
     ): ContestIF {
 
@@ -146,14 +146,6 @@ open class Contest(
             }
         }
         undervotes = info.voteForN * (Nc - Np()) - nvotes   // C1
-
-        // (undervotes + nvotes) = voteForN * (Nc - Np)
-        // Np + (undervotes + nvotes) / voteForN = Nc     // C2
-        // But if you calculate Nc from some random numbers, you have to ensure that there are enough ballots for the winner:
-        //  let winnerVotes = votes.map{ it.value }.max()
-        //  then (Nc - Np) >= winnerVotes
-        //       (Nc - Np) = (undervotes + nvotes) / voteForN >= winnerVotes
-        //                    undervotes >= winnerVotes * voteForN - nvotes   // C3
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
@@ -305,7 +297,6 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    // TODO could move to test
     fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
         cvrs.filter { it.hasContest(id) }.forEach { cvr ->

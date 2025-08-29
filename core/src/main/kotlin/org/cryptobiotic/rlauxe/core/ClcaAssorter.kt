@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.mean2margin
-
 /** See SHANGRLA Section 3.2.
  * Let bi denote the ith ballot, and let ci denote the cast-vote record for the ith ballot.
  * Let A denote an assorter, which maps votes into [0, u], where u is an upper bound (eg 1, 1/2f).
@@ -45,7 +43,7 @@ open class ClcaAssorter(
             require(assorter is SuperMajorityAssorter) { "assorter must be SuperMajorityAssorter" }
         }
 
-        // Define v ≡ 2Āc − 1, the assorter margin TODO just use reportedMArgin
+        // Define v ≡ 2Āc − 1, the assorter margin
         cvrAssortMargin = assorter.reportedMargin() // (0, 1)
         // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
         noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
@@ -73,13 +71,6 @@ open class ClcaAssorter(
     fun noerror() = noerror
     fun upperBound() = upperBound
     fun assorter() = assorter
-
-    // TODO move to test
-    fun calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
-        val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
-            .map { bassort(it.first, it.second) }.average()
-        return mean2margin(mean)
-    }
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where
     //                o is the overstatement

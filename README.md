@@ -1,7 +1,7 @@
 **RLAUXE ("rlux")**
 
 WORK IN PROGRESS
-_last changed: 08/28/2025_
+_last changed: 08/29/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code. 
 
@@ -9,7 +9,9 @@ The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work o
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the 
 [published papers](#reference-papers) of Stark et al.
 
-Also see the [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
+Also see:
+* [Implementation Specificaton](docs/notes/RlauxeSpec.md)
+* [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
 
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
@@ -17,12 +19,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
 <!-- TOC -->
 * [Audit Workflow](#audit-workflow)
 * [SHANGRLA framework](#shangrla-framework)
-  * [Assorters and supported SocialChoices](#assorters-and-supported-socialchoices)
-    * [Plurality](#plurality)
-    * [Approval](#approval)
-    * [SuperMajority](#supermajority)
-    * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
-  * [Missing Ballots (aka phantoms-to-evil zombies)](#missing-ballots-aka-phantoms-to-evil-zombies)
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
@@ -116,111 +112,6 @@ in a risk-limiting audit with risk limit α:
 | bettingFn  | decides how much to bet for each sample. (BettingMart)                                         |
 | riskFn     | the statistical method to test if the assertion is true.                                       |
 | audit      | iterative process of choosing ballots and checking if all the assertions are true.             |
-
-
-## Assorters and supported SocialChoices
-
-### Plurality
-
-"Top k candidates are elected."
-The rules may allow the voter to vote for one candidate, k candidates or some other number, including n, which
-makes it approval voting.
-
-See SHANGRLA, section 2.1.
-
-A contest has K ≥ 1 winners and C > K candidates. Let wk be the kth winner, and ℓj be the jth loser.
-For each pair of winner and loser, let H_wk,ℓj be the assertion that wk is really the winner over ℓj.
-
-There are K(C − K) assertions. The contest can be audited to risk limit α by testing all assertions at significance level α.
-Each assertion is tested that the mean of the assorter values is > 1/2 (or not).
-
-For the case when there is only one winner, there are C - 1 assertions, pairing the winner with each loser.
-For a two candidate election, there is only one assertion.
-
-For the ith ballot, define `A_wk,ℓj(bi)` as
-````
-    assign the value “1” if it has a mark for wk but not for ℓj; 
-    assign the value “0” if it has a mark for ℓj but not for wk;
-    assign the value 1/2, otherwise.
- ````
-
-For a Polling audit, the assorter function is this A_wk,ℓj(MVR).
-
-For a ClCA audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
-
-Notes
-* Someone has to enforce that each CVR has <= number of allowed votes.
-
-### Approval
-
-See SHANGRLA, section 2.2.
-
-In approval voting, voters may vote for as many candidates as they like.
-The top K candidates are elected.
-
-The plurality voting algorithm is used, with K winners and C-K losers.
-
-### SuperMajority
-
-"Top k candidates are elected, whose percent vote is above a fraction, f."
-
-See SHANGRLA, section 2.3.
-
-A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win.
-Currently only 1 winner is allowed.
-
-For the ith ballot, define `A_wk,ℓj(bi)` as
-````
-    assign the value “1/(2*f)” if it has a mark for wk but no one else; 
-    assign the value “0” if it has a mark for exactly one candidate and not wk
-    assign the value 1/2, otherwise.
-````
-For a Polling audit, the assorter function is this A_wk,ℓj(bi).
-
-For a CLCA audit, the assorter function is B(MVR, CVR) as defined below, using this A_wk,ℓj.
-
-One only needs one assorter for each winner, not one for each winner/loser pair.
-
-Notes
-* "minimum fraction of the valid votes": so use V-c, not N_c as the denominator.
-* Someone has to enforce that each CVR has <= number of allowed votes.
-
-**TODO** test when there are no winners.
-
-### Instant Runoff Voting (IRV)
-
-Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
-In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated. 
-This continues until only one candidate is left. Only 1 winner is allowed.
-
-In principle one could use polling audits for IRV, but the information
-needed to create the RaireAssertions all but necessitates CVRs.
-So currently we only support IRV with CLCA audits.
-
-We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate IRV assertions 
-that fit into the SHANGRLA framewok, and makes IRV contests amenable to risk limiting auditing, just like plurality contests.
-
-See the RAIRE guides for details:
-* [Part 1: Auditing IRV Elections with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_1.pdf)
-* [Part 2: Generating Assertions with RAIRE](https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials/blob/main/A_Guide_to_RAIRE_Part_2.pdf)
-
-
-## Missing Ballots (aka phantoms-to-evil zombies)
-
-From Phantoms to Zombies (P2Z) paper:
-
-"A listing of the groups of ballots and the number of ballots in each group is called a ballot manifest.
-What if the ballot manifest is not accurate?
-It suffices to make worst-case assumptions about the individual randomly selected ballots 
-that the audit cannot find. This ensures that the true risk limit remains smaller than 
-the nominal risk limit.
-The dead (not found, phantom) ballots are re-animated as evil zombies: 
-We suppose that they reflect whatever would increase the P-value most: 
-a 2-vote overstatement for a ballot-level comparison audit, 
-or a valid vote for every loser in a ballot-polling audit."
-
-See [Missing Ballots](docs/MissingBallots.md) for details.
-
 
 # Audit Types
 

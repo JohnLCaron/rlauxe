@@ -78,7 +78,7 @@ So:
 
 * When a CVR has a contest on it that the MVR does not, the overstatementError uses an assort value of 0 for the MVR.
 
-TODO: expain this. WHat if Prover is misrepresenting / wrong about which ballots have which contests?
+TODO: expain this. What if Prover is misrepresenting / wrong about which ballots have which contests?
 
 # Assorters
 

@@ -76,7 +76,7 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
             else if (doubleIsClose(sample, noerror)) countP0++
             else if (doubleIsClose(sample, noerror * 1.5)) countP1u++
             else if (doubleIsClose(sample, noerror * 2.0)) countP2u++
-            else println(" isClca not assigned ${df(sample / noerror)}")
+            // else println(" sample / noerror = ${df(sample / noerror)}")
         }
     }
 

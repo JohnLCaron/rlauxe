@@ -869,7 +869,7 @@ class NonnegMean:
 
 
 # Slice/Dice has no errors
-# alpha_mart        : 193 : 36 min
+# alpha_mart        : 193 : 36 min   // current OneAudit
 # mix_betting_mart  : 165 : 29 min
 # agrapa            : 112 : 17 min
 # kelly_optimal     : 112 :  1.14 min   cards are drawn IID (rather than without replacement)

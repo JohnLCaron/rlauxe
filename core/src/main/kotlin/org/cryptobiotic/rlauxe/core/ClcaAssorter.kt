@@ -65,6 +65,7 @@ open class ClcaAssorter(
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
         }
+        // println(" noerror = $noerror")
     }
 
     fun id() = info.id
@@ -118,6 +119,7 @@ open class ClcaAssorter(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
         if (hasStyle and !cvr.hasContest(info.id)) {
+            // TODO log error
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 

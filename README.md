@@ -1,17 +1,18 @@
 **RLAUXE ("rlux")**
 
 WORK IN PROGRESS
-_last changed: 08/29/2025_
+_last changed: 08/31/2025_
 
-A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code. 
-
-The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license. 
-The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the 
+A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
+The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
 [published papers](#reference-papers) of Stark et al.
+
+The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license.
+Also see [OneAudit example python code](https://github.com/spertus/UI-TS)
 
 Also see:
 * [Implementation Specificaton](docs/notes/RlauxeSpec.md)
-* [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
+* [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
 
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
@@ -408,18 +409,20 @@ For each round:
 We need Nc as a condition of the audit, but its straightforward to estimate a contests' sample size without Nc,
 since it works out that Nc cancels out:
 
-        sampleEstimate = rho / dilutedMargin                  // (SuperSimple p. 4)
-        where 
-          dilutedMargin = (vw - vl)/ Nc
-          rho = constant
+````
+sampleEstimate = rho / dilutedMargin  // (SuperSimple p. 4)
+where 
+  dilutedMargin = (v_w - v_l)/ Nc
+  rho = constant
 
-        sampleEstimate = rho * Nc / (vw - vl)
-        totalEstimate = sampleEstimate * Nb / Nc               // must scale by proportion of ballots with that contest
-                      = rho * Nb / (vw - vl) 
-                      = rho / fullyDilutedMargin
+sampleEstimate = rho * Nc / (v_w - v_l)
+totalEstimate = sampleEstimate * Nb / Nc  // must scale by proportion of ballots with that contest
+              = rho * Nb / (v_w - v_l) 
+              = rho / fullyDilutedMargin
 
-        where
-          fullyDilutedMargin = (vw - vl)/ Nb
+where
+  fullyDilutedMargin = (v_w - v_l)/ Nb
+````
 
 The scale factor Nb/Nc depends on how many contests there are and how they are distributed across the ballots, but its
 easy to see the effect of not having Card Style Data in any case.
@@ -682,6 +685,12 @@ Of course, when the same ballots are selected as in previous rounds, which is th
 balllots are used.
 
 ## Developer Notes
+
+Modules
+* core: the core library, with minimal dependencies
+* rla: serialization and command line utilities
+* cases: San Francisco, Colorado, and Boulder County use cases
+* plots: plot generation and testing
 
 * [Implementation Specificaton](docs/notes/RlauxeSpec.md)
 * [Developer Notes](docs/Development.md)

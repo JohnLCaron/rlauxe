@@ -39,8 +39,8 @@ class CvrBuilders {
         return cb
     }
 
-    fun addCvr(cvrId: String): CvrBuilder {
-        val cb = CvrBuilder(this, cvrId)
+    fun addCvr(cvrId: String, poolId: Int?): CvrBuilder {
+        val cb = CvrBuilder(this, cvrId, poolId = poolId)
         builders.add(cb)
         return cb
     }
@@ -82,6 +82,7 @@ class CvrBuilder(
     val builders: CvrBuilders,
     val id: String,
     val phantom: Boolean = false,
+    val poolId: Int? = null,
 ) {
     val contests = mutableMapOf<Int, ContestVoteBuilder>() // contestId -> ContestVoteBuilder
 
@@ -122,12 +123,12 @@ class CvrBuilder(
 
     fun build(poolId: Int?=null) : Cvr {
         val votes: Map<Int, IntArray> = contests.values.map { it.build() }.toMap()
-        return Cvr(id, votes, phantom, poolId = poolId)
+        return Cvr(id, votes, phantom, poolId = poolId?: this.poolId)
     }
 
     companion object {
         fun fromCvr(builders: CvrBuilders, cvr: Cvr): CvrBuilder {
-            val cvrb: CvrBuilder = if (cvr.phantom) builders.addPhantomCvr(cvr.id) else builders.addCvr(cvr.id)
+            val cvrb: CvrBuilder = if (cvr.phantom) builders.addPhantomCvr(cvr.id) else builders.addCvr(cvr.id, cvr.poolId)
             cvr.votes.forEach { contestId, votes ->
                 cvrb.addContest(contestId, votes)
             }

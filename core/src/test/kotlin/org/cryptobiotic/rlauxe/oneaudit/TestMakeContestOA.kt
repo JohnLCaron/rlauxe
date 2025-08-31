@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -8,22 +9,23 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/*
 class TestMakeContestOA {
     val N = 50000
 
-    /*
     @Test
     fun testAllCvrs() {
         val margin = .02
-        val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 1.0, undervotePercent = 0.0, phantomPercent = 0.0)
-        assertEquals(N, contestOA.Nc())
+        val (contestOA, cvrs) = makeOneContestUA(margin, N, cvrPercent = 1.0, undervotePercent = 0.0, phantomPercent = 0.0)
+        assertEquals(N, contestOA.Nc)
         val contest = contestOA.contest as Contest
-        assertEquals(contestOA.cvrVotes, contest.votes)
+        val cvrVotes =  tabulateVotesFromCvrs(cvrs.iterator())[0]!!
+        assertEquals(cvrVotes, contest.votes)
         assertEquals(margin, contest.calcMargin(0, 1), doublePrecision)
 
-        assertEquals(1, contestOA.pools.size)
-        val pool = contestOA.pools[1]!!
-        assertEquals("noCvr", pool.name)
+        val oaAssorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        assertEquals(1, oaAssorter.poolAverages.assortAverage.size)
+        val pool = oaAssorter.poolAverages.assortAverage[1]!!
         assertEquals(0, pool.ncards)
         assertEquals(0.0, pool.calcReportedMargin(0, 1), doublePrecision)
 
@@ -34,15 +36,14 @@ class TestMakeContestOA {
     fun testHalfCvrs() {
         val margin = .02
         val cvrPercent = 0.5
-        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, undervotePercent = 0.0, phantomPercent = 0.0)
+        val (contestOA, cvrs) = makeOneContestUA(margin, N, cvrPercent = cvrPercent, undervotePercent = 0.0, phantomPercent = 0.0)
 
         checkBasics(contestOA, margin, cvrPercent)
     }
 
     @Test
     fun testSkewCvrs() {
-        val contest = makeContestOA(30000, 20000, 0.5, 0.0, 0.0, skewPct = .03)
-        val contestUA = contest.makeContestUnderAudit()
+        val (contestUA, cvrs) = makeOneContestUA(30000, 20000, 0.5, 0.0, 0.0, skewPct = .03)
         println(contestUA)
         val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
@@ -57,7 +58,7 @@ class TestMakeContestOA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, undervotePercent = 0.10, phantomPercent = 0.0)
+        val (contestOA, cvrs) = makeOneContestUA(margin, N, cvrPercent = cvrPercent, undervotePercent = 0.10, phantomPercent = 0.0)
         checkBasics(contestOA, margin, cvrPercent)
     }
 
@@ -72,7 +73,7 @@ class TestMakeContestOA {
             cvrPercents.forEach { cvrPercent ->
                 println("======================================================================================================")
                 println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
-                val contestOA = makeContestOA(margin, N, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
+                val (contestOA, cvrs) = makeOneContestUA(margin, N, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
                 checkBasics(contestOA, margin, cvrPercent)
                 checkAgainstCvrs(contestOA, margin, cvrPercent, undervotePercent, phantomPercent)
             }
@@ -133,9 +134,8 @@ class TestMakeContestOA {
                 " rel=${abs(underPct - undervotePercent) /underPct}")
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
     }
-
-     */
 }
+*/
 
 fun showPct(what: String, votes: Map<Int, Int>, Nc: Int, winner: Int = 0, loser: Int = 1) {
     val winnerVotes = votes[winner] ?: 0

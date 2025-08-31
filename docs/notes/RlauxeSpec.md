@@ -515,3 +515,140 @@ while rigorously maintaining the risk limit even if the voting system misidentif
 cards contain which contests (Glazer, Spertus and Stark, 2021). There are also techniques for
 dealing with missing ballot cards (Bañuelos and Stark, 2012; Stark, 2020).
 
+=========================
+
+
+Does Ā = (winner - loser) /N  ? (1)
+
+What happens when you have lots of ballots where the contest is not on the ballot? Is 1/2 really "nothing" ?
+I think Ā gets closer to 1/2, but all the arguments about stay true.
+
+I think when noStyle, Nc = N.
+
+SHANGRLA
+
+Section 2, p 4.
+
+"let bi denote the ith ballot card, and suppose there are N ballot cards in all."
+
+"If bi shows a mark for Alice but not for Bob, A(bi ) = 1. If it shows a mark for
+Bob but not for Alice, A (bi ) = 0. If it shows marks for both Alice and Bob (an
+overvote), for neither Alice nor Bob (an undervote), or if the ballot card does not contain
+the Alice v. Bob contest at all, A(bi ) = 1/2. The average value of A over all ballot
+cards is
+
+	Ā ≡  1/N Sum( A(bi ).
+
+
+Section 3.1 Ballot Polling
+
+Section 3.2 Ballot comparison
+
+summing over N
+
+"Define v ≡ 2Āc − 1. In a two-candidate plurality contest, v
+is the fraction of ballot cards with valid votes for the reported winner, minus the fraction
+with valid votes for the reported loser. ie (1).  This is the diluted margin of [22,12]. (Margins are
+traditionally calculated as the difference in votes divided by the number of valid votes.
+Diluted refers to the fact that the denominator is the number of ballot cards, which is
+greater than or equal to the number of valid votes.
+
+
+Section 3.4 phantoms to zombies
+
+(see original P2Z for polling. this refers to Clca)
+
+"To conduct a RLA, it is crucial to have an upper bound on the total number of ballot cards cast in the contest.
+Let N denote an upper bound on the number of ballot cards that contain the contest." ((LOOK changing definition!))
+"Suppose that n ≤ N CVRs contain the contest... If N > n, create N − n “phantom ballots” and N − n “phantom CVRs. Calculate the
+assorter mean for all the CVRs—including the phantoms—treating the phantom CVRs
+as if they contain no valid vote in the contest contest (i.e., the assorter assigns the value
+1/2 to phantom CVRs). Find the corresponding assorter margin (twice the assorter mean minus 1)
+
+To conduct the audit, sample integers between 1 and N:
+
+– If the resulting integer is between 1 and n, retrieve and inspect the ballot card associated with the corresponding CVR.
+• If the associated ballot contains the contest, calculate the overstatement error as in equation {eq. 2}.
+• If the associated ballot does not contain the contest, calculate the overstatement error using the value the assorter assigned to the CVR, but as if the value the
+assorter assigns to the physical ballot is zero (that is, the overstatement error is equal to the value the assorter assigned to the CVR).
+
+– If the resulting integer is between n + 1 and N , we have drawn a phantom CVR and a phantom ballot.
+Calculate the overstatement error as if the value the assorter assigned to the phantom ballot was 0 (turning the phantom into an “evil zombie”),
+and as if the value the assorter assigned to the CVR was 1/2.
+
+Some jurisdictions, notably Colorado, redact CVRs if revealing them might compromise
+vote anonymity. If such CVRs are omitted from the tally and the number of phantom
+CVRs and ballots are increased correspondingly, this approach still leads to a valid RLA.
+But if they are included in the tally, then if they are selected for audit they should be
+treated as if they had the value u (the largest value the assorter can assign) in calculating
+the overstatement error."
+
+
+
+MoreStyle
+
+Technically, the diluted margin [17] drives sample sizes for ballot-level comparison audits, as described below. The
+diluted margin is the margin in votes divided by the total number of cards in the population from which the
+sample is drawn.
+
+A ballot is what the voter receives and casts; a ballot card is an individual page of a ballot. In
+the U.S., ballots often consist of more than one card. The ballot cards that together comprise
+a ballot generally do not stay together once they are cast. RLAs generally draw ballot cards
+at random—not “whole” ballots.
+To conduct an RLA, an upper bound on the number of validly cast ballot cards must
+be known before the audit begins. The bound could come from manually keeping track of
+the paper, or from other information available to the election official, such as the number of
+voters eligible to vote in each contest, the number of pollbook signatures, or the number of
+ballots sent to polling places, mailed to voters, and returned by voters
+
+RLAs generally rely on ballot manifests to draw a random sample of ballot cards. A ballot
+manifest describes how the physical ballot cards are stored. It is the sampling frame for the
+audit. This paper explains how it can be beneficial to augment the ballot manifest with
+information about the style of each card, i.e., the particular contests the card contains—
+card-style data (CSD).
+
+CSD derived from CVRs rely on the voting system, so they could be wrong:
+CSD might show that a card contains a contest it does not contain, or vice versa.
+
+((CSD from some other method also might be wrong.))
+
+With CSD, there are two
+relevant “diluted margins,” as we shall see. The partially diluted margin is the margin in votes
+divided by the number of cards that contain the contest, including cards with undervotes
+or no valid vote in the contest. The fully diluted margin is the margin in votes divided by the number of cards in
+the population of cards from which the audit sample is drawn. When the sample is drawn
+only from cards that contain the contest, the partially diluted margin and the fully diluted
+margin are equal; otherwise, the fully diluted margin is smaller. If CSD are unavailable, the
+number of cards in that population is the number of cards cast in the jurisdiction. If CSD are
+available, the number of cards in the population can be reduced to the number of cards that
+contain the contest. The availability of CSD drives the sample size through the difference
+between the partially and fully diluted margins.
+
+Absent CSD, the sample for auditing contest S would be drawn from the entire population
+of N ballots.
+
+((I think when noStyle, Nc = N.))
+
+Polling
+
+Suppose we know which ballots contain S but not which particular cards contain S, and
+that the c cards comprising each ballot are kept in the same container...
+information about which containers have which card styles—even without infor-
+mation about which cards contain which contests—can still yield substantial efficiency gains
+for ballot-polling audits.
+
+((affects setting Nc?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

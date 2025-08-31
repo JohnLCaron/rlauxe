@@ -160,7 +160,7 @@ class OneAuditFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO cant be used on approval?
+// TODO can this be used on approval?
 
 val fac = 10000.0
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {

@@ -38,6 +38,8 @@ class BettingMart(
         var pvalueLast = 1.0
         var pvalueMin = 1.0
 
+        if (showEachSample) println("  $sampleNumber: Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
+
         while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
             sampleNumber++
@@ -72,7 +74,9 @@ class BettingMart(
             if (sequences.isOn) {
                 sequences.add(xj, lamj, eta, tj, testStatistic)
             }
-            if (showEachSample) println("    bet=${df(lamj)} (eta=${df(eta)}) $sampleNumber: $xj tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
+            if (showEachSample) println("  $sampleNumber: $xj bet=${df(lamj)} tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
+            // if (sampleNumber % 100 == 0)
+            //    println(sampleNumber)
 
             // – S ← S + Xj
             tracker.addSample(xj)
@@ -96,6 +100,7 @@ class BettingMart(
             }
         }
         // println(" status=$status mean = ${tracker.mean()} samplesUsed = ${sampleNumber/Nc.toDouble()}")
+
         // data class TestH0Result(
         //    val status: TestH0Status,  // how did the test conclude?
         //    val sampleCount: Int,      // number of samples used in testH0

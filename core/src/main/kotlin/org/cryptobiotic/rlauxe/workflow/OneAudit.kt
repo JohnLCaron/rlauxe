@@ -57,32 +57,22 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         //// maximal: eta0 = upper*(1 - eps), 99% max bet
 
         val strategy = auditConfig.oaConfig.strategy
-        val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
-            cassorter.upperBound() * (1.0 - eps)
+
+        val testH0Result = if (strategy == OneAuditStrategyType.optimalBet)
+            runBetting(auditConfig,
+                contest.Nc(),
+                cassorter,
+                sampler,
+                cassorter.upperBound())
         else
-            cassorter.noerror() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
+            runAlpha(auditConfig,
+                contest.Nc(),
+                cassorter,
+                sampler,
+                cassorter.upperBound())
 
-        val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
-            FixedEstimFn(.99 * cassorter.upperBound())
-        } else {
-            TruncShrinkage(
-                N = contest.Nc(),
-                withoutReplacement = true,
-                upperBound = cassorter.upperBound(),
-                d = auditConfig.pollingConfig.d,
-                eta0 = eta0,
-            )
-        }
-
-        val testFn = AlphaMart(
-            estimFn = estimFn,
-            N = contest.Nc(),
-            withoutReplacement = true,
-            riskLimit = auditConfig.riskLimit,
-            upperBound = cassorter.upperBound(),
-        )
-
-        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        // println(testH0Result)
+        //println("pvalues=  ${debugSeq.pvalues()}")
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
@@ -96,5 +86,64 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         if (!quiet) logger.debug{" ${contest.name} ${assertionRound.auditResult}"}
         return testH0Result
+    }
+
+     fun runAlpha(
+        auditConfig: AuditConfig,
+        Nc: Int,
+        cassorter: OneAuditClcaAssorter,
+        sampler: Sampler,
+        upperBound: Double,
+    ): TestH0Result {
+
+         val strategy = auditConfig.oaConfig.strategy
+         val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
+             cassorter.upperBound() * (1.0 - eps)
+         else
+             cassorter.noerror() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
+
+         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
+             FixedEstimFn(.99 * cassorter.upperBound())
+         } else {
+             TruncShrinkage(
+                 N = Nc,
+                 withoutReplacement = true,
+                 upperBound = cassorter.upperBound(),
+                 d = auditConfig.pollingConfig.d,
+                 eta0 = eta0,
+             )
+         }
+
+        val alpha = AlphaMart(
+            estimFn = estimFn,
+            N = Nc,
+            withoutReplacement = true,
+            riskLimit = auditConfig.riskLimit,
+            upperBound = upperBound,
+        )
+        return alpha.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+    }
+
+    fun runBetting(
+        auditConfig: AuditConfig,
+        Nc: Int,
+        cassorter: OneAuditClcaAssorter,
+        sampler: Sampler,
+        upperBound: Double,
+    ): TestH0Result {
+
+        // no errors!
+        val bettingFn: BettingFn = OptimalComparisonNoP1(Nc, true, upperBound, p2 = 0.0)
+
+        val testFn = BettingMart(
+            bettingFn = bettingFn,
+            Nc = Nc,
+            noerror = cassorter.noerror(),
+            upperBound = cassorter.upperBound(),
+            riskLimit = auditConfig.riskLimit,
+            withoutReplacement = true
+        )
+
+        return testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
     }
 }

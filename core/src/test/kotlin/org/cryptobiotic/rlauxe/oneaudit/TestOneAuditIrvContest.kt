@@ -5,12 +5,14 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestOneAuditIrvContest {
 
-    /* TODO
+    /*
     @Test
     fun testContestBasics() {
         val info = ContestInfo(
@@ -22,7 +24,7 @@ class TestOneAuditIrvContest {
         )
         val Nc = 212
         val Np = 1
-        val contest = RaireContest(info, winners=listOf(1), Nc=Nc, Ncast=Nc-Np)
+        val rcontest = RaireContest(info, winners=listOf(1), Nc=Nc, Ncast=Nc-Np)
 
         // val contestOA = OneAuditContest.make(contest, cvrVotes, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
         val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?
@@ -42,9 +44,15 @@ class TestOneAuditIrvContest {
         //                  cvrNc: Int,                // the diff from cvrVotes tells you the undervotes
         //                  pools: List<BallotPool>,   // pools for this contest
         //                  Np: Int): OneAuditContest {
-        val contestOA = OneAuditContest.make(contest, cvrVotes, cvrNc, listOf(pool))
+        // val contestOA = OAContestUnderAudit(contest,  true) //  cvrVotes, cvrNc, listOf(pool))
 
-        val contestOAUA =  OAIrvContestUA(contestOA, true, emptyList<RaireAssertion>())
+        val rau : RaireContestUnderAudit = makeRaireContestUA(
+            info,
+            allPools,
+            ncards,
+            ncards,
+        )
+        val contestOAUA =  OAIrvContestUA(rau.contest as RaireContest,  true, rau.rassertions)
         contestOAUA.makeClcaAssertionsFromReportedMargin()
 
         assertEquals(contestOAUA, contestOAUA)

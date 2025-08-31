@@ -1,0 +1,165 @@
+OneAudit Dice
+
+Let mi denote the manual vote record for the ith card. 
+Card-level comparison audits (CLCAs, [22,24]) and ONEAudit [27] involve the difference
+between A(mi) and a ‘reference value’ ri, specified before the audit starts.
+
+reference values satisfy r_avg > 1/2, or reported assorter margin v := 2r¯ − 1 > 0.
+
+The overstatement of ri, i.e., the amount by which it exceeds A(mi), is ωi := ri − A(mi)
+The overstatement assorter is xi := O(mi) = (1 − ωi/u) / (2 − v/u), an affine transformation of the overstatement.  (1)
+
+Note x_avg< 1/2  iff  A(m)_avg < 1/2.
+
+The advantage of basing an RLA on {xi} is that it tends to have lower variance when each
+reference value ri is close to its corresponding assorter value A(mi), which reduces
+the sample size needed to confirm the reported outcome when it is correct.
+
+ If every reference value is equal to its corresponding assorter value, xi = 1/(2−v/u) for every card i. 
+
+if a CVR ci is available for card i, we take ri = A(ci).
+
+Otherwise, a reference value ri can be derived from the average of A(ci) (the average of the assorter applied to the CVRs) for cards in
+the batch.  
+
+=========================
+----------------------------------
+OneAudit
+https://www.github.com/pbstark/ONEAudit.
+
+ALPHA: 	shrink-truncate bet on expected mean
+OneAudit: ?
+sqKelly: ?
+apKelly:	
+	maximizes the log growth for an assumed population derived from the reported tallies [33]; 
+	this betting scheme is efficient when those tallies are (approximately) correct
+
+----------------------------------
+COBRA : how to do CLCA betting
+
+Oracle: assume we know true values of error rates
+apKelly: maximize expected value of log Ti
+
+Fixed Beting: a priori guess at error rates using historic data
+Adaptive Betting: shrink-trunc using apriori rate and actual rate
+Diversified Betting: grid Kelly
+
+caps error rate at p2=1%, considered unlikely.
+
+----------------------------------
+Dice
+
+bets_dict = {
+    "cobra": lambda x, eta: Bets.cobra(x, eta),
+    "agrapa": lambda x, eta: Bets.agrapa(x, eta, c = 0.99),
+    "alpha": "special handling", # see below
+    "kelly-optimal": "special handling",
+    "universal-portfolio": lambda x, eta: Bets.universal_portfolio(x, eta, step = 50)
+    }
+    
+Oracle Kelly: optimal bet for sampling with replacement from the actual population of overstatements
+AP Kelly: optimal bet based on sampling with replacement from an assumed (a priori) population of overstatements
+Universal Portfolio: averaging across a set of bets; discrete approximation to the universal portfolio of Cover
+AGRAPA : "approximate growth rate adapted to the particular alternative" (eq 3, p 7)
+truncated shrinkage: bet set implicitly by a truncated shrinkage estimate of the population mean
+COBRA: comparison-optimal bet [18] for sampling with replacement, computed on the assumption that there are no one-vote overstatements and 2-vote overstatements occur for 0.1% of cards
+
+The oracle Kelly bet maximizes the
+expected log growth for the true population of assorter values, which is unknown
+in practice. An a priori Kelly bet maximizes the log growth for an assumed
+population derived from the reported tallies [33]; this betting scheme is efficient
+when those tallies are (approximately) correct.
+
+The truncated shrinkage estimate
+bet and COBRA are closed-form, approximately Kelly-optimal bets for CPA and
+CLCA populations, respectively, but bets optimized for those populations are
+not efficient for ONEAudit overstatement populations, as demonstrated below.
+
+In particular, if we postulate a finite-population {x̃i } i=1..N and cards are drawn IID (rather than without replacement), 
+then the a priori Kelly bet solves (eq 2, p 6). 
+If the distribution of {x̃i } differs substantially from the distribution
+of the true values {xi }, the resulting bets may be far from optimal.
+
+The bet based on the truncated
+shrinkage estimate also had poor performance: it is typically too conservative
+since it assumes, incorrectly, that the variance is maximal, as it would be for a
+Bernoulli population distribution.
+
+I _think_ Im using Cobra adaptive betting ?? for CLCA and OneAudit.
+  im using BrentOptimizer, paper uses bisection.
+  
+Rlauxe uses the **BettingMart** risk function with the **AdaptiveBetting** _betting function_ for CLCA.
+AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
+AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
+  
+These results show maybe 2x better with kelly_optimal? 
+
+From UI_TS, oneaudit_simulations.py
+
+def kelly_optimal(x, eta, **kwargs):
+        '''
+        finds a kelly optimal bet by numerically optimizing for x; i
+        if x is a lagged sample, this produces GRAPA as described in Section B.2 of https://arxiv.org/pdf/2010.09686
+        if x is the actual population, this produces the Kely-optimal bet
+        '''
+        # cache the sample or the derivatives at the previous step
+        # LRU cache function tells python to save function evaluations
+        # at step n+1 evaluate the derivatives by calling the function
+        # can't be a lambda function though, needs to be defined externally
+
+        # warm start by bracketing based on the last optimum
+        # x_0 in kwargs as a warm start (e.g., previous optimum)
+
+        # compute the slope at the endpointss
+        min_slope = Bets.deriv(0, x, eta)
+        max_slope = Bets.deriv(1/eta, x, eta)
+        # if the return is always growing, set lambda to the maximum allowed
+        if (min_slope > 0) & (max_slope > 0):
+            out = 1/eta
+        # if the return is always shrinking, set lambda to 0
+        elif (min_slope < 0) & (max_slope < 0):
+            out = 0
+        # otherwise, optimize on the interval [0, 1/eta]
+        else:
+            lam_star = sp.optimize.root_scalar(lambda lam: Bets.deriv(lam, x, eta), bracket = [0, 1/eta], method = 'bisect') // Find a root of a scalar function Bets.deriv(lam, x, eta)
+            out = lam_star['root']
+        return out * np.ones(len(x))
+        
+   #simple derivative
+    def deriv(lam, x, eta):
+        return np.sum((x - eta) / (1 + lam * (x - eta)))
+        
+scipy.optimize
+
+def root_scalar(f, args=(), method=None, bracket=None,
+                fprime=None, fprime2=None,
+                x0=None, x1=None,
+                xtol=None, rtol=None, maxiter=None,
+                options=None):
+    Parameters
+    ----------
+    f : callable
+        Find a root of a scalar function.
+
+        A function to find a root of.
+
+        Suppose the callable has signature ``f0(x, *my_args, **my_kwargs)``, where
+        ``my_args`` and ``my_kwargs`` are required positional and keyword arguments.
+        Rather than passing ``f0`` as the callable, wrap it to accept
+        only ``x``; e.g., pass ``fun=lambda x: f0(x, *my_args, **my_kwargs)`` as the
+        callable, where ``my_args`` (tuple) and ``my_kwargs`` (dict) have been
+        gathered before invoking this function.
+    args : tuple, optional
+        Extra arguments passed to the objective function and its derivative(s).
+    method : str, optional
+        Type of solver.  Should be one of
+
+        - 'bisect'    :ref:`(see here) <optimize.root_scalar-bisect>`
+        - 'brentq'    :ref:`(see here) <optimize.root_scalar-brentq>`
+        - 'brenth'    :ref:`(see here) <optimize.root_scalar-brenth>`
+        - 'ridder'    :ref:`(see here) <optimize.root_scalar-ridder>`
+        - 'toms748'    :ref:`(see here) <optimize.root_scalar-toms748>`
+        - 'newton'    :ref:`(see here) <optimize.root_scalar-newton>`
+        - 'secant'    :ref:`(see here) <optimize.root_scalar-secant>`
+        - 'halley'    :ref:`(see here) <optimize.root_scalar-halley>`
+

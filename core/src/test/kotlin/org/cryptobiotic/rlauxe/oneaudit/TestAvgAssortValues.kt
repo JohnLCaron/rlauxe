@@ -2,9 +2,10 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import kotlin.test.Test
 
-/* when does (winner - loser) / Nc agree with AvgAssortValue?
+// when does (winner - loser) / Nc agree with AvgAssortValue?
 class TestAvgAssortValues {
 
+    /*
     @Test
     fun testAvgAssortValuesSmall() {
         val oaContest1 = makeContestOA1(
@@ -150,7 +151,6 @@ class TestAvgAssortValues {
         println("oaContest2 with merged")
         checkAssorterAvg1(oaContest2, allCvrs)
     }
+
+     */
 }
-
-
- */

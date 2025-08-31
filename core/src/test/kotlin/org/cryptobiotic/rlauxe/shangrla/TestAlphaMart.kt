@@ -64,6 +64,21 @@ class TestAlphaMart {
     }
 
     @Test
+    fun test_alpha_mart_u2() {
+        //        s = [0.6, 0.8, 1.0, 1.2, 1.4]
+        //        test.u = 2
+        //        np.testing.assert_array_less(test.alpha_mart(s)[1][1:], [eps] * (len(s) - 1))
+        val x = doubleArrayOf(0.6, 0.8, 1.0, 1.2, 1.4)
+        val eta0 = 0.5
+
+        val (u2, dseq) = testAlphaMartBatch(eta0, x.toList(), u = 2.0)
+        println(" u2 = ${dseq.pvalues()}")
+        dseq.pvalues().forEach {
+            assertEquals(1.0, it)
+        }
+    }
+
+    @Test
     fun test_alpha_mart1() {
         //         s1 = [1, 0, 1, 1, 0, 0, 1]
         val x2 = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
@@ -225,9 +240,8 @@ class TestAlphaMart {
         return Pair(alpha.testH0(x.size, true) { sampler.sample() }, dseq)
     }
 
-    fun testAlphaMartBatch(eta0: Double, x: List<Double>): Pair<TestH0Result, DebuggingSequences> {
+    fun testAlphaMartBatch(eta0: Double, x: List<Double>, u: Double = 1.0): Pair<TestH0Result, DebuggingSequences> {
         println("testAlphaMartBatch $eta0 x=$x")
-        val u = 1.0
         val d = 10
         val N = x.size
 

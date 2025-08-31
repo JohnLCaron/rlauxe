@@ -46,11 +46,13 @@ interface AssorterIF {
     // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
     // Note that we rely on it.hasContest(contestId), assumes undervotes are in the cvr, ie hasStyle = true.
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
-        val mean = cvrs.filter{ it.hasContest(contestId) }.map {
+        return mean2margin(calcAssortAvgFromCvrs(contestId, cvrs, usePhantoms))
+    }
+    fun calcAssortAvgFromCvrs(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
+        return cvrs.filter{ it.hasContest(contestId) }.map {
             val av = assort(it, usePhantoms = usePhantoms)
             av
         }.average()
-        return mean2margin(mean)
     }
 
     fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int): Double {

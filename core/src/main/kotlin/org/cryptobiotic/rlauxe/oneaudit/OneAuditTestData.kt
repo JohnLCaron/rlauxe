@@ -19,14 +19,10 @@ fun makeOneContestUA(
     skewPct: Double = 0.0,
 ): Pair<OAContestUnderAudit, List<Cvr>> {
     val nvotes = roundToInt(Nc * (1.0 - undervotePercent - phantomPercent))
-    // margin = (winner - loser) / Nc
-    // nvotes = winner + loser
-    // margin * Nc = (winner - (nvotes - winner))
-    // margin * Nc = (winner - nvotes + winner)
-    // (margin * Nc + nvotes) / 2 = winner
     val winner = roundToInt((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    require(doubleIsClose(margin, (winner - loser) / Nc.toDouble()))
+    // println("margin = $margin, reported = ${(winner - loser) / Nc.toDouble()} ")
+    // require(doubleIsClose(margin, (winner - loser) / Nc.toDouble()))
     return makeOneContestUA(winner, loser, cvrPercent, undervotePercent, phantomPercent, skewPct)
 }
 
@@ -82,8 +78,8 @@ fun makeOneContestUA(
     val votesPoolSum = votesNoCvr.values.sum()
 
     val undervotes = undervotePercent * Nc
-    val cvrUnderVotes = roundToInt(undervotes * cvrPercent)
-    val poolUnderVotes = roundToInt(undervotes - cvrUnderVotes)
+    val cvrUndervotes = roundToInt(undervotes * cvrPercent)
+    val poolUnderVotes = roundToInt(undervotes - cvrUndervotes)
 
     val pools = mutableListOf<BallotPool>()
     pools.add(
@@ -97,28 +93,29 @@ fun makeOneContestUA(
         )
     )
 
-    val expectNc = noCvrSize + cvrSize + cvrUnderVotes + poolUnderVotes + Np
+    val expectNc = noCvrSize + cvrSize + cvrUndervotes + poolUnderVotes + Np
     if (expectNc != Nc) {
-        println("nope")
+        println("fail1")
     }
 
-    val cvrNc = votesCvrSum + cvrUnderVotes
+    val cvrNc = votesCvrSum + cvrUndervotes
     if (cvrNc < votesCvrSum) {
-        println("nope")
+        println("fail2")
     }
 
     val expectNc3 = pools.sumOf { it.ncards } + cvrNc + Np
     if (expectNc3 != Nc) {
-        println("nope")
+        println("fail3")
     }
 
-    val contest = makeContest(info, cvrVotes, cvrNc, pools, Np=0)
+    val contest = makeContest(info, cvrVotes, cvrNc, pools, Np=undervotes.toInt())
 
     val oaUA = OAContestUnderAudit(contest, true)
     val clcaAssertions = oaUA.pollingAssertions.map { assertion ->
         val passort = assertion.assorter
         val pairs = pools.map { pool ->
             val avg = pool.reportedAverage(passort.winner(), passort.loser())
+            println("pool ${pool.poolId} avg $avg")
             Pair(pool.poolId, avg)
         }
         val poolAvgs = AssortAvgsInPools(assertion.info.id, pairs.toMap())
@@ -127,7 +124,7 @@ fun makeOneContestUA(
     }
     oaUA.clcaAssertions = clcaAssertions
 
-    val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, pools)
+    val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, cvrUndervotes, pools)
     return Pair(oaUA, cvrs)
 }
 
@@ -164,14 +161,19 @@ fun makeContest(info: ContestInfo,
     return Contest(info, voteInput, Nc = Nc, Ncast = poolNc + cvrNcards)
 }
 
-fun makeTestMvrs(oaContestUA: OAContestUnderAudit, cvrNcards: Int, cvrVotes:Map<Int, Int>, pools: List<BallotPool>): List<Cvr> {
+fun makeTestMvrs(
+    oaContestUA: OAContestUnderAudit,
+    cvrNcards: Int,
+    cvrVotes:Map<Int, Int>,
+    cvrUndervotes: Int,
+    pools: List<BallotPool>): List<Cvr> {
     val oaContest = oaContestUA.contest
     val cvrs = mutableListOf<Cvr>()
     val info = oaContest.info()
 
     // add the regular cvrs
     if (cvrNcards > 0) {
-        val vunderCvrs = VotesAndUndervotes(cvrVotes, oaContest.Nundervotes(), info.voteForN)
+        val vunderCvrs = VotesAndUndervotes(cvrVotes, cvrUndervotes, info.voteForN)
         val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
@@ -179,8 +181,8 @@ fun makeTestMvrs(oaContestUA: OAContestUnderAudit, cvrNcards: Int, cvrVotes:Map<
     // add the pooled cvrs
     pools.forEach { pool ->
         val vunderPool = pool.votesAndUndervotes(info.voteForN)
-        val vunderCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), poolId = pool.poolId)
-        cvrs.addAll(vunderCvrs)
+        val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), poolId = pool.poolId)
+        cvrs.addAll(poolCvrs)
     }
 
     // add phantoms

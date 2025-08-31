@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 
 import org.apache.commons.math3.analysis.UnivariateFunction
+import org.apache.commons.math3.analysis.solvers.BisectionSolver
 import org.apache.commons.math3.optim.MaxEval
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 import org.apache.commons.math3.optim.univariate.BrentOptimizer
@@ -230,3 +231,289 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
 // one-vote overstatements in the initial sample as a percentage of the diluted margin [17]. We define γ and λ as in
 // https://www.stat.berkeley.edu/~stark/Vote/auditTools.htm.
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//        # called "kelly optimal" from UI-TS SF_oneaudit_example.ipynb
+//       #     'test':             NonnegMean.betting_mart,
+//       #     'bet':              NonnegMean.kelly_optimal
+//       # 'test_kwargs': {'d': 100, 'f': 0}
+//    def kelly_optimal(self, x: np.array, pop = None, **kwargs):
+//        """
+//        return the Kelly-optimal bet
+//
+//        Parameters
+//        ----------
+//        x: np.array
+//            input data
+//        pop: optional np.array
+//            the population (order does not matter) that will be used to compute the optimal bet
+//        Takes x to be the population unless pop is provided
+//        """
+//        t = self.t # the null mean
+//        pop = getattr(self, "pop", None) # attempts to inherit pop from the class
+//        if pop is None:
+//            pop = x
+//        min_slope = NonnegMean.deriv(0, pop, t)
+//        max_slope = NonnegMean.deriv(1/t, pop, t)
+//        # if the return is always growing, set lambda to the maximum allowed
+//        if (min_slope > 0) & (max_slope > 0):
+//            out = 1/t
+//        # if the return is always shrinking, set lambda to 0
+//        elif (min_slope < 0) & (max_slope < 0):
+//            out = 0
+//        # otherwise, optimize on the interval [0, 1/eta]
+//        else:
+//            lam_star = sp.optimize.root_scalar(lambda lam: NonnegMean.deriv(lam, pop, t), bracket = [0, 1/t], method = 'bisect')
+//            assert lam_star.converged, "Could not find Kelly optimal bet, the optimization may be poorly conditioned"
+//            out = lam_star['root']
+//        return out * np.ones_like(x)
+
+// called "kelly optimal" from UI-TS SF_oneaudit_example.ipynb
+//     'test':             NonnegMean.betting_mart,
+//     'bet':              NonnegMean.kelly_optimal /'test_kwargs': {'d': 100, 'f': 0}
+
+class KellyOptimal(val x: DoubleArray, val t: Double) {
+    /*
+        return the Kelly-optimal bet
+
+        Parameters
+        ----------
+        x: np.array
+            input data
+        pop: optional np.array
+            the population (order does not matter) that will be used to compute the optimal bet
+        Takes x to be the population unless pop is provided
+        */
+
+    init {
+        // t = self.t # the null mean
+        // pop = getattr(self, "pop", None) # attempts to inherit pop from the class
+        // if pop is None:
+        //    pop = x
+        val pop = x
+        val min_slope = deriv(0.0, pop, t)
+        val max_slope = deriv(1.0 / t, pop, t)
+
+        //  if the return is always growing, set lambda to the maximum allowed
+        val result = if ((min_slope > 0) && (max_slope > 0))
+            1.0 / t
+        // if the return is always shrinking, set lambda to 0
+        else if ((min_slope < 0) && (max_slope < 0))
+            0.0
+        // otherwise, optimize on the interval [0, 1/eta]
+        else {
+            /* val lam_star = sp.optimize.root_scalar(
+                lambda lam : NonnegMean . deriv (lam,
+                pop,
+                t
+            ), bracket = [0.0, 1.0/t], method = 'bisect')
+            assert lam_star . converged, "Could not find Kelly optimal bet, the optimization may be poorly conditioned"
+            out = lam_star['root'] */
+            0.0
+        }
+    }
+}
+
+//     def deriv(lam, x, eta):
+//        return np.sum((x - eta) / (1 + lam * (x - eta)))
+//
+// numpy sum
+// def sum(a, axis=None, dtype=None, out=None, keepdims=np._NoValue,
+//        initial=np._NoValue, where=np._NoValue):
+//    """
+//    Sum of array elements over a given axis.
+
+// SliceDice section 3.1, p 6:
+// For a generic population and sampling design, the Kelly bet can be found numerically.
+// In particular, if we postulate a finite-population
+//    {x̃i} i=1..N
+// and cards are drawn IID (rather than without replacement), then the a priori Kelly bet solves
+//    0 = d/dlam (E log[1 + λ(X̃i − η)] = Sum ( xi - η / (1 + lam * (xi - η))   (eq 2)
+// and λ∗ can be found by bisection search, for example.
+//
+
+// this is eq 2
+fun deriv(lam: Double, xarray: DoubleArray, eta: Double): Double {
+    return xarray.sumOf { x ->
+        (x - eta) / (1 + lam * (x - eta))
+    }
+}
+
+// lo, hi are x values
+fun solve(function: UnivariateFunction, lo: Double, hi: Double): Double {
+
+    // BrentOptimizer: For a function defined on some interval (lo, hi),
+    // this class finds an approximation x to the point at which the function attains its minimum.
+    // It implements Richard Brent's algorithm (from his book "Algorithms for Minimization without Derivatives", p. 79)
+    // for finding minima of real univariate functions.
+    // This code is an adaptation, partly based on the Python code from SciPy (module "optimize.py" v0.5);
+    // the original algorithm is also modified to use an initial guess provided by the user,
+    // to ensure that the best point encountered is the one returned.
+    // Also see https://en.wikipedia.org/wiki/Brent%27s_method
+
+    val solver = BisectionSolver()
+
+    //     public double solve(int maxEval, FUNC f, double min, double max) {
+    //        return solve(maxEval, f, min, max, min + 0.5 * (max - min));
+    //    }
+    // Optimize the function within the given range [lo, hi, end]
+    val result = solver.solve(1000, function, lo, hi)
+
+    return result
+}
+
+// note SHANGRLA uses "bisect" here, not "brent"
+// hmmm Brent might not want the derivitive, rather the function itself??
+// from scipy:
+
+// def root_scalar(f, args=(), method=None, bracket=None,
+//                fprime=None, fprime2=None,
+//                x0=None, x1=None,
+//                xtol=None, rtol=None, maxiter=None,
+//                options=None):
+//    """
+//    Find a root of a scalar function.
+//
+//    Parameters
+//    ----------
+//    f : callable
+//        A function to find a root of.
+//
+//        Suppose the callable has signature ``f0(x, *my_args, **my_kwargs)``, where
+//        ``my_args`` and ``my_kwargs`` are required positional and keyword arguments.
+//        Rather than passing ``f0`` as the callable, wrap it to accept
+//        only ``x``; e.g., pass ``fun=lambda x: f0(x, *my_args, **my_kwargs)`` as the
+//        callable, where ``my_args`` (tuple) and ``my_kwargs`` (dict) have been
+//        gathered before invoking this function.
+//    args : tuple, optional
+//        Extra arguments passed to the objective function and its derivative(s).
+//    method : str, optional
+//        Type of solver.  Should be one of
+//
+//        - 'bisect'    :ref:`(see here) <optimize.root_scalar-bisect>`
+//        - 'brentq'    :ref:`(see here) <optimize.root_scalar-brentq>`
+//        - 'brenth'    :ref:`(see here) <optimize.root_scalar-brenth>`
+//        - 'ridder'    :ref:`(see here) <optimize.root_scalar-ridder>`
+//        - 'toms748'    :ref:`(see here) <optimize.root_scalar-toms748>`
+//        - 'newton'    :ref:`(see here) <optimize.root_scalar-newton>`
+//        - 'secant'    :ref:`(see here) <optimize.root_scalar-secant>`
+//        - 'halley'    :ref:`(see here) <optimize.root_scalar-halley>`
+//
+//    bracket: A sequence of 2 floats, optional
+//        An interval bracketing a root.  ``f(x, *args)`` must have different
+//        signs at the two endpoints.
+//    x0 : float, optional
+//        Initial guess.
+//    x1 : float, optional
+//        A second guess.
+//    fprime : bool or callable, optional
+//        If `fprime` is a boolean and is True, `f` is assumed to return the
+//        value of the objective function and of the derivative.
+//        `fprime` can also be a callable returning the derivative of `f`. In
+//        this case, it must accept the same arguments as `f`.
+//    fprime2 : bool or callable, optional
+//        If `fprime2` is a boolean and is True, `f` is assumed to return the
+//        value of the objective function and of the
+//        first and second derivatives.
+//        `fprime2` can also be a callable returning the second derivative of `f`.
+//        In this case, it must accept the same arguments as `f`.
+//    xtol : float, optional
+//        Tolerance (absolute) for termination.
+//    rtol : float, optional
+//        Tolerance (relative) for termination.
+//    maxiter : int, optional
+//        Maximum number of iterations.
+//    options : dict, optional
+//        A dictionary of solver options. E.g., ``k``, see
+//        :obj:`show_options()` for details.
+//
+//    Returns
+//    -------
+//    sol : RootResults
+//        The solution represented as a ``RootResults`` object.
+//        Important attributes are: ``root`` the solution , ``converged`` a
+//        boolean flag indicating if the algorithm exited successfully and
+//        ``flag`` which describes the cause of the termination. See
+//        `RootResults` for a description of other attributes.
+//
+//    See also
+//    --------
+//    show_options : Additional options accepted by the solvers
+//    root : Find a root of a vector function.
+//
+//    Notes
+//    -----
+//    This section describes the available solvers that can be selected by the
+//    'method' parameter.
+//
+//    The default is to use the best method available for the situation
+//    presented.
+//    If a bracket is provided, it may use one of the bracketing methods.
+//    If a derivative and an initial value are specified, it may
+//    select one of the derivative-based methods.
+//    If no method is judged applicable, it will raise an Exception.
+//
+//    Arguments for each method are as follows (x=required, o=optional).
+//
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    |                    method                     | f | args | bracket | x0 | x1 | fprime | fprime2 | xtol | rtol | maxiter | options |
+//    +===============================================+===+======+=========+====+====+========+=========+======+======+=========+=========+
+//    | :ref:`bisect <optimize.root_scalar-bisect>`   | x |  o   |    x    |    |    |        |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`brentq <optimize.root_scalar-brentq>`   | x |  o   |    x    |    |    |        |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`brenth <optimize.root_scalar-brenth>`   | x |  o   |    x    |    |    |        |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`ridder <optimize.root_scalar-ridder>`   | x |  o   |    x    |    |    |        |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`toms748 <optimize.root_scalar-toms748>` | x |  o   |    x    |    |    |        |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`secant <optimize.root_scalar-secant>`   | x |  o   |         | x  | o  |        |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`newton <optimize.root_scalar-newton>`   | x |  o   |         | x  |    |   o    |         |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//    | :ref:`halley <optimize.root_scalar-halley>`   | x |  o   |         | x  |    |   x    |    x    |  o   |  o   |    o    |   o     |
+//    +-----------------------------------------------+---+------+---------+----+----+--------+---------+------+------+---------+---------+
+//
+//    Examples
+//    --------
+//
+//    Find the root of a simple cubic
+//
+//    >>> from scipy import optimize
+//    >>> def f(x):
+//    ...     return (x**3 - 1)  # only one real root at x = 1
+//
+//    >>> def fprime(x):
+//    ...     return 3*x**2
+//
+//    The `brentq` method takes as input a bracket
+//
+//    >>> sol = optimize.root_scalar(f, bracket=[0, 3], method='brentq')
+//    >>> sol.root, sol.iterations, sol.function_calls
+//    (1.0, 10, 11)
+//
+//    The `newton` method takes as input a single point and uses the
+//    derivative(s).
+//
+//    >>> sol = optimize.root_scalar(f, x0=0.2, fprime=fprime, method='newton')
+//    >>> sol.root, sol.iterations, sol.function_calls
+//    (1.0, 11, 22)
+//
+//    The function can provide the value and derivative(s) in a single call.
+//
+//    >>> def f_p_pp(x):
+//    ...     return (x**3 - 1), 3*x**2, 6*x
+//
+//    >>> sol = optimize.root_scalar(
+//    ...     f_p_pp, x0=0.2, fprime=True, method='newton'
+//    ... )
+//    >>> sol.root, sol.iterations, sol.function_calls
+//    (1.0, 11, 11)
+//
+//    >>> sol = optimize.root_scalar(
+//    ...     f_p_pp, x0=0.2, fprime=True, fprime2=True, method='halley'
+//    ... )
+//    >>> sol.root, sol.iterations, sol.function_calls
+//    (1.0, 7, 8)

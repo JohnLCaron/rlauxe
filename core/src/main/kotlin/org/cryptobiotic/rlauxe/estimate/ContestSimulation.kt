@@ -65,13 +65,13 @@ class ContestSimulation(val contest: Contest) {
         val cvrbs = CvrBuilders().addContests(listOf(contest.info))
         val result = mutableListOf<Cvr>()
         repeat(this.voteCount) {
-            val cvrb = cvrbs.addCvr("$prefix-${count++}")
+            val cvrb = cvrbs.addCvr("$prefix-${count++}", poolId)
             cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
             result.add(cvrb.build(poolId))
         }
         // add empty undervotes
         repeat(underCount) {
-            val cvrb = cvrbs.addCvr("$prefix-${count++}")
+            val cvrb = cvrbs.addCvr("$prefix-${count++}", poolId)
             cvrb.addContest(info.name).done()
             result.add(cvrb.build(poolId))
         }

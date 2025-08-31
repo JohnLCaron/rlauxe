@@ -76,16 +76,13 @@ data class AuditableCard (
             return AuditableCard(cvr.id, 0, 0L, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
         }
 
+        // TODO dont throw away the votes; used for both cvr and mvr.
+        //      if you want to throw away the votes use fromCvrWithPool()
         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
-            return if (cvr.poolId == null) {
-                // store the contest separate from the candidates
-                val sortedVotes = cvr.votes.toSortedMap()
-                val contests = sortedVotes.keys.toList()
-                AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), null)
-            } else {
-                val contests = cvr.votes.keys.toSortedSet().toList()
-                AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), null, cvr.poolId)
-            }
+            // store the contests separate from the candidates
+            val sortedVotes = cvr.votes.toSortedMap()
+            val contests = sortedVotes.keys.toList()
+            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), cvr.poolId)
         }
 
         // there are no votes

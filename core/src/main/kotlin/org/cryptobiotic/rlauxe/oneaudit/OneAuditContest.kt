@@ -66,6 +66,7 @@ class OneAuditClcaAssorter(
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
+        // println("mvr = $mvr cvr = $cvr")
         if (cvr.poolId == null) {
             return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
         }
@@ -96,6 +97,7 @@ class OneAuditClcaAssorter(
 
     fun overstatementPoolError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
         if (hasStyle and !cvr.hasContest(info.id)) {
+            // TODO log error
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
@@ -116,7 +118,7 @@ class OneAuditClcaAssorter(
     }
 
     override fun toString() = buildString {
-        appendLine("OneAuditComparisonAssorter for contest ${info.name} (${info.id})")
+        appendLine("OneAuditClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
         appendLine("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
         poolAverages.assortAverage.forEach {

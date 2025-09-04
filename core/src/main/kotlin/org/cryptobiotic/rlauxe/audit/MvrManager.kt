@@ -40,7 +40,7 @@ interface MvrManagerTest : MvrManager {
 ////////////////////////////////////////////////////////////
 
 // Iterate through sortedCards to find the AuditableCard that match the samplePrns
-// samplePrns must in same order as sortedCards
+// samplePrns must be in the same order as sortedCards
 // Note this iterates through sortedCards only until all samplePrns have been found
 fun findSamples(samplePrns: List<Long>, sortedCards: Iterator<AuditableCard>): List<AuditableCard> {
     val result = mutableListOf<AuditableCard>()

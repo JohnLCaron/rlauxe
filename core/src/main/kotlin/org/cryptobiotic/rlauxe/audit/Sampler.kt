@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
@@ -112,6 +113,50 @@ fun makeClcaNoErrorSampler(contestId: Int, hasStyles: Boolean, cvrs : List<Cvr>,
     val cvrPairs = cvrs.zip(cvrs)
     return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, true, false)
 }
+
+//// For clca audits with styles and no errors
+// use iterator for efficiency
+class ClcaNoErrorIterator(
+    val contestId: Int,
+    val contestNc: Int,
+    val cvrIter: Iterator<Cvr>,
+    val cassorter: ClcaAssorter,
+): Sampler, Iterator<Double> {
+    private var idx = 0
+    private var count = 0
+    private var done = false
+
+    override fun sample(): Double {
+        while (cvrIter.hasNext()) {
+            val mvr = cvrIter.next()
+            idx++
+            if (mvr.hasContest(contestId)) {
+                val result = cassorter.bassort(mvr, mvr)
+                count++
+                return result
+            }
+        }
+        done = true
+        logger.warn {"ClcaNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter.shortName()}"}
+        return 0.0
+    }
+
+    override fun reset() {
+        throw RuntimeException("ClcaNoErrorIterator reset not allowed")
+    }
+
+    override fun maxSamples() = contestNc
+    override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = contestNc
+
+    override fun hasNext() = !done && (count < contestNc)
+    override fun next() = sample()
+
+    companion object {
+        private val logger = KotlinLogging.logger("ConcurrentTaskRunnerG")
+    }
+}
+
 
 
 

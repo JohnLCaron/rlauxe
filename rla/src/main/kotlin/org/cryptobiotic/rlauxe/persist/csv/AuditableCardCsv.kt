@@ -60,6 +60,19 @@ class AuditableCardCsvWriter(filename: String) {
 }
 
 /////////////////////////////////////////////////////////
+class AuditableCardCsvReader(val filename: String): Iterable<AuditableCard> {
+    override fun iterator(): Iterator<AuditableCard> {
+        return readCardsCsvIterator(filename)
+    }
+}
+
+class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): Iterable<AuditableCard> {
+    override fun iterator(): Iterator<AuditableCard> {
+        val iter = readCardsCsvIterator(filename)
+        repeat(skip) { if (iter.hasNext()) (iter.next()) }
+        return iter
+    }
+}
 
 fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")

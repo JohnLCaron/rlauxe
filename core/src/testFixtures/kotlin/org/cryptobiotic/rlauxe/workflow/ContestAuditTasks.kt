@@ -86,6 +86,12 @@ fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResu
     return results
 }
 
+fun runWorkflows(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
+    val results: List<WorkflowResult> = rresults.flatten()
+    return results
+}
+
 data class WorkflowResult(
     val name: String,
     val Nc: Int,

@@ -51,7 +51,7 @@ class ClcaAudit(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-// run all contests and assertion
+// run all contests and assertions for one round with the given auditor
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
                  mvrManager: MvrManagerClcaIF,

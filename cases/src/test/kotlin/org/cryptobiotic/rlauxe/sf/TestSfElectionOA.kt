@@ -1,23 +1,19 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.cli.runRound
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.MvrManagerTestFromRecord
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReaderSkip
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.MvrManagerCardsSingleRound
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import java.nio.file.Path
-import kotlin.math.min
-import kotlin.math.max
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 // This is to match https://github.com/spertus/UI-TS/blob/main/Code/SF_oneaudit_example.ipynb
 // can use the cvsExport file from sf2024. need to redo the sorted cards i think
@@ -274,36 +270,30 @@ class TestSfElectionOA {
         override fun toString() = "Tracking count=$count min=$min max=$max avg=${sum/count}"
     }
 
-    private val show = false
+     */
+    private val show = true
 
-    // @Test
-    fun auditSf2024oa() {
-        val auditDir = "/home/stormy/rla/cases/sf2024oa/audit"
+    @Test
+    fun auditSf2024Poa() {
+        val auditDir = "$topDir/audit"
 
-        val workflow = PersistentAudit(auditDir, true)
-        val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
+        val rlauxAudit = PersistentAudit(auditDir, true)
+        val contestRounds = rlauxAudit.contestsUA().map { ContestRound(it, 1) }
 
-        //val contestUA = workflow.contestsUA().first()
-        //val contestRound = ContestRound(contestUA, 1)
-        //val assertionRound = contestRound.assertionRounds.first()
-        //val cassorter = (assertionRound.assertion as ClcaAssertion).cassorter
-
-        val mvrManager = MvrManagerCardsSingleRound("$auditDir/sortedCards.csv")
-        val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
-        //val sampler = ClcaWithoutReplacement(contestUA.id, true, cvrPairs, cassorter, allowReset = false)
-
-        //     runClcaAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClcaIF, 1, auditor = auditor)
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader("$auditDir/sortedCards.csv"))
+        val cvrPairs = mvrManager.makeCvrPairsForRound() // TODO use iterator, not List
         val runner = OneAuditAssertionAuditor()
 
         contestRounds.forEach { contestRound ->
             if (show) println("run contest ${contestRound.contestUA.contest}")
             contestRound.assertionRounds.forEach { assertionRound ->
                 val cassorter = (assertionRound.assertion as ClcaAssertion).cassorter
-                val sampler = ClcaWithoutReplacement(contestRound.contestUA.id, true, cvrPairs, cassorter, allowReset = false)
+                val sampler =
+                    ClcaWithoutReplacement(contestRound.contestUA.id, true, cvrPairs, cassorter, allowReset = false)
                 if (show) println("  run assertion ${assertionRound.assertion} reported Margin= ${mean2margin(cassorter.assorter.reportedMargin())}")
 
                 val result: TestH0Result = runner.run(
-                    workflow.auditConfig(),
+                    rlauxAudit.auditConfig(),
                     contestRound.contestUA.contest,
                     assertionRound,
                     sampler,
@@ -315,6 +305,36 @@ class TestSfElectionOA {
         }
     }
 
-     */
+    @Test
+    fun auditSf2024oa18() {
+        val auditDir = "$topDir/audit"
+
+        val rlauxAudit = PersistentAudit(auditDir, true)
+        val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
+        val minAssertion = contest18.minClcaAssertion()!!
+        val assertionRound = AssertionRound(minAssertion, 1, null)
+
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader("$auditDir/sortedCards.csv"))
+        val sampler =
+            ClcaNoErrorIterator(
+                contest18.id,
+                contest18.Nc,
+                CvrIteratorAdapter(mvrManager.sortedCards()),
+                minAssertion.cassorter)
+
+        if (show) println("  run assertion ${assertionRound.assertion} reported Margin= ${mean2margin(minAssertion.cassorter.assorter.reportedMargin())}")
+
+        val runner = OneAuditAssertionAuditor()
+        val result: TestH0Result = runner.run(
+            rlauxAudit.auditConfig(),
+            contest18.contest,
+            assertionRound,
+            sampler,
+            1,
+        )
+        // assertEquals(TestH0Status.StatRejectNull, result.status)
+        if (show) println("    sampleCount = ${result.sampleCount} maxIdx=${sampler.maxSampleIndexUsed()} status = ${result.status}\n")
+    }
 }
+
 

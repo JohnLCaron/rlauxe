@@ -69,7 +69,7 @@ fun sample(
 // for audits with hasStyles = true
 fun consistentSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManager, // just need mvrManager.ballotCards().iterator()
+    mvrManager: MvrManager, // just need mvrManager.sortedCards().iterator()
     previousSamples: Set<Long> = emptySet(),
 ) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }

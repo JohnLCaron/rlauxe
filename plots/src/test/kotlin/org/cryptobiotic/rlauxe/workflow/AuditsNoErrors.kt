@@ -9,12 +9,13 @@ import kotlin.math.log10
 import kotlin.test.Test
 
 class AuditsNoErrors {
-    val name = "AuditsNoErrors"
+    val name = "AuditsNoErrors4"
     val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
     val nruns = 500  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
+    val skewPct = 0.0
 
     @Test
     fun genAuditsNoErrorsPlots() {
@@ -42,10 +43,10 @@ class AuditsNoErrors {
 
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, cvrPercent, 0.0, skewPct = .05,
+                    N, margin, 0.0, 0.0, cvrPercent, 0.0, skewPct = skewPct,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-                        oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
+                        oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalBet)
                     ),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),
                 )

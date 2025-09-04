@@ -14,12 +14,12 @@ private val logger = KotlinLogging.logger("Publisher")
       contests.json         // ContestsUnderAuditJson
       sortedCards.csv       // AuditableCardCsv (or)
       sortedCards.zip       // AuditableCardCsv
+      ballotPool.csv        // BallotPoolCsv (OneAudit only)
 
       roundX/
         auditState.json     // AuditRoundJson
         samplePrns.json     // SamplePrnsJson // the sample prns to be audited
         sampleMvrs.csv      // AuditableCardCsv  // the mvrs used for the audit; matches sampleNumbers.json
-
  */
 
 class Publisher(val topdir: String) {

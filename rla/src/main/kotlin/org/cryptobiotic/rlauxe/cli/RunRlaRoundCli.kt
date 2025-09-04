@@ -52,17 +52,17 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
 
         var complete = false
         var roundIdx = 0
-        val workflow = PersistentAudit(inputDir, useTest)
+        val rlauxAudit = PersistentAudit(inputDir, useTest)
 
-        if (!workflow.auditRounds().isEmpty()) {
-            val auditRound = workflow.auditRounds().last()
+        if (!rlauxAudit.auditRounds().isEmpty()) {
+            val auditRound = rlauxAudit.auditRounds().last()
             roundIdx = auditRound.roundIdx
 
             if (!auditRound.auditWasDone) {
                 logger.info { "Run audit round ${auditRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
 
-                complete = workflow.runAuditRound(auditRound, quiet)
+                complete = rlauxAudit.runAuditRound(auditRound, quiet)
                 logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
             } else {
                 complete = auditRound.auditIsComplete
@@ -72,8 +72,8 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
         if (!complete) {
             roundIdx++
             // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx with worklfow ${workflow}" }
-            val nextRound = workflow.startNewRound(quiet = false)
+            logger.info { "Start audit round $roundIdx with worklfow ${rlauxAudit}" }
+            val nextRound = rlauxAudit.startNewRound(quiet = false)
             logger.info { "nextRound ${nextRound.show()}" }
             return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
         }

@@ -115,7 +115,7 @@ fun makeOneContestUA(
         val passort = assertion.assorter
         val pairs = pools.map { pool ->
             val avg = pool.reportedAverage(passort.winner(), passort.loser())
-            println("pool ${pool.poolId} avg $avg")
+            // println("pool ${pool.poolId} avg $avg")
             Pair(pool.poolId, avg)
         }
         val poolAvgs = AssortAvgsInPools(assertion.info.id, pairs.toMap())

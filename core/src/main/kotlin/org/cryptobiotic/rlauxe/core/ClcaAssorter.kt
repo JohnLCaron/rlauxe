@@ -179,4 +179,6 @@ open class ClcaAssorter(
         appendLine("  assorter=${assorter.desc()}")
         append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound")
     }
+
+    fun shortName() = assorter.shortName()
 }

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import org.jetbrains.kotlinx.kandy.dsl.categorical
 import org.jetbrains.kotlinx.kandy.dsl.continuousPos
@@ -186,6 +187,88 @@ fun makeWrGroups(wrs: List<WorkflowResult>, catfld: List<String>): Map<String, L
         result[it] = wrs
     }
     return result.toSortedMap()
+}
+
+/////////////////////////////////////////////////////////////////////
+
+// scatter plots  for WorkflowResult
+fun wrsScatterPlot(
+    titleS: String,
+    subtitleS: String,
+    wrs: List<WorkflowResult>,
+    writeFile: String, // no suffix
+    xname: String, yname: String, catName: String,
+    xfld: (WorkflowResult) -> Double,
+    yfld: (WorkflowResult) -> Double,
+    catfld: (WorkflowResult) -> String,
+    scaleType: ScaleType = ScaleType.Linear,
+    colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null
+) {
+    val useWrs = wrs.filter { it.status == TestH0Status.StatRejectNull && it.margin > .005 }
+    // val groups = makeWrGroups(wrs, catfld)
+    val groups = mapOf("all" to useWrs)
+
+    val xvalues = mutableListOf<Double>()
+    val yvalues = mutableListOf<Double>()
+    val category = mutableListOf<String>()
+    groups.forEach { (cat, wrs) ->
+        val ssrtList = wrs.sortedBy { xfld(it) }
+        val xvalue = ssrtList.map { xfld(it) }
+        xvalues.addAll(xvalue)
+
+        val yvalue = ssrtList.map { yfld(it) }
+        yvalues.addAll(yvalue)
+
+        repeat(ssrtList.size) {
+            category.add(cat)
+        }
+    }
+
+    // names are used as labels
+    val multipleDataset = mapOf(
+        xname to xvalues,
+        yname to yvalues,
+        catName to category,
+    )
+
+    val xScale = if (scaleType == ScaleType.LogLog) Scale.continuousPos<Int>(transform = Transformation.LOG10) else Scale.continuousPos<Int>()
+    val yScale = if (scaleType == ScaleType.Linear) Scale.continuousPos<Int>() else Scale.continuousPos<Int>(transform = Transformation.LOG10)
+
+    val plot = multipleDataset.plot {
+        groupBy(catName) {
+            /* line {
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
+                if (colorChoices != null) {
+                    color(catName) {
+                        scale = categorical(*colorChoices(groups.keys))
+                    }
+                } else {
+                    color(catName)
+                }
+            } */
+
+            points {
+                x(xname) { scale = xScale }
+                y(yname) { scale = yScale }
+                size = 0.50
+                symbol = Symbol.CIRCLE_SMALL
+                color = Color.LIGHT_PURPLE
+
+                // tooltips(variables, formats, title, anchor, minWidth, hide)
+                tooltips(xname, yname, catName)
+            }
+
+            layout {
+                title = titleS
+                subtitle = subtitleS
+            }
+        }
+    }
+
+    plot.save("${writeFile}.png")
+    plot.save("${writeFile}.html")
+    println("saved to $writeFile")
 }
 
 /////////////////////////////////////////////////////////////////////

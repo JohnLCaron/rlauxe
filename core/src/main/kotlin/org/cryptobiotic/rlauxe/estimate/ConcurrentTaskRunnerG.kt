@@ -20,6 +20,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("ConcurrentTaskRunnerG")
+private val logRuns = false
 
 interface ConcurrentTaskG<T> {
     fun name() : String
@@ -34,7 +35,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
     // run all the tasks concurrently
     fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int = 30): List<T> {
         val stopwatch = Stopwatch()
-        logger.info{"ConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads"}
+        if (logRuns) logger.info{"ConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads"}
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -46,7 +47,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
         }
 
         // doesnt return until all tasks are done
-        logger.info{"took $stopwatch"}
+        if (logRuns) logger.info{"took $stopwatch"}
         // println("that ${stopwatch.tookPer(tasks.size, "task")}")
         return results
     }

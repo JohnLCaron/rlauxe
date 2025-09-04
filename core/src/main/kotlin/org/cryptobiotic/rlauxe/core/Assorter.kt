@@ -61,6 +61,7 @@ interface AssorterIF {
         return (winnerVotes - loserVotes) / Nc.toDouble()
     }
 
+    fun shortName() = "winner/loser:${winner()}/${loser()}"
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
@@ -87,8 +88,6 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin
-
-    fun shortName() = " winner/loser= $winner/$loser"
 
     override fun toString(): String = desc()
     override fun equals(other: Any?): Boolean {

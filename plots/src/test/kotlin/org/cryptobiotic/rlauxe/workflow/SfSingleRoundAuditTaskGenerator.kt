@@ -8,19 +8,8 @@ import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReaderSkip
-import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.toPoolMap
-import org.cryptobiotic.rlauxe.util.SortMerge
-import org.cryptobiotic.rlauxe.util.createZipFile
 
-val skipPerRun = 8_000
-
-interface WorkflowResultListTaskGenerator {
-    fun name(): String
-    fun generateNewTask(): ConcurrentTaskG<List<WorkflowResult>>
-}
-
-class SFoaSingleRoundAuditTaskGenerator(
+class SfSingleRoundAuditTaskGenerator(
     val run: Int, // including undervotes but not phantoms
     val auditDir: String,
     val mvrsFuzzPct: Double = 0.0,
@@ -28,11 +17,11 @@ class SFoaSingleRoundAuditTaskGenerator(
     val auditConfigIn: AuditConfig? = null,
 ): WorkflowResultListTaskGenerator {
 
-    override fun name() = "SFoaSingleRoundAuditTaskGenerator"
+    override fun name() = "SfSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ConcurrentTaskG<List<WorkflowResult>> {
 
-        return SfoaSingleRoundAuditTask(
+        return SfSingleRoundAuditTask(
             run,
             auditDir,
             parameters,
@@ -41,7 +30,7 @@ class SFoaSingleRoundAuditTaskGenerator(
     }
 }
 
-class SfoaSingleRoundAuditTask(
+class SfSingleRoundAuditTask(
     val run: Int,
     val auditDir: String,
     val otherParameters: Map<String, Any>,
@@ -51,7 +40,7 @@ class SfoaSingleRoundAuditTask(
     override fun name() = "run$run"
 
     override fun run(): List<WorkflowResult> {
-        println("SfoaSingleRoundAuditTask start ${name()}")
+        println("SfSingleRoundAuditTask start ${name()}")
         val wresults = mutableListOf<WorkflowResult>()
 
         val rlauxAudit = PersistentAudit(auditDir, true)
@@ -73,7 +62,7 @@ class SfoaSingleRoundAuditTask(
                         cassertion.cassorter
                     )
 
-                val runner = OneAuditAssertionAuditor()
+                val runner = AuditClcaAssertion()
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
                     contestUA.contest,
@@ -98,69 +87,7 @@ class SfoaSingleRoundAuditTask(
             }
         }
 
-        println("SfoaSingleRoundAuditTask finish ${name()}")
+        println("SfSingleRoundAuditTask finish ${name()}")
         return wresults
-    }
-}
-
-class SfoaSingleRoundAuditTaskContest18(
-    val run: Int,
-    val auditDir: String,
-    val otherParameters: Map<String, Any>,
-    val quiet: Boolean,
-) : ConcurrentTaskG<WorkflowResult> {
-
-    override fun name() = "run$run"
-
-    override fun run(): WorkflowResult {
-        if (!quiet) println("SfoaSingleRoundAuditTask start ${name()}")
-
-        val rlauxAudit = PersistentAudit(auditDir, true)
-        val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
-        val minAssertion = contest18.minClcaAssertion()!!
-        val assertionRound = AssertionRound(minAssertion, 1, null)
-
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run))
-        val sampler =
-            ClcaNoErrorIterator(
-                contest18.id,
-                contest18.Nc,
-                CvrIteratorAdapter(mvrManager.sortedCards()),
-                minAssertion.cassorter)
-
-        val runner = OneAuditAssertionAuditor()
-        val result: TestH0Result = runner.run(
-            rlauxAudit.auditConfig(),
-            contest18.contest,
-            assertionRound,
-            sampler,
-            1,
-        )
-        if (!quiet) println("${name()} result $result")
-
-        return WorkflowResult(
-            name(),
-            contest18.Nc,
-            minAssertion.assorter.reportedMargin(),
-            result.status,
-            1.0,
-            result.sampleCount.toDouble(),
-            result.sampleCount.toDouble(),
-            otherParameters,
-        )
-    }
-}
-
-
-////////////////////////////////////////////////////////
-
-const val sortedCardsFile = "sortedCards.csv"
-fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, ballotPoolFile: String?) {
-    val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
-    val pools = ballotPools?.toPoolMap()
-
-    SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run()
-    if (zip) {
-        createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }
 }

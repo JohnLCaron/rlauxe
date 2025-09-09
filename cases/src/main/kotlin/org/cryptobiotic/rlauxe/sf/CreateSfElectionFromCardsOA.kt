@@ -50,7 +50,7 @@ fun createSfElectionFromCsvExportOA(
     // pass 1 through cvrs, make card pools
     val cardPools: Map<String, CardPool> = createCardPools(
         auditDir,
-        contestInfos.associateBy { it.id},
+        contestInfos.associateBy { it.id },
         castVoteRecordZip,
         contestManifestFilename,
         cvrCsvFilename,
@@ -170,8 +170,8 @@ fun createCardPools(
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
     println("IRV contests = ${contestManifest.irvContests}")
 
+    // make the card pools
     val cardPools: MutableMap<String, CardPool> = mutableMapOf()
-
     val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
@@ -181,13 +181,12 @@ fun createCardPools(
         pool.accumulateVotes(cvrExport)
     }
 
-    // BallotPools
+    // write the ballot pool file. read back in createSortedCards to mark the pooled cvrs
     val poolFilename = "$auditDir/$ballotPoolsFile"
     println(" writing to $poolFilename with ${cardPools.size} pools")
     val poutputStream = FileOutputStream(poolFilename)
     poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
 
-    // write the ballot pool file
     var poolCount = 0
     val sortedPools = cardPools.toSortedMap()
     sortedPools.forEach { (poolName, pool) ->
@@ -197,7 +196,8 @@ fun createCardPools(
     }
     poutputStream.close()
     println(" total ${sortedPools.size} pools")
-    // accumulate across all the pools
+
+    ////  check that the cardPools agree with the summary XML
     val contestCount = mutableMapOf<Int, ContestTabulation>()
     sortedPools.forEach { (_poolName, pool) ->
         pool.contestTabulations.forEach { contestId, poolCt ->
@@ -211,7 +211,6 @@ fun createCardPools(
         }
     }
 
-    // check that the cardPools agree with the summary XML
     val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
     println("staxContests")
     contestCount.toSortedMap().forEach { (id, ct) ->
@@ -228,19 +227,18 @@ fun createCardPools(
 }
 
 // record the ContestTabulation (regular) or VoteConsolidator (IRV)
-class CardPool(val poolName: String, val poolId: Int, val irvIds: Set<Int>, val contestInfos: Map<Int, ContestInfo>) {
+open class CardPool(val poolName: String, val poolId: Int, val irvIds: Set<Int>, val contestInfos: Map<Int, ContestInfo>) {
     val contestTabulations = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
     val irvVoteConsolidations = mutableMapOf<Int, IrvContestVotes>()  // contestId -> IrvContestVotes TODO i think you dont need this by pool
     var assortAvg : MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>? = null // contestId -> assorter -> AssortAvg
 
-    fun accumulateVotes(cvr : CvrExport) {
+    open fun accumulateVotes(cvr : CvrExport) {
         cvr.votes.forEach { (contestId, candIds) ->
             if (irvIds.contains(contestId)) {
                 val irvContestVotes = irvVoteConsolidations.getOrPut(contestId) { IrvContestVotes(contestInfos[contestId]!!) }
-                irvContestVotes.addVote(candIds) // TODO not switching to index space !!
+                irvContestVotes.addVotes(candIds) // TODO not switching to index space !!
             } else {
                 val contestTab = contestTabulations.getOrPut(contestId) { ContestTabulation() }
-                contestTab.ncards++
                 contestTab.addVotes(candIds)
             }
         }
@@ -256,9 +254,14 @@ class CardPool(val poolName: String, val poolId: Int, val irvIds: Set<Int>, val 
         return bpools
     }
 
-    fun ballotPoolForContest(contestId: Int): BallotPool? {
-        val cm = contestTabulations[contestId]
-        return if (cm == null) null else BallotPool(poolName, poolId, contestId, cm.ncards, cm.votes)
+    fun addUndervote(contestId: Int) {
+        if (irvVoteConsolidations.contains(contestId)) {
+            val irvContestVotes = irvVoteConsolidations[contestId]!!
+            irvContestVotes.ncards++
+        } else {
+            val contestTab = contestTabulations[contestId]!!
+            contestTab.ncards++
+        }
     }
 }
 
@@ -290,16 +293,22 @@ fun addOAClcaAssorters(
         }
     }
 
-    // create the clcaAssertions and add them to the oaContests
+    // create the clcaAssertions and add then to the oaContests
     oaContests.forEach { oaContest ->
         val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
-            val assortAverage = mutableMapOf<Int, Double>() // poolId -> average assort value
+            val assortAverageTest = mutableMapOf<Int, Double>() // poolId -> average assort value
             cardPools.values.forEach { cardPool ->
+                if (cardPool.assortAvg == null)
+                    println("why?")
+                if (cardPool.assortAvg!![oaContest.id] == null)
+                    println("why2?")
+                if (cardPool.assortAvg!![oaContest.id]!![assertion.assorter] == null)
+                    println("why3?")
                 val assortAvg = cardPool.assortAvg!![oaContest.id]!![assertion.assorter]!!
-                assortAverage[cardPool.poolId] = assortAvg.avg()
+                assortAverageTest[cardPool.poolId] = assortAvg.avg()
             }
 
-            val poolAvgs = AssortAvgsInPools(assertion.info.id, assortAverage)
+            val poolAvgs = AssortAvgsInPools(assertion.info.id, assortAverageTest)
             val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAvgs)
             ClcaAssertion(assertion.info, clcaAssorter)
         }
@@ -335,6 +344,18 @@ class AssortAvg() {
 //    var ncards = 0
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fun countPools(cvrCsvFilename: String) {
+    var unpoolCount = 0
+    var poolCount = 0
+
+    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+    while (cvrIter.hasNext()) {
+        val cvrExport: CvrExport = cvrIter.next()
+        if (cvrExport.poolKey() == unpooled) unpoolCount++ else poolCount++
+    }
+    println(" unpoolCount = $unpoolCount poolCount = $poolCount")
+}
 
 //// obsolete
 // TODO use ContestTabulation in CheckAudits

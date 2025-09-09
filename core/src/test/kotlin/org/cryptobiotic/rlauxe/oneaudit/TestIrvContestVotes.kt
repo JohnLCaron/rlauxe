@@ -19,9 +19,9 @@ class TestIrvContestVotes {
         println(info)
 
         val target = IrvContestVotes(info)
-        target.addVote(intArrayOf(111,11) )
-        target.addVote(intArrayOf(12,123) )
-        target.addVote(intArrayOf(12,123) )
+        target.addVotes(intArrayOf(111,11) )
+        target.addVotes(intArrayOf(12,123) )
+        target.addVotes(intArrayOf(12,123) )
 
         println(target.vc)
     }

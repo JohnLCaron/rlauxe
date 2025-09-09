@@ -62,6 +62,7 @@ interface AssorterIF {
     }
 
     fun shortName() = "winner/loser:${winner()}/${loser()}"
+    fun winLose() = "${winner()}/${loser()}"
 }
 
 /** See SHANGRLA, section 2.1, p.4 */

@@ -36,7 +36,7 @@ open class ClcaAssorter(
     val noerror: Double // clca assort value when no error
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
     // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7)
-    val upperBound: Double // upper bound of clca assorter
+    val upperBound: Double // upper bound of clca assorter; betting functions may need to know this
 
     init {
         if (info.choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
@@ -49,7 +49,7 @@ open class ClcaAssorter(
         noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
         // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
         // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7) above
-        upperBound = 2.0 * noerror // upper bound of clca assorter
+        upperBound = 2.0 * noerror // upper bound of clca assorter;
 
         val cvrAssortAvg = if (assortAverageFromCvrs != null) assortAverageFromCvrs else assorter.reportedMean()
         /* if (cvrAssortAvg <= 0.5) {
@@ -181,4 +181,5 @@ open class ClcaAssorter(
     }
 
     fun shortName() = assorter.shortName()
+    fun winLose() = assorter.winLose()
 }

@@ -167,7 +167,6 @@ fun tabulateCvrs(cvrs: Iterator<Cvr>): Map<Int, ContestTabulation> {
     for (cvr in cvrs) {
         for ((con, conVotes) in cvr.votes) {
             val tab = votes.getOrPut(con) { ContestTabulation() }
-            tab.ncards++
             tab.addVotes(conVotes)
         }
     }
@@ -185,6 +184,7 @@ class ContestTabulation {
 
     fun addVotes(cands: IntArray) {
         cands.forEach { addVote(it, 1) }
+        ncards++
     }
 
     fun addVotes(cands: Map<Int, Int>) {

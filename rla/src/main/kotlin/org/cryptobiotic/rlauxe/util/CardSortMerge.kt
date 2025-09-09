@@ -25,33 +25,36 @@ class SortMerge(
         mergeCards(auditDir, workingDir, outputFile)
     }
 
-    /* out of memory sorting from directory
-fun sortCardsInDirectoryTree(
-    auditDir: String,
-    cardDirectory: String,
-    workingDirectory: String,
-) {
-    val stopwatch = Stopwatch()
-    val publisher = Publisher(auditDir)
-    val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
-
-    val prng = Prng(auditConfig.seed)
-    val cardSorter = CardSorter(workingDirectory, prng, maxChunk)
-
-    //// the reading and sorted chunks
-    val cardIter: Iterator<AuditableCard> = TreeReaderIterator(
-        cardDirectory,
-        fileFilter = { true },
-        reader = { path -> readCardsCsvIterator(path.toString()) }
-    )
-    while (cardIter.hasNext()) {
-        cardSorter.add(cardIter.next())
+    fun run2(cardIter: Iterator<CvrExport>) {
+        // out of memory sort by sampleNum()
+        sortCards2(auditDir, cardIter, workingDir, pools = pools)
+        mergeCards(auditDir, workingDir, outputFile)
     }
-    cardSorter.writeSortedChunk()
-    println("writeSortedChunk took $stopwatch")
-}
- */
+
+    fun sortCards2(
+        auditDir: String,
+        cardIter: Iterator<CvrExport>,
+        workingDirectory: String,
+        pools: Map<String, Int>?
+    ) {
+        val stopwatch = Stopwatch()
+        val publisher = Publisher(auditDir)
+        val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+
+        clearDirectory(Path.of(workingDirectory))
+        validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
+
+        val prng = Prng(auditConfig.seed)
+        val cardSorter = CardSorter(workingDirectory, prng, maxChunk, pools = pools)
+
+        //// reading CvrExport and sorted chunks
+        while (cardIter.hasNext()) {
+            cardSorter.add(cardIter.next())
+        }
+        cardSorter.writeSortedChunk()
+        println("writeSortedChunk took $stopwatch")
+    }
+
 
     // out of memory sorting
     fun sortCards(

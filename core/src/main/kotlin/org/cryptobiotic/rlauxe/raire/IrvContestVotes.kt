@@ -70,6 +70,7 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
             )
             contests.add(rcontestUA)
 
+            // TODO added to makeRaireContestUA; duplicate ??
             //// annotate RaireContest with IrvRounds TODO put inside RaireContestUnderAudit or RaireContest or makeRaireContestUA
 
             // The candidate Ids go from 0 ... ncandidates-1 because of Raire; use the ordering from ContestInfo.candidateIds

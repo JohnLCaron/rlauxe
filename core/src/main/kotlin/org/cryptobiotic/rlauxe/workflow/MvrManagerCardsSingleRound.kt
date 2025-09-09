@@ -9,11 +9,11 @@ class MvrManagerCardsSingleRound(val sortedCards: Iterable<AuditableCard>, val m
 
     override fun Nballots(contestUA: ContestUnderAudit) = contestUA.Nc - contestUA.Np // TODO wtf ??
 
-    override fun sortedCards() = sortedCards.iterator()
+    override fun sortedCards() = sortedCards
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
         val cvrs = mutableListOf<Cvr>()
-        val cardIter = sortedCards()
+        val cardIter = sortedCards().iterator()
         var count = 0
         var countPool = 0
         while (cardIter.hasNext() && (maxSamples < 0 || count < maxSamples)) {

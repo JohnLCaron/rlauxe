@@ -69,7 +69,7 @@ class SfoaSingleRoundAuditTask(
                     ClcaNoErrorIterator(
                         contestUA.id,
                         contestUA.Nc,
-                        CvrIteratorAdapter(mvrManager.sortedCards()),
+                        mvrManager.sortedCvrs().iterator(),
                         cassertion.cassorter
                     )
 
@@ -125,7 +125,7 @@ class SfoaSingleRoundAuditTaskContest18(
             ClcaNoErrorIterator(
                 contest18.id,
                 contest18.Nc,
-                CvrIteratorAdapter(mvrManager.sortedCards()),
+                mvrManager.sortedCvrs().iterator(),
                 minAssertion.cassorter)
 
         val runner = OneAuditAssertionAuditor()

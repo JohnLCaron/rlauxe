@@ -128,16 +128,19 @@ class ClcaNoErrorIterator(
 
     override fun sample(): Double {
         while (cvrIter.hasNext()) {
-            val mvr = cvrIter.next()
+            val cvr = cvrIter.next()
             idx++
-            if (mvr.hasContest(contestId)) {
-                val result = cassorter.bassort(mvr, mvr)
+            if (cvr.hasContest(contestId)) {
+                val result = cassorter.bassort(cvr, cvr)
                 count++
                 return result
             }
         }
         done = true
-        logger.warn {"ClcaNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter.shortName()}"}
+        if (!warned) {
+           logger.warn { "ClcaNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter}" }
+            warned = true
+        }
         return 0.0
     }
 
@@ -153,7 +156,64 @@ class ClcaNoErrorIterator(
     override fun next() = sample()
 
     companion object {
-        private val logger = KotlinLogging.logger("ConcurrentTaskRunnerG")
+        private val logger = KotlinLogging.logger("ClcaNoErrorIterator")
+        var warned = false
+    }
+}
+
+class OneAuditNoErrorIterator(
+    val contestId: Int,
+    val contestNc: Int,
+    val cassorter: ClcaAssorter,
+    val sampleLimit: Int,
+    cvrIter: Iterator<Cvr>,
+): Sampler, Iterator<Double> {
+    val cvrs = mutableListOf<Cvr>()
+    var permutedIndex = mutableListOf<Int>()
+
+    private var idx = 0
+    private var count = 0
+    private var done = false
+
+    init {
+        while (cvrs.size < sampleLimit && cvrIter.hasNext()) {
+            val cvr = cvrIter.next()
+            if (cvr.hasContest(contestId)) cvrs.add(cvr)
+        }
+        permutedIndex = MutableList(cvrs.size) { it }
+    }
+
+    override fun sample(): Double {
+        while (idx < cvrs.size) {
+            val cvr = cvrs[permutedIndex[idx]]
+            idx++
+            val result = cassorter.bassort(cvr, cvr)
+            count++
+            return result
+        }
+        if (!warned) {
+            logger.warn { "OneAuditNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter}" }
+            warned = true
+        }
+        return 0.0
+    }
+
+    override fun reset() {
+        permutedIndex.shuffle(Random)
+        idx = 0
+        count = 0
+    }
+
+    override fun maxSamples() = contestNc
+    override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = contestNc
+
+    override fun hasNext() = !done && (count < contestNc)
+    override fun next() = sample()
+
+    companion object {
+        private val logger = KotlinLogging.logger("OneAuditNoErrorIterator")
+        var warned = false
     }
 }
 

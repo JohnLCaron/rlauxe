@@ -58,7 +58,7 @@ class SfSingleRoundAuditTask(
                     ClcaNoErrorIterator(
                         contestUA.id,
                         contestUA.Nc,
-                        CvrIteratorAdapter(mvrManager.sortedCards()),
+                        mvrManager.sortedCvrs().iterator(),
                         cassertion.cassorter
                     )
 

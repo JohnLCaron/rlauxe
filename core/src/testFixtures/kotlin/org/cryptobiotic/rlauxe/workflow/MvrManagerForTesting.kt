@@ -19,7 +19,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
-    override fun sortedCards() : Iterator<AuditableCard> = sortedCards.iterator()
+    override fun sortedCards() = sortedCards
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
         if (mvrsRound.isEmpty()) {
@@ -72,7 +72,7 @@ class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
-    override fun sortedCards() : Iterator<AuditableCard> = sortedCards.iterator()
+    override fun sortedCards() = sortedCards
 
     override fun makeMvrsForRound(): List<Cvr> {
         val sampledCvrs = if (mvrsRound.isEmpty())

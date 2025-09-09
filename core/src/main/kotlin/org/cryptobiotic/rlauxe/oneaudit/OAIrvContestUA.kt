@@ -1,9 +1,15 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Assertion
+import org.cryptobiotic.rlauxe.raire.IrvCountResult
+import org.cryptobiotic.rlauxe.raire.IrvRound
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.showIrvCountResult
+
+private val logger = KotlinLogging.logger("OAIrvContestUA")
 
 class OAIrvContestUA(
     contest: RaireContest,
@@ -23,6 +29,28 @@ class OAIrvContestUA(
     }
 
     override fun recountMargin(): Double {
+        try {
+            val pctDefault = -1.0
+            val rcontest = (contest as RaireContest)
+            if (rcontest.roundsPaths.isEmpty()) return pctDefault
+            val rounds = rcontest.roundsPaths.first().rounds // common case is only one
+            if (rounds.isEmpty()) return pctDefault
+
+            // find the latest round with two candidates
+            var latestRound : IrvRound? = null
+            rounds.forEach{ if (it.count.size == 2) latestRound = it}
+            if (latestRound == null) return pctDefault
+
+            val winner = latestRound.count.maxBy { it.value }
+            val loser = latestRound.count.minBy { it.value }
+            return (winner.value - loser.value) / (winner.value.toDouble())
+        } catch (e : Throwable) {
+            logger.error(e) { "recountMargin for contest ${contest.id}" }
+            return -1.0
+        }
+    }
+
+    fun recountMarginOld(): Double {
         val pctDefault = -1.0
         val rcontest = (contest as RaireContest)
         if (rcontest.roundsPaths.isEmpty()) return pctDefault
@@ -50,5 +78,10 @@ class OAIrvContestUA(
         var result = super.hashCode()
         result = 31 * result + rassertions.hashCode()
         return result
+    }
+
+    override fun showCandidates() = buildString {
+        val roundsPaths = (contest as RaireContest).roundsPaths
+        append(showIrvCountResult(IrvCountResult(roundsPaths), contest.info))
     }
 }

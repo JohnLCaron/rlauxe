@@ -116,6 +116,10 @@ class OneAuditClcaAssorter(
         appendLine("OneAuditClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
         appendLine("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
+    }
+
+    fun showPools() = buildString {
+        appendLine("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
         poolAverages.assortAverage.forEach {
             appendLine("  pool=${it.key} average=${it.value}")
         }

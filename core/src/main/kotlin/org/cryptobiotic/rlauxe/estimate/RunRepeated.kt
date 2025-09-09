@@ -30,7 +30,7 @@ fun runTestRepeated(
 
     repeat(ntrials) {
         // TODO TIMING reset taking 12% of audit round, already have the sample Limit on it....
-        drawSample.reset()
+        drawSample.reset() // TODO this is supposed to create all the variation for the estimation
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,

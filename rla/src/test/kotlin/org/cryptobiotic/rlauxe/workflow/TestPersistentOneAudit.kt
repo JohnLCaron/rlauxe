@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile

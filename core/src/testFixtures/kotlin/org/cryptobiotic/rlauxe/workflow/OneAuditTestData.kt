@@ -1,6 +1,10 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
+import org.cryptobiotic.rlauxe.oneaudit.BallotPool
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.math.max
@@ -129,10 +133,10 @@ fun makeOneContestUA(
 }
 
 fun makeContest(info: ContestInfo,
-         cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
-         cvrNcards: Int,
-         pools: List<BallotPool>,   // pools for this contest
-         Np: Int): Contest {
+                cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
+                cvrNcards: Int,
+                pools: List<BallotPool>,   // pools for this contest
+                Np: Int): Contest {
 
     val poolNc = pools.sumOf { it.ncards }
     val Nc = poolNc + cvrNcards + Np

@@ -36,6 +36,7 @@ interface RlauxAuditIF {
         estimateSampleSizes(
             auditConfig(),
             auditRound,
+            mvrManager().sortedCvrs(),
         )
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.

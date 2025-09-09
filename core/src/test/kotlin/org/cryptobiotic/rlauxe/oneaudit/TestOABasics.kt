@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -34,7 +35,14 @@ class TestOABasics {
 
     @Test
     fun testMakeOneContestUA() {
-        val (contestUA, cvrs) = makeOneContestUA(20000, 18000, cvrPercent = .66, undervotePercent = .0, phantomPercent = .0, skewPct = .03)
+        val (contestUA, cvrs) = makeOneContestUA(
+            20000,
+            18000,
+            cvrPercent = .66,
+            undervotePercent = .0,
+            phantomPercent = .0,
+            skewPct = .03
+        )
         println(contestUA)
         val cvrVotes =  tabulateVotesFromCvrs(cvrs.iterator())
         showPct("  cvrVotes", cvrVotes[0]!!, contestUA.Nc)

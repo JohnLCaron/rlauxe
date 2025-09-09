@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 
 // mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
 class OneAuditContestAuditTaskGenerator(

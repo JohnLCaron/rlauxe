@@ -84,6 +84,7 @@ class PlotDistributions {
         return estimateSampleSizes(
             auditConfig,
             auditRound,
+            ballotCards.sortedCvrs()
         )
     }
 

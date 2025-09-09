@@ -7,12 +7,13 @@ private val logger = KotlinLogging.logger("MvrManager")
 
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
-    fun sortedCards() : Iterator<AuditableCard>
+    fun sortedCards() : Iterable<AuditableCard>
+    fun sortedCvrs() = Iterable { CvrIteratorAdapter(sortedCards().iterator()) }
 
     //// for uniformSampling
     fun takeFirst(nmvrs: Int): List<AuditableCard> {
         val result = mutableListOf<AuditableCard>()
-        val ballotCardsIter = sortedCards()
+        val ballotCardsIter = sortedCards().iterator()
         while (ballotCardsIter.hasNext() && result.size < nmvrs) {
             result.add(ballotCardsIter.next())
         }
@@ -27,7 +28,7 @@ interface MvrManagerClcaIF : MvrManager {
 }
 
 interface MvrManagerPollingIF : MvrManager {
-    // this is used for audit, not estimation
+    // this is used for audit, not estimation. need List so we can do mvrs[permutedIndex[idx]]
     fun makeMvrsForRound(): List<Cvr>
 }
 

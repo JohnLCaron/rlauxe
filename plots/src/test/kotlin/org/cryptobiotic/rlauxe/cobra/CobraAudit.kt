@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
 
 class CobraSingleRoundAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val reportedMean: Double,
     val p2oracle: Double,
     val p2prior: Double,

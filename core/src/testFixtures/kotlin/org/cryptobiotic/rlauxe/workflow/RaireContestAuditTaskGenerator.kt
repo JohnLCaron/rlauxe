@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 
 class RaireContestAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -50,7 +50,7 @@ class RaireContestAuditTaskGenerator(
 
 // Do the audit in a single round, dont use estimateSampleSizes
 class RaireSingleRoundAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,

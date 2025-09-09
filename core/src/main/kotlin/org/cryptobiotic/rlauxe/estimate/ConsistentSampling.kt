@@ -69,14 +69,14 @@ fun sample(
 // for audits with hasStyles = true
 fun consistentSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManager, // just need mvrManager.sortedCards().iterator()
+    mvrManager: MvrManager,
     previousSamples: Set<Long> = emptySet(),
 ) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) return
 
     // calculate how many samples are wanted for each contest
-    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards())
+    val wantSampleSize = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
@@ -97,7 +97,7 @@ fun consistentSampling(
 
     // while we need more samples
     var countSamples = 0
-    val sortedBorcIter = mvrManager.sortedCards()
+    val sortedBorcIter = mvrManager.sortedCards().iterator()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
             contestsIncluded.any { contestWantsMoreSamples(it) } &&
@@ -157,7 +157,7 @@ fun consistentSampling(
 // for audits with hasStyles = false
 fun uniformSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManager, // mvrManager.Nballots(contestUA), mvrManager.takeFirst(nmvrs)
+    mvrManager: MvrManager,
     previousSamples: Set<Long>,
     sampleLimit: Int,
     roundIdx: Int,

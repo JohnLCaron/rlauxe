@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

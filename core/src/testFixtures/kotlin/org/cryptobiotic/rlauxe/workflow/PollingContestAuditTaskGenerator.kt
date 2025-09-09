@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 import kotlin.math.max
 
 class PollingContestAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -52,7 +52,7 @@ class PollingContestAuditTaskGenerator(
 }
 // Do the audit in a single round, dont use estimateSampleSizes
 class PollingSingleRoundAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,

@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReaderSkip
 
 class SfSingleRoundAuditTaskGenerator(
-    val run: Int, // including undervotes but not phantoms
+    val run: Int,
     val auditDir: String,
     val mvrsFuzzPct: Double = 0.0,
     val parameters : Map<String, Any>,
@@ -58,7 +58,7 @@ class SfSingleRoundAuditTask(
                     ClcaNoErrorIterator(
                         contestUA.id,
                         contestUA.Nc,
-                        CvrIteratorAdapter(mvrManager.sortedCards()),
+                        mvrManager.sortedCvrs().iterator(),
                         cassertion.cassorter
                     )
 

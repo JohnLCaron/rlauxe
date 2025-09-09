@@ -29,7 +29,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
-    override fun sortedCards() : Iterator<AuditableCard> = auditableCards()
+    override fun sortedCards() = Iterable { auditableCards() }
 
     // same pairs over all contests (!)
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {

@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
+// abstraction for running an audit.
 interface RlauxAuditIF {
     fun auditConfig() : AuditConfig
     fun mvrManager() : MvrManager
@@ -35,6 +36,7 @@ interface RlauxAuditIF {
         estimateSampleSizes(
             auditConfig(),
             auditRound,
+            mvrManager().sortedCvrs(),
         )
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.

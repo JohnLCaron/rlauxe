@@ -126,7 +126,7 @@ class TestSfElectionOA {
             ClcaNoErrorIterator(
                 contest18.id,
                 contest18.Nc,
-                CvrIteratorAdapter(mvrManager.sortedCards()),
+                mvrManager.sortedCvrs().iterator(),
                 minAssertion.cassorter)
 
         if (show) println("  run assertion ${assertionRound.assertion} reported Margin= ${mean2margin(minAssertion.cassorter.assorter.reportedMargin())}")

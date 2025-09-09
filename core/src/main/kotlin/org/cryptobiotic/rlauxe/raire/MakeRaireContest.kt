@@ -106,7 +106,17 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
         Ncast = Ncast,
         raireAssertions,
     )
-    // rcontestUA.makeClcaAssertions()
+
+    val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
+    val irvCount = IrvCount(cvotes, candidateIdxs)
+    val roundResultByIdx = irvCount.runRounds()
+
+    // now convert results back to using the real Ids:
+    val roundPathsById = roundResultByIdx.ivrRoundsPaths.map { roundPath ->
+        val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
+        IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
+    }
+    (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
 
     return rcontestUA
 }

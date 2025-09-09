@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
 class ClcaContestAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -54,7 +54,7 @@ class ClcaContestAuditTaskGenerator(
 
 // Do the audit in a single round, dont use estimateSampleSizes
 class ClcaSingleRoundAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,

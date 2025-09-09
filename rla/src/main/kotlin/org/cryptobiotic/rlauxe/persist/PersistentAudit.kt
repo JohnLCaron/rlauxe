@@ -11,7 +11,8 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("PersistentAudit")
 
-/** Created from persistent state. See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
+/** Created from persistent state.
+ * See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
 class PersistentAudit(
     val auditDir: String,
     val useTest: Boolean,
@@ -84,4 +85,10 @@ class PersistentAudit(
     override fun mvrManager() = mvrManager
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
+
+    override fun toString(): String {
+        return "PersistentAudit(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"
+    }
+
+
 }

@@ -109,10 +109,10 @@ fun makeEstimationTasks(
             // TODO what about supermajority?
             ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
         }
-        //AuditType.ONEAUDIT -> {
-       //     val contestOA = (contestRound.contestUA as OAContestUnderAudit).contest
-        //    makeTestMvrsScaled(contestOA, auditConfig.sampleLimit)
-        //}
+        /* AuditType.ONEAUDIT -> {
+            val contestOA = (contestRound.contestUA as OAContestUnderAudit).contest
+            makeTestMvrsScaled(contestOA, auditConfig.sampleLimit)
+        } */
     }
 
     // logger.debug{ "add assertionRounds for contest ${contestRound.contestUA.id} round $roundIdx"}
@@ -442,7 +442,7 @@ fun simulateSampleSizeOneAuditAssorter(
     val oaConfig = auditConfig.oaConfig
     var fuzzPct = 0.0
 
-    // logger.debug{"simulateSampleSizeOneAuditAssorter ${contestUA.name} ${contestUA.id} ${oaCassorter.assorter().desc()} ${cvrs.size} "}
+    // TODO without the pools, you dont get the variance...
 
     // the sampler is specific to the assertion
     val sampler = if (oaConfig.simFuzzPct == null) {
@@ -451,37 +451,52 @@ fun simulateSampleSizeOneAuditAssorter(
         fuzzPct = oaConfig.simFuzzPct
         OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, oaCassorter) // TODO cant use Raire
     }
-    sampler.reset()
+    sampler.reset() // TODO
 
-    // the strategy effects the estimFn
     val strategy = auditConfig.oaConfig.strategy
-    val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
-        oaCassorter.upperBound() * (1.0 - eps)
-    else
-        oaCassorter.noerror()
+    val result = if (strategy == OneAuditStrategyType.optimalBet) {
+        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nc, true, oaCassorter.upperBound, p2 = 0.0)
 
-    val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
-        FixedEstimFn(.99 * oaCassorter.upperBound())
+        simulateSampleSizeBettingMart(
+            auditConfig,
+            sampler,
+            bettingFn,
+            oaCassorter.assorter().reportedMargin(),
+            oaCassorter.noerror(),
+            oaCassorter.upperBound(),
+            contestUA.Nc,
+            startingTestStatistic,
+            moreParameters
+        )
     } else {
-        TruncShrinkage(
-            N = contestUA.Nc,
-            withoutReplacement = true,
-            upperBound = oaCassorter.upperBound(),
-            d = auditConfig.pollingConfig.d,
+        val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
+            oaCassorter.upperBound() * (1.0 - eps)
+        else
+            oaCassorter.noerror()
+
+        val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
+            FixedEstimFn(.99 * oaCassorter.upperBound())
+        } else {
+            TruncShrinkage(
+                N = contestUA.Nc,
+                withoutReplacement = true,
+                upperBound = oaCassorter.upperBound(),
+                d = auditConfig.pollingConfig.d,
+                eta0 = eta0,
+            )
+        }
+
+        simulateSampleSizeAlphaMart(
+            auditConfig,
+            sampler,
+            estimFn = estimFn,
             eta0 = eta0,
+            upperBound = oaCassorter.upperBound(),
+            Nc = contestUA.Nc,
+            startingTestStatistic = startingTestStatistic,
+            moreParameters
         )
     }
-
-    val result = simulateSampleSizeAlphaMart(
-        auditConfig,
-        sampler,
-        estimFn = estimFn,
-        eta0 = eta0,
-        upperBound = oaCassorter.upperBound(),
-        Nc = contestUA.Nc,
-        startingTestStatistic = startingTestStatistic,
-        moreParameters
-    )
 
     assertionRound.estimationResult = EstimationRoundResult(roundIdx,
         oaConfig.strategy.name,

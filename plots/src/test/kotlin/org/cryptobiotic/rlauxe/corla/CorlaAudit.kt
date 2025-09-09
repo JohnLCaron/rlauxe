@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.*
 
 class CorlaSingleRoundAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -48,7 +48,7 @@ class CorlaSingleRoundAuditTaskGenerator(
 }
 
 class CorlaContestAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,

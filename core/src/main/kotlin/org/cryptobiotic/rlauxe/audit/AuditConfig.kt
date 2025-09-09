@@ -20,7 +20,7 @@ data class AuditConfig(
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.phantoms),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.eta0Eps),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalBet),
     val version: Double = 1.0,
 ) {
     val isClca = auditType == AuditType.CLCA || auditType == AuditType.ONEAUDIT

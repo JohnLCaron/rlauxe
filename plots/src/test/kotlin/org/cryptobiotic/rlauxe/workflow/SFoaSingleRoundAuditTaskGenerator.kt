@@ -21,7 +21,7 @@ interface WorkflowResultListTaskGenerator {
 }
 
 class SFoaSingleRoundAuditTaskGenerator(
-    val run: Int, // including undervotes but not phantoms
+    val run: Int,
     val auditDir: String,
     val mvrsFuzzPct: Double = 0.0,
     val parameters : Map<String, Any>,

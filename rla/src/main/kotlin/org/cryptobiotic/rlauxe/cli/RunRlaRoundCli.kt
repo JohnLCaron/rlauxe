@@ -72,7 +72,7 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
         if (!complete) {
             roundIdx++
             // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx with worklfow ${rlauxAudit}" }
+            logger.info { "Start audit round $roundIdx using ${rlauxAudit}" }
             val nextRound = rlauxAudit.startNewRound(quiet = false)
             logger.info { "nextRound ${nextRound.show()}" }
             return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null

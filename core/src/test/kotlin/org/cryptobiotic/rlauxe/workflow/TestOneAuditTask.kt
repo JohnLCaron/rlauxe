@@ -43,21 +43,6 @@ class TestOneAuditTask {
             AuditType.ONEAUDIT, hasStyles = true, nsimEst = 10,
             oaConfig = OneAuditConfig(simFuzzPct = mvrFuzzPct, strategy = OneAuditStrategyType.optimalBet)
         )
-        // class OneAuditSingleRoundAuditTaskGenerator(
-        //    val Nc: Int, // including undervotes but not phantoms
-        //    val margin: Double,
-        //    val underVotePct: Double,
-        //    val phantomPct: Double,
-        //    val cvrPercent: Double,
-        //    val mvrsFuzzPct: Double,
-        //    val parameters : Map<String, Any>,
-        //    val auditConfigIn: AuditConfig? = null,
-        //    val nsimEst: Int = 100,
-        //    val quiet: Boolean = true,
-        //    val skewPct: Double = 0.0,
-        //    val p2flips: Double? = null,
-        //    val p1flips: Double? = null,
-        //): ContestAuditTaskGenerator {
         val taskGen = OneAuditSingleRoundAuditTaskGenerator(
             Nc,
             margin,

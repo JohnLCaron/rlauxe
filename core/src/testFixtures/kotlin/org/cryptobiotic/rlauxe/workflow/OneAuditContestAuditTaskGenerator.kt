@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 
 // mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
 class OneAuditContestAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
@@ -40,7 +40,7 @@ class OneAuditContestAuditTaskGenerator(
 
 // Do the audit in a single round, dont use estimateSampleSizes
 class OneAuditSingleRoundAuditTaskGenerator(
-    val Nc: Int, // including undervotes but not phantoms
+    val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,

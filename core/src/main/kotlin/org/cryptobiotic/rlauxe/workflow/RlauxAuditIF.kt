@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
+// abstraction for running an audit.
 interface RlauxAuditIF {
     fun auditConfig() : AuditConfig
     fun mvrManager() : MvrManager

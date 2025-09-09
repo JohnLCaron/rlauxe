@@ -274,7 +274,6 @@ private fun makeScaledCvrs(
     val scaledUndervotes = (sNc - sNp) * voteForN - scaledVotesTotal
     val vunderCvrs = VotesAndUndervotes(scaledVotes, scaledUndervotes, voteForN)
     return makeVunderCvrs(mapOf(contestId to vunderCvrs), poolId = poolId)
-}
-*/
+} */
 
 ////////////////////////////////////////

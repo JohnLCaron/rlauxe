@@ -72,19 +72,15 @@ class OneAuditClcaAssorter(
         }
 
         val poolAverage = poolAverages.assortAverage[cvr.poolId] ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${info.id} assorter")
-        val overstatement = overstatementPoolError(mvr, cvr, poolAverage) // ωi
+        val overstatement = overstatementPoolError(mvr, poolAverage) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
 
         // for pooled data (i in Gg):
-        //   A(ci) = 1/2 or poolAvg = [pa, pa-1/2, pa-1]
-        //   A(bi) in [0, .5, u],
-        //   so ωi ≡ A(ci) − A(bi) ranges from -u to u
-        //   so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from [0, 2] * noerror
-
-        //// TODO which? had error using the pool margin (pool.calcReportedMargin) instead of the assorter margin (in noerror)
-        //     ONEAUDIT eq 6 has a denominator = 2u − v, which is the same for all ballots, so it cant be pool dependent.
-        //     v := 2Āc − 1
-        //     noerror = 1.0 / (2.0 - v / assorter.upperBound())  // assort value when there's no error
+        //   ωi ≡ A(ci) − A(bi) = [pa, pa-1/2, pa-1] = (loser, other, winner); pa in [0, 1]
+        // taui = 1.0 - ωi =  [1 - pa, 1.5 - pa, pa] = (loser, other, winner) = ([1:0], [3/2..1/2], [0..1])
+        //   B = taui * noerror = [1 - pa, 1.5 - pa, pa] * noerror;  (loser, other, winner)
+        // B < 1 decreases testStat, B > 1 increases testStat
+        //
 
         val result =  tau * noerror()
         if (result > upperBound()) {
@@ -95,25 +91,24 @@ class OneAuditClcaAssorter(
         return result
     }
 
-    fun overstatementPoolError(mvr: Cvr, cvr: Cvr, avgBatchAssortValue: Double, hasStyle: Boolean = true): Double {
-        if (hasStyle and !cvr.hasContest(info.id)) {
+    fun overstatementPoolError(mvr: Cvr, poolAvgAssortValue: Double): Double {
+        if (hasStyle and !mvr.hasContest(info.id)) {
             // TODO log error
-            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            throw RuntimeException("use_style==True but mvr=${mvr} does not contain contest ${info.name} (${info.id})")
         }
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
                          else this.assorter.assort(mvr, usePhantoms = false)
 
         // for pooled data (i in Gg):
-        //   A(ci) = 1/2 or poolAvg in [0..u]
-        //   A(bi) in [0, .5, u],
+        //   A(ci) = poolAvg in [0..u]
+        //   A(bi) in [0, .5, u],  (loser, other, winner)
         //   so ωi ≡ A(ci) − A(bi) ranges from -u to u
 
         // let u = 1, let poolAvg = pa, and pool margin = pv = 2*pa - 1
         // so ωi ≡ A(ci) − A(bi)
-        //   1/2 - 0, 1/2 - 1/2, 1/2 - 1 = [1/2, 0, -1/2] (or)
-        //   poolAvg - 0, poolAvg - 1/2, poolAvg - 1 in [pa, pa-1/2,pa-1]
+        //   poolAvg - 0, poolAvg - 1/2, poolAvg - 1 in [pa, pa-1/2, pa-1] = (loser, other, winner)
 
-        val cvr_assort = if (cvr.phantom) .5 else avgBatchAssortValue
+        val cvr_assort = poolAvgAssortValue
         return cvr_assort - mvr_assort
     }
 
@@ -142,3 +137,63 @@ class OneAuditClcaAssorter(
         return result
     }
 }
+
+/*
+Audit line 2584
+
+    def overstatement(self, mvr, cvr, use_style=True):
+        """
+        overstatement error for a CVR compared to the human reading of the ballot
+
+        If use_style, then if the CVR contains the contest but the MVR does
+        not, treat the MVR as having a vote for the loser (assort()=0)
+
+        If not use_style, then if the CVR contains the contest but the MVR does not,
+        the MVR is considered to be a non-vote in the contest (assort()=1/2).
+
+        Phantom CVRs and MVRs are treated specially:
+            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
+            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every
+            contest.
+
+        Parameters
+        ----------
+        mvr: Cvr
+            the manual interpretation of voter intent
+        cvr: Cvr
+            the machine-reported cast vote record
+
+        Returns
+        -------
+        overstatement: float
+            the overstatement error
+        """
+        # sanity check
+
+        # TODO there is no cvr; assume that SHANGRLA doesnt deal with use_style = true (?)
+        if use_style and not cvr.has_contest(self.contest.id):
+            raise ValueError(
+                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
+            )
+        # assort the MVR
+        mvr_assort = (
+            0
+            if
+                mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
+            else
+                self.assort(mvr)
+        )
+        # assort the CVR
+        cvr_assort = (
+            self.tally_pool_means[cvr.tally_pool]
+            if
+                cvr.pool and self.tally_pool_means is not None
+            else
+                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
+        )
+
+        #if cvr.pool and self.tally_pool_means is not None:
+        #    print(f"tally_pool {cvr.tally_pool} means: {self.tally_pool_means[cvr.tally_pool]} ")
+        # print(f" mvr_assort: {mvr_assort}, cvr_assort: {cvr_assort}")
+        return cvr_assort - mvr_assort
+ */

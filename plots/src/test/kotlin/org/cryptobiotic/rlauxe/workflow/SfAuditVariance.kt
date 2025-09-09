@@ -9,12 +9,12 @@ import kotlin.test.Test
 // the cvrExports are already extracted with createSF2024cvrs90().
 // the audit and contests are already setup with createSfElectionFromCsvExportOA().
 // each repetition will choose a new prn and do a full sort. (alternatively could segment sortedCards by sampleLimit).
-class SFoaAuditVariance {
-    val nruns = 50
+class SfAuditVariance {
+    val nruns = 1 // no variance when there are no errors
     val nsimEst = 10
     val mvrsFuzzPct = .00
 
-    val topDir = "/home/stormy/rla/cases/sf2024oa"
+    val topDir = "/home/stormy/rla/cases/sf2024"
     val auditDir = "$topDir/audit"
 
     @Test
@@ -23,25 +23,25 @@ class SFoaAuditVariance {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         repeat(nruns) { run ->
-            val sfoaGenerator = SFoaSingleRoundAuditTaskGenerator( run, auditDir, mvrsFuzzPct, parameters=emptyMap())
-            tasks.add(sfoaGenerator.generateNewTask())
+            val sfGenerator = SfSingleRoundAuditTaskGenerator(run, auditDir, mvrsFuzzPct, parameters = emptyMap())
+            tasks.add(sfGenerator.generateNewTask())
         }
         val results: List<WorkflowResult> = runWorkflows(tasks)
         println(stopwatch.took())
 
-        val name = "sfoaVariance"
-        val dirName = "/home/stormy/rla/sfoaAll/$name"
+        val name = "sfVariance"
+        val dirName = "/home/stormy/rla/sfAll/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
-        regenSfoa()
+        regenSf()
     }
 
     @Test
-    fun regenSfoa() {
-        val name = "sfoaVariance"
-        val dirName = "/home/stormy/rla/sfoaAll/$name"
-        val subtitle = "scatter plot of SF 2024 OneAudit contests, Ntrials=$nruns"
+    fun regenSf() {
+        val name = "sfVariance"
+        val dirName = "/home/stormy/rla/sfAll/$name"
+        val subtitle = "scatter plot of SF 2024 contests, Ntrials=$nruns"
         showNSamplesVsMarginScatter(dirName, name, subtitle, ScaleType.LogLinear)
     }
 
@@ -61,10 +61,4 @@ class SFoaAuditVariance {
         )
     }
 
-}
-
-fun runName(wr: WorkflowResult): String {
-    val contest = wr.parameters["contest"] as String
-    val assertion = wr.parameters["assertion"] as String
-    return "$contest $assertion"
 }

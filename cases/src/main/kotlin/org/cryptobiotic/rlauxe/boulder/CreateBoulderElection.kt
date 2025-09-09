@@ -108,7 +108,6 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         export.cvrs.forEach { cvr ->
             cvr.contestVotes.forEach { contestVote ->
                 val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation() }
-                tab.ncards++
                 tab.addVotes(contestVote.candVotes.toIntArray())
             }
         }

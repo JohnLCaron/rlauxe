@@ -81,7 +81,8 @@ fun wrsPlot(
                 color = Color.BLUE
 
                 // tooltips(variables, formats, title, anchor, minWidth, hide)
-                tooltips(xname, yname, catName)
+                tooltips(xname, yname, catName,
+                    formats = mapOf("margin" to "f8.3"))
             }
 
             layout {
@@ -197,10 +198,10 @@ fun wrsScatterPlot(
     subtitleS: String,
     wrs: List<WorkflowResult>,
     writeFile: String, // no suffix
-    xname: String, yname: String, catName: String,
+    xname: String, yname: String, runName: String,
     xfld: (WorkflowResult) -> Double,
     yfld: (WorkflowResult) -> Double,
-    catfld: (WorkflowResult) -> String,
+    runFld: (WorkflowResult) -> String,
     scaleType: ScaleType = ScaleType.Linear,
     colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null
 ) {
@@ -210,7 +211,7 @@ fun wrsScatterPlot(
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
-    val category = mutableListOf<String>()
+    val runNames = mutableListOf<String>()
     groups.forEach { (cat, wrs) ->
         val ssrtList = wrs.sortedBy { xfld(it) }
         val xvalue = ssrtList.map { xfld(it) }
@@ -219,24 +220,23 @@ fun wrsScatterPlot(
         val yvalue = ssrtList.map { yfld(it) }
         yvalues.addAll(yvalue)
 
-        repeat(ssrtList.size) {
-            category.add(cat)
-        }
+        val rns = ssrtList.map { runFld(it) }
+        runNames.addAll(rns)
     }
 
     // names are used as labels
     val multipleDataset = mapOf(
         xname to xvalues,
         yname to yvalues,
-        catName to category,
+        runName to runNames,
     )
 
     val xScale = if (scaleType == ScaleType.LogLog) Scale.continuousPos<Int>(transform = Transformation.LOG10) else Scale.continuousPos<Int>()
     val yScale = if (scaleType == ScaleType.Linear) Scale.continuousPos<Int>() else Scale.continuousPos<Int>(transform = Transformation.LOG10)
 
     val plot = multipleDataset.plot {
-        groupBy(catName) {
-            /* line {
+        // groupBy(catName) {
+        /*      line {
                 x(xname) { scale = xScale }
                 y(yname) { scale = yScale }
                 if (colorChoices != null) {
@@ -256,14 +256,14 @@ fun wrsScatterPlot(
                 color = Color.LIGHT_PURPLE
 
                 // tooltips(variables, formats, title, anchor, minWidth, hide)
-                tooltips(xname, yname, catName)
+                tooltips(xname, yname, runName)
             }
 
             layout {
                 title = titleS
                 subtitle = subtitleS
             }
-        }
+        // }
     }
 
     plot.save("${writeFile}.png")

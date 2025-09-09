@@ -1,6 +1,6 @@
 **Rlauxe Implementation Specification**
 
-_8/28/25_
+_9/7/25_
 
 See [references](../papers/papers.txt) for reference papers.
 
@@ -9,8 +9,11 @@ See [references](../papers/papers.txt) for reference papers.
 * [Missing Contests](#missing-contests)
 * [Assorters](#assorters)
   * [Plurality and Approval](#plurality-and-approval)
+    * [Proof that A is an assorter](#proof-that-a-is-an-assorter)
   * [SuperMajority](#supermajority)
+    * [TODO Proof that A is an assorter](#todo-proof-that-a-is-an-assorter)
   * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
+    * [TODO Proof that A is an assorter](#todo-proof-that-a-is-an-assorter-1)
 * [Audits](#audits)
   * [Polling Audits](#polling-audits)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
@@ -125,6 +128,27 @@ The upper bound is 1.
     }
 ````
 
+### Proof that A is an assorter
+
+The definition of an Assorter A is that if the mean of its assort values > 1/2 implies that the assertion is true, then A is an assorter.
+
+    "w has more votes than l" if Sum(w) > Sum(l), where the Sum is over N
+
+    Ā = 1/N Sum( (w - l + 1) * 0.5))
+      = 1/N ( Sum(w) - Sum(l) + N) / 2
+      = (Sum(w) - Sum(l))/N + 1) / 2
+
+convert to Amargin = 2.0 * mean - 1.0
+
+    Amargin = 2 * Ā - 1
+            = (Sum(w) - Sum(l))/N
+
+    so w is winner if Amargin > 0
+        2 * Ā - 1 > 0
+        Ā > 1/2
+
+so if the mean of the assort values > 1/2 then the assertion "w has more votes than l" is true; therefore A is an assorter.  
+
 ## SuperMajority
 
 "Top k candidates are elected, whose percent vote is above a fraction, f." See SHANGRLA, section 2.3.
@@ -144,6 +168,8 @@ For the ith ballot, calculate `A_wℓ` as
     1/2, otherwise.
 ````
 The upper bound is 1/(2*f).
+
+### TODO Proof that A is an assorter
 
 ## Instant Runoff Voting (IRV)
 
@@ -223,6 +249,8 @@ fun raire_votefor_elim(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>):
 ````
 The upper bound is 1.
 
+### TODO Proof that A is an assorter
+
 # Audits
 
 ## Polling Audits
@@ -259,15 +287,15 @@ CVR ci as:
         v is the cvrAssortMargin = 2 * (reported assorter mean) - 1
         o is the overstatement
 
-The reported assorter mean for A_wℓ is calculated as `(winnerVotes - loserVotes) / Nc`, where Nc is the trusted maximum ballots for contest c.
-TODO: relationship to Ā(cvr)
+The reported assorter mean for A_wℓ is calculated as `(winnerVotes - loserVotes) / Nc`, where Nc is the trusted maximum ballots for contest c,
+or as Ā(cvr).
 
 The overstatement is calculated as
 
         val noerror = 1.0 / (2.0 - cvrAssortMargin / u)             // clca assort value when overstatementError = 0
         val overstatement = overstatementError(mvr, cvr, hasStyle)  // ωi eq (1)
-        val tau = (1.0 - overstatement / u)                         // τi eq (6)
-        return tau * noerror                                        // Bi eq (7)
+        val tau = 1.0 - overstatement / u                           // τi eq (3)
+        return tau * noerror                                        // Bi eq (2,4)
 
 The overstatementError(mvr, cvr) is
 
@@ -286,35 +314,76 @@ See SHANGRLA Section 3.2.
     Let A denote an assorter, which maps votes into [0, u], where u is an upper bound (eg 1, 1/2f).
 
     The overstatement error for the ith ballot is
-         ωi ≡ A(ci) − A(bi) ≤ A(ci ) ≤ u.     (1)
+         ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ u.                  (1)
 
     Let Āc = AVG(A(ci)), Āb = AVG(A(bi)) and ω̄ = AVG(ωi).
     Then Āb = Āc − ω̄, so
-         Āb > 1/2  iff  ω̄ < Āc − 1/2.          (2)
+         Āb > 1/2  iff  ω̄ < Āc − 1/2.          
 
      We know that Āc > 1/2 (or the assertion would not be true for the CVRs), so 2Āc − 1 > 0,
      so we can divide without flipping the inequality:
         ω̄ < Āc − 1/2  <==>  ω̄ / (2Āc − 1) < (Āc − 1/2) / (2Āc − 1) = (2Āc − 1) / 2(2Āc − 1) = 1/2
      that is,
-        Āb > 1/2  iff  ω̄ / (2Āc − 1) < 1/2     (3)
+        Āb > 1/2  iff  ω̄ / (2Āc − 1) < 1/2     
 
-     Define v ≡ 2Āc − 1 == the reported assorter margin so
-        Āb > 1/2  iff  ω̄ / v < 1/2             (4)
+     Define v ≡ 2Āc − 1 == the reported assorter margin     (2)
+     So
+        Āb > 1/2  iff  ω̄ / v < 1/2             
 
-     Let τi ≡ 1 − (ωi / u) ≥ 0, and τ̄ ≡ Avg(τi) = 1 − ω̄/u, and ω̄ = u(1 − τ̄), so
-        Āb > 1/2  iff  (u/v) * (1 − τ̄) < 1/2   (5)
+     Define τi ≡ 1 − (ωi / u)                               (3)
+        τ̄ ≡ Avg(τi) = 1 − ω̄/u, and ω̄ = u(1 − τ̄), so
+     So
+        Āb > 1/2  iff  ω̄ / v < 1/2
+        Āb > 1/2  iff  u(1 − τ̄) / v  < 1/2
+                = (u/v) * (1 − τ̄) < 1/2
+                = (-u/v) τ̄ < 1/2 - (u/v) 
+                = τ̄ > (-v/u)/2 - (-v/u)(u/v) 
+                = τ̄ > -v/2u + 1
+                = τ̄ > (2u - v) / 2u
+                = τ̄ * u / (2u - v) > 1/2  
+                = τ̄ / (2 - v/u) > 1/2            
 
-     Then (u/v) * (1 − τ̄) < 1/2 == (-u/v) τ̄ < 1/2 - (u/v) == τ̄ > (-v/u)/2 - (-v/u)(u/v) == 1 - v/2u == (2u - v) / 2u
-        τ̄ * u / (2u - v)  > 1/2  ==   τ̄ / (2 - v/u) > 1/2             (6)
+     Define B(bi, ci) ≡ τi /(2 − v/u)                       (4)
 
-     Define B(bi, ci) ≡ τi /(2 − v/u) =  (1 − (ωi / u)) / (2 − v/u)   (7)
-       Āb > 1/2  iff  Avg(B(bi, ci)) > 1/2                            (8)
+     Then   Āb > 1/2  iff  Avg(B(bi, ci)) > 1/2, which makes B(bi, ci) an assorter.
 
-     which makes B(bi, ci) an assorter.
+     Let noerror = 1 / (2 − v/u)                            (5)
+     Note B(bi, ci) ≡ τi /(2 − v/u) = τi * noerror
+
 
 ## OneAudit
 
-We do not support OneAudit at this time.
+We have a complete ballot manifest. But the MVRs cant be matched to their corresponding CVR.
+
+One Audit is the same as CLCA except that 
+
+        val cvr_assort = if (cvr.isPhantom) .5 else A_wℓ(cvr, usePhantoms = false)
+
+is replaced by
+
+        val cvr_assort = if (cvr.isPhantom) .5 else avgBatchAssortValue
+
+````
+    
+    The overstatement is calculated as
+        if (cvr.poolId == null) 
+            return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
+        else
+            val poolAverage = poolAverages.assortAverage[cvr.poolId] // for this pool and contest
+
+        val noerror = 1.0 / (2.0 - cvrAssortMargin / u)   // still using cvrAssortMargin for entire contest   
+        val overstatement = overstatementError(mvr, cvr, hasStyle)  
+        val tau = 1.0 - overstatement / u                           
+        return tau * noerror   
+        
+    The overstatementError(mvr, cvr, poolAvgAssortValue) is
+
+        val mvr_assort = if (mvr.isPhantom || (hasStyle && !mvr.hasContest(contest.id))) 0.0
+                         else A_wℓ(mvr, usePhantoms = false)
+        val cvr_assort = if (cvr.isPhantom) .5 else avgBatchAssortValue
+        return cvr_assort - mvr_assort
+       
+````
 
 # Risk functions (p-value calculators)
 

@@ -17,7 +17,7 @@ fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cv
             if (irvContests.contains(contestId)) {
                 val irvContest = irvContests[contestId]!!
                 val irvVote = irvVotes.getOrPut(contestId) { IrvContestVotes(irvContest) }
-                irvVote.addVote(candidateRanks)
+                irvVote.addVotes(candidateRanks)
 
                 count++
                 if (count % 10000 == 0) print("$count ")
@@ -41,7 +41,7 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
         require(irvContestInfo.choiceFunction == SocialChoiceFunction.IRV)
     }
 
-    fun addVote(candidateRanks: IntArray) {
+    fun addVotes(candidateRanks: IntArray) {
         candidateRanks.forEach {
             if (candidateIdToIndex[it] == null) {
                 notfound[it] = notfound.getOrDefault(it, 0) + 1

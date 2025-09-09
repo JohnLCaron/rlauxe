@@ -110,7 +110,6 @@ class BoulderElectionOneAuditFromCvrs(
             export.cvrs.forEach { cvr ->
                 cvr.contestVotes.forEach { contestVote ->
                     val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation() }
-                    tab.ncards++
                     tab.addVotes(contestVote.candVotes.toIntArray())
                 }
             }

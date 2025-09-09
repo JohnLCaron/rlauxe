@@ -9,12 +9,12 @@ import kotlin.test.Test
 // the cvrExports are already extracted with createSF2024cvrs90().
 // the audit and contests are already setup with createSfElectionFromCsvExportOA().
 // each repetition will choose a new prn and do a full sort. (alternatively could segment sortedCards by sampleLimit).
-class SFoaAuditVariance {
-    val nruns = 50
+class SFoansAuditVariance {
+    val nruns = 2
     val nsimEst = 10
     val mvrsFuzzPct = .00
 
-    val topDir = "/home/stormy/rla/cases/sf2024oa"
+    val topDir = "/home/stormy/rla/cases/sf2024oaNS"
     val auditDir = "$topDir/audit"
 
     @Test
@@ -30,7 +30,7 @@ class SFoaAuditVariance {
         println(stopwatch.took())
 
         val name = "sfoaVariance"
-        val dirName = "/home/stormy/rla/sfoaAll/$name"
+        val dirName = "/home/stormy/rla/sfoaNS/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -40,8 +40,8 @@ class SFoaAuditVariance {
     @Test
     fun regenSfoa() {
         val name = "sfoaVariance"
-        val dirName = "/home/stormy/rla/sfoaAll/$name"
-        val subtitle = "scatter plot of SF 2024 OneAudit contests, Ntrials=$nruns"
+        val dirName = "/home/stormy/rla/sfoaNS/$name"
+        val subtitle = "scatter plot of SF 2024 OneAudit contests 'no style', Ntrials=$nruns"
         showNSamplesVsMarginScatter(dirName, name, subtitle, ScaleType.LogLinear)
     }
 
@@ -61,10 +61,4 @@ class SFoaAuditVariance {
         )
     }
 
-}
-
-fun runName(wr: WorkflowResult): String {
-    val contest = wr.parameters["contest"] as String
-    val assertion = wr.parameters["assertion"] as String
-    return "$contest $assertion"
 }

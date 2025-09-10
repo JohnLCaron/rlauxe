@@ -12,7 +12,7 @@ class AuditsNoErrors {
     val name = "AuditsNoErrors4"
     val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
-    val nruns = 500  // number of times to run workflow
+    val nruns = 100  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
     val skewPct = 0.0

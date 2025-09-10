@@ -168,9 +168,9 @@ class OptimalComparisonNoP1(
         val eta3 =  upperBound * (1.0 - p2) - 0.5
         val eta4 =  eta12 + eta3
         val result =  etaToLam(eta4, mu, upperBound)
-        if (result <= 0.0) {
-            println("hmmmm ${upperBound * (1.0 - p2)} should be > 1.0")
-        }
+        //if (result <= 0.0) {
+        //    println("hmmmm ${upperBound * (1.0 - p2)} should be > 1.0")
+        //}
         return result
     }
 

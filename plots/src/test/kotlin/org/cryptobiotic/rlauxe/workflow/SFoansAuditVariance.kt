@@ -10,7 +10,7 @@ import kotlin.test.Test
 // the audit and contests are already setup with createSfElectionFromCsvExportOA().
 // each repetition will choose a new prn and do a full sort. (alternatively could segment sortedCards by sampleLimit).
 class SFoansAuditVariance {
-    val nruns = 2
+    val nruns = 50
     val nsimEst = 10
     val mvrsFuzzPct = .00
 
@@ -29,8 +29,8 @@ class SFoansAuditVariance {
         val results: List<WorkflowResult> = runWorkflows(tasks)
         println(stopwatch.took())
 
-        val name = "sfoaVariance"
-        val dirName = "/home/stormy/rla/sfoaNS/$name"
+        val name = "sfoans2024"
+        val dirName = "/home/stormy/rla/oneaudit4/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -39,8 +39,8 @@ class SFoansAuditVariance {
 
     @Test
     fun regenSfoa() {
-        val name = "sfoaVariance"
-        val dirName = "/home/stormy/rla/sfoaNS/$name"
+        val name = "sfoans2024"
+        val dirName = "/home/stormy/rla/oneaudit4/$name"
         val subtitle = "scatter plot of SF 2024 OneAudit contests 'no style', Ntrials=$nruns"
         showNSamplesVsMarginScatter(dirName, name, subtitle, ScaleType.LogLinear)
     }

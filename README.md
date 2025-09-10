@@ -190,7 +190,7 @@ See plots in the next section below.
 ### Card Style Data for the Pooled data
 
 SHANGRLA code implementing OneAudit uses the SanFrancisco county 2024 primary and general elections for its use cases.
-There, the main-in votes have Cvrs that can be matched to the physical ballots, while the in-person votes have Cvrs
+There, the mail-in votes have Cvrs that can be matched to the physical ballots, while the in-person votes have Cvrs
 but cannot be matched to the physical ballots. In the latter case the ballots are kept by precinct in some fixed 
 ordering which can be used in the ballot manifest.
 
@@ -215,31 +215,33 @@ increasing the number of samples needed.
 
 Im not sure why San Francisco County chooses to not map CVRs to physical ballots for in-person voting. If its a 
 technical problem with the prcecinct scanners, then this could be a complete CLCA audit when that problem is overcome.
-If its a deliberate privacy-preserving choice, perhaps it might be sufficiently private to use the CVRs to create a ballot manifest
-with CSD (Card Style Data). This essentially redacts the actual vote, but keeps a record of what contests are on which ballots,
-which reduces the required sampling size by a factor of around 2 for the SF 2024 elections.
+If its a deliberate privacy-preserving choice, perhaps it might be sufficient to use the CVRs to create a ballot manifest
+with CSD (Card Style Data). This essentially redacts the actual vote, but keeps a record of what contests are on each ballot,
+which reduces the required sampling size.
 
 Here is the SF 2024 General Election for all contests and assertions when all ballots have an associated CVR and there are no errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.html" rel="sf2024NmvrsLogLinear">![sf2024NmvrsLogLinear](docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.png)</a>
 
 Here is the same election using OneAudit where the in-person ballots are in precinct pools and have no card style data.
-We run the audit 50 times with different permutatiopns of the same ballots, and show a scatter plot of the results. The
+We run the audit 50 times with different permutations of the actual ballots, and show a scatter plot of the results. The
 50 trials are spread out vertically, since they all have the same margin:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoans2024/sf2024oaNmvrsLogLinear.html" rel="sf2024oaNmvrsLogLinear">![sf2024oaNmvrsLogLinear](docs/plots/oneaudit4/sfoans2024/sf2024oaNmvrsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoans2024/sfoans2024NmvrsLogLinear.html" rel="sfoans2024NmvrsLogLinear">![sfoans2024NmvrsLogLinear](docs/plots/oneaudit4/sfoans2024/sfoans2024NmvrsLogLinear.png)</a>
 
 Here is the same election using OneAudit where the in-person ballots are in precinct pools but have card style data.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sf2024oaNmvrsLogLinear.html" rel="sf2024oaNmvrsLogLinear">![sf2024oaNmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sf2024oaNmvrsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.html" rel="sfoa2024NmvrsLogLinear">![sfoa2024NmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.png)</a>
 
-* OneAudit with pooled precinct data and no card style data needs about 4x the samples as a complete CLCA audit for this particular use case, on average.
-* OneAudit with card style data needs about 2x the samples as a complete CLCA, on average.
-* Due to the large variance introduced by the pooled data, comparing just the average samples needed may be misleading.
+* OneAudit does quite well for high margins, say > 10%.
+* OneAudit with no card style data needs about 2x the samples at 5% margin, compared to a CLCA audit for this particular use case, on average, but with a wide variance,
+  and progressively worse as margins get lower. TODO
+* OneAudit with card style data needs about ?x the samples as a complete CLCA, on average, due to the margin being higher.
+* Due to the large variance introduced by the pooled data, comparing just the average samples needed is misleading.
 
 ### OneAudit for Redacted data
 
-We have the use case of "redacted ballots" where we only get pool totals, and perhaps thats an instance where we might have pools but the admin is willing to give us the contest counts in each pool. (Since we then dont need ballot information, this may satisfy the privacy concern that redacted ballots is used for.)
+We also have the use case of "redacted ballots" where we only get pool totals, and perhaps thats an instance where we might have pools but the admin is willing to give us the contest counts in each pool. (Since we then dont need ballot information, this may satisfy the privacy concern that redacted ballots is used for.)
 
 CreateBoulderElectionOneAudit explores creating a OneAudit and making the redacted CVRs into OneAudit pools.
 

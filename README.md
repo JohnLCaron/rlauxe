@@ -1,7 +1,7 @@
 **RLAUXE ("rlux")**
 
 WORK IN PROGRESS
-_last changed: 08/31/2025_
+_last changed: 9/10/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -24,8 +24,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [Polling Audits](#polling-audits)
   * [OneAudit CLCA](#oneaudit-clca)
-    * [Auditing Batch level data with OneAudit](#auditing-batch-level-data-with-oneaudit)
-    * [Auditing heterogenous voting systems with OneAudit](#auditing-heterogenous-voting-systems-with-oneaudit)
+    * [OneAudit inherent sample variance](#oneaudit-inherent-sample-variance)
     * [Contest counts in the Pooled data](#contest-counts-in-the-pooled-data)
     * [OneAudit for Redacted data](#oneaudit-for-redacted-data)
 * [Comparing Samples Needed by Audit type](#comparing-samples-needed-by-audit-type)
@@ -159,50 +158,43 @@ See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart ri
 
 ## OneAudit CLCA
 
-OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit paper (see appendix). 
-It deals with 2 cases: 
+OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit papers (see appendix).
+It deals with the case when CVRS are not available for all ballots. The remaining ballots are in one or more "pools"
+for which subtotals are available. 
 
-1. CVRS are not available, only subtotals by batch ("Batch level data"), for example by precincts.
-2. CVRS are available for some, but not all ballots. The remaining ballots are in one or more batches
-   for which subtotals are available. This is a "hybrid" or "heterogenous" audit.
+The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for each pool, and use the average assorter
+value in that pool as the value of the (missing) CVR in the CLCA overstatement.
 
-The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for each batch, and use the average assorter
-value in that batch as the value of the (missing) CVR in the CLCA overstatement.
-
-One of the advantages of OneAudit is that one only has to retrieve the physical ballots that are chosen for auditing, 
-rather than retrieving all the physical ballots in a batch.
-
-Currently we only support PLURALITY contests with OneAudit.
-
-### Auditing Batch level data with OneAudit
-
-OneAudit "lets audits use batch-level data far more efficiently than traditional batch-level comparison RLAs (BLCAs) do:
-create ONE CVRs for each batch, then apply CLCA as if the voting system had provided those CVRs. For
-real and simulated data, this saves a large mount of work compared to manually
-tabulating the votes on every card in the batches selected for audit, as BLCAs
-require. If batches are sufficiently homogeneous, the workload approaches that
-of “pure” CLCA using linked CVRs from the voting system." ONEAudit p 13.
-
-The code in OneAuditContest handles BLCAs by setting cvrNc = 0 (and cvrVotes to empty). All CVRS must be part of a pool.
-
-In this case, we find the minimum assort value over all pools and create an
-affine transformation of the over-statement assorter values that subtracts the minimum assort value and
-rescales so that the null mean is 1/2. See ONEAudit eq (1), p 12.
-
-**TODO**: Test how much the affine transformation helps the sample size.
-
-### Auditing heterogenous voting systems with OneAudit
+Only PLURALITY and IRV can be used with OneAudit.
 
 CVRS are available for some, but not all ballots. When a ballot has been chosen for hand audit:
 
 1. If it has a CVR, we use the standard CLCA over-statement assorter value for the ballot.
 2. If it has no CVR, we use the overstatement-net-equivalent (ONE) CVR from the batch that it belongs to.
 
-For results, see [OneAudit version 3](docs/OneAudit3.md).
+For results, see [OneAudit version 4](docs/OneAudit4.md).
 
-Older version: [OneAudit version 2](docs/OneAudit2.md).
+Older versions: [OneAudit version 3](docs/OneAudit3.md) and [OneAudit version 2](docs/OneAudit2.md).
 
-### Contest counts in the Pooled data
+Archived notes: [OneAudit archive](docs/OneAudit.md).
+
+### OneAudit inherent sample variance
+
+For CLCA and Polling, if there are no errors, then the number of samples needed for the audit is completely determined
+by the margin and the betting method chosen. The presence of errors adds variance because the errors show up randomly in
+the sequence of sampled ballots. 
+
+OneAudit has inherent sample variance due to the random sequence of pooled ballots, even when there are no errors.
+See plots in the next section below.
+
+### Card Style Data for the Pooled data
+
+SHANGRLA code implementing OneAudit uses the SanFrancisco county 2024 primary and general elections for its use cases.
+There, the main-in votes have Cvrs that can be matched to the physical ballots, while the in-person votes have Cvrs
+but cannot be matched to the physical ballots. In the latter case the ballots are kept by precinct in some fixed 
+ordering which can be used in the ballot manifest.
+
+For this case:
 
 ````
 "With ONEAudit, you have to start by adding every contest that appears on any card in a tally 
@@ -218,24 +210,32 @@ The mean is over all cards in the batch, since we don't know which cards have wh
 (Phillip Stark, private communication)
 ````
 
-Even though we dont have CVRs for pooled ballots, we still have to have a ballot manifest (aka "Card Location" manifest) that includes each one. The ballot manifest might identify a pooled ballot only by their position in the batch or it might have an id that has been printed on the ballot. We might have card style information or not. The ballot manifest might have all the information that a CVR has, except for which candidates were voted for. In other words, all the possible variations that a polling audit might have.
+The increase in Nc (upper bound on the number of cards in the contest) has the effect of decreasing the margin and
+increasing the number of samples needed.
 
-When a pooled ballot is selected for sampling, we use the ballot manifest to retrieve the paper ballot and create an MVR. The MVR always has the complete set of contests and votes for that ballot. So when we calculate the assort value for a particular contest and assertion, we always know whether the contest appears on the ballot on not.
+Im not sure why San Francisco County chooses to not map CVRs to physical ballots for in-person voting. If its a 
+technical problem with the prcecinct scanners, then this could be a complete CLCA audit when that problem is overcome.
+If its a deliberate privacy-preserving choice, perhaps it might be sufficiently private to use the CVRs to create a ballot manifest
+with CSD (Card Style Data). This essentially redacts the actual vote, but keeps a record of what contests are on which ballots,
+which reduces the required sampling size by a factor of around 2 for the SF 2024 elections.
 
-For each pool we always have a pool count, which has a list of contests and their votes in the pool, and the number of ballots in the pool. However, we may not know the number of cards for each contest in each pool, that is, we may not know how many undervotes there are by contest. If we do know the undervotes by contest, we then know Nc_g for each contest and can accurately calculate the assorter mean of the pool.
+Here is the SF 2024 General Election for all contests and assertions when all ballots have an associated CVR and there are no errors:
 
-The case that Philip is talking about I think is when we dont know how many cards in each pool contain a given contest (or equivilently the number of undervotes by contest by pool). It is analogous to hasStyles = false in regular audits, although in that case, since we know Nc, the total ballots for a contest, we can correctly calculate the reported margin and the average assort value. The main effect of hasStyles = false is when it comes to sampling: we have to sample with a factor of (Nb / Nc) more ballots, where Nb is the number of physical ballots the contest might be in, and Nc in the number of ballots its actually in. (However, note this only comes into play when doing rounds of sampling; one can ignore this issue for the "one-mvr at a time" audit.)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.html" rel="sf2024NmvrsLogLinear">![sf2024NmvrsLogLinear](docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.png)</a>
 
-For OneAudit, we also need to know Nc_g, the number of cards for this contest for each pool g so that we can calculate the average assort values in each pool. Instead, we may only know N_g, the total number of cards in pool g.
+Here is the same election using OneAudit where the in-person ballots are in precinct pools and have no card style data.
+We run the audit 50 times with different permutatiopns of the same ballots, and show a scatter plot of the results. The
+50 trials are spread out vertically, since they all have the same margin:
 
-The reported assorter mean is over all cards in the batch (when you dont know Nc_g), which makes the mean smaller than it really is.
-````
-reported assorter mean = (winner - loser) / Npool <=  actual assorter mean =  (winner - loser) / NCpool, since Npool >= NCpool
-reported assorter margin =  2 * (reported assorter mean) - 1 <= actual assorter margin = 2 * (actual assorter mean) - 1, since reported assorter mean <= actual assorter mean)
-````
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoans2024/sf2024oaNmvrsLogLinear.html" rel="sf2024oaNmvrsLogLinear">![sf2024oaNmvrsLogLinear](docs/plots/oneaudit4/sfoans2024/sf2024oaNmvrsLogLinear.png)</a>
 
-**TODO**: understand why Philip's "add every contest that appears on any card in a tally batch to every card in that tally batch and increase the upper bound on the number of cards in the contest appropriately" works.
+Here is the same election using OneAudit where the in-person ballots are in precinct pools but have card style data.
 
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sf2024oaNmvrsLogLinear.html" rel="sf2024oaNmvrsLogLinear">![sf2024oaNmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sf2024oaNmvrsLogLinear.png)</a>
+
+* OneAudit with pooled precinct data and no card style data needs about 4x the samples as a complete CLCA audit for this particular use case, on average.
+* OneAudit with card style data needs about 2x the samples as a complete CLCA, on average.
+* Due to the large variance introduced by the pooled data, comparing just the average samples needed may be misleading.
 
 ### OneAudit for Redacted data
 
@@ -245,10 +245,10 @@ CreateBoulderElectionOneAudit explores creating a OneAudit and making the redact
 
 Findings so far:
 
-1. Boulder County apparently does not publish the number of ballots in each pool. 
-2. Also does not publish the number of ballots for each contest in each pool, ie, the undervotes. 
+1. Boulder County apparently does not publish the number of ballots in each pool.
+2. Also does not publish the number of ballots for each contest in each pool, ie, the undervotes.
 3. While we still can do a simulation with CreateBoulderElectionOneAudit, we probably cant do a real audit with existing published data.
-4. At a minimum we need (1). 
+4. At a minimum we need (1).
 
 **TODO**: Assuming we have (1), whats the consequences of not having (2) ??
 

@@ -29,8 +29,8 @@ class SfAuditVariance {
         val results: List<WorkflowResult> = runWorkflows(tasks)
         println(stopwatch.took())
 
-        val name = "sfVariance"
-        val dirName = "/home/stormy/rla/sfAll/$name"
+        val name = "sf2024"
+        val dirName = "/home/stormy/rla/oneaudit4/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -39,8 +39,8 @@ class SfAuditVariance {
 
     @Test
     fun regenSf() {
-        val name = "sfVariance"
-        val dirName = "/home/stormy/rla/sfAll/$name"
+        val name = "sf2024"
+        val dirName = "/home/stormy/rla/oneaudit4/$name"
         val subtitle = "scatter plot of SF 2024 contests, Ntrials=$nruns"
         showNSamplesVsMarginScatter(dirName, name, subtitle, ScaleType.LogLinear)
     }

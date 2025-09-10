@@ -12,13 +12,13 @@ We try different betting "strategies":
 Here we compare these 3 strategies along with polling and clca audits, when there are no errors, as a function of margin. 
 The OneAudit has CVRs for 95% of its cards, and 5% are in a single pool without CVRS, but with Card Style Data.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/OneAuditNoErrors4/OneAuditNoErrors4LogLog.html" rel="OneAuditNoErrors4LogLog">![OneAuditNoErrors4LogLog](plots/oneaudit4/OneAuditNoErrors4LogLog/OneAuditNoErrors4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/OneAuditNoErrors4/OneAuditNoErrors4LogLog.html" rel="OneAuditNoErrors4LogLog">![OneAuditNoErrors4LogLog](plots/oneaudit4/OneAuditNoErrors4/OneAuditNoErrors4LogLog.png)</a>
 
 * The bet99 and optimalBet are mostly identical and do best when there are no errors.
 
 Here we compare the same audit types when there are errors, at a fixed 4% margin, as a function of fuzzPct:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/OneAuditwithErrors4/OneAuditWithErrors4LogLinear.html" rel="OneAuditWithErrors4LogLinear">![OneAuditWithErrors4LogLinear](plots/oneaudit4/OneAuditwithErrors4/OneAuditWithErrors4LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/OneAuditWithErrors4/OneAuditWithErrors4LogLinear.html" rel="OneAuditWithErrors4LogLinear">![OneAuditWithErrors4LogLinear](plots/oneaudit4/OneAuditWithErrors4/OneAuditWithErrors4LogLinear.png)</a>
 
 * The optimalBet strategy does better even than CLCL once the fuzzPct are bigger than .005.
 

@@ -25,7 +25,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Polling Audits](#polling-audits)
   * [OneAudit CLCA](#oneaudit-clca)
     * [OneAudit inherent sample variance](#oneaudit-inherent-sample-variance)
-    * [Contest counts in the Pooled data](#contest-counts-in-the-pooled-data)
+    * [Card Style Data for the Pooled data](#card-style-data-for-the-pooled-data)
     * [OneAudit for Redacted data](#oneaudit-for-redacted-data)
 * [Comparing Samples Needed by Audit type](#comparing-samples-needed-by-audit-type)
   * [Samples needed with no errors](#samples-needed-with-no-errors)

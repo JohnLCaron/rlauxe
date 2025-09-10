@@ -1,0 +1,138 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;GRjMyG&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAuditWithErrors4 samples vs fuzz&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=200 cvrPercent=0.95 margin=0.04&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;mvrsFuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;samplesNeeded&quot;:[219.10499999999993,257.5999999999999,247.02500000000006,243.04500000000004,362.37500000000017,362.645,451.6299999999998,681.8449999999999,1943.214999999999,5793.57,149.0,151.20999999999998,151.04,168.54000000000002,208.80499999999992,256.2850000000002,348.84499999999997,345.7750000000002,505.9550000000002,617.0299999999997,517.2800000000001,493.81499999999977,521.9600000000005,576.4750000000001,582.49,609.0150000000001,624.6049999999998,771.15,762.4700000000003,1130.9149999999997,228.82000000000005,250.90000000000012,237.55000000000004,247.27000000000004,249.48499999999999,234.06,214.655,247.8699999999999,210.22000000000003,219.42499999999998,4494.419999999999,4354.015,4393.764999999999,3887.3350000000005,4472.369999999998,4553.045000000001,4336.705000000002,4303.000000000001,4048.2699999999995,4657.169999999997],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;mvrsFuzzPct&quot;:[0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;mvrsFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;mvrsFuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;samplesNeeded&quot;:[219.10499999999993,257.5999999999999,247.02500000000006,243.04500000000004,362.37500000000017,362.645,451.6299999999998,681.8449999999999,1943.214999999999,5793.57,149.0,151.20999999999998,151.04,168.54000000000002,208.80499999999992,256.2850000000002,348.84499999999997,345.7750000000002,505.9550000000002,617.0299999999997,517.2800000000001,493.81499999999977,521.9600000000005,576.4750000000001,582.49,609.0150000000001,624.6049999999998,771.15,762.4700000000003,1130.9149999999997,228.82000000000005,250.90000000000012,237.55000000000004,247.27000000000004,249.48499999999999,234.06,214.655,247.8699999999999,210.22000000000003,219.42499999999998,4494.419999999999,4354.015,4393.764999999999,3887.3350000000005,4472.369999999998,4553.045000000001,4336.705000000002,4303.000000000001,4048.2699999999995,4657.169999999997],
+&quot;auditType&quot;:[&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;bet99&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;eta0Eps&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;optimalBet&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;,&quot;poll&quot;],
+&quot;mvrsFuzzPct&quot;:[0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02,0.0,1.0E-4,3.0E-4,0.001,0.003,0.005,0.0075,0.01,0.015,0.02]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;mvrsFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;mvrsFuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+       var containerDiv = document.getElementById(&quot;GRjMyG&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

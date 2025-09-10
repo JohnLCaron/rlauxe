@@ -10,15 +10,15 @@ import kotlin.test.Test
 class AuditsWithErrors {
     val nruns = 100
     val nsimEst = 10
-    val name = "AuditsWithErrors4"
+    val name = "AuditsWithErrors2"
     val dirName = "/home/stormy/rla/audits/$name"
     val N = 50000
-    val margin = .04
+    val margin = .02
 
     @Test
     fun genAuditWithFuzzPlots() {
         val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01, .02, .03, .05)
-        val cvrPercents = listOf(0.05, 0.5, .80, .95, .99)
+        val cvrPercents = listOf(0.5, 0.75, 0.80, 0.90)
 
         val stopwatch = Stopwatch()
 

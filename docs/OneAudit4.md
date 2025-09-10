@@ -7,7 +7,7 @@ We try different betting "strategies":
 
 * **bet99**: Set eta0 = reportedMean, always bet 99% of the maximum allowed bet.
 * **eta0Eps**: Set eta0 = upper*(1 - eps), use shrinkTrunk for betting strategy.
-* **optimalBet**: Use betting mart with kelly_optimal betting.
+* **optimalBet**: Use betting mart with optimal_comparison betting from SHANGRLA.
 
 Here we compare these 3 strategies along with polling and clca audits, when there are no errors, as a function of margin. 
 The OneAudit has CVRs for 95% of its cards, and 5% are in a single pool without CVRS, but with Card Style Data.
@@ -24,7 +24,7 @@ Here we compare the same audit types when there are errors, at a fixed 4% margin
 
 ## Compare Audit Types
 
-We will use the optimalBet strategy for OneAudit, and compare Polling, Comparison (CLCA) and OneAudit (with 5%, 50%, 80%, 95% and 99% of cards having CVRs).
+We will use the optimalBet strategy for OneAudit, and compare Polling, Comparison (CLCA) and OneAudit (with 50%, 75%, 80%, and 90% of cards having CVRs).
 
 When there are no errors in the CVRs, as a function of margin:
 
@@ -34,10 +34,9 @@ When there are no errors in the CVRs, as a function of margin:
 
 When there are errors (parameterized by fuzzPct, the percent of ballots randomly changed), for fixed margin of 2% and 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors4/AuditsWithErrors4LogLog.html" rel="AuditsWithErrors4LogLog">![AuditsWithErrors4LogLog](plots/oneaudit4/AuditsWithErrors4/AuditsWithErrors4LogLog.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors4/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit4/AuditsWithErrors4/AuditsWithErrors4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors/AuditsWithErrors2LogLog.html" rel="AuditsWithErrors2LogLog">![AuditsWithErrors2LogLog](plots/oneaudit4/AuditsWithErrors/AuditsWithErrors2LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
-* There is an interesting discontinuity going from 0.0 (no errors) to even a very small error (.001 here). To be investigated.
 * The spread among the OneAudit-cvrPercent audits follow the expectation that higher cvr percents look more like CLCA. 
 * OneAudit results have similar sensitivities to errors as CLCA.
 * IRV (Raire) audits are less likely to have their outcomes altered due to random changes in the ballots.

@@ -14,7 +14,7 @@ class OneAuditNoErrors {
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
-    val cvrPercent = 0.95
+    val cvrPercent = 0.80
     val fuzzPct = 0.0
     val skewPct = 0.0
 

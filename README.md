@@ -160,11 +160,8 @@ See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart ri
 
 OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit papers (see appendix).
 It deals with the case when CVRS are not available for all ballots. The remaining ballots are in one or more "pools"
-for which subtotals are available. 
-
-The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for each pool, and use the average assorter
-value in that pool as the value of the (missing) CVR in the CLCA overstatement.
-
+for which subtotals are available. The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for each pool, 
+and use the average assorter value in that pool as the value of the (missing) CVR in the CLCA overstatement.
 Only PLURALITY and IRV can be used with OneAudit.
 
 CVRS are available for some, but not all ballots. When a ballot has been chosen for hand audit:

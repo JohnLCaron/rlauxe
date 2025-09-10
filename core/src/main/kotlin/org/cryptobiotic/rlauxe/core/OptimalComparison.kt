@@ -273,7 +273,7 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
 //     'test':             NonnegMean.betting_mart,
 //     'bet':              NonnegMean.kelly_optimal /'test_kwargs': {'d': 100, 'f': 0}
 
-class KellyOptimal(val x: DoubleArray, val t: Double) {
+class KellyOptimal(val x: DoubleArray, val t: Double)  {
     /*
         return the Kelly-optimal bet
 
@@ -285,6 +285,9 @@ class KellyOptimal(val x: DoubleArray, val t: Double) {
             the population (order does not matter) that will be used to compute the optimal bet
         Takes x to be the population unless pop is provided
         */
+    fun bet(prevSamples: PrevSamplesWithRates): Double {
+        TODO("Not yet implemented")
+    }
 
     init {
         // t = self.t # the null mean

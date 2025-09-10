@@ -128,11 +128,11 @@ fun consistentSampling(
             }
         }
         countSamples++
-        if (countSamples % 10000 == 0) print("$countSamples ")
+        /* if (countSamples % 10000 == 0) print("$countSamples ")
         if (countSamples % 100000 == 0) {
             val wants = contestsIncluded.filter { contestWantsMoreSamples(it) }.map { "${it.id}:${contestWants(it)}" }
-            logger.info{"\nsampledCards = ${sampledCards.size} newMvrs=$newMvrs wants = $wants"}
-        }
+            print{"sampledCards = ${sampledCards.size} newMvrs=$newMvrs wants = $wants"}
+        } */
     }
 
     if (debugConsistent) logger.info{"**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}

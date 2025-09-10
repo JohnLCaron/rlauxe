@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
+import org.cryptobiotic.rlauxe.util.Stopwatch
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
@@ -31,13 +32,16 @@ interface RlauxAuditIF {
         }
         auditRounds.add(auditRound)
 
-        if (!quiet) logger.info{"Estimate round ${roundIdx}"}
+        logger.info{"Estimate round ${roundIdx}"}
+        val stopwatch = Stopwatch()
+
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig(),
             auditRound,
             mvrManager().sortedCvrs(),
         )
+        logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
         // 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
@@ -47,6 +51,7 @@ interface RlauxAuditIF {
             auditRound,
             auditRounds.previousSamples(roundIdx),
             quiet)
+
         return auditRound
     }
 

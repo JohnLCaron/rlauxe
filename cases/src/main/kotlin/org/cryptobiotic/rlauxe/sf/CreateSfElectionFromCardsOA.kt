@@ -68,6 +68,7 @@ fun createSfElectionFromCsvExportOA(
     // these checks may modify the contest status; dont call until clca assertions are created
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
     )
 
     // TODO check that the sum of pooled and unpooled votes is correct

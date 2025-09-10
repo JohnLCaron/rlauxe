@@ -217,6 +217,7 @@ fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
 //    val startingTestStatistic: Double,
 //    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
 //    val sampleDeciles: List<Int>,   // distribution of estimated sample size as deciles
+//    val firstSample: Int
 //)
 
 @Serializable
@@ -227,6 +228,7 @@ data class EstimationRoundResultJson(
     val startingTestStatistic: Double,
     val startingRates: List<Double>?,
     val estimatedDistribution: List<Int>,
+    val firstSample: Int,
 )
 
 fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
@@ -236,6 +238,7 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.startingTestStatistic,
     this.startingRates?.toList(),
     this.estimatedDistribution,
+    this.firstSample,
 )
 
 fun EstimationRoundResultJson.import() : EstimationRoundResult {
@@ -246,6 +249,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
         this.startingTestStatistic,
         if (this.startingRates != null) ClcaErrorRates.fromList(this.startingRates) else null,
         this.estimatedDistribution,
+        this.firstSample,
     )
 }
 

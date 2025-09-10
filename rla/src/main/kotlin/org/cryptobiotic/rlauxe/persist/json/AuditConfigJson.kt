@@ -19,44 +19,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-// enum class AuditType { POLLING, CARD_COMPARISON, ONEAUDIT }
-//data class AuditConfig(
-//    val auditType: AuditType,
-//    val hasStyles: Boolean,
-//    val riskLimit: Double = 0.05,
-//    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
-//
-//    // simulation control
-//    val nsimEst: Int = 100, // number of simulation estimations
-//    val quantile: Double = 0.80, // use this percentile success for estimated sample size
-//    val samplePctCutoff: Double = .42, // dont sample more than this pct of N
-//    val minMargin: Double = 0.005,
-//
-//    val pollingConfig: PollingConfig = PollingConfig(),
-//    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
-//    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
-//    val version: Double = 1.0,
-//)
-
-// data class AuditConfig(
-//    val auditType: AuditType,
-//    val hasStyles: Boolean,
-//    val riskLimit: Double = 0.05,
-//    val seed: Long = secureRandom.nextLong(), // determines smaple order. set carefully to ensure truly random.
-//
-//    // simulation control
-//    val nsimEst: Int = 100, // number of simulation estimations
-//    val quantile: Double = 0.80, // use this percentile success for estimated sample size
-//    val samplePctCutoff: Double = 1.0, // dont sample more than this pct of N
-//    val minMargin: Double = 0.0, // do not audit contests less than this reported margin
-//    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
-//
-//    val pollingConfig: PollingConfig = PollingConfig(),
-//    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.noerror),
-//    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.default),
-//    val version: Double = 1.0,
-//)
-
 @Serializable
 data class AuditConfigJson(
     val auditType: String,
@@ -68,47 +30,103 @@ data class AuditConfigJson(
     val sampleLimit: Int,
     val minRecountMargin: Double, // should be minRecountMargin
     val removeTooManyPhantoms: Boolean,
-    val pollingConfig: PollingConfigJson,
-    val clcaConfig: ClcaConfigJson,
-    val oaConfig: OneAuditConfigJson,
-    val version: Double,
+    val version : Double,
+    val pollingConfig: PollingConfigJson? = null,
+    val clcaConfig: ClcaConfigJson? = null,
+    val oaConfig: OneAuditConfigJson?  = null,
 )
 
 fun AuditConfig.publishJson() : AuditConfigJson {
-    return AuditConfigJson(
-        this.auditType.name,
-        this.hasStyles,
-        this.riskLimit,
-        this.seed,
-        this.nsimEst,
-        this.quantile,
-        this.sampleLimit,
-        this.minRecountMargin,
-        this.removeTooManyPhantoms,
-        this.pollingConfig.publishJson(),
-        this.clcaConfig.publishJson(),
-        this.oaConfig.publishJson(),
-        this.version
-    )
+    return when (this.auditType) {
+        AuditType.CLCA -> AuditConfigJson(
+            this.auditType.name,
+            this.hasStyles,
+            this.riskLimit,
+            this.seed,
+            this.nsimEst,
+            this.quantile,
+            this.sampleLimit,
+            this.minRecountMargin,
+            this.removeTooManyPhantoms,
+            this.version,
+            clcaConfig = this.clcaConfig.publishJson(),
+        )
+
+        AuditType.POLLING -> AuditConfigJson(
+            this.auditType.name,
+            this.hasStyles,
+            this.riskLimit,
+            this.seed,
+            this.nsimEst,
+            this.quantile,
+            this.sampleLimit,
+            this.minRecountMargin,
+            this.removeTooManyPhantoms,
+            this.version,
+            pollingConfig = this.pollingConfig.publishJson(),
+        )
+
+        AuditType.ONEAUDIT -> AuditConfigJson(
+            this.auditType.name,
+            this.hasStyles,
+            this.riskLimit,
+            this.seed,
+            this.nsimEst,
+            this.quantile,
+            this.sampleLimit,
+            this.minRecountMargin,
+            this.removeTooManyPhantoms,
+            this.version,
+            oaConfig = this.oaConfig.publishJson(),
+        )
+    }
 }
 
 fun AuditConfigJson.import(): AuditConfig {
     val auditType = enumValueOf(this.auditType, AuditType.entries) ?: AuditType.CLCA
-    return AuditConfig(
-        auditType,
-        this.hasStyles,
-        this.riskLimit,
-        this.seed,
-        this.nsimEst,
-        this.quantile,
-        this.sampleLimit,
-        this.minRecountMargin,
-        this.removeTooManyPhantoms,
-        this.pollingConfig.import(),
-        this.clcaConfig.import(),
-        this.oaConfig.import(),
-        this.version,
-    )
+    return when (auditType) {
+        AuditType.CLCA -> AuditConfig(
+            auditType,
+            this.hasStyles,
+            this.riskLimit,
+            this.seed,
+            this.nsimEst,
+            this.quantile,
+            this.sampleLimit,
+            this.minRecountMargin,
+            this.removeTooManyPhantoms,
+            clcaConfig = this.clcaConfig!!.import(),
+            version = this.version,
+        )
+
+        AuditType.POLLING -> AuditConfig(
+            auditType,
+            this.hasStyles,
+            this.riskLimit,
+            this.seed,
+            this.nsimEst,
+            this.quantile,
+            this.sampleLimit,
+            this.minRecountMargin,
+            this.removeTooManyPhantoms,
+            pollingConfig = this.pollingConfig!!.import(),
+            version = this.version,
+        )
+
+        AuditType.ONEAUDIT -> AuditConfig(
+            auditType,
+            this.hasStyles,
+            this.riskLimit,
+            this.seed,
+            this.nsimEst,
+            this.quantile,
+            this.sampleLimit,
+            this.minRecountMargin,
+            this.removeTooManyPhantoms,
+            oaConfig = this.oaConfig!!.import(),
+            version = this.version,
+        )
+    }
 }
 
 // data class PollingConfig(
@@ -180,6 +198,7 @@ data class OneAuditConfigJson(
     val strategy: String,
     val simFuzzPct: Double?,
     val d: Int,
+    val useFirst: Boolean,
 )
 
 fun OneAuditConfig.publishJson() : OneAuditConfigJson {
@@ -187,6 +206,7 @@ fun OneAuditConfig.publishJson() : OneAuditConfigJson {
         this.strategy.name,
         this.simFuzzPct,
         this.d,
+        this.useFirst
     )
 }
 
@@ -196,6 +216,7 @@ fun OneAuditConfigJson.import(): OneAuditConfig {
         strategy,
         this.simFuzzPct,
         this.d,
+        this.useFirst
     )
 }
 

@@ -48,7 +48,8 @@ fun estimateSampleSizes(
         val task = estResult.task
         val result = estResult.repeatedResult
 
-        val estNewSamples = result.findQuantile(auditConfig.quantile)
+        val useFirst = auditConfig.auditType == AuditType.ONEAUDIT && auditConfig.oaConfig.useFirst // experimental
+        val estNewSamples = if (useFirst) result.sampleCount[0] else result.findQuantile(auditConfig.quantile)
         task.assertionRound.estNewSampleSize = estNewSamples
         task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
 
@@ -304,7 +305,8 @@ fun simulateSampleSizeClcaAssorter(
         startingTestStatistic = startingTestStatistic,
         startingRates = errorRates,
         estimatedDistribution = makeDeciles(result.sampleCount),
-    )
+        firstSample = result.sampleCount[0],
+        )
 
     return result
 }
@@ -383,7 +385,8 @@ fun simulateSampleSizePollingAssorter(
         fuzzPct = fuzzPct,
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
-    )
+        firstSample = result.sampleCount[0],
+        )
 
     return result
 }
@@ -454,13 +457,6 @@ fun simulateSampleSizeOneAuditAssorter(
             auditConfig.sampleLimit,
             cvrs.iterator(),
         )
-    /* val sampler = if (oaConfig.simFuzzPct == null) {
-        ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyles, cvrs.zip( cvrs), oaCassorter, allowReset=true, trackStratum=false)
-    } else {
-        fuzzPct = oaConfig.simFuzzPct
-        OneAuditFuzzSampler(oaConfig.simFuzzPct, cvrs, contestUA, oaCassorter) // TODO cant use Raire
-    }
-    sampler.reset() */
 
     val strategy = auditConfig.oaConfig.strategy
     val result = if (strategy == OneAuditStrategyType.optimalBet) {
@@ -507,13 +503,16 @@ fun simulateSampleSizeOneAuditAssorter(
         )
     }
 
-    assertionRound.estimationResult = EstimationRoundResult(roundIdx,
+    assertionRound.estimationResult = EstimationRoundResult(
+        roundIdx,
         oaConfig.strategy.name,
         fuzzPct = fuzzPct,
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
+        firstSample = result.sampleCount[0],
     )
 
-    println("  finish ${contestUA.id} ${oaCassorter.assorter().desc()} ${makeDeciles(result.sampleCount)} ")
+    logger.info{"simulateSampleSizeOneAuditAssorter $roundIdx ${contestUA.id} ${oaCassorter.assorter().desc()} ${makeDeciles(result.sampleCount)} " +
+                "first=${result.sampleCount[0]}"}
     return result
 }

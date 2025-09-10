@@ -69,23 +69,6 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
                 Ncast = irvContestVotes.ncards,
             )
             contests.add(rcontestUA)
-
-            // TODO added to makeRaireContestUA; duplicate ??
-            //// annotate RaireContest with IrvRounds TODO put inside RaireContestUnderAudit or RaireContest or makeRaireContestUA
-
-            // The candidate Ids go from 0 ... ncandidates-1 because of Raire; use the ordering from ContestInfo.candidateIds
-            // this just makes the candidateIds the sequential indexes (0..ncandidates-1)
-            val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
-            val cvotes = irvContestVotes.vc.makeVotes()
-            val irvCount = IrvCount(cvotes, candidateIdxs)
-            val roundResultByIdx = irvCount.runRounds()
-
-            // now convert results back to using the real Ids:
-            val roundPathsById = roundResultByIdx.ivrRoundsPaths.map { roundPath ->
-                val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
-                IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
-            }
-            (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
         }
     }
     return contests

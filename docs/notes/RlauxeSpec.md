@@ -1,6 +1,6 @@
 **Rlauxe Implementation Specification**
 
-_9/7/25_
+_9/10/25_
 
 See [references](../papers/papers.txt) for reference papers.
 
@@ -25,6 +25,8 @@ See [references](../papers/papers.txt) for reference papers.
     * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
   * [CLCA Audits](#clca-audits)
     * [The CLCA betting function](#the-clca-betting-function)
+  * [OneAudit](#oneaudit-1)
+    * [OneAudit](#oneaudit-)
 * [Attacks](#attacks)
   * [Category A. CLCA with styles](#category-a-clca-with-styles)
     * [Case 1. Prover changes CVR votes for A to B.](#case-1-prover-changes-cvr-votes-for-a-to-b)
@@ -494,6 +496,13 @@ See [OptimalComparison implementation](../../core/src/main/kotlin/org/cryptobiot
 for details on the AdaptiveBetting implementation.
 
 See [CLCA AdaptiveBetting](../AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
+
+## OneAudit
+
+Rlauxe uses the **BettingMart** risk function with the **OptimalKelly** _betting function_ for OneAudit.
+
+
+### OneAudit 
 
 # Attacks
 

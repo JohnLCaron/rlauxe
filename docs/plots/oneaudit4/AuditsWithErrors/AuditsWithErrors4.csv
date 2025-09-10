@@ -1,0 +1,64 @@
+parameters, N, margin, status, nrounds, samplesUsed, notUsed, nmvrs, failPct, usedStddev, mvrMargin
+"nruns=100.0 fuzzPct=0.0 mvrsFuzzPct=0.0 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4581.210000000002, 0.0, 0.0, 0.0, 3345.1983328197443, 0.040000000000000036
+"nruns=100.0 fuzzPct=0.001 mvrsFuzzPct=0.001 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4201.280000000001, 0.0, 0.0, 0.0, 2970.6312160212688, 0.03994120000000002
+"nruns=100.0 fuzzPct=0.01 mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4876.63, 0.0, 0.0, 0.0, 2988.3406956202307, 0.039360800000000015
+"nruns=100.0 fuzzPct=0.005 mvrsFuzzPct=0.005 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 3746.550000000001, 0.0, 0.0, 0.0, 2796.232677639685, 0.03968879999999999
+"nruns=100.0 fuzzPct=0.0025 mvrsFuzzPct=0.0025 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4118.47, 0.0, 0.0, 0.0, 3027.980064184703, 0.0398582
+"nruns=100.0 fuzzPct=0.0075 mvrsFuzzPct=0.0075 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 3537.1599999999994, 0.0, 0.0, 0.0, 2664.316275219592, 0.0395784
+"nruns=100.0 fuzzPct=0.0 mvrsFuzzPct=0.0 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 149.0, 0.0, 0.0, 0.0, 0.0, 0.040000000000000036
+"nruns=100.0 fuzzPct=0.005 mvrsFuzzPct=0.005 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 229.02999999999994, 0.0, 0.0, 0.0, 156.36338797813252, 0.0396982
+"nruns=100 fuzzPct=0.0 cvrPercent=90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 572.81, 0.0, 0.0, 0.0, 419.3579066859237, 0.040000000000000036
+"nruns=100 fuzzPct=0.0 cvrPercent=80% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1472.56, 0.0, 0.0, 0.0, 1454.2980734361165, 0.040000000000000036
+"nruns=100.0 fuzzPct=0.0025 mvrsFuzzPct=0.0025 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 175.46, 0.0, 0.0, 0.0, 80.4073902076171, 0.039882
+"nruns=100.0 fuzzPct=0.001 mvrsFuzzPct=0.001 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 161.95999999999998, 0.0, 0.0, 0.0, 58.28514733617819, 0.0399968
+"nruns=100 fuzzPct=0.0 cvrPercent=50% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 5020.27, 0.0, 0.0, 0.0, 4467.919647565296, 0.040000000000000036
+"nruns=100.0 fuzzPct=0.0075 mvrsFuzzPct=0.0075 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 218.39, 0.0, 0.0, 0.0, 133.4249523140256, 0.0395434
+"nruns=100.0 fuzzPct=0.01 mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 252.07000000000005, 0.0, 0.0, 0.0, 216.3865178332514, 0.03936039999999999
+"nruns=100 fuzzPct=0.0 cvrPercent=75% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2067.4299999999994, 0.0, 0.0, 0.0, 2028.3648698150932, 0.040000000000000036
+"nruns=100 fuzzPct=0.0075 cvrPercent=90% mvrsFuzzPct=0.0075 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 697.9699999999998, 0.0, 0.0, 0.0, 683.8072163263563, 0.03951879999999999
+"nruns=100.0 fuzzPct=0.0 mvrsFuzzPct=0.0 auditType=4.0 ", 50000, 0.0406, StatRejectNull, 1.0, 144.21999999999989, 0.0, 0.0, 0.0, 3.8667298845406965, 0.041252400000000015
+"nruns=100 fuzzPct=0.001 cvrPercent=90% mvrsFuzzPct=0.001 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 552.8399999999998, 0.0, 0.0, 0.0, 371.2192807492628, 0.03993720000000001
+"nruns=100 fuzzPct=0.0025 cvrPercent=75% mvrsFuzzPct=0.0025 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1820.7799999999995, 0.0, 0.0, 0.0, 1792.724923573051, 0.03989240000000001
+"nruns=100 fuzzPct=0.01 cvrPercent=80% mvrsFuzzPct=0.01 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1730.9300000000005, 0.0, 0.0, 0.0, 1864.2150533401452, 0.039400400000000016
+"nruns=100 fuzzPct=0.001 cvrPercent=80% mvrsFuzzPct=0.001 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1214.6900000000005, 0.0, 0.0, 0.0, 1121.5846173606344, 0.0399492
+"nruns=100 fuzzPct=0.005 cvrPercent=90% mvrsFuzzPct=0.005 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 571.12, 0.0, 0.0, 0.0, 498.8049173775254, 0.0397898
+"nruns=100 fuzzPct=0.0025 cvrPercent=90% mvrsFuzzPct=0.0025 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 643.13, 0.0, 0.0, 0.0, 500.8586558101997, 0.039876000000000016
+"nruns=100 fuzzPct=0.001 cvrPercent=75% mvrsFuzzPct=0.001 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1642.2200000000003, 0.0, 0.0, 0.0, 1978.073272555898, 0.0399798
+"nruns=100 fuzzPct=0.0075 cvrPercent=50% mvrsFuzzPct=0.0075 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 5720.8899999999985, 0.0, 0.0, 0.0, 4868.856109796221, 0.03952220000000001
+"nruns=100 fuzzPct=0.0025 cvrPercent=50% mvrsFuzzPct=0.0025 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 5339.430000000003, 0.0, 0.0, 0.0, 4477.523387443108, 0.03981800000000001
+"nruns=100 fuzzPct=0.01 cvrPercent=50% mvrsFuzzPct=0.01 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 6401.419999999998, 0.0, 0.0, 0.0, 4764.334014697122, 0.0393278
+"nruns=100 fuzzPct=0.005 cvrPercent=75% mvrsFuzzPct=0.005 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2347.08, 0.0, 0.0, 0.0, 2253.277189695045, 0.039664200000000004
+"nruns=100 fuzzPct=0.005 cvrPercent=80% mvrsFuzzPct=0.005 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1177.6200000000001, 0.0, 0.0, 0.0, 1366.5060393573092, 0.03973800000000002
+"nruns=100 fuzzPct=0.005 cvrPercent=50% mvrsFuzzPct=0.005 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 5923.429999999999, 0.0, 0.0, 0.0, 4027.5678175668254, 0.0396914
+"nruns=100 fuzzPct=0.001 cvrPercent=50% mvrsFuzzPct=0.001 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 4928.030000000001, 0.0, 0.0, 0.0, 3680.5734755741523, 0.03991899999999999
+"nruns=100 fuzzPct=0.0025 cvrPercent=80% mvrsFuzzPct=0.0025 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1402.0199999999998, 0.0, 0.0, 0.0, 1271.7912091220007, 0.03985159999999998
+"nruns=100.0 fuzzPct=0.0025 mvrsFuzzPct=0.0025 auditType=4.0 ", 50000, 0.04132, StatRejectNull, 1.0, 148.70999999999998, 0.0, 0.0, 0.0, 29.946717683245353, 0.0409516
+"nruns=100 fuzzPct=0.0075 cvrPercent=75% mvrsFuzzPct=0.0075 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1928.71, 0.0, 0.0, 0.0, 1818.1074076907555, 0.039576599999999997
+"nruns=100.0 fuzzPct=0.005 mvrsFuzzPct=0.005 auditType=4.0 ", 50000, 0.04026, StatRejectNull, 1.0, 160.07000000000002, 0.0, 0.0, 0.0, 49.35205264221539, 0.040765400000000014
+"nruns=100 fuzzPct=0.0075 cvrPercent=80% mvrsFuzzPct=0.0075 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1378.3799999999999, 0.0, 0.0, 0.0, 1340.6709796217713, 0.039588
+"nruns=100 fuzzPct=0.01 cvrPercent=75% mvrsFuzzPct=0.01 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2487.87, 0.0, 0.0, 0.0, 2653.3052016494444, 0.03943260000000001
+"nruns=100.0 fuzzPct=0.0075 mvrsFuzzPct=0.0075 auditType=4.0 ", 50000, 0.04066, StatRejectNull, 1.0, 164.44, 0.0, 0.0, 0.0, 48.54056447961849, 0.04076740000000001
+"nruns=100.0 fuzzPct=0.001 mvrsFuzzPct=0.001 auditType=4.0 ", 50000, 0.04006, StatRejectNull, 1.0, 143.7800000000001, 0.0, 0.0, 0.0, 7.306955590394675, 0.04113820000000001
+"nruns=100.0 fuzzPct=0.02 mvrsFuzzPct=0.02 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4765.46, 0.0, 0.0, 0.0, 3429.891909142327, 0.038824199999999975
+"nruns=100.0 fuzzPct=0.03 mvrsFuzzPct=0.03 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4542.230000000003, 0.0, 0.0, 0.0, 3056.6342890669803, 0.038299599999999996
+"nruns=100.0 fuzzPct=0.02 mvrsFuzzPct=0.02 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 329.81, 0.0, 0.0, 0.0, 269.8852235673528, 0.03889300000000002
+"nruns=100 fuzzPct=0.01 cvrPercent=90% mvrsFuzzPct=0.01 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 765.6, 0.0, 0.0, 0.0, 694.694810690277, 0.03935239999999999
+"nruns=100.0 fuzzPct=0.05 mvrsFuzzPct=0.05 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4907.41, 0.0, 0.0, 0.0, 3211.4569251198127, 0.037247
+"nruns=100 fuzzPct=0.02 cvrPercent=75% mvrsFuzzPct=0.02 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2673.350000000001, 0.0, 0.0, 0.0, 2837.8314832808524, 0.03872299999999998
+"nruns=100 fuzzPct=0.02 cvrPercent=50% mvrsFuzzPct=0.02 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 6407.620000000002, 0.0, 0.0, 0.0, 5007.039585982919, 0.03885240000000001
+"nruns=100.0 fuzzPct=0.03 mvrsFuzzPct=0.03 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 454.53, 0.0, 0.0, 0.0, 336.62268060842246, 0.038185399999999994
+"nruns=100 fuzzPct=0.02 cvrPercent=90% mvrsFuzzPct=0.02 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1302.8100000000006, 0.0, 0.0, 0.0, 1509.7240787309454, 0.03892920000000002
+"nruns=100.0 fuzzPct=0.01 mvrsFuzzPct=0.01 auditType=4.0 ", 50000, 0.04018, StatRejectNull, 1.0, 165.64999999999998, 0.0, 0.0, 0.0, 58.09137199274949, 0.04097299999999999
+"nruns=100 fuzzPct=0.02 cvrPercent=80% mvrsFuzzPct=0.02 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1874.0900000000004, 0.0, 0.0, 0.0, 1960.151214039366, 0.03875359999999998
+"nruns=100 fuzzPct=0.03 cvrPercent=75% mvrsFuzzPct=0.03 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2513.25, 0.0, 0.0, 0.0, 2419.209835359471, 0.03826139999999998
+"nruns=100.0 fuzzPct=0.05 mvrsFuzzPct=0.05 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 752.5399999999998, 0.0, 0.0, 0.0, 759.641012847516, 0.03718000000000002
+"nruns=100 fuzzPct=0.03 cvrPercent=80% mvrsFuzzPct=0.03 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2221.16, 0.0, 0.0, 0.0, 2673.7678160977257, 0.03803799999999999
+"nruns=100 fuzzPct=0.03 cvrPercent=50% mvrsFuzzPct=0.03 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 5830.380000000005, 0.0, 0.0, 0.0, 4790.850005541814, 0.03788740000000001
+"nruns=100 fuzzPct=0.03 cvrPercent=90% mvrsFuzzPct=0.03 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 1471.9800000000002, 0.0, 0.0, 0.0, 1888.2501634052624, 0.038147600000000025
+"nruns=100 fuzzPct=0.05 cvrPercent=75% mvrsFuzzPct=0.05 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 4900.06, 0.0, 0.0, 0.0, 4466.5966547697135, 0.037030800000000016
+"nruns=100 fuzzPct=0.05 cvrPercent=50% mvrsFuzzPct=0.05 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 7551.89, 0.0, 0.0, 0.0, 5950.398720917785, 0.036940199999999986
+"nruns=100.0 fuzzPct=0.02 mvrsFuzzPct=0.02 auditType=4.0 ", 50000, 0.04162, StatRejectNull, 1.0, 181.77000000000004, 0.0, 0.0, 0.0, 64.99274651836159, 0.04065779999999999
+"nruns=100 fuzzPct=0.05 cvrPercent=80% mvrsFuzzPct=0.05 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 3423.55, 0.0, 0.0, 0.0, 3121.5754399821894, 0.037133599999999996
+"nruns=100 fuzzPct=0.05 cvrPercent=90% mvrsFuzzPct=0.05 auditType=1.0 ", 50000, 0.04, StatRejectNull, 1.0, 2612.489999999999, 0.0, 0.0, 0.0, 3054.8337777856264, 0.03698900000000002
+"nruns=100.0 fuzzPct=0.03 mvrsFuzzPct=0.03 auditType=4.0 ", 50000, 0.04374, StatRejectNull, 1.0, 207.80999999999997, 0.0, 0.0, 0.0, 111.22487986057796, 0.040410200000000014
+"nruns=100.0 fuzzPct=0.05 mvrsFuzzPct=0.05 auditType=4.0 ", 50000, 0.04154, StatRejectNull, 1.0, 234.0199999999999, 0.0, 0.0, 0.0, 102.38437185430206, 0.039727399999999996

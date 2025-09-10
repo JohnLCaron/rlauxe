@@ -459,7 +459,7 @@ fun simulateSampleSizeOneAuditAssorter(
         )
 
     val strategy = auditConfig.oaConfig.strategy
-    val result = if (strategy == OneAuditStrategyType.optimalBet) {
+    val result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
         val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nc, true, oaCassorter.upperBound, p2 = 0.0)
 
         simulateSampleSizeBettingMart(

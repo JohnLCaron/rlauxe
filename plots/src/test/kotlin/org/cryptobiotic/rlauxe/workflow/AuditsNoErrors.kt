@@ -21,7 +21,7 @@ class AuditsNoErrors {
     fun genAuditsNoErrorsPlots() {
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10, .20)
 
-        val cvrPercents = listOf(0.05, 0.5, .80, .95, .99)
+        val cvrPercents = listOf(0.5, 0.75, 0.80, 0.90)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

@@ -1,0 +1,146 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;HJXVLM&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+       var plotSpec={
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;AuditsWithErrors4 samples needed&quot;,
+&quot;subtitle&quot;:&quot;margin=0.04 Nc=50000 nruns=100&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;auditType&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;],
+&quot;samplesNeeded&quot;:[149.0,161.95999999999998,175.46,229.02999999999994,218.39,252.07000000000005,329.81,454.53,752.5399999999998,5020.27,4928.030000000001,5339.430000000003,5923.429999999999,5720.8899999999985,6401.419999999998,6407.620000000002,5830.380000000005,7551.89,2067.4299999999994,1642.2200000000003,1820.7799999999995,2347.08,1928.71,2487.87,2673.350000000001,2513.25,4900.06,1472.56,1214.6900000000005,1402.0199999999998,1177.6200000000001,1378.3799999999999,1730.9300000000005,1874.0900000000004,2221.16,3423.55,572.81,552.8399999999998,643.13,571.12,697.9699999999998,765.6,1302.8100000000006,1471.9800000000002,2612.489999999999,4581.210000000002,4201.280000000001,4118.47,3746.550000000001,3537.1599999999994,4876.63,4765.46,4542.230000000003,4907.41,144.21999999999989,143.7800000000001,148.70999999999998,160.07000000000002,164.44,165.64999999999998,181.77000000000004,207.80999999999997,234.0199999999999],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;fuzzPct&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05,0.0,0.001,0.0025,0.005,0.0075,0.01,0.02,0.03,0.05],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;],
+&quot;samplesNeeded&quot;:[149.0,161.95999999999998,175.46,229.02999999999994,218.39,252.07000000000005,329.81,454.53,752.5399999999998,5020.27,4928.030000000001,5339.430000000003,5923.429999999999,5720.8899999999985,6401.419999999998,6407.620000000002,5830.380000000005,7551.89,2067.4299999999994,1642.2200000000003,1820.7799999999995,2347.08,1928.71,2487.87,2673.350000000001,2513.25,4900.06,1472.56,1214.6900000000005,1402.0199999999998,1177.6200000000001,1378.3799999999999,1730.9300000000005,1874.0900000000004,2221.16,3423.55,572.81,552.8399999999998,643.13,571.12,697.9699999999998,765.6,1302.8100000000006,1471.9800000000002,2612.489999999999,4581.210000000002,4201.280000000001,4118.47,3746.550000000001,3537.1599999999994,4876.63,4765.46,4542.230000000003,4907.41,144.21999999999989,143.7800000000001,148.70999999999998,160.07000000000002,164.44,165.64999999999998,181.77000000000004,207.80999999999997,234.0199999999999],
+&quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-80%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;polling&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;,&quot;raire&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;fuzzPct&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;formats&quot;:[{
+&quot;field&quot;:&quot;margin&quot;,
+&quot;format&quot;:&quot;f8.3&quot;
+}],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;9&quot;
+};
+       var containerDiv = document.getElementById(&quot;HJXVLM&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

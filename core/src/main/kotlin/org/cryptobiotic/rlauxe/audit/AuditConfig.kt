@@ -21,7 +21,7 @@ data class AuditConfig(
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.phantoms),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalBet),
-    val version: Double = 1.0,
+    val version: Double = 1.1,
 ) {
     val isClca = auditType == AuditType.CLCA || auditType == AuditType.ONEAUDIT
 
@@ -70,6 +70,7 @@ data class OneAuditConfig(
     val strategy: OneAuditStrategyType = OneAuditStrategyType.optimalBet,
     val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight
+    val useFirst: Boolean = false, // use actual cvrs for estimation
 )
 
 

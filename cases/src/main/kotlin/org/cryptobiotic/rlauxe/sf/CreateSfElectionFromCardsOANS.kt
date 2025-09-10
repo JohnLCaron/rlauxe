@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sf
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
@@ -57,6 +58,7 @@ fun createSfElectionFromCsvExportOANS(
     // these checks may modify the contest status; dont call until clca assertions are created
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
     )
 
     checkContestsCorrectlyFormed(auditConfig, contests)

@@ -84,7 +84,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             measuredMean = testH0Result.tracker.mean(),
         )
 
-        if (!quiet) logger.debug{" ${contest.name} ${assertionRound.auditResult}"}
+        if (!quiet) logger.debug{" ${contest.name} auditResult= ${assertionRound.auditResult}"}
         return testH0Result
     }
 

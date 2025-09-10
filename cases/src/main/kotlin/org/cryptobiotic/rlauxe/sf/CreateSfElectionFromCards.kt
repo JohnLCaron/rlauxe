@@ -100,6 +100,7 @@ fun createSfElectionFromCsvExport(
 
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
+        clcaConfig = ClcaConfig(strategy=ClcaStrategyType.noerror),
     )
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
     val allContests = contestsUA + irvContests

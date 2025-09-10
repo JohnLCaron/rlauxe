@@ -29,8 +29,7 @@ fun runTestRepeated(
     val sampleCounts = mutableListOf<Int>()
 
     repeat(ntrials) {
-        // TODO TIMING reset taking 12% of audit round, already have the sample Limit on it....
-        drawSample.reset() // TODO this is supposed to create all the variation for the estimation
+        if (it != 0) drawSample.reset() // TODO this is supposed to create all the variation for the estimation
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
@@ -69,7 +68,7 @@ data class RunTestRepeatedResult(
     val nsuccess: Int,           // number of successful trials
     val ntrials: Int,            // total number of trials
     val variance: Double,        // variance over ntrials of samples needed
-    val percentHist: Deciles? = null, // TODO remove
+    val percentHist: Deciles? = null, // TODO remove?
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
     val margin: Double?, // TODO needed?

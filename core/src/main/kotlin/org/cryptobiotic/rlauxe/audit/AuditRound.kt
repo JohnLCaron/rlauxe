@@ -186,6 +186,7 @@ data class EstimationRoundResult(
     val startingTestStatistic: Double,
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
+    val firstSample: Int,
 ) {
     override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution fuzzPct=$fuzzPct " +
             " startingRates=$startingRates"

@@ -85,7 +85,7 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
     }
     // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
     val wantSampleSizeMap = prevContestCounts.entries.map { it.key.id to it.key.wantSampleSize(it.value) }.toMap()
-    logger.debug{"**wantSampleSize = $wantSampleSizeMap"}
+    if (debug) logger.debug{"wantSampleSize = $wantSampleSizeMap"}
 
     return wantSampleSizeMap
 }

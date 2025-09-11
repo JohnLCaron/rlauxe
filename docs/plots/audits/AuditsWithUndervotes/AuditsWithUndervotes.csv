@@ -1,0 +1,13 @@
+parameters, N, margin, status, nrounds, samplesUsed, notUsed, nmvrs, failPct, usedStddev, mvrMargin
+"nruns=100 undervote=0.1 cat=polling mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 3992.3299999999995, 0.0, 0.0, 0.0, 2856.3769606093665, 0.03941679999999999
+"nruns=100 undervote=0.4 cat=polling mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 3275.0599999999995, 0.0, 0.0, 0.0, 2004.8675558250723, 0.03936240000000003
+"nruns=100 undervote=0.5 cat=polling mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 2866.309999999999, 0.0, 0.0, 0.0, 1684.499995221134, 0.03939780000000002
+"nruns=100 undervote=0.3 cat=polling mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 3773.210000000001, 0.0, 0.0, 0.0, 2247.5714862713485, 0.03935639999999999
+"nruns=100 undervote=0.0 cat=polling mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 4486.859999999999, 0.0, 0.0, 0.0, 2897.18930006308, 0.03937559999999998
+"nruns=100 undervote=0.2 cat=polling mvrsFuzzPct=0.01 auditType=2.0 ", 50000, 0.04, StatRejectNull, 1.0, 3498.3100000000004, 0.0, 0.0, 0.0, 2450.7309795038695, 0.039318000000000006
+"nruns=100 undervote=0.3 cat=clca mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 325.74, 0.0, 0.0, 0.0, 293.67804208009824, 0.039338600000000015
+"nruns=100 undervote=0.2 cat=clca mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 244.99000000000007, 0.0, 0.0, 0.0, 232.0117451768336, 0.03945619999999999
+"nruns=100 undervote=0.1 cat=clca mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 318.51, 0.0, 0.0, 0.0, 339.17787354130274, 0.039478599999999996
+"nruns=100 undervote=0.5 cat=clca mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 252.92999999999984, 0.0, 0.0, 0.0, 234.66300326212485, 0.0394736
+"nruns=100 undervote=0.4 cat=clca mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 257.73000000000013, 0.0, 0.0, 0.0, 241.26014403543738, 0.03931219999999999
+"nruns=100 undervote=0.0 cat=clca mvrsFuzzPct=0.01 auditType=3.0 ", 50000, 0.04, StatRejectNull, 1.0, 356.3300000000001, 0.0, 0.0, 0.0, 347.89877996336804, 0.03945500000000001

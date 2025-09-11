@@ -36,7 +36,7 @@ class AuditsWithPhantoms {
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+            /* val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct=phantom, cvrPercent = .95, mvrsFuzzPct=mvrFuzzPct, skewPct = .05,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit"),
                 auditConfigIn = AuditConfig(
@@ -44,7 +44,7 @@ class AuditsWithPhantoms {
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                 )
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator)) */
         }
 
         // run tasks concurrently and average the results

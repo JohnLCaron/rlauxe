@@ -1,5 +1,5 @@
 # OneAudit version 4 
-_last changed 9/10/2025_
+_last changed 9/11/2025_
 
 ## Strategies
 
@@ -24,13 +24,13 @@ Here we compare the same audit types when there are errors, at a fixed 4% margin
 
 ## Compare Audit Types
 
-We will use the optimalBet strategy for OneAudit, and compare Polling, Comparison (CLCA) and OneAudit (with 50%, 75%, 80%, and 90% of cards having CVRs).
+We will use the optimalBet strategy for OneAudit, and compare Polling, Comparison (CLCA) and OneAudit (with 50%, 75%, 83%, and 90% of cards having CVRs).
 
 When there are no errors in the CVRs, as a function of margin:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.html" rel="AuditsNoErrors4LogLinear">![AuditsNoErrors4LogLinear](plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.png)</a>
 
-* OneAudit looks ok as long as the % pooled data is not too high.
+* OneAudit looks ok as long as the % pooled data is not too high, and the margin is not too low.
 
 When there are errors (parameterized by fuzzPct, the percent of ballots randomly changed), for fixed margin of 2% and 4%:
 

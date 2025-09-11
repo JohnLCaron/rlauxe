@@ -1,7 +1,7 @@
 **RLAUXE ("rlux")**
 
 WORK IN PROGRESS
-_last changed: 9/10/2025_
+_last changed: 9/11/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -211,30 +211,33 @@ The increase in Nc (upper bound on the number of cards in the contest) has the e
 increasing the number of samples needed.
 
 Im not sure why San Francisco County chooses to not map CVRs to physical ballots for in-person voting. If its a 
-technical problem with the prcecinct scanners, then this could be a complete CLCA audit when that problem is overcome.
+technical problem with the prcecinct scanners, then when that problem is overcome, this can be a CLCA audit, which is much more efficient.
 If its a deliberate privacy-preserving choice, perhaps it might be sufficient to use the CVRs to create a ballot manifest
 with CSD (Card Style Data). This essentially redacts the actual vote, but keeps a record of what contests are on each ballot,
-which reduces the required sampling size.
+which reduces the required sampling size. 
 
-Here is the SF 2024 General Election for all contests and assertions when all ballots have an associated CVR and there are no errors:
+Since the variance is so highly dependent on the specifics of the pool counts and averages, we use the actual data from 
+the SF 2024 General Election to visualize the variance for this particular use case.
+
+For comparision, here are the number of samples needed for all 164 assertions of all the contests of the SF 2024 General Election,
+when all ballots have an associated CVR and there are no errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.html" rel="sf2024NmvrsLogLinear">![sf2024NmvrsLogLinear](docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.png)</a>
 
 Here is the same election using OneAudit where the in-person ballots are in precinct pools and have no card style data.
 We run the audit 50 times with different permutations of the actual ballots, and show a scatter plot of the results. The
-50 trials are spread out vertically, since they all have the same margin:
+variance is due to the random order of the pooled ballots; the 50 trials are spread out vertically, since they all have the same margin:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoans2024/sfoans2024NmvrsLogLinear.html" rel="sfoans2024NmvrsLogLinear">![sfoans2024NmvrsLogLinear](docs/plots/oneaudit4/sfoans2024/sfoans2024NmvrsLogLinear.png)</a>
 
-Here is the same election using OneAudit where the in-person ballots are in precinct pools but have card style data.
+Here is the same election using OneAudit where the in-person ballots are in precinct pools but have card style data:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.html" rel="sfoa2024NmvrsLogLinear">![sfoa2024NmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.png)</a>
 
 * OneAudit does quite well for high margins, say > 10%.
-* OneAudit with no card style data needs about 2x the samples at 5% margin, compared to a CLCA audit for this particular use case, on average, but with a wide variance,
-  and progressively worse as margins get lower. TODO
+* OneAudit with no card style data needs about 2x the samples at 5% margin, compared to a CLCA audit for this particular use case, on average, but with a wide variance, and progressively worse as margins get lower. TODO
 * OneAudit with card style data needs about ?x the samples as a complete CLCA, on average, due to the margin being higher.
-* Due to the large variance introduced by the pooled data, comparing just the average samples needed is misleading.
+* Due to the large variance introduced by the pooled data, comparing just the average of the samples needed is misleading at low margins.
 
 ### OneAudit for Redacted data
 
@@ -300,7 +303,7 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 This is a log-log plot of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](docs/plots/oneaudit3/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
 * CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
 * OneAudits are intermediate between Polling and CLCA.
@@ -310,7 +313,7 @@ This is a log-log plot of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
 Varying the percent of undervotes at margin of 4%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithUndervotes/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](docs/plots/oneaudit3/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsWithUndervotes/AuditsWithUndervotesLinear.html" rel="AuditsWithUndervotesLinear">![AuditsWithUndervotesLinear](docs/plots/audits/AuditsWithUndervotes/AuditsWithUndervotesLinear.png)</a>
 
 * Note that undervote percentages are shown up to 50%, with little effect.
 
@@ -318,7 +321,7 @@ Varying the percent of undervotes at margin of 4%, with errors generated with 1%
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit3/AuditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="auditsWithPhantomsLogLinear">![auditsWithPhantomsLogLinear](docs/plots/oneaudit3/AuditsWithPhantoms/AuditsWithPhantomsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="auditsWithPhantomsLogLinear">![auditsWithPhantomsLogLinear](docs/plots/audits/AuditsWithPhantoms/AuditsWithPhantomsLogLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.

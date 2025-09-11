@@ -1,4 +1,4 @@
-**RLAUXE ("rlux")**
+**RLAUXE ("r-lux")**
 
 WORK IN PROGRESS
 _last changed: 9/11/2025_
@@ -52,6 +52,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
     * [generation of phantoms](#generation-of-phantoms)
     * [estimate CLCA error rates](#estimate-clca-error-rates)
     * [use of previous round's sampled_cvr_indices](#use-of-previous-rounds-sampled_cvr_indices)
+    * [OneAudit Card Style Data](#oneaudit-card-style-data)
   * [Developer Notes](#developer-notes)
 <!-- TOC -->
 
@@ -235,8 +236,8 @@ Here is the same election using OneAudit where the in-person ballots are in prec
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.html" rel="sfoa2024NmvrsLogLinear">![sfoa2024NmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.png)</a>
 
 * OneAudit does quite well for high margins, say > 10%.
-* OneAudit with no card style data needs about 2x the samples at 5% margin, compared to a CLCA audit for this particular use case, on average, but with a wide variance, and progressively worse as margins get lower. TODO
-* OneAudit with card style data needs about ?x the samples as a complete CLCA, on average, due to the margin being higher.
+* OneAudit with no card style data needs about ?x the samples at 5% margin, compared to a CLCA audit for this particular use case, on average, but with a wide variance, and progressively worse as margins get lower. TODO
+* OneAudit with card style data needs about ?x the samples as a complete CLCA, on average, due to the margin being higher. TODO
 * Due to the large variance introduced by the pooled data, comparing just the average of the samples needed is misleading at low margins.
 
 ### OneAudit for Redacted data
@@ -674,8 +675,7 @@ Not clear what this means, and how its different from 2.c.
 SHANGRLA has guesses for p1,p2,p3,p4. 
 We can use that method (strategy.apriori), and we can also use strategy.fuzzPct, which guesses a percent of contests to randomly 
 change ("fuzzPct"), and use it to simulate errors (by number of candidates) in a contest. That and other strategies are described in
-[CLCA error rates](https://github.com/JohnLCaron/rlauxe/blob/main/docs/ClcaErrorRates.md) and we are still exploring 
-which strategy works best.
+[CLCA error rates](https://github.com/JohnLCaron/rlauxe/blob/main/docs/ClcaErrorRates.md) ; we are still exploring which strategy works best.
 
 ### use of previous round's sampled_cvr_indices
 
@@ -685,6 +685,15 @@ and so uses the same strategy as we do, namely sampling without regards to the p
 
 Of course, when the same ballots are selected as in previous rounds, which is the common case, the previous MVRs for those
 balllots are used.
+
+### OneAudit Card Style Data
+
+SHANGRLA assumes there is no [Card Style Data for polled data](#card-style-data-for-the-pooled-data), and so adds undervotes 
+to the ballots in the pools. Rlauxe adds the option that there may be CSD for pooled data, in part to investigate the 
+difference between the two options.
+
+The algorithm to add undervotes is not published anywhere that I know of, and needs explanation.
+
 
 ## Developer Notes
 

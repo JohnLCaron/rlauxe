@@ -176,7 +176,7 @@ class TestSfElection {
 
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
 
-        createSfElectionFromCsvExport(
+        createSfElectionFromCvrExport(
             auditDir,
             zipFilename,
             "ContestManifest.json",

@@ -7,6 +7,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 
+// Parse the 2024GeneralPrecinctLevelResults.csv file
 
 data class ContestChoice(val choice: String, val totalVotes: Int)
 
@@ -37,7 +38,9 @@ data class ColoradoPrecinctLevelResults(
 
 }
 
-data class ColoradoPrecinctLevelResult(
+// one line from the precinct csv file (2024GeneralPrecinctLevelResults.csv)
+// The total vote for this contest/candidate from the precinct
+data class ColoradoPrecinctLevelLine(
     val county: String,
     val precinct: String,
     val contest: String,
@@ -78,13 +81,13 @@ fun readColoradoPrecinctLevelResults(inputStream: InputStream): List<ColoradoPre
             line = records.next()!!
             var idx = 0
             if (line.get(0).startsWith("End of worksheet")) break
-            val bmi = ColoradoPrecinctLevelResult(
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++),
-                line.get(idx++).toInt(),
+            val bmi = ColoradoPrecinctLevelLine(
+                county = line.get(idx++),
+                precinct = line.get(idx++),
+                contest = line.get(idx++),
+                choice = line.get(idx++),
+                party = line.get(idx++),
+                totalVotes = line.get(idx++).toInt(),
             )
             val precinctID = "${bmi.county}#${bmi.precinct}"
             val precinct = precincts.getOrPut(precinctID) { ColoradoPrecinctLevelResults(bmi.county, bmi.precinct) }

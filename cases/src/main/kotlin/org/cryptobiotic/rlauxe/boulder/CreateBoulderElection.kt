@@ -60,23 +60,25 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
         val infos = makeContestInfo().sortedBy{ it.id }
         if (!quiet) println("ncontests with info = ${infos.size}")
 
+        val contestNcs= mutableMapOf<Int, Int>()
+        infos.forEach { info ->
+            val sovoContest = sovo.contests.find { it.contestTitle == info.name }
+            if (sovoContest != null) contestNcs[info.id] = sovoContest.totalBallots
+            else println("*** cant find '${info.name}' in BoulderStatementOfVotes")
+        }
+
         val countVotes = countVotes()
 
         val regContests = infos.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
             val contestCount = countVotes[info.id]!!
-            val sovContest = sovo.contests.find {
-                it.contestTitle == info.name
+            val Nc = contestNcs[info.id]
+            if (Nc != null) {
+                val diff = Nc - contestCount.ncards
+                println(" makeContest contestId= ${info.id} cvrCount= ${contestCount.ncards} sovContest.totalBallots= ${Nc} undercount=$diff")
             }
-            if (sovContest == null) {
-                println("*** cant find '${info.name}' in BoulderStatementOfVotes")
-            } else {
-                val diff = sovContest.totalBallots - contestCount.ncards
-                println(" makeContest ${info.id} cvrCount = ${contestCount.ncards} sovContest.totalBallots = ${sovContest.totalBallots} undercount=$diff" )
-                // TODO undervotes, phantoms to deal with diff?
-            }
-            // remove Write-Ins
-            val votesIn = contestCount.votes.filter { info.candidateIds.contains(it.key) }
-            Contest(info, votesIn, contestCount.ncards, 0)
+
+            val votesIn = contestCount.votes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
+            Contest(info, votesIn, Nc ?: contestCount.ncards, contestCount.ncards)
         }
 
         if (!quiet) {
@@ -85,11 +87,12 @@ class BoulderElectionFromCvrs(val export: DominionCvrExport, val sovo: BoulderSt
                 println(contest.show2())
             }
         }
+
         // val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
         val irvInfos = infos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
         val irvContests = if (irvInfos.isEmpty()) emptyList() else {
             val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrs.iterator())
-            makeRaireContests(irvInfos, irvVoteMap)
+            makeRaireContests(irvInfos, irvVoteMap, contestNcs)
         }
 
         if (!quiet) {
@@ -269,8 +272,9 @@ fun createBoulderElectionWithSov(
     minRecountMargin: Double = .01,
     auditConfigIn: AuditConfig? = null,
 ) {
-    clearDirectory(Path.of(auditDir))
+    // TODO clearDirectory(Path.of(auditDir))
 
+    println("readDominionCvrExport file $cvrExportFile")
     val stopwatch = Stopwatch()
     val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")
     val electionFromCvrs = BoulderElectionFromCvrs(export, sovo)
@@ -278,6 +282,7 @@ fun createBoulderElectionWithSov(
     // val cvrVotes: Map<Int, Map<Int, Int>> = tabulateVotes(electionFromCvrs.cvrs.iterator())
     // println("added ${electionFromCvrs.cvrs.size} cvrs with ${cvrVotes.values.sumOf { it.values.sum() }} total votes")
 
+    println("readDominionCvrExport $cvrExportFile")
     val (contests, irvContests) = electionFromCvrs.makeContests()
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(

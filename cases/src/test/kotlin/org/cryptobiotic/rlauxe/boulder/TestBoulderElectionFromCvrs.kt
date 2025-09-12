@@ -72,7 +72,7 @@ class TestBoulderElectionFromCvrs {
         )
     }
 
-    /* TODO
+    /*
     @Test
     fun createBoulder24oa() {
         createBoulderElectionOneAudit(
@@ -80,9 +80,9 @@ class TestBoulderElectionFromCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditDir = "/home/stormy/rla/cases/boulder24oa",
         )
-    }
+    } */
 
-    // pooled votes only, simulating a "batch level comparison audit"
+    /* pooled votes only, simulating a "batch level comparison audit"
     @Test
     fun createBoulder24blca() {
         createBoulderElectionOneAudit(

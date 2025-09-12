@@ -21,7 +21,7 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
 // NoStyles case
-fun createSfElectionFromCsvExportOANS(
+fun createSfElectionFromCvrExportOANS(
     topDir: String,
     auditDir: String,
     castVoteRecordZip: String,
@@ -32,7 +32,7 @@ fun createSfElectionFromCsvExportOANS(
     show: Boolean = false
 ) {
     val stopwatch = Stopwatch()
-    val contestInfos = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
+    val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
     val publisher = Publisher(auditDir) // creates auditDir
 
@@ -47,8 +47,8 @@ fun createSfElectionFromCsvExportOANS(
     val cardPoolList = CardPoolList(cardPools.values)
 
     // make contests based on cardPools
-    val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools)
-    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools)
+    val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools, contestNcs)
+    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools, contestNcs)
     val allContests = irvContests + contests
 
     // pass 2 through cvrs, create all the clca assertions in one go

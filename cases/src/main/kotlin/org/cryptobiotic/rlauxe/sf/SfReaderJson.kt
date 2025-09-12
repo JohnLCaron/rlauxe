@@ -16,7 +16,6 @@ import java.nio.file.StandardOpenOption
 
 data class ContestManifest(val contests: Map<Int, ContestMJson>, val irvContests: Set<Int>)
 
-
 @Serializable
 data class ContestManifestJson(
     val Version: String,

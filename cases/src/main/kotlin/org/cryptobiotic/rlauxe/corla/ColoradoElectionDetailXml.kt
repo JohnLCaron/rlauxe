@@ -8,10 +8,10 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import java.io.File
 
 // Detail XLS (295 contests, 92k zipped, 2.6M unzipped )
-//has a separate sheet for every contest with vote count, by county
-//https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxls.zip
-//can also get it as an XML (56k zipped, 780k unzipped ):
-//https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxml.zip
+// has a separate sheet for every contest with vote count, by county
+// https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxls.zip
+// can also get it as an XML (56k zipped, 780k unzipped ):
+// https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxml.zip
 
 // corla/src/test/data/2024election/detail.xml
 

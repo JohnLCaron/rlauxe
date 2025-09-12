@@ -10,7 +10,7 @@ import java.nio.charset.Charset
 import kotlin.collections.reversed
 import kotlin.text.appendLine
 
-// Colorado Election Results
+// Colorado Election Summary Results
 // https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
 // "corla/src/test/data/2024election/summary.csv"
 

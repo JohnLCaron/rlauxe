@@ -33,7 +33,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
         require(sampledCvrs.size == mvrsRound.size)
         val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
         cvruaPairs.forEach { (mvr, cvr) ->
-            require(mvr.desc == cvr.desc)
+            require(mvr.location == cvr.location)
             require(mvr.index == cvr.index)
             require(mvr.prn== cvr.prn)
         }

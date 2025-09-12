@@ -11,7 +11,8 @@ import java.nio.file.*
 
 private val maxChunk = 100000
 
-// assume auditCOnfig is alread in the auditDir
+// from Iterator<CvrExport>, convert to AuditableCard, assign prn, sort and write sortedCards.
+// assume auditConfig is already in the auditDir
 class SortMerge(
     val auditDir: String,
     val cardFile: String,

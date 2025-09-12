@@ -8,9 +8,8 @@ data class CardLocationManifest(
 )
 
 // if hasStyles, then either cardStyle or contestIds is non null; if !hasStyles then both are null
-// essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
 data class CardLocation(
-    val id: String,
+    val location: String,
     val phantom: Boolean = false,
     val cardStyle: CardStyle?, // if hasStyles (or)
     val contestIds: List<Int>? = null, // if hasStyles
@@ -33,6 +32,7 @@ data class CardLocation(
 // be of two different styles.) Here, we use card style to refer to the set of contests on a given
 // ballot card, and CSD to refer to card-style data for an election. (MoreStyle p.2)
 
+// essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
 data class CardStyle(
     val name: String,
     val id: Int,

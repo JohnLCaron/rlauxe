@@ -21,9 +21,13 @@ import java.nio.charset.Charset
 //   16     17                      18                19
 //   gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
 
+// 0                                    1                       2          3
 // City of Lafayette Ballot Question 2A,opportunistic_benefits,in_progress,1,
+// 4      5     6             7
 // 396121,18689,"""Yes/For""",3743,
+// 8
 // 0.03000000,0,0,0,0,0,0,0,
+// 16           18, 19
 // 1.03905000,0,772,772
 
 data class ContestRoundCsv(
@@ -86,24 +90,26 @@ fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
     val header = headerRecord.toList().joinToString(", ")
     println(header)
 
-    // subsequent lines contain ballot manifest info
     val contests = mutableListOf<ContestRoundCsv>()
 
+    // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,
+    //   audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,
+    //   gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
     var line: CSVRecord? = null
     try {
         while (records.hasNext()) {
             line = records.next()!!
             val bmi = ContestRoundCsv(
-                line.get(0),         // contest_name,audit_reason,random_audit_status,winners_allowed,
-                line.get(3).toInt(),
-                line.get(4).toInt(), // // ballot_card_count,contest_ballot_card_count,winners,min_margin,
-                line.get(5).toInt(),
-                line.get(6),
-                line.get(7).toInt(),    // minMargin
-                line.get(8).toDouble(), // riskLimit
-                line.get(16).toDouble(), // gamma
-                line.get(18).toInt(),
-                line.get(19).toInt(),
+                contestName = line.get(0),         // contest_name,
+                nwinners = line.get(3).toInt(),   // winners_allowed,
+                ballotCardCount = line.get(4).toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
+                contestBallotCardCount = line.get(5).toInt(), // contest_ballot_card_count
+                winners = line.get(6), // winners
+                minMargin = line.get(7).toInt(),    // minMargin
+                riskLimit = line.get(8).toDouble(), // riskLimit
+                gamma = line.get(16).toDouble(), // gamma
+                optimisticSamplesToAudit = line.get(18).toInt(), // optimistic_samples_to_audit
+                estimatedSamplesToAudit = line.get(19).toInt(), // estimated_samples_to_audit
             )
             contests.add(bmi)
             // println(bmi)

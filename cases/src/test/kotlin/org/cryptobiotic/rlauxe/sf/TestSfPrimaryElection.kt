@@ -17,7 +17,7 @@ class TestSfPrimaryElection {
         createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"
 
         // create sf2024 primary audit
-        createSfElectionFromCsvExport(
+        createSfElectionFromCvrExport(
             auditDir,
             zipFilename,
             manifestFile,

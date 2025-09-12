@@ -221,10 +221,9 @@ class BoulderElectionOneAuditFromCvrs(
     }
 }
 
-/*
 ////////////////////////////////////////////////////////////////////
 // Create a OneAudit where pools are from the redacted cvrs
-// Optionally only has pools (ie "batch level comparison audit") includeCvrs = false
+/* Optionally only has pools (ie "batch level comparison audit") includeCvrs = false
 fun createBoulderElectionOneAudit(
     cvrExportFile: String,
     sovoFile: String,
@@ -299,6 +298,4 @@ fun checkAssortAvgs(contests: List<OAContestUnderAudit>, cards: List<AuditableCa
 // we are making the contest votes from the cvrs. how does it compare with official tally ??
 fun checkAssortAvg(contestUA: OAContestUnderAudit, cards: List<AuditableCard>, check: Boolean = true, show: Boolean = false) {
     checkAssorterAvg(contestUA.contestOA, cards.map { it.cvr() }, check = check, show = show)
-}
-
- */
+} */

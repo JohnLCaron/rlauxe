@@ -118,7 +118,7 @@ open class Contest(
     val undervotes: Int
 
     init {
-        require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc=$Nc" }
+        require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc= $Nc" }
 
         // construct votes, adding 0 votes if needed
         voteInput.forEach {

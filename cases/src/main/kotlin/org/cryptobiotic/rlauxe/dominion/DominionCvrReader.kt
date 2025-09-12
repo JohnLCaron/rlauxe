@@ -10,9 +10,10 @@ import java.io.Reader
 import java.lang.StrictMath.sqrt
 import java.nio.charset.Charset
 
-//// this reads file.csv from "Dominion CVR export files"
+//// this reads csv files from "Dominion CVR export files"
 //// We are getting these files from Boulder County.
 //// used by createElectionFromDominionCvrs() in rlauxe.boulder
+// too bad we dont have the original CvrExport.json files, then we could share DominionCvrExportJson with SF2024
 
 // rewrite of us.freeandfair.corla.csv.DominionCVRExportParser.
 // should review that file since Vanessa may have made changes since the port

@@ -10,7 +10,7 @@ data class AuditRound(
 
     var auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
-    var samplePrns: List<Long>, // card prn to sample for this round
+    var samplePrns: List<Long>, // card prns to sample for this round
     var sampledBorc: List<AuditableCard> = emptyList(), // ballots to sample for this round TODO not used ?
     var nmvrs: Int = 0,
     var newmvrs: Int = 0,

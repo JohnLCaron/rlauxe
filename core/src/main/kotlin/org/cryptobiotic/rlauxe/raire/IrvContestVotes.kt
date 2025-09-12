@@ -55,7 +55,7 @@ data class IrvContestVotes(val irvContestInfo: ContestInfo) {
 }
 
 // called from cases module to create RaireContestUnderAudit from ContestInfo and IrvContestVotes
-fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvContestVotes>): List<RaireContestUnderAudit> {
+fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, IrvContestVotes>, contestNc: Map<Int, Int>): List<RaireContestUnderAudit> {
     val contests = mutableListOf<RaireContestUnderAudit>()
     contestInfos.forEach { info: ContestInfo ->
         val irvContestVotes = contestVotes[info.id] // candidate indexes
@@ -65,7 +65,7 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, Ir
             val rcontestUA = makeRaireContestUA(
                 info,
                 irvContestVotes.vc, // candidate indexes
-                Nc = irvContestVotes.ncards, // TODO get this elsewhere?
+                Nc = contestNc[info.id] ?: irvContestVotes.ncards,
                 Ncast = irvContestVotes.ncards,
             )
             contests.add(rcontestUA)

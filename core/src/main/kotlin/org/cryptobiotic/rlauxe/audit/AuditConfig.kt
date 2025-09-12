@@ -19,7 +19,7 @@ data class AuditConfig(
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 
     val pollingConfig: PollingConfig = PollingConfig(),
-    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.phantoms),
+    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison),
     val version: Double = 1.1,
 ) {

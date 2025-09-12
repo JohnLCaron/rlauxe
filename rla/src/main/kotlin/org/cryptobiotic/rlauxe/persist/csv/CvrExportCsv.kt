@@ -11,9 +11,11 @@ const val unpooled = "unpooled"
 
 private val logger = KotlinLogging.logger("CvrExport")
 
-// for DominionCvrSummary
+// intermediate CVR; originally for DominionCvrSummary
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
+    constructor(cvr: Cvr) : this(cvr.id, 0, cvr.votes)
 
+    // could be a function passed in
     fun poolKey(): String {
         if (group == 2) return unpooled
         val lastIdx = id.lastIndexOf('-')

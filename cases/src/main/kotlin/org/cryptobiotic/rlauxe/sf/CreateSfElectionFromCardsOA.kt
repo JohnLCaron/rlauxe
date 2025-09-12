@@ -33,7 +33,7 @@ private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOA")
 
 // use the contestManifest and candidateManifest to create the contestInfo, both regular and IRV.
 // Use "CvrExport" CSV file to tally the votes and create the assertions.
-fun createSfElectionFromCsvExportOA(
+fun createSfElectionFromCvrExportOA(
     auditDir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -43,9 +43,7 @@ fun createSfElectionFromCsvExportOA(
     show: Boolean = false
 ) {
     val stopwatch = Stopwatch()
-    val contestInfos = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
-
-    val publisher = Publisher(auditDir) // creates auditDir
+    val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
     // pass 1 through cvrs, make card pools
     val cardPools: Map<String, CardPool> = createCardPools(
@@ -56,16 +54,6 @@ fun createSfElectionFromCsvExportOA(
         cvrCsvFilename,
     )
 
-    // make contests based on cardPools
-    val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools)
-    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools)
-    val allContests = irvContests + contests
-
-    // pass 2 through cvrs, create all the clca assertions in one go
-    val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    addOAClcaAssorters(auditableContests, cvrExportCsvIterator(cvrCsvFilename), cardPools)
-
-    // these checks may modify the contest status; dont call until clca assertions are created
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
         oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
@@ -99,9 +87,21 @@ fun createSfElectionFromCsvExportOA(
 
      */
 
+
+    // make contests based on cardPools
+    val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools, contestNcs)
+    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools, contestNcs)
+    val allContests = irvContests + contests
+
+    // pass 2 through cvrs, create all the clca assertions in one go
+    val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
+    addOAClcaAssorters(auditableContests, cvrExportCsvIterator(cvrCsvFilename), cardPools)
+
+    // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contests)
     checkContestsWithCvrs(contests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), show = true)
 
+    val publisher = Publisher(auditDir) // creates auditDir
     writeContestsJsonFile(allContests, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
@@ -111,7 +111,7 @@ fun createSfElectionFromCsvExportOA(
 }
 
 // non-IRV
-fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<String, CardPool>): List<OAContestUnderAudit> {
+fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<String, CardPool>, contestNcs: Map<Int, Int>): List<OAContestUnderAudit> {
     val contestsUAs = mutableListOf<OAContestUnderAudit>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
@@ -126,7 +126,11 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<String,
         }
 
         if (ncards > 0) {
-            val contest = Contest(info, allPools.votes, ncards, ncards)
+            val contest = Contest(
+                info,
+                allPools.votes,
+                contestNcs[info.id] ?: ncards,
+                ncards)
             contestsUAs.add(OAContestUnderAudit(contest))
         }
     }
@@ -134,7 +138,7 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<String,
 }
 
 // IRV
-fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<String, CardPool>): List<OAIrvContestUA> {
+fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<String, CardPool>, contestNcs: Map<Int, Int>): List<OAIrvContestUA> {
     val contestsUAs = mutableListOf<OAIrvContestUA>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
@@ -152,7 +156,7 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<Stri
         val rau : RaireContestUnderAudit = makeRaireContestUA(
             info,
             allPools,
-            ncards,
+            contestNcs[info.id] ?: ncards,
             ncards,
         )
         contestsUAs.add( OAIrvContestUA(rau.contest as RaireContest,  true, rau.rassertions) )

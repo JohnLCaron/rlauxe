@@ -5,20 +5,25 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.CvrExport
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
+import org.cryptobiotic.rlauxe.sf.sortedCardsFile
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 
 private val showMissingCandidates = false
+val cvrExportDir = "cvrexport"
+const val sortedCardsFile = "sortedCards.csv"
 
 // making vote counts from the electionDetailXml
 // making cards (cvrs) from the precinct results
-fun coloradoElectionFromDetailXmlAndPrecincts(
+fun createColoradoElectionFromDetailXmlAndPrecincts(
     topDir: String,
-    detailXmlFile: String,
+    electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     auditConfigIn: AuditConfig? = null
@@ -26,7 +31,7 @@ fun coloradoElectionFromDetailXmlAndPrecincts(
     val stopwatch = Stopwatch()
 
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
-    val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
+    val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
     // making vote counts from the electionDetailXml
     val contests = makeContests(electionDetailXml, roundContests)
@@ -42,19 +47,19 @@ fun coloradoElectionFromDetailXmlAndPrecincts(
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    //// cards
+    //// precinct level vote totals
     val reader = ZipReader(precinctFile)
     val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
     val precincts: List<ColoradoPrecinctLevelResults> = readColoradoPrecinctLevelResults(input)
     println("precincts = ${precincts.size}")
 
+    // for each precinct make cvrs that agree with the vote totals; serialize as CvrExport
     var count = 0
     precincts.forEach { precinct ->
         val precinctCvrs = makeCvrs(precinct, contests)
-        val outputDir = "$topDir/cards/${precinct.county}"
+        val outputDir = "$topDir/$cvrExportDir/${precinct.county}"
         validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrs"))
-        val precinctCvrsUA = precinctCvrs.map{ AuditableCard.fromCvrWithZeros(it)}
-        writeAuditableCardCsvFile(precinctCvrsUA, "$outputDir/${precinct.precinct}.csv")
+        writeCvrExportCsvFile(precinctCvrs.iterator(), "$outputDir/${precinct.precinct}.csv")
         count += precinctCvrs.size
     }
     println("   total cards = $count")
@@ -63,23 +68,23 @@ fun coloradoElectionFromDetailXmlAndPrecincts(
 
     // note that here, the cvrs dont have to be sorted
     val precinctCvrReader = TreeReaderIterator(
-        "$topDir/cards/",
+        "$topDir/$cvrExportDir/",
         fileFilter = { true },
-        reader = { path -> readCardsCsvIterator(path.toString()) }
+        reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
     // make all the clca assertions in one go
-    makeClcaAssertions(contestsUA, CvrIteratorAdapter(precinctCvrReader))
+    makeClcaAssertions(contestsUA, CvrExportAdapter(precinctCvrReader))
 
     // these checks may modify the contest status
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 
     // need to reinit the iterator
     val precinctCvrReader2 = TreeReaderIterator(
-        "$topDir/cards/",
+        "$topDir/$cvrExportDir/",
         fileFilter = { true },
-        reader = { path -> readCardsCsvIterator(path.toString()) }
+        reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(precinctCvrReader2))
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(precinctCvrReader2))
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
@@ -126,10 +131,10 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
         val contest = Contest(
             info,
             candidateVotes,
-            useNc,
-            0
+            Nc = useNc,
+            Ncast = useNc
         )
-        // they dont have cvrs for contest >= 260, so well just skip them
+        // they dont have cvrs for contest >= 260, so we'll just skip them
         if (contest.id < 260) {
             contests.add(contest)
         }
@@ -147,7 +152,7 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
 }
 
 // each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
-private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): List<Cvr> {
+private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Contest>): List<CvrExport> {
     val contestsByName = contests.associateBy { it.name }
 
     // we are making the cvrs out of these votes.
@@ -181,7 +186,7 @@ private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Cont
 
     // make cvrs until we exhaust the votes
     // Assume that the cvr has all of the contests on it, even if theres no vote in the contest
-    val rcvrs = mutableListOf<Cvr>()
+    val rcvrs = mutableListOf<CvrExport>()
     var idx = 0
     var usedOne = true
     while (usedOne) {
@@ -208,7 +213,7 @@ private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Cont
         }
         val rcvr = cvb2.build()
         if (usedOne) {
-            rcvrs.add(rcvr)
+            rcvrs.add(CvrExport(rcvr))
             // println(rcvr)
             idx++
         }
@@ -221,4 +226,18 @@ private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Cont
     // require(rcvrs.size == maxVotes)
     // println(" made ${rcvrs.size} cvrs for precinct ${precinct.precinct}")
     return rcvrs
+}
+
+// run this after createColoradoElectionFromDetailXmlAndPrecincts
+fun createCorla2024sortedCards(topDir: String) {
+    val auditDir = "$topDir/audit"
+
+    val precinctCvrReader = TreeReaderIterator(
+        "$topDir/$cvrExportDir/",
+        fileFilter = { true },
+        reader = { path -> cvrExportCsvIterator(path.toString()) }
+    )
+
+    SortMerge(auditDir, "unused", "$topDir/sortChunks", "$auditDir/${sortedCardsFile}", null).run2(precinctCvrReader)
+    createZipFile("$auditDir/$sortedCardsFile", delete = false)
 }

@@ -12,7 +12,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.csv.CvrExport
-import org.cryptobiotic.rlauxe.sf.BallotTypeContestManifest
 import org.cryptobiotic.rlauxe.sf.ContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
@@ -26,10 +25,10 @@ import java.nio.file.StandardOpenOption
 // We derive CvrExports from them, and serialze to csv files.
 
 class DominionCvrSummary(
-    var ncvrs: Int,
-    var ncards: Int,
+    var ncvrs: Int,  // number of CVRs created
+    var ncards: Int,  // number of Card objects; all the Cards in a Session become one CVR
     val contestSums: MutableMap<Int, ContestSummary>,
-    val cvrs: List<CvrExport>,
+    val cvrExports: List<CvrExport>,
 ) {
     constructor(): this(0, 0, mutableMapOf<Int, ContestSummary>(), emptyList())
 
@@ -43,15 +42,16 @@ class DominionCvrSummary(
     }
 
     override fun toString() = buildString {
-        appendLine("DominionCvrSummary ncvrs=$ncvrs ncards=$ncards cvrs=$cvrs")
+        appendLine("DominionCvrSummary ncvrs=$ncvrs ncards=$ncards cvrs=$cvrExports")
         contestSums.toSortedMap().forEach { (id, summary) ->
             appendLine("  $summary")
         }
     }
 }
 
+// The id is from Contest.Id
 data class ContestSummary(val id: Int) {
-    var ncards = 0
+    var ncards = 0 // number of Card objects with this Contest
     var undervotes = 0
     var overvotes = 0
     var isOvervote = 0
@@ -233,13 +233,13 @@ fun removeDuplicates(svotes : List<Int> ) : List<Int> {
     return result
 }
 
-fun convertCvrExportToCard(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
+fun readCvrExport(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result is Ok) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")
 
     val summary = dominionCvrs.import(contestManifest)
-    summary.cvrs.forEach {
+    summary.cvrExports.forEach {
         outputStream.write(it.toCsv().toByteArray()) // UTF-8
     }
     return summary

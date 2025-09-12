@@ -31,16 +31,16 @@ class TestReadSfJson {
     fun makeContestInfo() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
-        val ifilename = "BallotTypeContestManifest.json"
 
         val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(zipFilename, "ContestManifest.json")
-        val contestManifest = if (resultContestM is Ok) resultContestM.unwrap()
-            else throw RuntimeException("Cannot read ContestManifestJson from $zipFilename err = $resultContestM")
+        val contestManifestJson = if (resultContestM is Ok) resultContestM.unwrap()
+        else throw RuntimeException("Cannot read ContestManifestJson from $zipFilename err = $resultContestM")
 
         val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(zipFilename, "CandidateManifest.json")
         val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
         else throw RuntimeException("Cannot read CandidateManifestJson from ${zipFilename} err = $resultCandidateM")
 
+        val contestManifest = readContestManifestFromZip(zipFilename, "ContestManifest.json")
         val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
         val mayor = contestInfos.find { it.id == 18 }!!
         println(mayor)

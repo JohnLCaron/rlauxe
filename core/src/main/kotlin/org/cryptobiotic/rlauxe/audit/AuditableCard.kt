@@ -3,13 +3,13 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Prng
 
-// A generalization of Cvr, allowing votes to be null
+// A generalization of Cvr, allowing votes to be null, eg for polling
 data class AuditableCard (
-    val desc: String, // info to find the card for a manual audit. Aka ballot identifier.
+    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
     val index: Int,  // index into the original, canonical list of cards
-    val prn: Long,
+    val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val contests: IntArray, // aka ballot style.
+    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
     val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
     val poolId: Int?, // for OneAudit
 ) {
@@ -18,11 +18,11 @@ data class AuditableCard (
         val votePairs = contests.mapIndexed { idx, contestId ->
             Pair(contestId, votes?.get(idx) ?: intArrayOf())
         }
-        return Cvr(desc, votePairs.toMap(), phantom, poolId)
+        return Cvr(location, votePairs.toMap(), phantom, poolId)
     }
 
     override fun toString() = buildString {
-        appendLine("AuditableCard(desc='$desc', index=$index, sampleNum=$prn, phantom=$phantom, contests=${contests.contentToString()}, poolId=$poolId)")
+        appendLine("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom, contests=${contests.contentToString()}, poolId=$poolId)")
         votes?.forEachIndexed { idx, vote -> appendLine("   contest $idx: ${vote.contentToString()}")}
     }
 
@@ -42,7 +42,7 @@ data class AuditableCard (
         if (prn != other.prn) return false
         if (phantom != other.phantom) return false
         if (poolId != other.poolId) return false
-        if (desc != other.desc) return false
+        if (location != other.location) return false
         if (!contests.contentEquals(other.contests)) return false
         if ((votes == null) != (other.votes == null)) return false
         if (votes != null) {
@@ -59,7 +59,7 @@ data class AuditableCard (
         result = 31 * result + prn.hashCode()
         result = 31 * result + phantom.hashCode()
         result = 31 * result + (poolId ?: 0)
-        result = 31 * result + desc.hashCode()
+        result = 31 * result + location.hashCode()
         result = 31 * result + contests.contentHashCode()
         votes?.forEach { vote ->
             result = 31 * result + vote.contentHashCode()
@@ -92,7 +92,7 @@ data class AuditableCard (
         }
 
         fun fromCardLocation(cardLocation: CardLocation, index: Int, sampleNum: Long, poolId: Int? = null): AuditableCard {
-            return AuditableCard(cardLocation.id, index, sampleNum, cardLocation.phantom, cardLocation.contests(), null, poolId)
+            return AuditableCard(cardLocation.location, index, sampleNum, cardLocation.phantom, cardLocation.contests(), null, poolId)
         }
     }
 }
@@ -102,6 +102,7 @@ class CvrIteratorAdapter(val cardIterator: Iterator<AuditableCard>) : Iterator<C
     override fun next() = cardIterator.next().cvr()
 }
 
+// convert cvrs into AuditableCard sorted by prn
 fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
     return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }

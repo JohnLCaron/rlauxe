@@ -44,7 +44,7 @@ data class CardStyle(
     fun hasContest(contestId: Int) = contestIds.contains(contestId)
 
     override fun toString() = buildString {
-        append("BallotStyle($id, contestIds=$contestIds, numberBallots=$ncards")
+        append("CardStyle('$name' ($id), contestIds=$contestIds")
     }
 
     companion object {

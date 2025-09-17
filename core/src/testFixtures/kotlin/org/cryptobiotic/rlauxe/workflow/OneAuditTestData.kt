@@ -22,8 +22,8 @@ fun makeOneContestUA(
     phantomPercent: Double,
     skewPct: Double = 0.0,
 ): Pair<OAContestUnderAudit, List<Cvr>> {
-    val nvotes = roundToInt(Nc * (1.0 - undervotePercent - phantomPercent))
-    val winner = roundToInt((margin * Nc + nvotes) / 2)
+    val nvotes = roundToClosest(Nc * (1.0 - undervotePercent - phantomPercent))
+    val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
     // println("margin = $margin, reported = ${(winner - loser) / Nc.toDouble()} ")
     // require(doubleIsClose(margin, (winner - loser) / Nc.toDouble()))
@@ -58,10 +58,10 @@ fun makeOneContestUA(
     val nvotes = winnerVotes + loserVotes
     // nvotes = Nc * (1.0 - undervotePercent - phantomPercent)
     // Nc = nvotes / (1.0 - undervotePercent - phantomPercent)
-    val Nc = roundToInt(nvotes / (1.0 - undervotePercent - phantomPercent))
-    val Np = roundToInt(Nc * phantomPercent)
+    val Nc = roundToClosest(nvotes / (1.0 - undervotePercent - phantomPercent))
+    val Np = roundToClosest(Nc * phantomPercent)
 
-    val cvrSize = roundToInt(nvotes * cvrPercent)
+    val cvrSize = roundToClosest(nvotes * cvrPercent)
     val noCvrSize = nvotes - cvrSize
     require(cvrSize + noCvrSize == nvotes)
 
@@ -69,12 +69,12 @@ fun makeOneContestUA(
     val nvotesCvr = nvotes * cvrPercent
     val useSkewPct = minOf(skewPct, cvrPercent, 1.0 - cvrPercent)
 
-    val winnerCvr = roundToInt(winnerVotes * cvrPercent)
-    val loserCvr = roundToInt(nvotesCvr - winnerCvr)
+    val winnerCvr = roundToClosest(winnerVotes * cvrPercent)
+    val loserCvr = roundToClosest(nvotesCvr - winnerCvr)
 
     val winnerPool = winnerVotes - winnerCvr
     val loserPool = loserVotes - loserCvr
-    val skewVotes = max(0, roundToInt(winnerVotes * useSkewPct))
+    val skewVotes = max(0, roundToClosest(winnerVotes * useSkewPct))
 
     val cvrVotes = mapOf(0 to winnerCvr + skewVotes, 1 to loserCvr)
     val votesNoCvr = mapOf(0 to winnerPool - skewVotes, 1 to loserPool)
@@ -82,8 +82,8 @@ fun makeOneContestUA(
     val votesPoolSum = votesNoCvr.values.sum()
 
     val undervotes = undervotePercent * Nc
-    val cvrUndervotes = roundToInt(undervotes * cvrPercent)
-    val poolUnderVotes = roundToInt(undervotes - cvrUndervotes)
+    val cvrUndervotes = roundToClosest(undervotes * cvrPercent)
+    val poolUnderVotes = roundToClosest(undervotes - cvrUndervotes)
 
     val pools = mutableListOf<BallotPool>()
     pools.add(

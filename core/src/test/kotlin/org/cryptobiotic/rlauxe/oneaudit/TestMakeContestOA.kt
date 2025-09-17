@@ -1,14 +1,5 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.roundToInt
-import kotlin.math.abs
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 /*
 class TestMakeContestOA {
     val N = 50000

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.MvrManagerCardsSingleRound
@@ -140,6 +141,35 @@ class TestSfElectionOA {
         )
         // assertEquals(TestH0Status.StatRejectNull, result.status)
         if (show) println("    sampleCount = ${result.sampleCount} maxIdx=${sampler.maxSampleIndexUsed()} status = ${result.status}\n")
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fun countPools(cvrCsvFilename: String) {
+    var unpoolCount = 0
+    var poolCount = 0
+
+    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+    while (cvrIter.hasNext()) {
+        val cvrExport: CvrExport = cvrIter.next()
+        if (cvrExport.poolKey() == CvrExport.unpooled) unpoolCount++ else poolCount++
+    }
+    println(" unpoolCount = $unpoolCount poolCount = $poolCount")
+}
+
+//// obsolete
+// TODO use ContestTabulation in CheckAudits
+data class ContestCount(var ncards: Int = 0, val counts: MutableMap<Int, Int> = mutableMapOf() ) {
+
+    fun reportedMargin(winner: Int, loser: Int): Double {
+        val winnerVotes = counts[winner] ?: 0
+        val loserVotes = counts[loser] ?: 0
+        return (winnerVotes - loserVotes) / ncards.toDouble()
+    }
+
+    override fun toString(): String {
+        return "total=$ncards, counts=${counts.toSortedMap()}"
     }
 }
 

@@ -30,10 +30,10 @@ fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     appendLine()
 }
 
-fun writeAuditableCardCsvFile(pools: List<AuditableCard>, filename: String) {
+fun writeAuditableCardCsvFile(cards: List<AuditableCard>, filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
     writer.write(AuditableCardHeader)
-    pools.forEach {
+    cards.forEach {
         writer.write(writeAuditableCardCsv(it))
     }
     writer.close()

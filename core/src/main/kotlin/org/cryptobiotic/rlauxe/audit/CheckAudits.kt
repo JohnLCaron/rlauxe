@@ -68,7 +68,8 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 }
 
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
-    val votes = tabulateCvrs(cvrs)
+    val voteForN = contestsUA.associate { it.id to it.contest.info().voteForN }
+    val votes = tabulateCvrs(cvrs, voteForN)
 
     if (show) {
         println("tabulateCvrs")
@@ -125,6 +126,7 @@ fun samplesNeeded(pvalues: List<Double>, riskLimit: Double): Int {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// TODO use ContestTabulation ??
 
 // Number of votes in each contest, return contestId -> candidateId -> nvotes
 fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
@@ -162,43 +164,61 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
 }
 
 // has both votes and ncards, return contestId -> ContestTabulation
-fun tabulateCvrs(cvrs: Iterator<Cvr>): Map<Int, ContestTabulation> {
+fun tabulateCvrs(cvrs: Iterator<Cvr>, voteForN: Map<Int, Int>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     for (cvr in cvrs) {
-        for ((con, conVotes) in cvr.votes) {
-            val tab = votes.getOrPut(con) { ContestTabulation() }
+        for ((contestId, conVotes) in cvr.votes) {
+            val tab = votes.getOrPut(contestId) { ContestTabulation(voteForN[contestId]) }
             tab.addVotes(conVotes)
         }
     }
     return votes
 }
 
-class ContestTabulation {
+class ContestTabulation(val voteForN: Int?) {
     val votes = mutableMapOf<Int, Int>()
     var ncards = 0
+    var novote = 0  // how many cards had no vote for this contest?
+    var undervotes = 0  // how many undervotes = voteForN - nvotes
+    var overvotes = 0  // how many undervotes = voteForN - nvotes
+
+    fun addVotes(cands: IntArray) {
+        cands.forEach { addVote(it, 1) }
+        ncards++
+        if (voteForN != null) {
+            if (voteForN < cands.size) overvotes++
+            undervotes += (voteForN - cands.size)
+        }
+        if (cands.isEmpty()) novote++
+    }
 
     fun addVote(cand: Int, vote: Int) {
         val accum = votes.getOrPut(cand) { 0 }
         votes[cand] = accum + vote
     }
 
-    fun addVotes(cands: IntArray) {
-        cands.forEach { addVote(it, 1) }
-        ncards++
+    // for summing multiple tabs together
+    fun sum(other: ContestTabulation) {
+        other.votes.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
+        this.ncards += other.ncards
+        this.novote += other.novote
+        this.undervotes += other.undervotes
     }
 
-    fun addVotes(cands: Map<Int, Int>) {
-        cands.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
-    }
-
-    // undervotes = info.voteForN * ncards - nvotes
-    // undervotes / ncards = info.voteForN - nvotes / ncards
-    fun undervotePct(voteForN: Int): Double {
+    fun undervotePct(): Double {
         val nvotes = votes.map { it.value }.sum()
-        return (voteForN * ncards - nvotes) / ncards.toDouble()
+        return undervotes.toDouble() / (undervotes + nvotes)
     }
 
-    override fun toString(): String {
-        return "${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards)"
+    fun nvotes() = votes.map { it.value}.sum()
+
+    override fun toString() = buildString {
+        // append("${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards undervotes=$undervotes novote=$novote")
+        append("${votes.toSortedMap()} nvotes=${nvotes()} ncards=$ncards undervotes=$undervotes overvotes=$overvotes novote=$novote")
+        if (voteForN != null) {
+            val nvotes = votes.map { it.value }.sum()
+            val underPct = (100.0 * undervotes / (nvotes + undervotes)).toInt()
+            append(" underPct= $underPct%")
+        }
     }
 }

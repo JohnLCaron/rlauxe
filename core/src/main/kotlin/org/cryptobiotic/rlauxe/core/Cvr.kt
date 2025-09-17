@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
-// TODO immutable except for the IntArray (!) Consider https://github.com/daniel-rusu/pods4k/tree/main/immutable-arrays
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+
+// core abstraction for both CVR and MVR
 // assumes that a vote is 0 or 1.
-// compact form in AuditableCard is (contests: IntArray, val votes: List<IntArray>?)
-// TODO switch to AuditableCard?
 data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
@@ -66,4 +66,56 @@ data class Cvr(
     companion object {
         fun makePhantom(cvrId: String, contestId: Int) = Cvr(cvrId, mapOf(contestId to IntArray(0)), phantom=true)
     }
+}
+
+// intermediate CVR representation; originally for DominionCvrSummary
+data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
+    constructor(cvr: Cvr) : this(cvr.id, 0, cvr.votes)
+
+    // Calculate the pool name from the cvr id. Could be a function id -> pool name
+    fun poolKey(): String {
+        if (group == 2) return unpooled
+        val lastIdx = id.lastIndexOf('-')
+        return id.substring(0, lastIdx)
+    }
+
+    fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null): AuditableCard {
+        val contests = votes.map { it.key }.toIntArray()
+        val candidates = votes.map { it.value }
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]
+        return AuditableCard(id, index, prn, phantom, contests, candidates, poolId)
+    }
+
+    fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]
+        return Cvr(id, votes, phantom, poolId)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CvrExport
+
+        if (group != other.group) return false
+        if (id != other.id) return false
+        if (votes.size != other.votes.size) return false
+        for ((contestId, candidates) in votes) {
+            if (!candidates.contentEquals(other.votes[contestId])) return false
+        }
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group
+        result = 31 * result + id.hashCode()
+        votes.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
+        return result
+    }
+
+    companion object {
+        const val unpooled = "unpooled"
+    }
+
 }

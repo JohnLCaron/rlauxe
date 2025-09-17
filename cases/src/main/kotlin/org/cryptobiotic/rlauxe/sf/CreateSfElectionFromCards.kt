@@ -7,14 +7,13 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
-import org.cryptobiotic.rlauxe.dominion.readCvrExport
+import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.toPoolMap
+import org.cryptobiotic.rlauxe.persist.csv.poolNameToId
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
@@ -44,7 +43,7 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
         castVoteRecordZip, silent = true, sortPaths = true,
         filter = { path -> path.toString().contains("CvrExport_") },
         visitor = { inputStream ->
-            val summary = readCvrExport(inputStream, cvrExportCsvStream, contestManifest)
+            val summary = convertCvrExportJsonToCsv(inputStream, cvrExportCsvStream, contestManifest)
             summaryTotal.add(summary)
             countFiles++
         },
@@ -60,7 +59,7 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
 // TODO add phantoms here
 fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, ballotPoolFile: String?) {
     val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
-    val pools = ballotPools?.toPoolMap()
+    val pools = ballotPools?.poolNameToId() // all we need is to know what the id is for each pool, so we can assign
 
     SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run()
     if (zip) {
@@ -80,8 +79,12 @@ fun createSfElectionFromCvrExport(
     show: Boolean = false
 ) {
     val stopwatch = Stopwatch()
-
+    val auditConfig = auditConfigIn ?: AuditConfig(
+        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
+        clcaConfig = ClcaConfig(strategy=ClcaStrategyType.noerror),
+    )
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
+
     val regularVoteMap = makeContestVotesFromCrvExport(cvrCsvFilename)
     val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap, contestNcs)
 
@@ -98,10 +101,6 @@ fun createSfElectionFromCvrExport(
         makeRaireContests(irvInfos, irvVoteMap, contestNcs)
     }
 
-    val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
-        clcaConfig = ClcaConfig(strategy=ClcaStrategyType.noerror),
-    )
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
     val allContests = contestsUA + irvContests
 

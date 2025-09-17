@@ -4,16 +4,22 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.CvrExport
 import org.junit.jupiter.api.Assertions.assertTrue
 
 class TestCvrExportCsv {
 
     @Test
     fun testRoundtrip() {
-        val target = CvrExport (
+        val target = CvrExport(
             "info to find card",
             42,
-            mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
+            mapOf(
+                19 to intArrayOf(1, 2, 3),
+                23 to intArrayOf(),
+                99 to intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 0),
+                123456 to intArrayOf(23498724)
+            ),
         )
 
         val csv = target.toCsv()

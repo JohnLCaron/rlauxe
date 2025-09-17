@@ -90,8 +90,8 @@ data class ContestTestDataNWinnersOld(
     val ncvrs: Int  // number of cvrs
 
     init {
-        underCount = roundToInt(this.Nc * undervotePct * voteForN)
-        phantomCount = roundToInt(this.Nc * phantomPct)
+        underCount = roundToClosest(this.Nc * undervotePct * voteForN)
+        phantomCount = roundToClosest(this.Nc * phantomPct)
         totalVotes = (Nc - phantomCount) * voteForN - underCount
         ncvrs = (Nc - phantomCount)
     }

@@ -58,18 +58,23 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         val strategy = auditConfig.oaConfig.strategy
 
-        val testH0Result = if (strategy == OneAuditStrategyType.optimalBet)
-            runBetting(auditConfig,
+        val testH0Result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
+            runBetting(
+                auditConfig,
                 contest.Nc(),
                 cassorter,
                 sampler,
-                cassorter.upperBound())
-        else
-            runAlpha(auditConfig,
+                cassorter.upperBound()
+            )
+        } else {
+            runAlpha(
+                auditConfig,
                 contest.Nc(),
                 cassorter,
                 sampler,
-                cassorter.upperBound())
+                cassorter.upperBound()
+            )
+        }
 
         // println(testH0Result)
         //println("pvalues=  ${debugSeq.pvalues()}")
@@ -84,7 +89,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             measuredMean = testH0Result.tracker.mean(),
         )
 
-        if (!quiet) logger.debug{" ${contest.name} auditResult= ${assertionRound.auditResult}"}
+        if (!quiet) logger.debug{" ${contest.name} strategy=$strategy auditResult= ${assertionRound.auditResult}"}
         return testH0Result
     }
 

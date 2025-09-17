@@ -176,7 +176,7 @@ class OneAuditNoErrorIterator(
     private var done = false
 
     init {
-        while (cvrs.size < sampleLimit && cvrIter.hasNext()) {
+        while ((sampleLimit == -1 || cvrs.size < sampleLimit) && cvrIter.hasNext()) {
             val cvr = cvrIter.next()
             if (cvr.hasContest(contestId)) cvrs.add(cvr)
         }

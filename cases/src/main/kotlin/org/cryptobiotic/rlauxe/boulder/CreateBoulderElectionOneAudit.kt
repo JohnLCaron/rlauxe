@@ -20,7 +20,7 @@ import kotlin.math.max
 class BoulderElectionOneAudit(
     export: DominionCvrExportCsv,
     sovo: BoulderStatementOfVotes,
-    quiet: Boolean = false,
+    quiet: Boolean = true,
     val includeCvrs: Boolean = true,
 ): BoulderElection(export,sovo, quiet)
 {
@@ -97,8 +97,6 @@ class BoulderElectionOneAudit(
                 println()
             }
             require(checkEquivilentVotes(oaContest.red.votes, contestTab.votes))
-            if (redUndervotes != contestTab.undervotes)
-                println("why")
             if (voteForN[contestId] == 1) require(redUndervotes == contestTab.undervotes) // TODO
         }
 
@@ -219,7 +217,8 @@ fun createBoulderElectionOneAudit(
 
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles = true, riskLimit = riskLimit, minRecountMargin = minRecountMargin,
+        AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
@@ -232,7 +231,6 @@ fun createBoulderElectionOneAudit(
     val contestsUA = contests.map {
         OAContestUnderAudit(it, auditConfig.hasStyles)
     }
-    val cardPoolMap = election.cardPools.associate { it.poolId to it }
     addOAClcaAssorters(contestsUA, cards.iterator(), election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
@@ -253,6 +251,11 @@ class OneAuditContest(val info: ContestInfo, val sovoContest: BoulderContestVote
     val undervotes = mutableMapOf<String, Int>() // group id -> undervote
 
     override fun toString() = buildString {
+        appendLine(info)
+        appendLine(" sovoContest=$sovoContest")
+    }
+
+    fun details() = buildString {
         appendLine(info)
         appendLine(" sovoContest=$sovoContest")
         // appendLine(" allTabulation=$all3")
@@ -308,6 +311,11 @@ class OneAuditContest(val info: ContestInfo, val sovoContest: BoulderContestVote
         println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncards} = ${sovoContest.totalBallots - contestTab.ncards}")
         println("  ${info.id}: nballots=${nballots()} - contestTab.ncards=${contestTab.ncards} = ${nballots() - contestTab.ncards}")
         println()
+    }
+
+    fun showSummary(contestTab: ContestTabulation) {
+        val ncvrs = cvr.ncards
+        println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} ncvrs=${cvr.ncards}  ${(100.0 * ncvrs)/sovoContest.totalBallots} % ")
     }
 
     fun nballots(): Int {

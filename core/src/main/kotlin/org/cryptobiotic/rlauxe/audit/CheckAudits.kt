@@ -180,7 +180,7 @@ class ContestTabulation(val voteForN: Int?) {
     var ncards = 0
     var novote = 0  // how many cards had no vote for this contest?
     var undervotes = 0  // how many undervotes = voteForN - nvotes
-    var overvotes = 0  // how many undervotes = voteForN - nvotes
+    var overvotes = 0  // how many overvotes = (voteForN < cands.size)
 
     fun addVotes(cands: IntArray) {
         cands.forEach { addVote(it, 1) }

@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.tabulateCvrs
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import kotlin.test.Test
+import kotlin.text.get
 
 class TestBoulderElectionOneAudit {
 
@@ -28,6 +29,10 @@ class TestBoulderElectionOneAudit {
 
         election.oaContests.forEach { (contestId, oaContest) ->
             oaContest.checkNcards(allTab[contestId]!!)
+        }
+
+        election.oaContests.forEach { (contestId, oaContest) ->
+            oaContest.showSummary(allTab[contestId]!!)
         }
     }
 }

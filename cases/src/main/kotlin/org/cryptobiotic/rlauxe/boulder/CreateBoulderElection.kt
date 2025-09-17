@@ -374,7 +374,7 @@ fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes) {
                 }
                 // createBoulder23 doesnt agree on contest "City of Louisville City Council Ward 2 (4-year term)"
                 // see ColbertDiscrepency.csv, FaheyDiscrepency.csv
-                // require(contestVote == sovoVote)
+                require(contestVote == sovoVote)
             }
         }
     }

@@ -84,7 +84,7 @@ class TestBoulderUndervotes {
     }
 
     @Test
-    fun testSovoContests() {
+    fun showSovoContestDetails() {
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024"
@@ -109,7 +109,7 @@ class TestBoulderUndervotes {
         println()
         oaContests.forEach {
             println(BoulderContestVotes.header)
-            println(it)
+            println(it.details())
         }
     }
 

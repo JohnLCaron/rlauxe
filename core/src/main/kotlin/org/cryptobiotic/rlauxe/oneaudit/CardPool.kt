@@ -111,6 +111,10 @@ class AssortAvg() {
     var ncards = 0
     var totalAssort = 0.0
     fun avg() : Double = if (ncards == 0) 0.0 else totalAssort / ncards
+
+    override fun toString(): String {
+        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
+    }
 }
 
 data class AssortAvgsInPools (
@@ -126,14 +130,14 @@ fun addOAClcaAssorters(
     cardIter: Iterator<AuditableCard>, // vs CvrExport
     cardPools: Map<Int, CardPool> // vs Map<String, CardPool>
 ) {
-    // LOOK can probably skip this, we only want pool averages
-    val unpooledAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>() // contestId -> assorter -> AssortAvg
 
     // sum all the assorters values in one pass across all the cvrs
     while (cardIter.hasNext()) {
         val card: AuditableCard = cardIter.next()
+        if (card.poolId == null) continue
+
         val cvr = card.cvr()
-        val assortAvg = if (card.poolId == null) unpooledAvg else cardPools[card.poolId]!!.assortAvg
+        val assortAvg = cardPools[card.poolId]!!.assortAvg
         oaContests.forEach { contest ->
             val avg = assortAvg.getOrPut(contest.id) { mutableMapOf() }
             contest.pollingAssertions.forEach { assertion ->
@@ -152,12 +156,6 @@ fun addOAClcaAssorters(
         val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
             val assortAverageTest = mutableMapOf<Int, Double>() // poolId -> average assort value
             cardPools.values.forEach { cardPool ->
-                if (cardPool.assortAvg == null)
-                    println("why?")
-                if (cardPool.assortAvg!![oaContest.id] == null)
-                    println("why2?")
-                if (cardPool.assortAvg!![oaContest.id]!![assertion.assorter] == null)
-                    println("why3?")
                 val assortAvg = cardPool.assortAvg!![oaContest.id]!![assertion.assorter]!!
                 assortAverageTest[cardPool.poolId] = assortAvg.avg()
             }
@@ -179,8 +177,14 @@ fun addOAClcaAssorters(
                 val cvrAverage = assortAvg.avg()
 
                 if (!doubleIsClose(calcReportedMean, cvrAverage)) {
-                    println("pool ${cardPool.poolId} means not agree for assorter $assorter ")
+                    println("pool ${cardPool.poolId} means not agree for contest $contestId assorter $assorter ")
+                    println("     calcReportedMean= ${calcReportedMean} cvrAverage= $cvrAverage ")
+                    println("     ${assortAvg} contestTabulation= $contestTabulation ")
+                    println()
                 }
+                // pool 24 means not agree for contest 18 assorter  winner=0 loser=3 reportedMargin=0.0546 reportedMean=0.5273
+                //  calcReportedMean= 0.5295774647887324 cvrAverage= 0.5294943820224719
+                //  AssortAvg(ncards=356, totalAssort=188.5 avg=0.5294943820224719) contestTabulation= {0=70, 1=63, 2=86, 3=49} nvotes=268 ncards=355 undervotes=0 overvotes=0 novote=0 underPct= 0%
             }
         }
     }

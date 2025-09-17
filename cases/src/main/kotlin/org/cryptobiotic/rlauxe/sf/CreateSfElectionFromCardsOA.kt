@@ -46,7 +46,7 @@ fun createSfElectionFromCvrExportOA(
     val stopwatch = Stopwatch()
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
-        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
     )
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 

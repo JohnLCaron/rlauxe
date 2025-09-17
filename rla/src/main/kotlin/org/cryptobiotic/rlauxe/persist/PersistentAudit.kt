@@ -62,7 +62,7 @@ class PersistentAudit(
         //   in a test audit, the test mvrs are in "private/testMvrs.csv"
         if (mvrManager is MvrManagerTestFromRecord) {
             val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)
-            if (!quiet) logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
+            logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
         }
 
         val complete =  when (auditConfig.auditType) {

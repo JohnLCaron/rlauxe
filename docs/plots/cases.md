@@ -69,6 +69,7 @@ We can use the published precinct level results to create simulated CVRs and run
 
 
 ## BoulderCounty
+
   DominionCvrExportCsv
     CvrNumber, TabulatorNum, BatchId, RecordId, ImprintedId, CountingGroup, BallotType,
     CastVoteRecord(cvrNumber: Int, tabulatorNum: Int, batchId: String, recordId: Int, imprintedId: String, ballotType: String)

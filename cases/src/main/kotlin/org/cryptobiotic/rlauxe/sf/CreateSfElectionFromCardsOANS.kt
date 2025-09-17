@@ -4,8 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
@@ -32,9 +34,11 @@ fun createSfElectionFromCvrExportOANS(
     show: Boolean = false
 ) {
     val stopwatch = Stopwatch()
+    val auditConfig = auditConfigIn ?: AuditConfig(
+        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
+    )
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
-
-    val publisher = Publisher(auditDir) // creates auditDir
 
     // pass 1 through cvrs, make card pools
     val cardPools: Map<String, CardPoolNs> = createCardPoolsNS(
@@ -56,22 +60,18 @@ fun createSfElectionFromCvrExportOANS(
     addOAClcaAssorters(auditableContests, cardPoolList.iterator(), cardPools)
 
     // these checks may modify the contest status; dont call until clca assertions are created
-    val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
-        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
-    )
-
     checkContestsCorrectlyFormed(auditConfig, contests)
     checkContestsWithCvrs(contests, CvrExportAdapter(cardPoolList.iterator()), show = true)
 
+    val publisher = Publisher(auditDir) // creates auditDir
     writeContestsJsonFile(allContests, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
     println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
 
-    // we are going to write the sortedCards here since we have the CvrExports in memory
+    // we write the sortedCards here while we have the CvrExports in memory
     val ballotPools = readBallotPoolCsvFile("$auditDir/$ballotPoolsFile")
-    val pools = ballotPools.toPoolMap()
+    val pools = ballotPools.poolNameToId()
     SortMerge(auditDir, "unused", "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run2(cardPoolList.iterator())
 
     println("took = $stopwatch")
@@ -89,7 +89,7 @@ fun createCardPoolsNS(
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
     println("IRV contests = ${contestManifest.irvContests}")
 
-    // create the card Pools
+    // create the unamended card Pools,
     val cardPoolsU: MutableMap<String, CardPoolNs> = mutableMapOf()
     val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
     while (cvrIter.hasNext()) {
@@ -163,10 +163,12 @@ fun createCardPoolsNS(
     return cardPoolsM
 }
 
+// keep all the CVRS, which we can use to caclulate average assort. only used for SF.
 class CardPoolNs( poolName: String, poolId: Int, irvIds: Set<Int>,  contestInfos: Map<Int, ContestInfo>) :
     CardPool(poolName, poolId, irvIds, contestInfos) {
 
-    var cvrs = mutableListOf<CvrExport>() // TODO keeping all the CvrExport in memory here. better to write them back ??
+    // TODO keeping all the CvrExport in memory here. better to write them back ??
+    var cvrs = mutableListOf<CvrExport>()
 
     override fun accumulateVotes(cvr: CvrExport) {
         cvrs.add(cvr)

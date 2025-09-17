@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class TestBoulderElectionFromCvrs {
+class TestCreateBoulderElection {
 
     @Test
     fun testParseContestName() {
@@ -72,7 +72,7 @@ class TestBoulderElectionFromCvrs {
         )
     }
 
-    /*
+
     @Test
     fun createBoulder24oa() {
         createBoulderElectionOneAudit(
@@ -80,7 +80,7 @@ class TestBoulderElectionFromCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditDir = "/home/stormy/rla/cases/boulder24oa",
         )
-    } */
+    }
 
     /* pooled votes only, simulating a "batch level comparison audit"
     @Test

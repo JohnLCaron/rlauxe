@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.audit.tabulateCvrs
-import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -127,7 +125,7 @@ data class ContestTestDataNWinners(
     val ncvrs: Int  // number of cvrs
 
     init {
-        phantomCount = roundToInt(this.Nc * phantomPct)
+        phantomCount = roundToClosest(this.Nc * phantomPct)
         ncvrs = (Nc - phantomCount)
     }
 
@@ -156,7 +154,7 @@ data class ContestTestDataNWinners(
         val cvrVoteTracker = PartitionTracker(votesByCandIds.toMutableList())
         val cvrs = makeCvrs(cvrVoteTracker, ncands) // last candidate is the undervote
         println("  Number of cvrs = ${cvrs.size}")
-        val tabs = tabulateCvrs(cvrs.iterator())
+        val tabs = tabulateCvrs(cvrs.iterator(), mapOf(info.id to info.voteForN))
         assert(tabs.size == 1)
         val contestTab = tabs[0]!!
         println("  contestTab= $contestTab")

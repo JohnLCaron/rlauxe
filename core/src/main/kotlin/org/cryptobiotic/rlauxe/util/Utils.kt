@@ -16,7 +16,7 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
     return abs(a - b) <= atol + rtol * abs(b)
 }
 
-fun roundToInt(x: Double) = round(x).toInt()
+fun roundToClosest(x: Double) = round(x).toInt()
 fun roundUp(x: Double) = ceil(x).toInt()
 
 fun ceilDiv(numerator: Int, denominator: Int): Int {
@@ -42,6 +42,11 @@ fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
 fun sfn(s: String, n: Int) = "%${n}s".format(s)  // right justify in windth n
+fun trunc(s: String, n:Int) : String {
+    if (s.length > n) return s.substring(0,n)
+    if (s.length < n) return sfn(s, n)
+    return s
+}
 
 fun Double.sigfig(minSigfigs: Int = 4): String {
     val df = "%.${minSigfigs}G".format(this)

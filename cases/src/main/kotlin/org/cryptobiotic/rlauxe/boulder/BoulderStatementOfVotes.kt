@@ -41,7 +41,7 @@ data class BoulderStatementOfVotes(val filename: String, val contests: List<Boul
     }
 }
 
-class BoulderContestVotes(
+data class BoulderContestVotes(
     val contestTitle: String,
 ) {
     var precinctCount: Int = 0
@@ -50,7 +50,7 @@ class BoulderContestVotes(
     var totalVotes: Int = 0     // sum of votes
     var totalUnderVotes: Int = 0  // undervotes
     var totalOverVotes: Int = 0     // hmmm
-    val candidateVotes = mutableMapOf<String, Int>()
+    val candidateVotes = mutableMapOf<String, Int>()  // candidateName -> number of votes
 
     fun addPrecinct(precinct: BoulderContestPrecinctVotes) {
         precinctCount++
@@ -68,11 +68,12 @@ class BoulderContestVotes(
     }
 
     override fun toString(): String {
-        return "$contestTitle, $precinctCount, $activeVoters, $totalBallots, $totalVotes, $totalUnderVotes, $totalOverVotes"
+        val diff = totalBallots - totalVotes - totalUnderVotes - totalOverVotes
+        return "$contestTitle, $precinctCount, $activeVoters, $totalBallots, $totalVotes, $totalUnderVotes, $totalOverVotes, $diff"
     }
 
     companion object {
-        val header = "contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes"
+        val header = "contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes, diff"
     }
 }
 
@@ -85,6 +86,8 @@ data class BoulderContestPrecinctVotes(
     val totalUnderVotes: Int,
     val totalOverVotes: Int,
 ) {
+    constructor(line: BoulderStatementLine): this(line.contestTitle, line.precinctCode, line.precinctNumber, line.activeVoters, line.totalBallots, line.totalUnderVotes, line.totalOverVotes)
+
     val lines = mutableListOf<BoulderStatementLine>()
 
     fun addLine(line: BoulderStatementLine) {
@@ -190,13 +193,7 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
     val precincts = mutableMapOf<String, BoulderContestPrecinctVotes>()
     lines.forEach {
         val key = "${it.contestTitle}#${it.precinctCode}#${it.precinctNumber}"
-        val precinct = precincts.getOrPut(key) {
-            //     val activeVoters: Int,
-            //    val totalBallots: Int,
-            //    val totalUnderVotes: Int,
-            //    val totalOverVotes: Int,
-            BoulderContestPrecinctVotes(it.contestTitle, it.precinctCode, it.precinctNumber, it.activeVoters, it.totalBallots, it.totalUnderVotes, it.totalOverVotes)
-        }
+        val precinct = precincts.getOrPut(key) { BoulderContestPrecinctVotes(it) }
         precinct.addLine(it)
     }
 

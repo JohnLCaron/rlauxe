@@ -10,9 +10,9 @@ import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/*
-class TestVotesAndUndervotes {
 
+class TestVotesAndUndervotes {
+/*
     @Test
     fun testBallotPool() {
         repeat (6) { it ->
@@ -23,7 +23,7 @@ class TestVotesAndUndervotes {
 
     fun testBallotPool(voteForN: Int) {
         // TODO not great coverage; do more tests with random contest values
-        val contestOA = makeContestKalamazoo(voteForN)
+        val contestOA = (voteForN)
         // println("$contestOA nwinners=${contestOA.info.nwinners}")
 
         val ballotPool = contestOA.pools[1]!!
@@ -48,7 +48,6 @@ class TestVotesAndUndervotes {
         println("votesAndUndervotes()= ${vunder.votesAndUndervotes()}")
         assertEquals(vunder.votesAndUndervotes(), tabsWith)
     }
-
+*/
 }
 
- */

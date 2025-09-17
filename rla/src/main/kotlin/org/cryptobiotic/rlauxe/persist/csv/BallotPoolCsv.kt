@@ -60,7 +60,7 @@ fun readBallotPoolCsvFile(filename: String): List<BallotPool> {
     return pools
 }
 
-fun List<BallotPool>.toPoolMap(): Map<String, Int> {
+fun List<BallotPool>.poolNameToId(): Map<String, Int> {
     val pools = mutableMapOf<String, Int>()
     this.forEach { pools[it.name] = it.poolId }
     return pools

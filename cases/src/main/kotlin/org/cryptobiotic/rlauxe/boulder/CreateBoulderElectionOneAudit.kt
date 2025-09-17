@@ -1,229 +1,198 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.RedactedGroup
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExport
+import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.makeIrvContestVotes
+import org.cryptobiotic.rlauxe.raire.makeRaireContests
 import org.cryptobiotic.rlauxe.util.*
-import java.nio.file.Path
 import kotlin.math.max
 
 // using sovo just to define the contests. TODO: tests there are some votes
-class BoulderElectionOneAuditFromCvrs(
-    val export: DominionCvrExport,
-    val sovo: BoulderStatementOfVotes,
+class BoulderElectionOneAudit(
+    export: DominionCvrExportCsv,
+    sovo: BoulderStatementOfVotes,
+    quiet: Boolean = false,
     val includeCvrs: Boolean = true,
-    val quiet: Boolean = false
-) {
-    val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
-    val infos = makeContestInfo().associateBy { it.id }
-    val cvrCounts = cvrCounts() // contestId -> ContestTabulation
-    // the pools have ncards reflecting the same pct undervotes as the cvrs
-    val poolsByContest = makePoolsFromRedacted(cvrCounts) // contestId -> List<BallotPool>
+): BoulderElection(export,sovo, quiet)
+{
+    val oaContests = makeOAContests().associate { it.info.id to it}
+    val cardPools: List<CardPool> = convertRedactedToCardPools()
+    val redactedCvrs = makeRedactedCvrs()
+    val allCvrs = exportCvrs + redactedCvrs // TODO could be CvrExport ??
 
-    // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
-    fun makeContestInfo(): List<ContestInfo> {
-        val columns = export.schema.columns
+    // TODO IRV?
+    fun makeOAContests(): List<OneAuditContest> {
+        val countCvrVotes = countCvrVotes()
+        val countRedactedVotes = countRedactedVotes()
 
-        return sovo.contests.map { sovoContest ->
-            val exportContest = export.schema.contests.find { it.contestName.startsWith(sovoContest.contestTitle) }!!
-
-            val candidateMap = if (!exportContest.isIRV) {
-                val candidateMap1 = mutableMapOf<String, Int>()
-                var candIdx = 0
-                for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                    // if (columns[col].choice != "Write-in") { // remove write-ins
-                        candidateMap1[columns[col].choice] = candIdx
-                    // }
-                    candIdx++
-                }
-                candidateMap1
-
-            } else { // there are ncand x ncand columns, so need something different here
-                val candidates = mutableListOf<String>()
-                for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                    candidates.add(columns[col].choice)
-                }
-                val pairs = mutableListOf<Pair<String, Int>>()
-                repeat(exportContest.nchoices) { idx ->
-                    pairs.add(Pair(candidates[idx], idx))
-                }
-                pairs.toMap()
+        val oaContests = mutableListOf<OneAuditContest>()
+        infoList.forEach { info ->
+            val sovoContest = sovo.contests.find { it.contestTitle == info.name }
+            if (sovoContest != null) {
+                val oaContest = OneAuditContest(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
+                oaContest.allocateUndervotes(export.redacted)
+                oaContests.add( oaContest)
             }
-
-            val choiceFunction = if (exportContest.isIRV) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY
-            val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestName(exportContest.contestName)
-            ContestInfo( name, exportContest.contestIdx, candidateMap, choiceFunction, nwinners)
+            else println("*** cant find '${info.name}' in BoulderStatementOfVotes")
         }
-    }
-
-    /* TODO
-    fun makeContests(): List<OneAuditContest> {
-        if (!quiet) println("ncontests with info = ${infos.size}")
-        val sortedInfos = infos.values.sortedBy { it.id }
-
-        // no IRV contests
-        val oaContests = sortedInfos.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
-            val contestTabulation: ContestTabulation? = cvrCounts[info.id]
-            val sovContest = sovo.contests.find {
-                it.contestTitle == info.name
-            }
-            if (sovContest == null) {
-                println("*** cant find '${info.name}' in BoulderStatementOfVotes")
-            }
-            // remove Write-Ins
-            // val votesIn = contestCount.votes.filter { info.candidateIds.contains(it.key) }
-
-            val pools = poolsByContest[info.id]!!
-            OneAuditContest.make(info,
-                contestTabulation ?.votes ?: emptyMap(),
-                contestTabulation ?.ncards ?: 0,
-                pools ?: emptyList(),
-                Nc = 0,
-                Ncast = 0)// TODO
-        }
-
-        if (!quiet) {
-            println("\nRegular contests (No IRV)) = ${oaContests.size}")
-            oaContests.forEach { contest ->
-                println(contest)
-            }
-        }
-
         return oaContests
     }
 
-     */
-
-    // make contest votes from the export.cvrs
-    fun cvrCounts() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulation>()
-
-        if (includeCvrs) {
-            export.cvrs.forEach { cvr ->
-                cvr.contestVotes.forEach { contestVote ->
-                    val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation() }
-                    tab.addVotes(contestVote.candVotes.toIntArray())
-                }
-            }
-        }
-        return votes
-    }
-
-    // each RedactedVotes is a pool with multiple contests in it.
-    // convert to a Map<ContestId, List<BallotPool>>
-    // use the undervotes pct in cvrCounts to add undervotes to the pools
-    fun makePoolsFromRedacted(cvrCounts: Map<Int, ContestTabulation> ): Map<Int, List<BallotPool>> {
-        val result = mutableMapOf<Int, MutableList<BallotPool>>()
+    // cant do this until we have oaContest.undervotes
+    fun convertRedactedToCardPools(): List<CardPool> {
+        val result = mutableListOf<CardPool>()
 
         export.redacted.forEachIndexed { redactedCount, redacted ->
-            // redacted.contestVotes: contestId -> candidateId -> nvotes
-            redacted.contestVotes.forEach { (contestId, votes) ->
-                val info = infos[contestId]
-                if (info == null) {
-                    println("Dont have contestId $contestId")
-                } else {
-                    val contestPools = result.getOrPut(contestId) { mutableListOf() }
-                    votes.forEach { cand, vote ->
-                        if (!info.candidateIds.contains(cand))
-                            println("Contest ${contestId} missing candidate $cand vote=$vote")
-                    }
-                    // data class BallotPool(
-                    //    val name: String,
-                    //    val id: Int,
-                    //    val contest:Int,
-                    //    val ncards: Int,          // ncards for this contest in this pool
-                    //    val votes: Map<Int, Int>, // candid -> nvotes // the diff from ncards tell you the undervotes
+            // val poolName: String,
+            // val poolId: Int,
+            // val irvIds: Set<Int>,
+            // val contestInfos: Map<Int, ContestInfo>)
+            // val contestTabulations = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
+            // val irvVoteConsolidations = mutableMapOf<Int, IrvContestVotes>()  // contestId -> IrvContestVotes
+            val cardPool = CardPool(redacted.ballotType, redactedCount, emptySet(), infoMap)
 
-                    //                 undervotes = info.voteForN * (iNc - Np) - nvotes
-                    val nvotes = votes.values.sum()
-                    val contestTab = cvrCounts[contestId]!!
+            val tabs = cardPool.contestTabulations  // contestId -> candidateId -> nvotes
+            redacted.contestVotes.forEach { (contestId, candCounts) ->
+                val info = infoMap[contestId]!!
+                val tab = ContestTabulation(info.voteForN)
+                tabs[contestId] = tab
+                candCounts.forEach { (cand, vote) -> tab.addVote(cand, vote)}
 
-                    // use the same undervote pct as in the cvrs TODO bogus! They need to supply this value.
-                    val undervotePct = contestTab.undervotePct(info.voteForN)
-                    // undervotes = undervotesPct * ncards
-                    // ncards = (undervotes + nvotes) / voteForN
-                    // ncards = (undervotesPct * ncards + nvotes) / voteForN
-                    // ncards (1 - undervotesPct / voteForN ) =  nvotes / voteForN
-                    // ncards = (nvotes / voteForN ) / (1 - undervotesPct / voteForN )
-                    // ncards = nvotes / (voteForN - undervotesPct)
-
-                    val packedCards = roundToInt( nvotes / (info.voteForN - undervotePct))
-                    val ncards = max(packedCards, votes.values.max()) // cant have less cards than votes
-                    if (ncards > packedCards)
-                        println("ncards > packedCards")
-
-                    // TODO does Ballot Pool need Np ?
-                    // use the index as the poolId
-                    contestPools.add(BallotPool("pool$redactedCount", redactedCount, contestId, ncards, votes))
-                }
+                //  redVotes = redacted.votes.map { it.value }.sum()
+                val redVotes = candCounts.map { it.value }.sum()
+                //  redNcards = (redVotes + redUndervotes) / info.voteForN
+                val oaContest = oaContests[contestId]!!
+                tab.ncards = (redVotes + oaContest.undervotes[redacted.ballotType]!!) / info.voteForN
             }
+            result.add(cardPool)
         }
         return result
     }
 
-    fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
+    override fun makeRedactedCvrs(show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
-        export.redacted.forEachIndexed { redactedIdx, redacted ->
-            rcvrs.addAll(makeRedactedCvrs(redactedIdx, redacted, show))
+        cardPools.forEach { cardPool ->
+            rcvrs.addAll(makeRedactedCvrs(cardPool, show))
         }
+
+        val voteForN = oaContests.mapValues { it.value.info.voteForN }
+        val rcvrTabs = tabulateCvrs(rcvrs.iterator(), voteForN).toSortedMap()
+        rcvrTabs.forEach { contestId, contestTab ->
+            val oaContest: OneAuditContest = oaContests[contestId]!!
+            val redUndervotes = oaContest.redUndervotes()
+            if (show) {
+                println("contestId=${contestId}")
+                println("  redacted= ${oaContest.red.votes}")
+                println("  contestTab=${contestTab.votes.toSortedMap()}")
+                println("  oaContest.undervotes= ${redUndervotes} == contestTab.undervotes = ${contestTab.undervotes}")
+                println()
+            }
+            require(checkEquivilentVotes(oaContest.red.votes, contestTab.votes))
+            if (redUndervotes != contestTab.undervotes)
+                println("why")
+            if (voteForN[contestId] == 1) require(redUndervotes == contestTab.undervotes) // TODO
+        }
+
         return rcvrs
     }
 
-    // make cvrs for one redactedGroup
-    // A redactedGroup corresponds to one poolId; it will have an arbitrary number of contests in it
-    fun makeRedactedCvrs(poolId: Int, redacted: RedactedGroup, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
+    // the redacted Cvrs simulate the real CVRS that are in the pools, for testing and estimation
+    // for a real OneAudit, only the pool averages are used. CLCA can only be used for testing, not for a real audit.
+    // we could use CardPool instead of redacted, would be more resusable
+    fun makeRedactedCvrs(cardPool: CardPool, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
 
-        if (show) {
-            println("ballotStyle = ${redacted.ballotType}")
-            redacted.contestVotes.forEach { (key, votes) ->
-                println("  contest $key = ${votes.values.sum()}")
-            }
-            val expectedCvrs = redacted.contestVotes.values.map { it.values.sum() }.max()
-            println("expectedCvrs= $expectedCvrs\n")
+        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        cardPool.contestTabulations.forEach { (contestId, contestTab) ->
+            val oaContest: OneAuditContest = oaContests[contestId]!!
+            val underVotes = oaContest.undervotes[cardPool.poolName]!!
+            contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
         }
 
-        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>()
-        redacted.contestVotes.entries.forEach { (contestId, candidateCount) ->
-            val ballotPool: BallotPool = poolsByContest[contestId]!!.find { it.poolId == poolId }!!
-            require(candidateCount == ballotPool.votes)
-            val info = infos[contestId]!!
-            contestVotes[contestId] = ballotPool.votesAndUndervotes(info.voteForN)
-        }
+        val cvrs = makeVunderCvrs(contestVotes, poolId = cardPool.poolId) // TODO test
 
-        val cvrs = makeVunderCvrs(contestVotes, poolId = poolId)
-        // println("makeRedactedCvrs cvrs=${cvrs.size}")
+        // check
         val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
-
         contestVotes.forEach { (contestId, vunders) ->
             val tv = tabVotes[contestId] ?: emptyMap()
             if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+                println("  contestId=${contestId}")
                 println("  tabVotes=${tv}")
-                println("  vunders.candVotesSorted ${vunders.candVotesSorted}")
+                println("  vunders= ${vunders.candVotesSorted}")
                 require(checkEquivilentVotes(vunders.candVotesSorted, tv))
             }
-
-            val tabsWith = tabulateVotesWithUndervotes(cvrs.iterator(), contestId, vunders.votes.size, vunders.voteForN).toSortedMap()
-            if (!checkEquivilentVotes(vunders.votesAndUndervotes(), tabsWith)) {
-                println("  tabsWith=${tabsWith}")
-                println("  vunders.votesAndUndervotes()= ${vunders.votesAndUndervotes()}")
-                require(checkEquivilentVotes(vunders.votesAndUndervotes(), tabsWith))
-            }
         }
+
+        val voteForN = oaContests.mapValues { it.value.info.voteForN }
+        val cvrTab = tabulateCvrs(cvrs.iterator(), voteForN).toSortedMap()
+        cvrTab.forEach { contestId, contestTab ->
+            val oaContest: OneAuditContest = oaContests[contestId]!!
+            if (show) {
+                println("contestId=${contestId} group=${cardPool.poolName}")
+                println("  redacted= ${contestTab.votes[contestId]}")
+                println("  oaContest.undervotes= ${oaContest.undervotes[cardPool.poolName]} == ${contestTab.undervotes}")
+                println("  contestTab=$contestTab")
+                println()
+            }
+            require(checkEquivilentVotes(cardPool.contestTabulations[contestId]!!.votes, contestTab.votes))
+        }
+
         return cvrs
     }
+
+    fun makeContestsUA(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
+        if (!quiet) println("ncontests with info = ${infoList.size}")
+
+        val voteForN = oaContests.mapValues { it.value.info.voteForN }
+        val allTab = tabulateCvrs(allCvrs.iterator(), voteForN).toSortedMap()
+
+        val regContests = infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
+            val contestTab = allTab[info.id]!!
+            val useNc = oaContests[info.id]?.nballots() ?: contestTab.ncards
+            val useNcast = contestTab.ncards
+
+            val votesIn = contestTab.votes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
+            Contest(info, votesIn, useNc, useNcast)
+        }
+
+        if (!quiet) {
+            println("Regular contests (No IRV)) = ${regContests.size}")
+            regContests.forEach { contest ->
+                println(contest.show2())
+            }
+        }
+
+        /* val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
+        val irvInfos = infoList.filter { it.choiceFunction == SocialChoiceFunction.IRV }
+        val irvContests = if (irvInfos.isEmpty()) emptyList() else {
+            val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, exportCvrs.iterator())
+            makeRaireContests(irvInfos, irvVoteMap, sovoNcs)
+        }
+
+        if (!quiet) {
+            println("contests with IRV = ${irvContests.size}")
+            irvContests.forEach { contest ->
+                println(contest.show2())
+            }
+        }
+
+         */
+        return Pair(regContests, emptyList()) // no IRV contests
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////
 // Create a OneAudit where pools are from the redacted cvrs
-/* Optionally only has pools (ie "batch level comparison audit") includeCvrs = false
+// Optionally only has pools (ie "batch level comparison audit") includeCvrs = false
 fun createBoulderElectionOneAudit(
     cvrExportFile: String,
     sovoFile: String,
@@ -231,71 +200,153 @@ fun createBoulderElectionOneAudit(
     includeCvrs: Boolean = true,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .01,
-    auditConfigIn: AuditConfig? = null) {
+    auditConfigIn: AuditConfig? = null)
+{
+    //  TODO clearDirectory(Path.of(auditDir))
+    val stopwatch = Stopwatch()
 
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
 
-    clearDirectory(Path.of(auditDir))
+    println("readDominionCvrExport $cvrExportFile")
+    val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+    val election = BoulderElectionOneAudit(export, sovo, includeCvrs = includeCvrs)
 
-    val stopwatch = Stopwatch()
-    val export: DominionCvrExport = readDominionCvrExport(cvrExportFile, "Boulder")
-    val boulderElection = BoulderElectionOneAuditFromCvrs(export, sovo, includeCvrs = includeCvrs)
+    val rcvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(election.redactedCvrs.iterator())
+    println("added ${election.redactedCvrs.size} redacted cvrs with ${rcvrVotes.values.sumOf { it.values.sum() }} total votes")
 
-    val contests: List<OneAuditContest> = boulderElection.makeContests()
+    val (contests, irvContests) = election.makeContestsUA()
+
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, riskLimit = riskLimit, minRecountMargin = minRecountMargin,
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    val redactedCvrs = boulderElection.makeRedactedCvrs()
-    val rcvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(redactedCvrs.iterator())
-    println("added ${redactedCvrs.size} redacted cvrs with ${rcvrVotes.values.sumOf { it.values.sum() }} total votes")
-    // val allCvrs = electionFromCvrs.cvrs + redactedCvrs
+    val cards = createSortedCards(election.allCvrs, auditConfig.seed)
+    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
+    println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${election.allCvrs.size}")
 
     /////////////////
-    val contestsUA: List<OAContestUnderAudit> = contests.map { it.makeContestUnderAudit() }
+    // TODO attach (abstraction of) OneAuditContest ?
+    val contestsUA = contests.map {
+        OAContestUnderAudit(it, auditConfig.hasStyles)
+    }
+    val cardPoolMap = election.cardPools.associate { it.poolId to it }
+    addOAClcaAssorters(contestsUA, cards.iterator(), election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-
-    val allCvrs = if (includeCvrs) boulderElection.cvrs + redactedCvrs else redactedCvrs
-    val cards = createSortedCards(allCvrs, auditConfig.seed)
-    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${allCvrs.size}")
-
+    checkContestsCorrectlyFormed(auditConfig, contestsUA)
     checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = false)
+    checkVotesVsSovo(contests, sovo)
 
-    writeContestsJsonFile(contestsUA, publisher.contestsFile())
+    writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
-
-    checkAssortAvgs(contestsUA, cards, check = true, show = false) // TODO this is slow, reading cvrs for each contest
     println("took = $stopwatch\n")
-
-    val contest18 = contestsUA.find { it.id == 18 }!!
-    val cards18 = cards.filter { it.cvr().hasContest(18)}
-    writeAuditableCardCsvFile(cards18, "${publisher.topdir}/sortedCards18.csv")
-    println("   writeCvrs18 ${"${publisher.topdir}/sortedCards18.csv"} cvrs = ${cards18.size}")
-
-    val redacted18 = redactedCvrs.filter { it.hasContest(18)}
-    println("     redacted18 = ${redacted18.size}")
-
-    println(contest18.contestOA)
-    contest18.showPools(redacted18)
-
-    checkAssortAvg(contest18, cards18, show = true)
-    checkAssortAvg(contest18, cards, show = true)
 }
 
-fun checkAssortAvgs(contests: List<OAContestUnderAudit>, cards: List<AuditableCard>, check: Boolean = true, show: Boolean = false) {
-    contests.forEach { contestUA ->
-        if (contestUA.minAssertion() != null) {  // single candidates have no assertions
-            checkAssortAvg(contestUA, cards, check = check, show = show)
+
+// intermediate form before we make Contest
+class OneAuditContest(val info: ContestInfo, val sovoContest: BoulderContestVotes,
+                      val cvr: ContestTabulation, val red: ContestTabulation) {
+
+    val undervotes = mutableMapOf<String, Int>() // group id -> undervote
+
+    override fun toString() = buildString {
+        appendLine(info)
+        appendLine(" sovoContest=$sovoContest")
+        // appendLine(" allTabulation=$all3")
+        appendLine(" cvrTabulation=$cvr")
+        appendLine(" redTabulation=$red")
+
+        val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN
+        val phantoms = sovoContest.totalBallots - sovoCards - sovoContest.totalOverVotes
+        appendLine("  sovoCards= $sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN")
+        appendLine("  phantoms= $phantoms  = sovoContest.totalBallots - sovoCards - sovoContest.totalOverVotes")
+
+        val redUndervotes = sovoContest.totalUnderVotes - cvr.undervotes
+        val redVotes = red.nvotes()
+        val redNcards = (redVotes + redUndervotes) / info.voteForN
+        val redUnderPct = 100.0 * redUndervotes / (redVotes + redUndervotes)
+        appendLine("  redUndervotes= $redUndervotes  = sovoContest.totalUnderVotes - cvr.undervotes")
+        appendLine("  redVotes= $redVotes = redacted.votes.map { it.value }.sum()")
+        appendLine("  redNcards= $redNcards = (redVotes + redUndervotes) / info.voteForN")
+        appendLine("  redUnderPct= 100.0 * redUndervotes / redNcards  = ${redUnderPct.toInt()}%")
+    }
+
+    fun problems() = buildString {
+        appendLine(info)
+        val nvotes = cvr.nvotes() + red.nvotes()
+        val no = if (nvotes == sovoContest.totalVotes) "" else "***"
+        appendLine("  nvotes= $nvotes, sovoContest.totalVotes = ${sovoContest.totalVotes} $no")
+
+        val nballots = (nvotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
+        val no2 = if (nballots == sovoContest.totalBallots) "" else "***"
+        appendLine("  nballots= $nballots, sovoContest.totalBallots = ${sovoContest.totalBallots} $no2")
+
+        val ncards = cvr.ncards + red.ncards
+        val no3 = if (ncards == votesCast()) "" else "***"
+        appendLine("  ncards= $ncards, votesCast() = ${votesCast()} $no3")
+    }
+    // on contest 20, totalVotes and totalBallots is wrong vs the cvrs. (only one where voteForN=3)
+    // 'Town of Superior - Trustee' (20) candidates=[0, 1, 2, 3, 4, 5, 6] choiceFunction=PLURALITY nwinners=3 voteForN=3
+    //  nvotes= 17110, sovoContest.totalVotes = 16417
+    //  nballots= 8485, sovoContest.totalBallots = 8254
+
+    fun checkCvrs(contestTab: ContestTabulation) {
+        sovoContest.candidateVotes.forEach { (sovoCandidate, sovoVote) ->
+            val candidateId = info.candidateNames[sovoCandidate]
+            val contestVote = contestTab.votes[candidateId] ?: 0
+            if (contestVote != sovoVote) {
+                println("*** ${info.name} '$sovoCandidate' $contestVote != $sovoVote")
+            }
+            require(contestVote == sovoVote)
         }
     }
-}
 
-// we are making the contest votes from the cvrs. how does it compare with official tally ??
-fun checkAssortAvg(contestUA: OAContestUnderAudit, cards: List<AuditableCard>, check: Boolean = true, show: Boolean = false) {
-    checkAssorterAvg(contestUA.contestOA, cards.map { it.cvr() }, check = check, show = show)
-} */
+    fun checkNcards(contestTab: ContestTabulation) {
+        println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncards} = ${sovoContest.totalBallots - contestTab.ncards}")
+        println("  ${info.id}: nballots=${nballots()} - contestTab.ncards=${contestTab.ncards} = ${nballots() - contestTab.ncards}")
+        println()
+    }
+
+    fun nballots(): Int {
+        val nvotes = cvr.nvotes() + red.nvotes()
+        val nballots = (nvotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
+        return max(nballots, sovoContest.totalBallots)
+    }
+
+    fun votesCast(): Int {
+        val nvotes = cvr.nvotes() + red.nvotes()
+        val sovoCards = (nvotes + sovoContest.totalUnderVotes) / info.voteForN
+        val votesCast = sovoCards + sovoContest.totalOverVotes
+        return votesCast
+    }
+
+    // there are no overvotes in the Cvrs; we treat them as undervotes and add to redacted pools.
+    fun redUndervotes() = sovoContest.totalUnderVotes + sovoContest.totalOverVotes - cvr.undervotes
+
+    fun allocateUndervotes(groups: List<RedactedGroup>) {
+        val totalCards = red.ncards
+        var used = 0
+        val redUndervotes = redUndervotes()
+
+        groups.forEach { group ->
+            val votes = group.contestVotes[info.id]
+            if (votes != null) {
+                // distribute undervotes as proportion of totalVotes
+                val groupUndervotes = roundToClosest(redUndervotes * (votes.values.sum()/totalCards.toDouble()))
+                used += groupUndervotes
+                undervotes[group.ballotType] = groupUndervotes
+            }
+        }
+        // adjust the last group so sum undervotes = redUndervotes
+        if (redUndervotes - used != 0) {
+            val adjustGroup = groups.first { undervotes[it.ballotType] != null && undervotes[it.ballotType]!! > (used - redUndervotes) }.ballotType
+            val lastUnder = undervotes[adjustGroup]!!
+            undervotes[adjustGroup] = lastUnder + (redUndervotes - used)
+        }
+        // check
+        require (undervotes.values.sum() == redUndervotes)
+    }
+}

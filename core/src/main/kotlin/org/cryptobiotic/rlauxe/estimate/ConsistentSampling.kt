@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.roundToInt
+import org.cryptobiotic.rlauxe.util.roundToClosest
 
 private val debug = false
 private val debugConsistent = false
@@ -169,7 +169,7 @@ fun uniformSampling(
     contestsNotDone.forEach { contestRound ->
         val Nb = mvrManager.Nballots(contestRound.contestUA)
         val fac = Nb / contestRound.Nc.toDouble()
-        val estWithFactor = roundToInt((contestRound.estSampleSize * fac))
+        val estWithFactor = roundToClosest((contestRound.estSampleSize * fac))
         contestRound.estSampleSizeNoStyles = estWithFactor
         // val estPct = estWithFactor / Nb.toDouble()
         if (sampleLimit > 0 && estWithFactor > sampleLimit) { // might as well test it here, since it will happen a lot

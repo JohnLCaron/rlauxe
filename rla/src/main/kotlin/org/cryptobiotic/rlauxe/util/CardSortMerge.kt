@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory

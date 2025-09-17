@@ -135,17 +135,17 @@ open class Contest(
         }
         votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by votes recieved
         votes.forEach { (candId, candVotes) ->
-            require(candVotes <= (Nc - Np())) { // LOOK
+            require(candVotes <= Ncast) { // LOOK
                 "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Np) = ${Nc - Np()}"
             }
         }
         val nvotes = votes.values.sum()
        if (info.choiceFunction != SocialChoiceFunction.IRV) {
-            require(nvotes <= info.voteForN * (Nc - Np())) {
+            require(nvotes <= info.voteForN * Ncast) {
                 "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=${Np()}) = ${info.voteForN * (Nc - Np())}"
             }
         }
-        undervotes = info.voteForN * (Nc - Np()) - nvotes   // C1
+        undervotes = info.voteForN * Ncast - nvotes   // C1
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
@@ -185,6 +185,7 @@ open class Contest(
         return candVotes / Nc.toDouble()
     }
 
+    // put the undervotes into the candidate map.
     fun votesAndUndervotes(): Map<Int, Int> {
         return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, undervotes)).toMap()
     }

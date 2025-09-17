@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.roundToInt
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
@@ -127,7 +127,7 @@ class TestMultiContestTestData {
         val ballotManifest = test.makeCardLocationManifest(true)
 
         test.contests.forEachIndexed { idx, contest ->
-            assertEquals(roundToInt(N * (1.0 + phantomPct)), contest.Nc)
+            assertEquals(roundToClosest(N * (1.0 + phantomPct)), contest.Nc)
             val fcontest = test.fcontests[idx]
             assertEquals(contest.Nc, fcontest.ncards + fcontest.phantomCount)
             println("contest $contest ncards=${fcontest.ncards}")

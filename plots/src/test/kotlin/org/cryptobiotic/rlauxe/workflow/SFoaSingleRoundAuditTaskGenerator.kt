@@ -3,13 +3,12 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.ClcaNoErrorIterator
-import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReaderSkip
 import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.toPoolMap
+import org.cryptobiotic.rlauxe.persist.csv.poolNameToId
 import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.createZipFile
 
@@ -157,7 +156,7 @@ class SfoaSingleRoundAuditTaskContest18(
 const val sortedCardsFile = "sortedCards.csv"
 fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, ballotPoolFile: String?) {
     val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
-    val pools = ballotPools?.toPoolMap()
+    val pools = ballotPools?.poolNameToId()
 
     SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run()
     if (zip) {

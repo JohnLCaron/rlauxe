@@ -176,7 +176,7 @@ The constant γ is a tuning parameter that trades off effort when the cast vote 
 corla
 
 - RLATool needs to be improved to audit contests that cross county lines and to audit small contests efficiently.
-- RLATool needs to be modified torecognize and group together contests that cross jurisdictional boundaries;currently, it treats every contest as if it were entirely contained in a single county.
+- RLATool needs to be modified to recognize and group together contests that cross jurisdictional boundaries; currently, it treats every contest as if it were entirely contained in a single county.
 - auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from just those ballots that contain the contest
 
 "stratification": partitioning the cast ballots into non-overlapping groups and sampling independently from those groups. We consider methods that use two strata: CVR counties and no-CVR counties.

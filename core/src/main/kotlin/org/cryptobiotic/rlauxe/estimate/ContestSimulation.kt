@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.util.roundToInt
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.audit.CardLocation
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
@@ -130,15 +130,15 @@ class ContestSimulation(val contest: Contest) {
                                 undervotePct: Double, // needed to set Nc
                                 phantomPct: Double): ContestSimulation {
             val nvotes = round(Nc * (1.0 - undervotePct - phantomPct))
-            val winner = roundToInt((margin * Nc + nvotes) / 2)
-            val loser = roundToInt(nvotes - winner)
-            val Np = roundToInt(Nc * phantomPct)
-            val Nu = roundToInt(Nc * undervotePct)
+            val winner = roundToClosest((margin * Nc + nvotes) / 2)
+            val loser = roundToClosest(nvotes - winner)
+            val Np = roundToClosest(Nc * phantomPct)
+            val Nu = roundToClosest(Nc * undervotePct)
             val contest = Contest(
                 ContestInfo("standard", 0, mapOf("A" to 0,"B" to 1), choiceFunction = SocialChoiceFunction.PLURALITY),
                 mapOf(0 to winner, 1 to loser),
                 Nc = Nc,
-                Ncast = roundToInt(nvotes + Nu)
+                Ncast = roundToClosest(nvotes + Nu)
             )
             return ContestSimulation(contest)
         }
@@ -148,10 +148,10 @@ class ContestSimulation(val contest: Contest) {
 
             // otherwise scale everything
             val sNc = sampleLimit / contest.Nc.toDouble()
-            val sNp = roundToInt(sNc * contest.Np())
-            val sNu = roundToInt(sNc * contest.Nundervotes())
+            val sNp = roundToClosest(sNc * contest.Np())
+            val sNu = roundToClosest(sNc * contest.Nundervotes())
             val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
-            val svotes = contest.votes.map { (id, nvotes) -> id to roundToInt(sNc * nvotes) }.toMap()
+            val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
             val voteCount = svotes.map { it.value }.sum() // V_c
 
             if (voteCount > sampleLimit) {

@@ -4,11 +4,11 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
 // This is a way to create test Cvrs that match known vote totals and undervotes for a contest
-// Also used in OneAudit estimation of sample sizes
 class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
-    val candVotesSorted = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
+    val candVotesSorted: Map<Int, Int> = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
     val votes: IntArray = candVotesSorted.map { it.value }.toIntArray()
     private val candidateIds = candVotesSorted.keys.toList()
+
     var undervotesUsed = 0
     var cand0 = 0
     var finishedVotes = false
@@ -106,7 +106,6 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
 
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
-// contestId -> VotesAndUndervotes typically from a pool
 fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolId: Int?): List<Cvr> {
     val rcvrs = mutableListOf<Cvr>()
 
@@ -114,7 +113,8 @@ fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolId: Int?): Li
     var usedOne = true
     while (usedOne) {
         usedOne = false
-        val cvb2 = CvrBuilder2("redacted$count", phantom = false, poolId = poolId)
+        val cvrId = if (poolId == null) "redacted${count}" else "pool${poolId}-redacted${count}"
+        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
         contestVotes.entries.forEach { (contestId, vunders) ->
             if (vunders.isNotEmpty()) {
                 // pick random candidates for the contest

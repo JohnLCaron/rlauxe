@@ -11,7 +11,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.persist.csv.CvrExport
+import org.cryptobiotic.rlauxe.core.CvrExport
+import org.cryptobiotic.rlauxe.persist.csv.toCsv
 import org.cryptobiotic.rlauxe.sf.ContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.InputStream
@@ -233,7 +234,8 @@ fun removeDuplicates(svotes : List<Int> ) : List<Int> {
     return result
 }
 
-fun readCvrExport(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
+// read CvrExport JSON inputStream and append CvrExport csv to outputStream
+fun convertCvrExportJsonToCsv(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result is Ok) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")

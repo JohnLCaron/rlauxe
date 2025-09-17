@@ -1,10 +1,8 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
-import org.cryptobiotic.rlauxe.boulder.*
-import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.boulder.convert
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,7 +13,7 @@ class TestDominionCvrReader {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/ThreeCandidatesTenVotes.csv"
-        val result: DominionCvrExport = readDominionCvrExport(filename, "Saguache")
+        val result: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Saguache")
         println(result.show())
 
         // There should be one contest, the one we just read in.
@@ -72,7 +70,7 @@ class TestDominionCvrReader {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         println(export.summary())
 
         assertEquals("Boulder", export.countyId)
@@ -155,7 +153,7 @@ class TestDominionCvrReader {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         // println(export.summary())
 
         assertEquals("Boulder", export.countyId)
@@ -169,24 +167,27 @@ class TestDominionCvrReader {
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
         val cvr0 = export.redacted[0]
         assertEquals("7", cvr0.ballotType)
-        var idx=0
-        assertEquals(listOf(265,104,0,0,2,1,1,5,2,0,0,0,0,0,0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(228,74,6,2,5,0,0,), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(233,12,0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(89,209,2,5), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        var idx = 0
+        assertEquals(
+            listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),
+            cvr0.contestVotes[idx++]!!.toMap().values.toList()
+        )
+        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0,), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(233, 12, 0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(89, 209, 2, 5), cvr0.contestVotes[idx++]!!.toMap().values.toList())
 
         // ,,,227,38,,,,,212,83,,,,,228,,223,4,0,207,79,216,,,,,,,,,,,,,
         assertNull(cvr0.contestVotes[idx++])
-        assertEquals(listOf(227,38), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(227, 38), cvr0.contestVotes[idx++]!!.toMap().values.toList())
         assertNull(cvr0.contestVotes[idx++])
         assertNull(cvr0.contestVotes[idx++])
-        assertEquals(listOf(212,83), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(212, 83), cvr0.contestVotes[idx++]!!.toMap().values.toList())
         assertNull(cvr0.contestVotes[idx++])
         assertNull(cvr0.contestVotes[idx++])
         assertEquals(listOf(228), cvr0.contestVotes[idx++]!!.toMap().values.toList())
         assertNull(cvr0.contestVotes[idx++])
-        assertEquals(listOf(223,4,0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(207,79), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(223, 4, 0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(207, 79), cvr0.contestVotes[idx++]!!.toMap().values.toList())
         assertEquals(listOf(216), cvr0.contestVotes[idx++]!!.toMap().values.toList())
 
         for (i in idx until 20) {
@@ -194,31 +195,31 @@ class TestDominionCvrReader {
         }
         // 130,87,111,50,25,36,101,175,74,147,91,163,75,167,70,145,89,162,63,150,69,
         idx = 20
-        assertEquals(listOf(130,87,111,50,25,36,101), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(175,74), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(147,91), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(163,75), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(167,70), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(145,89), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(162,63), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(150,69), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(130, 87, 111, 50, 25, 36, 101), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(175, 74), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(147, 91), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(163, 75), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(167, 70), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(145, 89), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(162, 63), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(150, 69), cvr0.contestVotes[idx++]!!.toMap().values.toList())
         // 152,67,147,55,148,55,150,54,141,58,149,60,223,73,
-        assertEquals(listOf(152,67), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(147,55), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(148,55), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(150,54), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(141,58), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(149,60), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(223,73), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(152, 67), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(147, 55), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(148, 55), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(150, 54), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(141, 58), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(149, 60), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(223, 73), cvr0.contestVotes[idx++]!!.toMap().values.toList())
         // 212,58,195,93,261,53,133,135,255,68,170,137,263,40,204,104,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-        assertEquals(listOf(212,58), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(195,93), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(261,53), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(133,135), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(255,68), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(170,137), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(263,40), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(204,104), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(212, 58), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(195, 93), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(261, 53), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(133, 135), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(255, 68), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(170, 137), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(263, 40), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(204, 104), cvr0.contestVotes[idx++]!!.toMap().values.toList())
 
         for (i in idx until cvr0.contestVotes.size) {
             assertNull(cvr0.contestVotes[i])
@@ -240,7 +241,7 @@ class TestDominionCvrReader {
     @Test
     fun parseBoulder23Succeeds() {
         val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val result = readDominionCvrExport(filename, "Boulder")
+        val result = readDominionCvrExportCsv(filename, "Boulder")
         println(result.summary())
 
         val schema = result.schema
@@ -248,13 +249,29 @@ class TestDominionCvrReader {
         assertEquals(38, schema.contests.size)
 
         val boulderMayoral = schema.contests[0]
-        assertEquals("City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)", boulderMayoral.contestName)
+        assertEquals(
+            "City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)",
+            boulderMayoral.contestName
+        )
         //assertEquals(boulderMayoral.votesAllowed() as Int, 4)
         //assertEquals(boulderMayoral.winnersAllowed() as Int, 1)
         val boulderCouncil = schema.contests.get(1)
         // println(schema.choices(boulderCouncil.contestIdx).forEach{ print("\"${it}\", ")} )
-        assertEquals(listOf("Terri Brncic", "Jenny Robins", "Aaron Gabriel Neyer", "Jacques Decalo", "Silas Atkins", "Waylon Lewis", "Ryan Schuchard", "Tara Winer", "Tina Marquis", "Taishya Adams"),
-            schema.choices(boulderCouncil.contestIdx))
+        assertEquals(
+            listOf(
+                "Terri Brncic",
+                "Jenny Robins",
+                "Aaron Gabriel Neyer",
+                "Jacques Decalo",
+                "Silas Atkins",
+                "Waylon Lewis",
+                "Ryan Schuchard",
+                "Tara Winer",
+                "Tina Marquis",
+                "Taishya Adams"
+            ),
+            schema.choices(boulderCouncil.contestIdx)
+        )
 
         // Check that the first cvr was correctly parsed.
         assertEquals(result.cvrs.size, 118669)
@@ -352,11 +369,12 @@ class TestDominionCvrReader {
          */
     }
 
+
     @Test
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder County")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder County")
         println(export.summary())
 
         assertEquals("Boulder County", export.countyId)
@@ -368,161 +386,6 @@ class TestDominionCvrReader {
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
         assertEquals(25430, export.cvrs.size)
-    }
-
-    @Test
-    fun parseBoulder24() {
-        val stopwatch = Stopwatch()
-        // redaction lines are present
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
-        // println(export.summary())
-        println("took = $stopwatch")
-
-        assertEquals("Boulder", export.countyId)
-        assertEquals(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            export.filename
-        )
-        assertEquals("2024 Boulder County General Election", export.electionName)
-        assertEquals("5.17.17.1", export.versionName)
-        assertEquals(65, export.schema.contests.size)
-        assertEquals(384384, export.cvrs.size)
-
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024")
-
-        val maker = BoulderElectionFromCvrs(export, sovo)
-        val infos = maker.makeContestInfo()
-        println("ncontests with info = ${infos.size}")
-
-        /* infos.forEach { info ->
-            println(info.show())
-        } */
-        val countVotes = maker.countVotes()
-        val contests = infos.map { info ->
-            val contestTab = countVotes[info.id]!!
-            contestTab.votes.forEach {
-                if (!info.candidateIds.contains(it.key)) {
-                    "contestCount ${info.id } has candidate '${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
-                }
-            }
-            val inputVotes = contestTab.votes.filter{ info.candidateIds.contains(it.key) }
-            Contest(info, inputVotes, contestTab.ncards, 0)
-        }
-        /* println("ncontests with votes = ${contests.size}")
-        contests.forEach { contest ->
-            println(contest.show2())
-        } */
-
-        // from https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
-        val expected = mapOf(
-            "Kamala D. Harris / Tim Walz" to 150149,
-            "Donald J. Trump / JD Vance" to 40758,
-            "Blake Huber / Andrea Denault" to 123,
-            "Chase Russell Oliver / Mike ter Maat" to 1263,
-            "Jill Stein / Rudolph Ware" to 1499,
-            "Randall Terry / Stephen E Broden" to 147,
-            "Cornel West / Melina Abdullah" to 457,
-            "Robert F. Kennedy Jr. / Nicole Shanahan" to 1754,
-            "Chris Garrity / Cody Ballard" to 4,
-            "Claudia De la Cruz / Karina García" to 82,
-            "Shiva Ayyadurai / Crystal Ellis" to 2,
-            "Peter Sonski / Lauren Onak" to 65,
-            "Bill Frankel / Steve Jenkins" to 1,
-            "Brian Anthony Perry / Mark Sbani" to 0,
-        )
-
-        val contestPrez = contests.find { it.name.startsWith("President")}!!
-        val candidatesById = contestPrez.info.candidateNames.map { (name, id) -> id to name }.toMap()
-        val votesByCandidateName = contestPrez.votes.toSortedMap().map { (id, nvotes) ->
-            Pair(candidatesById[id]!!, nvotes)
-        }.toMap()
-        /*
-        votesByCandidateName.forEach { (name, nvotes) ->
-            println("  \"$name\" to $nvotes,")
-        }
-*/
-        assertEquals(expected, votesByCandidateName)
-    }
-
-    @Test
-    fun testMakeRedactedCvrs() {
-        val stopwatch = Stopwatch()
-        // redaction lines are present
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
-
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024")
-
-        val maker = BoulderElectionFromCvrs(export, sovo)
-        val infos = maker.makeContestInfo()
-        println("ncontests with info = ${infos.size}")
-
-        val redactedCvrs = maker.makeRedactedCvrs()
-        println("nredacted cvrs = ${redactedCvrs.size}")
-        println("took = $stopwatch")
-
-        // TODO check that vote tallies agree...
-        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(redactedCvrs.iterator())
-
-        val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.redacted.forEach { redacted ->
-            redacted.contestVotes.forEach { (contestId, conVotes) ->
-                val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
-                conVotes.forEach { (cand, nvotes) ->
-                    if (nvotes > 0) {
-                        val accum = accumVotes.getOrPut(cand) { 0 }
-                        accumVotes[cand] = accum + nvotes
-                    }
-                }
-            }
-        }
-        // println(compareRedactions(redactedCvrVotes, redactedDirect))
-        assertEquals(redactedCvrVotes, redactedDirect)
-        println("redactedCvrVotes agrees with redactedDirect")
-    }
-
-    @Test
-    fun testIrvRedactedCvrs() {
-        val stopwatch = Stopwatch()
-        // redaction lines are present
-        val filename = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv"
-        val export: DominionCvrExport = readDominionCvrExport(filename, "Boulder")
-
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv", "Boulder2023")
-        // println("sovo = ${sovo.show()}")
-
-        val sovoRcv = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
-        // println("sovoRcv = ${sovoRcv.show()}")
-        val irvContest: BoulderContestVotes = sovoRcv.contests.first()
-        // println("irvContest = ${irvContest}")
-
-        val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
-
-        val electionFromCvrs = BoulderElectionFromCvrs(export, combined)
-        val (contests, raireContests) = electionFromCvrs.makeContests()
-        val irvId = raireContests.first().id
-
-        val countIrvCvrs = electionFromCvrs.cvrs.filter{ it.hasContest(irvId) }.count()
-        println("countIrvCvrs = $countIrvCvrs")
-        assertEquals(irvContest.totalBallots, countIrvCvrs)
-    }
-
-}
-
-fun compareRedactions(votes1: Map<Int, Map<Int, Int>>, votes2: Map<Int, Map<Int, Int>>) = buildString {
-    val svotes1 = votes1.toSortedMap()
-    svotes1.forEach { (contestId, conVotes1) ->
-        val conVotes2 = votes2[contestId]!!.toSortedMap()
-        val sortedConVotes1 = conVotes1.toSortedMap()
-        appendLine("  contest $contestId: cvrVotes = $sortedConVotes1")
-        appendLine("  contest $contestId: redacted = $conVotes2")
     }
 }
 

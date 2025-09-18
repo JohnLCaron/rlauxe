@@ -4,11 +4,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssorters
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
@@ -36,12 +38,12 @@ fun createSfElectionFromCvrExportOANS(
     val stopwatch = Stopwatch()
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
-        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalBet, useFirst = true)
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
     )
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
     // pass 1 through cvrs, make card pools
-    val cardPools: Map<String, CardPoolNs> = createCardPoolsNS(
+    val cardPools: Map<Int, CardPoolNs> = createCardPoolsNS(
         auditDir,
         contestInfos.associateBy { it.id },
         castVoteRecordZip,
@@ -52,16 +54,19 @@ fun createSfElectionFromCvrExportOANS(
 
     // make contests based on cardPools
     val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools, contestNcs)
-    val contests = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools, contestNcs)
-    val allContests = irvContests + contests
+    val contestsUA = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools, contestNcs)
+    val allContests = irvContests + contestsUA
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    addOAClcaAssorters(auditableContests, cardPoolList.iterator(), cardPools)
+    //     oaContests: List<OAContestUnderAudit>,
+    //    cardIter: Iterator<Cvr>,
+    //    cardPools: Map<Int, CardPool>
+    addOAClcaAssorters(auditableContests, CvrExportAdapter(cardPoolList.iterator()), cardPools)
 
     // these checks may modify the contest status; dont call until clca assertions are created
-    checkContestsCorrectlyFormed(auditConfig, contests)
-    checkContestsWithCvrs(contests, CvrExportAdapter(cardPoolList.iterator()), show = true)
+    checkContestsCorrectlyFormed(auditConfig, contestsUA)
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cardPoolList.iterator()), show = true)
 
     val publisher = Publisher(auditDir) // creates auditDir
     writeContestsJsonFile(allContests, publisher.contestsFile())
@@ -84,7 +89,7 @@ fun createCardPoolsNS(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     cvrCsvFilename: String,
-    ): Map<String, CardPoolNs>
+    ): Map<Int, CardPoolNs>
 {
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
     println("IRV contests = ${contestManifest.irvContests}")
@@ -97,7 +102,7 @@ fun createCardPoolsNS(
         val pool = cardPoolsU.getOrPut(cvrExport.poolKey() ) {
             CardPoolNs(cvrExport.poolKey(), cardPoolsU.size + 1, contestManifest.irvContests, contestInfos)
         }
-        pool.accumulateVotes(cvrExport)
+        pool.accumulateVotes(cvrExport.toCvr())
     }
 
     // for each pool, every cvr has to have every contest in the pool
@@ -160,7 +165,7 @@ fun createCardPoolsNS(
     poutputStream.close()
     println(" total ${sortedPools.size} pools")
 
-    return cardPoolsM
+    return cardPoolsM.values.associateBy { it.poolId }
 }
 
 // keep all the CVRS, which we can use to caclulate average assort. only used for SF.
@@ -170,9 +175,9 @@ class CardPoolNs( poolName: String, poolId: Int, irvIds: Set<Int>,  contestInfos
     // TODO keeping all the CvrExport in memory here. better to write them back ??
     var cvrs = mutableListOf<CvrExport>()
 
-    override fun accumulateVotes(cvr: CvrExport) {
-        cvrs.add(cvr)
-        super.accumulateVotes(cvr)
+    fun accumulateVotes(cvrExport: CvrExport) {
+        cvrs.add(cvrExport)
+        super.accumulateVotes(cvrExport.toCvr())
     }
 }
 

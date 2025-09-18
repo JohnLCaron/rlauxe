@@ -1,7 +1,7 @@
 **RLAUXE ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 9/11/2025_
+_last changed: 9/18/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -226,6 +226,7 @@ when all ballots have an associated CVR and there are no errors:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.html" rel="sf2024NmvrsLogLinear">![sf2024NmvrsLogLinear](docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.png)</a>
 
 Here is the same election using OneAudit where the in-person ballots are in precinct pools and have no card style data.
+About 86% of the ballots have CVRs, the rest are in the precinct pools.
 We run the audit 50 times with different permutations of the actual ballots, and show a scatter plot of the results. The
 variance is due to the random order of the pooled ballots; the 50 trials are spread out vertically, since they all have the same margin:
 
@@ -242,18 +243,16 @@ Here is the same election using OneAudit where the in-person ballots are in prec
 
 ### OneAudit for Redacted data
 
-We also have the use case of "redacted ballots" where we only get pool totals, and perhaps thats an instance where we might have pools but the admin is willing to give us the contest counts in each pool. (Since we then dont need ballot information, this may satisfy the privacy concern that redacted ballots is used for.)
-
-CreateBoulderElectionOneAudit explores creating a OneAudit and making the redacted CVRs into OneAudit pools.
+We have the use case of "redacted ballots" where we only get pool vote totals. CreateBoulderElectionOneAudit uses the
+publically available data from Boulder County, CO 2024 general election, using OneAudit and making the redacted CVRs into OneAudit pools.
 
 Findings so far:
 
-1. Boulder County apparently does not publish the number of ballots in each pool.
+1. Boulder County does not publish the number of ballots in each pool.
 2. Also does not publish the number of ballots for each contest in each pool, ie, the undervotes.
-3. While we still can do a simulation with CreateBoulderElectionOneAudit, we probably cant do a real audit with existing published data.
+3. While we still can do a simulation with CreateBoulderElectionOneAudit, we cant do a real audit with existing published data.
 4. At a minimum we need (1).
-
-**TODO**: Assuming we have (1), whats the consequences of not having (2) ??
+5. **TODO**: Assuming we have (1), whats the consequences of not having (2) ??
 
 
 # Comparing Samples Needed by Audit type

@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.audit.tabulateCvrs
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import kotlin.test.Test
-import kotlin.text.get
 
 class TestBoulderElectionOneAudit {
 

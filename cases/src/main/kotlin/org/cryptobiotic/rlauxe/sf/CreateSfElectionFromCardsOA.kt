@@ -194,6 +194,12 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, Ca
                 allPools.ncards)
             contestsUAs.add(OAContestUnderAudit(contest))
         }
+        val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
+        val unpooledTab = unpooledPool.contestTabulations[info.id]
+        if (unpooledTab != null) {
+            val unpooledPct = 100.0 * unpooledTab.ncards / allPools.ncards
+            println(" contest ${info.id} allPools.ncards= ${allPools.ncards} unpooled.ncards = ${unpooledTab.ncards} $unpooledPct %")
+        }
     }
     return contestsUAs
 }

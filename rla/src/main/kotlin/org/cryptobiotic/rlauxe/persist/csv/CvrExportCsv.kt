@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.util.ZipReader
@@ -107,9 +106,9 @@ fun CvrExport.toCsv() = buildString {
     appendLine()
 }
 
-class CvrExportAdapter(val cvrExportIterator: Iterator<CvrExport>) : Iterator<Cvr> {
+class CvrExportAdapter(val cvrExportIterator: Iterator<CvrExport>, val pools: Map<String, Int>? = null) : Iterator<Cvr> {
     override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next() = cvrExportIterator.next().toCvr()
+    override fun next() = cvrExportIterator.next().toCvr(pools=pools)
 }
 
 

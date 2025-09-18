@@ -203,6 +203,7 @@ class ContestTabulation(val voteForN: Int?) {
         this.ncards += other.ncards
         this.novote += other.novote
         this.undervotes += other.undervotes
+        this.overvotes += other.overvotes
     }
 
     fun undervotePct(): Double {

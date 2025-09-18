@@ -167,22 +167,6 @@ class BoulderElectionOneAudit(
                 println(contest.show2())
             }
         }
-
-        /* val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
-        val irvInfos = infoList.filter { it.choiceFunction == SocialChoiceFunction.IRV }
-        val irvContests = if (irvInfos.isEmpty()) emptyList() else {
-            val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, exportCvrs.iterator())
-            makeRaireContests(irvInfos, irvVoteMap, sovoNcs)
-        }
-
-        if (!quiet) {
-            println("contests with IRV = ${irvContests.size}")
-            irvContests.forEach { contest ->
-                println(contest.show2())
-            }
-        }
-
-         */
         return Pair(regContests, emptyList()) // no IRV contests
     }
 
@@ -231,7 +215,7 @@ fun createBoulderElectionOneAudit(
     val contestsUA = contests.map {
         OAContestUnderAudit(it, auditConfig.hasStyles)
     }
-    addOAClcaAssorters(contestsUA, cards.iterator(), election.cardPools.associate { it.poolId to it })
+    addOAClcaAssorters(contestsUA, CvrIteratorAdapter(cards.iterator()), election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
     checkContestsCorrectlyFormed(auditConfig, contestsUA)

@@ -1,5 +1,5 @@
 # Use Cases
-last changed: 9/16/2025
+last changed: 9/18/2025
 
 core
   CvrExport    ( val id: String, val group: Int, val votes: Map<Int, IntArray>))
@@ -24,8 +24,10 @@ This allows us to calculate the RaireAssertions and assortMean for each pool.
 So we can run a real IRV, at the cost of increased sammple sizes to use OneAudit instead of CLCA.
 
 Note that in this case we can use Card Style Data to do style sampling. 
-TODO compare to Philips approach of adding contest undervotes. Preliminary results shows it may net matter much except at 
+
+TODO compare to Philips approach of adding contest undervotes. Preliminary results shows it may not matter much except at 
 low margins.
+
 TODO get a python programmer who can do a better job of comparing RLAUXE directly to SHANGRLA code.
 
 # Colorado RLA (CORLA)

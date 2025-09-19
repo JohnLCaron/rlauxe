@@ -16,6 +16,7 @@ class TestCreateColoradoElectionAudit {
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
         println(electionResultXml)
+        println("  number of contests = ${electionResultXml.contests.size}")
     }
 
     // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)

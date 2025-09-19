@@ -135,7 +135,7 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
             Nc = useNc,
             Ncast = useNc
         )
-        // they dont have cvrs for contest >= 260, so we'll just skip them
+        // they dont have precinct data for contest >= 260, so we'll just skip them
         if (contest.id < 260) {
             contests.add(contest)
         }

@@ -1,7 +1,7 @@
 # Case Studies
-last changed 9/19/2025
+_last changed 9/19/2025_
 
-While rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
+While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
 
 A real election requires human auditors to manually retrieve physical ballots and create MVRs (manual vote records). 
@@ -36,36 +36,25 @@ simulated and written to sampleMvrs.csv.
 
 We have several representations of CVRs:
 
-### CvrExport
-
 **CvrExport( val id: String, val group: Int, val votes: Map<Int, IntArray>))**
 
 is an intermediate CVR representation for DominionCvrExportJson. Used by SanFrancisico and Corla.
 
 Can use CardSortMerge to do out-of-memory sorting. From an Iterator\<CvrExport\>, convert to AuditableCard, assign prn, sort and write sortedCards.csv.
 
-
-### AuditableCard
-
 **AuditableCard( val location: String, val index: Int, val prn: Long, val phantom: Boolean, val contests: IntArray, val votes: List<IntArray>?, val poolId: Int? )**
 
 is a serialization format for CVRs, written to a csv file.
-
-### Cvr
 
 **Cvr( val id: String, val votes: Map<Int, IntArray>, val phantom: Boolean, val poolId: Int?)**
 
 is used by all the core routines.
 
-### CardLocation
-
 **CardLocation(  val location: String, val phantom: Boolean, val cardStyle: CardStyle?, val contestIds: List<Int>? = null)**
 
 is used to make CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
 
-## Case Studies
-
-### SanFranciscoCounty 2024
+## SanFranciscoCounty 2024
 
 Input is in CVR_Export_20241202143051.zip. This contains the Dominion CVR_Export JSON files, as well as the
 Contest Manifest, Candidate Manifest, and other manifests. We also have the San Francisco County summary.xml file from
@@ -96,13 +85,11 @@ adding contest undervotes to all the cards in the pool (so that all cards have a
 This allows us to test the two approaches. Preliminary results shows it may not matter much except at low margins.
 
 
-### Colorado RLA (CORLA) 2024
+## Colorado RLA (CORLA) 2024
 
 * 3,241,120 ballot cast (Colorado 2024 General Election). 64 contests, no IRV.
-* CO doesnt publically publish the CVRs, just precinct totals, see **2024GeneralPrecinctLevelResults.csv/zip/xlsx**.
-* CORLA does an RLA, so they do have access to the CVRs.
-* A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they
-  are "privately available".
+* CO doesnt publically publish the CVRs, just precinct totals, see **2024GeneralPrecinctLevelResults.csv/zip/xlsx**. We use the published precinct  level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests.
+* CORLA does an RLA, so they do have access to the CVRs. A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they are "privately available".
 
 * _detail.xls_ has summary by contest broken out by county, in a multipage excel file. **detail.xml** has same info in xml file
 
@@ -120,7 +107,9 @@ This allows us to test the two approaches. Preliminary results shows it may not 
   estimated_samples_to_audit
 ````
 
-Note that this gives us the number of samples estimated for each audit round, from the CORLA "super simple" algorithm. One can compare these estimates with the CORLA software's estimates (estimates can be seen in the Rlauxe Viewer AuditRoundsTable).
+Note that this gives us the number of samples estimated for each audit round, from the CORLA "super simple" algorithm. We can compare these estimates with the CORLA software's estimates (estimates can be seen in Rlauxe Viewer AuditRoundsTable).
+
+* There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests >= 260. SO we restrict our attension to those 259 contests.
 
 * createColoradoElectionFromDetailXmlAndPrecincts: contestRound, electionDetailXml, precinctResults -> precinctCvrs -> CvrExport.csv
 
@@ -148,7 +137,7 @@ Presidential Electors,state_wide_contest,in_progress,1,4746866,3239722,"""Kamala
 ````
 Not exactly consistent, eg 1728159 - 1377441 = 350718 != 350348, but close enough for now (we can only do a simulation since we dont have the real CVRs).
 
-#### Next Steps
+### Next Steps
 
 From "Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program" (Mark Lindeman, Neal McBurnett, Kellie Ottoboni, Philip B. Stark. March 5, 2018):
 
@@ -178,11 +167,7 @@ the CORLA software, to be used in 2025 Nov election.
 * On point 2, we can use OneAudit, and put each non-CVR county into a pool, as long as we know the undervotes.
   This is an evolution from the time the paper was written (2017), which was investigating statification.
 
-We use the published precinct level results to create simulated CVRs and run simulated RLAs.
-Note that we need the CVRs to do IRV contests.
-
-
-### BoulderCounty 2024
+## BoulderCounty 2024
 
 ````
 DominionCvrExportCsv

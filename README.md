@@ -1,7 +1,7 @@
 **RLAUXE ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 9/18/2025_
+_last changed: 9/19/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -515,7 +515,9 @@ For each Estimation round:
 These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
 auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the estimation stage,
 and try out different scenarios before committing to which contests continue on to the next round. 
-See the prototype [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
+
+* See the prototype [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
+* See [Case Studies](docs/CaseStudies.md)
 
 
 ### Efficiency
@@ -704,6 +706,7 @@ Modules
 
 Also See:
 * [Implementation Specificaton](docs/notes/RlauxeSpec.md)
+* [Case Studies](docs/CaseStudies.md)
 * [Developer Notes](docs/Development.md)
-* [Notes on Colorado RLA](docs/Corla.md)
-* [RLA Options](docs/RlaOptions.md)
+* [Corla Notes](docs/Corla.md)
+

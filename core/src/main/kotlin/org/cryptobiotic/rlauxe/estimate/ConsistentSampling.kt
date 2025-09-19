@@ -39,15 +39,15 @@ fun sampleCheckLimits(
         val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
         logger.warn{" ***too many samples, remove contest ${maxContest.id} with status FailMaxSamplesAllowed"}
 
+        /// remove maxContest from the audit
         // information we want in the persisted record
         maxContest.done = true
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
-
         contestsNotDone.remove(maxContest)
     }
 }
 
-/** Choose what ballots to sample */
+/** Choose what cards to sample */
 fun sample(
     auditConfig: AuditConfig,
     mvrManager : MvrManager,
@@ -66,6 +66,7 @@ fun sample(
     }
 }
 
+// From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
 // for audits with hasStyles = true
 fun consistentSampling(
     auditRound: AuditRound,
@@ -85,9 +86,6 @@ fun consistentSampling(
         if (c.auditorWantNewMvrs > 0 && (haveNewSamples[c.id] ?: 0) >= c.auditorWantNewMvrs) return false
         return (haveSampleSize[c.id] ?: 0) < (wantSampleSize[c.id] ?: 0)
     }
-    fun contestWants(c: ContestRound): Int {
-        return (wantSampleSize[c.id] ?: 0) - (haveSampleSize[c.id] ?: 0)
-    }
 
     val contestsIncluded = contestsNotDone.filter { it.included }
     val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
@@ -95,7 +93,7 @@ fun consistentSampling(
     var newMvrs = 0
     val sampledCards = mutableListOf<AuditableCard>()
 
-    // while we need more samples
+    // the cards come in order of the prn, aka "ticket number" (Rivest)
     var countSamples = 0
     val sortedBorcIter = mvrManager.sortedCards().iterator()
     while (
@@ -103,7 +101,7 @@ fun consistentSampling(
             contestsIncluded.any { contestWantsMoreSamples(it) } &&
             sortedBorcIter.hasNext()) {
 
-        // get the next sorted cvr
+        // get the next card in sorted order
         val boc = sortedBorcIter.next()
         // does this contribute to one or more contests that need more samples?
         if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && boc.hasContest(contestRound.id) }) {
@@ -128,11 +126,6 @@ fun consistentSampling(
             }
         }
         countSamples++
-        /* if (countSamples % 10000 == 0) print("$countSamples ")
-        if (countSamples % 100000 == 0) {
-            val wants = contestsIncluded.filter { contestWantsMoreSamples(it) }.map { "${it.id}:${contestWants(it)}" }
-            print{"sampledCards = ${sampledCards.size} newMvrs=$newMvrs wants = $wants"}
-        } */
     }
 
     if (debugConsistent) logger.info{"**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}

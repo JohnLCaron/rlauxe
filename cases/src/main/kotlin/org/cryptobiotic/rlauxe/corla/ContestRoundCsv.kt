@@ -12,6 +12,7 @@ import java.nio.charset.Charset
 // Colorado Audit Round Contest
 // https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
 // "corla/src/test/data/2024audit/round1/contest.csv"
+// // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
 //  0           1            2                   3
 // contest_name,audit_reason,random_audit_status,winners_allowed,
 //   4                 5                         6       7

@@ -17,6 +17,7 @@ data class ContestInfo(
     val minFraction: Double? = null, // supermajority only.
 ) {
     val candidateIds: List<Int>
+    val metadata = mutableMapOf<String, Int>()
 
     init {
         if (choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {

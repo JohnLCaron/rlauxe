@@ -11,7 +11,6 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-// import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -38,6 +37,7 @@ data class ContestInfoJson(
     val nwinners: Int,
     val voteForN: Int? = null,
     val minFraction: Double?,
+    val metadata: Map<String, Int>?,
 )
 
 fun ContestInfo.publishJson() : ContestInfoJson {
@@ -49,12 +49,13 @@ fun ContestInfo.publishJson() : ContestInfoJson {
         this.nwinners,
         this.voteForN,
         this.minFraction,
+        this.metadata,
     )
 }
 
 fun ContestInfoJson.import(): ContestInfo {
     val choiceFunction = enumValueOf(this.choiceFunction, SocialChoiceFunction.entries) ?: SocialChoiceFunction.PLURALITY
-    return ContestInfo(
+    val info = ContestInfo(
         this.name,
         this.id,
         this.candidateNames,
@@ -63,6 +64,10 @@ fun ContestInfoJson.import(): ContestInfo {
         this.voteForN ?: this.nwinners,
         this.minFraction,
     )
+    if (this.metadata != null) {
+        this.metadata.forEach { (key, value) -> info.metadata[key] = value}
+    }
+    return info
 }
 
 // class Contest(

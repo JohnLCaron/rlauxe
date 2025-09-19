@@ -127,6 +127,8 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
             SocialChoiceFunction.PLURALITY,
             detailContest.voteFor
         )
+        info.metadata["CORLAsample"] = roundContest?.optimisticSamplesToAudit ?: 0
+
         val contest = Contest(
             info,
             candidateVotes,

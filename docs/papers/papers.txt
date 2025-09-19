@@ -19,6 +19,8 @@ RLA papers
 
 2018	Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program		Mark Lindeman, Neal McBurnett, Kellie Ottoboni, Philip B. Stark. March 5, 2018
 
+2018    Consistent Sampling with Replacement        Ronald Rivest   August 31, 2018
+
 2018	Risk-Limiting Audits by Stratified Union-Intersection Tests of Elections (SUITE)	Kellie Ottoboni, Philip B. Stark, Mark Lindeman, and Neal McBurnett.  12 Sep 2018	
 	The key is to use stratified sampling with two strata: ballots cast in CVR counties and those cast in no-CVR counties.
 	Stratified audits, ties into CORLA paper and notebook https://notebooks.gesis.org/binder/jupyter/user/pbstark-corla18-xnwriml9/notebooks/code/fisher_combined_pvalue.ipynb
@@ -42,7 +44,6 @@ RLA papers
 
 2021	A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
 	unify ‘ballot-polling’ RLAs and Baysian Audits.
-	Rivest group?
 
 2021	The ATHENA Class of Risk-Limiting Ballot Polling Audits		Filip Zagórski, Grant McClearn, Sarah Morin, Neal McBurnett, and Poorvi L. Vora. February 23, 2021
 	ATHENA class of R2 (round by round) stopping rules
@@ -107,8 +108,6 @@ Related
 
 2008	Consistent Weighted Sampling					Manese, McSherry, Talwar
 	an efficient procedure for sampling representatives from a weighted set
-
-2018	Consistent Sampling with Replacement				Rivest
 
 2024 	DVSorder: Ballot Randomization Flaws Threaten Voter Privacy	Braden L. Crimmins, Dhanya Y. Narayanan, Drew Springall,  J. Alex Halderman
 	privacy flaw that affects Dominion Voting Systems (DVS) ImageCast Precinct (ICP) and ImageCast Evolution (ICE) ballot scanners,

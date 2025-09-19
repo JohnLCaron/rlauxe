@@ -98,7 +98,7 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
     val contests = mutableListOf<Contest>()
 
     electionDetailXml.contests.forEachIndexed { detailIdx, detailContest ->
-        var contestName = contestNameCleanup(detailContest.text)
+        val contestName = contestNameCleanup(detailContest.text)
         var roundContest = roundContestMap[contestName]
         if (roundContest == null) {
             roundContest = roundContestMap[mutatisMutandi(contestName)]

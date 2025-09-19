@@ -165,19 +165,16 @@ data class CountyVote(
     val votes: Int,
 )
 
-fun readColoradoElectionDetail(filename : String ) : ElectionDetailXml {
+fun readColoradoElectionDetail(filename : String) : ElectionDetailXml {
     println("readColoradoElectionDetail filename = ${filename}")
 
-    //gulp the entire file to a string
+    // gulp the entire file to a string
     val file = File(filename)
     val text = file.readText(Charsets.UTF_8)
 
     val serializer = serializer<ElectionDetailXml>() // use the default serializer
-
-    // Create the configuration for (de)serialization
-    val xml = XML { indent = 2 }
-
+    val xml = XML { indent = 2 } // Create the configuration for (de)serialization
     val result : ElectionDetailXml = xml.decodeFromString(serializer, text)
-    // println("$result")
+
     return result
 }

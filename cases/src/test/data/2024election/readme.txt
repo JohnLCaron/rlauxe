@@ -1,6 +1,9 @@
 03/24/2025
 Election Results & Data
 
+RLAs: https://www.coloradosos.gov/pubs/elections/auditCenter.html
+targeted contests
+
 https://www.coloradosos.gov/pubs/elections/resultsData.html
 https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
 

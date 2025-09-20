@@ -1,6 +1,6 @@
 **Rlauxe Implementation Specification**
 
-_9/10/25_
+_9/20/25_
 
 See [references](../papers/papers.txt) for reference papers.
 
@@ -10,6 +10,7 @@ See [references](../papers/papers.txt) for reference papers.
 * [Assorters](#assorters)
   * [Plurality and Approval](#plurality-and-approval)
     * [Proof that A is an assorter](#proof-that-a-is-an-assorter)
+    * [Adding 1/2 to the running mean and margin](#adding-12-to-the-running-mean-and-margin)
   * [SuperMajority](#supermajority)
     * [TODO Proof that A is an assorter](#todo-proof-that-a-is-an-assorter)
   * [Instant Runoff Voting (IRV)](#instant-runoff-voting-irv)
@@ -121,7 +122,7 @@ The assorter function `A_wℓ(bi)` for winner w and loser ℓ operating on the i
 The upper bound is 1.
 
 ````
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // worst case
         val w = mvr.hasMarkFor(info.id, winner)
@@ -132,13 +133,13 @@ The upper bound is 1.
 
 ### Proof that A is an assorter
 
-The definition of an Assorter A is that if the mean of its assort values > 1/2 implies that the assertion is true, then A is an assorter.
+The definition of an Assorter A is that the mean of its assort values > 1/2 implies that the assertion is true.
 
     "w has more votes than l" if Sum(w) > Sum(l), where the Sum is over N
 
     Ā = 1/N Sum( (w - l + 1) * 0.5))
       = 1/N ( Sum(w) - Sum(l) + N) / 2
-      = (Sum(w) - Sum(l))/N + 1) / 2
+      = ((Sum(w) - Sum(l))/N + 1) / 2
 
 convert to Amargin = 2.0 * mean - 1.0
 
@@ -150,6 +151,60 @@ convert to Amargin = 2.0 * mean - 1.0
         Ā > 1/2
 
 so if the mean of the assort values > 1/2 then the assertion "w has more votes than l" is true; therefore A is an assorter.  
+
+### Adding 1/2 to the running mean and margin
+
+Whats the effect of adding assort values of 1/2 to the assort average?
+
+    Suppose 
+      Sum(x) / N > 1/2
+      Sum(x) > N/2
+
+    Then adding 1/2, the average is now:
+      (Sum(x) + 1/2) / (N + 1) > (N/2 + 1/2) / (N+1) = (N+1) * 1/2 / (N+1) = 1/2
+
+    So if Sum(x)/N > 1/2, (Sum(x) + 1/2) / (N+1) > 1/2
+       if Sum(x)/N < 1/2, (Sum(x) + 1/2) / (N+1) < 1/2
+    
+So adding 1/2 to the running mean does not change the inequality. 
+
+However it does decrease/increase the running average:
+
+        Average(i) - Average(i+1) ? 0
+        Sum(x)/N - (Sum(x) + 1/2) / (N+1) ? 0
+        Sum(x)/N - Sum(x)/(N+1) - 1/2(N+1) ? 0
+        Sum(x)/N * (1 - N/(N+1)) - 1/2(N+1) ? 0
+        Sum(x)/N * (1/(N+1)) - 1/2(N+1) ? 0
+
+        if Sum(x)/N > 1/2 
+            Sum(x)/N * 1/(N+1) > 1/2(N+1)
+            Sum(x)/N * (1/(N+1)) - 1/2(N+1) < 0
+            the average decreases (towards 1/2)
+
+        if Sum(x)/N < 1/2 
+            Sum(x)/N * 1/(N+1) < 1/2(N+1)
+            Sum(x)/N * (1/(N+1)) - 1/2(N+1) > 0
+            the average increases (towards 1/2)
+      
+This should be exactly the effect on the margin of increasing N by 1, without changing the votes.
+
+Show that Margin(i+1) = (w-l)/(N+1) when Mean(i+1) = (Sum(i) + 1/2) / (N+1)
+
+    mean(i+1) = (Sum(i) + 1/2) / (N+1)
+    Sum(i) = Sum( (w - l + 1) * 0.5)) over N
+    mean(i+1) = (Sum( (w - l + 1) * 0.5)) + 1/2) / (N+1)
+    mean(i+1) = (Sum(w - l) + N) * 0.5 + 1/2) / (N+1)
+    mean(i+1) = ((w - l) + N)/2 + 1/2) / (N+1)
+    mean(i+1) = ((w - l) + N + 1)/ 2) / (N+1)
+    mean(i+1) = ((w - l) + N + 1) / 2(N+1)
+
+    margin(i+1) = 2 * Mean(i+1) - 1
+                = 2 * ((w - l) + N + 1) / 2(N+1) - 1
+                = ((w - l) + N + 1) / (N+1) - 1
+                = (w - l) / (N+1) + (N + 1)/(N+1) - 1
+                = (w - l) / (N+1) + 1 - 1
+                = (w - l) / (N+1)
+                QED
 
 ## SuperMajority
 

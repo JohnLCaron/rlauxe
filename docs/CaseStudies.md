@@ -1,5 +1,5 @@
 # Case Studies
-_last changed 9/19/2025_
+_last changed 9/20/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -9,9 +9,9 @@ This is done in rounds; the number of ballots needed is estimated based on the c
 At each round, the MVRS are typically entered into a spreadsheet, and the results are exported to a csv (comma separated value) file,
 and copied into the Audit Record for processing.
 
-Managing the MVRS is delegated to an MvrManager.
-When testing, the MVRS are typically simulated by introducing "errors" on the corresponding CVRs. See MvrManagerTestFromRecord.
-MvrManagerFromRecord is used for real elections.
+Managing the MVRS is delegated to an _MvrManager_.
+When testing, the MVRS are typically simulated by introducing "errors" on the corresponding CVRs. See _MvrManagerTestFromRecord_.
+_MvrManagerFromRecord_ is used for real elections.
 
 
 ## AuditRecord
@@ -20,8 +20,8 @@ MvrManagerFromRecord is used for real elections.
       auditConfig.json      // AuditConfigJson
       contests.json         // ContestsUnderAuditJson
       sortedCards.csv       // AuditableCardCsv (or)
-      sortedCards.zip       // AuditableCardCsv
-      ballotPool.csv        // BallotPoolCsv (OneAudit only)
+      sortedCards.csv.zip   // AuditableCardCsv
+      ballotPools.csv       // BallotPoolCsv (OneAudit only)
 
       roundX/
         auditState.json     // AuditRoundJson
@@ -44,20 +44,20 @@ Can use CardSortMerge to do out-of-memory sorting. From an Iterator\<CvrExport\>
 
 **AuditableCard( val location: String, val index: Int, val prn: Long, val phantom: Boolean, val contests: IntArray, val votes: List<IntArray>?, val poolId: Int? )**
 
-is a serialization format for CVRs, written to a csv file.
+is a serialization format for CVRs, written to a csv file. Optionally zipped. Rlauxe can read from the zipped file directly.
 
 **Cvr( val id: String, val votes: Map<Int, IntArray>, val phantom: Boolean, val poolId: Int?)**
 
-is used by all the core routines.
+is the core abstraction, used by all the core routines.
 
 **CardLocation(  val location: String, val phantom: Boolean, val cardStyle: CardStyle?, val contestIds: List<Int>? = null)**
 
-is used to make CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
+is used to make the CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
 
 ## SanFranciscoCounty 2024
 
-Input is in CVR_Export_20241202143051.zip. This contains the Dominion CVR_Export JSON files, as well as the
-Contest Manifest, Candidate Manifest, and other manifests. We also have the San Francisco County summary.xml file from
+Input is in _CVR_Export_20241202143051.zip_. This contains the Dominion CVR_Export JSON files, as well as the
+Contest Manifest, Candidate Manifest, and other manifests. We also have the San Francisco County _summary.xml_ file from
 their website for corroboration.
 
 **createSfElectionFromCards/createSfElectionFromCardsOA/createSfElectionFromCardsOANS**: We read the CVR_Export files 
@@ -69,31 +69,33 @@ We write the auditConfig.json (which contains the prn seed) and contests.json fi
 **createSortedCards**: Using the prn seed, we assign prns to all cvrs and rewrite the cvrs to sortedCards.csv (optionally zipped), using an out-of-memory
 sorting algorithm.
 
-The CVRs are in two groups, "mail-in" and "in-person". The _createSfElectionFromCardsOA_ variant assumes that the mail-in cvrs can be matched to the corresponding
-physical ballot, but the in-person cannot. We can use OneAudit by putting the in-person cvrs into pools by precinct, since we can
+The CVRs are in two groups, "mail-in" and "in-person". The _createSfElectionFromCardsOA_ variant assumes that the mail-in cvrs can be matched 
+to the corresponding physical ballot, but the in-person cannot. We can use OneAudit by putting the in-person cvrs into pools by precinct, since we can
 then calculate the ContestTabulation and assortMean for each pool. For IRV, we can calculate the VoteConsolidator for each pool.
 This allows us to calculate the RaireAssertions and assortMean for each pool. 
 So we can run a real IRV, at the cost of increased sample sizes to use OneAudit instead of CLCA. 
-Note that in this case we can use Card Style Data to do style sampling.
+In this case we use Card Style Data to do style sampling, which is equivilent to assuming we can match the CRV to the MRV,
+but the crv vote counts have been redacted for privacy reasons.
 
 The _createSfElectionFromCards_ variant assumes we can match in-person CVRs to physical ballots, so theres no need to use OneAudit.
 This allows us to compare the cost of OneAudit vs CLCA.
 
 The _createSfElectionFromCardsOANS_ ("One Audit, no Styles") variant assumes we cannot match in-person CVRs to physical ballots, so uses OneAudit, 
 but assumes that we dont know which cards have which contests for the pooled data. Instead it uses Philip's approach of 
-adding contest undervotes to all the cards in the pool (so that all cards have all the contests), and increasing the contest upper limit (Nc). 
+adding contest undervotes to all the cards in the pool (so that all cards have all the contests in the pool), and increasing the contest upper limit (Nc). 
+Consistent sampling is still used, but with increased undervotes in the pool ballots.
 This allows us to test the two approaches. Preliminary results shows it may not matter much except at low margins.
 
 
 ## Colorado RLA (CORLA) 2024
 
 * 3,241,120 ballot cast (Colorado 2024 General Election). 64 contests, no IRV.
-* CO doesnt publically publish the CVRs, just precinct totals, see **2024GeneralPrecinctLevelResults.csv/zip/xlsx**. We use the published precinct  level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests.
+* CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_. We use the published precinct  level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests.
 * CORLA does an RLA, so they do have access to the CVRs. A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they are "privately available".
 
-* _detail.xls_ has summary by contest broken out by county, in a multipage excel file. **detail.xml** has same info in xml file
+* _detail.xls_ has summary by contest broken out by county, in a multipage excel file. _detail.xml_ has same info in xml file
 
-* round1/contest.csv has summary of each round and we use these fields from it to make the contest:
+* _round1/contest.csv_ has a summary of each round and we use these fields from it to make the contest:
 ````
   contest_name
   winners_allowed
@@ -107,15 +109,15 @@ This allows us to test the two approaches. Preliminary results shows it may not 
   estimated_samples_to_audit
 ````
 
-Note that this gives us the number of samples estimated for each audit round, from the CORLA "super simple" algorithm. We can compare these estimates with the CORLA software's estimates (estimates can be seen in Rlauxe Viewer AuditRoundsTable).
+Note that this gives us the number of samples estimated for each audit round, from the CORLA "super simple" algorithm. We can compare these estimates with the CORLA software's estimates (estimates can be seen in Rlauxe Viewer _AuditRoundsTable_).
 
-* There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests >= 260. SO we restrict our attension to those 259 contests.
+* There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests >= 260. So we restrict our attention to those 259 contests.
 
 * createColoradoElectionFromDetailXmlAndPrecincts: contestRound, electionDetailXml, precinctResults -> precinctCvrs -> CvrExport.csv
 
 * createCorla2024sortedCards: use CardSortMerge to convert to AuditableCard, assign prn, sort and write sortedCards (900 Mb, 120 Mb zipped)
 
-The file data/2024audit/**targetedContests.xlsx** shows contests selected for audit, eg:
+The file data/2024audit/_targetedContests.xlsx_ shows contests selected for audit, eg:
 
 ````
   "County","Contest","Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,
@@ -165,7 +167,7 @@ the CORLA software, to be used in 2025 Nov election.
   * TODO investigate integrating RLAUXE into CORLA.
   * TODO investigate integrating RLAUXE into Dominion.
 * On point 2, we can use OneAudit, and put each non-CVR county into a pool, as long as we know the undervotes.
-  This is an evolution from the time the paper was written (2017), which was investigating statification.
+  This is an evolution from the time the paper was written (2017), which was investigating stratification.
 
 ## BoulderCounty 2024
 

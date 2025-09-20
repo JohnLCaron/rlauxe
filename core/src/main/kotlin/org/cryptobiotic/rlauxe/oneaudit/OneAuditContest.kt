@@ -108,6 +108,7 @@ class OneAuditClcaAssorter(
         // so ωi ≡ A(ci) − A(bi)
         //   poolAvg - 0, poolAvg - 1/2, poolAvg - 1 in [pa, pa-1/2, pa-1] = (loser, other, winner)
 
+        // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue
         val cvr_assort = poolAvgAssortValue
         return cvr_assort - mvr_assort
     }
@@ -189,6 +190,8 @@ Audit.py line 2584
         )
         # assort the CVR
         cvr_assort = (
+           # TODO in case theres phantoms in the pool, I think this should be
+           # TODO int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.tally_pool_means[cvr.tally_pool]
             self.tally_pool_means[cvr.tally_pool]
             if
                 cvr.pool and self.tally_pool_means is not None

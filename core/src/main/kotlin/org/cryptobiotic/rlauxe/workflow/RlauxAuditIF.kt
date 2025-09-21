@@ -24,7 +24,7 @@ interface RlauxAuditIF {
 
         val auditRound = if (previousRound == null) {
             // first time, create the rounds
-            val contestRounds = contestsUA().map { ContestRound(it, roundIdx) }
+            val contestRounds = contestsUA().filter { !auditConfig().skipContests.contains(it.id) }.map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
         } else {
             // next time, create from previous round

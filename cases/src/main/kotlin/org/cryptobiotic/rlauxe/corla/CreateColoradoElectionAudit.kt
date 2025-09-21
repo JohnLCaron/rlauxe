@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -14,6 +15,7 @@ import org.cryptobiotic.rlauxe.sf.sortedCardsFile
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 
+private val logger = KotlinLogging.logger("createColoradoElection")
 private val showMissingCandidates = false
 val cvrExportDir = "cvrexport"
 const val sortedCardsFile = "sortedCards.csv"
@@ -57,7 +59,8 @@ fun createColoradoElectionFromDetailXmlAndPrecincts(
     precincts.forEach { precinct ->
         val precinctCvrs = makeCvrs(precinct, contests)
         val outputDir = "$topDir/$cvrExportDir/${precinct.county}"
-        validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrs"))
+        val errs = validateOutputDir(Path.of(outputDir), ErrorMessages("precinctCvrs"))
+        if (errs.hasErrors()) logger.error { errs.toString() }
         writeCvrExportCsvFile(precinctCvrs.iterator(), "$outputDir/${precinct.precinct}.csv")
         count += precinctCvrs.size
     }
@@ -72,7 +75,7 @@ fun createColoradoElectionFromDetailXmlAndPrecincts(
         reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
     // make all the clca assertions in one go
-    makeClcaAssertions(contestsUA, CvrExportAdapter(precinctCvrReader))
+    addClcaAssertions(contestsUA, CvrExportAdapter(precinctCvrReader))
 
     // these checks may modify the contest status
     checkContestsCorrectlyFormed(auditConfig, contestsUA)

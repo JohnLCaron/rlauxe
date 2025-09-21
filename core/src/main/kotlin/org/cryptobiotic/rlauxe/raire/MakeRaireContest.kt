@@ -30,7 +30,8 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
     if (!quiet) logger.debug{" runElection: possibleWinners=${irvResult.possibleWinners.contentToString()} eliminationOrder=${irvResult.eliminationOrder.contentToString()}"}
 
     if (1 != irvResult.possibleWinners.size) {
-        throw RuntimeException("nwinners ${irvResult.possibleWinners.size} must be 1")
+        // throw RuntimeException("nwinners ${irvResult.possibleWinners.size} must be 1")
+        logger.warn{"nwinners ${irvResult.possibleWinners.size} must be 1"}
     }
     val winner: Int = irvResult.possibleWinners[0] // we need a winner in order to generate the assertions
 

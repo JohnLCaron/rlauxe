@@ -34,6 +34,7 @@ data class AuditConfigJson(
     val pollingConfig: PollingConfigJson? = null,
     val clcaConfig: ClcaConfigJson? = null,
     val oaConfig: OneAuditConfigJson?  = null,
+    val skipContests: List<Int>?  = null,
 )
 
 fun AuditConfig.publishJson() : AuditConfigJson {
@@ -50,6 +51,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.version,
             clcaConfig = this.clcaConfig.publishJson(),
+            skipContests = skipContests,
         )
 
         AuditType.POLLING -> AuditConfigJson(
@@ -64,6 +66,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.version,
             pollingConfig = this.pollingConfig.publishJson(),
+            skipContests = skipContests,
         )
 
         AuditType.ONEAUDIT -> AuditConfigJson(
@@ -78,6 +81,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.version,
             oaConfig = this.oaConfig.publishJson(),
+            skipContests = skipContests,
         )
     }
 }
@@ -97,6 +101,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeTooManyPhantoms,
             clcaConfig = this.clcaConfig!!.import(),
             version = this.version,
+            skipContests = skipContests?: emptyList(),
         )
 
         AuditType.POLLING -> AuditConfig(
@@ -111,6 +116,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeTooManyPhantoms,
             pollingConfig = this.pollingConfig!!.import(),
             version = this.version,
+            skipContests = skipContests?: emptyList(),
         )
 
         AuditType.ONEAUDIT -> AuditConfig(
@@ -125,6 +131,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeTooManyPhantoms,
             oaConfig = this.oaConfig!!.import(),
             version = this.version,
+            skipContests = skipContests?: emptyList(),
         )
     }
 }

@@ -201,7 +201,7 @@ data class RaireAssertion(
     val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
 ) {
     fun show() = buildString {
-        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated difficulty=$difficulty, marginInVotes=$marginInVotes")
+        appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated difficulty=${dfn(difficulty,2)}, marginInVotes=$marginInVotes")
     }
 
     fun remaining(candidateIds: List<Int>) = candidateIds.filter { !eliminated.contains(it) }

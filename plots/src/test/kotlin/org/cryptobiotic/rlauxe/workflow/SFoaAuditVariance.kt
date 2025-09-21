@@ -1,8 +1,10 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import kotlin.io.path.Path
 import kotlin.test.Test
 
 // audit variance for SF2024 OA contest 18 (mayoral)
@@ -17,6 +19,13 @@ class SFoaAuditVariance {
     val topDir = "/home/stormy/rla/cases/sf2024oa"
     val auditDir = "$topDir/audit"
 
+    val name = "sf2024oaAuditVariance"
+    val dirName = "/home/stormy/rla/plots/sf2024/$name"
+
+    init {
+        validateOutputDir(Path(dirName))
+    }
+
     @Test
     fun genAuditVariationClcaPlots() {
         val stopwatch = Stopwatch()
@@ -29,8 +38,6 @@ class SFoaAuditVariance {
         val results: List<WorkflowResult> = runWorkflows(tasks)
         println(stopwatch.took())
 
-        val name = "sfoa2024"
-        val dirName = "/home/stormy/rla/oneaudit4/$name"
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -39,8 +46,6 @@ class SFoaAuditVariance {
 
     @Test
     fun regenSfoa() {
-        val name = "sfoa2024"
-        val dirName = "/home/stormy/rla/oneaudit4/$name"
         val subtitle = "scatter plot of SF 2024 OneAudit contests, Ntrials=$nruns"
         showNSamplesVsMarginScatter(dirName, name, subtitle, ScaleType.LogLinear)
     }

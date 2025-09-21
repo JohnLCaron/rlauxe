@@ -20,14 +20,15 @@ data class AuditConfig(
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison),
-    val version: Double = 1.1,
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+    val version: Double = 1.2,
+    val skipContests: List<Int> = emptyList()
 ) {
-    val isClca = auditType == AuditType.CLCA || auditType == AuditType.ONEAUDIT
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, sampleLimit=$sampleLimit, minRecountMargin=$minRecountMargin version=$version")
+        if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
             AuditType.CLCA -> appendLine("  $clcaConfig")

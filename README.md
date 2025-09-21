@@ -1,7 +1,7 @@
 **RLAUXE ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 9/19/2025_
+_last changed: 9/21/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -11,7 +11,7 @@ The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work o
 Also see [OneAudit example python code](https://github.com/spertus/UI-TS)
 
 Also see:
-* [Implementation Specificaton](docs/notes/RlauxeSpec.md)
+* [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
 
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
@@ -236,10 +236,51 @@ Here is the same election using OneAudit where the in-person ballots are in prec
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.html" rel="sfoa2024NmvrsLogLinear">![sfoa2024NmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.png)</a>
 
-* OneAudit does quite well for high margins, say > 10%.
-* OneAudit with no card style data needs about ?x the samples at 5% margin, compared to a CLCA audit for this particular use case, on average, but with a wide variance, and progressively worse as margins get lower. TODO
-* OneAudit with card style data needs about ?x the samples as a complete CLCA, on average, due to the margin being higher. TODO
+* Both versions of OneAudit do quite well for high margins, say > 10%.
 * Due to the large variance introduced by the pooled data, comparing just the average of the samples needed is misleading at low margins.
+
+Here are all three audit types on a single scatter plot, showing the 80% quantile of samples needed for 500 trials, for each assertion of the SF 2024 General Election,
+when there are no errors:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceCompare/sf2024AuditVarianceCompareLogLog.html" rel="sf2024AuditVarianceCompareLogLog">![sf2024AuditVarianceCompareLogLog](docs/plots/sf2024/sf2024AuditVarianceCompare/sf2024AuditVarianceCompareLogLog.png)</a>
+
+* The CLCA is smooth because it has no variance when there are no errors, while OneAudit show scatter for the same margins.
+* OneAuditNS (no card style data) plot uses the original margin (not the lowered margin), in order to compare it accurately to the other types.
+* OneAudit needs about 3x, and OneAuditNS needs about 6x the samples at 5% margin, compared to a CLCA audit for the 80% quantile, and gets progressively worse as margins get lower. 
+* This result is very dependent on the particular use case.
+
+Using the 80% quantile for each contest seriously overestimates the number of samples needed. This is especially true for
+OneAudit, where there is so much variation in the sample size distribution even when there are no errors. We are now testing a new 
+strategy for OneAudit where we use the actual sample size, assuming no errors, for the first round. On subsequent rounds, we use the 
+measured error rates with the OptimalComparision betting strategy.
+
+Because we use the actual sample size only for choosing the number of first round ballots to draw, and not for the betting 
+strategy or sampling algorithm, I believe that we are not violating the requirements of the "anytime P-value" property of the Betting martingales (TBD).
+
+There is also increased efficiency when auditing many or all of the contests of an election at once, see [Multiple Contest Auditing](#multiple-contest-auditing).
+In order to get a sense of how well these audit types might work in real elections, we ran the SF 2024 General Election
+10 times (with different PRN seeds each time) for both the OneAudit and OneAuditNS. We used the actual sample to get the 
+estimated cards needed when there are no errors. This gives us a better sense of the absolute values and spread of
+a real election
+
+We ran 1 CLCA and 10 trials each of OneAudit and OneAudiy NoStyle. The total number of MVRS used were:
+
+| type       | avg   | trials                                                           | CLCA / avg |
+|------------|-------|------------------------------------------------------------------|------------|
+| CLCA       | 1592  | [1592]                                                           | 1.0        |
+| OneAudit   | 5442  | [2726, 2889, 3035, 3706, 4162, 4649, 4695, 5782, 10856, 11926]   | 3.4        |
+| OneAuditNS | 13409 | [3368, 4399, 7032, 7424, 7665, 7914, 13565, 25835, 26839, 30049] | 8.4        |
+
+The spread among all the assertions:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceScatter/ssf2024AuditVarianceScatterLogLinear.html" rel="ssf2024AuditVarianceScatterLogLinear">![ssf2024AuditVarianceScatterLogLinear](docs/plots/sf2024/sf2024AuditVarianceScatter/ssf2024AuditVarianceScatterLogLinear.png)</a>
+
+* We removed two contests with the lowest margins: contest 14, a plurality contest with 4 winners (margin=0.0006 recount=0.0020), 
+  and contest 28, an IRV contest ( margin=0.0037 recount=0.0100). This is probably what would happen in a real election.
+* The contest with the lowest margin in the audit is contest 15 (margin=0.0086 recount=0.0302)
+* Both versions of OneAudit do better than CLCA on a significant number of assertions; the spread goes below CLCA as well as above.
+* The total mvrs used are dominated by the contest(s) with the lowest margin. By removing the close contests, the mvrs needed can
+  be greatly reduced. OTOH, its the close contests where RLAs are most needed.
 
 ### OneAudit for Redacted data
 
@@ -705,7 +746,7 @@ Modules
 * plots: plot generation and testing
 
 Also See:
-* [Implementation Specificaton](docs/notes/RlauxeSpec.md)
+* [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Case Studies](docs/CaseStudies.md)
 * [Developer Notes](docs/Development.md)
 * [Corla Notes](docs/Corla.md)

@@ -4,9 +4,10 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.rlaplots.showSampleSizesVsMargin
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
+import org.cryptobiotic.rlauxe.rlaplots.category
+import org.cryptobiotic.rlauxe.rlaplots.wrsPlot
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
@@ -62,4 +63,20 @@ class GenRaireNoErrorsPlots {
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.Linear, catName = "cat")
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLinear, catName = "cat")
     }
+}
+
+
+fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "margin", xfld = { it.margin },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
+        catName = catName, catfld = { category(it) },
+        scaleType = scaleType
+    )
 }

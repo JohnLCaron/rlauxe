@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.math.log10
 
-// TODO replace with wrsPlot()
+// TODO replace with wrsPlot() in WorkflowResultsPlotter
 
 enum class ScaleTypeOld { Linear, Log, Pct;
     fun desc(what: String): String =
@@ -16,7 +16,7 @@ enum class ScaleTypeOld { Linear, Log, Pct;
         }
 }
 
-class WorkflowResultsPlotter(val dir: String, val filename: String) {
+class WorkflowResultsPlotterOld(val dir: String, val filename: String) {
 
     fun showNmvrsVsMargin(data: List<WorkflowResult>, catName: String, yscale: ScaleTypeOld = ScaleTypeOld.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]

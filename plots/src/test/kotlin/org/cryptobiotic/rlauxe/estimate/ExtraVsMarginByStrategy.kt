@@ -111,7 +111,7 @@ class ExtraVsMarginByStrategy {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showFailuresVsMargin(results, subtitle, "category") { category(it) }
     }
 
@@ -119,7 +119,7 @@ class ExtraVsMarginByStrategy {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showNroundsVsMargin(results, subtitle, "category") { category(it) }
     }
 

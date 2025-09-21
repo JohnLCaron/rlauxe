@@ -86,3 +86,19 @@ fun compareCategories(wr: WorkflowResult): String {
         else -> "unknown"
     }
 }
+
+fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
+                             catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "fuzzPct", xfld = { it.Dparam("fuzzPct") },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
+        catName = catName, catfld = catfld,
+        scaleType = scaleType
+    )
+}

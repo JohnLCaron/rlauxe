@@ -81,7 +81,7 @@ class ExtraVsMarginByFuzzDiff {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showEstSizesVsMargin(results, subtitle, "fuzzDiff %", yscale) { categoryFuzzDiff(it) }
     }
 
@@ -89,7 +89,7 @@ class ExtraVsMarginByFuzzDiff {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showFailuresVsMargin(results, subtitle, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
 
@@ -97,7 +97,7 @@ class ExtraVsMarginByFuzzDiff {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showNroundsVsMargin(results, subtitle, "fuzzDiff %") { categoryFuzzDiff(it) }
     }
 }

@@ -133,10 +133,12 @@ fun ContestRound.publishJson() : ContestRoundJson {
 }
 
 fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
-    // not exactly type safe TODO fails on Raire
+    // TODO not exactly type safe TODO fails on Raire. Why cant we use hash ?? FIX THIS!
     val assertionMap = contestUA.assertions().associateBy { it.assorter.desc() }
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
+        if (ref == null)
+            println("wtf")
         it.import( ref!! )
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
@@ -345,7 +347,7 @@ fun readAuditRoundJsonFile(
     sampledBorc: List<AuditableCard>,
 ): Result<AuditRound, ErrorMessages> {
 
-    val errs = ErrorMessages("readAuditConfigJsonFile '${auditRoundFile}'")
+    val errs = ErrorMessages("readAuditRoundJsonFile '${auditRoundFile}'")
     val filepath = Path.of(auditRoundFile)
     if (!Files.exists(filepath)) {
         return errs.add("file does not exist")

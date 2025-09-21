@@ -11,7 +11,7 @@ class AuditsWithErrors {
     val nruns = 100
     val nsimEst = 10
     val name = "AuditsWithErrors2"
-    val dirName = "/home/stormy/rla/audits/$name"
+    val dirName = "/home/stormy/rla/plots/oneaudit4/$name"
     val N = 50000
     val margin = .02
 
@@ -34,7 +34,7 @@ class AuditsWithErrors {
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
-                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to "clca")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 

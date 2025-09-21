@@ -76,7 +76,7 @@ class AuditsNoErrors {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showSampleSizesVsMargin(results, null, "auditType", yscale) { category(it) }
 
 
@@ -230,7 +230,7 @@ class AuditsNoErrors {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showSampleSizesVsMargin(results, subtitle, "strategy", yscale) { category(it) }
     }
 
@@ -238,7 +238,7 @@ class AuditsNoErrors {
         val io = WorkflowResultsIO("$dirName/${name}.csv")
         val results = io.readResults()
 
-        val plotter = WorkflowResultsPlotter(dirName, name)
+        val plotter = WorkflowResultsPlotterOld(dirName, name)
         plotter.showFailuresVsMargin(results, subtitle, "strategy") { category(it) }
     }
 

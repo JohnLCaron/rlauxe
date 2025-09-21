@@ -42,8 +42,8 @@ fun createSfElectionFromCvrExportOA(
 ) {
     val stopwatch = Stopwatch()
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 10,
-        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 50,
+        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = false)
     )
     val publisher = Publisher(auditDir) // creates auditDir
 
@@ -58,39 +58,10 @@ fun createSfElectionFromCvrExportOA(
         cvrCsvFilename,
     )
 
-    // TODO check that the sum of pooled and unpooled votes is correct
-    /*  check that the votes agree with the summary XML
-    val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
-    val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
-
-    val votes = tabulateCvrs(CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
-    votes.forEach { (id, ct) ->
-        val contestName = contestManifest.contests[id]!!.Description
-        val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
-        if (staxContest.ncards() != ct.ncards) {
-            println("staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${ct.ncards} ")
-            // assertEquals(staxContest.blanks(), contest.blanks)
-        }
-    }
-
-    //  check that the contests agree with the summary XML
-    contests.forEach { contest ->
-        val contestName = contestManifest.contests[contest.id]!!.Description
-        val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
-        val ncards = staxContest.ncards()
-        if (ncards != contest.Nc) {
-            println("staxContest $contestName ($contest.id) has ncards = ${staxContest.ncards()} not equal to contest Nc = ${contest.Nc} ")
-            // assertEquals(staxContest.blanks(), contest.blanks)
-        }
-    }
-
-     */
-
-
     // make contests based on cardPools, which must include the unpooled
     val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools, contestNcs)
     val contestsUA = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools, contestNcs)
-    val allContests = irvContests + contestsUA
+    val allContests =  contestsUA + irvContests
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
@@ -107,6 +78,34 @@ fun createSfElectionFromCvrExportOA(
 
     println("took = $stopwatch")
 }
+
+// TODO check that the sum of pooled and unpooled votes is correct
+/*  check that the votes agree with the summary XML
+val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
+val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
+
+val votes = tabulateCvrs(CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
+votes.forEach { (id, ct) ->
+    val contestName = contestManifest.contests[id]!!.Description
+    val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
+    if (staxContest.ncards() != ct.ncards) {
+        println("staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${ct.ncards} ")
+        // assertEquals(staxContest.blanks(), contest.blanks)
+    }
+}
+
+//  check that the contests agree with the summary XML
+contests.forEach { contest ->
+    val contestName = contestManifest.contests[contest.id]!!.Description
+    val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
+    val ncards = staxContest.ncards()
+    if (ncards != contest.Nc) {
+        println("staxContest $contestName ($contest.id) has ncards = ${staxContest.ncards()} not equal to contest Nc = ${contest.Nc} ")
+        // assertEquals(staxContest.blanks(), contest.blanks)
+    }
+}
+
+ */
 
 fun createCardPools(
     auditDir: String,
@@ -194,11 +193,13 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, Ca
                 allPools.ncards)
             contestsUAs.add(OAContestUnderAudit(contest))
         }
+
         val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
         val unpooledTab = unpooledPool.contestTabulations[info.id]
         if (unpooledTab != null) {
             val unpooledPct = 100.0 * unpooledTab.ncards / allPools.ncards
-            println(" contest ${info.id} allPools.ncards= ${allPools.ncards} unpooled.ncards = ${unpooledTab.ncards} $unpooledPct %")
+            print(" contest ${info.id} contestNcs = ${contestNcs[info.id]} allPools.ncards= ${allPools.ncards} unpooled.ncards = ${unpooledTab.ncards} $unpooledPct %")
+            println( if (contestNcs[info.id] == allPools.ncards) "" else "***")
         }
     }
     return contestsUAs

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -18,8 +19,8 @@ class TestSfElectionOAnoStyles {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val topDir = "/home/stormy/rla/cases/sf2024oaNS"
+    val cvrCsv = "$sfDir/$cvrExportCsvFile"
 
-    // create the audit contests using the cvrExport files
     @Test
     fun createSF2024OANS() {
         val auditDir = "$topDir/audit"
@@ -31,9 +32,55 @@ class TestSfElectionOAnoStyles {
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
-            "$sfDir/$cvrExportCsvFile",
-            show = true,
+            cvrCsvFilename = cvrCsv,
         )
+    }
+
+    @Test
+    fun createSF2024OANSrepeat() {
+
+        repeat(10) { run ->
+            val auditDir = "$topDir/audit$run"
+            val workingDir = "$topDir/sortChunks$run"
+            clearDirectory(Path.of(auditDir))
+
+            val auditConfig = AuditConfig(
+                AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 50000, riskLimit = .05, nsimEst = 10,
+                minRecountMargin = 0.0,
+                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+                skipContests = listOf(14, 28)
+            )
+
+            createSfElectionFromCvrExportOANS(
+                topDir,
+                auditDir,
+                castVoteRecordZip = zipFilename,
+                contestManifestFilename = "ContestManifest.json",
+                candidateManifestFile = "CandidateManifest.json",
+                cvrCsvFilename = cvrCsv,
+                auditConfigIn = auditConfig,
+                workingDir = workingDir,
+            )
+        }
+    }
+
+    @Test
+    fun runSF2024OArepeat() {
+        repeat(10) { run ->
+            val auditDir = "$topDir/audit$run"
+            RunRliRoundCli.main(
+                arrayOf(
+                    "-in", auditDir,
+                    "-test",
+                )
+            )
+            RunRliRoundCli.main(
+                arrayOf(
+                    "-in", auditDir,
+                    "-test",
+                )
+            )
+        }
     }
 
     @Test

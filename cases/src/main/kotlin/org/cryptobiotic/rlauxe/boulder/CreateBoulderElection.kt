@@ -338,7 +338,7 @@ fun createBoulderElectionWithSov(
     val contestsUA = contests.map {
         ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles)
     }
-    makeClcaAssertions(contestsUA, allCvrs.iterator())
+    addClcaAssertions(contestsUA, allCvrs.iterator())
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
     checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = true)
     checkVotesVsSovo(contests, sovo)

@@ -23,9 +23,8 @@ private val logger = KotlinLogging.logger("Publisher")
  */
 
 class Publisher(val topdir: String) {
-    val errs =  ErrorMessages("Publisher");
     init {
-        validateOutputDir(Path.of(topdir), errs)
+        validateOutputDir(Path.of(topdir), ErrorMessages("Publisher"))
     }
 
     fun auditConfigFile() = "$topdir/auditConfig.json"
@@ -35,19 +34,19 @@ class Publisher(val topdir: String) {
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$topdir/round$round"
-        validateOutputDir(Path.of(dir), errs)
+        validateOutputDir(Path.of(dir), ErrorMessages("samplePrnsFile"))
         return "$dir/samplePrns.json"
     }
 
     fun sampleMvrsFile(round: Int): String {
         val dir = "$topdir/round$round"
-        validateOutputDir(Path.of(dir), errs)
+        validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))
         return "$dir/sampleMvrs.csv"
     }
 
     fun auditRoundFile(round: Int): String {
         val dir = "$topdir/round$round"
-        validateOutputDir(Path.of(dir), errs)
+        validateOutputDir(Path.of(dir), ErrorMessages("auditRoundFile"))
         return "$dir/auditState.json"
     }
 
@@ -59,16 +58,9 @@ class Publisher(val topdir: String) {
         }
         return roundIdx - 1
     }
-
-    fun validateOutputDirOfFile(filename: String) {
-        val parentDir = Path.of(filename).parent
-        if (!validateOutputDir(parentDir, errs)) {
-            logger.error{errs}
-        }
-    }
 }
 
-/** Make sure output directories exists and are writeable.  */
+/** Make sure output directories exists; delete existing files in them.  */
 fun clearDirectory(path: Path): Boolean {
     if (!Files.exists(path)) {
         Files.createDirectories(path)
@@ -81,19 +73,26 @@ fun clearDirectory(path: Path): Boolean {
     return true
 }
 
-/** Make sure output directories exists and are writeable.  */
-fun validateOutputDir(path: Path, errs: ErrorMessages): Boolean {
-    if (!Files.exists(path)) {
-        Files.createDirectories(path)
+/** Make sure output directories exist and are writeable.  */
+fun validateOutputDir(dirPath: Path, errs: ErrorMessages? = null): ErrorMessages {
+    val useErrors = errs ?: ErrorMessages("anon")
+    if (!Files.exists(dirPath)) {
+        Files.createDirectories(dirPath)
     }
-    if (!Files.isDirectory(path)) {
-        errs.add(" Output directory '$path' is not a directory")
+    if (!Files.isDirectory(dirPath)) {
+        useErrors.add(" Output directory '$dirPath' is not a directory")
     }
-    if (!Files.isWritable(path)) {
-        errs.add(" Output directory '$path' is not writeable")
+    if (!Files.isWritable(dirPath)) {
+        useErrors.add(" Output directory '$dirPath' is not writeable")
     }
-    if (!Files.isExecutable(path)) {
-        errs.add(" Output directory '$path' is not executable")
+    if (!Files.isExecutable(dirPath)) {
+        useErrors.add(" Output directory '$dirPath' is not executable")
     }
-    return !errs.hasErrors()
+    if (useErrors.hasErrors()) logger.error{ useErrors.toString() }
+    return useErrors
+}
+
+fun validateOutputDirOfFile(filename: String) {
+    val parentDir = Path.of(filename).parent
+    validateOutputDir(parentDir, ErrorMessages("validateOutputDirOfFile"))
 }

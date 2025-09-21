@@ -57,11 +57,11 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
 }
 
 // TODO add phantoms here
-fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, ballotPoolFile: String?) {
+fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, workingDir: String? = null, ballotPoolFile: String? = null) {
     val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
     val pools = ballotPools?.poolNameToId() // all we need is to know what the id is for each pool, so we can assign
-
-    SortMerge(auditDir, cvrCsvFilename, "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run()
+    val working = workingDir ?: "$topDir/sortChunks"
+    SortMerge(auditDir, cvrCsvFilename, workingDir = working, "$auditDir/$sortedCardsFile", pools = pools).run()
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }
@@ -80,7 +80,7 @@ fun createSfElectionFromCvrExport(
 ) {
     val stopwatch = Stopwatch()
     val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05,
+        AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 50,
         clcaConfig = ClcaConfig(strategy=ClcaStrategyType.noerror),
     )
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
@@ -97,16 +97,14 @@ fun createSfElectionFromCvrExport(
                 it.notfound.forEach { (cand, count) -> println("  candidate $cand not found $count times")}
             }
         }
-        // TODO where do we get contestNc?
         makeRaireContests(irvInfos, irvVoteMap, contestNcs)
     }
 
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-    val allContests = contestsUA + irvContests
+    val allContests = (contestsUA + irvContests).filter { it.preAuditStatus == TestH0Status.InProgress && !auditConfig.skipContests.contains(it.id) }
 
     // make all the clca assertions in one go
-    val auditableContests = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    makeClcaAssertions(auditableContests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
+    addClcaAssertions(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
@@ -138,6 +136,7 @@ fun makeContestInfos(
     val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
     if (show) contestInfos.forEach { println("   ${it} nwinners = ${it.nwinners} choiceFunction = ${it.choiceFunction}") }
 
+    // The contest Ncs come from the contestManifest
     val contestNcs: Map<Int, Int> = makeContestNcs(contestManifest, contestInfos) // contestId -> Nc
     return Pair(contestNcs, contestInfos)
 }

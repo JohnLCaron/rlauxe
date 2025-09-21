@@ -150,7 +150,6 @@ fun addOAClcaAssorters(
             }
         }
     }
-    val check = cardPools[2]
 
     // create the clcaAssertions and add then to the oaContests
     oaContests.forEach { oaContest ->
@@ -176,7 +175,6 @@ fun addOAClcaAssorters(
         }
         oaContest.clcaAssertions = clcaAssertions
     }
-    val check2 = cardPools[2]
 
     // compare the assortAverage with the value computed from the contestTabulation (non-IRV only)
     cardPools.values.forEach { cardPool ->

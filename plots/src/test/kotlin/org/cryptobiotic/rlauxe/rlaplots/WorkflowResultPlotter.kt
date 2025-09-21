@@ -270,36 +270,3 @@ fun wrsScatterPlot(
     plot.save("${writeFile}.html")
     println("saved to $writeFile")
 }
-
-/////////////////////////////////////////////////////////////////////
-
-fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
-                             catName: String, catfld: ((WorkflowResult) -> String) = { it -> category(it) } ) {
-    val io = WorkflowResultsIO("$dirName/${name}.csv")
-    val data = io.readResults()
-    wrsPlot(
-        titleS = "$name samples needed",
-        subtitleS = subtitle,
-        writeFile = "$dirName/${name}${scaleType.name}",
-        wrs = data,
-        xname = "fuzzPct", xfld = { it.Dparam("fuzzPct") },
-        yname = "samplesNeeded", yfld = { it.samplesUsed },
-        catName = catName, catfld = catfld,
-        scaleType = scaleType
-    )
-}
-
-fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
-    val io = WorkflowResultsIO("$dirName/${name}.csv")
-    val data = io.readResults()
-    wrsPlot(
-        titleS = "$name samples needed",
-        subtitleS = subtitle,
-        writeFile = "$dirName/${name}${scaleType.name}",
-        wrs = data,
-        xname = "margin", xfld = { it.margin },
-        yname = "samplesNeeded", yfld = { it.samplesUsed },
-        catName = catName, catfld = { category(it) },
-        scaleType = scaleType
-    )
-}

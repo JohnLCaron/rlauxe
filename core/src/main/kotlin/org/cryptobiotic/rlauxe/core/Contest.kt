@@ -430,9 +430,9 @@ open class ContestUnderAudit(
 
 }
 
-// make ClcaAssertions for multiple Contests from one iteration over the Cvrs
+// add ClcaAssertions for multiple Contests from one iteration over the Cvrs
 // The Cvrs must have the undervotes recorded
-fun makeClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
+fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
     val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
     contestsUA.forEach { contestUA ->
         contestUA.pollingAssertions.forEach { assertion ->

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -18,6 +19,7 @@ import kotlin.test.Test
 class TestSfElectionOA {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
+    val cvrCsv = "$sfDir/cvrExport.csv"
     val topDir = "/home/stormy/rla/cases/sf2024oa"
 
     // create the audit contests using the cvrExport files
@@ -39,13 +41,63 @@ class TestSfElectionOA {
     // create sorted cards, assumes auditDir/auditConfig already exists
     // do this after createSF2024OA, so ballotPools have been created
     @Test
-    fun createSF2024sortedCards() {
+    fun createSF2024OAsortedCards() {
         val sfDir = "/home/stormy/rla/cases/sf2024"
         val topDir = "/home/stormy/rla/cases/sf2024oa"
         val auditDir = "$topDir/audit"
         val cvrCsv = "$sfDir/cvrExport.csv"
         val ballotPoolFile = "$auditDir/$ballotPoolsFile"
         createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+    }
+
+    @Test
+    fun createSF2024OArepeat() {
+
+        repeat(10) { run ->
+
+            val auditConfig = AuditConfig(
+                AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 50000, riskLimit = .05, nsimEst = 10,
+                minRecountMargin = 0.0,
+                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+                skipContests = listOf(14, 28)
+            )
+
+            val auditDir = "$topDir/audit$run"
+            clearDirectory(Path.of(auditDir))
+
+            createSfElectionFromCvrExportOA(
+                auditDir,
+                castVoteRecordZip = zipFilename,
+                contestManifestFilename = "ContestManifest.json",
+                candidateManifestFile = "CandidateManifest.json",
+                cvrCsvFilename = cvrCsv,
+                auditConfigIn = auditConfig,
+                show = false,
+            )
+
+            val workingDir = "$topDir/sortChunks$run"
+            val ballotPoolFile = "$auditDir/$ballotPoolsFile"
+            createSortedCards(topDir, auditDir, cvrCsv, zip = true, workingDir = workingDir, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+        }
+    }
+
+    @Test
+    fun runSF2024OArepeat() {
+        repeat(10) { run ->
+            val auditDir = "$topDir/audit$run"
+            RunRliRoundCli.main(
+                arrayOf(
+                    "-in", auditDir,
+                    "-test",
+                )
+            )
+            RunRliRoundCli.main(
+                arrayOf(
+                    "-in", auditDir,
+                    "-test",
+                )
+            )
+        }
     }
 
     @Test

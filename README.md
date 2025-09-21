@@ -273,7 +273,7 @@ We ran 1 CLCA and 10 trials each of OneAudit and OneAudiy NoStyle. The total num
 
 The spread among all the assertions:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceScatter/ssf2024AuditVarianceScatterLogLinear.html" rel="ssf2024AuditVarianceScatterLogLinear">![ssf2024AuditVarianceScatterLogLinear](docs/plots/sf2024/sf2024AuditVarianceScatter/ssf2024AuditVarianceScatterLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceScatter/sf2024AuditVarianceScatterLogLinear.html" rel="sf2024AuditVarianceScatterLogLinear">![sf2024AuditVarianceScatterLogLinear](docs/plots/sf2024/sf2024AuditVarianceScatter/sf2024AuditVarianceScatterLogLinear.png)</a>
 
 * We removed two contests with the lowest margins: contest 14, a plurality contest with 4 winners (margin=0.0006 recount=0.0020), 
   and contest 28, an IRV contest ( margin=0.0037 recount=0.0100). This is probably what would happen in a real election.

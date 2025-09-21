@@ -251,17 +251,17 @@ when there are no errors:
 
 Using the 80% quantile for each contest seriously overestimates the number of samples needed. This is especially true for
 OneAudit, where there is so much variation in the sample size distribution even when there are no errors. We are now testing a new 
-strategy for OneAudit where we use the actual sample size, assuming no errors, for the first round. On subsequent rounds, we use the 
-measured error rates with the OptimalComparision betting strategy.
+strategy for OneAudit where we use the actual sample data to get the contest sample size (assuming no errors), for the first round. 
+On subsequent rounds, we use the measured error rates with the OptimalComparision betting strategy.
 
 Because we use the actual sample size only for choosing the number of first round ballots to draw, and not for the betting 
 strategy or sampling algorithm, I believe that we are not violating the requirements of the "anytime P-value" property of the Betting martingales (TBD).
 
-There is also increased efficiency when auditing many or all of the contests of an election at once, see [Multiple Contest Auditing](#multiple-contest-auditing).
+There is also increased efficiency when auditing many or all of the contests of an election at one time, see [Multiple Contest Auditing](#multiple-contest-auditing).
 In order to get a sense of how well these audit types might work in real elections, we ran the SF 2024 General Election
 10 times (with different PRN seeds each time) for both the OneAudit and OneAuditNS. We used the actual sample to get the 
-estimated cards needed when there are no errors. This gives us a better sense of the absolute values and spread of
-a real election
+number of cards needed when there are no errors. This gives us a better sense of the absolute values and spread of
+a real election.
 
 We ran 1 CLCA and 10 trials each of OneAudit and OneAudiy NoStyle. The total number of MVRS used were:
 

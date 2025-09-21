@@ -2,15 +2,19 @@
    &lt;head>
        &lt;meta charset=&quot;UTF-8&quot;>
        &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
-       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
    &lt;/head>
    &lt;body>
-          &lt;div id=&quot;w6idnJ&quot;>&lt;/div>
+          &lt;div id=&quot;WK5pZi&quot;>&lt;/div>
    &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
        var plotSpec={
 &quot;ggtitle&quot;:{
 &quot;text&quot;:&quot;pollingNoErrors samples needed&quot;,
-&quot;subtitle&quot;:&quot;Nc=10000 nruns=250&quot;
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100&quot;
 },
 &quot;mapping&quot;:{
 },
@@ -42,14 +46,30 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;&amp;merged_groups&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;],
 &quot;margin&quot;:[0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
-&quot;samplesNeeded&quot;:[3.8013781302666003,3.681652379897711,3.550700719964565,3.315542292860934,3.1085451135226063,2.971373587568987,2.8305299365746404,2.615696995744459,2.4208552474012244,2.294791948313176,3.9193649459270268,3.843934559048912,3.7617979814885723,3.6102273561329516,3.469715416725483,3.3422441885969096,3.2278034354407894,3.074349725513445,2.9671490658089144,2.8108049252809093,4.012049756112574,3.9618005316993368,3.9032354886500316,3.7841828696497837,3.664135084142129,3.5393247211586423,3.431756630696005,3.292408618835764,3.201602127675847,3.0400308923895363],
-&quot;legend&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;]
+&quot;&amp;merged_groups&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;],
+&quot;legend&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;],
+&quot;samplesNeeded&quot;:[4.202117954137397,3.960423192719763,3.8212717816487,3.3408815813087016,3.00018725293316,2.8894887508391007,2.726331017519204,2.5922079905275943,2.527605370494325,2.2647858545728,4.427848843393634,4.26418480253943,4.1403952123775545,3.8262063675167544,3.6216612155360117,3.4583220210091423,3.3288197915880424,3.159843802441807,3.04031746343485,2.932975754280074,4.575630088512715,4.441182794890115,4.32235389508429,4.049677390904238,3.8674031781228644,3.6963988670976065,3.5719190604077773,3.3977335619343676,3.26894730073264,3.1846895981903547]
 },
 &quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
 &quot;position&quot;:&quot;identity&quot;,
-&quot;geom&quot;:&quot;line&quot;
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
 },{
 &quot;mapping&quot;:{
 &quot;x&quot;:&quot;margin&quot;,
@@ -58,25 +78,61 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;&amp;merged_groups&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;],
 &quot;margin&quot;:[0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
-&quot;samplesNeeded&quot;:[3.8013781302666003,3.681652379897711,3.550700719964565,3.315542292860934,3.1085451135226063,2.971373587568987,2.8305299365746404,2.615696995744459,2.4208552474012244,2.294791948313176,3.9193649459270268,3.843934559048912,3.7617979814885723,3.6102273561329516,3.469715416725483,3.3422441885969096,3.2278034354407894,3.074349725513445,2.9671490658089144,2.8108049252809093,4.012049756112574,3.9618005316993368,3.9032354886500316,3.7841828696497837,3.664135084142129,3.5393247211586423,3.431756630696005,3.292408618835764,3.201602127675847,3.0400308923895363],
-&quot;legend&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;]
+&quot;&amp;merged_groups&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;],
+&quot;legend&quot;:[&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;minusStdev&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;needed&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;,&quot;plusStdev&quot;],
+&quot;samplesNeeded&quot;:[4.202117954137397,3.960423192719763,3.8212717816487,3.3408815813087016,3.00018725293316,2.8894887508391007,2.726331017519204,2.5922079905275943,2.527605370494325,2.2647858545728,4.427848843393634,4.26418480253943,4.1403952123775545,3.8262063675167544,3.6216612155360117,3.4583220210091423,3.3288197915880424,3.159843802441807,3.04031746343485,2.932975754280074,4.575630088512715,4.441182794890115,4.32235389508429,4.049677390904238,3.8674031781228644,3.6963988670976065,3.5719190604077773,3.3977335619343676,3.26894730073264,3.1846895981903547]
 },
 &quot;size&quot;:1.0,
 &quot;shape&quot;:1.0,
 &quot;color&quot;:&quot;#5470c6&quot;,
 &quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
 &quot;position&quot;:&quot;identity&quot;,
 &quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
 &quot;tooltips&quot;:{
 &quot;variables&quot;:[&quot;margin&quot;,&quot;samplesNeeded&quot;,&quot;legend&quot;],
 &quot;disable_splitting&quot;:true
 }
-}]
+}],
+&quot;spec_id&quot;:&quot;6&quot;
 };
-       var plotContainer = document.getElementById(&quot;w6idnJ&quot;);
-       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+       var containerDiv = document.getElementById(&quot;WK5pZi&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
    &lt;/script>
    &lt;/body>
 &lt;/html>"></iframe>    

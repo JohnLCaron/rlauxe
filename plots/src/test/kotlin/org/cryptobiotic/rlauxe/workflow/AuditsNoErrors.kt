@@ -3,14 +3,16 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import kotlin.io.path.Path
 import kotlin.math.log10
 import kotlin.test.Test
 
 class AuditsNoErrors {
     val name = "AuditsNoErrors4"
-    val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
+    val dirName = "/home/stormy/rla/plots/oneaudit4/$name" // you need to make this directory first
 
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10
@@ -93,7 +95,8 @@ class AuditsNoErrors {
     @Test
     fun clcaNoErrorsPlots() {
         val name = "clcaNoErrors"
-        val dirName = "/home/stormy/rla/workflow/$name"
+        val dirName = "/home/stormy/rla/plots/workflows/$name"
+        validateOutputDir(Path(dirName))
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
@@ -104,7 +107,7 @@ class AuditsNoErrors {
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.oracle, 0.0),
-                parameters=mapOf("nruns" to nruns)
+                parameters=mapOf("nruns" to nruns, "cat" to "clca")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
         }
@@ -117,14 +120,13 @@ class AuditsNoErrors {
         writer.writeResults(results)
 
         showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Linear)
-        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Log)
-        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Pct)
     }
 
     @Test
     fun pollingNoErrorsPlots() {
         val name = "pollingNoErrors"
-        val dir = "/home/stormy/rla/workflow/$name"
+        val dir = "/home/stormy/rla/plots/workflows/$name"
+        validateOutputDir(Path(dir))
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
         val stopwatch = Stopwatch()
 
@@ -177,69 +179,6 @@ class AuditsNoErrors {
             }},
             catflds = listOf("needed", "plusStdev", "minusStdev"),
         )
-    }
-
-    @Test
-    fun oaNoErrorsPlots() {
-        val name = "oaNoErrors2"
-        val dirName = "/home/stormy/rla/workflow/$name"
-        val margins =
-            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        val fuzzPct = 0.0
-        val cvrPercent = 0.95
-
-        val stopwatch = Stopwatch()
-
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
-        margins.forEach { margin ->
-            val oneauditGenerator1 = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "cat" to "default"),
-                auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean)
-                )
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator1))
-            val oneauditGenerator2 = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
-                mapOf("nruns" to nruns.toDouble(), "cat" to "max99"),
-                auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = 100,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
-                )
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator2))
-        }
-
-        // run tasks concurrently and average the results
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
-        println(stopwatch.took())
-
-        val writer = WorkflowResultsIO("$dirName/${name}.csv")
-        writer.writeResults(results)
-
-        val subtitle = "Nc=${N} nruns=${nruns} cvrPercent=$cvrPercent"
-        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, ScaleTypeOld.Linear)
-        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, ScaleTypeOld.Log)
-        showSampleSizesVsMarginByStrategy(name, dirName, subtitle, ScaleTypeOld.Pct)
-        showFailuresVsMarginByStrategy(name, dirName, subtitle=subtitle)
-    }
-
-    fun showSampleSizesVsMarginByStrategy(name: String, dirName: String, subtitle: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.csv")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotterOld(dirName, name)
-        plotter.showSampleSizesVsMargin(results, subtitle, "strategy", yscale) { category(it) }
-    }
-
-    fun showFailuresVsMarginByStrategy(name: String, dirName: String, subtitle: String) {
-        val io = WorkflowResultsIO("$dirName/${name}.csv")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotterOld(dirName, name)
-        plotter.showFailuresVsMargin(results, subtitle, "strategy") { category(it) }
     }
 
 }

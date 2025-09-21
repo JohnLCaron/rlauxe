@@ -172,10 +172,6 @@ CVRS are available for some, but not all ballots. When a ballot has been chosen 
 
 For results, see [OneAudit version 4](docs/OneAudit4.md).
 
-Older versions: [OneAudit version 3](docs/OneAudit3.md) and [OneAudit version 2](docs/OneAudit2.md).
-
-Archived notes: [OneAudit archive](docs/OneAudit.md).
-
 ### OneAudit inherent sample variance
 
 For CLCA and Polling, if there are no errors, then the number of samples needed for the audit is completely determined
@@ -223,18 +219,18 @@ the SF 2024 General Election to visualize the variance for this particular use c
 For comparision, here are the number of samples needed for all 164 assertions of all the contests of the SF 2024 General Election,
 when all ballots have an associated CVR and there are no errors:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.html" rel="sf2024NmvrsLogLinear">![sf2024NmvrsLogLinear](docs/plots/oneaudit4/sf2024/sf2024NmvrsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVariance/sf2024AuditVarianceNmvrsLogLinear.html" rel="sf2024AuditVarianceNmvrsLogLinear">![sf2024AuditVarianceNmvrsLogLinear](docs/plots/sf2024/sf2024AuditVariance/sf2024AuditVarianceNmvrsLogLinear.png)</a>
 
 Here is the same election using OneAudit where the in-person ballots are in precinct pools and have no card style data.
 About 86% of the ballots have CVRs, the rest are in the precinct pools.
 We run the audit 50 times with different permutations of the actual ballots, and show a scatter plot of the results. The
 variance is due to the random order of the pooled ballots; the 50 trials are spread out vertically, since they all have the same margin:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoans2024/sfoans2024NmvrsLogLinear.html" rel="sfoans2024NmvrsLogLinear">![sfoans2024NmvrsLogLinear](docs/plots/oneaudit4/sfoans2024/sfoans2024NmvrsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024oansAuditVariance/sf2024oansAuditVarianceNmvrsLogLinear.html" rel="sf2024oansAuditVarianceNmvrsLogLinear">![sf2024oansAuditVarianceNmvrsLogLinear](docs/plots/sf2024/sf2024oansAuditVariance/sf2024oansAuditVarianceNmvrsLogLinear.png)</a>
 
 Here is the same election using OneAudit where the in-person ballots are in precinct pools but have card style data:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.html" rel="sfoa2024NmvrsLogLinear">![sfoa2024NmvrsLogLinear](docs/plots/oneaudit4/sfoa2024/sfoa2024NmvrsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024oaAuditVariance/sf2024oaAuditVarianceNmvrsLogLinear.html" rel="sf2024oaAuditVarianceNmvrsLogLinear">![sf2024oaAuditVarianceNmvrsLogLinear](docs/plots/sf2024/sf2024oaAuditVariance/sf2024oaAuditVarianceNmvrsLogLinear.png)</a>
 
 * Both versions of OneAudit do quite well for high margins, say > 10%.
 * Due to the large variance introduced by the pooled data, comparing just the average of the samples needed is misleading at low margins.
@@ -344,7 +340,7 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 This is a log-log plot of samplesNeeded vs fuzzPct, with margin fixed at 4%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.html" rel="AuditsNoErrors4LogLog">![AuditsNoErrors4LogLog](docs/plots/oneaudit4/AuditsWithErrors/AuditsWithErrors4LogLog.png)</a>
 
 * CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
 * OneAudits are intermediate between Polling and CLCA.

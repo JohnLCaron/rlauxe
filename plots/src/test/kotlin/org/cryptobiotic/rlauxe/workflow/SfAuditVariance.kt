@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.io.path.Path
 import kotlin.test.Test
 
+// NOT USED
 // audit variance for SF2024 OA contest 18 (mayoral)
 // the cvrExports are already extracted with createSF2024cvrs90().
 // the audit and contests are already setup with createSfElectionFromCsvExportOA().

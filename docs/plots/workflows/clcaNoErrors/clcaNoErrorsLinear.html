@@ -2,15 +2,19 @@
    &lt;head>
        &lt;meta charset=&quot;UTF-8&quot;>
        &lt;style> html, body { margin: 0; overflow: hidden; } &lt;/style>
-       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.3.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.5.1/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
    &lt;/head>
    &lt;body>
-          &lt;div id=&quot;mKPtJM&quot;>&lt;/div>
+          &lt;div id=&quot;C6W8nj&quot;>&lt;/div>
    &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
        var plotSpec={
 &quot;ggtitle&quot;:{
-&quot;text&quot;:&quot;clcaNoErrors estimated sample sizes&quot;,
-&quot;subtitle&quot;:&quot;N=10000 nruns=1&quot;
+&quot;text&quot;:&quot;clcaNoErrors samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100&quot;
 },
 &quot;mapping&quot;:{
 },
@@ -42,14 +46,30 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;],
 &quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
-&quot;samplesNeeded&quot;:[4506.0,2587.0,1809.0,1389.0,1128.0,949.0,720.0,580.0,485.0,366.0,293.0,196.0,147.0,117.0,97.0,83.0,73.0,58.0],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;],
+&quot;samplesNeeded&quot;:[5646.0,2907.0,1957.0,1475.0,1183.0,988.0,742.0,595.0,496.0,372.0,298.0,198.0,149.0,119.0,99.0,85.0,74.0,59.0],
 &quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;]
 },
 &quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
 &quot;position&quot;:&quot;identity&quot;,
-&quot;geom&quot;:&quot;line&quot;
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
 },{
 &quot;mapping&quot;:{
 &quot;x&quot;:&quot;margin&quot;,
@@ -58,25 +78,65 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;],
 &quot;margin&quot;:[0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
-&quot;samplesNeeded&quot;:[4506.0,2587.0,1809.0,1389.0,1128.0,949.0,720.0,580.0,485.0,366.0,293.0,196.0,147.0,117.0,97.0,83.0,73.0,58.0],
+&quot;&amp;merged_groups&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;],
+&quot;samplesNeeded&quot;:[5646.0,2907.0,1957.0,1475.0,1183.0,988.0,742.0,595.0,496.0,372.0,298.0,198.0,149.0,119.0,99.0,85.0,74.0,59.0],
 &quot;auditType&quot;:[&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;,&quot;clca&quot;]
 },
 &quot;size&quot;:1.0,
 &quot;shape&quot;:1.0,
 &quot;color&quot;:&quot;#5470c6&quot;,
 &quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
 &quot;position&quot;:&quot;identity&quot;,
 &quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
 &quot;tooltips&quot;:{
 &quot;variables&quot;:[&quot;margin&quot;,&quot;samplesNeeded&quot;,&quot;auditType&quot;],
+&quot;formats&quot;:[{
+&quot;field&quot;:&quot;margin&quot;,
+&quot;format&quot;:&quot;f8.3&quot;
+}],
 &quot;disable_splitting&quot;:true
 }
-}]
+}],
+&quot;spec_id&quot;:&quot;3&quot;
 };
-       var plotContainer = document.getElementById(&quot;mKPtJM&quot;);
-       LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer);
+       var containerDiv = document.getElementById(&quot;C6W8nj&quot;);
+       
+               var toolbar = null;
+               var plotContainer = containerDiv;               
+               
+       var options = {
+           sizing: {
+               width_mode: &quot;fixed&quot;,
+               height_mode: &quot;fixed&quot;,
+               width: 600.0,
+               height: 400.0
+           }
+       };
+       var fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, -1, -1, plotContainer, options);
+       if (toolbar) {
+         toolbar.bind(fig);
+       }
+       
+   // ----------
+   })();
+   
    &lt;/script>
    &lt;/body>
 &lt;/html>"></iframe>    

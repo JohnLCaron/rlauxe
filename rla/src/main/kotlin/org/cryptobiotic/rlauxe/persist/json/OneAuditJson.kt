@@ -130,22 +130,20 @@ fun OAIrvJson.import(): OAIrvContestUA {
 }
 
 // data class AssortAvgsInPools (
-//    val contest:Int,
-//    val assortAverage: Map<Int, Double>, // poolId -> average assort value
+//    val assortAverage: Map<Int, Double>, // poolId -> average assort value, for one assorter
 //)
 @Serializable
 data class AssortAvgsInPoolsJson(
-    val contest: Int,
+    val contest: Int?, // TODO remove
     val assortAverage: Map<Int, Double>,
 )
 
 fun AssortAvgsInPools.publishJson() = AssortAvgsInPoolsJson(
-    contest,
+    contest = null,
     assortAverage,
 )
 
 fun AssortAvgsInPoolsJson.import() = AssortAvgsInPools(
-    contest,
     assortAverage,
 )
 

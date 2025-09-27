@@ -39,7 +39,7 @@ fun makeTestContestOAIrv(): OAIrvContestUA {
             val pairs = pools.map { pool ->
                 Pair(pool.poolId, 0.55)
             }
-            val poolAvgs = AssortAvgsInPools(assertion.info.id, pairs.toMap())
+            val poolAvgs = AssortAvgsInPools(pairs.toMap())
             val clcaAssertion = OneAuditClcaAssorter(assertion.info, passort, true, poolAvgs)
             ClcaAssertion(assertion.info, clcaAssertion)
         }

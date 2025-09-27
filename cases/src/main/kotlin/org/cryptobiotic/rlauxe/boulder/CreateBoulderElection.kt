@@ -17,15 +17,14 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.map
 import kotlin.math.max
 
-// this may be used to compare the cost of OneAudit, vs if we had all CVRs.
-// or, have a single class that does both CLCA and OneAudit
-// TODO I think were not handling redacted IRV ?? see Boulder2023
+// simulate having all CVRs by making CVRS out of redacted votes.
+// TODO not handling redacted IRV. No IRV in boulder24, but there is in Boulder23.
 open class BoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val quiet: Boolean = true)
 {
-    val exportCvrs: List<Cvr> = export.cvrs.map { it.convert() }
+    val cvrs: List<Cvr> = export.cvrs.map { it.convert() } // could use export.cvrs instead of converting ??
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
 
@@ -102,7 +101,7 @@ open class BoulderElection(
         // val irvContests = allContests.filter { it.info.choiceFunction == SocialChoiceFunction.IRV }
         val irvInfos = infoList.filter { it.choiceFunction == SocialChoiceFunction.IRV }
         val irvContests = if (irvInfos.isEmpty()) emptyList() else {
-            val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, exportCvrs.iterator())
+            val irvVoteMap = makeIrvContestVotes(irvInfos.associateBy { it.id }, cvrs.iterator())
             makeRaireContests(irvInfos, irvVoteMap, contestNcs)
         }
 
@@ -116,32 +115,14 @@ open class BoulderElection(
     }
 
     // make contest votes from the export.cvrs and export.redacted
-    // ncards is approx, will be corrected from sovo
+    // ncards is approx, will be corrected from sovo and OneContest
     fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulation>()
-
-        export.cvrs.forEach { cvr ->
-            cvr.contestVotes.forEach { contestVote ->
-                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]?.voteForN) }
-                tab.addVotes(contestVote.candVotes.toIntArray())
-            }
-        }
-
-        export.redacted.forEach { redacted ->
-            redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
-                val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]?.voteForN) }
-                // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
-                //   would be safer to make the cvrs first, then just use them to make the Contest
-                //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
-                //   one could also try to use OneAudit for the redacted cvrs.
-                //   but we still need to make an accurate CardLocationManifest
-
-                contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
-                val info = infoMap[contestId]
-                tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // approx
-            }
-        }
-        return votes
+        val cvrVotes =  countCvrVotes()
+        val redVotes =  countRedactedVotes()
+        val allVotes = mutableMapOf<Int, ContestTabulation>()
+        allVotes.sumContestTabulations(cvrVotes)
+        allVotes.sumContestTabulations(redVotes)
+        return allVotes
     }
 
     fun countCvrVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
@@ -162,14 +143,20 @@ open class BoulderElection(
         export.redacted.forEach { redacted ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
                 val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]?.voteForN) }
+                // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
+                //   would be safer to make the cvrs first, then just use them to make the Contest
+                //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
+                //   one could also try to use OneAudit for the redacted cvrs.
+                //   but we still need to make an accurate CardLocationManifest
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
                 val info = infoMap[contestId]
-                tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // approx
+                tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // wrong, dont use
             }
         }
         return votes
     }
 
+    // make CVRS to simulate CLCA
     open fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
         export.redacted.forEachIndexed { redactedIdx, redacted ->
@@ -291,7 +278,7 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
 
 ////////////////////////////////////////////////////////////////////
 
-// read in the sov file
+// read in the sovo file
 fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
@@ -306,7 +293,7 @@ fun createBoulderElection(
     createBoulderElectionWithSov(cvrExportFile, auditDir, sovo, riskLimit, minRecountMargin, auditConfigIn)
 }
 
-// the sov is already read in
+// the sovo is already read in
 fun createBoulderElectionWithSov(
     cvrExportFile: String,
     auditDir: String,
@@ -330,7 +317,7 @@ fun createBoulderElectionWithSov(
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
     val redactedCvrs = boulderElection.makeRedactedCvrs()
-    val allCvrs = boulderElection.exportCvrs + redactedCvrs
+    val allCvrs = boulderElection.cvrs + redactedCvrs
     val cards = createSortedCards(allCvrs, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${allCvrs.size}")
@@ -354,7 +341,7 @@ fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
     return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
 }
 
-fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes) {
+fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {
     // we are making the contest votes from the cvrs. how does it compare with official tally ??
     contests.forEach { contest ->
         val sovoContest: BoulderContestVotes? = sovo.contests.find { it.contestTitle == contest.name }
@@ -374,7 +361,7 @@ fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes) {
                 }
                 // createBoulder23 doesnt agree on contest "City of Louisville City Council Ward 2 (4-year term)"
                 // see ColbertDiscrepency.csv, FaheyDiscrepency.csv
-                require(contestVote == sovoVote)
+                if (mustAgree) require(contestVote == sovoVote)
             }
         }
     }

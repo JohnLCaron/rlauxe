@@ -116,11 +116,11 @@ class OneAuditClcaAssorter(
     override fun toString() = buildString {
         appendLine("OneAuditClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        appendLine("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
+        appendLine("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
     }
 
     fun showPools() = buildString {
-        appendLine("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
+        appendLine("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
         poolAverages.assortAverage.forEach {
             appendLine("  pool=${it.key} average=${it.value}")
         }
@@ -142,6 +142,11 @@ class OneAuditClcaAssorter(
         return result
     }
 }
+
+// for a specific assorter, all the averages in each pool
+data class AssortAvgsInPools (
+    val assortAverage: Map<Int, Double>, // poolId -> average assort value
+)
 
 /*
 Audit.py line 2584

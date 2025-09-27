@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -140,7 +141,7 @@ object RunRlaStartFuzz {
 
         // save the sorted testMvrs
         val mvrFile = "$auditDir/private/testMvrs.csv"
-        publisher.validateOutputDirOfFile(mvrFile)
+        validateOutputDirOfFile(mvrFile)
         writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 
@@ -196,7 +197,7 @@ object RunRlaStartFuzz {
 
         // save the sorted testMvrs
         val mvrFile = "$auditDir/private/testMvrs.csv"
-        publisher.validateOutputDirOfFile(mvrFile)
+        validateOutputDirOfFile(mvrFile)
         writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   writeMvrsJsonFile ${mvrFile}")
 

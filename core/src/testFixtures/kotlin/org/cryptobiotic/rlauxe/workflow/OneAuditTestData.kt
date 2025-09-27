@@ -122,7 +122,7 @@ fun makeOneContestUA(
             // println("pool ${pool.poolId} avg $avg")
             Pair(pool.poolId, avg)
         }
-        val poolAvgs = AssortAvgsInPools(assertion.info.id, pairs.toMap())
+        val poolAvgs = AssortAvgsInPools(pairs.toMap())
         val clcaAssertion = OneAuditClcaAssorter(assertion.info, passort, true, poolAvgs)
         ClcaAssertion(assertion.info, clcaAssertion)
     }

@@ -128,17 +128,18 @@ data class CastVoteRecord(
 // use colIdx to eliminate write-ins.
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
-// transform into a CardPool
+// raw data from Boulder, before we start to adjust it. Turn into a CardPool,
 // unfortunately, we dont know how many ballots this group represents, nor the number of undervotes
 class RedactedGroup(val ballotType: String) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
-    var csvRecord : CSVRecord? = null
+    var csvRecord : CSVRecord? = null // debugging
 
     fun addVotes(schema: Schema, line: CSVRecord): RedactedGroup {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
-            if (line.get(colidx).isNotEmpty()) {
-                val useContestIdx = schema.columns[colidx].contestIdx  // TODO same as contestID?
+            val valueAtIdx = line.get(colidx)
+            if (valueAtIdx.isNotEmpty()) {
+                val useContestIdx = schema.columns[colidx].contestIdx  // same as contestID?
                 val useContest = schema.contests[useContestIdx]
                 if (useContest.isIRV) {
                     // I think these are just regular Cvrs but the IRV contest was made seperate for privacy reasons
@@ -168,6 +169,7 @@ class RedactedGroup(val ballotType: String) {
         // appendLine(csvRecord.toString())
     }
 
+    // TODO divide by voteForN?
     // TODO to get this right, the A and B should be merged into one group
     fun maxCards(): Int {
         return contestVotes.values.maxOfOrNull { it.values.sum() }!!

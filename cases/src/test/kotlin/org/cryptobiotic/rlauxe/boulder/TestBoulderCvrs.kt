@@ -141,7 +141,7 @@ class TestBoulderCvrs {
         val (contests, raireContests) = electionFromCvrs.makeContests()
         val irvId = raireContests.first().id
 
-        val countIrvCvrs = electionFromCvrs.exportCvrs.filter{ it.hasContest(irvId) }.count()
+        val countIrvCvrs = electionFromCvrs.cvrs.filter{ it.hasContest(irvId) }.count()
         println("countIrvCvrs = $countIrvCvrs")
         assertEquals(irvContest.totalBallots, countIrvCvrs)
     }

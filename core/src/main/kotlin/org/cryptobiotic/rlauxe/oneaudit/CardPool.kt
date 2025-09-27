@@ -57,19 +57,21 @@ data class BallotPool(
 // record the ContestTabulation (regular) or VoteConsolidator (IRV), using the cvrs in the pool.
 // TODO what if you dont have cvrs in the pool? isnt that the whole point of OneAudit?? eg Boulder.
 //  then you are just given ContestTabulation (with undervote count!!)
-//  if you have and IRV contest, you must be given IrvContestVotes.VoteConsolidator which is needed to calculate the
+//  if you have any IRV contest, you must be given IrvContestVotes.VoteConsolidator which is needed to calculate the
 //  RaireAssertions and probably the average assort value for the pool ??
 open class CardPool(
     val poolName: String,
     val poolId: Int,
-    val irvIds: Set<Int>,
+    val irvIds: Set<Int>, // TODO could make a CardPoolIRV
     val contestInfos: Map<Int, ContestInfo>)
 {
     val contestTabulations = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
     val irvVoteConsolidations = mutableMapOf<Int, IrvContestVotes>()  // contestId -> IrvContestVotes
-    // a convenient place to keep this, calculated in addOAClcaAssorters()
-    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()
 
+    // a convenient place to keep this, calculated in addOAClcaAssorters()
+    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+
+    // this is when you have CVRs. (sfoa, sfoans)
     open fun accumulateVotes(cvr : Cvr) {
         cvr.votes.forEach { (contestId, candIds) ->
             if (irvIds.contains(contestId)) {
@@ -82,6 +84,7 @@ open class CardPool(
         }
     }
 
+    // TODO sfoa, sfoan serialize BallotPool, but only use it to get map name -> id. Needed?
     fun toBallotPools(): List<BallotPool> {
         val bpools = mutableListOf<BallotPool>()
         contestTabulations.forEach { contestId, contestCount ->
@@ -92,6 +95,7 @@ open class CardPool(
         return bpools
     }
 
+    // sfoans needs to add undervotes
     fun addUndervote(contestId: Int) {
         if (irvVoteConsolidations.contains(contestId)) {
             val irvContestVotes = irvVoteConsolidations[contestId]!!
@@ -102,14 +106,18 @@ open class CardPool(
         }
     }
 
+    // sum regular (non IRV) votes into sumTab. (sfoa)
     fun sumRegular(sumTab: MutableMap<Int, ContestTabulation>) {
         this.contestTabulations.forEach { (contestId, poolContestTab) ->
             val contestSum = sumTab.getOrPut(contestId) { ContestTabulation(contestInfos[contestId]?.voteForN) }
             contestSum.sum(poolContestTab)
         }
     }
+
+    fun contests() = (contestTabulations.map { it.key } + irvVoteConsolidations.map { it.key }).toSortedSet().toIntArray()
 }
 
+// for calculating average from running total, see addOAClcaAssorters
 class AssortAvg() {
     var ncards = 0
     var totalAssort = 0.0
@@ -119,11 +127,6 @@ class AssortAvg() {
         return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
     }
 }
-
-data class AssortAvgsInPools (
-    val contest:Int,
-    val assortAverage: Map<Int, Double>, // poolId -> average assort value
-)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +172,7 @@ fun addOAClcaAssorters(
                 }
             }
 
-            val poolAvgs = AssortAvgsInPools(assertion.info.id, assortAverageTest)
+            val poolAvgs = AssortAvgsInPools(assortAverageTest)
             val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAvgs)
             ClcaAssertion(assertion.info, clcaAssorter)
         }

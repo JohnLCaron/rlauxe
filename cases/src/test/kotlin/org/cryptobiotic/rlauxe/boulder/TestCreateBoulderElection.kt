@@ -72,10 +72,18 @@ class TestCreateBoulderElection {
         )
     }
 
+    @Test
+    fun createBoulder24oasim() { // simulate CVRs
+        createBoulderElectionOAsim(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/rla/cases/boulder24oasim",
+        )
+    }
 
     @Test
     fun createBoulder24oa() {
-        createBoulderElectionOneAudit(
+        createBoulderElectionOA(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditDir = "/home/stormy/rla/cases/boulder24oa",

@@ -53,10 +53,6 @@ fun Double.sigfig(minSigfigs: Int = 4): String {
     return if (df.startsWith("0.")) df.substring(1) else df
 }
 
-fun showLast(x: List<Double>, n: Int) = buildString {
-    val last = x.takeLast(n)
-    last.forEach { append("${df(it)}, ") }
-}
 
 fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
@@ -64,12 +60,25 @@ fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
 fun MutableMap<String, Int>.mergeReduceS(others: List<Map<String, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
 
+fun sumContestVotes(contestVotes: Map<Int, Map<Int, Int>>, summond: MutableMap<Int, MutableMap<Int, Int>>) {
+    contestVotes.forEach { (contestId, candVotes) ->
+        val contestSum = summond.getOrPut(contestId) { mutableMapOf() }
+        candVotes.forEach { (cand, vote) ->
+            val candVotes = contestSum.getOrPut(cand)  { 0 }
+            contestSum[cand] = candVotes + vote
+        }
+    }
+}
+
 fun <T : Enum<T>> enumValueOf(name: String, entries: EnumEntries<T>): T? {
     for (status in entries) {
         if (status.name.lowercase() == name.lowercase()) return status
     }
     return null
 }
+
+private val regex = Regex("[,]") // Matches '!', ',' or any digit
+fun cleanCsvString(originalString: String) = originalString.replace(regex, "")
 
 
 

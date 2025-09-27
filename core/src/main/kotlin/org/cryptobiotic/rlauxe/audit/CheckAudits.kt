@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
+import kotlin.collections.component1
+import kotlin.collections.component2
+
 // import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
@@ -163,7 +166,7 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
     return result
 }
 
-// has both votes and ncards, return contestId -> ContestTabulation
+// return contestId -> ContestTabulation
 fun tabulateCvrs(cvrs: Iterator<Cvr>, voteForN: Map<Int, Int>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     for (cvr in cvrs) {
@@ -176,7 +179,7 @@ fun tabulateCvrs(cvrs: Iterator<Cvr>, voteForN: Map<Int, Int>): Map<Int, Contest
 }
 
 class ContestTabulation(val voteForN: Int?) {
-    val votes = mutableMapOf<Int, Int>()
+    val votes = mutableMapOf<Int, Int>() // cand -> votes
     var ncards = 0
     var novote = 0  // how many cards had no vote for this contest?
     var undervotes = 0  // how many undervotes = voteForN - nvotes
@@ -223,3 +226,11 @@ class ContestTabulation(val voteForN: Int?) {
         }
     }
 }
+
+fun MutableMap<Int, ContestTabulation>.sumContestTabulations(contestTabulations: Map<Int, ContestTabulation>) {
+    contestTabulations.forEach { (contestId, contestTab) ->
+        val contestSum = this.getOrPut(contestId) { ContestTabulation(contestTab.voteForN) }
+        contestSum.sum(contestTab)
+    }
+}
+

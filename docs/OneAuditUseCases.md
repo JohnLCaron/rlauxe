@@ -10,7 +10,7 @@ the sequence of sampled ballots.
 OneAudit has inherent sample variance due to the random sequence of pooled ballots, even when there are no errors.
 See plots in the next section below.
 
-## Card Style Data for the Pooled data
+## Card Style Data for Pooled data
 
 SHANGRLA code implementing OneAudit uses the SanFrancisco county 2024 primary and general elections for its use cases.
 There, the mail-in votes have Cvrs that can be matched to the physical ballots, while the in-person votes have Cvrs
@@ -41,29 +41,40 @@ technical problem with the precinct scanners, then when that problem is overcome
 If its a deliberate privacy-preserving choice, perhaps it might be sufficient to use the CVRs to create a ballot manifest
 with CSD (Card Style Data). This essentially redacts the actual vote, but keeps a record of what contests are on each ballot.
 Note in this case, the physical ballots have to be tied to the CVR, usually by
-printing a ballot id on the physical ballot, and recording that id on the CVR. A different use case is if
+printing a ballot id on the physical ballot, and recording that id on the CVR. 
+
+A different use case is if
 all the ballots in a pool have the same ballot style, and we are told what it is. Then, anytime a ballot is sampled from the pool,
 we know what the ballot style is, so style-based sampling can be used. In this case, there is no CVR that has to be matched
-to teh physical ballot. These two use cases can both be audited with "OneAudit with styles".
+to teh physical ballot. 
 
-## Comparison of CLCA and OneAudit, with and without styles
+These two use cases can both be audited with "OneAudit with styles".
 
-Since the variance is so highly dependent on the specifics of the pool counts and averages, we use the actual data from
-the SF 2024 General Election to visualize the variance for this particular use case.
+## SF2024: Comparison of CLCA and OneAudit, with and without styles
 
-For comparision, here are the number of samples needed for all 164 assertions of all the contests of the SF 2024 General Election,
+We compare CLCA, OneAudit with styles, and OneAudit without styles on the SanFrancisco 2024 General Election. In
+reality we can only use OneAudit without styles, since the in-precinct CVRs are not associated with the physical ballots.
+We can use these CVRs to calculate the average assort values of the pools, however.
+
+For simulating a OneAudit with styles, we use the in-precinct CVRS as Card Style Data for each ballot, and pretend that we can
+associate them with physical ballots. We dont use the in-precinct CVRS during the audit sampling.
+
+For simulating a CLCA, we ignore the in-precinct vs mail-in distinction between the CVRS, and pretend that we can
+associate all CVRs with physical ballots, and use all the CVRs during the audit sampling.
+
+Here are the number of samples needed for each of the 164 assertions of all the contests of SF2024 for the CLCA simulation,
 when all ballots have an associated CVR and there are no errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVariance/sf2024AuditVarianceNmvrsLogLinear.html" rel="sf2024AuditVarianceNmvrsLogLinear">![sf2024AuditVarianceNmvrsLogLinear](plots/sf2024/sf2024AuditVariance/sf2024AuditVarianceNmvrsLogLinear.png)</a>
 
-Here is the same election using OneAudit where the in-person ballots are in precinct pools and have no card style data.
+Here is the same election using OneAudit without styles.
 About 86% of the ballots have CVRs, the rest are in the precinct pools.
 We run the audit 50 times with different permutations of the actual ballots, and show a scatter plot of the results. The
 variance is due to the random order of the pooled ballots; the 50 trials are spread out vertically, since they all have the same margin:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024oansAuditVariance/sf2024oansAuditVarianceNmvrsLogLinear.html" rel="sf2024oansAuditVarianceNmvrsLogLinear">![sf2024oansAuditVarianceNmvrsLogLinear](plots/sf2024/sf2024oansAuditVariance/sf2024oansAuditVarianceNmvrsLogLinear.png)</a>
 
-Here is the same election using OneAudit where the in-person ballots are in precinct pools but have card style data:
+Here is the same election using OneAudit with styles:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024oaAuditVariance/sf2024oaAuditVarianceNmvrsLogLinear.html" rel="sf2024oaAuditVarianceNmvrsLogLinear">![sf2024oaAuditVarianceNmvrsLogLinear](plots/sf2024/sf2024oaAuditVariance/sf2024oaAuditVarianceNmvrsLogLinear.png)</a>
 
@@ -77,7 +88,8 @@ Here are all three audit types on a single scatter plot, showing the 80% quantil
 
 * OneAuditNS (no card style data) plot uses the original margin (not the lowered margin), in order to compare it accurately to the other types.
 * The CLCA is smooth because it has no variance when there are no errors, while OneAudit show scatter for the same margins.
-* OneAudit needs about 3x, and OneAuditNS needs about 6x the samples at 5% margin, compared to a CLCA audit for the 80% quantile, and gets progressively worse as margins get lower.
+* OneAudit needs about 3x, and OneAuditNS needs about 6x the samples at 5% margin, compared to a CLCA audit, for the 80% quantile, 
+  and gets progressively worse as margins get lower.
 * The actual values depend strongly on all the details of the use case.
 
 Using the 80% quantile for each contest seriously overestimates the number of samples needed. This is especially true for
@@ -114,10 +126,18 @@ The spread among all the assertions (click to get an ineractive chart):
 * The total mvrs used are dominated by the contest(s) with the lowest margin. By removing the close contests, we can greatly reduce
   the sampled mvrs. OTOH, its the close contests where RLAs are most needed.
 
-## OneAudit for Redacted data
+## Boulder2024: OneAudit for Redacted data
 
 Consider the use case of "redacted ballots" where we only get pool vote totals. CreateBoulderElectionOneAudit uses the
 publically available data from Boulder County, CO, 2024 general election, using OneAudit and making the redacted CVRs into OneAudit pools.
+
+    // on contest 20, sovo.totalVotes and sovo.totalBallots is wrong vs the cvrs. (only one where voteForN=3, but may not be related)
+    //  'Town of Superior - Trustee' (20) candidates=[0, 1, 2, 3, 4, 5, 6] choiceFunction=PLURALITY nwinners=3 voteForN=3
+    //   nvotes= 17110, sovoContest.totalVotes = 16417
+    //   nballots= 8485, sovoContest.totalBallots = 8254
+    // assume sovo is wrong
+    // so nballotes uses max(nballots, sovoContest.totalBallots)
+
 
 Findings so far:
 
@@ -126,3 +146,23 @@ Findings so far:
 3. While we still can do a simulation with CreateBoulderElectionOneAudit, we cant do a real audit with existing published data.
 4. At a minimum we need (1).
 5. **TODO**: Assuming we have (1), whats the consequences of not having (2) ??
+
+Boulder2024 redacted pools are missing undervotes for each contest. We will simulate those by distributing the missing undervotes
+(sovo.undervotes - cvr.undervotes ) across the pools in proportion to pool.nvotes.
+
+Boulder2024 redacted pools are missing nvotes. We will assume that all cards have the same ballot style. 
+
+Seems true except for:
+````
+RedactedGroup '06, 33, & 36-A', contestIds=[0, 1, 2, 3, 5, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42], totalVotes=8012
+*** rgroup '06, 33, & 36-A'
+[0, 1, 2, 3, 5, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] !=
+[0, 1, 2, 3, 5, 10, 11, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] (6-A)
+````
+
+'06, 33, & 36-A' has extra contest 12.
+
+Assume that we can match physical ballots with location = "pool${pool.poolName} card ${poolIndex+1}"
+Assume that all the ballots in the pool have the same Ballot Type. So the undervotes are all accounted for, and we dont have to add extra ballots.
+
+Some of these assumptions may not be right, but they are sufficient for our purposes. In a real audit, we would have to work with the EA to track each down.

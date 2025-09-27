@@ -31,7 +31,7 @@ open class ClcaAssorter(
     val check: Boolean = true,
 ) {
     // Define v ≡ 2Āc − 1, the assorter margin
-    val cvrAssortMargin: Double
+    val reportedAssortMargin: Double
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
     val noerror: Double // clca assort value when no error
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
@@ -44,14 +44,15 @@ open class ClcaAssorter(
         }
 
         // Define v ≡ 2Āc − 1, the assorter margin
-        cvrAssortMargin = assorter.reportedMargin() // (0, 1)
+        reportedAssortMargin = assorter.reportedMargin() // (0, 1)
         // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
-        noerror = 1.0 / (2.0 - cvrAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
+        noerror = 1.0 / (2.0 - reportedAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
         // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
         // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7) above
         upperBound = 2.0 * noerror // upper bound of clca assorter;
 
-        val cvrAssortAvg = if (assortAverageFromCvrs != null) assortAverageFromCvrs else assorter.reportedMean()
+        // TODO
+        val reportedAssortAvg = if (assortAverageFromCvrs != null) assortAverageFromCvrs else assorter.reportedMean()
         /* if (cvrAssortAvg <= 0.5) {
             println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5")
         }
@@ -59,8 +60,8 @@ open class ClcaAssorter(
             println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: noerror ($noerror) must be > .5" )
          */
         if (check) { // TODO suspend checking for some tests that expect to fail
-            require(cvrAssortAvg > 0.5) {
-                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5"
+            require(reportedAssortAvg > 0.5) {
+                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"
             }
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
@@ -177,7 +178,7 @@ open class ClcaAssorter(
     override fun toString() = buildString {
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  cvrAssortMargin=$cvrAssortMargin noerror=$noerror upperBound=$upperBound")
+        append("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound")
     }
 
     fun shortName() = assorter.shortName()

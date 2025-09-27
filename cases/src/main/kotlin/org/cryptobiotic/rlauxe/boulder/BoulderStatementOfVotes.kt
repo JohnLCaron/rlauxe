@@ -68,12 +68,11 @@ data class BoulderContestVotes(
     }
 
     override fun toString(): String {
-        val diff = totalBallots - totalVotes - totalUnderVotes - totalOverVotes
-        return "$contestTitle, $precinctCount, $activeVoters, $totalBallots, $totalVotes, $totalUnderVotes, $totalOverVotes, $diff"
+        return "$contestTitle, $precinctCount, $activeVoters, $totalBallots, $totalVotes, $totalUnderVotes, $totalOverVotes"
     }
 
     companion object {
-        val header = "contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes, diff"
+        val header = "contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes"
     }
 }
 

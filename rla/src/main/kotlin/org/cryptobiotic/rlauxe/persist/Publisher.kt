@@ -31,6 +31,7 @@ class Publisher(val topdir: String) {
     fun contestsFile() = "$topdir/contests.json"
     fun cardsCsvFile() = "$topdir/sortedCards.csv"
     fun cardsCsvZipFile() = "$topdir/sortedCards.csv.zip"
+    fun ballotPoolsFile() = "$topdir/ballotPools.csv"
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$topdir/round$round"

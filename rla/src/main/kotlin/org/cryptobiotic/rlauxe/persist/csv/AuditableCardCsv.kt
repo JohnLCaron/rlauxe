@@ -3,17 +3,20 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
+import java.nio.file.Files
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("AuditableCardCsv")
 
 // data class AuditableCard (
-//    val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
-//    val index: Int,  // index into the original, canonical (committed-to) list of cards
-//    val sampleNum: Long,
+//    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+//    val index: Int,  // index into the original, canonical list of cards
+//    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
-//    val contests: IntArray, // aka ballot style
+//    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
 //    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
 //    val poolId: Int?, // for OneAudit
 //)
@@ -60,19 +63,7 @@ class AuditableCardCsvWriter(filename: String) {
 }
 
 /////////////////////////////////////////////////////////
-class AuditableCardCsvReader(val filename: String): Iterable<AuditableCard> {
-    override fun iterator(): Iterator<AuditableCard> {
-        return readCardsCsvIterator(filename)
-    }
-}
 
-class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): Iterable<AuditableCard> {
-    override fun iterator(): Iterator<AuditableCard> {
-        val iter = readCardsCsvIterator(filename)
-        repeat(skip) { if (iter.hasNext()) (iter.next()) }
-        return iter
-    }
-}
 
 fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
@@ -105,6 +96,24 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     }
 
     return AuditableCard(desc, index, sampleNum, phantom, contests, votes, poolId)
+}
+
+class AuditableCardCsvReader(publisher: Publisher): Iterable<AuditableCard> {
+    val filename: String = if (Files.exists(Path(publisher.cardsCsvZipFile()))) publisher.cardsCsvZipFile()
+      else if (Files.exists(Path(publisher.cardsCsvFile()))) publisher.cardsCsvFile()
+      else throw RuntimeException("CardsCsvFile does not exist in directory ${publisher.topdir}")
+
+    override fun iterator(): Iterator<AuditableCard> {
+        return readCardsCsvIterator(filename)
+    }
+}
+
+class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): Iterable<AuditableCard> {
+    override fun iterator(): Iterator<AuditableCard> {
+        val iter = readCardsCsvIterator(filename)
+        repeat(skip) { if (iter.hasNext()) (iter.next()) }
+        return iter
+    }
 }
 
 fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {

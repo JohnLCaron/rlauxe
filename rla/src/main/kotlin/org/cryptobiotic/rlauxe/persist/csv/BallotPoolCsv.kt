@@ -5,10 +5,10 @@ import java.io.*
 
 // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
 
-val BallotPoolCsvHeader = "Pool, Id, Contest, ncards, candidate:nvotes, ...\n"
+val BallotPoolCsvHeader = "Pool, PoolId, ContestId, ncards, candidate:nvotes, ...\n"
 
 fun writeBallotPoolCSV(pool: BallotPool) = buildString {
-    append("${pool.name}, ${pool.poolId}, ${pool.contest}, ${pool.ncards}, ")
+    append("${pool.name}, ${pool.poolId}, ${pool.contestId}, ${pool.ncards}, ")
     pool.votes.forEach { (cand, vote) -> append("$cand: $vote, ") }
     appendLine()
 }

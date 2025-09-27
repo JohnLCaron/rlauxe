@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -119,7 +120,7 @@ class TestSfElectionOAnoStyles {
         val rlauxAudit = PersistentAudit(auditDir, true)
         val contestRounds = rlauxAudit.contestsUA().map { ContestRound(it, 1) }
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader("$auditDir/sortedCards.csv"))
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir)))
         val cvrPairs = mvrManager.makeCvrPairsForRound() // TODO use iterator, not List
         val runner = OneAuditAssertionAuditor()
 
@@ -153,7 +154,7 @@ class TestSfElectionOAnoStyles {
         val minAssertion = contest18.minClcaAssertion()!!
         val assertionRound = AssertionRound(minAssertion, 1, null)
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader("$auditDir/sortedCards.csv"))
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir)))
         val sampler =
             ClcaNoErrorIterator(
                 contest18.id,

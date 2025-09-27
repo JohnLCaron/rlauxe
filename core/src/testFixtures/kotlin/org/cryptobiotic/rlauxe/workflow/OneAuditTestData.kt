@@ -148,7 +148,7 @@ fun makeContest(info: ContestInfo,
         voteBuilder[cand] = tvote + votes
     }
     pools.forEach { pool ->
-        require(pool.contest == info.id)
+        require(pool.contestId == info.id)
         pool.votes.forEach { (cand, votes) ->
             val tvote = voteBuilder[cand] ?: 0
             voteBuilder[cand] = tvote + votes

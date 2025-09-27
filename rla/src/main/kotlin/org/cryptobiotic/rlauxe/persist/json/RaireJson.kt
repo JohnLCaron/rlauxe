@@ -46,6 +46,7 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
 // data class RaireAssertion(
 //    val winnerId: Int, // this must be the candidate ID, in order to match with Cvr.votes
 //    val loserId: Int,  // ditto
+//    var difficulty: Double,
 //    var marginInVotes: Int,
 //    val assertionType: RaireAssertionType,
 //    val eliminated: List<Int> = emptyList(), // candidate Ids; NEN only; already eliminated for the purpose of this assertion
@@ -57,7 +58,7 @@ data class RaireAssertionJson(
     val winner: Int,
     val loser: Int,
     val difficulty: Double,
-    val margin: Int,
+    val margin: Int, // TODO change to marginInVotes
     val assertion_type: String,
     val eliminated: List<Int>,
     val votes: Map<Int, Int>,

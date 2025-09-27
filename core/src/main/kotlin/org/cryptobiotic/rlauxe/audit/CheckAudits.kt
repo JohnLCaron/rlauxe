@@ -1,10 +1,9 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import kotlin.collections.component1
 import kotlin.collections.component2
-
-// import org.cryptobiotic.rlauxe.oneaudit.OneAuditContest
 
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
@@ -70,37 +69,34 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     }
 }
 
-fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
+fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>,
+                          ballotPools: List<BallotPool> = emptyList(), show: Boolean = false) = buildString {
     val voteForN = contestsUA.associate { it.id to it.contest.info().voteForN }
-    val votes = tabulateCvrs(cvrs, voteForN)
+    val allVotes = mutableMapOf<Int, ContestTabulation>()
+    allVotes.sumContestTabulations(tabulateCvrs(cvrs, voteForN))
+    allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), voteForN))
 
     if (show) {
-        println("tabulateCvrs")
-        votes.toSortedMap().forEach { (key, value) ->
-            println(" $key : $value")
+        appendLine("tabulateCvrs")
+        allVotes.toSortedMap().forEach { (key, value) ->
+            appendLine(" $key : $value")
         }
     }
+
     contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
         val contestVotes = contestUA.contest.votes()!!
-        val contestTab = votes[contestUA.id]
+        val contestTab = allVotes[contestUA.id]
         if (contestTab == null) {
-            println("*** contest ${contestUA.id} not found in tabulated Cvrs")
+            appendLine("*** contest ${contestUA.id} not found in tabulated Cvrs")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         } else {
-            /* add in the pool votes
-            if (contestUA.contest is OneAuditContest) {
-                contestUA.contest.pools.values.forEach { pool ->
-                    contestTab.addVotes(pool.votes)
-                }
-            } */
-
             if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
-                println("*** contest ${contestUA.id} votes disagree with cvrs = $contestTab marking as ContestMisformed")
-                println("contestVotes = $contestVotes")
-                println("tabulation   = ${contestTab.votes}")
+                appendLine("*** contest ${contestUA.id} votes disagree with cvrs = $contestTab marking as ContestMisformed")
+                appendLine("contestVotes = $contestVotes")
+                appendLine("tabulation   = ${contestTab.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
-            } else if (show) {
-                println("contest ${contestUA.id} cvrVotes = $contestTab")
+            } else {
+                appendLine("    contest ${contestUA.id} contestVotes matches cvrTabulation")
             }
         }
     }
@@ -112,20 +108,6 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
     val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
     val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
     return votes1z == votes2z
-}
-
-// not used
-// find first index where pvalue < riskLimit, and stays below the riskLimit for the rest of the sequence
-fun samplesNeeded(pvalues: List<Double>, riskLimit: Double): Int {
-    var firstIndex = -1
-    pvalues.forEachIndexed { idx, pvalue ->
-        if (pvalue <= riskLimit && firstIndex < 0) {
-            firstIndex = idx
-        } else if (pvalue >= riskLimit) {
-            firstIndex = -1
-        }
-    }
-    return firstIndex
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -164,6 +146,16 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
         }
     }
     return result
+}
+
+// return contestId -> ContestTabulation
+fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, voteForN: Map<Int, Int>): Map<Int, ContestTabulation> {
+    val votes = mutableMapOf<Int, ContestTabulation>()
+    ballotPools.forEach { pool ->
+        val tab = votes.getOrPut(pool.contestId) { ContestTabulation(voteForN[pool.contestId]) }
+        pool.votes.forEach { (cand, vote) -> tab.addVote(cand, vote) }
+    }
+    return votes
 }
 
 // return contestId -> ContestTabulation

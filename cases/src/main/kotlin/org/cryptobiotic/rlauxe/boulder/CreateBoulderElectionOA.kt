@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
@@ -156,7 +157,6 @@ class BoulderElectionOA(
         }
     }
 
-
     fun makeContestsUA(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
@@ -208,12 +208,16 @@ fun createBoulderElectionOA(
     )
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    // TODO add phantoms
+    // write ballot pools
+    val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
+    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
+    logger.info{" total ${ballotPools.size} pools to ${publisher.ballotPoolsFile()}"}
+
+    // write cards TODO add phantoms
     val cards = createSortedCards(election.cvrs, election.cardPools, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    println("   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${cards.size}")
+    logger.info{"   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${cards.size}"}
 
-    /////////////////
     // TODO attach (abstraction of) OneAuditContest ?
     val contestsUA = contests.map {
         OAContestUnderAudit(it, auditConfig.hasStyles)
@@ -221,12 +225,13 @@ fun createBoulderElectionOA(
     addOAClcaAssorters2(contestsUA, election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    // checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = false)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools=ballotPools, show = false)
     checkVotesVsSovo(contests, sovo, mustAgree = false)
 
+    // write contests
     writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())
-    println("   writeContestsJsonFile ${publisher.contestsFile()}")
-    println("took = $stopwatch\n")
+    logger.info{"   writeContestsJsonFile ${publisher.contestsFile()}"}
+    logger.info{"took = $stopwatch\n"}
 }
 
 fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPool2>, seed: Long) : List<AuditableCard> {
@@ -236,7 +241,7 @@ fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPool2>, seed: Long) : Lis
     cvrs.forEach { cards.add(AuditableCard.fromCvr(it, idx++, prng.next())) }
     // add the redacted votes
     pools.forEach { pool ->
-        val ncards = pool.maxMinCardsNeeded + pool.adjustCards
+        val ncards = pool.ncards()
         val cleanName = cleanCsvString(pool.poolName)
         repeat(ncards) { poolIndex ->
             //     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
@@ -244,7 +249,7 @@ fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPool2>, seed: Long) : Lis
             //    val prn: Long,   // psuedo random number
             //    val phantom: Boolean,
             //    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
-            //    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
+            //    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, rankeballotPools=ballotPools, cleand first to last
             //    val poolId: Int?, // for OneAudit
             cards.add(
                 AuditableCard(

@@ -58,6 +58,11 @@ fun createSfElectionFromCvrExportOA(
         cvrCsvFilename,
     )
 
+    // write ballot pools
+    val ballotPools = cardPools.values.map { it.toBallotPools() }.flatten()
+    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
+    logger.info{" total ${ballotPools.size} pools to ${publisher.ballotPoolsFile()}"}
+
     // make contests based on cardPools, which must include the unpooled
     val irvContests = makeOneAuditIrvContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }, cardPools, contestNcs)
     val contestsUA = makeOneAuditContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, cardPools, contestNcs)
@@ -69,14 +74,14 @@ fun createSfElectionFromCvrExportOA(
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), show = true)
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), ballotPools=ballotPools, show = true)
 
     writeContestsJsonFile(allContests, publisher.contestsFile())
-    println("   writeContestsJsonFile ${publisher.contestsFile()}")
+    logger.info{"   writeContestsJsonFile ${publisher.contestsFile()}"}
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
-    println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
+    logger.info{"   writeAuditConfigJsonFile ${publisher.auditConfigFile()}"}
 
-    println("took = $stopwatch")
+    logger.info{"took = $stopwatch"}
 }
 
 // TODO check that the sum of pooled and unpooled votes is correct
@@ -131,21 +136,12 @@ fun createCardPools(
 
     // write the ballot pool file. read back in createSortedCards to mark the pooled cvrs TODO needed?
     val poolFilename = "$auditDir/$ballotPoolsFile"
-    println(" writing to $poolFilename with ${cardPools.size} pools")
+    logger.info{" writing to $poolFilename with ${cardPools.size} pools"}
     val poutputStream = FileOutputStream(poolFilename)
     poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
 
-    var poolCount = 0
-    val sortedPools = cardPools.toSortedMap()
-    sortedPools.forEach { (poolName, pool) ->
-        val bpools = pool.toBallotPools() // one for each contest
-        bpools.forEach { poutputStream.write(writeBallotPoolCSV(it).toByteArray()) }
-        poolCount += bpools.size
-    }
-    poutputStream.close()
-    println(" total ${sortedPools.size} pools")
-
     ////  check that the cardPools agree with the summary XML
+    val sortedPools = cardPools.toSortedMap()
     val contestTabSums = mutableMapOf<Int, ContestTabulation>()
     sortedPools.forEach { (_, pool : CardPool) ->
         pool.sumRegular( contestTabSums)

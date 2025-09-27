@@ -1,5 +1,5 @@
 # Case Studies
-_last changed 9/20/2025_
+_last changed 9/27/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -40,11 +40,13 @@ We have several representations of CVRs:
 
 is an intermediate CVR representation for DominionCvrExportJson. Used by SanFrancisico and Corla.
 
-Can use CardSortMerge to do out-of-memory sorting. From an Iterator\<CvrExport\>, convert to AuditableCard, assign prn, sort and write sortedCards.csv.
+Use CardSortMerge to do out-of-memory sorting: using an Iterator\<CvrExport\>, this converts to AuditableCard, assign prn, sorts and writes
+to _sortedCards.csv_.
 
 **AuditableCard( val location: String, val index: Int, val prn: Long, val phantom: Boolean, val contests: IntArray, val votes: List<IntArray>?, val poolId: Int? )**
 
 is a serialization format for CVRs, written to a csv file. Optionally zipped. Rlauxe can read from the zipped file directly.
+Note that _votes_ may be null, which is used for for pooled data with no CVRs.
 
 **Cvr( val id: String, val votes: Map<Int, IntArray>, val phantom: Boolean, val poolId: Int?)**
 
@@ -186,19 +188,25 @@ BoulderStatementOfVotes has
 _createBoulderElection_: BoulderStatementOfVotes, 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx
 
 * we have the cvr undervotes, but not count or undervotes for the redacted votes
-* mostly phantoms = 0 = totalBallots - totalVotes - totalUnderVotes - totalOverVotes
-* a significant number of undervotes are missing. we will assume they are in the redacted batches.
-* We calculate redactedUndervotes = totalUndervotes - cvrUndervotes, then distribute the redactedUndervotes across the groups in proportion to number of votes.
+* for most contests, phantoms = 0 = sovoContest.totalBallots - ((sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes)
+* missing undervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN - cvr.undervotes.
+  we assume they are in the redacted pools.
 
-We cant do a OneAudit RLA unless we know the number of undervotes in each redacted group.
-If we assume the ballotTypes are correct, and that all cards in the batch are of the ballotType, then we just need to know the ncards in each batch.
+**createBoulderElectionOA** assumes that each pool has a single CardStyle, allowing us to use style based sampling. This also 
+constrains the way that undervotes are added to the pools. In this case we need to know the number of cards in each batch. We cont,
+so we approximate it, and adjust Nc. (see TestBoulderUndervotes.kt for details).
 
-For now, we simulate the RLA by distributing redactedUndervotes across the groups in proportion to number of votes.
+**createBoulderElectionOAsim** simulates the RLA by distributing redactedUndervotes across the groups in proportion to number of votes.
 We create simulated cvrs by making random choices until the cvr sums equal the given batch totals, including undervotes.
+We use these simulated cvrs as the mvs in the simulated RLA. TODO
+
+**createBoulderElection** simulates a CLCA by creating simulated cvrs by making random choices until the cvr sums equal the given batch totals, including undervotes.
 We use these simulated cvrs as the mvs in the simulated RLA.
 
-I dont see how we can handle IRV contests in the presence of redacted CVRs. There are lines called "RCV Redacted & Randomly Sorted", but they dont make much sense so far.
-To do IRV with OneAudit you need to create VoteConsolidator for each pool from the real cvrs. 
+In reality, we cant do a OneAudit RLA unless we know the number of undervotes in each redacted group.
+If we assume the ballotTypes are correct, and that all cards in the batch are of the ballotType, then we just need to know the ncards in each batch.
+
+I dont see how we can handle IRV contests in the presence of redacted CVRs. There are lines called "RCV Redacted & Randomly Sorted", but they dont make much sense so far. To do IRV with OneAudit you need to create VoteConsolidator for each pool from the real cvrs. 
 
 
 

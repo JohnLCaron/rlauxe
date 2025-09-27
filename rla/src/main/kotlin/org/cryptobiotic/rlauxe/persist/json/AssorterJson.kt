@@ -13,12 +13,6 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 //    val check: Boolean = true,
 //)
 
-// class OAClcaAssorter(
-//    val contestOA: OneAuditContest,
-//    assorter: AssorterIF,   // A(mvr)
-//    avgCvrAssortValue: Double,    // Ā(c) = average CVR assorter value
-//) : ClcaAssorter(contestOA.info, assorter, avgCvrAssortValue)
-
 // class OneAuditClcaAssorter(
 //    info: ContestInfo,
 //    assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
@@ -29,7 +23,7 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 @Serializable
 data class ClcaAssorterJson(
     val className: String,
-    val assorter: AssorterIFJson,
+    val assorter: AssorterIFJson, // TODO duplicate
     val avgCvrAssortValue: Double?,
     val hasStyle: Boolean,
     val poolAverages: AssortAvgsInPoolsJson?,

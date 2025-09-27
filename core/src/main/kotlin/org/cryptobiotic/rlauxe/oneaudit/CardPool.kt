@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.raire.IrvContestVotes
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.mutableMapOf
@@ -21,7 +22,7 @@ private val logger = KotlinLogging.logger("CardPool")
 data class BallotPool(
     val name: String,
     val poolId: Int,
-    val contest:Int,
+    val contestId :Int,
     val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
     val votes: Map<Int, Int>, // candid -> nvotes, for plurality. umm do we really need ?
 ) {
@@ -122,6 +123,7 @@ class AssortAvg() {
     var ncards = 0
     var totalAssort = 0.0
     fun avg() : Double = if (ncards == 0) 0.0 else totalAssort / ncards
+    fun margin() : Double = mean2margin(avg())
 
     override fun toString(): String {
         return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"

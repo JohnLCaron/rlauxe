@@ -5,8 +5,10 @@ import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
+import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.nfn
@@ -121,14 +123,16 @@ class OneAuditContest2(val info: ContestInfo, val sovoContest: BoulderContestVot
 }
 
 class CardPool2(
-    val poolName: String,
+    poolNameIn: String,
     val poolId: Int,
     val redVotes: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes from redacted group
     val infos: Map<Int, ContestInfo>) // all infos
 {
+    val poolName = cleanCsvString(poolNameIn)
+
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
-    var adjustCards = 0
+    private var adjustCards = 0
 
     init {
         redVotes.forEach { (contestId, candidateCounts) ->
@@ -187,6 +191,14 @@ class CardPool2(
     }
 
     fun ncards() = maxMinCardsNeeded + adjustCards
+
+    fun toBallotPools(): List<BallotPool> {
+        if (poolId == 10)
+            print("heh")
+        return redVotes.map { (contestId, candCount) ->
+            BallotPool(poolName, poolId, contestId, ncards(), candCount)
+        }
+    }
 }
 
 fun addOAClcaAssorters2(
@@ -214,7 +226,7 @@ fun addOAClcaAssorters2(
     } */
 
 
-    // ClcaAssorter already has the contest wide reported margin. We justy have to add the poolAvgs
+    // ClcaAssorter already has the contest-wide reported margin. We justy have to add the poolAvgs
     // create the clcaAssertions and add then to the oaContests
     oaContests.forEach { oaContest ->
         val contestId = oaContest.id

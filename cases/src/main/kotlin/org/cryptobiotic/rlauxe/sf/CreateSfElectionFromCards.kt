@@ -21,6 +21,7 @@ import java.io.FileOutputStream
 
 private val quiet = false
 
+// TODO why isnt this in publisher ??
 const val cvrExportCsvFile = "cvrExport.csv"
 const val sortedCardsFile = "sortedCards.csv"
 const val ballotPoolsFile = "ballotPools.csv"

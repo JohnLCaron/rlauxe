@@ -70,33 +70,21 @@ fun ContestInfoJson.import(): ContestInfo {
     return info
 }
 
-// class Contest(
-//        override val info: ContestInfo,
+// open class Contest(
+//        val info: ContestInfo,
 //        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-//        override val Nc: Int,
-//        override val Np: Int,
-//    ): ContestIF {
+//        val Nc: Int,               // trusted maximum ballots/cards that contain this contest
+//        val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
+//    ): ContestIF
 //
 // data class RaireContest(
-//    override val info: ContestInfo,
-//    override val winners: List<Int>,
-//    override val Nc: Int,
-//    override val Np: Int,
-//)
-// class OneAuditContest (
-//    val contest: ContestIF,
-//
-//    val cvrVotes: Map<Int, Int>,   // candidateId -> nvotes (may be empty) from the crvs
-//    val cvrNc: Int,                // may be 0
-//    val pools: Map<Int, BallotPool>, // pool id -> pool
+//    val info: ContestInfo,
+//    val winners: List<Int>,
+//    val Nc: Int,
+//    val Ncast: Int,
 //) : ContestIF {
+//     val roundsPaths = mutableListOf<IrvRoundsPath>()
 
-// data class OAContestJson(
-//    // val contestJson : ContestIFJson,
-//    val cvrVotes: Map<Int, Int>,
-//    val cvrNc: Int,
-//    val pools: List<BallotPoolJson>,
-//)
 @Serializable
 data class ContestIFJson(
     val className: String,
@@ -105,8 +93,7 @@ data class ContestIFJson(
     val Nc: Int,
     val Ncast: Int,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
-    val contestJson: ContestIFJson? = null,
-    val pools: List<BallotPoolJson>? = null,
+    // val contestJson: ContestIFJson? = null,
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -122,23 +109,12 @@ fun ContestIF.publishJson() : ContestIFJson {
         is RaireContest ->
             ContestIFJson(
                 "RaireContest",
-                null,
+                votes = null,
                 this.winners,
                 this.Nc,
                 this.Ncast,
-                this.roundsPaths.map { it.publishJson() },
+                irvRoundsPaths = this.roundsPaths.map { it.publishJson() },
             )
-        /* is OneAuditContest ->
-            ContestIFJson(
-                "OneAuditContest",
-                this.cvrVotes,
-                null, // TODO why dont we have winners ??
-                this.cvrNcards,
-                0,
-                null,
-                this.contest.publishJson(),
-                this.pools.values.map { it.publishJson()},
-            ) */
         else -> throw RuntimeException("unknown contest type ${this.javaClass.simpleName} = $this")
     }
 }
@@ -164,15 +140,6 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
             }
             rcontest
         }
-        /* "OneAuditContest" -> {
-            val contest = this.contestJson!!.import(info)
-            OneAuditContest.make(
-                contest,
-                this.votes!!,
-                this.Nc,
-                this.pools!!.map { it.import() },
-            )
-        } */
         else -> throw RuntimeException()
     }
 }
@@ -247,14 +214,14 @@ data class ContestsUnderAuditJson(
     val contestsUnderAudit: List<ContestUnderAuditJson>,
     val rcontestsUnderAudit: List<RaireContestUnderAuditJson>,
     val oacontestsUnderAudit: List<ContestUnderAuditJson>,
-    val oarcontestsUnderAudit: List<OAIrvJson>,
+    val oarcontestsUnderAudit: List<OAIrvContestJson>,
 )
 
 fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
     val contests = mutableListOf<ContestUnderAuditJson>()
     val rcontests = mutableListOf<RaireContestUnderAuditJson>()
     val oacontests = mutableListOf<ContestUnderAuditJson>()
-    val oarcontests = mutableListOf<OAIrvJson>()
+    val oarcontests = mutableListOf<OAIrvContestJson>()
     this.forEach {
         if (it is RaireContestUnderAudit) {
             rcontests.add( it.publishRaireJson())

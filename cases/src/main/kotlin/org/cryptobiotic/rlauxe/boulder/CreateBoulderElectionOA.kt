@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.map
 import kotlin.collections.set
@@ -24,14 +23,15 @@ private val logger = KotlinLogging.logger("BoulderElectionOA")
 
 // Use OneAudit, redacted ballots are in pools. use redacted vote counts for pools' assort averages.
 // No redacted CVRs. Cant do IRV.
-class BoulderElectionOA(
+open class BoulderElectionOA(
     export: DominionCvrExportCsv,
     sovo: BoulderStatementOfVotes,
+    clca: Boolean = false,
     quiet: Boolean = true,
-): BoulderElection(export, sovo, quiet)
-{
-    val cardPools: List<CardPool2> = convertRedactedToCardPool2() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val oaContests = makeOAContest2().associate { it.info.id to it}
+): BoulderElection(export, sovo, quiet) {
+
+    val cardPools: List<CardPoolB> = convertRedactedToCardPool2() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
+    val oaContests: Map<Int, OneAuditContest> = makeOAContest2().associate { it.info.id to it}
 
     init {
         val cardPoolMap = cardPools.associateBy { it.poolId }
@@ -45,7 +45,7 @@ class BoulderElectionOA(
         distributeRedactedNcardsDiff(oaContest63, cardPoolMap)
     }
 
-    private fun convertRedactedToCardPool2(): List<CardPool2> {
+    private fun convertRedactedToCardPool2(): List<CardPoolB> {
         return export.redacted.mapIndexed { redactedIdx, redacted: RedactedGroup ->
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
@@ -53,12 +53,12 @@ class BoulderElectionOA(
                 redacted.contestVotes.filter{ (key, value) -> key != 12 }
             } else redacted.contestVotes
 
-            CardPool2(redacted.ballotType, redactedIdx, useContestVotes.toMap(), infoMap)
+            CardPoolB(redacted.ballotType, redactedIdx, useContestVotes.toMap(), infoMap)
         }
     }
 
     // put the A and B into the same pool, so we can count undervotes accurately
-    private fun convertRedactedToCardPoolPaired(groups: List<RedactedGroup>, infoMap: Map<Int, ContestInfo>): List<CardPool2> {
+    private fun convertRedactedToCardPoolPaired(groups: List<RedactedGroup>, infoMap: Map<Int, ContestInfo>): List<CardPoolB> {
         val aandbs = mutableMapOf<String, MutableList<RedactedGroup>>()
         groups.forEach { redacted: RedactedGroup ->
             val name = redacted.ballotType.substring(0, redacted.ballotType.lastIndexOf('-'))
@@ -72,19 +72,19 @@ class BoulderElectionOA(
 
             aandb.forEach { sumContestVotes(it.contestVotes, contestVotesSummed) }
 
-            CardPool2(name, poolIdx++, contestVotesSummed, infoMap)
+            CardPoolB(name, poolIdx++, contestVotesSummed, infoMap)
         }
     }
 
-    fun makeOAContest2(): List<OneAuditContest2> {
+    fun makeOAContest2(): List<OneAuditContest> {
         val countCvrVotes = countCvrVotes()
         val countRedactedVotes = countRedactedVotes()
 
-        val oa2Contests = mutableListOf<OneAuditContest2>()
+        val oa2Contests = mutableListOf<OneAuditContest>()
         infoList.forEach { info ->
             val sovoContest = sovo.contests.find { it.contestTitle == info.name }
             if (sovoContest != null) {
-                oa2Contests.add( OneAuditContest2(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!, cardPools))
+                oa2Contests.add( OneAuditContest(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!, cardPools))
             }
             else logger.warn{"*** cant find contest '${info.name}' in BoulderStatementOfVotes"}
         }
@@ -92,7 +92,7 @@ class BoulderElectionOA(
         return oa2Contests
     }
 
-    // // so distribute diff to pools proportionate to sumPoolCards
+    // distribute diff to pools proportionate to pool.maxMinCardsNeeded
     fun distributeRedactedNcardsDiff() {
         val cardPoolMap = cardPools.associateBy { it.poolId }
 
@@ -105,7 +105,7 @@ class BoulderElectionOA(
         }
     }
 
-    fun distributeRedactedNcardsDiff(oaContest: OneAuditContest2, cardPoolMap: Map<Int, CardPool2>) {
+    fun distributeRedactedNcardsDiff(oaContest: OneAuditContest, cardPoolMap: Map<Int, CardPoolB>) {
         val contestId = oaContest.info.id
         val poolCards = oaContest.poolTotals()
         val totalCards = oaContest.redNcards
@@ -145,9 +145,6 @@ class BoulderElectionOA(
             }
         }
 
-        if (allocDiffPool.values.sum() != diff)
-            print("whw")
-
         // check
         require(allocDiffPool.values.sum() == diff)
 
@@ -157,7 +154,7 @@ class BoulderElectionOA(
         }
     }
 
-    fun makeContestsUA(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
+    open fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
         val regContests = infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
@@ -165,16 +162,11 @@ class BoulderElectionOA(
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.sumAllCards()
             val useNc = max( ncards, oaContest.Nc())
-            Contest(info, candVotes, useNc, oaContest.sumAllCards())
+            val contest = Contest(info, candVotes, useNc, oaContest.sumAllCards())
+            OAContestUnderAudit(contest, hasStyles)
         }
 
-        if (!quiet) {
-            println("Regular contests (No IRV)) = ${regContests.size}")
-            regContests.forEach { contest ->
-                println(contest.show2())
-            }
-        }
-        return Pair(regContests, emptyList()) // no IRV contests
+        return regContests
     }
 
 }
@@ -199,8 +191,6 @@ fun createBoulderElectionOA(
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
     val election = BoulderElectionOA(export, sovo)
 
-    val (contests, irvContests) = election.makeContestsUA()
-
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
@@ -218,23 +208,20 @@ fun createBoulderElectionOA(
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     logger.info{"   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${cards.size}"}
 
-    // TODO attach (abstraction of) OneAuditContest ?
-    val contestsUA = contests.map {
-        OAContestUnderAudit(it, auditConfig.hasStyles)
-    }
-    addOAClcaAssorters2(contestsUA, election.cardPools.associate { it.poolId to it })
+    val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
+    addOAClcaAssortersFromMargin(contestsUA, election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
     checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools=ballotPools, show = false)
-    checkVotesVsSovo(contests, sovo, mustAgree = false)
+    checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
 
     // write contests
-    writeContestsJsonFile(contestsUA + irvContests, publisher.contestsFile())
+    writeContestsJsonFile(contestsUA, publisher.contestsFile())
     logger.info{"   writeContestsJsonFile ${publisher.contestsFile()}"}
     logger.info{"took = $stopwatch\n"}
 }
 
-fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPool2>, seed: Long) : List<AuditableCard> {
+fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPoolB>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
     val cards = mutableListOf<AuditableCard>()
     var idx = 0

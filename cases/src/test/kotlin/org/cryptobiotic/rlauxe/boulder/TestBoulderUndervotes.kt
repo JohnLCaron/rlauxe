@@ -87,69 +87,6 @@ class TestBoulderUndervotes {
         return btoke.toInt().toString()
     }
 
-    @Test
-    fun showSovoContestDetails() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-
-        val boulderElection = BoulderElection(export, sovo)
-        val countCvrVotes = boulderElection.countCvrVotes()
-        val countRedactedVotes = boulderElection.countRedactedVotes()
-
-        val oaContests = mutableListOf<OneAuditContest>()
-        boulderElection.infoList.forEach { info ->
-            val sovoContest = sovo.contests.find { it.contestTitle == info.name }
-            if (sovoContest != null) oaContests.add(
-                OneAuditContest(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
-            )
-            else println("*** cant find '${info.name}' in BoulderStatementOfVotes")
-        }
-
-        println()
-        oaContests.forEach {
-            println(BoulderContestVotes.header)
-            println(it.details())
-        }
-    }
-
-    @Test
-    fun testSovoProblems() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-
-        val boulderElection = BoulderElection(export, sovo)
-        val countCvrVotes = boulderElection.countCvrVotes()
-        val countRedactedVotes = boulderElection.countRedactedVotes()
-
-        val oaContests = mutableListOf<OneAuditContest>()
-        boulderElection.infoList.forEach { info ->
-            val sovoContest = sovo.contests.find { it.contestTitle == info.name }
-            if (sovoContest != null) oaContests.add(
-                OneAuditContest(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
-            )
-            else println("*** cant find '${info.name}' in BoulderStatementOfVotes")
-        }
-
-        println("OAContest problems")
-        oaContests.forEach {
-            println(it.problems())
-        }
-    }
-    // on contest 20, totalVotes and totalBallots is wrong vs the cvrs. only one where voteForN=3.
-    // 'Town of Superior - Trustee' (20) candidates=[0, 1, 2, 3, 4, 5, 6] choiceFunction=PLURALITY nwinners=3 voteForN=3
-    //  nvotes= 17110, sovoContest.totalVotes = 16417   ***  val nvotes = cvr.nvotes() + red.nvotes()
-    //  nballots= 8485, sovoContest.totalBallots = 8254 *** val nballots = (nvotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
-
 // sovo totalUnderVotes is high or cvr.novotes is low, causing redUnderPct to be much bigger than cvrTabulation.novote
 // much worse when voteForN > 1, which is probably a clue as to whats wrong.
 // Generate novote CVRS anyway from these calculations. The main thing is to augment the group with the number of
@@ -194,50 +131,6 @@ so
  */
 
     @Test
-    fun testRedactedGroups() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election = BoulderElection(export, sovo)
-
-        val contestIds = election.infoList.map { it.id }
-        print("          ")
-        contestIds.forEach {  print("${nfn(it, 4)}|") }
-        println()
-
-        export.redacted.forEach { rgroup ->
-            print(rgroup.showVotes(contestIds))
-        }
-    }
-
-    @Test
-    fun testRedactedUndervotes() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election = BoulderElection(export, sovo)
-
-        val contestUnderVoteSums = mutableMapOf<Int, Int>()
-        export.redacted.forEach { rgroup ->
-            val undervotes = rgroup.undervote() // contestid -> undervote
-            undervotes.forEach { key, value ->
-                val contestUnderVoteSum = contestUnderVoteSums.getOrPut(key) { 0 }
-                contestUnderVoteSums[key] = contestUnderVoteSum + value
-            }
-        }
-        contestUnderVoteSums.toSortedMap().forEach {  println(it) }
-        println()
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Test
     fun showSovoContestDetail2() {
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
@@ -272,7 +165,7 @@ so
         showPoolVotes(contestIds, election2.cardPools)
     }
 
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPool2>, width:Int = 4) {
+    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPoolB>, width:Int = 4) {
         println("votes, undervotes")
         print("${trunc("poolName", 9)}:")
         contestIds.forEach {  print("${nfn(it, width)}|") }

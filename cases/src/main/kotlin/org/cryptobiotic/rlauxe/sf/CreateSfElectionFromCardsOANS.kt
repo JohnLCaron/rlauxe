@@ -8,9 +8,7 @@ import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.core.CvrExport.Companion.unpooled
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssorters
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
@@ -177,7 +175,7 @@ fun createCardPoolsNS(
 
 // keep all the CVRS, which we can use to caclulate average assort. only used for SF.
 class CardPoolNs( poolName: String, poolId: Int, irvIds: Set<Int>,  contestInfos: Map<Int, ContestInfo>) :
-    CardPool(poolName, poolId, irvIds, contestInfos) {
+    CardPoolSF(poolName, poolId, irvIds, contestInfos) {
 
     // TODO keeping all the CvrExport in memory here. better to write them back ??
     var cvrs = mutableListOf<CvrExport>()

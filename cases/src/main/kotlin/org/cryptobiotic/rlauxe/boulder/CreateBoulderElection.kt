@@ -17,6 +17,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.map
 import kotlin.math.max
 
+// obsolete except as base class
 // simulate having all CVRs by making CVRS out of redacted votes.
 // TODO not handling redacted IRV. No IRV in boulder24, but there is in Boulder23.
 open class BoulderElection(

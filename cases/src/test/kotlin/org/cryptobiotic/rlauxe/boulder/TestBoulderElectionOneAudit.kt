@@ -30,8 +30,8 @@ class TestBoulderElectionOneAudit {
             oaContest.checkNcards(allTab[contestId]!!)
         }
 
-        election.oaContests.forEach { (_, oaContest) ->
+        /* election.oaContests.forEach { (_, oaContest) ->
             oaContest.showSummary()
-        }
+        } */
     }
 }

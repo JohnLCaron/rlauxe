@@ -8,10 +8,8 @@ import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.core.CvrExport.Companion.unpooled
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssorters
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
@@ -50,7 +48,7 @@ fun createSfElectionFromCvrExportOA(
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
     // pass 1 through cvrs, make card pools
-    val cardPools: Map<Int, CardPool> = createCardPools(
+    val cardPools: Map<Int, CardPoolSF> = createCardPools(
         auditDir,
         contestInfos.associateBy { it.id },
         castVoteRecordZip,
@@ -118,18 +116,18 @@ fun createCardPools(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     cvrCsvFilename: String,
-): Map<Int, CardPool>
+): Map<Int, CardPoolSF>
 {
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
     println("IRV contests = ${contestManifest.irvContests}")
 
     // make the card pools
-    val cardPools: MutableMap<String, CardPool> = mutableMapOf()
+    val cardPools: MutableMap<String, CardPoolSF> = mutableMapOf()
     val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
         val pool = cardPools.getOrPut(cvrExport.poolKey() ) {
-            CardPool(cvrExport.poolKey(), cardPools.size + 1, contestManifest.irvContests, contestInfos)
+            CardPoolSF(cvrExport.poolKey(), cardPools.size + 1, contestManifest.irvContests, contestInfos)
         }
         pool.accumulateVotes(cvrExport.toCvr())
     }
@@ -143,7 +141,7 @@ fun createCardPools(
     ////  check that the cardPools agree with the summary XML
     val sortedPools = cardPools.toSortedMap()
     val contestTabSums = mutableMapOf<Int, ContestTabulation>()
-    sortedPools.forEach { (_, pool : CardPool) ->
+    sortedPools.forEach { (_, pool : CardPoolSF) ->
         pool.sumRegular( contestTabSums)
 
         // TODO HEY
@@ -169,7 +167,7 @@ fun createCardPools(
 }
 
 // non-IRV. This assumes that the CVRS are in CardPool.
-fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, CardPool>, contestNcs: Map<Int, Int>): List<OAContestUnderAudit> {
+fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, CardPoolSF>, contestNcs: Map<Int, Int>): List<OAContestUnderAudit> {
     val contestsUAs = mutableListOf<OAContestUnderAudit>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
@@ -202,7 +200,7 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, Ca
 }
 
 // IRV
-fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, CardPool>, contestNcs: Map<Int, Int>): List<OAIrvContestUA> {
+fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, CardPoolSF>, contestNcs: Map<Int, Int>): List<OAIrvContestUA> {
     val contestsUAs = mutableListOf<OAIrvContestUA>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
@@ -231,7 +229,7 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<Int,
 fun addOAClcaAssortersFromCvrExport(
     oaContests: List<OAContestUnderAudit>,
     cardIter: Iterator<CvrExport>,
-    cardPools: Map<Int, CardPool>
+    cardPools: Map<Int, CardPoolSF>
 ) {
     val poolsOnly = cardPools.filter { it.value.poolName != unpooled }
     val poolMap = poolsOnly.values.associate { it.poolName to it.poolId }

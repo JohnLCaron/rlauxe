@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.plots
 
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 
-// CANDIDATE FOR REMOVAL: find all uses, delete or rplace
+// CANDIDATE FOR REMOVAL: find all uses, delete or replace
 
 fun plotNTsuccessPct(srs: List<SRT>, title: String, colTitle: String= "") {
     val utitle = "successPct cvrMean (col) vs N (row): " + title
@@ -59,20 +59,14 @@ fun plotDDpct(srs: List<SRT>, title: String) {
     )
 }
 
-fun plotDDsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
+/* fun plotDDsuccessDecile(srs: List<SRT>, title: String, sampleMaxPct: Int, colTitle: String= "") {
     val utitle = "% successRLA, for sampleMaxPct=$sampleMaxPct: " + title
     plotSRS(srs, utitle, false, ff = "%6.1f", colTitle = colTitle,
         colFld = { srt: SRT -> srt.theta },
         rowFld = { srt: SRT -> srt.d.toDouble() },
         fld = { srt: SRT -> srt.percentHist?.cumul(sampleMaxPct) ?: -1.0 }
     )
-}
-
-fun extractDecile(srt: SRT, sampleMaxPct: Int): Double {
-    return if (srt.percentHist == null || srt.percentHist.cumul(sampleMaxPct) == 0.0) 0.0 else {
-        srt.percentHist.cumul(sampleMaxPct)
-    }
-}
+} */
 
 ////
 // general

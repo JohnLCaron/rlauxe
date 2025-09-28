@@ -55,7 +55,8 @@ data class PollingConfig(
 // apriori: pass in apriori errorRates, with adaptation
 // phantoms: use phantom rates for apriori
 // previous: use phantom rates for apriori, then previous round measured
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous }
+// optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda
+enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous, optimalComparison }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation

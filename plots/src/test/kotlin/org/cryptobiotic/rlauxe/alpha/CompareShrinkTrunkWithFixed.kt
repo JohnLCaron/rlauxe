@@ -79,11 +79,11 @@ class CompareShrinkTrunkWithFixed {
         }
 
         calcMean(" pctSamplesNeeded", fixResults, truncResults) { it.pctSamplesNeeded() }
-        calcMean(" success10percent", fixResults, truncResults) { it.percentHist!!.cumul(10) }
-        calcMean(" success20percent", fixResults, truncResults) { it.percentHist!!.cumul(20) }
-        calcMean(" success30percent", fixResults, truncResults) { it.percentHist!!.cumul(30) }
-        calcMean(" success40percent", fixResults, truncResults) { it.percentHist!!.cumul(40) }
-        calcMean(" success50percent", fixResults, truncResults) { it.percentHist!!.cumul(50) }
+        // calcMean(" success10percent", fixResults, truncResults) { it.percentHist!!.cumul(10) }
+        // calcMean(" success20percent", fixResults, truncResults) { it.percentHist!!.cumul(20) }
+        // calcMean(" success30percent", fixResults, truncResults) { it.percentHist!!.cumul(30) }
+        // calcMean(" success40percent", fixResults, truncResults) { it.percentHist!!.cumul(40) }
+        // calcMean(" success50percent", fixResults, truncResults) { it.percentHist!!.cumul(50) }
     }
 
     fun calcMean(title: String, fixResults : List<RunTestRepeatedResult>, truncResults : List<RunTestRepeatedResult>,

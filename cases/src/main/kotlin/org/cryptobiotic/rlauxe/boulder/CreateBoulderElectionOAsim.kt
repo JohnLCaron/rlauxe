@@ -148,7 +148,7 @@ fun createBoulderElectionOAsim(
             sampleLimit = 20000,
             minRecountMargin = minRecountMargin,
             nsimEst = 10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.previous)
+            clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
         )
     } else {
         AuditConfig(

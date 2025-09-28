@@ -77,7 +77,7 @@ class PlotPollingDiffMeans {
         nThetaMap.forEach { (ntheta, srts) ->
             plotDDpct(srts, "N=${ntheta.N} theta=${ntheta.theta} ")
             plotDDfailPct(srts, "N=${ntheta.N} theta=${ntheta.theta} ")
-            plotDDsuccessDecile(srts, "N=${ntheta.N} theta=${ntheta.theta} ", 30)
+            // plotDDsuccessDecile(srts, "N=${ntheta.N} theta=${ntheta.theta} ", 30)
             println()
         }
 

@@ -34,7 +34,6 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
                 val sr = SRT(
                     N, margin, 0.0, emptyMap(), 0, 0, 0,
                     stddev = TODO(),
-                    percentHist = null
                 ) // TODO
                 val newsrs = newdlc.getOrPut(d) { mutableListOf() }
                 newsrs.add(sr)

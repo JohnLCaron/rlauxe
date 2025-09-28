@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.util.showDeciles
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -108,7 +109,7 @@ class ReproduceCobraResults {
                     margin = margin,
                     Nc=N,
                     )
-                println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
+                println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
 
                 val expected = findTable1Entry(margin, p2)
                 if (expected != null) {
@@ -177,7 +178,7 @@ class ReproduceCobraResults {
                             margin = margin,
                             Nc=N,
                             )
-                        println("  result = ${result.avgSamplesNeeded()} ${result.percentHist}")
+                        println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
                         val expected = findTable2Entry(p2 = p2, p1 = p1, p2prior = p2m, p1prior = p1m)
                         if (expected != null) {
                             val ratio = result.avgSamplesNeeded().toDouble() / expected.oracleMean
@@ -261,7 +262,7 @@ class ReproduceCobraResults {
                             margin = margin,
                             Nc=N,
                             )
-                        println("  result = ${result.avgSamplesNeeded()} hist:${result.percentHist}")
+                        println("  result = ${result.avgSamplesNeeded()} dist: ${showDeciles(result.sampleCount)}")
                         val expected = findTable2Entry(p2 = p2o, p1 = p1o, p2prior = p2prior, p1prior = p1prior)
                         if (expected != null) {
                             val ratio = result.avgSamplesNeeded().toDouble() / expected.adaptiveMean

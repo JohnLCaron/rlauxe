@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.estimate.EstimationResult
-import org.cryptobiotic.rlauxe.estimate.EstimateSampleSizeTask
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.util.*
 import java.io.BufferedReader
@@ -19,7 +17,7 @@ data class SRT(val Nc: Int,
                val ntrials: Int,
                val totalSamplesNeeded: Int,
                val stddev: Double,
-               val percentHist: Deciles?) {
+                ) {
 
     val reportedMean = margin2mean(reportedMargin)
     val theta = reportedMean + reportedMeanDiff // the true mean
@@ -53,7 +51,6 @@ data class SRT(val Nc: Int,
         if (totalSamplesNeeded != other.totalSamplesNeeded) return false
         if (stddev != other.stddev) return false
         if (testParameters != other.testParameters) return false
-        if (percentHist != other.percentHist) return false
 
         return true
     }
@@ -67,7 +64,6 @@ data class SRT(val Nc: Int,
         result = 31 * result + totalSamplesNeeded
         result = 31 * result + stddev.hashCode()
         result = 31 * result + testParameters.hashCode()
-        result = 31 * result + (percentHist?.hashCode() ?: 0)
         return result
     }
 }
@@ -80,45 +76,8 @@ fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double
         reportedMeanDiff,
         this.testParameters,
         this.nsuccess, this.ntrials, this.totalSamplesNeeded,
-        sqrt(this.variance), this.percentHist)
-}
-
-// class SimulateSampleSizeTask(
-//        val auditConfig: AuditConfig,
-//        val contestUA: ContestUnderAudit,
-//        val assertion: Assertion,
-//        val cvrs: List<Cvr>,
-//        val maxSamples: Int,
-//        val startingTestStatistic: Double,
-//        val prevSampleSize: Int,
-//        val moreParameters: Map<String, Double> = emptyMap(),
-//    ) : EstimationTask {
-
-// data class SRT(val Nc: Int,
-//               val reportedMargin: Double,
-//               val reportedMeanDiff: Double,
-//               val testParameters: Map<String, Double>,
-//               val nsuccess: Int,
-//               val ntrials: Int,
-//               val totalSamplesNeeded: Int,
-//               val stddev: Double,
-//               val percentHist: Deciles?)
-
-// TODO Nc in parameters, or in EstimationResult
-fun EstimationResult.makeSRTnostyle(Nc: Int): SRT {
-    val task = this.task as EstimateSampleSizeTask
-    val parameters = task.moreParameters
-    val N = parameters["N"]!! // double
-    return SRT(
-        Nc=Nc,
-        reportedMargin=parameters["reportedMargin"]?: 0.0,
-        reportedMeanDiff=parameters["reportedMeanDiff"]?: 0.0,
-        testParameters=task.moreParameters,
-        this.repeatedResult.nsuccess,
-        task.auditConfig.nsimEst,
-        roundUp(this.repeatedResult.totalSamplesNeeded * N / Nc),
-        stddev=0.0,
-        percentHist=null)
+        sqrt(this.variance),
+        )
 }
 
 // simple serialization to csv files
@@ -142,9 +101,6 @@ class SRTcsvWriter(val filename: String) {
             "${writeParameters(srt.testParameters)}, ${srt.Nc}, ${srt.reportedMean}, ${srt.reportedMeanDiff}, " +
                     "${srt.nsuccess}, ${srt.ntrials}, ${srt.totalSamplesNeeded}, ${srt.stddev} "
         )
-        if (srt.percentHist != null) {
-            append(", \"${srt.percentHist}\"")
-        }
         appendLine()
     }
 
@@ -200,11 +156,10 @@ class SRTcsvReader(filename: String) {
         val ntrials = ttokens[idx++].toInt()
         val nsamples = ttokens[idx++].toInt()
         val stddev = ttokens[idx++].toDouble()
-        val percentHist = if (idx < tokens.size) Deciles.Companion.fromString(ttokens[idx++]) else null
 
         return SRT(N, mean2margin(reportedMean), reportedMeanDiff,
             readParameters(testParameters),
-            nsuccess, ntrials, nsamples, stddev, percentHist)
+            nsuccess, ntrials, nsamples, stddev)
     }
 }
 
@@ -232,9 +187,6 @@ class SRTcsvWriterVersion1(val filename: String) {
             "${srt.Nc}, ${srt.reportedMargin}, ${srt.reportedMeanDiff}, ${srt.d}, ${srt.eta0}, ${srt.eta0Factor}, " +
                 "${srt.nsuccess}, ${srt.ntrials}, ${srt.totalSamplesNeeded}, ${srt.stddev} "
         )
-        if (srt.percentHist != null) {
-            append(", \"${srt.percentHist}\"")
-        }
         appendLine()
     }
 
@@ -276,10 +228,8 @@ class SRTcsvReaderVersion1(filename: String) {
         val nsamples = ttokens[idx++].toInt()
         val stddev = ttokens[idx++].toDouble()
 
-        val percentHist = if (idx < tokens.size) Deciles.Companion.fromString(ttokens[idx++]) else null
-
         return SRT(N, reportedMargin, reportedMeanDiff,
             mapOf("d" to d.toDouble(), "eta0" to eta0, "eta0Factor" to eta0Factor),
-            nsuccess, ntrials, nsamples, stddev, percentHist)
+            nsuccess, ntrials, nsamples, stddev)
     }
 }

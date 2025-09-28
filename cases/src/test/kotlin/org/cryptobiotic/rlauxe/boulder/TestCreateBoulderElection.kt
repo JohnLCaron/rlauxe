@@ -26,7 +26,39 @@ class TestCreateBoulderElection {
 
     // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
     // hand corrected "Claudia De la Cruz / Karina García"
+
     @Test
+    fun createBoulder24oa() {
+        createBoulderElectionOA(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/rla/cases/boulder24oa",
+        )
+    }
+
+    @Test
+    fun createBoulder24oasim() { // simulate CVRs
+        createBoulderElectionOAsim(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/rla/cases/boulder24oasim",
+            clca=false,
+        )
+    }
+
+    @Test
+    fun createBoulder24clca() { // simulate CVRs
+        createBoulderElectionOAsim(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            auditDir = "/home/stormy/rla/cases/boulder24clca",
+            clca=true,
+        )
+    }
+
+    /*
+
+       @Test
     fun createBoulder24() {
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
@@ -72,25 +104,7 @@ class TestCreateBoulderElection {
         )
     }
 
-    @Test
-    fun createBoulder24oasim() { // simulate CVRs
-        createBoulderElectionOAsim(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24oasim",
-        )
-    }
-
-    @Test
-    fun createBoulder24oa() {
-        createBoulderElectionOA(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24oa",
-        )
-    }
-
-    /* pooled votes only, simulating a "batch level comparison audit"
+    pooled votes only, simulating a "batch level comparison audit"
     @Test
     fun createBoulder24blca() {
         createBoulderElectionOneAudit(

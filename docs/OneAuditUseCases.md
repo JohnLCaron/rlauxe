@@ -114,7 +114,7 @@ Here are 1 CLCA and 10 trials each of OneAudit and OneAudit NoStyle for SF2024. 
 | OneAudit   | 5442  | [2726, 2889, 3035, 3706, 4162, 4649, 4695, 5782, 10856, 11926]   | 3.4        |
 | OneAuditNS | 13409 | [3368, 4399, 7032, 7424, 7665, 7914, 13565, 25835, 26839, 30049] | 8.4        |
 
-The spread among all the assertions (click to get an ineractive chart):
+The spread among all the assertions (click to get an interactive chart):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceScatter/sf2024AuditVarianceScatterLogLinear.html" rel="sf2024AuditVarianceScatterLogLinear">![sf2024AuditVarianceScatterLogLinear](plots/sf2024/sf2024AuditVarianceScatter/sf2024AuditVarianceScatterLogLinear.png)</a>
 

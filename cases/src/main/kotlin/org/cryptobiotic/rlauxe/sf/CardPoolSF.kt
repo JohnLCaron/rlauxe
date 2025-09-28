@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.sf
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.ContestTabulation
@@ -7,60 +7,21 @@ import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport.Companion.unpooled
+import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
+import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
+import org.cryptobiotic.rlauxe.oneaudit.BallotPool
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.raire.IrvContestVotes
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.mutableMapOf
+import kotlin.collections.forEach
 
-private val logger = KotlinLogging.logger("CardPool")
+private val logger = KotlinLogging.logger("CardPoolSF")
 
-// candidate for removal - use CardPool insted.
-data class BallotPool(
-    val name: String,
-    val poolId: Int,
-    val contestId :Int,
-    val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
-    val votes: Map<Int, Int>, // candid -> nvotes, for plurality. umm do we really need ?
-) {
-    // TODO does this really agree with the average assorter?
-    // this could go from -1 to 1. TODO shouldnt that be -u to u ??
-    fun calcReportedMargin(winner: Int, loser: Int): Double {
-        if (ncards == 0) return 0.0
-        val winnerVote = votes[winner] ?: 0
-        val loserVote = votes[loser] ?: 0
-        return (winnerVote - loserVote) / ncards.toDouble()
-    }
-
-    fun votesAndUndervotes(voteForN: Int, ncandidates: Int): Map<Int, Int> {
-        val poolVotes = votes.values.sum()
-        val poolUndervotes = ncards * voteForN - poolVotes
-        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, poolUndervotes)).toMap()
-    }
-
-    fun votesAndUndervotes(voteForN: Int): VotesAndUndervotes {
-        val poolUndervotes = ncards * voteForN - votes.values.sum()
-        return VotesAndUndervotes(votes, poolUndervotes, voteForN)
-    }
-
-    fun reportedAverage(winner: Int, loser: Int): Double {
-        val winnerVotes = votes[winner] ?: 0
-        val loserVotes = votes[loser] ?: 0
-        val reportedMargin = (winnerVotes - loserVotes) / ncards.toDouble() // TODO dont know Nc
-        return margin2mean(reportedMargin)
-    }
-}
-
-// could serialize CardPools in a seperate file.
-// record the ContestTabulation (regular) or VoteConsolidator (IRV), using the cvrs in the pool.
-// TODO what if you dont have cvrs in the pool? isnt that the whole point of OneAudit?? eg Boulder.
-//  then you are just given ContestTabulation (with undervote count!!)
-//  if you have any IRV contest, you must be given IrvContestVotes.VoteConsolidator which is needed to calculate the
-//  RaireAssertions and probably the average assort value for the pool ??
-open class CardPool(
+open class CardPoolSF(
     val poolName: String,
     val poolId: Int,
     val irvIds: Set<Int>, // TODO could make a CardPoolIRV
@@ -118,24 +79,12 @@ open class CardPool(
     fun contests() = (contestTabulations.map { it.key } + irvVoteConsolidations.map { it.key }).toSortedSet().toIntArray()
 }
 
-// for calculating average from running total, see addOAClcaAssorters
-class AssortAvg() {
-    var ncards = 0
-    var totalAssort = 0.0
-    fun avg() : Double = if (ncards == 0) 0.0 else totalAssort / ncards
-    fun margin() : Double = mean2margin(avg())
-
-    override fun toString(): String {
-        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
-    }
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 fun addOAClcaAssorters(
     oaContests: List<OAContestUnderAudit>,
     cardIter: Iterator<Cvr>,
-    cardPools: Map<Int, CardPool>
+    cardPools: Map<Int, CardPoolSF>
 ) {
     // sum all the assorters values in one pass across all the cvrs
     while (cardIter.hasNext()) {

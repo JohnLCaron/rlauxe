@@ -142,13 +142,14 @@ The Boulder County, CO, 2024 general election publishes pools of "redacted ballo
 * 396,681 cards 
 * 12,297 redacted cards (3%) in 60 pools
 * 65 contests (no IRV)
+* Both the cvrs and the redacted pool totals reference a BallotType, which can be used for Card Style Data.
 * The number of cards in each pool is not published, so we estimate it, and adjust contest Nc to be consistent.
-* See [CaseStudies](https://github.com/JohnLCaron/rlauxe/blob/main/docs/CaseStudies.md for details.
+  See [CaseStudies](https://github.com/JohnLCaron/rlauxe/blob/main/docs/CaseStudies.md) for details.
 * There are 2 contests below the automatic recountMargin of .005, so we exclude them from the audit. The recount margin
   for Colorado is (winner - loser)/ winner, rather than margin = (winner - loser)/ Nc.
-* Risk limit is 3%, per Colorado law.
+* Risk limit is 3% per Colorado law.
 
-Here are 1 CLCA and 10 trials of OneAudit for Coulder2024. The total number of MVRS sampled were:
+Here are 1 CLCA and 10 trials of OneAudit for Boulder2024. The total number of MVRS sampled were:
 
 | type       | avg   | trials                                                         | avg / CLCA |
 |------------|-------|----------------------------------------------------------------|------------|
@@ -159,10 +160,11 @@ The spread among all the trials (click to get an interactive chart):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/boulder2024/Boulder2024AuditVarianceScatter/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](plots/boulder2024/Boulder2024AuditVarianceScatter/Boulder2024AuditVarianceScatterLogLog.png)</a>
 
-* OneAudit suprisingly does better for the second and third lowest margins. TODO: investigate
-* Most of the difference may be coming from the lowest margin.
+* OneAudit suprisingly does better for the second and third lowest margins. TODO: investigate.
+* Most of the difference in total samples (table above) probably comes from the lowest margin assertion.
 
 Findings so far:
 
 1. Boulder County must publish the number of ballots in each pool to do a real audit.
-2. OneAudit is comparable to CLCA at this low percent of pooled ballot.
+2. To do IRV with redacted ballots, VoteConsolidations for the redacted ballots would have to be provided.
+3. OneAudit is comparable to CLCA at this low percent (3%) of pooled ballots.

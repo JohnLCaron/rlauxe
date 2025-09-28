@@ -25,13 +25,13 @@ class SfAuditVarianceCompare {
     @Test
     fun genSfAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
-        val clcaAssertions = readAudit("/home/stormy/rla/cases/sf2024/audit", "CLCA")
+        val clcaAssertions = readAssertionAndTotal("/home/stormy/rla/cases/sf2024/audit", "CLCA").second
         allAssertions.addAll( clcaAssertions)
-        allAssertions.addAll( readAudit("/home/stormy/rla/cases/sf2024oa/audit", "OneAudit"))
+        allAssertions.addAll( readAssertionAndTotal("/home/stormy/rla/cases/sf2024oa/audit", "OneAudit").second)
 
         // overrride the margins
         val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.reportedMargin() }
-        allAssertions.addAll( readAudit("/home/stormy/rla/cases/sf2024oaNS/audit", "OneAuditNS", marginOverride))
+        allAssertions.addAll( readAssertionAndTotal("/home/stormy/rla/cases/sf2024oaNS/audit", "OneAuditNS", marginOverride).second)
 
         val title = "$name est nmvrs vs margin, no errors"
         val subtitle = "compare SF 2024 audit variances, Ntrials=$nruns quantile=80%"
@@ -46,30 +46,9 @@ class SfAuditVarianceCompare {
             yname = "estimated samples",
             catName = "type",
             xfld = { it.margin },
-            yfld = { it.assertion.estSampleSize.toDouble() },
+            yfld = { it.samplesUsed().toDouble() },
             catfld = { it.cat },
             scaleType=scaleType,
         )
     }
-}
-
-
-data class AssertionAndCat(val assertion: AssertionRound, val cat: String, val margin: Double)
-
-fun readAudit(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): List<AssertionAndCat> {
-    val auditRecord = readFrom(auditDir)
-    val auditRounds = auditRecord.rounds
-    require( auditRounds.size >= 1)
-    val auditRound = auditRounds[0]
-
-    val allAssertions = mutableListOf<AssertionAndCat>()
-    val contestRounds = auditRound.contestRounds
-    contestRounds.forEach { contestRound ->
-        contestRound.assertionRounds.forEach { assertionRound ->
-            val margin = if (marginOverride == null) assertionRound.assertion.assorter.reportedMargin() else
-                marginOverride[assertionRound.assertion.id().hashCode()] ?: 0.0
-            allAssertions.add( AssertionAndCat(assertionRound, cat, margin))
-        }
-    }
-    return allAssertions
 }

@@ -7,11 +7,13 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOAsim")
@@ -121,9 +123,10 @@ fun createBoulderElectionOAsim(
     auditDir: String,
     clca: Boolean = false,
     riskLimit: Double = 0.03,
-    minRecountMargin: Double = .01,
+    minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null) {
-    //  TODO clearDirectory(Path.of(auditDir))
+
+    clearDirectory(Path(auditDir))
     val stopwatch = Stopwatch()
 
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
@@ -162,12 +165,12 @@ fun createBoulderElectionOAsim(
 
     val cards = createSortedCards(election.allCvrs, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    logger.info { "   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${election.allCvrs.size}" }
+    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
     // write ballot pools
     val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
     writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
-    logger.info { " total ${ballotPools.size} pools to ${publisher.ballotPoolsFile()}" }
+    logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
 
     // form contests
     val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
@@ -182,6 +185,6 @@ fun createBoulderElectionOAsim(
     checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
-    println("   writeContestsJsonFile ${publisher.contestsFile()}")
+    logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
     println("took = $stopwatch\n")
 }

@@ -1,5 +1,13 @@
 # OneAudit Use Cases
-_last changed: 9/22/2025_
+_last changed: 9/28/2025_
+
+<!-- TOC -->
+* [OneAudit Use Cases](#oneaudit-use-cases)
+  * [OneAudit inherent sample variance](#oneaudit-inherent-sample-variance)
+  * [Card Style Data for Pooled data](#card-style-data-for-pooled-data)
+  * [SF2024: Comparison of CLCA and OneAudit, with and without styles](#sf2024-comparison-of-clca-and-oneaudit-with-and-without-styles)
+  * [Boulder2024: OneAudit for Redacted data](#boulder2024-oneaudit-for-redacted-data)
+<!-- TOC -->
 
 ## OneAudit inherent sample variance
 
@@ -34,7 +42,7 @@ The mean is over all cards in the batch, since we don't know which cards have wh
 ````
 
 The increase in Nc (upper bound on the number of cards in the contest) has the effect of decreasing the margin and
-increasing the number of samples needed. The scenario is called "OneAudit without styles".
+increasing the number of samples needed. This scenario is called "OneAudit without styles".
 
 Im not sure why San Francisco County chooses to not map CVRs to physical ballots for in-person voting. If its a
 technical problem with the precinct scanners, then when that problem is overcome, this can be a CLCA audit, which is much more efficient.
@@ -46,7 +54,7 @@ printing a ballot id on the physical ballot, and recording that id on the CVR.
 A different use case is if
 all the ballots in a pool have the same ballot style, and we are told what it is. Then, anytime a ballot is sampled from the pool,
 we know what the ballot style is, so style-based sampling can be used. In this case, there is no CVR that has to be matched
-to teh physical ballot. 
+to the physical ballot. The ballot manifest identifies the physical ballot by a sequence number in a bundle of ballots, or similar.
 
 These two use cases can both be audited with "OneAudit with styles".
 
@@ -78,11 +86,11 @@ Here is the same election using OneAudit with styles:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024oaAuditVariance/sf2024oaAuditVarianceNmvrsLogLinear.html" rel="sf2024oaAuditVarianceNmvrsLogLinear">![sf2024oaAuditVarianceNmvrsLogLinear](plots/sf2024/sf2024oaAuditVariance/sf2024oaAuditVarianceNmvrsLogLinear.png)</a>
 
-* Its not obvious but the margins of OneAudit without styles are shifted to lower values compared to OneAudit with styles.
+* Its not immediately obvious but the margins of OneAudit without styles are shifted to lower values compared to OneAudit with styles.
 * Other than the margin shift, the two versions of OneAudit look similar and do well for high margins, say > 10%.
 * Due to the large variance introduced by the pooled data, comparing just the average of the samples needed is misleading at low margins.
 
-Here are all three audit types on a single scatter plot, showing the 80% quantile of samples needed for 500 trials, for each assertion of the SF 2024 General Election, when there are no errors:
+Here are all three audit types on a single scatter plot, showing the 80% quantile of 500 trials of number of samples needed for each assertion of the SF 2024 General Election, when there are no errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceCompare/sf2024AuditVarianceCompareLogLog.html" rel="sf2024AuditVarianceCompareLogLog">![sf2024AuditVarianceCompareLogLog](plots/sf2024/sf2024AuditVarianceCompare/sf2024AuditVarianceCompareLogLog.png)</a>
 
@@ -90,9 +98,10 @@ Here are all three audit types on a single scatter plot, showing the 80% quantil
 * The CLCA is smooth because it has no variance when there are no errors, while OneAudit show scatter for the same margins.
 * OneAudit needs about 3x, and OneAuditNS needs about 6x the samples at 5% margin, compared to a CLCA audit, for the 80% quantile, 
   and gets progressively worse as margins get lower.
-* The actual values depend strongly on all the details of the use case.
+* The actual values depend strongly on all the details of the use case, in particular the percent of pooled ballots, and the
+  within-pool variance of the pooled data from the average pool assort value.
 
-Using the 80% quantile for each contest seriously overestimates the number of samples needed. This is especially true for
+Using the 80% quantile for each contest overestimates the number of samples needed. This is especially true for
 OneAudit, where there is so much variation in the sample size distribution even when there are no errors. We are now testing a new
 strategy for OneAudit where we use the actual sample data to get the contest sample size (assuming no errors) for the first round.
 On subsequent rounds, we use the measured error rates with the OptimalComparision betting strategy.
@@ -106,15 +115,15 @@ In order to get a sense of how well these audit types might work in real electio
 number of cards needed when there are no errors. This gives us a better sense of the absolute values and spread of
 a real election.
 
-Here are 1 CLCA and 10 trials each of OneAudit and OneAudit NoStyle for SF2024. The total number of MVRS used were:
+Here are 1 CLCA and 10 trials each of OneAudit and OneAudit NoStyle for SF2024. The total number of MVRS sampled were:
 
-| type       | avg   | trials                                                           | CLCA / avg |
-|------------|-------|------------------------------------------------------------------|------------|
-| CLCA       | 1592  | [1592]                                                           | 1.0        |
-| OneAudit   | 5442  | [2726, 2889, 3035, 3706, 4162, 4649, 4695, 5782, 10856, 11926]   | 3.4        |
-| OneAuditNS | 13409 | [3368, 4399, 7032, 7424, 7665, 7914, 13565, 25835, 26839, 30049] | 8.4        |
+| type       | avg   | trials                                                           | avg / CLCA  |
+|------------|-------|------------------------------------------------------------------|-------------|
+| CLCA       | 1592  | [1592]                                                           | 1.0         |
+| OneAudit   | 5442  | [2726, 2889, 3035, 3706, 4162, 4649, 4695, 5782, 10856, 11926]   | 3.4         |
+| OneAuditNS | 13409 | [3368, 4399, 7032, 7424, 7665, 7914, 13565, 25835, 26839, 30049] | 8.4         |
 
-The spread among all the assertions (click to get an interactive chart):
+The spread among all the trials (click to get an interactive chart):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/sf2024/sf2024AuditVarianceScatter/sf2024AuditVarianceScatterLogLinear.html" rel="sf2024AuditVarianceScatterLogLinear">![sf2024AuditVarianceScatterLogLinear](plots/sf2024/sf2024AuditVarianceScatter/sf2024AuditVarianceScatterLogLinear.png)</a>
 
@@ -128,41 +137,32 @@ The spread among all the assertions (click to get an interactive chart):
 
 ## Boulder2024: OneAudit for Redacted data
 
-Consider the use case of "redacted ballots" where we only get pool vote totals. CreateBoulderElectionOneAudit uses the
-publically available data from Boulder County, CO, 2024 general election, using OneAudit and making the redacted CVRs into OneAudit pools.
+The Boulder County, CO, 2024 general election publishes pools of "redacted ballots" with vote totals, but no CVRS.
 
-    // on contest 20, sovo.totalVotes and sovo.totalBallots is wrong vs the cvrs. (only one where voteForN=3, but may not be related)
-    //  'Town of Superior - Trustee' (20) candidates=[0, 1, 2, 3, 4, 5, 6] choiceFunction=PLURALITY nwinners=3 voteForN=3
-    //   nvotes= 17110, sovoContest.totalVotes = 16417
-    //   nballots= 8485, sovoContest.totalBallots = 8254
-    // assume sovo is wrong
-    // so nballotes uses max(nballots, sovoContest.totalBallots)
+* 396,681 cards 
+* 12,297 redacted cards (3%) in 60 pools
+* 65 contests (no IRV)
+* The number of cards in each pool is not published, so we estimate it, and adjust contest Nc to be consistent.
+* See [CaseStudies](https://github.com/JohnLCaron/rlauxe/blob/main/docs/CaseStudies.md for details.
+* There are 2 contests below the automatic recountMargin of .005, so we exclude them from the audit. The recount margin
+  for Colorado is (winner - loser)/ winner, rather than margin = (winner - loser)/ Nc.
+* Risk limit is 3%, per Colorado law.
 
+Here are 1 CLCA and 10 trials of OneAudit for Coulder2024. The total number of MVRS sampled were:
+
+| type       | avg   | trials                                                         | avg / CLCA |
+|------------|-------|----------------------------------------------------------------|------------|
+| CLCA       | 4800  | [4800]                                                         | 1.0        |
+| OneAudit   | 5857  | [5545, 5580, 5801, 5851, 5902, 5909, 5948, 5958, 6025, 6058]   | 1.22       |
+
+The spread among all the trials (click to get an interactive chart):
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/boulder2024/Boulder2024AuditVarianceScatter/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](plots/boulder2024/Boulder2024AuditVarianceScatter/Boulder2024AuditVarianceScatterLogLog.png)</a>
+
+* OneAudit suprisingly does better for the second and third lowest margins. TODO: investigate
+* Most of the difference may be coming from the lowest margin.
 
 Findings so far:
 
-1. Boulder County does not publish the number of ballots in each pool.
-2. Also does not publish the number of ballots for each contest in each pool, ie, the undervotes.
-3. While we still can do a simulation with CreateBoulderElectionOneAudit, we cant do a real audit with existing published data.
-4. At a minimum we need (1).
-5. **TODO**: Assuming we have (1), whats the consequences of not having (2) ??
-
-Boulder2024 redacted pools are missing undervotes for each contest. We will simulate those by distributing the missing undervotes
-(sovo.undervotes - cvr.undervotes ) across the pools in proportion to pool.nvotes.
-
-Boulder2024 redacted pools are missing nvotes. We will assume that all cards have the same ballot style. 
-
-Seems true except for:
-````
-RedactedGroup '06, 33, & 36-A', contestIds=[0, 1, 2, 3, 5, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42], totalVotes=8012
-*** rgroup '06, 33, & 36-A'
-[0, 1, 2, 3, 5, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] !=
-[0, 1, 2, 3, 5, 10, 11, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] (6-A)
-````
-
-'06, 33, & 36-A' has extra contest 12.
-
-Assume that we can match physical ballots with location = "pool${pool.poolName} card ${poolIndex+1}"
-Assume that all the ballots in the pool have the same Ballot Type. So the undervotes are all accounted for, and we dont have to add extra ballots.
-
-Some of these assumptions may not be right, but they are sufficient for our purposes. In a real audit, we would have to work with the EA to track each down.
+1. Boulder County must publish the number of ballots in each pool to do a real audit.
+2. OneAudit is comparable to CLCA at this low percent of pooled ballot.

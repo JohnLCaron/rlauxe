@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFrom
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.io.path.Path
 import kotlin.test.Test
@@ -66,6 +66,12 @@ class SfAuditVarianceScatter {
     }
 }
 
+data class AssertionAndCat(val assertion: AssertionRound, val cat: String, val margin: Double) {
+    fun samplesUsed(): Int {
+        return assertion.auditResult!!.samplesUsed
+    }
+}
+
 fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, List<AssertionAndCat>> {
     val auditRecord = readFrom(auditDir)
     val auditRounds = auditRecord.rounds
@@ -78,7 +84,9 @@ fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int,
         contestRound.assertionRounds.forEach { assertionRound ->
             val margin = if (marginOverride == null) assertionRound.assertion.assorter.reportedMargin() else
                 marginOverride[assertionRound.assertion.id().hashCode()] ?: 0.0
-            allAssertions.add( AssertionAndCat(assertionRound, cat, margin))
+            if (assertionRound.auditResult != null) {
+                allAssertions.add(AssertionAndCat(assertionRound, cat, margin))
+            }
         }
     }
     return Pair(auditRound.nmvrs, allAssertions)

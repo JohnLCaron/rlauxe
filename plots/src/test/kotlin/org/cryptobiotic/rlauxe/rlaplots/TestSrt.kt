@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.util.Deciles
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,15 +10,13 @@ class TestSrt {
     @Test
     fun testWriteRead() {
         val ntrials = 111
-        val hist = Deciles(ntrials)
-        repeat(ntrials) { hist.add(it + 1) }
 
         // SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
         //               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?)
         val target =
             SRT(19, 42.0, -.006,
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
-                123, 234, 456, 0.009, hist)
+                123, 234, 456, 0.009)
 
         val testFile = "/home/stormy/rla/testSrt/testWriteRead.csv"
         val writer = SRTcsvWriter(testFile)
@@ -37,8 +34,8 @@ class TestSrt {
     @Test
     fun testWriteReadBetaResult() {
         val ntrials = 111
-        val hist = Deciles(ntrials)
-        repeat(ntrials) { hist.add(it + 1) }
+        // val hist = Deciles(ntrials)
+        // repeat(ntrials) { hist.add(it + 1) }
         val status = mapOf(TestH0Status.LimitReached to 1, TestH0Status.AcceptNull to 2, TestH0Status.StatRejectNull to 3, TestH0Status.SampleSumRejectNull to 4 )
 
         //                val testParameters: Map<String, Double>, // various parameters, depends on the test
@@ -51,8 +48,7 @@ class TestSrt {
         //               val status: Map<TestH0Status, Int>? = null, // count of the trial status
         val parameters = mapOf("p1" to .01, "p2" to .001, "lam" to 1.1)
         val betta = RunTestRepeatedResult(parameters, Nc=43, totalSamplesNeeded=112, nsuccess=12,
-            ntrials=ntrials, variance=11.5, percentHist=hist, status,
-            margin = .04,
+            ntrials=ntrials, variance=11.5, status, margin = .04,
         )
 
         // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0
@@ -73,16 +69,12 @@ class TestSrt {
 
     @Test
     fun testWriteReadVersion1() {
-        val ntrials = 111
-        val hist = Deciles(ntrials)
-        repeat(ntrials) { hist.add(it + 1) }
-
         // SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
         //               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?)
         val target =
             SRT(19, 42.0, -.006,
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
-                123, 234, 456, 0.009, hist)
+                123, 234, 456, 0.009)
 
         val testFile = "/home/stormy/rla/testSrt/testWriteRead1.csv"
         val writer = SRTcsvWriterVersion1(testFile)
@@ -104,7 +96,7 @@ class TestSrt {
         val target =
             SRT(19, 42.0, -.006,
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
-                123, 234, 456, 0.009, null)
+                123, 234, 456, 0.009)
 
         val testFile = "/home/stormy/rla/testSrt/testNullHistogram.csv"
         val writer = SRTcsvWriter(testFile)

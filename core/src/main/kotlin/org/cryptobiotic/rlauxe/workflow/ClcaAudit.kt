@@ -128,10 +128,11 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
 
         val clcaConfig = auditConfig.clcaConfig
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
+            ClcaStrategyType.optimalComparison,
             ClcaStrategyType.previous,
             ClcaStrategyType.phantoms
                 -> {
-                // use phantomRate as apriori
+                // use phantomRate as apriori TODO shouldnt we be using the rate from the previous sample, if any ??
                 ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
             }
 
@@ -158,6 +159,8 @@ class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+        }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
+            OptimalComparisonNoP1(N = contest.Nc(), withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRates.p2o)
         } else {
             AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         }

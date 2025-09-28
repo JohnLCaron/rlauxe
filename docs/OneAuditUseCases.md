@@ -166,5 +166,6 @@ The spread among all the trials (click to get an interactive chart):
 Findings so far:
 
 1. Boulder County must publish the number of ballots in each pool to do a real audit.
-2. To do IRV with redacted ballots, VoteConsolidations for the redacted ballots would have to be provided.
-3. OneAudit is comparable to CLCA at this low percent (3%) of pooled ballots.
+2. The redacted pools should always use a single BallotType, so we can sample with styles.
+3. To do IRV with redacted ballots, VoteConsolidations for the redacted ballots would have to be provided.
+4. OneAudit is comparable to CLCA at this low percent (3%) of pooled ballots.

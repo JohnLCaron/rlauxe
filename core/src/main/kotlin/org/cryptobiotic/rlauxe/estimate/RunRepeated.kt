@@ -23,7 +23,6 @@ fun runTestRepeated(
     var totalSamplesNeeded = 0
     var fail = 0
     var nsuccess = 0
-    val percentHist = Deciles(ntrials) // bins of 10%
     val statusMap = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
     val sampleCounts = mutableListOf<Int>()
@@ -50,7 +49,6 @@ fun runTestRepeated(
 
             // sampleCount was what percent of N? keep 10% histogram bins. TODO remove
             val percent = ceilDiv(100 * testH0Result.sampleCount, Nc) // percent, rounded up
-            percentHist.add(percent)
             sampleCounts.add(testH0Result.sampleCount)
         }
         if (showH0Result) println(" $it $testH0Result")
@@ -58,7 +56,7 @@ fun runTestRepeated(
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, Nc=Nc, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance=variance, percentHist, statusMap, sampleCounts, margin = margin)
+        ntrials=ntrials, variance=variance, statusMap, sampleCounts, margin = margin)
 }
 
 data class RunTestRepeatedResult(
@@ -68,7 +66,7 @@ data class RunTestRepeatedResult(
     val nsuccess: Int,           // number of successful trials
     val ntrials: Int,            // total number of trials
     val variance: Double,        // variance over ntrials of samples needed
-    val percentHist: Deciles? = null, // TODO remove?
+    // val percentHist: Deciles? = null, // TODO remove?
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
     val margin: Double?, // TODO needed?
@@ -82,7 +80,7 @@ data class RunTestRepeatedResult(
     override fun toString() = buildString {
         appendLine("RunTestRepeatedResult: testParameters=$testParameters Nc=$Nc successPct=${successPct()} in ntrials=$ntrials")
         append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
-        if (percentHist != null) appendLine("  cumulPct:${percentHist.cumulPct()}") else appendLine()
+        append(showDeciles(sampleCount))
         if (status != null) appendLine("  status:${status}")
     }
 

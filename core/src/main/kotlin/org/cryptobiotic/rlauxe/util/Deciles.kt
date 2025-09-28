@@ -1,79 +1,74 @@
 package org.cryptobiotic.rlauxe.util
 
-// TODO get rid of, or port to Distribution
+import kotlin.math.min
+import kotlin.math.round
 
-data class Deciles(val ntrials: Int, val hist: MutableMap<Int, Int>) {
-    private val incr = 10
+// 10*(idx+1) percent of distribution is less than decile[idx]
+fun makeDeciles(data: List<Int>): List<Int> {
+    if (data.isEmpty()) return emptyList()
+    val sortedData = data.sorted()
+    val deciles = mutableListOf<Int>()
+    val n = sortedData.size
+    repeat(9) {
+        val quantile = .10 * (it + 1)
+        val p = min((quantile * n).toInt(), n - 1)
+        deciles.add(sortedData[p])
+    }
+    deciles.add(sortedData.last()+1)
+    return deciles
+}
 
-    constructor(ntrials: Int): this(ntrials, mutableMapOf())
+fun showDeciles(data: List<Int>) = buildString {
+    if (data.isEmpty()) return ""
+    val deciles = makeDeciles(data)
+    append(" deciles=[")
+    deciles.forEach { append(" $it, ") }
+    append("]")
+}
 
-    // bin[key] goes from [(key-1)*incr, key*incr - 1]
-    fun add(q: Int) {
-        var bin = 0
-        while (q >= bin * incr) bin++
-        val currVal = hist.getOrPut(bin) { 0 }
-        hist[bin] = (currVal + 1)
+/**
+ * @param deciles The distribution as deciles (10 values)
+ * @param sample The sample estimate
+ * @return probability of that sample as percent
+ */
+fun probability(deciles: List<Int>, sample: Int): Int {
+    if (deciles.size < 10) return 0
+    if (sample >= deciles.last()) return 100
+
+    if (sample < deciles[0]) {
+        val frac = frac(0, sample, deciles[0])
+        return round(10 * frac).toInt()
     }
 
-    override fun toString() = buildString {
-        val shist = hist.toSortedMap()
-        append("$ntrials [")
-        shist.forEach { append("${it.key}:${it.value} ") }
-        append("]")
+    var topIdx = 0
+    while (topIdx < 10) {
+        if (sample < deciles[topIdx]) break
+        topIdx++
     }
+    // if (top == 0) return 10 // shouldnt this be caught above ??
+    // if (sample == deciles[top-1]) return top * 10
 
-    fun toStringBinned() = buildString {
-        val shist = hist.toSortedMap()
-        shist.forEach {
-            val binNo = it.key
-            val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
-            append("$binDesc:${it.value}; ")
-        }
-    }
+    // interpolate
+    val frac = frac(deciles[topIdx-1], sample, deciles[topIdx])
+    return round(10.0 * (topIdx + frac)).toInt()
+}
 
-    fun cumulPct() = buildString {
-        require(ntrials != 0) {"ntrials not set"}
-        val smhist = hist.toSortedMap().toMutableMap()
-        var cumul = 0
-        smhist.forEach {
-            cumul += it.value
-            val binNo = it.key
-            val binDesc = "[${(binNo-1)*incr}-${binNo*incr}]"
-            append("$binDesc:${"%5.2f".format(((100.0 * cumul)/ntrials))}; ")
-        }
-    }
+fun frac(bot: Int, sample: Int, top: Int): Double {
+    return (sample - bot) / (top - bot).toDouble()
+}
 
-    // bin[key] goes from [(key-1)*incr, key*incr - 1]
-    // max must be n * incr
-    fun cumul(max: Int) : Double {
-        require(ntrials != 0) {"ntrials not set"}
-        val smhist = hist.toSortedMap()
-        var cumul = 0
-        for (entry:Map.Entry<Int,Int> in smhist) {
-            if (max < entry.key*incr) {
-                return 100.0 * cumul / ntrials
-            }
-            cumul += entry.value
-        }
-        return 100.0 * cumul / ntrials
-    }
+//////////////////////////////////////////////////////////////
 
-    companion object {
-        // 111 [1:9 2:10 3:10 4:10 5:10 6:10 7:10 8:10 9:10 10:10 11:10 12:2 ]
-        fun fromString(str: String): Deciles {
-            val tokens = str.split(" ", "[", "]", "\"")
-            val ftokens = tokens.filter { it.isNotEmpty() }
-            val ntrials = ftokens.first().toInt()
-            val hist = mutableMapOf<Int, Int>()
+// find the sample value where percent of samples < that value equals quantile percent
+fun quantile(data: List<Int>, quantile: Double): Int {
+    require(quantile in 0.0..1.0)
+    if (data.isEmpty()) return 0
+    if (quantile == 0.0) return 0
 
-            for (tidx in 1 until ftokens.size) {
-                val ftoke = ftokens[tidx]
-                val htokes = ftoke.split(":")
-                val key = htokes[0].toInt()
-                val value = htokes[1].toInt()
-                hist[key] = value
-            }
-            return Deciles(ntrials, hist)
-        }
-    }
+    val sortedData = data.sorted()
+    if (quantile == 100.0) return sortedData.last()
+
+    // rounding down
+    val p = min((quantile * data.size).toInt(), data.size-1)
+    return sortedData[p]
 }

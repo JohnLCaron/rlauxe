@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
@@ -16,6 +17,7 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.map
 import kotlin.collections.set
 import kotlin.collections.sortedBy
+import kotlin.io.path.Path
 import kotlin.math.max
 import kotlin.random.Random
 
@@ -43,6 +45,8 @@ open class BoulderElectionOA(
         // card B
         val oaContest63 = oaContests[63]!!
         distributeRedactedNcardsDiff(oaContest63, cardPoolMap)
+        val totalRedactedBallots = cardPools.sumOf { it.ncards() }
+        logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
     }
 
     private fun convertRedactedToCardPool2(): List<CardPoolB> {
@@ -178,10 +182,10 @@ fun createBoulderElectionOA(
     sovoFile: String,
     auditDir: String,
     riskLimit: Double = 0.03,
-    minRecountMargin: Double = .01,
+    minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null)
 {
-    //  TODO clearDirectory(Path.of(auditDir))
+    clearDirectory(Path(auditDir))
     val stopwatch = Stopwatch()
 
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
@@ -201,12 +205,12 @@ fun createBoulderElectionOA(
     // write ballot pools
     val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
     writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
-    logger.info{" total ${ballotPools.size} pools to ${publisher.ballotPoolsFile()}"}
+    logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
 
     // write cards TODO add phantoms
     val cards = createSortedCards(election.cvrs, election.cardPools, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    logger.info{"   writeCvrsCvsFile ${publisher.cardsCsvFile()} cvrs = ${cards.size}"}
+    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
     val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
     addOAClcaAssortersFromMargin(contestsUA, election.cardPools.associate { it.poolId to it })
@@ -217,7 +221,7 @@ fun createBoulderElectionOA(
 
     // write contests
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
-    logger.info{"   writeContestsJsonFile ${publisher.contestsFile()}"}
+    logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
     logger.info{"took = $stopwatch\n"}
 }
 

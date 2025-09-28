@@ -1,6 +1,16 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.OneAuditConfig
+import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
+import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
+import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.sf.ballotPoolsFile
+import org.cryptobiotic.rlauxe.sf.createSfElectionFromCvrExportOA
+import org.cryptobiotic.rlauxe.sf.createSortedCards
 import org.junit.jupiter.api.Test
+import java.nio.file.Path
 import kotlin.test.assertEquals
 
 class TestCreateBoulderElection {
@@ -54,6 +64,42 @@ class TestCreateBoulderElection {
             auditDir = "/home/stormy/rla/cases/boulder24clca",
             clca=true,
         )
+    }
+
+    @Test
+    fun createBoulderOArepeat() {
+        val topDir = "/home/stormy/rla/cases/boulder24oa"
+
+        repeat(10) { run ->
+            val auditDir = "$topDir/audit$run"
+
+            createBoulderElectionOA(
+                "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+                "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+                auditDir = auditDir,
+            )
+        }
+    }
+
+    @Test
+    fun runBoulderOArepeat() {
+        val topDir = "/home/stormy/rla/cases/boulder24oa"
+
+        repeat(10) { run ->
+            val auditDir = "$topDir/audit$run"
+            RunRliRoundCli.main(
+                arrayOf(
+                    "-in", auditDir,
+                    "-test",
+                )
+            )
+            RunRliRoundCli.main(
+                arrayOf(
+                    "-in", auditDir,
+                    "-test",
+                )
+            )
+        }
     }
 
     /*

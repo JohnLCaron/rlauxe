@@ -1,5 +1,5 @@
 # Case Studies
-_last changed 9/27/2025_
+_last changed 9/28/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -56,7 +56,7 @@ is the core abstraction, used by all the core routines.
 
 is used to make the CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
 
-## SanFranciscoCounty 2024
+## SanFrancisco County 2024
 
 Input is in _CVR_Export_20241202143051.zip_. This contains the Dominion CVR_Export JSON files, as well as the
 Contest Manifest, Candidate Manifest, and other manifests. We also have the San Francisco County _summary.xml_ file from
@@ -169,9 +169,9 @@ the CORLA software, to be used in 2025 Nov election.
   * TODO investigate integrating RLAUXE into CORLA.
   * TODO investigate integrating RLAUXE into Dominion.
 * On point 2, we can use OneAudit, and put each non-CVR county into a pool, as long as we know the undervotes.
-  This is an evolution from the time the paper was written (2017), which was investigating stratification.
+  This is an evolution from the time the paper was written (2017), before OneAudit was developed.
 
-## BoulderCounty 2024
+## Boulder County 2024
 
 ````
 DominionCvrExportCsv
@@ -187,28 +187,72 @@ BoulderStatementOfVotes has
 
 _createBoulderElection_: BoulderStatementOfVotes, 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx
 
-* we have the cvr undervotes, but not count or undervotes for the redacted votes
-* for most contests, phantoms = 0 = sovoContest.totalBallots - ((sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes)
-* missing undervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN - cvr.undervotes.
-  we assume they are in the redacted pools.
+* Both the cvrs and the redacted pool totals reference a BallotType, which can be used as the Card Style Data.
+* We are not given the count of ballots or undervotes in the redacted pools.
+* The StatementOfVotes gives us enough information to calculate Nc.
+* We estimate the undervotes and pool counts as explained below, and adjust the contest Nc to be consistest with the ballot manifest.
 
 **createBoulderElectionOA** assumes that each pool has a single CardStyle, allowing us to use style based sampling. This also 
-constrains the way that undervotes are added to the pools. In this case we need to know the number of cards in each batch. We cont,
-so we approximate it, and adjust Nc. (see TestBoulderUndervotes.kt for details).
+constrains the way that undervotes are added to the pools. In this case we need to know the number of cards in each batch. We dont,
+so we approximate it, and adjust Nc. (see _TestBoulderUndervotes.kt_ and _OneAuditContest.kt_ for details).
 
-**createBoulderElectionOAsim** simulates the RLA by distributing redactedUndervotes across the groups in proportion to number of votes.
+**createBoulderElectionOAsim** extends createBoulderElectionOA.
 We create simulated cvrs by making random choices until the cvr sums equal the given batch totals, including undervotes.
-We use these simulated cvrs as the mvs in the simulated RLA. TODO
+This allows us to characterize the pool variances. With the parameter **clca** set to true, we create a CLCA audit with those
+simulated CVRS, in order to compare OneAudit to CLCA for this use case.
 
-**createBoulderElection** simulates a CLCA by creating simulated cvrs by making random choices until the cvr sums equal the given batch totals, including undervotes.
-We use these simulated cvrs as the mvs in the simulated RLA.
+Its not possible to run an IRV audit with redacted CVRs. There are lines called "RCV Redacted & Randomly Sorted", but they dont make much sense so far. To do IRV with OneAudit you need to create VoteConsolidator for each pool from the real cvrs.
 
-In reality, we cant do a OneAudit RLA unless we know the number of undervotes in each redacted group.
-If we assume the ballotTypes are correct, and that all cards in the batch are of the ballotType, then we just need to know the ncards in each batch.
+### Calculating the redacted undervotes and pool counts
 
-I dont see how we can handle IRV contests in the presence of redacted CVRs. There are lines called "RCV Redacted & Randomly Sorted", but they dont make much sense so far. To do IRV with OneAudit you need to create VoteConsolidator for each pool from the real cvrs. 
+We have two source of information: **sovo** is Boulder's StatementOfVotes, and DominionCvrExportCsv contain the CVRs and
+the redacted pool counts.
 
+* For most contests, phantoms = 0 = sovoContest.totalBallots - ((sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes)
+* We can calculate missing undervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN - cvr.undervotes.
+* We assume missing undervotes are in the redacted pools.
+* We assume all ballots in each pool contain the same set of contests, called the Ballot Style. In that case, we just need to
+  estimate the number of cards for each pool, that gives the correct number of undervotes.
+* We create the Ballot Manifest with the published CVRS, and entries for each card in the pools, which contain CSD and pool ids,
+but no vote information.
 
+Some of these assumptions may not be right, but they are sufficient for our purposes. In a real audit, we would to work with the EA to track each down.
+We would advocate that the number of cards in each pool be published.
+
+### Corrections to StatementOfVotes
+
+On contest 20, sovo.totalVotes and sovo.totalBallots is wrong vs the cvrs. (only one where voteForN=3, but may not be related)
+
+````
+'Town of Superior - Trustee' (20) candidates=[0, 1, 2, 3, 4, 5, 6] choiceFunction=PLURALITY nwinners=3 voteForN=3
+contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes
+sovoContest=Town of Superior - Trustee, 7, 9628, 8254, 16417, 8246, 33
+cvrTabulation={0=3121, 1=3332, 2=3421, 3=2097, 4=805, 5=657, 6=3137} nvotes=16570 ncards=7865 undervotes=7025 overvotes=0 novote=1484 underPct= 29%
+redTabulation={0=130, 1=87, 2=111, 3=50, 4=25, 5=36, 6=101} nvotes=540 ncards=180 undervotes=0 overvotes=0 novote=0 underPct= 0%
+  sovoCards= 8254 = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
+  phantoms= 0  = sovoContest.totalBallots - sovoCards
+  sovoUndervotes= 8345 = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN
+  cvrUndervotes= 7025
+  redUndervotes= 1320  = sovoUndervotes - cvr.undervotes
+  redVotes= 540 = redacted.votes.map { it.value }.sum()
+  redNcards= 620 = (redVotes + redUndervotes) / info.voteForN
+  totalCards= 8485 = redNcards + cvr.ncards
+  diff= -231 = sovoContest.totalBallots - totalCards
+````
+Assume sovo.totalBallots is wrong, so Nc = max(totalCards, sovoContest.totalBallots)
+
+### Corrections to Redacted Ballots
+
+We assume all ballots in each pool contain the same set of contests, called the Ballot Style. Seems true except for
+RedactedGroup '06, 33, & 36-A'. We can compare the BallotStyle for CV RS vs the redacted group:
+
+````
+RedactedGroup=[0, 1, 2, 3, 5, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42]
+         CVRS=[0, 1, 2, 3, 5, 10, 11, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42]
+````
+
+Note that contest 12 is in RedactedGroup but not CVRs. Its value in the RedactedGroup is zero, so we assume that it is a mistake to be there.
+This matters for the undervote count of that contest.
 
 
 

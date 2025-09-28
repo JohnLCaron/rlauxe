@@ -87,49 +87,6 @@ class TestBoulderUndervotes {
         return btoke.toInt().toString()
     }
 
-// sovo totalUnderVotes is high or cvr.novotes is low, causing redUnderPct to be much bigger than cvrTabulation.novote
-// much worse when voteForN > 1, which is probably a clue as to whats wrong.
-// Generate novote CVRS anyway from these calculations. The main thing is to augment the group with the number of
-// novotes per contest. Assign novotes across groups based on the number of ballots in that group (it could be theres
-// something tricky in that?). Test that we can recreate the sovo contest values from the generated cvrs.
-//
-// contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes, diff
-//'Town of Erie - Mayor' (17) candidates=[0, 1] choiceFunction=PLURALITY nwinners=1 voteForN=1
-// sovoContest=Town of Erie - Mayor, 8, 13681, 10004, 8807, 1193, 4, 0
-// allTabulation={1=4454, 0=4353} ncards=9837 novote=1030 underPct= 10%
-// cvrTabulation={1=4157, 0=4031} ncards=9218 novote=1030 underPct= 11%
-// redTabulation={0=322, 1=297} ncards=619 novote=0 underPct= 0%
-//  sovoCards= 10000 = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN
-//  phantoms= 0  = sovoContest.totalBallots - sovoCards - sovoContest.totalOverVotes
-//  redUnder= 163  = sovoContest.totalUnderVotes / info.voteForN - cvr.novote
-//  redNcards= 782 = redUnder + redacted.ncards
-//  redUnderPct= 100.0 * redUnder / redNcards  = 20%
-//
-//contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes, diff
-//'Town of Erie - Council Member District 1' (18) candidates=[0, 1, 2, 3] choiceFunction=PLURALITY nwinners=2 voteForN=2
-// sovoContest=Town of Erie - Council Member District 1, 6, 10357, 8512, 11469, 5553, 1, -8511
-// allTabulation={2=3992, 0=2654, 1=2634, 3=2189} ncards=8279 novote=1403 underPct= 16%
-// cvrTabulation={2=3795, 0=2523, 1=2512, 3=2076} ncards=7998 novote=1403 underPct= 17%
-// redTabulation={2=197, 0=131, 1=122, 3=113} ncards=281 novote=0 underPct= 0%
-//  sovoCards= 8511 = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN
-//  phantoms= 0  = sovoContest.totalBallots - sovoCards - sovoContest.totalOverVotes
-//  redUnder= 1373  = sovoContest.totalUnderVotes / info.voteForN - cvr.novote
-//  redNcards= 1654 = redUnder + redacted.ncards
-//  redUnderPct= 100.0 * redUnder / redNcards  = 83%
-
-    /*
-a novote means no candidate was chosen in the contest,
-when voteForN = 1, an undervote is a contest where no candidate was chosen. undervote = novote
-when voteForN > 1, an undervote is a contest where less than max candidate. if undervote = voteForN - actual, then
-  ncards = (totalVotes + undervotes) / VoteForN.
-
-We could modify ContestTabulation to calculate undervotes as well as novotes.
-then
-  redUndervotes = sovoContest.totalUnderVotes - cvr.undervotes
-so
-  redNcards = (redVotes + redUndervotes) / VoteForN
- */
-
     @Test
     fun showSovoContestDetail2() {
         val sovo = readBoulderStatementOfVotes(

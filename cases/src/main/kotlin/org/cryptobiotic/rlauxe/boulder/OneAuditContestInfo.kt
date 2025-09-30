@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.audit.ContestTabulationOld
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.util.mergeReduce
@@ -14,7 +14,7 @@ import kotlin.math.max
 private val logger = KotlinLogging.logger("OneAuditContest2")
 
 class OneAuditContestInfo(val info: ContestInfo, val sovoContest: BoulderContestVotes,
-                          val cvr: ContestTabulation, val red: ContestTabulation, val cardPools: List<CardPool>
+                          val cvr: ContestTabulationOld, val red: ContestTabulationOld, val cardPools: List<CardPool>
 ) {
     // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
     val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
@@ -93,7 +93,7 @@ class OneAuditContestInfo(val info: ContestInfo, val sovoContest: BoulderContest
         return poolTotalCards() + cvr.ncards
     }
 
-    fun checkCvrs(contestTab: ContestTabulation) {
+    fun checkCvrs(contestTab: ContestTabulationOld) {
         sovoContest.candidateVotes.forEach { (sovoCandidate, sovoVote) ->
             val candidateId = info.candidateNames[sovoCandidate]
             val contestVote = contestTab.votes[candidateId] ?: 0
@@ -104,7 +104,7 @@ class OneAuditContestInfo(val info: ContestInfo, val sovoContest: BoulderContest
         }
     }
 
-   fun checkNcards(contestTab: ContestTabulation) {
+   fun checkNcards(contestTab: ContestTabulationOld) {
         println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncards} = ${sovoContest.totalBallots - contestTab.ncards}")
         println("  ${info.id}: sumAllCards=${sumAllCards()} - contestTab.ncards=${contestTab.ncards} = ${sumAllCards() - contestTab.ncards}")
         println()

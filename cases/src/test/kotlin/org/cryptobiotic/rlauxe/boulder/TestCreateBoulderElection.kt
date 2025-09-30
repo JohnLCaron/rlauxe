@@ -1,16 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.OneAuditConfig
-import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.sf.ballotPoolsFile
-import org.cryptobiotic.rlauxe.sf.createSfElectionFromCvrExportOA
-import org.cryptobiotic.rlauxe.sf.createSortedCards
 import org.junit.jupiter.api.Test
-import java.nio.file.Path
 import kotlin.test.assertEquals
 
 class TestCreateBoulderElection {
@@ -42,7 +33,8 @@ class TestCreateBoulderElection {
         createBoulderElectionOA(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24oa",
+            auditDir = "/home/stormy/rla/cases/boulder24oa/audit",
+            clear = false,
         )
     }
 
@@ -53,6 +45,7 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditDir = "/home/stormy/rla/cases/boulder24oasim",
             clca=false,
+            clear = false,
         )
     }
 
@@ -63,10 +56,11 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditDir = "/home/stormy/rla/cases/boulder24clca",
             clca=true,
+            clear = false,
         )
     }
 
-    @Test
+    // @Test
     fun createBoulderOArepeat() {
         val topDir = "/home/stormy/rla/cases/boulder24oa"
 
@@ -79,9 +73,10 @@ class TestCreateBoulderElection {
                 auditDir = auditDir,
             )
         }
+        runBoulderOArepeat()
     }
 
-    @Test
+    // @Test
     fun runBoulderOArepeat() {
         val topDir = "/home/stormy/rla/cases/boulder24oa"
 

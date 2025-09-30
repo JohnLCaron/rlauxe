@@ -14,6 +14,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+// read ContestManifest.json
+
 data class ContestManifest(val contests: Map<Int, ContestMJson>, val irvContests: Set<Int>)
 
 @Serializable
@@ -105,6 +107,7 @@ fun readContestManifestFromZip(zipFilename: String, contestManifestFilename: Str
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+// read CandidateManifest.json
 
 enum class CandidateMType { Regular, WriteIn, QualifiedWriteIn }
 
@@ -166,6 +169,7 @@ fun readCandidateManifestJsonFromZip(zipFilename: String, filename: String): Res
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+// read BallotTypeContestManifest.json
 
 @Serializable
 data class BallotTypeContestManifestJson(

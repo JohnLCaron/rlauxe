@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.raire.IrvContestVotes
+import org.cryptobiotic.rlauxe.raire.IrvContestTabulation
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import kotlin.test.Test
 
@@ -18,7 +18,7 @@ class TestIrvContestVotes {
         )
         println(info)
 
-        val target = IrvContestVotes(info)
+        val target = IrvContestTabulation(info)
         target.addVotes(intArrayOf(111,11) )
         target.addVotes(intArrayOf(12,123) )
         target.addVotes(intArrayOf(12,123) )

@@ -140,13 +140,13 @@ fun createCardPools(
 
     ////  check that the cardPools agree with the summary XML
     val sortedPools = cardPools.toSortedMap()
-    val contestTabSums = mutableMapOf<Int, ContestTabulation>()
+    val contestTabSums = mutableMapOf<Int, ContestTabulationOld>()
     sortedPools.forEach { (_, pool : CardPoolSF) ->
         pool.sumRegular( contestTabSums)
 
         // TODO HEY
         pool.irvVoteConsolidations.forEach { contestId, irv ->
-            val ct = contestTabSums.getOrPut(contestId) { ContestTabulation(contestInfos[contestId]?.voteForN) }
+            val ct = contestTabSums.getOrPut(contestId) { ContestTabulationOld(contestInfos[contestId]?.voteForN) }
             ct.ncards += irv.ncards
         }
     }
@@ -171,13 +171,13 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, Ca
     val contestsUAs = mutableListOf<OAContestUnderAudit>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
-        val allCards = ContestTabulation(info.voteForN)
+        val allCards = ContestTabulationOld(info.voteForN)
         cardPools.values.forEach { pool ->
             val poolTab = pool.contestTabulations[info.id]
             if (poolTab != null) allCards.sum(poolTab)
         }
         // pooled data only
-        val pooledCards = ContestTabulation(info.voteForN)
+        val pooledCards = ContestTabulationOld(info.voteForN)
         cardPools.values.filter{ it.poolName != unpooled }.forEach { pool ->
             val poolTab = pool.contestTabulations[info.id]
             if (poolTab != null) pooledCards.sum(poolTab)

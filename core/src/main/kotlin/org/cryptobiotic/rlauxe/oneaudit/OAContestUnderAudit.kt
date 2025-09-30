@@ -92,10 +92,6 @@ class OneAuditClcaAssorter(
     }
 
     fun overstatementPoolError(mvr: Cvr, poolAvgAssortValue: Double): Double {
-        if (hasStyle and !mvr.hasContest(info.id)) {
-            // TODO log error
-            throw RuntimeException("use_style==True but mvr=${mvr} does not contain contest ${info.name} (${info.id})")
-        }
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
                          else this.assorter.assort(mvr, usePhantoms = false)
 

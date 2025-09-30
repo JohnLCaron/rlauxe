@@ -8,17 +8,18 @@ class TestCardSortMerge {
 
     @Test
     fun testCardSortMerge() {
-        val topDir = "/home/stormy/rla/cases/sf2024Poa"
+        val topDir = "/home/stormy/rla/cases/sf2024"
+        val tempDir = "/home/stormy/rla/cases/temp"
         SortMerge("$topDir/audit",
-            "$topDir/cards.csv",
-            "$topDir/sortChunkTest",
-            "$topDir/sortChunkTest/sortedCards.csv",
+            "$topDir/cvrExport.csv",
+            "$tempDir/sortChunkTest",
+            "$tempDir/sortChunkTest/sortedCards.csv",
             pools = null,
             ).run()
-        val cardIter = readCardsCsvIterator("$topDir/sortChunkTest/sortedCards.csv")
+        val cardIter = readCardsCsvIterator("$tempDir/sortChunkTest/sortedCards.csv")
         var count = 0
         cardIter.forEach { count++ }
-        assertEquals(467063, count)
+        assertEquals(1603908, count)
     }
 
 }

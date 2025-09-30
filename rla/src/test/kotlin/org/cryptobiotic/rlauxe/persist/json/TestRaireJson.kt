@@ -27,12 +27,14 @@ class TestRaireJson {
             candidateNames = listToMap("A", "B", "C", "D"),
         )
         val target = RaireContest(info, listOf(3), 42, 33)
+        target.roundsPaths.addAll(roundPathsById)
 
         val json = target.publishJson()
-        val roundtrip = json.import(info)
+        val roundtrip = json.import(info) as RaireContest
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
+        assertTrue(roundtrip.roundsPaths.equals(target.roundsPaths))
     }
 
     // class RaireContestUnderAudit(

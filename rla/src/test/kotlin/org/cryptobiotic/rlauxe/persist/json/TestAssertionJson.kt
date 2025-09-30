@@ -14,7 +14,7 @@ class TestAssertionJson {
     fun testAssertionRoundtrip() {
         val target = makeAssertion()
 
-        val json = target.publishJson()
+        val json = target.publishIFJson()
         val roundtrip = json.import(target.info)
         assertNotNull(roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -84,7 +84,7 @@ class TestAssertionJson {
         val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 0, info.minFraction!!)
         val target = Assertion(info, assorter)
 
-        val json = target.publishJson()
+        val json = target.publishIFJson()
         val roundtrip = json.import(target.info)
         assertNotNull(roundtrip)
         assertTrue(roundtrip.equals(target))

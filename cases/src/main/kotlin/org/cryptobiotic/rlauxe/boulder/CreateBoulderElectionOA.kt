@@ -184,9 +184,10 @@ fun createBoulderElectionOA(
     auditDir: String,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
-    auditConfigIn: AuditConfig? = null)
+    auditConfigIn: AuditConfig? = null,
+    clear: Boolean = true)
 {
-    clearDirectory(Path(auditDir))
+    if (clear) clearDirectory(Path(auditDir))
     val stopwatch = Stopwatch()
 
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"

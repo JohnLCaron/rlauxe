@@ -181,7 +181,7 @@ data class ContestUnderAuditJson(
     val contest: ContestIFJson,
     val isComparison: Boolean,
     val hasStyle: Boolean,
-    var pollingAssertions: List<AssertionJson>,
+    var pollingAssertions: List<AssertionIFJson>,
     var clcaAssertions: List<ClcaAssertionJson>,
     val status: TestH0Status,
 )
@@ -192,7 +192,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
         this.contest.publishJson(),
         this.isComparison,
         this.hasStyle,
-        this.pollingAssertions.map { it.publishJson() },
+        this.pollingAssertions.map { it.publishIFJson() },
         this.clcaAssertions.map { it.publishJson() },
         this.preAuditStatus
     )

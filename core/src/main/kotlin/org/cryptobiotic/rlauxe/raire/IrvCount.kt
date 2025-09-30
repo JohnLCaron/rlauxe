@@ -10,32 +10,8 @@ import kotlin.collections.getOrPut
 private val quiet = true
 private val logger = KotlinLogging.logger("IrvCount")
 
-// recreate raire's elimination paths, so that we can display to the user
-
-// this is called from Viewer in "Show Contest" for IRV
-fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString {
-    val multipleRounds = result.ivrRoundsPaths.size > 1
-
-    result.ivrRoundsPaths.forEachIndexed { idx, roundsPath ->
-        if (multipleRounds) appendLine("   Alternative IrvCountResult ${'A' + idx} --------------------")
-
-        val rounds = roundsPath.rounds
-        append(sfn("round", 30))
-        repeat(rounds.size) { append("${nfn(it, 8)} ") }
-        appendLine()
-
-        info.candidateNames.forEach { (name, candId) ->
-            append(sfn("$candId $name", 30))
-            rounds.forEachIndexed { idx, round ->
-                append("${nfn(round.countFor(candId), 8)} ")
-            }
-            if (roundsPath.irvWinner.winners.contains(candId)) {
-                append(" (winner)")
-            }
-            appendLine()
-        }
-    }
-}
+// Recreate Raire's elimination paths, so that we can display to the user.
+// We do not duplicate Raire's calculation of what assertions are needed.
 
 // one for each round, in order, for one elimination path
 data class IrvRoundsPath(val rounds: List<IrvRound>, val irvWinner: IrvWinners)
@@ -218,5 +194,31 @@ fun Set<Int>.removeNew( eliminate: Int): Set<Int> {
     result.addAll(this)
     result.remove(eliminate)
     return result
+}
+
+
+// this is called from Viewer in "Show Contest" for IRV
+fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString {
+    val multipleRounds = result.ivrRoundsPaths.size > 1
+
+    result.ivrRoundsPaths.forEachIndexed { idx, roundsPath ->
+        if (multipleRounds) appendLine("   Alternative IrvCountResult ${'A' + idx} --------------------")
+
+        val rounds = roundsPath.rounds
+        append(sfn("round", 30))
+        repeat(rounds.size) { append("${nfn(it, 8)} ") }
+        appendLine()
+
+        info.candidateNames.forEach { (name, candId) ->
+            append(sfn("$candId $name", 30))
+            rounds.forEachIndexed { idx, round ->
+                append("${nfn(round.countFor(candId), 8)} ")
+            }
+            if (roundsPath.irvWinner.winners.contains(candId)) {
+                append(" (winner)")
+            }
+            appendLine()
+        }
+    }
 }
 

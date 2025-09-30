@@ -22,7 +22,7 @@ import kotlin.test.assertNotNull
 class TestSfElection {
 
     // extract the cvrs from json
-    @Test
+    // @Test
     fun createSF2024cvrs() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
@@ -60,10 +60,11 @@ class TestSfElection {
             "$topDir/$cvrExportCsvFile",
             show = false,
         )
+        createSF2024sortedCards()
     }
 
     // create sorted cards, assumes auditDir/auditConfig already exists
-    @Test
+    // @Test
     fun createSF2024sortedCards() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val auditDir = "$topDir/audit"
@@ -73,7 +74,7 @@ class TestSfElection {
 
     // create the audit contests using the cvrExport records
     @Test
-    fun createSF2024contestsN() {
+    fun createSF2024contestsRepeat() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val cvrCsv = "$topDir/cvrExport.csv"
@@ -117,7 +118,7 @@ class TestSfElection {
         }
     }
 
-    @Test
+    // @Test
     fun showIrvCounts() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val publisher = Publisher("$topDir/audit")

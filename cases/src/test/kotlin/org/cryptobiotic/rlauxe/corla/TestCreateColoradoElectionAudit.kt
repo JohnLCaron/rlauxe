@@ -29,7 +29,9 @@ class TestCreateColoradoElectionAudit {
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElectionFromDetailXmlAndPrecincts(topDir, detailXmlFile, contestRoundFile, precinctFile)
+        createColoradoElectionFromDetailXmlAndPrecincts(topDir, detailXmlFile, contestRoundFile, precinctFile, clear=false)
+
+        createCorla2024sortedCards("/home/stormy/rla/cases/corla")
 
         // other tests depend on this one
         // testTreeReader()
@@ -40,7 +42,7 @@ class TestCreateColoradoElectionAudit {
     // do this after createElectionFromDetailXmlAndPrecincts
     // TODO add phantoms here
 
-    @Test
+    // @Test
     fun createCorla2024sortedCards() {
         createCorla2024sortedCards("/home/stormy/rla/cases/corla")
     }
@@ -57,31 +59,8 @@ class TestCreateColoradoElectionAudit {
         tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
     }
 
-    // class TreeReaderIterator <T> (
-    //    topDir: String,
-    //    val fileFilter: (Path) -> Boolean,
-    //    val reader: (Path) -> Iterator<T>
-    //)
     @Test
-    fun testTreeReader() {
-        val stopwatch = Stopwatch()
-        val topDir = "/home/stormy/rla/cases/corla"
-        val precinctReader = TreeReaderIterator(
-            "$topDir/$cvrExportDir/",
-            fileFilter = { true },
-            reader = { path -> readCardsCsvIterator(path.toString()) }
-        )
-
-        var count = 0
-        while (precinctReader.hasNext()) {
-            count++
-            precinctReader.next()
-        }
-        println("count = $count took = $stopwatch")
-    }
-
-    @Test
-    fun makePrecinctTree() {
+    fun testPrecinctTree() {
         val cvrsDir = "/home/stormy/rla/cases/corla/$cvrExportDir"
         val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }
         println("county, precinct")
@@ -97,8 +76,8 @@ class TestCreateColoradoElectionAudit {
         return CountyAndPrecinct(county.toString(), precinct)
     }
 
-    @Test
-    fun makeCountySampleLists() {
+    // @Test
+    fun testCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
         val topDir = "/home/stormy/rla/cases/corla"

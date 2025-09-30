@@ -7,6 +7,8 @@ import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.events.XMLEvent
 import javax.xml.stream.events.StartElement
 
+// read SF2024/summary.xml with Stax library
+
 class StaxReader {
     val ballots2Q = QName("ballots2")
     val contestIdQ = QName("contestId")

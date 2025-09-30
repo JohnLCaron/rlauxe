@@ -36,10 +36,11 @@ class PollWithoutReplacement(
             val mvr = mvrs[permutedIndex[idx]]
             idx++
             if (mvr.hasContest(contestId)) {
+                count++
                 return assorter.assort(mvr, usePhantoms = true)
             }
         }
-        throw RuntimeException("no samples left for ${contestId} and Assorter ${assorter}")
+        throw RuntimeException("no samples left for contest ${contestId} and Assorter ${assorter}")
     }
 
     override fun reset() {
@@ -50,7 +51,7 @@ class PollWithoutReplacement(
     }
 
     override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
+    override fun maxSampleIndexUsed() = count
     override fun nmvrs() = mvrs.size
 
     override fun hasNext() = (count < maxSamples)

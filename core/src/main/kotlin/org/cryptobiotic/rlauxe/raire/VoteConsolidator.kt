@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
 import au.org.democracydevelopers.raire.irv.Vote
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import kotlin.collections.getOrPut
 
 /**
@@ -13,10 +12,9 @@ import kotlin.collections.getOrPut
  * a large number of weight votes, possibly the same, into a
  * set of unique votes with multiplicities.
  *
- * It is also (optionally) capable of converting a preference list of
- * strings into the array of integer preferences used by Raire.
+ * This is what gets fed into the Raire library.
  */
-// Note that the candidates go from 0 ... ncandidates-1, not candidate ids
+// Note that the candidates go from index 0 ... ncandidates-1, not candidate ids
 class VoteConsolidator {
     private val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
 

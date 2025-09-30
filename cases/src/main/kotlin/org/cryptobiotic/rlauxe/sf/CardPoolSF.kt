@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.audit.ContestTabulationOld
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
-import org.cryptobiotic.rlauxe.raire.IrvContestVotes
+import org.cryptobiotic.rlauxe.raire.IrvContestTabulation
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.collections.component1
@@ -27,8 +27,8 @@ open class CardPoolSF(
     val irvIds: Set<Int>, // TODO could make a CardPoolIRV
     val contestInfos: Map<Int, ContestInfo>)
 {
-    val contestTabulations = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
-    val irvVoteConsolidations = mutableMapOf<Int, IrvContestVotes>()  // contestId -> IrvContestVotes
+    val contestTabulations = mutableMapOf<Int, ContestTabulationOld>()  // contestId -> ContestTabulation
+    val irvVoteConsolidations = mutableMapOf<Int, IrvContestTabulation>()  // contestId -> IrvContestVotes
 
     // a convenient place to keep this, calculated in addOAClcaAssorters()
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
@@ -37,10 +37,10 @@ open class CardPoolSF(
     open fun accumulateVotes(cvr : Cvr) {
         cvr.votes.forEach { (contestId, candIds) ->
             if (irvIds.contains(contestId)) {
-                val irvContestVotes = irvVoteConsolidations.getOrPut(contestId) { IrvContestVotes(contestInfos[contestId]!!) }
+                val irvContestVotes = irvVoteConsolidations.getOrPut(contestId) { IrvContestTabulation(contestInfos[contestId]!!) }
                 irvContestVotes.addVotes(candIds)
             } else {
-                val contestTab = contestTabulations.getOrPut(contestId) { ContestTabulation(contestInfos[contestId]?.voteForN) }
+                val contestTab = contestTabulations.getOrPut(contestId) { ContestTabulationOld(contestInfos[contestId]?.voteForN) }
                 contestTab.addVotes(candIds)
             }
         }
@@ -69,9 +69,9 @@ open class CardPoolSF(
     }
 
     // sum regular (non IRV) votes into sumTab. (sfoa)
-    fun sumRegular(sumTab: MutableMap<Int, ContestTabulation>) {
+    fun sumRegular(sumTab: MutableMap<Int, ContestTabulationOld>) {
         this.contestTabulations.forEach { (contestId, poolContestTab) ->
-            val contestSum = sumTab.getOrPut(contestId) { ContestTabulation(contestInfos[contestId]?.voteForN) }
+            val contestSum = sumTab.getOrPut(contestId) { ContestTabulationOld(contestInfos[contestId]?.voteForN) }
             contestSum.sum(poolContestTab)
         }
     }

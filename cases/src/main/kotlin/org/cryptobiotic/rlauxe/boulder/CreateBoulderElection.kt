@@ -117,33 +117,33 @@ open class BoulderElection(
 
     // make contest votes from the export.cvrs and export.redacted
     // ncards is approx, will be corrected from sovo and OneContest
-    fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
+    fun countVotes() : Map<Int, ContestTabulationOld> { // contestId -> candidateId -> nvotes
         val cvrVotes =  countCvrVotes()
         val redVotes =  countRedactedVotes()
-        val allVotes = mutableMapOf<Int, ContestTabulation>()
+        val allVotes = mutableMapOf<Int, ContestTabulationOld>()
         allVotes.sumContestTabulations(cvrVotes)
         allVotes.sumContestTabulations(redVotes)
         return allVotes
     }
 
-    fun countCvrVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulation>()
+    fun countCvrVotes() : Map<Int, ContestTabulationOld> { // contestId -> candidateId -> nvotes
+        val votes = mutableMapOf<Int, ContestTabulationOld>()
 
         export.cvrs.forEach { cvr ->
             cvr.contestVotes.forEach { contestVote ->
-                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]?.voteForN) }
+                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulationOld(infoMap[contestVote.contestId]?.voteForN) }
                 tab.addVotes(contestVote.candVotes.toIntArray())
             }
         }
         return votes
     }
 
-    fun countRedactedVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulation>()
+    fun countRedactedVotes() : Map<Int, ContestTabulationOld> { // contestId -> candidateId -> nvotes
+        val votes = mutableMapOf<Int, ContestTabulationOld>()
 
         export.redacted.forEach { redacted ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
-                val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]?.voteForN) }
+                val tab = votes.getOrPut(contestId) { ContestTabulationOld(infoMap[contestId]?.voteForN) }
                 // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
                 //   would be safer to make the cvrs first, then just use them to make the Contest
                 //   problem is we cant distinguish phantoms from undervotes in redacted cvrs

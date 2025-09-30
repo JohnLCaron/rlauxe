@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.sf
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -206,7 +207,7 @@ fun countPools(cvrCsvFilename: String) {
     val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
-        if (cvrExport.poolKey() == CvrExport.unpooled) unpoolCount++ else poolCount++
+        if (cvrExport.poolKey() == unpooled) unpoolCount++ else poolCount++
     }
     println(" unpoolCount = $unpoolCount poolCount = $poolCount")
 }

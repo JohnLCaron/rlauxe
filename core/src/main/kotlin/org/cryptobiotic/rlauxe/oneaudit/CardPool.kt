@@ -1,139 +1,85 @@
-package org.cryptobiotic.rlauxe.boulder
+package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrExport.Companion.unpooled
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
-import org.cryptobiotic.rlauxe.oneaudit.BallotPool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mergeReduce
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.collections.get
-import kotlin.collections.set
 import kotlin.math.max
 
-private val logger = KotlinLogging.logger("OneAuditContest2")
 
-// in this form we calculate undervoets differenctly, dont use red.ncards which is unknown at the time of creation
-class OneAuditContest(val info: ContestInfo, val sovoContest: BoulderContestVotes,
-                      val cvr: ContestTabulation, val red: ContestTabulation, val cardPools: List<CardPoolB>
+private val logger = KotlinLogging.logger("CardPool")
+
+const val unpooled = "unpooled"
+
+// this is really CardPoolForContest
+data class BallotPool(
+    val name: String,
+    val poolId: Int,
+    val contestId :Int,
+    val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
+    val votes: Map<Int, Int>, // candid -> nvotes, for plurality. umm do we really need ?
 ) {
-    // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
-    val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
-    val phantoms = sovoContest.totalBallots - sovoCards
 
-    val sovoUndervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN
-    val redUndervotes = sovoUndervotes  - cvr.undervotes
-    val redVotes = red.nvotes()
-    val redNcards = (redVotes + redUndervotes) / info.voteForN
-    val totalCards= redNcards + cvr.ncards
-
-    fun candVoteTotals(): Map<Int, Int> {
-        val sum = mutableMapOf<Int, Int>()
-        sum.mergeReduce(listOf(cvr.votes, red.votes))
-        return sum
+    fun calcReportedMargin(winner: Int, loser: Int): Double {
+        if (ncards == 0) return 0.0
+        val winnerVote = votes[winner] ?: 0
+        val loserVote = votes[loser] ?: 0
+        return (winnerVote - loserVote) / ncards.toDouble()
     }
 
-    override fun toString() = buildString {
-        appendLine(info)
-        appendLine(" sovoContest=$sovoContest")
+    fun votesAndUndervotes(voteForN: Int, ncandidates: Int): Map<Int, Int> {
+        val poolVotes = votes.values.sum()
+        val poolUndervotes = ncards * voteForN - poolVotes
+        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, poolUndervotes)).toMap()
     }
 
-    fun details() = buildString {
-        appendLine(info)
-        appendLine(" sovoContest=$sovoContest")
-        // appendLine(" allTabulation=$all3")
-        appendLine(" cvrTabulation=$cvr")
-        appendLine(" redTabulation=$red")
-
-        appendLine("  sovoCards= $sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes")
-        appendLine("  phantoms= $phantoms  = sovoContest.totalBallots - sovoCards")
-
-
-        val redUnderPct = 100.0 * redUndervotes / (redVotes + redUndervotes)
-        appendLine("  sovoUndervotes= ${sovoUndervotes} = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN")
-        appendLine("  cvrUndervotes= ${cvr.undervotes}")
-        appendLine("  redUndervotes= $redUndervotes  = sovoUndervotes - cvr.undervotes")
-        appendLine("  redVotes= $redVotes = redacted.votes.map { it.value }.sum()")
-        appendLine("  redNcards= $redNcards = (redVotes + redUndervotes) / info.voteForN")
-        appendLine("  totalCards= ${totalCards} = redNcards + cvr.ncards")
-        appendLine("  diff= ${sovoContest.totalBallots - totalCards} = sovoContest.totalBallots - totalCards")
-        appendLine("  redUnderPct= 100.0 * redUndervotes / redNcards  = ${redUnderPct.toInt()}%")
+    fun votesAndUndervotes(voteForN: Int): VotesAndUndervotes {
+        val poolUndervotes = ncards * voteForN - votes.values.sum()
+        return VotesAndUndervotes(votes, poolUndervotes, voteForN)
     }
 
-    // on contest 20, sovo.totalVotes and sovo.totalBallots is wrong vs the cvrs. (only one where voteForN=3, but may not be related)
-
-    // contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes
-    //'Town of Superior - Trustee' (20) candidates=[0, 1, 2, 3, 4, 5, 6] choiceFunction=PLURALITY nwinners=3 voteForN=3
-    // sovoContest=Town of Superior - Trustee, 7, 9628, 8254, 16417, 8246, 33
-    // cvrTabulation={0=3121, 1=3332, 2=3421, 3=2097, 4=805, 5=657, 6=3137} nvotes=16570 ncards=7865 undervotes=7025 overvotes=0 novote=1484 underPct= 29%
-    // redTabulation={0=130, 1=87, 2=111, 3=50, 4=25, 5=36, 6=101} nvotes=540 ncards=180 undervotes=0 overvotes=0 novote=0 underPct= 0%
-    //  sovoCards= 8254 = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
-    //  phantoms= 0  = sovoContest.totalBallots - sovoCards
-    //  sovoUndervotes= 8345 = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN
-    //  cvrUndervotes= 7025
-    //  redUndervotes= 1320  = sovoUndervotes - cvr.undervotes
-    //  redVotes= 540 = redacted.votes.map { it.value }.sum()
-    //  redNcards= 620 = (redVotes + redUndervotes) / info.voteForN
-    //  totalCards= 8485 = redNcards + cvr.ncards
-    //  diff= -231 = sovoContest.totalBallots - totalCards
-    //  redUnderPct= 100.0 * redUndervotes / redNcards  = 70%
-
-    // assume sovo.totalBallots is wrong
-    // so nballotes uses max(totalCards, sovoContest.totalBallots)
-
-    fun Nc(): Int {
-        return max(totalCards, sovoContest.totalBallots)
-    }
-
-    fun poolTotals(): Int {
-        return cardPools.filter{ it.contains(info.id)}.sumOf { it.ncards() }
-    }
-
-    // ncards
-    fun sumAllCards() : Int {
-        return poolTotals() + cvr.ncards
-    }
-
-    fun checkCvrs(contestTab: ContestTabulation) {
-        sovoContest.candidateVotes.forEach { (sovoCandidate, sovoVote) ->
-            val candidateId = info.candidateNames[sovoCandidate]
-            val contestVote = contestTab.votes[candidateId] ?: 0
-            if (contestVote != sovoVote) {
-                println("*** ${info.name} '$sovoCandidate' $contestVote != $sovoVote")
-            }
-            require(contestVote == sovoVote)
-        }
-    }
-
-   fun checkNcards(contestTab: ContestTabulation) {
-        println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncards} = ${sovoContest.totalBallots - contestTab.ncards}")
-        println("  ${info.id}: sumAllCards=${sumAllCards()} - contestTab.ncards=${contestTab.ncards} = ${sumAllCards() - contestTab.ncards}")
-        println()
+    fun reportedAverage(winner: Int, loser: Int): Double {
+        val winnerVotes = votes[winner] ?: 0
+        val loserVotes = votes[loser] ?: 0
+        val reportedMargin = (winnerVotes - loserVotes) / ncards.toDouble() // TODO dont know Nc
+        return margin2mean(reportedMargin)
     }
 }
 
-class CardPoolB(
+
+// for calculating average from running total, see addOAClcaAssorters
+class AssortAvg() {
+    var ncards = 0
+    var totalAssort = 0.0
+    fun avg() : Double = if (ncards == 0) 0.0 else totalAssort / ncards
+    fun margin() : Double = mean2margin(avg())
+
+    override fun toString(): String {
+        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
+    }
+}
+
+class CardPool(
     poolNameIn: String,
     val poolId: Int,
-    val redVotes: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes from redacted group // TODO use ContestTabulation ??
-    val infos: Map<Int, ContestInfo>) // all infos
+    val poolVotes: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes from redacted group // TODO use ContestTabulation ??
+    infos: Map<Int, ContestInfo>) // all infos
 {
     val poolName = cleanCsvString(poolNameIn)
+    val voteForNmap = infos.values.associate { it.id to it.voteForN }
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
@@ -143,28 +89,27 @@ class CardPoolB(
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
 
     init {
-        redVotes.forEach { (contestId, candidateCounts) ->
-            val info = infos[contestId]!!
+        poolVotes.forEach { (contestId, candidateCounts) ->
             val redVotesSum = candidateCounts.map { it.value }.sum()
             // need at leat this many cards would you need for this contest?
-            minCardsNeeded[contestId] = roundUp(redVotesSum.toDouble() / info.voteForN)
+            minCardsNeeded[contestId] = roundUp(redVotesSum.toDouble() / voteForNmap[contestId]!!)
         }
         maxMinCardsNeeded = minCardsNeeded.values.max()
     }
 
-    fun contains(contestId: Int) = redVotes.contains(contestId)
+    fun contains(contestId: Int) = poolVotes.contains(contestId)
 
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!contains(contestId)) throw RuntimeException("NO CONTEST")
         adjustCards = max( adjust, adjustCards)
     }
 
-    fun contests() = (redVotes.map { it.key }).toSortedSet().toIntArray()
+    fun contests() = (poolVotes.map { it.key }).toSortedSet().toIntArray()
 
     fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(poolName, 9)}:")
         contestIds.forEach { id ->
-            val contestVote = redVotes[id]
+            val contestVote = poolVotes[id]
             if (contestVote == null)
                 append("    |")
             else {
@@ -177,7 +122,7 @@ class CardPoolB(
         val undervotes = undervotes2()
         append("${trunc("", 9)}:")
         contestIds.forEach { id ->
-            val contestVote = redVotes[id]
+            val contestVote = poolVotes[id]
             if (contestVote == null)
                 append("    |")
             else {
@@ -190,10 +135,9 @@ class CardPoolB(
 
     // undervotes per contest when single BallotStyle, no blanks
     fun undervotes2(): Map<Int, Int> {  // contest -> undervote
-        val undervote = redVotes.map { (id, cands) ->
+        val undervote = poolVotes.map { (id, cands) ->
             val sum = cands.map { it.value }.sum()
-            val info = infos[id]!!
-            Pair(id, maxMinCardsNeeded * info.voteForN - sum)
+            Pair(id, maxMinCardsNeeded * voteForNmap[id]!! - sum)
         }
         return undervote.toMap().toSortedMap()
     }
@@ -203,7 +147,7 @@ class CardPoolB(
     fun toBallotPools(): List<BallotPool> {
         if (poolId == 10)
             print("heh")
-        return redVotes.map { (contestId, candCount) ->
+        return poolVotes.map { (contestId, candCount) ->
             BallotPool(poolName, poolId, contestId, ncards(), candCount)
         }
     }
@@ -211,7 +155,7 @@ class CardPoolB(
 
 fun addOAClcaAssortersFromMargin(
     oaContests: List<ContestUnderAudit>,
-    cardPools: Map<Int, CardPoolB>
+    cardPools: Map<Int, CardPool>
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We justy have to add the poolAvgs
     // create the clcaAssertions and add then to the oaContests
@@ -221,7 +165,7 @@ fun addOAClcaAssortersFromMargin(
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
             cardPools.values.forEach { cardPool ->
                 if (cardPool.contains(contestId)) {
-                    val poolMargin = assertion.assorter.calcReportedMargin(cardPool.redVotes[oaContest.id]!!, cardPool.ncards())
+                    val poolMargin = assertion.assorter.calcReportedMargin(cardPool.poolVotes[oaContest.id]!!, cardPool.ncards())
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }
@@ -235,7 +179,7 @@ fun addOAClcaAssortersFromMargin(
 fun addOAClcaAssortersFromCvrs(
     oaContests: List<ContestUnderAudit>,
     cardIter: Iterator<Cvr>,
-    cardPools: Map<Int, CardPoolB>
+    cardPools: Map<Int, CardPool>
 ) {
     // sum all the assorters values in one pass across all the cvrs
     while (cardIter.hasNext()) {
@@ -283,7 +227,7 @@ fun addOAClcaAssortersFromCvrs(
 
     // compare the assortAverage with the value computed from the contestTabulation (non-IRV only)
     cardPools.values.forEach { cardPool ->
-        cardPool.redVotes.forEach { (contestId, candVotes) ->
+        cardPool.poolVotes.forEach { (contestId, candVotes) ->
             val avg = cardPool.assortAvg[contestId]
             if (avg != null) {
                 avg.forEach { (assorter, assortAvg) ->
@@ -305,7 +249,5 @@ fun addOAClcaAssortersFromCvrs(
         }
     }
 }
-
-
 
 

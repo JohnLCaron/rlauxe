@@ -32,8 +32,8 @@ open class BoulderElectionOA(
     quiet: Boolean = true,
 ): BoulderElection(export, sovo, quiet) {
 
-    val cardPools: List<CardPoolB> = convertRedactedToCardPool2() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val oaContests: Map<Int, OneAuditContest> = makeOAContest2().associate { it.info.id to it}
+    val cardPools: List<CardPool> = convertRedactedToCardPool2() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
+    val oaContests: Map<Int, OneAuditContestInfo> = makeOAContest2().associate { it.info.id to it}
 
     init {
         val cardPoolMap = cardPools.associateBy { it.poolId }
@@ -49,7 +49,7 @@ open class BoulderElectionOA(
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
     }
 
-    private fun convertRedactedToCardPool2(): List<CardPoolB> {
+    private fun convertRedactedToCardPool2(): List<CardPool> {
         return export.redacted.mapIndexed { redactedIdx, redacted: RedactedGroup ->
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
@@ -57,12 +57,12 @@ open class BoulderElectionOA(
                 redacted.contestVotes.filter{ (key, value) -> key != 12 }
             } else redacted.contestVotes
 
-            CardPoolB(redacted.ballotType, redactedIdx, useContestVotes.toMap(), infoMap)
+            CardPool(redacted.ballotType, redactedIdx, useContestVotes.toMap(), infoMap)
         }
     }
 
     // put the A and B into the same pool, so we can count undervotes accurately
-    private fun convertRedactedToCardPoolPaired(groups: List<RedactedGroup>, infoMap: Map<Int, ContestInfo>): List<CardPoolB> {
+    private fun convertRedactedToCardPoolPaired(groups: List<RedactedGroup>, infoMap: Map<Int, ContestInfo>): List<CardPool> {
         val aandbs = mutableMapOf<String, MutableList<RedactedGroup>>()
         groups.forEach { redacted: RedactedGroup ->
             val name = redacted.ballotType.substring(0, redacted.ballotType.lastIndexOf('-'))
@@ -76,19 +76,19 @@ open class BoulderElectionOA(
 
             aandb.forEach { sumContestVotes(it.contestVotes, contestVotesSummed) }
 
-            CardPoolB(name, poolIdx++, contestVotesSummed, infoMap)
+            CardPool(name, poolIdx++, contestVotesSummed, infoMap)
         }
     }
 
-    fun makeOAContest2(): List<OneAuditContest> {
+    fun makeOAContest2(): List<OneAuditContestInfo> {
         val countCvrVotes = countCvrVotes()
         val countRedactedVotes = countRedactedVotes()
 
-        val oa2Contests = mutableListOf<OneAuditContest>()
+        val oa2Contests = mutableListOf<OneAuditContestInfo>()
         infoList.forEach { info ->
             val sovoContest = sovo.contests.find { it.contestTitle == info.name }
             if (sovoContest != null) {
-                oa2Contests.add( OneAuditContest(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!, cardPools))
+                oa2Contests.add( OneAuditContestInfo(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!, cardPools))
             }
             else logger.warn{"*** cant find contest '${info.name}' in BoulderStatementOfVotes"}
         }
@@ -109,9 +109,9 @@ open class BoulderElectionOA(
         }
     }
 
-    fun distributeRedactedNcardsDiff(oaContest: OneAuditContest, cardPoolMap: Map<Int, CardPoolB>) {
+    fun distributeRedactedNcardsDiff(oaContest: OneAuditContestInfo, cardPoolMap: Map<Int, CardPool>) {
         val contestId = oaContest.info.id
-        val poolCards = oaContest.poolTotals()
+        val poolCards = oaContest.poolTotalCards()
         val totalCards = oaContest.redNcards
         val diff = totalCards - poolCards
 
@@ -167,6 +167,7 @@ open class BoulderElectionOA(
             val ncards = oaContest.sumAllCards()
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, oaContest.sumAllCards())
+            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
             OAContestUnderAudit(contest, hasStyles)
         }
 
@@ -225,7 +226,7 @@ fun createBoulderElectionOA(
     logger.info{"took = $stopwatch\n"}
 }
 
-fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPoolB>, seed: Long) : List<AuditableCard> {
+fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPool>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
     val cards = mutableListOf<AuditableCard>()
     var idx = 0

@@ -5,11 +5,11 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrExport
-import org.cryptobiotic.rlauxe.core.CvrExport.Companion.unpooled
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
+import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
@@ -171,29 +171,33 @@ fun makeOneAuditContests(contestInfos: List<ContestInfo>, cardPools: Map<Int, Ca
     val contestsUAs = mutableListOf<OAContestUnderAudit>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
-        val allPools = ContestTabulation(info.voteForN)
+        val allCards = ContestTabulation(info.voteForN)
         cardPools.values.forEach { pool ->
             val poolTab = pool.contestTabulations[info.id]
-            if (poolTab != null) {
-                allPools.sum(poolTab)
-            }
+            if (poolTab != null) allCards.sum(poolTab)
+        }
+        // pooled data only
+        val pooledCards = ContestTabulation(info.voteForN)
+        cardPools.values.filter{ it.poolName != unpooled }.forEach { pool ->
+            val poolTab = pool.contestTabulations[info.id]
+            if (poolTab != null) pooledCards.sum(poolTab)
         }
 
-        if (allPools.ncards > 0) {
-            val contest = Contest(
-                info,
-                allPools.votes,
-                contestNcs[info.id] ?: allPools.ncards,
-                allPools.ncards)
+        val useNc = contestNcs[info.id] ?: allCards.ncards
+        if (useNc > 0) {
+            val contest = Contest(info, allCards.votes, useNc, allCards.ncards)
+            val poolPct = (100.0 * pooledCards.ncards / useNc).toInt()
+            info.metadata["PoolPct"] = poolPct
             contestsUAs.add(OAContestUnderAudit(contest))
-        }
 
-        val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
-        val unpooledTab = unpooledPool.contestTabulations[info.id]
-        if (unpooledTab != null) {
-            val unpooledPct = 100.0 * unpooledTab.ncards / allPools.ncards
-            print(" contest ${info.id} contestNcs = ${contestNcs[info.id]} allPools.ncards= ${allPools.ncards} unpooled.ncards = ${unpooledTab.ncards} $unpooledPct %")
-            println( if (contestNcs[info.id] == allPools.ncards) "" else "***")
+            val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
+            val unpooledTab = unpooledPool.contestTabulations[info.id]
+            if (unpooledTab != null) {
+                val unpooledPct = 100.0 * unpooledTab.ncards / allCards.ncards
+                print(" contest ${info.id} contestNcs = ${contestNcs[info.id]} allPools.ncards= ${allCards.ncards} unpooled.ncards = ${unpooledTab.ncards} $unpooledPct %")
+                print(" pooled.ncards = ${pooledCards.ncards} $poolPct %")
+                println(if (contestNcs[info.id] == allCards.ncards) "" else " ***")
+            }
         }
     }
     return contestsUAs
@@ -204,23 +208,22 @@ fun makeOneAuditIrvContests(contestInfos: List<ContestInfo>, cardPools: Map<Int,
     val contestsUAs = mutableListOf<OAIrvContestUA>()
     contestInfos.map { info ->
         // get a complete tabulation over all the pools
-        val allPools = VoteConsolidator()
+        val allCards = VoteConsolidator()
         var ncards = 0
+        var pooledCards = 0
         cardPools.values.forEach { pool ->
             val poolVC = pool.irvVoteConsolidations[info.id]
             if (poolVC != null) {
-                allPools.addVotes(poolVC.vc)
+                allCards.addVotes(poolVC.vc)
                 ncards += poolVC.ncards
+                if (pool.poolName != unpooled) pooledCards += poolVC.ncards
             }
         }
 
-        // fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int, Nundervotes: Int): RaireContestUnderAudit {
-        val rau : RaireContestUnderAudit = makeRaireContestUA(
-            info,
-            allPools,
-            contestNcs[info.id] ?: ncards,
-            ncards,
-        )
+        val useNc = contestNcs[info.id] ?: ncards
+        val rau : RaireContestUnderAudit = makeRaireContestUA(info, allCards, useNc, ncards)
+        val poolPct = (100.0 * pooledCards / useNc).toInt()
+        info.metadata["PoolPct"] = poolPct
         contestsUAs.add( OAIrvContestUA(rau.contest as RaireContest,  true, rau.rassertions) )
     }
     return contestsUAs

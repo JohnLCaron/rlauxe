@@ -5,7 +5,9 @@ import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -39,7 +41,7 @@ class BoulderElectionOAsim(
         val voteForN = oaContests.mapValues { it.value.info.voteForN }
         val rcvrTabs = tabulateCvrs(rcvrs.iterator(), voteForN).toSortedMap()
         rcvrTabs.forEach { contestId, contestTab ->
-            val oaContest: OneAuditContest = oaContests[contestId]!!
+            val oaContest: OneAuditContestInfo = oaContests[contestId]!!
             val redUndervotes = oaContest.redUndervotes
             if (show) {
                 println("contestId=${contestId}")
@@ -57,11 +59,11 @@ class BoulderElectionOAsim(
 
     // the redacted Cvrs simulate the real CVRS that are in the pools, for testing and estimation
     // for a real OneAudit, only the pool averages are used. CLCA can only be used for testing, not for a real audit.
-    private fun makeRedactedCvrs(cardPool: CardPoolB, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
+    private fun makeRedactedCvrs(cardPool: CardPool, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
 
         val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
-        cardPool.redVotes.forEach { (contestId, candVotes) ->
-            val oaContest: OneAuditContest = oaContests[contestId]!!
+        cardPool.poolVotes.forEach { (contestId, candVotes) ->
+            val oaContest: OneAuditContestInfo = oaContests[contestId]!!
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
             contestVotes[contestId] = VotesAndUndervotes(candVotes, underVotes, oaContest.info.voteForN)
@@ -84,7 +86,7 @@ class BoulderElectionOAsim(
         val voteForN = oaContests.mapValues { it.value.info.voteForN }
         val cvrTab = tabulateCvrs(cvrs.iterator(), voteForN).toSortedMap()
         cvrTab.forEach { contestId, contestTab ->
-            val oaContest: OneAuditContest = oaContests[contestId]!!
+            val oaContest: OneAuditContestInfo = oaContests[contestId]!!
             if (show) {
                 println("contestId=${contestId} group=${cardPool.poolName}")
                 println("  redacted= ${contestTab.votes[contestId]}")
@@ -92,7 +94,7 @@ class BoulderElectionOAsim(
                 println("  contestTab=$contestTab")
                 println()
             }
-            require(checkEquivilentVotes(cardPool.redVotes[contestId]!!, contestTab.votes))
+            require(checkEquivilentVotes(cardPool.poolVotes[contestId]!!, contestTab.votes))
         }
 
         return cvrs
@@ -107,6 +109,7 @@ class BoulderElectionOAsim(
             val ncards = oaContest.sumAllCards()
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, oaContest.sumAllCards())
+            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
             if (clca) ContestUnderAudit(contest, hasStyles) else OAContestUnderAudit(contest, hasStyles)
         }
 

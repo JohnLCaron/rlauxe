@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -122,7 +123,7 @@ class TestBoulderUndervotes {
         showPoolVotes(contestIds, election2.cardPools)
     }
 
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPoolB>, width:Int = 4) {
+    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPool>, width:Int = 4) {
         println("votes, undervotes")
         print("${trunc("poolName", 9)}:")
         contestIds.forEach {  print("${nfn(it, width)}|") }

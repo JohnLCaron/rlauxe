@@ -23,6 +23,7 @@ class VoteConsolidator {
             votes[key] = votes.getOrPut(key) { 0 } + 1
     }
 
+    // add other's votes into this
     fun addVotes(other: VoteConsolidator) {
         other.votes.forEach { key, count ->
             votes[key] = votes.getOrPut(key) { 0 } + count

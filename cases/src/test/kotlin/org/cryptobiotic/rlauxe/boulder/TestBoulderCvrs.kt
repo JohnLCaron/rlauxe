@@ -37,7 +37,7 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = BoulderElection(export, sovo)
+        val maker = BoulderElectionOA(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -90,7 +90,7 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = BoulderElection(export, sovo)
+        val maker = BoulderElectionOA(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -137,11 +137,11 @@ class TestBoulderCvrs {
 
         val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
 
-        val electionFromCvrs = BoulderElection(export, combined)
+        val electionFromCvrs = BoulderElectionOA(export, combined)
         val (contests, raireContests) = electionFromCvrs.makeContests()
         val irvId = raireContests.first().id
 
-        val countIrvCvrs = electionFromCvrs.cvrs.filter{ it.hasContest(irvId) }.count()
+        val countIrvCvrs = electionFromCvrs.cvrs.count { it.hasContest(irvId) }
         println("countIrvCvrs = $countIrvCvrs")
         assertEquals(irvContest.totalBallots, countIrvCvrs)
     }

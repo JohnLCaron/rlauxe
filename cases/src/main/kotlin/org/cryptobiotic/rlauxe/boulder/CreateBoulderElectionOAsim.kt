@@ -62,7 +62,7 @@ class BoulderElectionOAsim(
     private fun makeRedactedCvrs(cardPool: CardPool, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
 
         val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
-        cardPool.poolVotes.forEach { (contestId, candVotes) ->
+        cardPool.voteTotals.forEach { (contestId, candVotes) ->
             val oaContest: OneAuditContestInfo = oaContests[contestId]!!
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
@@ -94,7 +94,7 @@ class BoulderElectionOAsim(
                 println("  contestTab=$contestTab")
                 println()
             }
-            require(checkEquivilentVotes(cardPool.poolVotes[contestId]!!, contestTab.votes))
+            require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!, contestTab.votes))
         }
 
         return cvrs
@@ -181,7 +181,7 @@ fun createBoulderElectionOAsim(
     if (clca) {
         addClcaAssertions(contestsUA, CvrIteratorAdapter(cards.iterator()))
     } else {
-        addOAClcaAssortersFromCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), election.cardPools.associate { it.poolId to it })
+        addOAClcaAssortersFromCvrs(contestsUA as List<OAContestUnderAudit>, CvrIteratorAdapter(cards.iterator()), election.cardPools.associate { it.poolId to it })
     }
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)

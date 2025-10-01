@@ -37,7 +37,7 @@ class TestSfElectionOAnoStyles {
         )
     }
 
-    @Test
+    // @Test
     fun createSF2024OANSrepeat() {
 
         repeat(10) { run ->

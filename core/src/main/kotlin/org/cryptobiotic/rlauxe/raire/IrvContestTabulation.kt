@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulationOld
 import org.cryptobiotic.rlauxe.core.*
 
 private val logger = KotlinLogging.logger("IrvContestVotes")
@@ -28,18 +27,6 @@ fun makeIrvContestVotes(irvContests: Map<Int, ContestInfo>, cvrIter: Iterator<Cv
     }
     logger.debug{" read ${count} cvrs"}
     return irvVotes
-}
-
-// return contestId -> ContestTabulation
-fun tabulateCvrs(cvrs: Iterator<Cvr>, voteForN: Map<Int, Int>): Map<Int, IrvContestTabulation> {
-    val votes = mutableMapOf<Int, IrvContestTabulation>()
-    for (cvr in cvrs) {
-        for ((contestId, conVotes) in cvr.votes) {
-            val tab = votes.getOrPut(contestId) { ContestTabulationOld(voteForN[contestId]) }
-            tab.addVotes(conVotes)
-        }
-    }
-    return votes
 }
 
 // wrapper around VoteConsolidator; analog to ContestTabulation

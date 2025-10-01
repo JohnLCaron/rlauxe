@@ -26,8 +26,8 @@ class TestRaireJson {
             choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
-        val target = RaireContest(info, listOf(3), 42, 33)
-        target.roundsPaths.addAll(roundPathsById)
+        val target = RaireContest(info, listOf(3), 42, 33, undervotes=11)
+        // TODO target.roundsPaths.addAll(roundPathsById)
 
         val json = target.publishJson()
         val roundtrip = json.import(info) as RaireContest
@@ -93,7 +93,7 @@ fun makeRaireUA(): RaireContestUnderAudit {
         choiceFunction = SocialChoiceFunction.IRV,
         candidateNames = listToMap("A", "B", "C", "D"),
     )
-    val contest = RaireContest(info, listOf(1), 42, 33)
+    val contest = RaireContest(info, listOf(1), 42, 33, undervotes=1)
 
     val assert1 = RaireAssertion(1, 0, 0.0,42, RaireAssertionType.winner_only)
     val assert2 = RaireAssertion(1, 2, 0.0,422, RaireAssertionType.irv_elimination,

@@ -33,7 +33,7 @@ open class BoulderElectionOA(
 ): BoulderElection(export, sovo, quiet) {
 
     val cardPools: List<CardPool> = convertRedactedToCardPool2() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val oaContests: Map<Int, OneAuditContestInfo> = makeOAContest2().associate { it.info.id to it}
+    val oaContests: Map<Int, OneAuditContestInfo> = makeOAContest().associate { it.info.id to it}
 
     init {
         val cardPoolMap = cardPools.associateBy { it.poolId }
@@ -61,26 +61,7 @@ open class BoulderElectionOA(
         }
     }
 
-    // put the A and B into the same pool, so we can count undervotes accurately
-    private fun convertRedactedToCardPoolPaired(groups: List<RedactedGroup>, infoMap: Map<Int, ContestInfo>): List<CardPool> {
-        val aandbs = mutableMapOf<String, MutableList<RedactedGroup>>()
-        groups.forEach { redacted: RedactedGroup ->
-            val name = redacted.ballotType.substring(0, redacted.ballotType.lastIndexOf('-'))
-            val rlist = aandbs.getOrPut( name, { mutableListOf() })
-            rlist.add(redacted)
-        }
-
-        var poolIdx = 0
-        return aandbs.map { (name, aandb: List<RedactedGroup>) ->
-            val contestVotesSummed = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
-
-            aandb.forEach { sumContestVotes(it.contestVotes, contestVotesSummed) }
-
-            CardPool(name, poolIdx++, contestVotesSummed, infoMap)
-        }
-    }
-
-    fun makeOAContest2(): List<OneAuditContestInfo> {
+    fun makeOAContest(): List<OneAuditContestInfo> {
         val countCvrVotes = countCvrVotes()
         val countRedactedVotes = countRedactedVotes()
 
@@ -215,7 +196,7 @@ fun createBoulderElectionOA(
     logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
     val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
-    addOAClcaAssortersFromMargin(contestsUA, election.cardPools.associate { it.poolId to it })
+    addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
     checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools=ballotPools, show = false)

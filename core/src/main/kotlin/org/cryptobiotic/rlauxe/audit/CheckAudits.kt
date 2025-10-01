@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.audit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import kotlin.collections.component1
 import kotlin.collections.component2
+
+private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
@@ -13,14 +16,14 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
 
             // see if margin is too small
             if (contestUA.recountMargin() <= auditConfig.minRecountMargin) {
-                println("*** MinMargin contest ${contestUA} recountMargin ${contestUA.recountMargin()} <= ${auditConfig.minRecountMargin}")
+                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.recountMargin()} <= ${auditConfig.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms
                 val minMargin = contestUA.minMargin()
                 val adjustedMargin = minMargin - contestUA.contest.phantomRate()
                 if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
-                    println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
+                    logger.warn{"***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0"}
                     contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
                 }
             }
@@ -43,7 +46,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     val winnerSet = mutableSetOf<Int>()
     winnerSet.addAll(contest.winners)
     if (winnerSet.size != contest.winners.size) {
-        println("*** winners in contest ${contest} have duplicates")
+        logger.warn{"*** winners in contest ${contest} have duplicates"}
         contestUA.preAuditStatus = TestH0Status.ContestMisformed
         return
     }
@@ -53,7 +56,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     if (sortedVotes.size > nwinners) {
         val firstLoser = sortedVotes[nwinners]
         if (firstLoser.value == winnerMin ) {
-            println("*** tie in contest ${contest}")
+            logger.warn{"*** tie in contest ${contest}"}
             contestUA.preAuditStatus = TestH0Status.MinMargin
             return
         }
@@ -62,7 +65,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     // check that the top nwinners are in winners list
     sortedVotes.take(nwinners).forEach { (candId, vote) ->
         if (!contest.winners.contains(candId)) {
-            println("*** winners ${contest.winners} does not contain candidateId $candId")
+            logger.warn{"*** winners ${contest.winners} does not contain candidateId $candId"}
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
             return
         }
@@ -71,6 +74,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>,
                           ballotPools: List<BallotPool> = emptyList(), show: Boolean = false) = buildString {
+
     val voteForN = contestsUA.associate { it.id to it.contest.info().voteForN }
     val allVotes = mutableMapOf<Int, ContestTabulationOld>()
     allVotes.sumContestTabulations(tabulateCvrs(cvrs, voteForN))
@@ -92,11 +96,11 @@ fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cv
         } else {
             if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
                 appendLine("*** contest ${contestUA.id} votes disagree with cvrs = $contestTab marking as ContestMisformed")
-                appendLine("contestVotes = $contestVotes")
-                appendLine("tabulation   = ${contestTab.votes}")
+                appendLine("  contestVotes = $contestVotes")
+                appendLine("  tabulation   = ${contestTab.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             } else {
-                appendLine("    contest ${contestUA.id} contestVotes matches cvrTabulation")
+                appendLine("contest ${contestUA.id} contestVotes matches cvrTabulation")
             }
         }
     }

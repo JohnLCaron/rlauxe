@@ -50,7 +50,7 @@ class TestSfElectionOA {
         val auditDir = "$topDir/audit"
         val cvrCsv = "$sfDir/cvrExport.csv"
         val ballotPoolFile = "$auditDir/$ballotPoolsFile"
-        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
     }
 
     // @Test

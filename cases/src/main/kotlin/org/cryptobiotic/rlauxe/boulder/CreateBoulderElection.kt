@@ -20,7 +20,7 @@ import kotlin.math.max
 // obsolete except as base class
 // simulate having all CVRs by making CVRS out of redacted votes.
 // TODO not handling redacted IRV. No IRV in boulder24, but there is in Boulder23.
-open class BoulderElection(
+abstract class BoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val quiet: Boolean = true)
@@ -65,8 +65,7 @@ open class BoulderElection(
         }
     }
 
-    // TODO can we generalize this so its not Boulder specific?
-    // TODO cant do this until we have countVotes corrected.... could use OneAuditContest
+    /*
     fun makeContests(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
@@ -227,7 +226,7 @@ open class BoulderElection(
             }
         }
         return rcvrs
-    }
+    } */
 }
 
 fun ContestInfo.show() = buildString {
@@ -279,7 +278,7 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
 
 ////////////////////////////////////////////////////////////////////
 
-// read in the sovo file
+/* read in the sovo file
 fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
@@ -340,7 +339,7 @@ fun createBoulderElectionWithSov(
 fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
     return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-}
+} */
 
 fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {
     // we are making the contest votes from the cvrs. how does it compare with official tally ??

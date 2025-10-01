@@ -93,7 +93,7 @@ data class ContestIFJson(
     val Nc: Int,
     val Ncast: Int,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
-    // val contestJson: ContestIFJson? = null,
+    val undervotes: Int? = null,
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -114,6 +114,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.Nc,
                 this.Ncast,
                 irvRoundsPaths = this.roundsPaths.map { it.publishJson() },
+                undervotes = this.undervotes
             )
         else -> throw RuntimeException("unknown contest type ${this.javaClass.simpleName} = $this")
     }
@@ -134,6 +135,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.winners!!,
                 this.Nc,
                 this.Ncast,
+                undervotes = this.undervotes ?: 0,
             )
             if (this.irvRoundsPaths != null) {
                 rcontest.roundsPaths.addAll(this.irvRoundsPaths.map { it.import() })

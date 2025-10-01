@@ -32,14 +32,14 @@ class BoulderElectionOAsim(
     val redactedCvrs = makeRedactedCvrs()
     val allCvrs = cvrs + redactedCvrs // TODO could be CvrExport ??
 
-    override fun makeRedactedCvrs(show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
+    fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
         cardPools.forEach { cardPool ->
             rcvrs.addAll(makeRedactedCvrs(cardPool, show))
         }
 
-        val voteForN = oaContests.mapValues { it.value.info.voteForN }
-        val rcvrTabs = tabulateCvrs(rcvrs.iterator(), voteForN).toSortedMap()
+        val infos = oaContests.mapValues { it.value.info }
+        val rcvrTabs = tabulateCvrs(rcvrs.iterator(), infos).toSortedMap()
         rcvrTabs.forEach { contestId, contestTab ->
             val oaContest: OneAuditContestInfo = oaContests[contestId]!!
             val redUndervotes = oaContest.redUndervotes
@@ -83,8 +83,8 @@ class BoulderElectionOAsim(
             }
         }
 
-        val voteForN = oaContests.mapValues { it.value.info.voteForN }
-        val cvrTab = tabulateCvrs(cvrs.iterator(), voteForN).toSortedMap()
+        val infos = oaContests.mapValues { it.value.info }
+        val cvrTab = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
         cvrTab.forEach { contestId, contestTab ->
             val oaContest: OneAuditContestInfo = oaContests[contestId]!!
             if (show) {

@@ -2,20 +2,11 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.RedactedGroup
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.map
-import kotlin.math.max
 
 // obsolete except as base class
 // simulate having all CVRs by making CVRS out of redacted votes.
@@ -112,37 +103,37 @@ abstract class BoulderElection(
             }
         }
         return Pair(regContests, irvContests)
-    }
+    } */
 
     // make contest votes from the export.cvrs and export.redacted
     // ncards is approx, will be corrected from sovo and OneContest
-    fun countVotes() : Map<Int, ContestTabulationOld> { // contestId -> candidateId -> nvotes
+    fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         val cvrVotes =  countCvrVotes()
         val redVotes =  countRedactedVotes()
-        val allVotes = mutableMapOf<Int, ContestTabulationOld>()
+        val allVotes = mutableMapOf<Int, ContestTabulation>()
         allVotes.sumContestTabulations(cvrVotes)
         allVotes.sumContestTabulations(redVotes)
         return allVotes
     }
 
-    fun countCvrVotes() : Map<Int, ContestTabulationOld> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulationOld>()
+    fun countCvrVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
+        val votes = mutableMapOf<Int, ContestTabulation>()
 
         export.cvrs.forEach { cvr ->
             cvr.contestVotes.forEach { contestVote ->
-                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulationOld(infoMap[contestVote.contestId]?.voteForN) }
+                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]!!) }
                 tab.addVotes(contestVote.candVotes.toIntArray())
             }
         }
         return votes
     }
 
-    fun countRedactedVotes() : Map<Int, ContestTabulationOld> { // contestId -> candidateId -> nvotes
-        val votes = mutableMapOf<Int, ContestTabulationOld>()
+    fun countRedactedVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
+        val votes = mutableMapOf<Int, ContestTabulation>()
 
         export.redacted.forEach { redacted ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
-                val tab = votes.getOrPut(contestId) { ContestTabulationOld(infoMap[contestId]?.voteForN) }
+                val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
                 // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
                 //   would be safer to make the cvrs first, then just use them to make the Contest
                 //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
@@ -156,6 +147,7 @@ abstract class BoulderElection(
         return votes
     }
 
+    /*
     // make CVRS to simulate CLCA
     open fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()

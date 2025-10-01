@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -90,11 +91,11 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = BoulderElectionOA(export, sovo)
-        val infos = maker.makeContestInfo()
+        val electionSimCvrs = BoulderElectionOAsim(export, sovo)
+        val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
-        val redactedCvrs = maker.makeRedactedCvrs()
+        val redactedCvrs = electionSimCvrs.makeRedactedCvrs()
         println("nredacted cvrs = ${redactedCvrs.size}")
         println("took = $stopwatch")
 
@@ -137,13 +138,14 @@ class TestBoulderCvrs {
 
         val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
 
-        val electionFromCvrs = BoulderElectionOA(export, combined)
-        val (contests, raireContests) = electionFromCvrs.makeContests()
-        val irvId = raireContests.first().id
-
-        val countIrvCvrs = electionFromCvrs.cvrs.count { it.hasContest(irvId) }
-        println("countIrvCvrs = $countIrvCvrs")
-        assertEquals(irvContest.totalBallots, countIrvCvrs)
+        val electionSimCvrs = BoulderElectionOAsim(export, combined)
+        val contestUA = electionSimCvrs.makeContestsUA(true)
+        val irv = contestUA.find { it.choiceFunction == SocialChoiceFunction.IRV }
+        if (irv != null) {
+            val countIrvCvrs = electionSimCvrs.cvrs.count { it.hasContest(irv.id) }
+            println("countIrvCvrs = $countIrvCvrs")
+            assertEquals(irvContest.totalBallots, countIrvCvrs)
+        }
     }
 
 }

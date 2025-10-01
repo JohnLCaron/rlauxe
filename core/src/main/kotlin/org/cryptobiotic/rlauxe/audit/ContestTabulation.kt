@@ -2,10 +2,13 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.collections.iterator
 
 private val logger = KotlinLogging.logger("ContestTabulation")
 
@@ -66,7 +69,8 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         if (mappedVotes.isNotEmpty()) irvVotes.addVote(mappedVotes.filterNotNull().toIntArray())
         ncards++
         if (candidateRanks.isEmpty()) novote++
-        if (candidateRanks.isEmpty()) undervotes++
+        if (candidateRanks.isEmpty())
+            undervotes++
     }
 
     // for summing multiple tabs into this one
@@ -99,4 +103,34 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
             append(" underPct= $underPct%")
         }
     }
+}
+
+// add other into this
+fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, ContestTabulation>) {
+    other.forEach { (contestId, otherTab) ->
+        val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab.info) }
+        contestSum.sum(otherTab)
+    }
+}
+
+// return contestId -> ContestTabulation
+fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val votes = mutableMapOf<Int, ContestTabulation>()
+    ballotPools.forEach { pool ->
+        val tab = votes.getOrPut(pool.contestId) { ContestTabulation(infos[pool.contestId]!!) }
+        pool.votes.forEach { (cand, vote) -> tab.addVote(cand, vote) }
+    }
+    return votes
+}
+
+// return contestId -> ContestTabulation
+fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val votes = mutableMapOf<Int, ContestTabulation>()
+    for (cvr in cvrs) {
+        for ((contestId, conVotes) in cvr.votes) {
+            val tab = votes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+            tab.addVotes(conVotes)
+        }
+    }
+    return votes
 }

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.sumContestTabulations
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import kotlin.collections.component1
@@ -75,10 +76,10 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>,
                           ballotPools: List<BallotPool> = emptyList(), show: Boolean = false) = buildString {
 
-    val voteForN = contestsUA.associate { it.id to it.contest.info().voteForN }
-    val allVotes = mutableMapOf<Int, ContestTabulationOld>()
-    allVotes.sumContestTabulations(tabulateCvrs(cvrs, voteForN))
-    allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), voteForN))
+    val infos = contestsUA.associate { it.id to it.contest.info() }
+    val allVotes = mutableMapOf<Int, ContestTabulation>()
+    allVotes.sumContestTabulations(tabulateCvrs(cvrs, infos))
+    allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), infos))
 
     if (show) {
         appendLine("tabulateCvrs")

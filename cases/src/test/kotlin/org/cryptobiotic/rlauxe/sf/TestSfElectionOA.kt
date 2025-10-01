@@ -38,21 +38,22 @@ class TestSfElectionOA {
             "$sfDir/$cvrExportCsvFile",
             show = true,
         )
+        createSF2024OAsortedCards()
     }
 
     // create sorted cards, assumes auditDir/auditConfig already exists
     // do this after createSF2024OA, so ballotPools have been created
-    @Test
+    // @Test
     fun createSF2024OAsortedCards() {
         val sfDir = "/home/stormy/rla/cases/sf2024"
         val topDir = "/home/stormy/rla/cases/sf2024oa"
         val auditDir = "$topDir/audit"
         val cvrCsv = "$sfDir/cvrExport.csv"
         val ballotPoolFile = "$auditDir/$ballotPoolsFile"
-        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
     }
 
-    @Test
+    // @Test
     fun createSF2024OArepeat() {
 
         repeat(10) { run ->
@@ -79,11 +80,19 @@ class TestSfElectionOA {
 
             val workingDir = "$topDir/sortChunks$run"
             val ballotPoolFile = "$auditDir/$ballotPoolsFile"
-            createSortedCards(topDir, auditDir, cvrCsv, zip = true, workingDir = workingDir, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+            createSortedCards(
+                topDir,
+                auditDir,
+                cvrCsv,
+                zip = true,
+                workingDir = workingDir,
+                ballotPoolFile = ballotPoolFile
+            ) // write to "$auditDir/sortedCards.csv"
         }
+
+        runSF2024OArepeat()
     }
 
-    @Test
     fun runSF2024OArepeat() {
         repeat(10) { run ->
             val auditDir = "$topDir/audit$run"
@@ -100,15 +109,6 @@ class TestSfElectionOA {
                 )
             )
         }
-    }
-
-    @Test
-    fun countPoolCvrs() {
-        val sfDir = "/home/stormy/rla/cases/sf2024"
-        val cvrCsv = "$sfDir/cvrExport.csv"
-        countPools(cvrCsv)
-
-        //  unpoolCount = 1387622 poolCount = 216286
     }
 
     @Test
@@ -134,8 +134,8 @@ class TestSfElectionOA {
 
     private val show = true
 
-    @Test
-    fun auditSf2024Poa() {
+    // @Test
+    fun auditSf2024oa() {
         val auditDir = "$topDir/audit"
 
         val rlauxAudit = PersistentAudit(auditDir, true)
@@ -165,52 +165,10 @@ class TestSfElectionOA {
             }
         }
     }
-
-    @Test
-    fun auditSf2024oa18() {
-        val auditDir = "$topDir/audit"
-
-        val rlauxAudit = PersistentAudit(auditDir, true)
-        val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
-        val minAssertion = contest18.minClcaAssertion()!!
-        val assertionRound = AssertionRound(minAssertion, 1, null)
-
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir)))
-        val sampler =
-            ClcaNoErrorIterator(
-                contest18.id,
-                contest18.Nc,
-                mvrManager.sortedCvrs().iterator(),
-                minAssertion.cassorter)
-
-        if (show) println("  run assertion ${assertionRound.assertion} reported Margin= ${mean2margin(minAssertion.cassorter.assorter.reportedMargin())}")
-
-        val runner = OneAuditAssertionAuditor()
-        val result: TestH0Result = runner.run(
-            rlauxAudit.auditConfig(),
-            contest18.contest,
-            assertionRound,
-            sampler,
-            1,
-        )
-        // assertEquals(TestH0Status.StatRejectNull, result.status)
-        if (show) println("    sampleCount = ${result.sampleCount} maxIdx=${sampler.maxSampleIndexUsed()} status = ${result.status}\n")
-    }
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-fun countPools(cvrCsvFilename: String) {
-    var unpoolCount = 0
-    var poolCount = 0
-
-    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
-    while (cvrIter.hasNext()) {
-        val cvrExport: CvrExport = cvrIter.next()
-        if (cvrExport.poolKey() == unpooled) unpoolCount++ else poolCount++
-    }
-    println(" unpoolCount = $unpoolCount poolCount = $poolCount")
-}
 
 //// obsolete
 // TODO use ContestTabulation in CheckAudits

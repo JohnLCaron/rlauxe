@@ -1,9 +1,13 @@
 package org.cryptobiotic.rlauxe.audit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.sumContestTabulations
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import kotlin.collections.component1
 import kotlin.collections.component2
+
+private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
@@ -13,14 +17,14 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
 
             // see if margin is too small
             if (contestUA.recountMargin() <= auditConfig.minRecountMargin) {
-                println("*** MinMargin contest ${contestUA} recountMargin ${contestUA.recountMargin()} <= ${auditConfig.minRecountMargin}")
+                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.recountMargin()} <= ${auditConfig.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms
                 val minMargin = contestUA.minMargin()
                 val adjustedMargin = minMargin - contestUA.contest.phantomRate()
                 if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
-                    println("***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0")
+                    logger.warn{"***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0"}
                     contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
                 }
             }
@@ -43,7 +47,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     val winnerSet = mutableSetOf<Int>()
     winnerSet.addAll(contest.winners)
     if (winnerSet.size != contest.winners.size) {
-        println("*** winners in contest ${contest} have duplicates")
+        logger.warn{"*** winners in contest ${contest} have duplicates"}
         contestUA.preAuditStatus = TestH0Status.ContestMisformed
         return
     }
@@ -53,7 +57,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     if (sortedVotes.size > nwinners) {
         val firstLoser = sortedVotes[nwinners]
         if (firstLoser.value == winnerMin ) {
-            println("*** tie in contest ${contest}")
+            logger.warn{"*** tie in contest ${contest}"}
             contestUA.preAuditStatus = TestH0Status.MinMargin
             return
         }
@@ -62,7 +66,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     // check that the top nwinners are in winners list
     sortedVotes.take(nwinners).forEach { (candId, vote) ->
         if (!contest.winners.contains(candId)) {
-            println("*** winners ${contest.winners} does not contain candidateId $candId")
+            logger.warn{"*** winners ${contest.winners} does not contain candidateId $candId"}
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
             return
         }
@@ -71,10 +75,11 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>,
                           ballotPools: List<BallotPool> = emptyList(), show: Boolean = false) = buildString {
-    val voteForN = contestsUA.associate { it.id to it.contest.info().voteForN }
+
+    val infos = contestsUA.associate { it.id to it.contest.info() }
     val allVotes = mutableMapOf<Int, ContestTabulation>()
-    allVotes.sumContestTabulations(tabulateCvrs(cvrs, voteForN))
-    allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), voteForN))
+    allVotes.sumContestTabulations(tabulateCvrs(cvrs, infos))
+    allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), infos))
 
     if (show) {
         appendLine("tabulateCvrs")
@@ -92,11 +97,11 @@ fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cv
         } else {
             if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
                 appendLine("*** contest ${contestUA.id} votes disagree with cvrs = $contestTab marking as ContestMisformed")
-                appendLine("contestVotes = $contestVotes")
-                appendLine("tabulation   = ${contestTab.votes}")
+                appendLine("  contestVotes = $contestVotes")
+                appendLine("  tabulation   = ${contestTab.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             } else {
-                appendLine("    contest ${contestUA.id} contestVotes matches cvrTabulation")
+                appendLine("contest ${contestUA.id} contestVotes matches cvrTabulation")
             }
         }
     }
@@ -148,81 +153,4 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
     return result
 }
 
-// return contestId -> ContestTabulation
-fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, voteForN: Map<Int, Int>): Map<Int, ContestTabulation> {
-    val votes = mutableMapOf<Int, ContestTabulation>()
-    ballotPools.forEach { pool ->
-        val tab = votes.getOrPut(pool.contestId) { ContestTabulation(voteForN[pool.contestId]) }
-        pool.votes.forEach { (cand, vote) -> tab.addVote(cand, vote) }
-    }
-    return votes
-}
-
-// return contestId -> ContestTabulation
-fun tabulateCvrs(cvrs: Iterator<Cvr>, voteForN: Map<Int, Int>): Map<Int, ContestTabulation> {
-    val votes = mutableMapOf<Int, ContestTabulation>()
-    for (cvr in cvrs) {
-        for ((contestId, conVotes) in cvr.votes) {
-            val tab = votes.getOrPut(contestId) { ContestTabulation(voteForN[contestId]) }
-            tab.addVotes(conVotes)
-        }
-    }
-    return votes
-}
-
-class ContestTabulation(val voteForN: Int?) {
-    val votes = mutableMapOf<Int, Int>() // cand -> votes
-    var ncards = 0
-    var novote = 0  // how many cards had no vote for this contest?
-    var undervotes = 0  // how many undervotes = voteForN - nvotes
-    var overvotes = 0  // how many overvotes = (voteForN < cands.size)
-
-    fun addVotes(cands: IntArray) {
-        cands.forEach { addVote(it, 1) }
-        ncards++
-        if (voteForN != null) {
-            if (voteForN < cands.size) overvotes++
-            undervotes += (voteForN - cands.size)
-        }
-        if (cands.isEmpty()) novote++
-    }
-
-    fun addVote(cand: Int, vote: Int) {
-        val accum = votes.getOrPut(cand) { 0 }
-        votes[cand] = accum + vote
-    }
-
-    // for summing multiple tabs together
-    fun sum(other: ContestTabulation) {
-        other.votes.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
-        this.ncards += other.ncards
-        this.novote += other.novote
-        this.undervotes += other.undervotes
-        this.overvotes += other.overvotes
-    }
-
-    fun undervotePct(): Double {
-        val nvotes = votes.map { it.value }.sum()
-        return undervotes.toDouble() / (undervotes + nvotes)
-    }
-
-    fun nvotes() = votes.map { it.value}.sum()
-
-    override fun toString() = buildString {
-        // append("${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards undervotes=$undervotes novote=$novote")
-        append("${votes.toSortedMap()} nvotes=${nvotes()} ncards=$ncards undervotes=$undervotes overvotes=$overvotes novote=$novote")
-        if (voteForN != null) {
-            val nvotes = votes.map { it.value }.sum()
-            val underPct = (100.0 * undervotes / (nvotes + undervotes)).toInt()
-            append(" underPct= $underPct%")
-        }
-    }
-}
-
-fun MutableMap<Int, ContestTabulation>.sumContestTabulations(contestTabulations: Map<Int, ContestTabulation>) {
-    contestTabulations.forEach { (contestId, contestTab) ->
-        val contestSum = this.getOrPut(contestId) { ContestTabulation(contestTab.voteForN) }
-        contestSum.sum(contestTab)
-    }
-}
 

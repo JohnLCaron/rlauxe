@@ -154,7 +154,7 @@ data class ContestTestDataNWinners(
         val cvrVoteTracker = PartitionTracker(votesByCandIds.toMutableList())
         val cvrs = makeCvrs(cvrVoteTracker, ncands) // last candidate is the undervote
         println("  Number of cvrs = ${cvrs.size}")
-        val tabs = tabulateCvrs(cvrs.iterator(), mapOf(info.id to info.voteForN))
+        val tabs = tabulateCvrs(cvrs.iterator(), mapOf(info.id to info))
         assert(tabs.size == 1)
         val contestTab = tabs[0]!!
         println("  contestTab= $contestTab")

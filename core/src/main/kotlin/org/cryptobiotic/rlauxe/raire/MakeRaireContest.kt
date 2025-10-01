@@ -10,17 +10,19 @@ import au.org.democracydevelopers.raire.irv.IRVResult
 import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 
 private val quiet = true
 private val logger = KotlinLogging.logger("MakeRaireContest")
 
 // gets RaireAssertions from raire-java libray
-fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc: Int, Ncast: Int): RaireContestUnderAudit {
+fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int): RaireContestUnderAudit {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes
-    val startingVotes = voteConsolidator.makeVoteList()
-    val cvotes = voteConsolidator.makeVotes()
+    val vc = contestTab.irvVotes
+    val startingVotes = vc.makeVoteList()
+    val cvotes = vc.makeVotes()
     val votes = Votes(cvotes, info.candidateIds.size)
 
     //// TODO seems like we just need to know the winner. we could replace this with IrvCount
@@ -104,7 +106,8 @@ fun makeRaireContestUA(info: ContestInfo, voteConsolidator: VoteConsolidator, Nc
         info,
         winnerIndex = raireResult.winner,
         Nc = Nc,
-        Ncast = Ncast,
+        Ncast = contestTab.ncards,
+        undervotes = contestTab.undervotes,
         raireAssertions,
     )
 

@@ -113,7 +113,7 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=219)
         }.message
         assertNotNull(mess0)
-        assertEquals("contest 0 Ncast= 219 must be <= Nc=211", mess0)
+        assertEquals("contest 0 Ncast= 219 must be <= Nc= 211", mess0)
 
         val mess1 = assertFailsWith<IllegalArgumentException> {
             Contest(info, mapOf(0 to 100, 1 to 108, 3 to 2), Nc=222, Ncast=222)

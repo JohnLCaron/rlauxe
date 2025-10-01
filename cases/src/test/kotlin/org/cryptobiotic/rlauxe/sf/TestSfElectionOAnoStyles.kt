@@ -37,7 +37,7 @@ class TestSfElectionOAnoStyles {
         )
     }
 
-    @Test
+    // @Test
     fun createSF2024OANSrepeat() {
 
         repeat(10) { run ->
@@ -63,9 +63,10 @@ class TestSfElectionOAnoStyles {
                 workingDir = workingDir,
             )
         }
+        runSF2024OArepeat()
     }
 
-    @Test
+    // @Test
     fun runSF2024OArepeat() {
         repeat(10) { run ->
             val auditDir = "$topDir/audit$run"
@@ -82,13 +83,6 @@ class TestSfElectionOAnoStyles {
                 )
             )
         }
-    }
-
-    @Test
-    fun countPoolCvrs() {
-        val cvrCsv = "$sfDir/cvrExport.csv"
-        countPools(cvrCsv)
-        //  unpoolCount = 1387622 poolCount = 216286
     }
 
     @Test
@@ -113,7 +107,7 @@ class TestSfElectionOAnoStyles {
 
     private val show = true
 
-    @Test
+    // @Test
     fun auditSf2024Poa() {
         val auditDir = "$topDir/audit"
 
@@ -145,7 +139,7 @@ class TestSfElectionOAnoStyles {
         }
     }
 
-    @Test
+    // @Test
     fun auditSf2024oa18() {
         val auditDir = "$topDir/audit"
 

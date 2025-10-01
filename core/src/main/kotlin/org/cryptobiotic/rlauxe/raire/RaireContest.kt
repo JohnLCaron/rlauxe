@@ -17,6 +17,7 @@ data class RaireContest(
     val winners: List<Int>,
     val Nc: Int,
     val Ncast: Int,
+    val undervotes: Int,
 ) : ContestIF {
     val winnerNames: List<String>
     val losers: List<Int>
@@ -39,7 +40,7 @@ data class RaireContest(
 
     override fun Nc() = Nc
     override fun Np() = Nc - Ncast
-    override fun Nundervotes() = 0
+    override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames
     override fun winners() = winners
@@ -124,6 +125,7 @@ class RaireContestUnderAudit(
                  winnerIndex: Int,
                  Nc: Int,
                  Ncast: Int,
+                 undervotes: Int,
                  assertions: List<RaireAssertion>
          ): RaireContestUnderAudit {
 
@@ -133,6 +135,7 @@ class RaireContestUnderAudit(
                 listOf(winnerId),
                 Nc = Nc,
                 Ncast = Ncast,
+                undervotes = undervotes,
             )
             return RaireContestUnderAudit(contest, winnerId, assertions)
         }

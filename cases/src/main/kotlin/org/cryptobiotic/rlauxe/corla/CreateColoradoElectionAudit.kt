@@ -18,7 +18,6 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("createColoradoElection")
 private val showMissingCandidates = false
 val cvrExportDir = "cvrexport"
-const val sortedCardsFile = "sortedCards.csv"
 
 // making vote counts from the electionDetailXml
 // making cards (cvrs) from the precinct results
@@ -27,7 +26,8 @@ fun createColoradoElectionFromDetailXmlAndPrecincts(
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
-    auditConfigIn: AuditConfig? = null
+    auditConfigIn: AuditConfig? = null,
+    clear: Boolean = true,
 ) {
     val stopwatch = Stopwatch()
 
@@ -40,7 +40,7 @@ fun createColoradoElectionFromDetailXmlAndPrecincts(
 
     // auditConfig
     val auditDir = "$topDir/audit"
-    clearDirectory(Path.of(auditDir))
+    if (clear) clearDirectory(Path.of(auditDir))
     val publisher = Publisher(auditDir)
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .03,

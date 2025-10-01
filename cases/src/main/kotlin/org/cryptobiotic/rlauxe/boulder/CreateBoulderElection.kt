@@ -2,25 +2,16 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.RedactedGroup
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.map
-import kotlin.math.max
 
 // obsolete except as base class
 // simulate having all CVRs by making CVRS out of redacted votes.
 // TODO not handling redacted IRV. No IRV in boulder24, but there is in Boulder23.
-open class BoulderElection(
+abstract class BoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val quiet: Boolean = true)
@@ -65,8 +56,7 @@ open class BoulderElection(
         }
     }
 
-    // TODO can we generalize this so its not Boulder specific?
-    // TODO cant do this until we have countVotes corrected.... could use OneAuditContest
+    /*
     fun makeContests(): Pair<List<Contest>, List<RaireContestUnderAudit>> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
@@ -113,7 +103,7 @@ open class BoulderElection(
             }
         }
         return Pair(regContests, irvContests)
-    }
+    } */
 
     // make contest votes from the export.cvrs and export.redacted
     // ncards is approx, will be corrected from sovo and OneContest
@@ -131,7 +121,7 @@ open class BoulderElection(
 
         export.cvrs.forEach { cvr ->
             cvr.contestVotes.forEach { contestVote ->
-                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]?.voteForN) }
+                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]!!) }
                 tab.addVotes(contestVote.candVotes.toIntArray())
             }
         }
@@ -143,7 +133,7 @@ open class BoulderElection(
 
         export.redacted.forEach { redacted ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
-                val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]?.voteForN) }
+                val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
                 // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
                 //   would be safer to make the cvrs first, then just use them to make the Contest
                 //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
@@ -157,6 +147,7 @@ open class BoulderElection(
         return votes
     }
 
+    /*
     // make CVRS to simulate CLCA
     open fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
@@ -227,7 +218,7 @@ open class BoulderElection(
             }
         }
         return rcvrs
-    }
+    } */
 }
 
 fun ContestInfo.show() = buildString {
@@ -279,7 +270,7 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
 
 ////////////////////////////////////////////////////////////////////
 
-// read in the sovo file
+/* read in the sovo file
 fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
@@ -340,7 +331,7 @@ fun createBoulderElectionWithSov(
 fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
     return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-}
+} */
 
 fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {
     // we are making the contest votes from the cvrs. how does it compare with official tally ??

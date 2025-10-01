@@ -4,10 +4,12 @@ package org.cryptobiotic.rlauxe.sf
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
@@ -18,6 +20,8 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.*
 import java.io.FileOutputStream
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 private val quiet = false
 
@@ -25,6 +29,8 @@ private val quiet = false
 const val cvrExportCsvFile = "cvrExport.csv"
 const val sortedCardsFile = "sortedCards.csv"
 const val ballotPoolsFile = "ballotPools.csv"
+
+private val logger = KotlinLogging.logger("SfElectionFromCards")
 
 // read the CvrExport_* files out of the castVoteRecord JSON zip file, convert them to "CvrExport" CSV file.
 // use the contestManifestFile to add the undervotes, and to identify the IRV contests
@@ -85,20 +91,14 @@ fun createSfElectionFromCvrExport(
         clcaConfig = ClcaConfig(strategy=ClcaStrategyType.noerror),
     )
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
+    val infoMap = contestInfos.associateBy { it.id }
 
-    val regularVoteMap = makeContestVotesFromCrvExport(cvrCsvFilename)
-    val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, regularVoteMap, contestNcs)
+    val contestTabs = makeContestTabulations(cvrCsvFilename, infoMap)
+    val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, contestTabs, contestNcs)
 
     val irvInfos = contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
     val irvContests = if (irvInfos.isEmpty()) emptyList() else {
-        val cvrIter = CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename))
-        val irvVoteMap = makeIrvContestVotes( irvInfos.associateBy { it.id }, cvrIter)
-        if (show) {
-            irvVoteMap.values.forEach { println("IrvVotes( ${it.irvContestInfo.id} ${it.irvContestInfo.choiceFunction} ${it.irvContestInfo}")
-                it.notfound.forEach { (cand, count) -> println("  candidate $cand not found $count times")}
-            }
-        }
-        makeRaireContests(irvInfos, irvVoteMap, contestNcs)
+        makeRaireContests(irvInfos, contestTabs, contestNcs)
     }
 
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
@@ -158,6 +158,35 @@ fun makeContestInfos(contestManifest: ContestManifest, candidateManifest: Candid
     }
 }
 
+fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestInfo>): Map<Int, Int> { // contestId -> Nc
+    val staxContests: List<StaxReader.StaxContest> = StaxReader().read("src/test/data/SF2024/summary.xml") // sketchy
+    val contestNcs= mutableMapOf<Int, Int>()
+    contestInfos.forEach { info ->
+        val contestM = contestManifest.contests.values.find { it.Description == info.name }
+        if (contestM != null) {
+            val staxContest = staxContests.find { it.id == info.name }
+            if (staxContest != null) contestNcs[info.id] = staxContest.ncards()!!
+            else println("*** cant find contest '${info.name}' in summary.xml")
+
+        } else println("*** cant find contest '${info.name}' in ContestManifest")
+    }
+    return contestNcs
+}
+
+fun makeContestTabulations(cvrCsvFilename: String, infoMap: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val contestTabs = mutableMapOf<Int, ContestTabulation>()
+    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+
+    while (cvrIter.hasNext()) {
+        val cvrExport: CvrExport = cvrIter.next()
+        cvrExport.votes.forEach { (contestId, cands) ->
+            val contestTab = contestTabs.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
+            contestTab.addVotes(cands)
+        }
+    }
+    return contestTabs
+}
+
 // sum all of the cards' votes
 fun makeContestVotesFromCrvExport(cvrCsvFilename: String): Map<Int, ContestVotes> {
     val contestVotes = mutableMapOf<Int, ContestVotes>()
@@ -192,31 +221,29 @@ data class ContestVotes(val contestId: Int) {
     }
 }
 
-fun makeRegularContests(contestInfos: List<ContestInfo>, contestVotes: Map<Int, ContestVotes>, contestNcs: Map<Int, Int>): List<Contest> {
+fun makeRegularContests(contestInfos: List<ContestInfo>, contestTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>): List<Contest> {
     val contests = mutableListOf<Contest>()
     contestInfos.forEach { info: ContestInfo ->
-        val contestVote = contestVotes[info.id]
-        if (contestVote == null) {
-            println("*** Contest '${info}' has no contestVotes")
+        val contestTab = contestTabs[info.id]
+        if (contestTab == null) {
+            logger.warn {"*** Cant find reg contest '${info.id}' in contestTabulations"}
         } else {
             // TODO another source of Nc ? Currently the ElectionSummary StaxContest agrees with the cvr list
-            contests.add( Contest(info, contestVote.votes, contestNcs[info.id] ?: contestVote.countBallots, contestVote.countBallots))
+            contests.add( Contest(info, contestTab.votes, contestNcs[info.id] ?: contestTab.ncards, contestTab.ncards))
         }
     }
     return contests
 }
 
-fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestInfo>): Map<Int, Int> { // contestId -> Nc
-    val staxContests: List<StaxReader.StaxContest> = StaxReader().read("src/test/data/SF2024/summary.xml") // sketchy
-    val contestNcs= mutableMapOf<Int, Int>()
-    contestInfos.forEach { info ->
-        val contestM = contestManifest.contests.values.find { it.Description == info.name }
-        if (contestM != null) {
-            val staxContest = staxContests.find { it.id == info.name }
-            if (staxContest != null) contestNcs[info.id] = staxContest.ncards()!!
-            else println("*** cant find contest '${info.name}' in summary.xml")
-
-        } else println("*** cant find contest '${info.name}' in ContestManifest")
+fun makeRaireContests(contestInfos: List<ContestInfo>, contestTabs: Map<Int, ContestTabulation>, contestNc: Map<Int, Int>): List<RaireContestUnderAudit> {
+    val contests = mutableListOf<RaireContestUnderAudit>()
+    contestInfos.forEach { info: ContestInfo ->
+        val contestTab = contestTabs[info.id] // candidate indexes
+        if (contestTab == null) {
+            logger.warn {"*** Cant find irv contest '${info.id}' in contestTabulations"}
+        } else {
+            contests.add(makeRaireContestUA(info, contestTab, Nc = contestNc[info.id] ?: contestTab.ncards))
+        }
     }
-    return contestNcs
+    return contests
 }

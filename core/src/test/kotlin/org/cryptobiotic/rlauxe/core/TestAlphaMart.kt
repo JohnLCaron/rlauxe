@@ -56,6 +56,7 @@ class TestAlphaMart {
         println("simulateSampleSizeAlphaMart = $result")
 
         val d = 100
+        cvrSampler.reset()
         val result2 = runAlphaMartRepeated(
             drawSample = cvrSampler,
             eta0 = eta0,

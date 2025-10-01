@@ -11,7 +11,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-
 // reading RAIRE JSON assertion files
 // TestReadRaireResultsJson reads "/home/stormy/dev/github/rla/rlauxe/core/src/test/data/334_361_vbm.json"
 
@@ -71,6 +70,7 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestUnderAudi
         listOf(winner),
         Nc = Nc,
         Ncast = Nc - Np,
+        undervotes = 0,
     )
     return RaireContestUnderAudit(contest, winner, assertions)
 }

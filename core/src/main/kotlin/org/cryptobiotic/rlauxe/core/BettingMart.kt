@@ -75,7 +75,7 @@ class BettingMart(
                 sequences.add(xj, lamj, eta, tj, testStatistic)
             }
             if (showEachSample) println("  $sampleNumber: $xj bet=${df(lamj)} tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
-            // if (sampleNumber % 100 == 0)
+            // if (sampleNumber % 1000 == 0)
             //    println(sampleNumber)
 
             // – S ← S + Xj

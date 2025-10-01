@@ -243,6 +243,7 @@ open class ContestUnderAudit(
     val ncandidates = contest.ncandidates
     val Nc = contest.Nc()
     val Np = contest.Np()
+    val Nu = contest.Nundervotes()
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
@@ -377,9 +378,8 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votesAndUndervotes() else emptyMap()
-        appendLine("${contest.javaClass.simpleName} '$name' ($id) votesAndUndervotes=${votes}")
-        appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
-        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info().nwinners}, winners=${contest.winners()}")
+        appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction votesAndUndervotes=${votes}")
+        appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu")
         append(showCandidates())
     }
 
@@ -387,12 +387,14 @@ open class ContestUnderAudit(
         if (contest.votes() != null) {
             val votes = contest.votes()!!
             contest.info().candidateNames.forEach { (name, id) ->
-                appendLine("   $id '$name': votes=${votes[id]}")
+                val win = if (contest.winners().contains(id)) " (winner)" else ""
+                appendLine("   $id '$name': votes=${votes[id]} $win")
             }
             append("    Total=${votes.values.sum()}")
         } else {
             contest.info().candidateNames.forEach { (name, id) ->
-                appendLine("   $id '$name'")
+                val win = if (contest.winners().contains(id)) " (winner)" else ""
+                appendLine("   $id '$name' $win")
             }
         }
     }

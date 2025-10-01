@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.core.CvrExport
+import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrExportFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,15 +19,15 @@ class TestTreeReader {
         var countFiles = 0
         val treeIter = TreeReaderIterator(topDir,
             fileFilter = { it.toString().endsWith(".csv") },
-            reader = {  path -> countFiles++; readCardsCsvIterator(path.toString()) },
+            reader = {  path -> countFiles++; IteratorCvrExportFile(path.toString()) },
         )
         var summVotes = 0
         var countCards = 0
         while (treeIter.hasNext()) {
-            val card = treeIter.next()
+            val cvrExport: CvrExport = treeIter.next()
             countCards++
-            if (card.votes != null) {
-                card.votes!!.forEach { summVotes += it.sum() }
+            if (cvrExport.votes != null) {
+                cvrExport.votes.values.forEach { summVotes += it.sum() }
             }
         }
         // TODO anything smaller to test on ?
@@ -36,10 +38,10 @@ class TestTreeReader {
 
     @Test
     fun testTreeReaderTour() {
-        val dirname = "/home/stormy/rla/cases/sf2024P/CVR_Export_20240322103409"
+        val topDir = "/home/stormy/rla/cases/corla"
         var countFiles = 0
-        val tour = TreeReaderTour(dirname, visitor = { countFiles++ })
+        val tour = TreeReaderTour("$topDir/cvrexport", visitor = { countFiles++ })
         tour.tourFiles()
-        assertEquals(8972, countFiles)
+        assertEquals(3200, countFiles)
     }
 }

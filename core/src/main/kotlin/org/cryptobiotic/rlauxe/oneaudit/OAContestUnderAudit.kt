@@ -13,13 +13,6 @@ open class OAContestUnderAudit(
         return OneAuditClcaAssorter(contest.info(), assertion.assorter, hasStyle = true, poolAverages)
     }
 
-    override fun show() = buildString {
-        appendLine("${contest.javaClass.simpleName} $contest")
-        appendLine(" margin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np")
-        appendLine(" choiceFunction=${choiceFunction} nwinners=${contest.info().nwinners}, winners=${contest.winners()}")
-        append(showCandidates())
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -92,10 +85,6 @@ class OneAuditClcaAssorter(
     }
 
     fun overstatementPoolError(mvr: Cvr, poolAvgAssortValue: Double): Double {
-        if (hasStyle and !mvr.hasContest(info.id)) {
-            // TODO log error
-            throw RuntimeException("use_style==True but mvr=${mvr} does not contain contest ${info.name} (${info.id})")
-        }
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
                          else this.assorter.assort(mvr, usePhantoms = false)
 

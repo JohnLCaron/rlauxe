@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.sumContestTabulations
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import kotlin.collections.component1
@@ -12,7 +11,7 @@ private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
     contestsUA.forEach { contestUA ->
-        if (contestUA.preAuditStatus == TestH0Status.InProgress && contestUA.choiceFunction != SocialChoiceFunction.IRV) {
+        if (contestUA.preAuditStatus == TestH0Status.InProgress && !contestUA.isIrv) {
             checkWinners(contestUA)
 
             // see if margin is too small
@@ -88,7 +87,7 @@ fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cv
         }
     }
 
-    contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress && it.choiceFunction != SocialChoiceFunction.IRV }.forEach { contestUA ->
+    contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress && !it.isIrv }.forEach { contestUA ->
         val contestVotes = contestUA.contest.votes()!!
         val contestTab = allVotes[contestUA.id]
         if (contestTab == null) {

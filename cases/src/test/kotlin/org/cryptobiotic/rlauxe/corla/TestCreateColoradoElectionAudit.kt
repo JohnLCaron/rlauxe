@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
-import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
@@ -45,18 +43,6 @@ class TestCreateColoradoElectionAudit {
     // @Test
     fun createCorla2024sortedCards() {
         createCorla2024sortedCards("/home/stormy/rla/cases/corla")
-    }
-
-    @Test
-    fun testCvrsAreComplete() {
-        val topDir = "/home/stormy/rla/cases/corla"
-        val precinctCvrReader = TreeReaderIterator(
-            "$topDir/$cvrExportDir/",
-            fileFilter = { true },
-            reader = { path -> readCardsCsvIterator(path.toString()) }
-        )
-        val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(CvrIteratorAdapter(precinctCvrReader)).toSortedMap()
-        tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
     }
 
     @Test

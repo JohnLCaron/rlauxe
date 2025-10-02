@@ -22,31 +22,31 @@ private val logger = KotlinLogging.logger("Publisher")
         sampleMvrs.csv      // AuditableCardCsv  // the mvrs used for the audit; matches sampleNumbers.json
  */
 
-class Publisher(val topdir: String) {
+class Publisher(val auditDir: String) {
     init {
-        validateOutputDir(Path.of(topdir), ErrorMessages("Publisher"))
+        validateOutputDir(Path.of(auditDir), ErrorMessages("Publisher"))
     }
 
-    fun auditConfigFile() = "$topdir/auditConfig.json"
-    fun contestsFile() = "$topdir/contests.json"
-    fun cardsCsvFile() = "$topdir/sortedCards.csv"
-    fun cardsCsvZipFile() = "$topdir/sortedCards.csv.zip"
-    fun ballotPoolsFile() = "$topdir/ballotPools.csv"
+    fun auditConfigFile() = "$auditDir/auditConfig.json"
+    fun contestsFile() = "$auditDir/contests.json"
+    fun cardsCsvFile() = "$auditDir/sortedCards.csv"
+    fun cardsCsvZipFile() = "$auditDir/sortedCards.csv.zip"
+    fun ballotPoolsFile() = "$auditDir/ballotPools.csv"
 
     fun samplePrnsFile(round: Int): String {
-        val dir = "$topdir/round$round"
+        val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("samplePrnsFile"))
         return "$dir/samplePrns.json"
     }
 
     fun sampleMvrsFile(round: Int): String {
-        val dir = "$topdir/round$round"
+        val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))
         return "$dir/sampleMvrs.csv"
     }
 
     fun auditRoundFile(round: Int): String {
-        val dir = "$topdir/round$round"
+        val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("auditRoundFile"))
         return "$dir/auditState.json"
     }
@@ -54,7 +54,7 @@ class Publisher(val topdir: String) {
     // what round are we on?
     fun currentRound(): Int {
         var roundIdx = 1
-        while (Files.exists(Path.of("$topdir/round$roundIdx"))) {
+        while (Files.exists(Path.of("$auditDir/round$roundIdx"))) {
             roundIdx++
         }
         return roundIdx - 1

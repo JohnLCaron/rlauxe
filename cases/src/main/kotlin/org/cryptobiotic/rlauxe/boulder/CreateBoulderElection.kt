@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dominion.ContestVotes
+import org.cryptobiotic.rlauxe.dominion.RedactedGroup
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.collections.map
@@ -120,7 +122,7 @@ abstract class BoulderElection(
         val votes = mutableMapOf<Int, ContestTabulation>()
 
         export.cvrs.forEach { cvr ->
-            cvr.contestVotes.forEach { contestVote ->
+            cvr.contestVotes.forEach { contestVote: ContestVotes ->
                 val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]!!) }
                 tab.addVotes(contestVote.candVotes.toIntArray())
             }
@@ -131,16 +133,13 @@ abstract class BoulderElection(
     fun countRedactedVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         val votes = mutableMapOf<Int, ContestTabulation>()
 
-        export.redacted.forEach { redacted ->
+        export.redacted.forEach { redacted: RedactedGroup ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
                 val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
-                // TODO how many cards depends if multiple votes are allowed. assume 1 vote = 1 card
-                //   would be safer to make the cvrs first, then just use them to make the Contest
-                //   problem is we cant distinguish phantoms from undervotes in redacted cvrs
-                //   one could also try to use OneAudit for the redacted cvrs.
-                //   but we still need to make an accurate CardLocationManifest
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
                 val info = infoMap[contestId]
+
+                // TODO
                 tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // wrong, dont use
             }
         }

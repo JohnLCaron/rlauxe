@@ -103,7 +103,7 @@ class BoulderElectionOAsim(
     override fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
-        val regContests = infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
+        val regContests = infoList.filter { !it.isIrv }.map { info ->
             val oaContest = oaContests[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.sumAllCards()

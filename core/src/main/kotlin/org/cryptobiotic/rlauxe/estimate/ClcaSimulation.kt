@@ -19,7 +19,7 @@ class ClcaSimulation(
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
     val Nc = contest.Nc()
-    val isIRV = contest.choiceFunction == SocialChoiceFunction.IRV
+    val isIRV = contest.isIrv()
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
     val usedCvrs = mutableSetOf<String>()

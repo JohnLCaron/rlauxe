@@ -140,7 +140,7 @@ class TestBoulderCvrs {
 
         val electionSimCvrs = BoulderElectionOAsim(export, combined)
         val contestUA = electionSimCvrs.makeContestsUA(true)
-        val irv = contestUA.find { it.choiceFunction == SocialChoiceFunction.IRV }
+        val irv = contestUA.find { it.isIrv }
         if (irv != null) {
             val countIrvCvrs = electionSimCvrs.cvrs.count { it.hasContest(irv.id) }
             println("countIrvCvrs = $countIrvCvrs")

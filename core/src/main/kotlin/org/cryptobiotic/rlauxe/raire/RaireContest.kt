@@ -94,7 +94,7 @@ class RaireContestUnderAudit(
     }
 
     override fun showShort() = buildString {
-        appendLine("${name} ($id) Nc=$Nc winner$winner losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
+        appendLine("${name} ($id) Nc=$Nc winner $winner losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -289,6 +289,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, 
         val aloser = raire_votefor_elim(rcvr, contestId, rassertion.loserId, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
+
+    override fun toString() = desc()
 }
 
 /** Duplicating the math from SHANGRLA CVR in Audit.py */

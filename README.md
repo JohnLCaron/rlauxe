@@ -1,7 +1,7 @@
 **RLAUXE ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 9/22/2025_
+_last changed: 10/01/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -163,11 +163,16 @@ See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart ri
 ## OneAudit CLCA
 
 OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit papers (see appendix).
-It deals with the case when CVRS are not available for all ballots. The remaining ballots are in one or more "pools"
-for which subtotals are available. The basic idea is to create an “overstatement-net-equivalent” (ONE) CVR for each pool, 
-and use the average assorter value in that pool as the value of the (missing) CVR in the CLCA overstatement.
-Only PLURALITY and IRV can be used with OneAudit.
+It deals with the cases where:
+1. CVRS are not available for all ballots, and the remaining ballots are in one or more "pools"
+   for which subtotals are available. This is the Boulder "redacted votes" case. Each pool of redacted ballots
+   has a single Ballot Style, which allows style-based sampling.
+2. CVRS are available but some cannot be matched to physical ballots. This is the San Francisco case where
+   mail-in ballots have matched CVRS, and in-person precinct votes have unmatched CVRs. Each precinct's ballots
+   are kept in a separate pool.
 
+In both cases we create an “overstatement-net-equivalent” (ONE) CVR for each pool, 
+and use the average assorter value in that pool as the value of the (missing) CVR in the CLCA overstatement.
 When a ballot has been chosen for hand audit:
 
 1. If it has a CVR, use the standard CLCA over-statement assorter value for the ballot.
@@ -175,8 +180,9 @@ When a ballot has been chosen for hand audit:
 
 For results, see [OneAudit results](docs/OneAudit4.md).
 
-For details, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
+For details of the use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
 
+Only PLURALITY and IRV can be used with OneAudit at this time.
 
 # Comparing Samples Needed by Audit type
 

@@ -10,7 +10,7 @@ data class AuditableCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
     val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
-    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
+    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last; missing for pooled data
     val poolId: Int?, // for OneAudit
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes

@@ -101,7 +101,7 @@ fun readAuditableCardCsv(line: String): AuditableCard {
 class AuditableCardCsvReader(publisher: Publisher): Iterable<AuditableCard> {
     val filename: String = if (Files.exists(Path(publisher.cardsCsvZipFile()))) publisher.cardsCsvZipFile()
       else if (Files.exists(Path(publisher.cardsCsvFile()))) publisher.cardsCsvFile()
-      else throw RuntimeException("CardsCsvFile does not exist in directory ${publisher.topdir}")
+      else throw RuntimeException("CardsCsvFile does not exist in directory ${publisher.auditDir}")
 
     override fun iterator(): Iterator<AuditableCard> {
         return readCardsCsvIterator(filename)

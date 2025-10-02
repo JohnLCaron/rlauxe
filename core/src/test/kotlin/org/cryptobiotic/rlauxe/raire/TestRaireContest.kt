@@ -29,7 +29,7 @@ class TestRaireContest {
         assertEquals(listOf(1), contest.winners)
         assertEquals(listOf(0, 2, 3, 4, 42), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
-        assertEquals( "RaireContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210)",
+        assertEquals( "RaireContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210, undervotes=1)",
             contest.toString()
         )
 
@@ -49,16 +49,10 @@ class TestRaireContest {
         assertNotEquals(rcontestUA, rcontestUA2)
         assertNotEquals(rcontestUA.hashCode(), rcontestUA2.hashCode())
 
-       /* val expectedShowCandidates = """
-   0 'cand0': votes=100
-   1 'cand1': votes=108
-   2 'cand2': votes=0
-    Total=208
-        """.replaceIndent("   ")
-        assertEquals(expectedShowCandidates, rcontestUA.showCandidates()) */
-
-        assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner0 losers [1, 2] minMargin="))
-        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25\n choiceFunction=IRV nwinners=1, winners=[0]"), rcontestUA.show())
+        println(rcontestUA.showShort())
+        assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner 0 losers [1, 2] minMargin="))
+        println(rcontestUA.show())
+        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25 Nu=250"), rcontestUA.show())
         assertEquals(-1.0, rcontestUA.recountMargin(), doublePrecision)
     }
 

@@ -18,6 +18,7 @@ data class ContestInfo(
 ) {
     val candidateIds: List<Int>
     val metadata = mutableMapOf<String, Int>()
+    val isIrv = choiceFunction == SocialChoiceFunction.IRV
 
     init {
         if (choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
@@ -64,7 +65,7 @@ interface ContestIF {
     fun losers(): List<Int>
 
     fun phantomRate() = Np() / Nc().toDouble()
-    fun isIRV() = choiceFunction == SocialChoiceFunction.IRV
+    fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
 
     fun votes() : Map<Int, Int>? {
@@ -244,6 +245,7 @@ open class ContestUnderAudit(
     val Nc = contest.Nc()
     val Np = contest.Np()
     val Nu = contest.Nundervotes()
+    val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization

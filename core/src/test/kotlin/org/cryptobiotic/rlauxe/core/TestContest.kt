@@ -274,19 +274,18 @@ class TestContest {
         assertEquals(contestUAc2.showShort(), contestUAc.showShort())
 
         val expectedShowCandidates = """
-               0 'cand0': votes=100
-               1 'cand1': votes=108
-               2 'cand2': votes=0
+               0 'cand0': votes=100 
+               1 'cand1': votes=108  (winner)
+               2 'cand2': votes=0 
                 Total=208
         """.replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.showCandidates())
 
-        val expectedShow = """Contest 'testContestInfo' (0) votesAndUndervotes={1=108, 0=100, 2=0, 3=1}
- margin=0.0379 recount=0.0741 Nc=211 Np=2
- choiceFunction=PLURALITY nwinners=1, winners=[1]
-   0 'cand0': votes=100
-   1 'cand1': votes=108
-   2 'cand2': votes=0
+        val expectedShow = """Contest 'testContestInfo' (0) PLURALITY votesAndUndervotes={1=108, 0=100, 2=0, 3=1}
+ winners=[1] minMargin=0.0379 recount=0.0741 Nc=211 Np=2 Nu=1
+   0 'cand0': votes=100 
+   1 'cand1': votes=108  (winner)
+   2 'cand2': votes=0 
     Total=208"""
         assertEquals(expectedShow, contestUAc.show())
 

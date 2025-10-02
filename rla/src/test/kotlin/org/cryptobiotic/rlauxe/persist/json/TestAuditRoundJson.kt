@@ -218,9 +218,6 @@ fun check(s1: AuditRound, s2: AuditRound) {
 
     assertEquals(s1.contestRounds.size, s2.contestRounds.size)
     s1.contestRounds.forEachIndexed { idx, c1 ->
-        if (c1.contestUA.contest.choiceFunction == SocialChoiceFunction.IRV) {
-            println("here")
-        }
         val c2 = s2.contestRounds[idx]
         assertEquals(c1.contestUA.contest, c2.contestUA.contest, "contest ${c1.contestUA.contest.show()}\n not ${c2.contestUA.contest.show()}")
         c1.contestUA.clcaAssertions.forEachIndexed { asnIdx, a1 ->

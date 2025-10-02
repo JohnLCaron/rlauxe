@@ -5,7 +5,6 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.verifier.VerifyAuditRecord
 import org.cryptobiotic.rlauxe.verifier.VerifyContests
 
 /** Run election record verification CLI. */
@@ -26,23 +25,23 @@ object RunVerifyContests {
         )
         val show by parser.option(
             ArgType.Boolean,
-            shortName = "details",
+            shortName = "show",
             description = "Show details"
         ).default(false)
 
         parser.parse(args)
         println("RunVerifyContests on $inputDir")
-        val results = runVerifyContest(inputDir, contestId, show)
+        val results = runVerifyContests(inputDir, contestId, show)
         println(results)
     }
 
-    fun runVerifyContest(inputDir: String, contestId: Int?, show: Boolean): String {
-        val verifier = VerifyContests(inputDir)
+    fun runVerifyContests(inputDir: String, contestId: Int?, show: Boolean): String {
+        val verifier = VerifyContests(inputDir, show)
         if (contestId != null) {
             val wantContest = verifier.contests.find { it.id == contestId }
             if (wantContest == null) return ("Cant find contest with id $contestId")
-            return verifier.verifyContest(wantContest, show)
+            return verifier.verifyContest(wantContest)
         }
-        return verifier.verify(show)
+        return verifier.verify()
     }
 }

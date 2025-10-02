@@ -21,7 +21,7 @@ import kotlin.test.assertNotNull
 
 class TestSfElection {
 
-    // extract the cvrs from json
+    // extract the cvrExport from zipFilename json, write to cvrExport.csv
     @Test
     fun createSF2024cvrs() {
         val topDir = "/home/stormy/rla/cases/sf2024"
@@ -127,7 +127,7 @@ class TestSfElection {
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
 
         val irvCounters = mutableListOf<IrvCounter>()
-        contestsUA.filter { it.choiceFunction == SocialChoiceFunction.IRV}.forEach { contestUA ->
+        contestsUA.filter { it.isIrv}.forEach { contestUA ->
             println("$contestUA")
             println("   winners=${contestUA.contest.winnerNames()}")
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))

@@ -100,7 +100,7 @@ fun makeEstimationTasks(
     val cvrs: Iterable<Cvr> = when (auditConfig.auditType) {
         AuditType.CLCA -> {
             // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
-            if (contest.isIRV()) {
+            if (contest.isIrv()) {
                 SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
             } else {
                 ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
@@ -266,7 +266,7 @@ fun simulateSampleSizeClcaAssorter(
     }
 
     // optional fuzzing of the cvrs
-    val isIrvFzz = (contest.isIRV() && clcaConfig.simFuzzPct != null)
+    val isIrvFzz = (contest.isIrv() && clcaConfig.simFuzzPct != null)
     val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
         if (isIrvFzz) fuzzPct = clcaConfig.simFuzzPct
         Pair(

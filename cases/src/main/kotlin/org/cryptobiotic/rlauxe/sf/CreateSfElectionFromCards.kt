@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
@@ -96,7 +95,7 @@ fun createSfElectionFromCvrExport(
     val contestTabs = makeContestTabulations(cvrCsvFilename, infoMap)
     val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, contestTabs, contestNcs)
 
-    val irvInfos = contestInfos.filter { it.choiceFunction == SocialChoiceFunction.IRV }
+    val irvInfos = contestInfos.filter {!it.isIrv }
     val irvContests = if (irvInfos.isEmpty()) emptyList() else {
         makeRaireContests(irvInfos, contestTabs, contestNcs)
     }

@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -31,7 +32,7 @@ data class BallotPool(
     val poolId: Int,
     val contestId :Int,
     val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
-    val votes: Map<Int, Int>, // candid -> nvotes, for plurality. umm do we really need ?
+    val votes: Map<Int, Int>, // candid -> nvotes, for plurality. TODO add undervotes ??
 ) {
 
     fun calcReportedMargin(winner: Int, loser: Int): Double {
@@ -84,12 +85,13 @@ interface CardPoolIF {
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
 class CardPool(
-    val poolName: String,
+    poolNameIn: String,
     override val poolId: Int,
     val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes from redacted group // TODO use ContestTabulation ??
     val infos: Map<Int, ContestInfo>, // all infos
 ) : CardPoolIF
 {
+    val poolName = cleanCsvString(poolNameIn)
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
     private var adjustCards = 0
@@ -232,7 +234,7 @@ fun addOAClcaAssortersFromMargin(
             cardPools.values.forEach { cardPool ->
                 if (cardPool.contains(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
-                    val poolMargin = assertion.assorter.calcReportedMargin(regVotes.votes, regVotes.ncards)
+                    val poolMargin = assertion.assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }
@@ -297,7 +299,7 @@ fun addOAClcaAssortersFromCvrs(
             if (avg != null) {
                 avg.forEach { (assorter, assortAvg) ->
                     val calcReportedMargin =
-                        assorter.calcReportedMargin(regVotes.votes, regVotes.ncards)
+                        assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
                     val calcReportedMean = margin2mean(calcReportedMargin)
                     val cvrAverage = assortAvg.avg()
 

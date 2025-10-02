@@ -90,6 +90,7 @@ open class BoulderElectionOA(
         }
     }
 
+    // for one contest, distribute overvotes amongst the pools
     fun distributeRedactedNcardsDiff(oaContest: OneAuditContestInfo, cardPoolMap: Map<Int, CardPool>) {
         val contestId = oaContest.info.id
         val poolCards = oaContest.poolTotalCards()
@@ -147,7 +148,7 @@ open class BoulderElectionOA(
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.sumAllCards()
             val useNc = max( ncards, oaContest.Nc())
-            val contest = Contest(info, candVotes, useNc, oaContest.sumAllCards())
+            val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
             OAContestUnderAudit(contest, hasStyles)
         }

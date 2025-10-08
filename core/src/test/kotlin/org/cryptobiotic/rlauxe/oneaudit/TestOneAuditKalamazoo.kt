@@ -8,15 +8,15 @@ import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
+import org.cryptobiotic.rlauxe.workflow.makeTestMvrs
 import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/* TODO
 
-// here we recreate Kalamazoo example in rlaux framework.
+/* here we recreate Kalamazoo example in rlaux framework.
 // also see plots/src/test/kotlin/org/cryptobiotic/rlauxe/oneaudit/KalamazooExample.kt, which ports the python directly
 class TestOneAuditKalamazoo {
 
@@ -172,53 +172,52 @@ fun testReportedMargins() {
 fun makeContestKalamazoo(nwinners:Int = 1): OneAuditContest { // TODO set margin
 
 // the candidates
-val info = ContestInfo(
-    "Kalamazoo", 0,
-    mapOf(
-        "Butkovich" to 0,
-        "Gelineau" to 1,
-        "Kurland" to 2,
-        "Schleiger" to 3,
-        "Schuette" to 4,
-        "Whitmer" to 5,
-    ),
-    SocialChoiceFunction.PLURALITY,
-    nwinners = nwinners,
-)
+    val info = ContestInfo(
+        "Kalamazoo", 0,
+        mapOf(
+            "Butkovich" to 0,
+            "Gelineau" to 1,
+            "Kurland" to 2,
+            "Schleiger" to 3,
+            "Schuette" to 4,
+            "Whitmer" to 5,
+        ),
+        SocialChoiceFunction.PLURALITY,
+        nwinners = nwinners,
+    )
 
 // reported results for the two strata
-val candidateVotes = mapOf(     // candidateName -> [votes(cvr), votes(nocvr)]
-    "Schuette" to listOf(1349, 4220),
-    "Whitmer" to listOf(3765, 16934),
-    "Gelineau" to listOf(56, 462),
-    "Schleiger" to listOf(19, 116),
-    "Kurland" to listOf(23, 284),
-    "Butkovich" to listOf(6, 66)
-)
+    val candidateVotes = mapOf(     // candidateName -> [votes(cvr), votes(nocvr)]
+        "Schuette" to listOf(1349, 4220),
+        "Whitmer" to listOf(3765, 16934),
+        "Gelineau" to listOf(56, 462),
+        "Schleiger" to listOf(19, 116),
+        "Kurland" to listOf(23, 284),
+        "Butkovich" to listOf(6, 66)
+    )
 
 // The stratum with linked CVRs comprised 5,294 ballots with 5,218 reported votes in the contest
 // the “no-CVR” stratum comprised 22,372 ballots with 22,082 reported votes.
-val stratumSizes = listOf(5294, 22372) // hasCvr, noCvr
+    val stratumSizes = listOf(5294, 22372) // hasCvr, noCvr
 
 // reported results for the two strata
-val votesCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
-val votesNoCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[1]) }.toMap()
-val ncCvr = max(roundUp(stratumSizes[0] / nwinners.toDouble()), votesCvr.values.max())
-val ncNocvr = max(roundUp(stratumSizes[1] / nwinners.toDouble()), votesNoCvr.values.max())
+    val votesCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
+    val votesNoCvr = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[1]) }.toMap()
+    val ncCvr = max(roundUp(stratumSizes[0] / nwinners.toDouble()), votesCvr.values.max())
+    val ncNocvr = max(roundUp(stratumSizes[1] / nwinners.toDouble()), votesNoCvr.values.max())
 
-val pools = mutableListOf<BallotPool>()
-pools.add(
-    // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
-    BallotPool(
-        "noCvr",
-        poolId = 1,
-        contest = 0,
-        ncards = ncNocvr,
-        votes = votesNoCvr,
+    val pools = mutableListOf<BallotPool>()
+    pools.add(
+        // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
+        BallotPool(
+            "noCvr",
+            poolId = 1,
+            contestId = 0,
+            ncards = ncNocvr,
+            votes = votesNoCvr,
+        )
     )
-)
 
-return OneAuditContest.make(info, votesCvr, ncCvr, pools, 0, 0) // TODO
+    return OneAuditContest.make(info, votesCvr, ncCvr, pools, 0, 0) // TODO
 }
-
- */
+*/

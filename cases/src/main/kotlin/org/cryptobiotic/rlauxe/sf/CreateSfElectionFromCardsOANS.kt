@@ -29,7 +29,7 @@ fun createSfElectionFromCvrExportOANS(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
-    cvrCsvFilename: String,
+    cvrExportCsv: String,
     auditConfigIn: AuditConfig? = null,
     workingDir: String? = null,
 ) {
@@ -48,7 +48,7 @@ fun createSfElectionFromCvrExportOANS(
         contestInfos.associateBy { it.id },
         castVoteRecordZip,
         contestManifestFilename,
-        cvrCsvFilename,
+        cvrExportCsv,
     )
     val cardPoolList = CardPoolList(cardPools.values)
     val contestNcsAmended = mutableMapOf<Int, Int>()
@@ -79,10 +79,9 @@ fun createSfElectionFromCvrExportOANS(
     logger.info{"   writeAuditConfigJsonFile ${publisher.auditConfigFile()}"}
 
     // we write the sortedCards here while we have the amended CvrExports in memory
-    val ballotPools = readBallotPoolCsvFile("$auditDir/$ballotPoolsFile")
-    val pools = ballotPools.poolNameToId()
+    val poolNameToId = readBallotPoolCsvFile("$auditDir/$ballotPoolsFile").poolNameToId()
     val working = workingDir ?: "$topDir/sortChunks"
-    SortMerge(auditDir, "unused", working, "$auditDir/$sortedCardsFile", pools = pools).run2(cardPoolList.iterator())
+    SortMerge(auditDir, "unused", working, "$auditDir/$sortedCardsFile", pools = poolNameToId).run2(cardPoolList.iterator())
 
     println("took = $stopwatch")
 }
@@ -93,7 +92,7 @@ fun createCardPoolsNS(
     contestInfos: Map<Int, ContestInfo>,
     castVoteRecordZip: String,
     contestManifestFilename: String,
-    cvrCsvFilename: String,
+    cvrExportCsv: String,
     ): Pair<Map<Int, CardPoolNs>, Map<Int, Int>>
 {
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
@@ -102,7 +101,7 @@ fun createCardPoolsNS(
     // create the unamended card Pools,
     var count = 0
     val cardPoolsU: MutableMap<String, CardPoolNs> = mutableMapOf()
-    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
     while (cvrIter.hasNext()) {
         count++
         val cvrExport: CvrExport = cvrIter.next()
@@ -166,7 +165,7 @@ fun createCardPoolsNS(
     poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
 
     var poolCount = 0
-    val sortedPools = cardPoolsM.toSortedMap()
+    val sortedPools = cardPoolsM.filter { it.value.poolName != unpooled }.toSortedMap()
     sortedPools.forEach { (poolName, pool) ->
         val bpools = pool.toBallotPools() // one for each contest
         bpools.forEach { poutputStream.write(writeBallotPoolCSV(it).toByteArray()) }
@@ -178,7 +177,7 @@ fun createCardPoolsNS(
     return Pair(cardPoolsM.values.associateBy { it.poolId }, contestAmended)
 }
 
-// keep all the CVRS, which we can use to caclulate average assort. only used for SF.
+// keep all the CVRS, which we can use to calculate average assort.
 class CardPoolNs( poolName: String, poolId: Int, contestInfos: Map<Int, ContestInfo>) :
     CardPoolFromCvrs(poolName, poolId, contestInfos) {
     // TODO keeping all the CvrExport in memory here. better to write them back ??

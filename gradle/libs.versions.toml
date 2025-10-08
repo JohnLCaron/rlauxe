@@ -20,7 +20,7 @@ xmlutil-version = "0.91.1"
 junit-jupiter-params = "5.13.1"
 logback = "1.5.18"
 mockk = "1.14.2"
-kotest = "5.9.1"
+kotest = "6.0.3"
 
 [libraries]
 
@@ -45,11 +45,13 @@ oshai-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "osha
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 # Test
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter-params" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
 
 [bundles]
 jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk", "kotest-runner", "kotest-property"]

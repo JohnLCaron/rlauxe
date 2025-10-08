@@ -106,7 +106,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
 
     fun nvotes() = votes.map { it.value}.sum()
 
-    override fun toString() = buildString {
+    fun toString2() = buildString {
         // append("${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards undervotes=$undervotes novote=$novote")
         append("contest ${info.id} ${votes.toSortedMap()} nvotes=${nvotes()} ncards=$ncards undervotes=$undervotes overvotes=$overvotes novote=$novote")
         if (voteForN != null) {
@@ -115,6 +115,8 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
             append(" underPct= $underPct%")
         }
     }
+
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -143,6 +145,10 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         result = 31 * result + candidateIdToIndex.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "ContestTabulation(isIrv=$isIrv, voteForN=$voteForN, votes=$votes, ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
+    }
 }
 
 // add other into this
@@ -165,8 +171,11 @@ fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabul
 fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     ballotPools.forEach { pool ->
-        val tab = votes.getOrPut(pool.contestId) { ContestTabulation(infos[pool.contestId]!!) }
-        pool.votes.forEach { (cand, vote) -> tab.addVote(cand, vote) }
+        val info = infos[pool.contestId]
+        if (info != null) {
+            val tab = votes.getOrPut(pool.contestId) { ContestTabulation(infos[pool.contestId]!!) }
+            pool.votes.forEach { (cand, vote) -> tab.addVote(cand, vote) }
+        }
     }
     return votes
 }
@@ -176,8 +185,11 @@ fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, Co
     val votes = mutableMapOf<Int, ContestTabulation>()
     for (cvr in cvrs) {
         for ((contestId, conVotes) in cvr.votes) {
-            val tab = votes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-            tab.addVotes(conVotes)
+            val info = infos[contestId]
+            if (info != null) {
+                val tab = votes.getOrPut(contestId) { ContestTabulation(info) }
+                tab.addVotes(conVotes)
+            }
         }
     }
     return votes

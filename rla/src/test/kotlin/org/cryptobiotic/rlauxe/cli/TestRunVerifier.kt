@@ -6,7 +6,7 @@ class TestRunVerifier {
 
     @Test
     fun testClcaVerify() {
-        val topdir = "/home/stormy/rla/cases/boulder24"
+        val topdir = "/home/stormy/rla/cases/boulder24/audit"
         RunVerifier.main(
             arrayOf(
                 "-in", topdir

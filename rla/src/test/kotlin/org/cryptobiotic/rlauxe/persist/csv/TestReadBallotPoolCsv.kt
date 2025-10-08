@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFrom
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestCardLocationPoolCsv {
+class TestReadBallotPoolCsv {
 
     @Test
     fun testRoundtrip() {
@@ -19,6 +21,15 @@ class TestCardLocationPoolCsv {
         val roundtrip = readBallotPoolCsvFile(poolFileOut)
         println("read ${roundtrip.size} pools (roundtrip")
         assertEquals(pools.toSet(), roundtrip.toSet())
+    }
+
+    @Test
+    fun testMakeCardPoolsFromAuditRecord() {
+        val topDir = "/home/stormy/rla/cases/boulder24oa/audit"
+        val auditRecord = readFrom(topDir)
+
+        val cardPools = makeCardPoolsFromAuditRecord(auditRecord)
+        println(cardPools.showPoolVotes())
     }
 
 }

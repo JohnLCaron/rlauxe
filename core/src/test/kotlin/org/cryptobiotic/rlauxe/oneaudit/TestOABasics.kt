@@ -35,13 +35,12 @@ class TestOABasics {
 
     @Test
     fun testMakeOneContestUA() {
-        val (contestUA, cvrs) = makeOneContestUA(
+        val (contestUA, ballotPools, cvrs) = makeOneContestUA(
             20000,
             18000,
             cvrPercent = .66,
             undervotePercent = .0,
             phantomPercent = .0,
-            skewPct = .03
         )
         println(contestUA)
         val cvrVotes =  tabulateVotesFromCvrs(cvrs.iterator())
@@ -313,4 +312,12 @@ class TestOABasics {
     // noCvr     7 = 0.24305555555555555 m=0.5 bet = 1.3822132305208128 tj=0.6448479893800689, Tj = 0.71610651140852 pj = 1.3964403116976076
     //card113     12 = 0.5135869565217391 m=0.5 bet = 1.358891811147106 tj=1.018463203955803, Tj = 0.7838092123617311 pj = 1.2758206770584575
     //noCvr     13 = 0.7569444444444444 m=0.5 bet = 1.3671953397727525 tj=1.3512932470249432, Tj = 1.059156095620347 pj = 0.94414789674066
+}
+
+
+fun showPct(what: String, votes: Map<Int, Int>, Nc: Int, winner: Int = 0, loser: Int = 1) {
+    val winnerVotes = votes[winner] ?: 0
+    val loserVotes = votes[loser] ?: 0
+    val hasMargin = (winnerVotes - loserVotes) / Nc.toDouble()
+    println("$what winnerVotes = $winnerVotes loserVotes = $loserVotes diff=${winnerVotes-loserVotes} Nc=${Nc} hasMargin=$hasMargin ")
 }

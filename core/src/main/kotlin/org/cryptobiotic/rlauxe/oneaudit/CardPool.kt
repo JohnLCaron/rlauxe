@@ -26,42 +26,6 @@ private val logger = KotlinLogging.logger("CardPool")
 
 const val unpooled = "unpooled"
 
-// this is really CardPoolForContest: used for serialization to csv
-data class BallotPool(
-    val name: String,
-    val poolId: Int,
-    val contestId :Int,
-    val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
-    val votes: Map<Int, Int>, // candid -> nvotes, for plurality. TODO add undervotes ??
-) {
-
-    fun calcReportedMargin(winner: Int, loser: Int): Double {
-        if (ncards == 0) return 0.0
-        val winnerVote = votes[winner] ?: 0
-        val loserVote = votes[loser] ?: 0
-        return (winnerVote - loserVote) / ncards.toDouble()
-    }
-
-    fun votesAndUndervotes(voteForN: Int, ncandidates: Int): Map<Int, Int> {
-        val poolVotes = votes.values.sum()
-        val poolUndervotes = ncards * voteForN - poolVotes
-        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, poolUndervotes)).toMap()
-    }
-
-    fun votesAndUndervotes(voteForN: Int): VotesAndUndervotes {
-        val poolUndervotes = ncards * voteForN - votes.values.sum()
-        return VotesAndUndervotes(votes, poolUndervotes, voteForN)
-    }
-
-    fun reportedAverage(winner: Int, loser: Int): Double {
-        val winnerVotes = votes[winner] ?: 0
-        val loserVotes = votes[loser] ?: 0
-        val reportedMargin = (winnerVotes - loserVotes) / ncards.toDouble() // TODO dont know Nc
-        return margin2mean(reportedMargin)
-    }
-}
-
-
 // for calculating average from running total, see addOAClcaAssorters
 class AssortAvg() {
     var ncards = 0
@@ -135,7 +99,7 @@ class CardPool(
         }
         appendLine()
 
-        val undervotes = undervotes2()
+        val undervotes = undervotes()
         append("${trunc("", 9)}:")
         contestIds.forEach { id ->
             val contestVote = voteTotals[id]
@@ -150,7 +114,7 @@ class CardPool(
     }
 
     // undervotes per contest when single BallotStyle, no blanks
-    fun undervotes2(): Map<Int, Int> {  // contest -> undervote
+    fun undervotes(): Map<Int, Int> {  // contest -> undervote
         val undervote = voteTotals.map { (id, cands) ->
             val sum = cands.map { it.value }.sum()
             val info = infos[id]!!
@@ -220,12 +184,12 @@ open class CardPoolFromCvrs(
     }
 }
 
-// there are no cvrs; only for non-IRV
+// there are no cvrs, use reportedMargin to set the pool assorter averages.  can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
     oaContests: List<OAContestUnderAudit>,
     cardPools: Map<Int, CardPoolIF>
 ) {
-    // ClcaAssorter already has the contest-wide reported margin. We just have to add the poolAvgs
+    // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
     oaContests.forEach { oaContest ->
         val contestId = oaContest.id
@@ -250,7 +214,7 @@ fun addOAClcaAssortersFromCvrs(
     cardIter: Iterator<Cvr>,
     cardPools: Map<Int, CardPoolIF>
 ) {
-    // sum all the assorters values in one pass across all the cvrs. works for Irvs and Reg.
+    // sum all the assorters values in one pass across all the cvrs. works for both Irvs and Reg.
     while (cardIter.hasNext()) {
         val card: Cvr = cardIter.next()
         if (card.poolId == null) continue

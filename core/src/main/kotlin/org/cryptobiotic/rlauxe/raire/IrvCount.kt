@@ -196,7 +196,6 @@ fun Set<Int>.removeNew( eliminate: Int): Set<Int> {
     return result
 }
 
-
 // this is called from Viewer in "Show Contest" for IRV
 fun showIrvCountResult(result: IrvCountResult, info: ContestInfo) = buildString {
     val multipleRounds = result.ivrRoundsPaths.size > 1

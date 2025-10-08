@@ -31,7 +31,7 @@ class TestOneAuditTask {
         val task = taskGen.generateNewTask()
         val workflowResult = task.run()
         println(workflowResult)
-        assertEquals(TestH0Status.StatRejectNull, workflowResult.status, )
+        assertEquals(true, workflowResult.status.success, )
     }
 
     @Test

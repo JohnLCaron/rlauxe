@@ -210,7 +210,7 @@ class TestMakeFuzzedCvrsFrom {
             val welfordFromFuzz = Welford()
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-                val (contestOA, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01) // TODO no skew
+                val (contestOA, _, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01) // TODO no skew
                 val ncands = contestOA.ncandidates
                 val contest = contestOA.contest as Contest
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
@@ -239,16 +239,16 @@ class TestMakeFuzzedCvrsFrom {
                     print(showChangeMatrix(ncands, choiceChange))
                     // choiceChange.toSortedMap().forEach { println("  $it") }
                 }
-                val nn = Nc - contestOA.contest.Np()
+                val ncast = contestOA.contest.Ncast()
                 choiceChanges.add(choiceChange)
                 val allSum = choiceChange.values.sum()
-                assertEquals(nn, allSum)
+                assertEquals(ncast, allSum)
 
                 val changed = sumOffDiagonal(ncands, choiceChange)
                 val unchanged = sumDiagonal(ncands, choiceChange)
-                assertEquals(nn, changed + unchanged)
+                assertEquals(ncast, changed + unchanged)
 
-                val changedPct = 1.0 - unchanged / nn.toDouble()
+                val changedPct = 1.0 - unchanged / ncast.toDouble()
                 if (showOA) println(" unchanged=$unchanged = changedPct=$changedPct should be ${1.0 - fuzzPct} diff = ${df(fuzzPct - changedPct)}")
                 welfordFromCvrs.update(fuzzPct - changedPct)
 

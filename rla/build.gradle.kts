@@ -20,6 +20,7 @@ dependencies {
 
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":core")))
 }
 

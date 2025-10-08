@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Prng
 
-// A generalization of Cvr, allowing votes to be null, eg for polling
+// A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
     val index: Int,  // index into the original, canonical list of cards

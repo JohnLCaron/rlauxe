@@ -1,0 +1,80 @@
+package org.cryptobiotic.rlauxe.oneaudit
+
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.audit.RegVotes
+import org.cryptobiotic.rlauxe.audit.RegVotesImpl
+import org.cryptobiotic.rlauxe.core.AssorterIF
+import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.cleanCsvString
+import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.roundUp
+import org.cryptobiotic.rlauxe.util.trunc
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.forEach
+import kotlin.math.max
+
+
+private val logger = KotlinLogging.logger("CardPool")
+
+// this is really CardPoolForContest: used for serialization to csv
+data class BallotPool(
+    val name: String,
+    val poolId: Int,
+    val contestId :Int,
+    val ncards: Int,          // ncards for this contest in this pool; TODO hasStyles = false?
+    val votes: Map<Int, Int>, // candid -> nvotes, for plurality. TODO add undervotes ??
+) {
+
+    fun calcReportedMargin(winner: Int, loser: Int): Double {
+        if (ncards == 0) return 0.0
+        val winnerVote = votes[winner] ?: 0
+        val loserVote = votes[loser] ?: 0
+        return (winnerVote - loserVote) / ncards.toDouble()
+    }
+
+    fun votesAndUndervotes(voteForN: Int, ncandidates: Int): Map<Int, Int> {
+        val poolVotes = votes.values.sum()
+        val poolUndervotes = ncards * voteForN - poolVotes
+        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, poolUndervotes)).toMap()
+    }
+
+    fun votesAndUndervotes(voteForN: Int): VotesAndUndervotes {
+        val poolUndervotes = ncards * voteForN - votes.values.sum()
+        return VotesAndUndervotes(votes, poolUndervotes, voteForN)
+    }
+
+    fun reportedAverage(winner: Int, loser: Int): Double {
+        val winnerVotes = votes[winner] ?: 0
+        val loserVotes = votes[loser] ?: 0
+        val reportedMargin = (winnerVotes - loserVotes) / ncards.toDouble() // TODO dont know Nc
+        return margin2mean(reportedMargin)
+    }
+}
+
+fun addOAClcaAssortersFromMargin(
+    oaContests: List<OAContestUnderAudit>,
+    balotPools: List<BallotPool>,
+) {
+    oaContests.forEach { oaUA ->
+        val clcaAssertions = oaUA.pollingAssertions.map { assertion ->
+            val passort = assertion.assorter
+            val pairs = balotPools.filter{ it.contestId == oaUA.id }.map { pool ->
+                val avg = pool.reportedAverage(passort.winner(), passort.loser())
+                // println("pool ${pool.poolId} avg $avg")
+                Pair(pool.poolId, avg)
+            }
+            val poolAvgs = AssortAvgsInPools(pairs.toMap())
+            val clcaAssertion = OneAuditClcaAssorter(assertion.info, passort, true, poolAvgs)
+            ClcaAssertion(assertion.info, clcaAssertion)
+        }
+        oaUA.clcaAssertions = clcaAssertions
+    }
+}

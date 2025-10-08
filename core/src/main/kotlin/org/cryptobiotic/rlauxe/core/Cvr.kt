@@ -82,14 +82,14 @@ data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArra
 
     fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null): AuditableCard {
         val contests = votes.map { it.key }.toIntArray()
-        val candidates = votes.map { it.value }
-        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
+        val candidates = if (poolId == null) votes.map { it.value } else null
         return AuditableCard(id, index, prn, phantom, contests, candidates, poolId)
     }
 
     fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]
-        return Cvr(id, votes, phantom, poolId) // TODO could remove votes im pool?
+        return Cvr(id, votes, phantom, poolId)
     }
 
     override fun equals(other: Any?): Boolean {

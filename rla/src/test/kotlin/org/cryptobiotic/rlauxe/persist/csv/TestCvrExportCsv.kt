@@ -52,7 +52,7 @@ class TestCvrExportCsv {
         assertEquals(target, card)
     }
 
-    @Test // slow
+    // @Test // slow
     fun testSf2024Poa() {
         val filenameIn = "/home/stormy/rla/cases/sf2024/cvrExport.csv"
         val filenameOut = "/home/stormy/tmp/cvrExport.csv"

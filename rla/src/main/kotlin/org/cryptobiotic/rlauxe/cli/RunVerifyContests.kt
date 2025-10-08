@@ -30,7 +30,8 @@ object RunVerifyContests {
         ).default(false)
 
         parser.parse(args)
-        println("RunVerifyContests on $inputDir")
+        print("RunVerifyContests on $inputDir ")
+        if (contestId != null) println("for contest $contestId") else println()
         val results = runVerifyContests(inputDir, contestId, show)
         println(results)
     }

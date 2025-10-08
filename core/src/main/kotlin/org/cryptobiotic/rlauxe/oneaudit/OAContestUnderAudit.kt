@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.*
 
 open class OAContestUnderAudit(
     contest: ContestIF,

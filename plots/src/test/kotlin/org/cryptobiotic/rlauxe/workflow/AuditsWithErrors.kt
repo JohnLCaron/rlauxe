@@ -40,7 +40,7 @@ class AuditsWithErrors {
 
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = .05,
+                    N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                         oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)

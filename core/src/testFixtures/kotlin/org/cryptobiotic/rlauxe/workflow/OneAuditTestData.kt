@@ -1,13 +1,11 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
-import kotlin.math.max
 
 // margin = (winner - loser) / Nc
 // (winner - loser) = margin * Nc
@@ -20,14 +18,16 @@ fun makeOneContestUA(
     cvrPercent: Double,
     undervotePercent: Double,
     phantomPercent: Double,
-    skewPct: Double = 0.0,
-): Pair<OAContestUnderAudit, List<Cvr>> {
+): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
     val nvotes = roundToClosest(Nc * (1.0 - undervotePercent - phantomPercent))
+    // margin = (w - l) / Nc ; nvotes = w + l
+    // margin * Nc + l = w
+    // margin * Nc + nvotes - w = w
+    // margin * Nc + nvotes = 2w
+    // (margin * Nc + nvotes)/2 = w
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    // println("margin = $margin, reported = ${(winner - loser) / Nc.toDouble()} ")
-    // require(doubleIsClose(margin, (winner - loser) / Nc.toDouble()))
-    return makeOneContestUA(winner, loser, cvrPercent, undervotePercent, phantomPercent, skewPct)
+    return makeOneContestUA(winner, loser, cvrPercent, undervotePercent, phantomPercent)
 }
 
 // two contest, specified total votes
@@ -39,9 +39,8 @@ fun makeOneContestUA(
     cvrPercent: Double,
     undervotePercent: Double,
     phantomPercent: Double,
-    skewPct: Double = 0.0,
     contestId: Int = 0,
-): Pair<OAContestUnderAudit, List<Cvr>> {
+): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
     require(cvrPercent > 0.0)
 
     // the candidates
@@ -60,24 +59,23 @@ fun makeOneContestUA(
     // Nc = nvotes / (1.0 - undervotePercent - phantomPercent)
     val Nc = roundToClosest(nvotes / (1.0 - undervotePercent - phantomPercent))
     val Np = roundToClosest(Nc * phantomPercent)
+    val Ncast = Nc - Np
 
-    val cvrSize = roundToClosest(nvotes * cvrPercent)
-    val noCvrSize = nvotes - cvrSize
-    require(cvrSize + noCvrSize == nvotes)
+    val cvrSize = roundToClosest(Ncast * cvrPercent)
+    val noCvrSize = Ncast - cvrSize
+    require(cvrSize + noCvrSize == Ncast)
 
     // reported results for the two strata
     val nvotesCvr = nvotes * cvrPercent
-    val useSkewPct = minOf(skewPct, cvrPercent, 1.0 - cvrPercent)
 
     val winnerCvr = roundToClosest(winnerVotes * cvrPercent)
     val loserCvr = roundToClosest(nvotesCvr - winnerCvr)
 
     val winnerPool = winnerVotes - winnerCvr
     val loserPool = loserVotes - loserCvr
-    val skewVotes = max(0, roundToClosest(winnerVotes * useSkewPct))
 
-    val cvrVotes = mapOf(0 to winnerCvr + skewVotes, 1 to loserCvr)
-    val votesNoCvr = mapOf(0 to winnerPool - skewVotes, 1 to loserPool)
+    val cvrVotes = mapOf(0 to winnerCvr, 1 to loserCvr)
+    val votesNoCvr = mapOf(0 to winnerPool, 1 to loserPool)
     val votesCvrSum = cvrVotes.values.sum()
     val votesPoolSum = votesNoCvr.values.sum()
 
@@ -85,19 +83,19 @@ fun makeOneContestUA(
     val cvrUndervotes = roundToClosest(undervotes * cvrPercent)
     val poolUnderVotes = roundToClosest(undervotes - cvrUndervotes)
 
-    val pools = mutableListOf<BallotPool>()
-    pools.add(
+    val poolNcards = votesPoolSum + poolUnderVotes
+    val pools = listOf(
         // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
         BallotPool(
             "noCvr",
             1, // poolId
             contestId, // contestId
-            ncards = votesPoolSum + poolUnderVotes,
+            ncards = poolNcards,
             votes = votesNoCvr,
         )
     )
 
-    val expectNc = noCvrSize + cvrSize + cvrUndervotes + poolUnderVotes + Np
+    val expectNc = noCvrSize + cvrSize + Np
     if (expectNc != Nc) {
         println("fail1")
     }
@@ -112,57 +110,14 @@ fun makeOneContestUA(
         println("fail3")
     }
 
-    val contest = makeContest(info, cvrVotes, cvrNc, pools, Np=undervotes.toInt())
+    val contest = Contest(info, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
+    info.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
 
     val oaUA = OAContestUnderAudit(contest, true)
-    val clcaAssertions = oaUA.pollingAssertions.map { assertion ->
-        val passort = assertion.assorter
-        val pairs = pools.map { pool ->
-            val avg = pool.reportedAverage(passort.winner(), passort.loser())
-            // println("pool ${pool.poolId} avg $avg")
-            Pair(pool.poolId, avg)
-        }
-        val poolAvgs = AssortAvgsInPools(pairs.toMap())
-        val clcaAssertion = OneAuditClcaAssorter(assertion.info, passort, true, poolAvgs)
-        ClcaAssertion(assertion.info, clcaAssertion)
-    }
-    oaUA.clcaAssertions = clcaAssertions
+    addOAClcaAssortersFromMargin(listOf(oaUA), pools)
 
     val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, cvrUndervotes, pools)
-    return Pair(oaUA, cvrs)
-}
-
-fun makeContest(info: ContestInfo,
-                cvrVotes: Map<Int, Int>,   // candidateId -> nvotes
-                cvrNcards: Int,
-                pools: List<BallotPool>,   // pools for this contest
-                Np: Int): Contest {
-
-    val poolNc = pools.sumOf { it.ncards }
-    val Nc = poolNc + cvrNcards + Np
-
-    //// construct total votes
-    val voteBuilder = mutableMapOf<Int, Int>()  // cand -> vote
-    cvrVotes.forEach { (cand, votes) ->
-        val tvote = voteBuilder[cand] ?: 0
-        voteBuilder[cand] = tvote + votes
-    }
-    pools.forEach { pool ->
-        require(pool.contestId == info.id)
-        pool.votes.forEach { (cand, votes) ->
-            val tvote = voteBuilder[cand] ?: 0
-            voteBuilder[cand] = tvote + votes
-        }
-    }
-    // add 0 candidate votes if needed
-    info.candidateIds.forEach {
-        if (!voteBuilder.contains(it)) {
-            voteBuilder[it] = 0
-        }
-    }
-    val voteInput = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap()
-
-    return Contest(info, voteInput, Nc = Nc, Ncast = poolNc + cvrNcards)
+    return Triple(oaUA, pools, cvrs)
 }
 
 fun makeTestMvrs(

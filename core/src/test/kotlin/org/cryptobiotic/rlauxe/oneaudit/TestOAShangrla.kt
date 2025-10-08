@@ -3,8 +3,11 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.calcClcaAssorterMargin
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,18 +35,22 @@ class TestOAShangrla {
     //    mvr has winner vote = (2-assorter_mean_poll)/(2-v/u)
     //    otherwise = 1/2
 
-    /* @Test TODO match with SHANGRLA, make tests pass
+    @Test // TODO match with SHANGRLA, make tests pass
     fun testOAShangrla() {
         val winnerNoCvr = makeCvr(0, "noCvr", poolId=1)
         val loserNoCvr = makeCvr(1, "noCvr", poolId=1)
         val otherNoCvr = makeCvr(2, "noCvr", poolId=1)
 
         val margin = .6571495728340697
-        val N = 10000
+        val Nc = 10000
+
+        val (contestUA, pools, testCvrs) = makeOneContestUA(margin, Nc, cvrPercent = 0.33, undervotePercent = 0.0, phantomPercent = 0.0)
+
+
         // val contestOA: OneAuditContest = makeContestOA(N, margin, poolPct = 0.66, poolMargin = mean2margin(0.625))
         // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-        val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 0.33, undervotePercent = 0.0, phantomPercent = 0.0) // poolMargin = mean2margin(0.625))
-        val contestUA = contestOA.makeContestUnderAudit()
+        //val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 0.33, undervotePercent = 0.0, phantomPercent = 0.0) // poolMargin = mean2margin(0.625))
+        //val contestUA = contestOA.makeContestUnderAudit()
         val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
 
         val assortMargin = cassorter.assorter.reportedMargin()
@@ -58,10 +65,6 @@ class TestOAShangrla {
         assertEquals(0.0, loserAssortValue)
         assertEquals(0.5, otherAssortValue)
 
-        println("pool=${contestOA.pools[1]}")
-        val poolMargin = contestOA.pools[1]!!.calcReportedMargin(0, 1)
-        assertEquals(mean2margin(0.625), poolMargin)
-
         // From Shangrla
         // tally_pool 31-119 means: 0.625
         // mvr_assort: 0.5, cvr_assort: 0.625
@@ -70,6 +73,12 @@ class TestOAShangrla {
         // mvr_assort: 1.0, cvr_assort: 1.0
         //overstatement=0.7446845752661285 margin=0.6571495728340697
         assertEquals(0.6515990033578625, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
+
+
+        val pool = pools[0]
+        println("pool=${pool}")
+        val poolMargin = pool.calcReportedMargin(0, 1)
+        assertEquals(margin, poolMargin)
 
         // for pooled assort from pool with avg Ā(g)
         //   mvr has loser vote = (1 - Ā(g)/u) / (2-v/u)
@@ -116,29 +125,31 @@ class TestOAShangrla {
         assertEquals(expect, cassorter.toString())
     }
 
-     */
-
     /*
     @Test
     fun testONE() {
         // two candidate plurailty
-        val contest = makeContestOA(1000, 923, cvrPercent = .57, .007, undervotePercent = .0, phantomPercent = .0)
-        println(contest)
+        // fun makeOneContestUA(
+        //    winnerVotes: Int,
+        //    loserVotes: Int,
+        //    cvrPercent: Double,
+        //    undervotePercent: Double,
+        //    phantomPercent: Double,
+        //    contestId: Int = 0,
+        //):
+        val (contestUA, pools, testCvrs) = makeOneContestUA(1000, 923, cvrPercent = 0.57, undervotePercent = 0.0, phantomPercent = 0.0)
+        println(contestUA)
 
-        val testCvrs = contest.makeTestCvrs()
-        val contestOA = contest.makeContestUnderAudit()
-        println(contestOA)
-
-        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        val bassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
-        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${mean2margin(bassorter.meanAssort())} ")
+        println("reportedMargin = ${bassorter.assorter.reportedMargin()} clcaMargin = ${mean2margin(bassorter.reportedAssortMargin)} ")
 
         // sanity check
         val allCount = testCvrs.count()
-        val cvrCount = testCvrs.filter { it.id != "noCvr" }.count()
-        val noCount = testCvrs.filter { it.id == "noCvr" }.count()
+        val cvrCount = testCvrs.count { it.id != "noCvr" }
+        val noCount = testCvrs.count { it.id == "noCvr" }
         println("allCount = $allCount cvrCount=$cvrCount noCount=$noCount")
-        assertEquals(allCount, contest.Nc)
+        assertEquals(allCount, contestUA.Nc)
         assertEquals(cvrCount, contest.strata[1].Ng)
         assertEquals(noCount, contest.strata[0].Ng)
 
@@ -148,7 +159,7 @@ class TestOAShangrla {
         val cvrAvgp = testCvrs.filter { it.id != "noCvr" }.map { pluralityAssorter.assort(it) }.average()
         val noAvgp = testCvrs.filter { it.id == "noCvr" }.map { pluralityAssorter.assort(it) }.average()
         println("allAvgp = $allAvgp cvrAvgp=$cvrAvgp noAvgp=$noAvgp")
-        assertEquals(allAvgp, bassorter.avgCvrAssortValue)
+        assertEquals(allAvgp, bassorter.reportedAssortMargin)
         assertEquals(cvrAvgp, bassorter.stratumInfos["hasCvr"]!!.avgBatchAssortValue)
         assertEquals(noAvgp, bassorter.stratumInfos["noCvr"]!!.avgBatchAssortValue)
 
@@ -161,7 +172,7 @@ class TestOAShangrla {
         println("allAvg = $allAvg cvrAvg=$cvrAvg noAvg=$noAvg")
 
         val pairs = testCvrs.zip(testCvrs)
-        val calc = bassorter.calcAssorterMargin(pairs)
+        val calc = bassorter.calcClcaAssorterMargin(pairs)
         assertEquals(allAvg, margin2mean(calc))
 
         // TODO what should this equal??
@@ -176,6 +187,5 @@ class TestOAShangrla {
         println("clcaMean = ${bassorter.meanAssort()}")
         // assertEquals(allAvg, margin2mean(bassorter.clcaMargin), doublePrecision)
     }
-
-     */
+*/
 }

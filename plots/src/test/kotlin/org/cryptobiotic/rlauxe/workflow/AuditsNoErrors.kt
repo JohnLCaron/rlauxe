@@ -17,7 +17,6 @@ class AuditsNoErrors {
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10
     val N = 50000
-    val skewPct = 0.0
 
     @Test
     fun genAuditsNoErrorsPlots() {
@@ -45,7 +44,7 @@ class AuditsNoErrors {
 
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, cvrPercent, 0.0, skewPct = skewPct,
+                    N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
                         oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalBet)

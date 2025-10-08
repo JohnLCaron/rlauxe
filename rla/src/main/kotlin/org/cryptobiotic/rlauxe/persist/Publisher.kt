@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger("Publisher")
       contests.json         // ContestsUnderAuditJson
       sortedCards.csv       // AuditableCardCsv (or)
       sortedCards.zip       // AuditableCardCsv
-      ballotPool.csv        // BallotPoolCsv (OneAudit only)
+      ballotPools.csv        // BallotPoolCsv (OneAudit only)
 
       roundX/
         auditState.json     // AuditRoundJson

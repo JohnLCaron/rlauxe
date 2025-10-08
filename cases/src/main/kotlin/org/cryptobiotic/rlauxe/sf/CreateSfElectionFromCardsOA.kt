@@ -36,7 +36,7 @@ fun createSfElectionFromCvrExportOA(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
-    cvrCsvFilename: String,
+    cvrExportCsv: String,
     auditConfigIn: AuditConfig? = null,
     show: Boolean = false
 ) {
@@ -51,18 +51,18 @@ fun createSfElectionFromCvrExportOA(
 
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
 
-    // pass 1 through cvrs, make card pools
+    // pass 1 through cvrs, make card pools, including unpooled
     val (cardPools: Map<Int, CardPoolFromCvrs>, contestTabSums) = createCardPools(
         auditDir,
         contestInfos.associateBy { it.id },
         castVoteRecordZip,
         contestManifestFilename,
-        cvrCsvFilename,
+        cvrExportCsv,
     )
 
-    // write ballot pools
+    // write ballot pools, but not unpooled
     val ballotPools = cardPools.values.map { it.toBallotPools() }.flatten()
-    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
+    writeBallotPoolCsvFile(ballotPools.filter { it.name != unpooled }, publisher.ballotPoolsFile()) // dont write unpooled
     logger.info{" total ${ballotPools.size} pools to ${publisher.ballotPoolsFile()}"}
 
     // make contests based on cardPool tabulations
@@ -71,12 +71,12 @@ fun createSfElectionFromCvrExportOA(
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    addOAClcaAssortersFromCvrExport(auditableContests, cvrExportCsvIterator(cvrCsvFilename), cardPools)
+    addOAClcaAssortersFromCvrExport(auditableContests, cvrExportCsvIterator(cvrExportCsv), cardPools)
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, allContests)
-    // leave out ballot pools since the cvrs havethe votes in them
-    val state = checkContestsWithCvrs(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), ballotPools=emptyList(), show = true)
+    // leave out ballot pools since the cvrs have the votes in them
+    val state = checkContestsWithCvrs(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), ballotPools=emptyList(), show = true)
     logger.info{state}
 
     writeContestsJsonFile(allContests, publisher.contestsFile())
@@ -92,7 +92,7 @@ fun createSfElectionFromCvrExportOA(
 val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
 val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
 
-val votes = tabulateCvrs(CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
+val votes = tabulateCvrs(CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)))
 votes.forEach { (id, ct) ->
     val contestName = contestManifest.contests[id]!!.Description
     val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
@@ -120,7 +120,7 @@ fun createCardPools(
     contestInfos: Map<Int, ContestInfo>,
     castVoteRecordZip: String,
     contestManifestFilename: String,
-    cvrCsvFilename: String,
+    cvrExportCsv: String,
 ): Pair<Map<Int, CardPoolFromCvrs>, Map<Int, ContestTabulation>> {
 
     val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
@@ -129,7 +129,7 @@ fun createCardPools(
     // make the card pools
     var count = 0
     val cardPools: MutableMap<String, CardPoolFromCvrs> = mutableMapOf()
-    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
         val pool = cardPools.getOrPut(cvrExport.poolKey() ) {
@@ -140,7 +140,7 @@ fun createCardPools(
     }
     println("$count cvrs")
 
-    // write the ballot pool file. read back in createSortedCards to mark the pooled cvrs TODO needed?
+    // write the ballot pool file. read back in createSortedCards to mark the pooled cvrs
     val poolFilename = "$auditDir/$ballotPoolsFile"
     logger.info{" writing to $poolFilename with ${cardPools.size} pools"}
     val poutputStream = FileOutputStream(poolFilename)

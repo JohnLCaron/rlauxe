@@ -23,7 +23,7 @@ class TestPersistentOneAudit {
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000
-        val (contestOA, testCvrs) = makeOneContestUA(N+100, N-100, cvrPercent = .95, undervotePercent=.0, phantomPercent = .0)
+        val (contestOA, _, testCvrs) = makeOneContestUA(N+100, N-100, cvrPercent = .95, undervotePercent=.0, phantomPercent = .0)
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testMvrs = testCvrs

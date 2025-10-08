@@ -165,7 +165,7 @@ class TestBoulderUndervotes {
 
         // show the sums and compare to sovo
         // val list1 = election1.cardPools.map { it.undervotes() }
-        val list2 = election2.cardPools.map { it.undervotes2() }
+        val list2 = election2.cardPools.map { it.undervotes() }
 
         //val sum1 = mutableMapOf<Int, Int>()
         //sum1.mergeReduce(list1)

@@ -1,4 +1,13 @@
 # Developer Notes
+
+## Code Coverage
+
+| date       | pct    | cover/total LOC |
+|------------|--------|-----------------|
+| 10/02/2025 | 82.9 % | 4476/5400       |
+ 
+
+## UML
 last changed: 03/10/2025
 
 ![rlauxe core UML](images/rlauxeUML.svg)

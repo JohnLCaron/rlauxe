@@ -58,6 +58,7 @@ interface ContestIF {
 
     fun Nc(): Int  // independent contest bound
     fun Np(): Int  // number of phantoms
+    fun Ncast() = Nc() - Np()
     fun Nundervotes(): Int  // number of undervotes
     fun info(): ContestInfo
     fun winnerNames(): List<String>

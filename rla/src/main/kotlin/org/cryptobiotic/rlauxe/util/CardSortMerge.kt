@@ -16,14 +16,14 @@ private val maxChunk = 100000
 // assume auditConfig is already in the auditDir
 class SortMerge(
     val auditDir: String,
-    val cvrCsvFilename: String, // open with cvrExportCsvIterator; contains CvrExport objects
+    val cvrExportCsv: String, // open with cvrExportCsvIterator; contains CvrExport objects
     val workingDir: String,
     val outputFile: String,
     val pools: Map<String, Int>?) {
 
     fun run() {
         // out of memory sort by sampleNum()
-        sortCards(auditDir, cvrCsvFilename, workingDir, pools = pools)
+        sortCards(auditDir, cvrExportCsv, workingDir, pools = pools)
         mergeCards(auditDir, workingDir, outputFile)
     }
 
@@ -60,7 +60,7 @@ class SortMerge(
     // out of memory sorting
     fun sortCards(
         auditDir: String,
-        cvrCsvFilename: String, // may be zipped or not
+        cvrExportCsv: String, // may be zipped or not
         workingDirectory: String,
         pools: Map<String, Int>?
     ) {
@@ -75,7 +75,7 @@ class SortMerge(
         val cardSorter = CardSorter(workingDirectory, prng, maxChunk, pools = pools)
 
         //// reading CvrExport and sorted chunks
-        val cardIter: Iterator<CvrExport> = cvrExportCsvIterator(cvrCsvFilename)
+        val cardIter: Iterator<CvrExport> = cvrExportCsvIterator(cvrExportCsv)
         while (cardIter.hasNext()) {
             cardSorter.add(cardIter.next())
         }

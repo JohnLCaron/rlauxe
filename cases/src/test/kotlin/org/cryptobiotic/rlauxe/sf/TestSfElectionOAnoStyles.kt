@@ -33,7 +33,7 @@ class TestSfElectionOAnoStyles {
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
-            cvrCsvFilename = cvrCsv,
+            cvrExportCsv = cvrCsv,
         )
     }
 
@@ -58,7 +58,7 @@ class TestSfElectionOAnoStyles {
                 castVoteRecordZip = zipFilename,
                 contestManifestFilename = "ContestManifest.json",
                 candidateManifestFile = "CandidateManifest.json",
-                cvrCsvFilename = cvrCsv,
+                cvrExportCsv = cvrCsv,
                 auditConfigIn = auditConfig,
                 workingDir = workingDir,
             )

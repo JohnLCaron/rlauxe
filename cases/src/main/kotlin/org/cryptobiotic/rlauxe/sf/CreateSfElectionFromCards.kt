@@ -63,11 +63,11 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
 }
 
 // TODO add phantoms here
-fun createSortedCards(topDir: String, auditDir: String, cvrCsvFilename: String, zip: Boolean = true, workingDir: String? = null, ballotPoolFile: String? = null) {
+fun createSortedCards(topDir: String, auditDir: String, cvrExportCsv: String, zip: Boolean = true, workingDir: String? = null, ballotPoolFile: String? = null) {
     val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
     val pools = ballotPools?.poolNameToId() // all we need is to know what the id is for each pool, so we can assign
     val working = workingDir ?: "$topDir/sortChunks"
-    SortMerge(auditDir, cvrCsvFilename, workingDir = working, "$auditDir/$sortedCardsFile", pools = pools).run()
+    SortMerge(auditDir, cvrExportCsv, workingDir = working, "$auditDir/$sortedCardsFile", pools = pools).run()
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }
@@ -80,7 +80,7 @@ fun createSfElectionFromCvrExport(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
-    cvrCsvFilename: String,
+    cvrExportCsv: String,
     auditConfigIn: AuditConfig? = null,
     show: Boolean = false
 ) {
@@ -92,7 +92,7 @@ fun createSfElectionFromCvrExport(
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
     val infoMap = contestInfos.associateBy { it.id }
 
-    val contestTabs = makeContestTabulations(cvrCsvFilename, infoMap)
+    val contestTabs = makeContestTabulations(cvrExportCsv, infoMap)
     val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, contestTabs, contestNcs)
 
     val irvInfos = contestInfos.filter {!it.isIrv }
@@ -104,11 +104,11 @@ fun createSfElectionFromCvrExport(
     val allContests = (contestsUA + irvContests).filter { it.preAuditStatus == TestH0Status.InProgress && !auditConfig.skipContests.contains(it.id) }
 
     // make all the clca assertions in one go
-    addClcaAssertions(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)))
+    addClcaAssertions(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)))
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrCsvFilename)), show = true)
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), show = true)
 
     val publisher = Publisher(auditDir)
     writeContestsJsonFile(allContests, publisher.contestsFile())
@@ -172,9 +172,9 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
     return contestNcs
 }
 
-fun makeContestTabulations(cvrCsvFilename: String, infoMap: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+fun makeContestTabulations(cvrExportCsv: String, infoMap: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
-    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
 
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()
@@ -187,11 +187,11 @@ fun makeContestTabulations(cvrCsvFilename: String, infoMap: Map<Int, ContestInfo
 }
 
 // sum all of the cards' votes
-fun makeContestVotesFromCrvExport(cvrCsvFilename: String): Map<Int, ContestVotes> {
+fun makeContestVotesFromCrvExport(cvrExportCsv: String): Map<Int, ContestVotes> {
     val contestVotes = mutableMapOf<Int, ContestVotes>()
 
     var count = 0
-    val cvrIter = cvrExportCsvIterator(cvrCsvFilename)
+    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
 
     while (cvrIter.hasNext()) {
         val cvrExport: CvrExport = cvrIter.next()

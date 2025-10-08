@@ -3,12 +3,10 @@ package org.cryptobiotic.rlauxe.sf
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
-import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.MvrManagerCardsSingleRound
@@ -21,7 +19,7 @@ import kotlin.test.Test
 class TestSfElectionOA {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
-    val cvrCsv = "$sfDir/cvrExport.csv"
+    val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
     val topDir = "/home/stormy/rla/cases/sf2024oa"
 
     // create the audit contests using the cvrExport files
@@ -35,7 +33,7 @@ class TestSfElectionOA {
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
-            "$sfDir/$cvrExportCsvFile",
+            cvrExportCsv = cvrExportCsv,
             show = true,
         )
         createSF2024OAsortedCards()
@@ -48,9 +46,8 @@ class TestSfElectionOA {
         val sfDir = "/home/stormy/rla/cases/sf2024"
         val topDir = "/home/stormy/rla/cases/sf2024oa"
         val auditDir = "$topDir/audit"
-        val cvrCsv = "$sfDir/cvrExport.csv"
         val ballotPoolFile = "$auditDir/$ballotPoolsFile"
-        createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
+        createSortedCards(topDir, auditDir, cvrExportCsv = cvrExportCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
     }
 
     // @Test
@@ -73,7 +70,7 @@ class TestSfElectionOA {
                 castVoteRecordZip = zipFilename,
                 contestManifestFilename = "ContestManifest.json",
                 candidateManifestFile = "CandidateManifest.json",
-                cvrCsvFilename = cvrCsv,
+                cvrExportCsv = cvrExportCsv,
                 auditConfigIn = auditConfig,
                 show = false,
             )
@@ -83,7 +80,7 @@ class TestSfElectionOA {
             createSortedCards(
                 topDir,
                 auditDir,
-                cvrCsv,
+                cvrExportCsv = cvrExportCsv,
                 zip = true,
                 workingDir = workingDir,
                 ballotPoolFile = ballotPoolFile

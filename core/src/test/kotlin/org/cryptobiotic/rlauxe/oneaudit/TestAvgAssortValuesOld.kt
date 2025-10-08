@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import kotlin.test.Test
-
 // when does (winner - loser) / Nc agree with AvgAssortValue?
-class TestAvgAssortValues {
+class TestAvgAssortValuesOld {
 
     /*
     @Test

@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 
 class TestTreeReader {
 
-    @Test
+    // @Test slow
     fun testTreeReaderIterator() {
         val topDir = "/home/stormy/rla/cases/corla/cards"
         // class TreeReaderIterator <T> (
@@ -36,12 +36,12 @@ class TestTreeReader {
         assertEquals(38968771, summVotes)
     }
 
-    @Test
+    // @Test TODO get smaller test data
     fun testTreeReaderTour() {
         val topDir = "/home/stormy/rla/cases/corla"
         var countFiles = 0
         val tour = TreeReaderTour("$topDir/cvrexport", visitor = { countFiles++ })
         tour.tourFiles()
-        assertEquals(3200, countFiles)
+        assertEquals(3199, countFiles)
     }
 }

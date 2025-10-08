@@ -1,17 +1,12 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.makeTestContestOAIrv
 import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
-import org.cryptobiotic.rlauxe.raire.RaireAssertion
-import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -73,7 +68,7 @@ class TestOneAuditJson {
     }
 
     fun makeTestContestOA(): OAContestUnderAudit {
-        val (contestOA, testCvrs) = makeOneContestUA(23000, 21000, cvrPercent = .70, undervotePercent=.01, phantomPercent=.01)
+        val (contestOA, _, _) = makeOneContestUA(23000, 21000, cvrPercent = .70, undervotePercent=.01, phantomPercent=.01)
         contestOA.preAuditStatus = TestH0Status.ContestMisformed
         val minAllAsserter = contestOA.minClcaAssertion()
         assertNotNull(minAllAsserter)

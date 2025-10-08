@@ -7,7 +7,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestSmall() {
-        val (contestOA, testCvrs) = makeOneContestUA(100, 50, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
+        val (contestOA, _, testCvrs) = makeOneContestUA(100, 50, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
         println(contestOA)
 
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
@@ -19,7 +19,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContest() {
-        val (contestOA, testCvrs) = makeOneContestUA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = 0.0)
+        val (contestOA, _, testCvrs) = makeOneContestUA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = 0.0)
         println(contestOA)
 
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
@@ -30,7 +30,7 @@ class TestOneAudit {
 
     @Test
     fun testMakeScaledMvrs() {
-        val (contestOA, testCvrs) = makeOneContestUA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = 0.0)
+        val (contestOA, _, testCvrs) = makeOneContestUA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = 0.0)
         println(contestOA)
 
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
@@ -41,7 +41,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestMax99() {
-        val (contestOA, testCvrs) = makeOneContestUA(100, 50, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
+        val (contestOA, _, testCvrs) = makeOneContestUA(100, 50, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
         println(contestOA)
 
         val auditConfig = AuditConfig(

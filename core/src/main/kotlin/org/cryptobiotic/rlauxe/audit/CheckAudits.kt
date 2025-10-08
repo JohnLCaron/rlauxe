@@ -72,6 +72,7 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
     }
 }
 
+// TODO use VerifyContests instead. problem here is whether the ballot pools have to be added or not.
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>,
                           ballotPools: List<BallotPool> = emptyList(), show: Boolean = false) = buildString {
 

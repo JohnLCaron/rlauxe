@@ -16,7 +16,6 @@ class OneAuditNoErrors {
     val N = 50000
     val cvrPercent = 0.80
     val fuzzPct = 0.0
-    val skewPct = 0.0
 
     @Test
     fun oaNoErrorsPlots() {
@@ -43,7 +42,7 @@ class OneAuditNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             val oneauditGeneratorDefault = OneAuditSingleRoundAuditTaskGenerator(
-                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = skewPct,
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalBet"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = nsimEst,
@@ -53,7 +52,7 @@ class OneAuditNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorDefault))
 
             val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGenerator(
-                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = skewPct,
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "bet99"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = nsimEst,
@@ -63,7 +62,7 @@ class OneAuditNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorBet99))
 
             val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGenerator(
-                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct, skewPct = skewPct,
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "eta0Eps"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = nsimEst,

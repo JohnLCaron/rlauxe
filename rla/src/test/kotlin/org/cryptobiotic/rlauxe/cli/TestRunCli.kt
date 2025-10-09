@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 
 class TestRunCli {
@@ -7,7 +8,7 @@ class TestRunCli {
     @Test
     fun testCliRoundClca() {
         // val topdir = "/home/stormy/rla/persist/testCliRoundClca"
-        val topdir = kotlin.io.path.createTempDirectory().toString()
+        val topdir = createTempDirectory().toString()
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -29,7 +30,7 @@ class TestRunCli {
     @Test
     fun testCliRoundPolling() {
         // val topdir = "/home/stormy/rla/persist/testCliRoundPolling"
-        val topdir = kotlin.io.path.createTempDirectory().toString()
+        val topdir = createTempDirectory().toString()
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -49,7 +50,7 @@ class TestRunCli {
     @Test
     fun testCliRoundRaire() {
         // val topdir = "/home/stormy/rla/persist/testCliRoundRaire"
-        val topdir = kotlin.io.path.createTempDirectory().toString()
+        val topdir = createTempDirectory().toString()
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,

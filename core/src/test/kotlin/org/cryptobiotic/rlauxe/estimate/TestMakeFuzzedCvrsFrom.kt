@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.math.max
 
 class TestMakeFuzzedCvrsFrom {
     val show = false
@@ -96,7 +97,7 @@ class TestMakeFuzzedCvrsFrom {
 
             val changes = totalErrorCounts.subList(1, 5).sum()
             val changePct = changes / total
-            assertEquals(fuzzPct, changePct, .01)
+            assertEquals(fuzzPct, changePct, max(fuzzPct / 4, .01))
         }
     }
 

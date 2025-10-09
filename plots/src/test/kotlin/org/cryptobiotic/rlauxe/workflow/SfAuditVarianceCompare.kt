@@ -1,13 +1,8 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AssertionRound
-import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFrom
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
-import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
-import org.cryptobiotic.rlauxe.rlaplots.wrsScatterPlot
-import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 import kotlin.test.Test
 

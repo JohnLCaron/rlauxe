@@ -10,7 +10,6 @@ version = libs.versions.rlauxe.get()
 
 dependencies {
     api(project(":core"))
-    api(project(":rla"))
     implementation(files("../libs/raire-java-1.0.2-jar-with-dependencies.jar"))
 
     implementation(libs.bull.result)

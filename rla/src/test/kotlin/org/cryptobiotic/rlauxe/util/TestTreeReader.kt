@@ -2,13 +2,12 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrExportFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestTreeReader {
 
-    // @Test slow
+    @Test
     fun testTreeReaderIterator() {
         val topDir = "/home/stormy/rla/cases/corla/cards"
         // class TreeReaderIterator <T> (
@@ -36,7 +35,7 @@ class TestTreeReader {
         assertEquals(38968771, summVotes)
     }
 
-    // @Test TODO get smaller test data
+    @Test // TODO get smaller test data
     fun testTreeReaderTour() {
         val topDir = "/home/stormy/rla/cases/corla"
         var countFiles = 0

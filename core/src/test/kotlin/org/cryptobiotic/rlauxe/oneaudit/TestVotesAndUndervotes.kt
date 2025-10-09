@@ -74,7 +74,7 @@ class TestVotesAndUndervotes {
     }
 
     @Test
-    fun testMakeContestsWithUndervotes() {
+    fun testMakeContestsWithUndervotesAndPhantoms() {
         val candVotes = mutableListOf<Map<Int, Int>>()
         candVotes.add(mapOf(0 to 200, 1 to 123, 2 to 17))
         candVotes.add(mapOf(0 to 71, 1 to 123, 2 to 0, 3 to 77, 4 to 99))
@@ -89,11 +89,11 @@ class TestVotesAndUndervotes {
 
         // check
         contestTabs.forEach { (id, tab) ->
-            println("contestId=${id}")
-            println("  tabVotes=${tab}")
+            println("contestTab=${tab}")
             val contest = contestMap[id]!!
+            println("contest=${contest}")
             assertEquals(contest.Nc, tab.ncards)
-            assertEquals(contest.undervotes, tab.undervotes)
+            assertEquals(contest.undervotes + contest.Np(), tab.undervotes)
             assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
         }
     }

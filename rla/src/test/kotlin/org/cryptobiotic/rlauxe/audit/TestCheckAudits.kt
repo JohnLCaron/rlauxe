@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import kotlin.test.Test
 
 class TestCheckAudits {
@@ -21,7 +21,7 @@ class TestCheckAudits {
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
         val state = checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExport)))
         println(state)
-        assertTrue(!state.contains("***"))
+        Assertions.assertTrue(!state.contains("***"))
     }
 
     // TODO move to verifier
@@ -34,7 +34,7 @@ class TestCheckAudits {
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
         val state = checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cardIter))
         println(state)
-        assertTrue(!state.contains("***"))
+        Assertions.assertTrue(!state.contains("***"))
 
         val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(CvrIteratorAdapter(cardIter)).toSortedMap()
         tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}

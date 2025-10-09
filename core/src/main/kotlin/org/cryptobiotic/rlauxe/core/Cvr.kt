@@ -80,10 +80,10 @@ data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArra
         return id.substring(0, lastIdx)
     }
 
-    fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null): AuditableCard {
+    fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCard {
         val contests = votes.map { it.key }.toIntArray()
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
-        val candidates = if (poolId == null) votes.map { it.value } else null
+        val candidates = if (poolId == null || showPoolVotes) votes.map { it.value } else null
         return AuditableCard(id, index, prn, phantom, contests, candidates, poolId)
     }
 

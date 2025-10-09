@@ -192,6 +192,7 @@ fun createBoulderElectionOA(
     logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
 
     // write cards TODO add phantoms
+
     val cards = createSortedCards(election.cvrs, election.cardPools, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}

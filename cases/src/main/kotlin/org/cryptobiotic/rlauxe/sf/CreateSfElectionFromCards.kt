@@ -62,7 +62,7 @@ fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestMan
     return summaryTotal
 }
 
-// TODO add phantoms here
+// add phantoms here, but there arent any
 fun createSortedCards(topDir: String, auditDir: String, cvrExportCsv: String, zip: Boolean = true, workingDir: String? = null, ballotPoolFile: String? = null) {
     val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
     val pools = ballotPools?.poolNameToId() // all we need is to know what the id is for each pool, so we can assign
@@ -93,9 +93,9 @@ fun createSfElectionFromCvrExport(
     val infoMap = contestInfos.associateBy { it.id }
 
     val contestTabs = makeContestTabulations(cvrExportCsv, infoMap)
-    val contests = makeRegularContests(contestInfos.filter { it.choiceFunction == SocialChoiceFunction.PLURALITY }, contestTabs, contestNcs)
+    val contests = makeRegularContests(contestInfos.filter { !it.isIrv }, contestTabs, contestNcs)
 
-    val irvInfos = contestInfos.filter {!it.isIrv }
+    val irvInfos = contestInfos.filter { it.isIrv }
     val irvContests = if (irvInfos.isEmpty()) emptyList() else {
         makeRaireContests(irvInfos, contestTabs, contestNcs)
     }
@@ -225,7 +225,7 @@ fun makeRegularContests(contestInfos: List<ContestInfo>, contestTabs: Map<Int, C
     contestInfos.forEach { info: ContestInfo ->
         val contestTab = contestTabs[info.id]
         if (contestTab == null) {
-            logger.warn {"*** Cant find reg contest '${info.id}' in contestTabulations"}
+            logger.warn {"*** Cant find reg contest '${info.id}' in contestTabulations, presume no votes"}
         } else {
             // TODO another source of Nc ? Currently the ElectionSummary StaxContest agrees with the cvr list
             contests.add( Contest(info, contestTab.votes, contestNcs[info.id] ?: contestTab.ncards, contestTab.ncards))

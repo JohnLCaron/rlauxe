@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -181,7 +181,7 @@ fun createBoulderElectionOAsim(
     if (clca) {
         addClcaAssertions(contestsUA, CvrIteratorAdapter(cards.iterator()))
     } else {
-        addOAClcaAssortersFromCvrs(contestsUA as List<OAContestUnderAudit>, CvrIteratorAdapter(cards.iterator()), election.cardPools.associate { it.poolId to it })
+        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associateBy { it.poolId })
     }
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)

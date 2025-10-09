@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.audit.tabulateCvrs
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TestAssorterMeans {
 
@@ -53,43 +55,11 @@ class TestAssorterMeans {
             voteForN = nwinners,
         )
 
-        val testData = ContestTestDataNWinners(
-            info,
-            Nc = Nc,
-            phantomPct = 0.01,
-        )
+        val testData = ContestTestDataNWinners(info, Nc = Nc, phantomPct = 0.01)
         val (cvrs, contest) = testData.makeCvrsAndContest()
 
         testMeanAssort(cvrs, contest)
     }
-
-    /*
-    Not allowed
-    @Test
-    fun testSuperNwinners() {
-        val Nc = 1776
-        val ncands = 3
-        val nwinners = 2
-
-        val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
-        val info = ContestInfo("contest0", 0,
-            candidateNames = listToMap(candidateNames),
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            nwinners = nwinners,
-            voteForN = nwinners,
-            minFraction = .20,
-        )
-
-        val testData = ContestTestDataNWinners(
-            info,
-            Nc = Nc,
-            phantomPct = 0.0,
-        )
-
-        val (cvrs, contest) = testData.makeCvrsAndContest()
-        println("$contest winners=${contest.winners} losers=${contest.losers}")
-        testMeanAssort(cvrs, contest)
-    } */
 
     fun testMeanAssort(cvrs: List<Cvr>, contest: Contest) {
         val contestAU = ContestUnderAudit(contest, isComparison = false)
@@ -107,7 +77,7 @@ class TestAssorterMeans {
             // println("   assorter assort margin = ${mean2margin(assortAvg)}")
             // cvrs.forEach{ println(" $it == ${assorter.assort(it)}")}
 
-            // assertEquals(assortAvg, margin2mean(assorter.reportedMargin()), doublePrecision)
+            assertEquals(assortAvg, margin2mean(assorter.reportedMargin()), doublePrecision)
         }
     }
 }
@@ -181,8 +151,8 @@ data class ContestTestDataNWinners(
         }
         cvrVoteTracker.trackVotesRemaining.forEach { require(it.second == 0) }
 
-        val wtf = makePhantomCvrs(info.id, phantomCount)
-        result.addAll(wtf)
+        val phantoms = makePhantomCvrs(info.id, phantomCount)
+        result.addAll(phantoms)
         return result
     }
 }

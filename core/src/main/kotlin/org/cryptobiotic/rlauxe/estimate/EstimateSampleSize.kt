@@ -305,7 +305,7 @@ fun simulateSampleSizeClcaAssorter(
         startingTestStatistic = startingTestStatistic,
         startingRates = errorRates,
         estimatedDistribution = makeDeciles(result.sampleCount),
-        firstSample = result.sampleCount[0],
+        firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
         )
 
     return result

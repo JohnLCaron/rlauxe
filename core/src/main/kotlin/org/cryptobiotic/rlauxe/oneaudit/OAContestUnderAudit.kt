@@ -107,13 +107,6 @@ class OneAuditClcaAssorter(
         appendLine("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
     }
 
-    fun showPools() = buildString {
-        appendLine("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
-        poolAverages.assortAverage.forEach {
-            appendLine("  pool=${it.key} average=${it.value}")
-        }
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -61,9 +61,11 @@ fun createSfElectionFromCvrExportOA(
     )
 
     // write ballot pools, but not unpooled
-    val ballotPools = cardPools.values.map { it.toBallotPools() }.flatten()
-    writeBallotPoolCsvFile(ballotPools.filter { it.name != unpooled }, publisher.ballotPoolsFile()) // dont write unpooled
-    logger.info{" total ${ballotPools.size} pools to ${publisher.ballotPoolsFile()}"}
+    val cardPoolsNotUnpooled = cardPools.values.filter{ it.poolName != unpooled }
+    val poolCards = cardPoolsNotUnpooled.sumOf { it.totalCards }
+    val ballotPools = cardPoolsNotUnpooled.map { it.toBallotPools() }.flatten()
+    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile()) // dont write unpooled
+    logger.info{" ${cardPools.size} cardPools, ${poolCards} cards to ${publisher.ballotPoolsFile()}"}
 
     // make contests based on cardPool tabulations
     val unpooled = cardPools.values.find { it.poolName == unpooled }!!
@@ -71,7 +73,8 @@ fun createSfElectionFromCvrExportOA(
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    addOAClcaAssortersFromCvrExport(auditableContests, cvrExportCsvIterator(cvrExportCsv), cardPools)
+    val poolsOnly = cardPools.filter { it.value.poolName != org.cryptobiotic.rlauxe.oneaudit.unpooled }
+    addOAClcaAssortersFromMargin(auditableContests, poolsOnly)
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, allContests)
@@ -155,14 +158,14 @@ fun createCardPools(
 
     val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
     println("staxContests")
-    contestTabSums.toSortedMap().forEach { (id, ct) ->
+    contestTabSums.toSortedMap().forEach { (id, contestTab) ->
         val contestName = contestManifest.contests[id]!!.Description
         val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
-        if (staxContest.ncards() != ct.ncards) {
-            logger.warn{"staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${ct.ncards} "}
+        if (staxContest.ncards() != contestTab.ncards) {
+            logger.warn{"staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${contestTab.ncards} "}
             // assertEquals(staxContest.blanks(), contest.blanks)
         }
-        println("  $contestName ($id) has ncards stax = ${staxContest.ncards()}, ct.ncards = ${ct.ncards}")
+        println("  $contestName ($id) has stax ncards = ${staxContest.ncards()}, cvr ncards = ${contestTab.ncards}")
     }
 
     return Pair(cardPools.values.associateBy { it.poolId }, contestTabSums)
@@ -191,15 +194,4 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
         }
     }
     return contestsUAs
-}
-
-fun addOAClcaAssortersFromCvrExport(
-    oaContests: List<OAContestUnderAudit>,
-    cardIter: Iterator<CvrExport>,
-    cardPools: Map<Int, CardPoolFromCvrs>
-) {
-    val poolsOnly = cardPools.filter { it.value.poolName != unpooled }
-    val poolMap = poolsOnly.values.associate { it.poolName to it.poolId }
-    val cvrIter = CvrExportAdapter(cardIter, poolMap)
-    addOAClcaAssortersFromCvrs(oaContests, cvrIter, poolsOnly)
 }

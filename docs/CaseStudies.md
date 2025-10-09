@@ -1,5 +1,5 @@
 # Case Studies
-_last changed 9/29/2025_
+_last changed 10/08/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -58,9 +58,19 @@ is used to make the CardLocationManifest (aka Ballot Manifest), especially when 
 
 ## SanFrancisco County 2024
 
+* 1,603,908 cvrs
+* 53 contests, 11 IRV
+* 4224 pools with 216286 cards (13.5%), using SHANGRLA grouping. 
+* Many pools have only a few cards, so this may be problematic.
+
+````
+The election produced 1,603,908 CVRs, of which 216,286 were for cards
+cast in 4,223 precinct batches and 1,387,622 CVRs were for vote-by-mail (VBM) cards.
+````
+
 Input is in _CVR_Export_20241202143051.zip_. This contains the Dominion CVR_Export JSON files, as well as the
 Contest Manifest, Candidate Manifest, and other manifests. We also have the San Francisco County _summary.xml_ file from
-their website for corroboration.
+their website for corroboration. The summary.xml ncards match the CVRS exactly, so there are no phantoms.
 
 **createSfElectionFromCards/createSfElectionFromCardsOA/createSfElectionFromCardsOANS**: We read the CVR_Export files 
 and write equivilent csv files in our own "AuditableCard" format to a temporary "cvrExport.csv" file.
@@ -86,7 +96,7 @@ The _createSfElectionFromCardsOANS_ ("One Audit, no Styles") variant assumes we 
 but assumes that we dont know which cards have which contests for the pooled data. Instead it uses Philip's approach of 
 adding contest undervotes to all the cards in the pool (so that all cards have all the contests in the pool), and increasing the contest upper limit (Nc). 
 Consistent sampling is still used, but with increased undervotes in the pool ballots.
-This allows us to test the two approaches. Preliminary results shows it may not matter much except at low margins.
+This allows us to test the two approaches. 
 
 
 ## Colorado RLA (CORLA) 2024

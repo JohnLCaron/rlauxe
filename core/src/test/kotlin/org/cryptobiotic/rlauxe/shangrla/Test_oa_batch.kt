@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage

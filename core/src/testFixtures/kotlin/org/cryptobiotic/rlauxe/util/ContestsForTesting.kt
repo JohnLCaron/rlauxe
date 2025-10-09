@@ -1,8 +1,11 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.audit.tabulateCvrs
 import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import kotlin.random.Random
 
 fun makeContestFromCvrs(
@@ -31,27 +34,6 @@ fun cardsPerContest(cvrs: List<Cvr>): Map<Int, Int> {
     return d
 }
 
-// tabulate votes, make sure of correct winners, count ncvrs for each contest
-fun makeNcvrsPerContest(contests: List<Contest>, cvrs: List<Cvr>): Map<Int, Int> {
-    val ncvrs = mutableMapOf<Int, Int>()  // contestId -> ncvr
-    contests.forEach { ncvrs[it.id] = 0 } // make sure map is complete
-    for (cvr in cvrs) {
-        for (conId in cvr.votes.keys) {
-            val accum = ncvrs.getOrPut(conId) { 0 }
-            ncvrs[conId] = accum + 1
-        }
-    }
-    contests.forEach {
-        val ncvr = ncvrs[it.id]!!
-        //	2.b) If there are more CVRs that contain the contest than the upper bound, something is seriously wrong.
-        if (it.Nc < ncvr) throw RuntimeException(
-            "upperBound ${it.Nc} < ncvrs ${ncvr} for contest ${it.id}"
-        )
-    }
-
-    return ncvrs
-}
-
 fun makeContestsFromCvrs(
     cvrs: List<Cvr>,
     choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
@@ -69,7 +51,7 @@ fun makeContestsFromCvrs(
     val svotes = votes.toSortedMap()
     val contests = mutableListOf<Contest>()
 
-    for ((contestId, candidateMap) in svotes.toSortedMap()) {
+    for ((contestId, candidateMap) in svotes) {
         val scandidateMap = candidateMap.toSortedMap()
 
         contests.add(
@@ -91,7 +73,7 @@ fun makeContestsFromCvrs(
     return contests
 }
 
-fun makeFakeContest(info: ContestInfo, ncvrs: Int): Contest {
+fun makeContestFromFakeCvrs(info: ContestInfo, ncvrs: Int): Contest {
     val cvrs = mutableListOf<Cvr>()
     repeat(ncvrs) {
         val votes = mutableMapOf<Int, IntArray>()
@@ -129,4 +111,41 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }
+}
+
+// candsv: candidate votes for each contest
+// undervotes: undervotes for each contest
+// phantoms: phantoms for each contest
+fun makeContestsWithUndervotesAndPhantoms(candsv: List<Map<Int, Int>>, undervotes: List<Int>, phantoms: List<Int>): Pair<List<Contest>, List<Cvr>> {
+    val candsMap = candsv.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
+    val phantomMap = phantoms.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
+
+    val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+    candsv.forEachIndexed { idx: Int, cands: Map<Int, Int> ->
+        contestVotes[idx] = VotesAndUndervotes(cands, undervotes[idx], 1)
+    }
+
+    val cvrs = makeVunderCvrs(contestVotes, null)
+
+    // make the infos
+    val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+    val infos = tabVotes.mapValues { (id, cands) ->
+        val orgCands = candsMap[id]!!
+        val candidateNames =  orgCands.keys.associate { "cand$it" to it }
+        // val candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
+
+        ContestInfo("contest$id", id, candidateNames, SocialChoiceFunction.PLURALITY)
+    }
+
+    // make the contests
+    val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
+    val contests = contestTabs.map { (id, tab) ->
+        val phantoms = phantomMap[id]!!
+        Contest(infos[id]!!, tab.votes, tab.ncards + phantoms, tab.ncards)
+    }
+
+    // add the phantoms
+    val phantoms =  makePhantomCvrs(contests)
+
+    return Pair(contests, cvrs + phantoms)
 }

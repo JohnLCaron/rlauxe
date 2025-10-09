@@ -61,7 +61,7 @@ class TestConsistentSamplingFromShangrla {
 
     @Test
     fun testSamplingWithPhantoms() {
-        val contestInfos: List<ContestInfo> = listOf(
+        val infos: List<ContestInfo> = listOf(
             ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
                 choiceFunction = SocialChoiceFunction.PLURALITY),
             ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
@@ -92,8 +92,8 @@ class TestConsistentSamplingFromShangrla {
         contestRounds[1].estSampleSize = 3
         contestRounds[2].estSampleSize = 2
 
-        val ncvrs = makeNcvrsPerContest(contests, cvrs)
-        val phantomCVRs = makePhantomCvrs(contests, ncvrs)
+        // val ncvrs = makeNcvrsPerContest(contests, cvrs)
+        val phantomCVRs = makePhantomCvrs(contests)
 
         val prng = Prng(123456789012L)
         var cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }

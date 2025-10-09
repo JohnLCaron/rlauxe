@@ -474,7 +474,7 @@ class ReproduceAlphaResults {
             listToMap("A", "B"),
             choiceFunction = SocialChoiceFunction.PLURALITY
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {

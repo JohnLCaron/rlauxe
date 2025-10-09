@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
 
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
@@ -16,7 +17,7 @@ data class ContestInfo(
     val voteForN: Int = nwinners,   // aka "contestSelectionLimit" or "optionSelectionLimit"
     val minFraction: Double? = null, // supermajority only.
 ) {
-    val candidateIds: List<Int>
+    val candidateIds: List<Int> // same order as candidateNames
     val metadata = mutableMapOf<String, Int>()
     val isIrv = choiceFunction == SocialChoiceFunction.IRV
 
@@ -65,6 +66,7 @@ interface ContestIF {
     fun winners(): List<Int>
     fun losers(): List<Int>
 
+    fun undervotePct() = roundToClosest(100.0 * Nundervotes() / (info().voteForN * Nc()))
     fun phantomRate() = Np() / Nc().toDouble()
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
@@ -265,6 +267,7 @@ open class ContestUnderAudit(
         // So Raire has to add its own asserttions
     }
 
+    // TODO rename primitive assertions ??
     private fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes

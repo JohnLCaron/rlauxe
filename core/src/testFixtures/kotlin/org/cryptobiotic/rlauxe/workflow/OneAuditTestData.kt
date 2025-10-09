@@ -126,6 +126,7 @@ fun makeTestMvrs(
     cvrVotes:Map<Int, Int>,
     cvrUndervotes: Int,
     pools: List<BallotPool>): List<Cvr> {
+
     val oaContest = oaContestUA.contest
     val cvrs = mutableListOf<Cvr>()
     val info = oaContest.info()

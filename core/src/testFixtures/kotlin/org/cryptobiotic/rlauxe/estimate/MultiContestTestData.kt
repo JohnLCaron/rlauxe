@@ -136,7 +136,7 @@ data class MultiContestTestData(
             }
         }
 
-        // add phantoms
+        /* add phantoms
         val ncardsPerContest = mutableMapOf<Int, Int>() // contestId -> ncards
         result.forEach { cvr ->
             cvr.votes.keys.forEach{ contestId -> ncardsPerContest.merge(contestId, 1) { a, b -> a + b } }
@@ -147,9 +147,9 @@ data class MultiContestTestData(
         if (ncardsByContest != ncardsPerContest) {
             println("$ncardsByContest != $ncardsPerContest")
         }
-        //require( ncardsByContest == ncardsPerContest)
+        require( ncardsByContest == ncardsPerContest) */
 
-        val phantoms = makePhantomCvrs(contests, ncardsPerContest)
+        val phantoms = makePhantomCvrs(contests)
         return result + phantoms
     }
 
@@ -195,7 +195,7 @@ data class ContestTestData(
 
         val nvotes = this.ncards - underCount
         if (nvotes == 0) {
-            return Contest(this.info, emptyMap(), this.ncards, 0)
+            return Contest(this.info, emptyMap(), Nc, this.ncards)
         }
         val votes: List<Pair<Int, Int>> = partition(nvotes, ncands)
         var svotes = votes.sortedBy { it.second }.reversed().toMutableList()
@@ -209,7 +209,7 @@ data class ContestTestData(
             svotes = svotes.sortedBy { it.second }.reversed().toMutableList()
             if (debugAdjust) println()
         }
-        val contest = Contest(this.info, svotes.toMap(), Nc, Nc - this.phantomCount)
+        val contest = Contest(this.info, svotes.toMap(), Nc, this.ncards)
 
         svotes.add(Pair(ncands, underCount)) // the adjusted votes include the undervotes TODO check this
         this.adjustedVotes = svotes // includes the undervotes

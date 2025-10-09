@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.listToMap
-import org.cryptobiotic.rlauxe.util.makeFakeContest
+import org.cryptobiotic.rlauxe.util.makeContestFromFakeCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -47,7 +47,7 @@ class TestAssertionsFromShangrla {
             candidateNames = listToMap( "Alice", "Bob", "Candy", "Dan"),
             nwinners = 2,
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
         val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
 
@@ -125,7 +125,7 @@ class TestAssertionsFromShangrla {
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
             minFraction = 2.0 / 3.0,
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
         val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val target = asrtns.first()

@@ -8,9 +8,7 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.cleanCsvString
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
@@ -39,11 +37,21 @@ class AssortAvg() {
 }
 
 interface CardPoolIF {
-    val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contest -> assorter -> average
+    val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contest -> assorter -> average in the pool
     val poolId: Int
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
-    fun ncards() : Int // total number of cards in the pool, including undervotes
+    // fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
+}
+
+class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
+    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    override fun regVotes() = mapOf(contestId to regVotes)
+    override fun contains(contestId: Int) = contestId == this.contestId
+
+    fun toBallotPools(): List<BallotPool> {
+        return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
+    }
 }
 
 // When the pools do not have CVRS, but just pool vote count totals.
@@ -77,7 +85,7 @@ class CardPool(
     override fun regVotes(): Map<Int, RegVotes> {
         return voteTotals.mapValues { (_, votes) -> RegVotesImpl(votes, ncards()) }
     }
-    override fun ncards() = maxMinCardsNeeded + adjustCards
+    fun ncards() = maxMinCardsNeeded + adjustCards
 
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!contains(contestId)) throw RuntimeException("NO CONTEST")
@@ -143,7 +151,7 @@ open class CardPoolFromCvrs(
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun contains(contestId: Int) = contestTabs.contains(contestId)
     override fun regVotes() = contestTabs.filter { !it.value.isIrv }
-    override fun ncards() = totalCards
+    // override fun ncards() = totalCards
 
     // this is when you have CVRs. (sfoa, sfoans)
     open fun accumulateVotes(cvr : Cvr) {
@@ -153,9 +161,9 @@ open class CardPoolFromCvrs(
             } else {
                 val contestTab = contestTabs.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                 contestTab.addVotes(candIds)
-                totalCards++
             }
         }
+        totalCards++
     }
 
     fun toBallotPools(): List<BallotPool> {
@@ -209,10 +217,12 @@ fun addOAClcaAssortersFromMargin(
     }
 }
 
+
+/* add pool assort averages to the OneAuditClcaAssorters
 fun addOAClcaAssortersFromCvrs(
     oaContests: List<OAContestUnderAudit>,
     cardIter: Iterator<Cvr>,
-    cardPools: Map<Int, CardPoolIF>
+    cardPools: Map<Int, CardPoolIF> // poolId -> CardPoolIF
 ) {
     // sum all the assorters values in one pass across all the cvrs. works for both Irvs and Reg.
     while (cardIter.hasNext()) {
@@ -221,55 +231,55 @@ fun addOAClcaAssortersFromCvrs(
 
         val assortAvg = cardPools[card.poolId]!!.assortAvg
         oaContests.forEach { contest ->
-            val avg = assortAvg.getOrPut(contest.id) { mutableMapOf() }
-            contest.pollingAssertions.forEach { assertion ->
-                val passorter = assertion.assorter
-                val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
-                if (card.hasContest(contest.id)) {
+            if (card.hasContest(contest.id)) { // TODO assumes has_styles = true
+                val avg = assortAvg.getOrPut(contest.id) { mutableMapOf() }
+                contest.pollingAssertions.forEach { assertion ->
+                    val passorter = assertion.assorter
+                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
                     assortAvg.ncards++
-                    assortAvg.totalAssort += passorter.assort(card, usePhantoms = false) // TODO usePhantoms correct ??
+                    assortAvg.totalAssort += passorter.assort(card, usePhantoms = false)
                 }
             }
         }
     }
 
-    // create the clcaAssertions and add them to the oaContests
+    // create the clcaAssertions and add poolAverages to them
     oaContests.forEach { oaContest ->
         val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
-            val assortAverageTest = mutableMapOf<Int, Double>() // poolId -> average assort value
+            val poolAvgMap = mutableMapOf<Int, Double>() // poolId -> average assort value
             cardPools.values.forEach { cardPool ->
                 val contestAA = cardPool.assortAvg[oaContest.id]
                 if (contestAA != null) {
                     val assortAvg = contestAA[assertion.assorter]
                     if (assortAvg != null) {
-                        assortAverageTest[cardPool.poolId] = assortAvg.avg()
+                        poolAvgMap[cardPool.poolId] = assortAvg.avg()
                     } else {
                         logger.warn { "cardPool ${cardPool.poolId} missing assertion ${assertion.assorter}" }
                     }
                 }
             }
-
-            val poolAvgs = AssortAvgsInPools(assortAverageTest)
+            val poolAvgs = AssortAvgsInPools(poolAvgMap)
             val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAvgs)
             ClcaAssertion(assertion.info, clcaAssorter)
         }
         oaContest.clcaAssertions = clcaAssertions
     }
 
-    // compare the assortAverage with the value computed from the contestTabulation (non-IRV only)
+    // compare the pool's assortAverage with the value computed from the contestTabulation (non-IRV only)
     cardPools.values.forEach { cardPool ->
         cardPool.regVotes().forEach { (contestId, regVotes) ->
             val avg = cardPool.assortAvg[contestId]
             if (avg != null) {
                 avg.forEach { (assorter, assortAvg) ->
-                    val calcReportedMargin =
-                        assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
+                    // calculated margin based on winner/loser counts in the pool
+                    val calcReportedMargin = assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
                     val calcReportedMean = margin2mean(calcReportedMargin)
-                    val cvrAverage = assortAvg.avg()
+                    // average assort value in the pool
+                    val cvrAssortAverage = assortAvg.avg()
 
-                    if (!doubleIsClose(calcReportedMean, cvrAverage)) {
+                    if (!doubleIsClose(calcReportedMean, cvrAssortAverage)) {
                         println("pool ${cardPool.poolId} means not agree for contest $contestId assorter $assorter ")
-                        println("     calcReportedMean= ${calcReportedMean} cvrAverage= $cvrAverage ")
+                        println("     calcReportedMean= ${calcReportedMean} cvrAssortAverage= $cvrAssortAverage ")
                         println("     ${assortAvg} regVotes= $regVotes ")
                         println()
                     }
@@ -277,6 +287,7 @@ fun addOAClcaAssortersFromCvrs(
             }
         }
     }
-}
+
+} */
 
 

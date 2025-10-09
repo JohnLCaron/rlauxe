@@ -133,7 +133,7 @@ class CardPoolsFromBallotPools(
         override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
 
         override fun regVotes() = voteTotals.mapValues { RegVotesImpl(it.value, ncards) }
-        override fun ncards() = ncards
+        // override fun ncards() = ncards
         override fun contains(contestId: Int) = voteTotals.containsKey(contestId)
 
         fun showVotes(contestIds: Collection<Int>, width: Int = 4) = buildString {

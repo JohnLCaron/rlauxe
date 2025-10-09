@@ -5,7 +5,7 @@ import kotlin.test.Test
 class TestRunVerifyContests {
 
     @Test
-    fun testRunVerifySf2024oa() {
+    fun testRunVerifySf2024() {
         val auditdir = "/home/stormy/rla/cases/sf2024oa/audit"
         RunVerifyContests.main(
             arrayOf(

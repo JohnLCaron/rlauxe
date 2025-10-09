@@ -16,7 +16,7 @@ import kotlin.test.Test
 
 class TestPersistentWorkflowClca {
     val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
-    // val topdir = kotlin.io.path.createTempDirectory().toString()
+    // val auditDir = kotlin.io.path.createTempDirectory().toString()
 
     @Test
     fun testPersistentWorkflowClca() {

@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 // 2.d) If Nc is greater than the number of physical cards that contain the contest, create enough
 //   “phantom” cards to make up the difference.
 
-// SHANGRLA.make_phantoms(). Probably 2.d ?
+// SHANGRLA.make_phantoms().
 //     @classmethod
 //    def make_phantoms(
 //        cls,
@@ -115,18 +115,13 @@ fun makePhantomCvrs(
 // cvrs for multiple contests
 fun makePhantomCvrs(
     contests: List<Contest>,
-    ncvrs: Map<Int, Int>,
     prefix: String = "phantom-",
 ): List<Cvr> {
 
     val phantombs = mutableListOf<PhantomBuilder>()
 
     for (contest in contests) {
-        val ncvrsForContest = ncvrs[contest.id]
-        if (ncvrsForContest == null) {
-            throw Exception("makePhantomCvrs: no ncvrs for contest ${contest.id}")
-        }
-        val phantoms_needed = contest.Nc - ncvrsForContest
+        val phantoms_needed = contest.Np()
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
         }

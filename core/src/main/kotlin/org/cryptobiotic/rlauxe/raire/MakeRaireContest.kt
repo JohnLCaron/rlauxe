@@ -33,7 +33,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
 
     if (1 != irvResult.possibleWinners.size) {
         // throw RuntimeException("nwinners ${irvResult.possibleWinners.size} must be 1")
-        logger.warn{"nwinners ${irvResult.possibleWinners.size} must be 1"}
+        logger.warn{"${info.id} nwinners ${irvResult.possibleWinners.size} must be 1"}
     }
     val winner: Int = irvResult.possibleWinners[0] // we need a winner in order to generate the assertions
 

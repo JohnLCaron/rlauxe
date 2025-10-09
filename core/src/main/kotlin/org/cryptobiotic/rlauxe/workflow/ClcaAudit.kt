@@ -70,7 +70,7 @@ fun runClcaAudit(auditConfig: AuditConfig,
     logger.info { "Run ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.name} " }
 
     val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
-    return complete.reduce { acc, b -> acc && b }
+    return if (complete.isEmpty()) true else complete.reduce { acc, b -> acc && b }
 }
 
 class RunContestTask(

@@ -50,19 +50,6 @@ class OAIrvContestUA(
         }
     }
 
-    fun recountMarginOld(): Double {
-        val pctDefault = -1.0
-        val rcontest = (contest as RaireContest)
-        if (rcontest.roundsPaths.isEmpty()) return pctDefault
-        val rounds = rcontest.roundsPaths.first().rounds // common case is only one
-        if (rounds.isEmpty()) return pctDefault
-
-        val count = rounds.last().count // the last round should have two nonzero candidates
-        val winner = count.filter { it.value > 0.0 }.maxBy { it.value }
-        val loser = count.filter { it.value > 0.0 && it.key != winner.key }.maxBy { it.value }
-        return (winner.value - loser.value) / (winner.value.toDouble())
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

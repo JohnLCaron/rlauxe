@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.*
@@ -65,8 +66,8 @@ fun createSfElectionFromCvrExportOANS(
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
-    // addOAClcaAssorters(auditableContests, CvrExportAdapter(cardPoolList.iterator()), cardPools)
-    addOAClcaAssortersFromCvrExport(auditableContests, cardPoolList.iterator(), cardPools)
+    val poolsOnly = cardPools.filter { it.value.poolName != org.cryptobiotic.rlauxe.oneaudit.unpooled }
+    addOAClcaAssortersFromMargin(auditableContests, poolsOnly)
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, allContests)

@@ -113,7 +113,8 @@ fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolId: Int?): Li
     var usedOne = true
     while (usedOne) {
         usedOne = false
-        val cvrId = if (poolId == null) "redacted${count}" else "pool${poolId}-redacted${count}"
+        val cvrId = if (poolId == null) "ballot${count}"
+                             else "pool${poolId}-${count}"
         val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
         contestVotes.entries.forEach { (contestId, vunders) ->
             if (vunders.isNotEmpty()) {

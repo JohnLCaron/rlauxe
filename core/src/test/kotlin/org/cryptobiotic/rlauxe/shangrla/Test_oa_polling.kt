@@ -1,3 +1,5 @@
+package org.cryptobiotic.rlauxe.shangrla
+
 import kotlin.math.*
 
 // Generalized Wald SPRT, corresponds to ALphaMart (TODO test that)
@@ -187,9 +189,7 @@ data class TestPollingResult(
     val estSampleSize: Int,
 )
 
-class TestOAPolling(
-    withoutReplacement: Boolean = true
-) {
+class TestOAPolling(withoutReplacement: Boolean = true) {
 
     // Table 3: Column 6: expected sample size for CLCA using ONE CVRs based on batch subtotals, for the ALPHA
     // risk-measuring function with the truncated shrinkage estimator with parameters c = 1/2, d = 10, estimated from

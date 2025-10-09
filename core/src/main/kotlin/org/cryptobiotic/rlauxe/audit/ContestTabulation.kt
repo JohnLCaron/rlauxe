@@ -116,8 +116,6 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         }
     }
 
-
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -159,7 +157,7 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
     }
 }
 
-// add other into this
+// add other into this TODO needed?
 fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabulation>) {
     other.forEach { (contestId, otherTab) ->
         val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab.info) }

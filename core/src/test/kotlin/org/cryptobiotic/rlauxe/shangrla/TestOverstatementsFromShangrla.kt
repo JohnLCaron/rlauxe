@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.estimate.makeCvr
-import org.cryptobiotic.rlauxe.util.makeFakeContest
+import org.cryptobiotic.rlauxe.util.makeContestFromFakeCvrs
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,7 +64,7 @@ class TestOverstatementsFromShangrla {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
         val assort = PluralityAssorter.makeWithVotes(contest, 0, 1)
         var margin = 0.5
         var aVb = ClcaAssorter(info, assort, (margin + 1) / 2)
@@ -137,7 +137,7 @@ class TestOverstatementsFromShangrla {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
 
         val assort = PluralityAssorter.makeWithVotes(contest, 0, 1)
         var margin = 0.5
@@ -206,7 +206,7 @@ class TestOverstatementsFromShangrla {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob"),
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
         val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter
@@ -310,7 +310,7 @@ class TestOverstatementsFromShangrla {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
         val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter
@@ -437,7 +437,7 @@ class TestOverstatementsFromShangrla {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "Alice", "Bob"),
         )
-        val contest = makeFakeContest(info, 100)
+        val contest = makeContestFromFakeCvrs(info, 100)
         val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
         val assort = asrtns.first().assorter

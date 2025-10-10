@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
 
+private val logger = KotlinLogging.logger("Sampler")
+
 //// abstraction for creating a sequence of samples
 interface Sampler: Iterator<Double> {
     fun sample(): Double // get next in sample
@@ -40,11 +42,15 @@ class PollWithoutReplacement(
                 return assorter.assort(mvr, usePhantoms = true)
             }
         }
-        throw RuntimeException("no samples left for contest ${contestId} and Assorter ${assorter}")
+        logger.error{"no samples left for contest ${contestId} and Assorter ${assorter}"}
+        throw RuntimeException("no samples left for contest ${contestId} and assorter ${assorter}")
     }
 
     override fun reset() {
-        if (!allowReset) throw RuntimeException("PollWithoutReplacement reset not allowed")
+        if (!allowReset) {
+            logger.error {"PollWithoutReplacement reset not allowed; contest ${contestId} assorter ${assorter}\""}
+            throw RuntimeException("PollWithoutReplacement reset not allowed")
+        }
         permutedIndex.shuffle(Random)
         idx = 0
         count = 0
@@ -90,11 +96,15 @@ class ClcaWithoutReplacement(
                 return result
             }
         }
+        logger.error{"ClcaWithoutReplacement no samples left for ${contestId} and ComparisonAssorter ${cassorter}"}
         throw RuntimeException("ClcaWithoutReplacement no samples left for ${contestId} and ComparisonAssorter ${cassorter}")
     }
 
     override fun reset() {
-        if (!allowReset) throw RuntimeException("ClcaWithoutReplacement reset not allowed")
+        if (!allowReset) {
+            logger.error{"ClcaWithoutReplacement reset not allowed"}
+            throw RuntimeException("ClcaWithoutReplacement reset not allowed")
+        }
         permutedIndex.shuffle(Random)
         idx = 0
         count = 0
@@ -120,16 +130,16 @@ fun makeClcaNoErrorSampler(contestId: Int, hasStyles: Boolean, cvrs : List<Cvr>,
 class ClcaNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,
-    val cvrIter: Iterator<Cvr>,
     val cassorter: ClcaAssorter,
+    val cvrIterator: Iterator<Cvr>,
 ): Sampler, Iterator<Double> {
     private var idx = 0
     private var count = 0
     private var done = false
 
     override fun sample(): Double {
-        while (cvrIter.hasNext()) {
-            val cvr = cvrIter.next()
+        while (cvrIterator.hasNext()) {
+            val cvr = cvrIterator.next()
             idx++
             if (cvr.hasContest(contestId)) {
                 val result = cassorter.bassort(cvr, cvr)
@@ -139,13 +149,14 @@ class ClcaNoErrorIterator(
         }
         done = true
         if (!warned) {
-           logger.warn { "ClcaNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter}" }
+            logger.warn { "ClcaNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter}" }
             warned = true
         }
         return 0.0
     }
 
     override fun reset() {
+        logger.error{"ClcaNoErrorIterator reset not allowed"}
         throw RuntimeException("ClcaNoErrorIterator reset not allowed")
     }
 
@@ -157,7 +168,6 @@ class ClcaNoErrorIterator(
     override fun next() = sample()
 
     companion object {
-        private val logger = KotlinLogging.logger("ClcaNoErrorIterator")
         var warned = false
     }
 }
@@ -165,8 +175,8 @@ class ClcaNoErrorIterator(
 class OneAuditNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,
-    val cassorter: ClcaAssorter,
     val sampleLimit: Int,
+    val cassorter: ClcaAssorter,
     cvrIter: Iterator<Cvr>,
 ): Sampler, Iterator<Double> {
     val cvrs = mutableListOf<Cvr>()
@@ -213,7 +223,6 @@ class OneAuditNoErrorIterator(
     override fun next() = sample()
 
     companion object {
-        private val logger = KotlinLogging.logger("OneAuditNoErrorIterator")
         var warned = false
     }
 }

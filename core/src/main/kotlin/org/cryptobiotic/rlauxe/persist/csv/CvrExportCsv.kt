@@ -63,7 +63,6 @@ class IteratorCvrExportStream(input: InputStream): CloseableIterator<CvrExport> 
     }
 
     override fun close() {
-        logger.info{"read $countLines lines"}
         reader.close()
     }
 }
@@ -84,17 +83,14 @@ class IteratorCvrExportFile(filename: String): CloseableIterator<CvrExport> {
     }
 
     override fun close() {
-        logger.info{"read $countLines lines"}
         reader.close()
     }
 }
 
-fun writeCvrExportCsvFile(pools: Iterator<CvrExport>, filename: String) {
+fun writeCvrExportCsvFile(cvrs: Iterator<CvrExport>, filename: String) {
     val writer: OutputStreamWriter = FileOutputStream(filename).writer()
     writer.write(CvrExportCsvHeader)
-    pools.forEach {
-        writer.write(it.toCsv())
-    }
+    cvrs.forEach { writer.write(it.toCsv()) }
     writer.close()
 }
 

@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.CvrExport
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.cryptobiotic.rlauxe.util.createZipFile
 
 class TestCvrExportCsv {
 
@@ -28,6 +28,26 @@ class TestCvrExportCsv {
 
         val roundtrip = readCvrExportCsv(csv)
         assertEquals(target, roundtrip)
+
+        val tempFile = kotlin.io.path.createTempFile().toString()
+        writeCvrExportCsvFile(listOf(target).iterator(), tempFile)
+
+        cvrExportCsvIterator(tempFile).use { csvIter ->
+            while (csvIter.hasNext()) {
+                val roundtrip = csvIter.next()
+                assertEquals(target, roundtrip)
+            }
+        }
+
+        val zipFile = createZipFile(tempFile, delete = true)
+        cvrExportCsvIterator(zipFile.toString()).use { csvIter ->
+            while (csvIter.hasNext()) {
+                val roundtrip = csvIter.next()
+                assertEquals(target, roundtrip)
+            }
+        }
+        val ok = zipFile.delete()
+        println("delete file $zipFile was successful = $ok")
     }
 
     @Test

@@ -1,10 +1,16 @@
 package org.cryptobiotic.rlauxe.util
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.file.*
 import java.nio.file.spi.FileSystemProvider
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
-//// this could be in core
+private val logger = KotlinLogging.logger("Zipper")
 
 class ZipReader(val zipFilename: String) {
     val fileSystem : FileSystem
@@ -73,4 +79,22 @@ class ZipReaderTour(zipFile: String, val silent: Boolean = true, val sortPaths: 
         }
         return count
     }
+}
+
+fun createZipFile(filename: String, delete: Boolean = false): File {
+    val file = File(filename)
+    val outputZipFile = File(filename + ".zip")
+    ZipOutputStream(FileOutputStream(outputZipFile)).use { zipOut ->
+        FileInputStream(file).use { fis ->
+            val zipEntry = ZipEntry(file.name)
+            zipOut.putNextEntry(zipEntry)
+            fis.copyTo(zipOut)
+            zipOut.closeEntry()
+        }
+    }
+    if (delete) {
+        val ok = file.delete()
+        logger.info{ "delete file $filename} was successful = $ok"}
+    }
+    return outputZipFile
 }

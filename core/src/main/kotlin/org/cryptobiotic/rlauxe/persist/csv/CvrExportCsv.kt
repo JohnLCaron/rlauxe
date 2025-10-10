@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 import kotlin.collections.joinToString
@@ -36,7 +37,7 @@ fun readCvrExportCsv(line: String): CvrExport {
     return CvrExport(id, group, votes)
 }
 
-fun cvrExportCsvIterator(filename: String): Iterator<CvrExport> {
+fun cvrExportCsvIterator(filename: String): CloseableIterator<CvrExport> {
     return if (filename.endsWith("zip")) {
         val reader = ZipReader(filename)
         val input = reader.inputStream()
@@ -46,7 +47,7 @@ fun cvrExportCsvIterator(filename: String): Iterator<CvrExport> {
     }
 }
 
-class IteratorCvrExportStream(input: InputStream): Iterator<CvrExport> {
+class IteratorCvrExportStream(input: InputStream): CloseableIterator<CvrExport> {
     val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1"))
     var nextLine: String? = reader.readLine() // get rid of header line
 
@@ -61,13 +62,13 @@ class IteratorCvrExportStream(input: InputStream): Iterator<CvrExport> {
         return readCvrExportCsv(nextLine!!)
     }
 
-    fun close() {
+    override fun close() {
         logger.info{"read $countLines lines"}
         reader.close()
     }
 }
 
-class IteratorCvrExportFile(filename: String): Iterator<CvrExport> {
+class IteratorCvrExportFile(filename: String): CloseableIterator<CvrExport> {
     val reader: BufferedReader = File(filename).bufferedReader()
     var nextLine: String? = reader.readLine() // get rid of header line
 
@@ -82,7 +83,7 @@ class IteratorCvrExportFile(filename: String): Iterator<CvrExport> {
         return readCvrExportCsv(nextLine!!)
     }
 
-    fun close() {
+    override fun close() {
         logger.info{"read $countLines lines"}
         reader.close()
     }
@@ -106,9 +107,12 @@ fun CvrExport.toCsv() = buildString {
     appendLine()
 }
 
-class CvrExportAdapter(val cvrExportIterator: Iterator<CvrExport>, val pools: Map<String, Int>? = null) : Iterator<Cvr> {
+class CvrExportAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
     override fun hasNext() = cvrExportIterator.hasNext()
     override fun next() = cvrExportIterator.next().toCvr(pools=pools)
+    override fun close() {
+        cvrExportIterator.close()
+    }
 }
 
 

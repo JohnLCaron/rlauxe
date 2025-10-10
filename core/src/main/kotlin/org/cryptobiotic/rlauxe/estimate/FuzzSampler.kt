@@ -106,7 +106,7 @@ class PollingFuzzSampler(
     override fun next(): Double = sample()
 }
 
-// TODO used in simulateSampleSizeOneAuditAssorter
+/* TODO no longer used by simulateSampleSizeOneAuditAssorter
 class OneAuditFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
@@ -157,7 +157,7 @@ class OneAuditFuzzSampler(
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
-}
+} */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO can this be used on approval?

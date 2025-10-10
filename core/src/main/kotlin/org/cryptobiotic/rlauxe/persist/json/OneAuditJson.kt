@@ -6,32 +6,6 @@ import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import kotlin.Int
 
-// data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
-@Serializable
-data class BallotPoolJson(
-    val name: String,
-    val id: Int,
-    val contest: Int,
-    val ncards: Int,
-    val votes: Map<Int, Int>,
-)
-
-fun BallotPool.publishJson() = BallotPoolJson(
-    this.name,
-    this.poolId,
-    this.contestId,
-    this.ncards,
-    this.votes,
-)
-
-fun BallotPoolJson.import() = BallotPool(
-    this.name,
-    this.id,
-    this.contest,
-    this.ncards,
-    this.votes,
-)
-
 // class OAIrvContestUA(
 //    contest: RaireContest,
 //    hasStyle: Boolean = true,

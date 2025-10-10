@@ -4,7 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
+import org.cryptobiotic.rlauxe.util.Closer
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
@@ -76,14 +78,14 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
             undervotes++
     }
 
-    fun addJustVotes(other: ContestTabulation) {
+    /* fun addJustVotes(other: ContestTabulation) {
         require(info.id == other.info.id)
         if (this.isIrv) {
             this.irvVotes.addVotes(other.irvVotes)
         } else {
             other.votes.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
         }
-    }
+    } */
 
     // for summing multiple tabs into this one
     fun sum(other: ContestTabulation) {
@@ -99,14 +101,14 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         this.overvotes += other.overvotes
     }
 
-    fun undervotePct(): Double {
+    /* fun undervotePct(): Double {
         val nvotes = votes.map { it.value }.sum()
         return undervotes.toDouble() / (undervotes + nvotes)
-    }
+    } */
 
     fun nvotes() = votes.map { it.value}.sum()
 
-    fun toString2() = buildString {
+    /* fun toString2() = buildString {
         // append("${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards undervotes=$undervotes novote=$novote")
         append("contest ${info.id} ${votes.toSortedMap()} nvotes=${nvotes()} ncards=$ncards undervotes=$undervotes overvotes=$overvotes novote=$novote")
         if (voteForN != null) {
@@ -114,6 +116,11 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
             val underPct = (100.0 * undervotes / (nvotes + undervotes)).toInt()
             append(" underPct= $underPct%")
         }
+    } */
+
+
+    override fun toString(): String {
+        return "ContestTabulation(isIrv=$isIrv, voteForN=$voteForN, votes=$votes, nvotes=${nvotes()} ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -125,10 +132,12 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         if (isIrv != other.isIrv) return false
         if (voteForN != other.voteForN) return false
         if (ncards != other.ncards) return false
+        if (novote != other.novote) return false
+        if (undervotes != other.undervotes) return false
+        if (overvotes != other.overvotes) return false
         if (info != other.info) return false
         if (votes != other.votes) return false
         if (irvVotes != other.irvVotes) return false
-        if (candidateIdToIndex != other.candidateIdToIndex) return false
 
         return true
     }
@@ -137,15 +146,13 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         var result = isIrv.hashCode()
         result = 31 * result + voteForN
         result = 31 * result + ncards
+        result = 31 * result + novote
+        result = 31 * result + undervotes
+        result = 31 * result + overvotes
         result = 31 * result + info.hashCode()
         result = 31 * result + votes.hashCode()
         result = 31 * result + irvVotes.hashCode()
-        result = 31 * result + candidateIdToIndex.hashCode()
         return result
-    }
-
-    override fun toString(): String {
-        return "ContestTabulation(isIrv=$isIrv, voteForN=$voteForN, votes=$votes, ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
     }
 }
 
@@ -157,22 +164,23 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
     }
 }
 
-// add other into this TODO needed?
+/* add other into this TODO needed?
 fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabulation>) {
     other.forEach { (contestId, otherTab) ->
         val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab.info) }
         contestSum.addJustVotes(otherTab)
     }
-}
+} */
 
 // return contestId -> ContestTabulation
 fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
-    ballotPools.forEach { pool ->
-        val info = infos[pool.contestId]
+    ballotPools.forEach { ballotPool ->
+        val info = infos[ballotPool.contestId]
         if (info != null) {
-            val tab = votes.getOrPut(pool.contestId) { ContestTabulation(infos[pool.contestId]!!) }
-            pool.votes.forEach { (cand, vote) -> tab.addVote(cand, vote) }
+            val contestTab = votes.getOrPut(ballotPool.contestId) { ContestTabulation(infos[ballotPool.contestId]!!) }
+            ballotPool.votes.forEach { (cand, vote) -> contestTab.addVote(cand, vote) }
+            contestTab.ncards += ballotPool.ncards
         }
     }
     return votes
@@ -180,13 +188,20 @@ fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, Conte
 
 // return contestId -> ContestTabulation
 fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    return tabulateCloseableCvrs(Closer(cvrs), infos)
+}
+
+fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
-    for (cvr in cvrs) {
-        for ((contestId, conVotes) in cvr.votes) {
-            val info = infos[contestId]
-            if (info != null) {
-                val tab = votes.getOrPut(contestId) { ContestTabulation(info) }
-                tab.addVotes(conVotes)
+    cvrs.use { cvrIter ->
+        while (cvrIter.hasNext()) {
+            val cvr = cvrIter.next()
+            for ((contestId, conVotes) in cvr.votes) {
+                val info = infos[contestId]
+                if (info != null) {
+                    val tab = votes.getOrPut(contestId) { ContestTabulation(info) }
+                    tab.addVotes(conVotes)
+                }
             }
         }
     }

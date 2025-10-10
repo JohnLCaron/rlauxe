@@ -102,15 +102,16 @@ fun createCardPoolsNS(
     // create the unamended card Pools,
     var count = 0
     val cardPoolsU: MutableMap<String, CardPoolNs> = mutableMapOf()
-    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
-    while (cvrIter.hasNext()) {
-        count++
-        val cvrExport: CvrExport = cvrIter.next()
-        val pool = cardPoolsU.getOrPut(cvrExport.poolKey() ) {
-            CardPoolNs(cvrExport.poolKey(), cardPoolsU.size + 1, contestInfos)
+    cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
+        while (cvrIter.hasNext()) {
+            count++
+            val cvrExport: CvrExport = cvrIter.next()
+            val pool = cardPoolsU.getOrPut(cvrExport.poolKey()) {
+                CardPoolNs(cvrExport.poolKey(), cardPoolsU.size + 1, contestInfos)
+            }
+            pool.accumulateVotes(cvrExport.toCvr())
+            pool.cvrs.add(cvrExport)
         }
-        pool.accumulateVotes(cvrExport.toCvr())
-        pool.cvrs.add(cvrExport)
     }
     println("unamended pools = ${cardPoolsU.size} from $count cvrs")
 
@@ -187,11 +188,11 @@ class CardPoolNs( poolName: String, poolId: Int, contestInfos: Map<Int, ContestI
 
 class CardPoolList(val cardPools: Collection<CardPoolNs>): Iterable<CvrExport> {
 
-    override fun iterator(): Iterator<CvrExport> {
+    override fun iterator(): CloseableIterator<CvrExport> {
         return PoolIterator()
     }
 
-    inner class PoolIterator() : Iterator<CvrExport> {
+    inner class PoolIterator() : CloseableIterator<CvrExport> {
         var pools = cardPools.iterator()
         var base = getNextBaseIterator()
 
@@ -215,11 +216,14 @@ class CardPoolList(val cardPools: Collection<CardPoolNs>): Iterable<CvrExport> {
             if (!pools.hasNext()) return null
             return BaseIterator(pools.next())
         }
+
+        override fun close() {}
     }
 
-    class BaseIterator(val pool: CardPoolNs) : Iterator<CvrExport> {
+    class BaseIterator(val pool: CardPoolNs) : CloseableIterator<CvrExport> {
         val bitter = pool.cvrs.iterator()
         override fun hasNext(): Boolean = bitter.hasNext()
         override fun next(): CvrExport = bitter.next()
+        override fun close() {}
     }
 }

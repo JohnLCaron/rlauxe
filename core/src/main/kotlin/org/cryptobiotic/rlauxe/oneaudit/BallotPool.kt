@@ -78,3 +78,88 @@ fun addOAClcaAssortersFromMargin(
         oaUA.clcaAssertions = clcaAssertions
     }
 }
+
+/////////////////////////////////////////////////
+
+class CardPoolsFromBallotPools(
+    val ballotPools: List<BallotPool>,
+    val infos: Map<Int, ContestInfo>) {
+
+    val cardPoolMap: Map<Int, CardPoolFromBallotPools> // poolId -> pool
+
+    init {
+        val reaggs = mutableMapOf<Int, MutableList<BallotPool>>()
+        ballotPools.forEach { pool ->
+            val reagg = reaggs.getOrPut(pool.poolId) { mutableListOf() }
+            reagg.add(pool)
+        }
+        cardPoolMap = reaggs.mapValues { (poolId, ballotPools) ->
+            val voteTotals = ballotPools.associate { Pair(it.contestId, it.votes) }
+            CardPoolFromBallotPools(ballotPools[0].name, poolId, voteTotals, ballotPools[0].ncards)
+        }
+    }
+
+    fun showPoolVotes(width: Int = 4) = buildString {
+        val contestIds = infos.values.map { it.id }.sorted()
+        appendLine("votes, undervotes")
+        append("${trunc("poolName", 9)}:")
+        contestIds.forEach { append("${nfn(it, width)}|") }
+        appendLine()
+
+        cardPoolMap.values.filter { it.poolName != unpooled}.forEach { cardpool ->
+            appendLine(cardpool.showVotes(contestIds, width))
+        }
+
+        // TODO add sums
+    }
+
+    inner class CardPoolFromBallotPools(
+        val poolName: String,
+        override val poolId: Int,
+        val voteTotals: Map<Int, Map<Int, Int>>,
+        val ncards: Int,
+    ) : CardPoolIF {
+        // TODO fill this in from the margins?? or get rid of ??
+        override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+
+        override fun regVotes() = voteTotals.mapValues { RegVotesImpl(it.value, ncards) }
+        override fun ncards() = ncards
+        override fun contains(contestId: Int) = voteTotals.containsKey(contestId)
+
+        fun showVotes(contestIds: Collection<Int>, width: Int = 4) = buildString {
+            append("${trunc(poolName, 9)}:")
+            contestIds.forEach { id ->
+                val contestVote = voteTotals[id]
+                if (contestVote == null)
+                    append("    |")
+                else {
+                    val sum = contestVote.map { it.value }.sum()
+                    append("${nfn(sum, width)}|")
+                }
+            }
+            appendLine()
+
+            val undervotes = undervotes()
+            append("${trunc("", 9)}:")
+            contestIds.forEach { id ->
+                val contestVote = voteTotals[id]
+                if (contestVote == null)
+                    append("    |")
+                else {
+                    val undervote = undervotes[id]!!
+                    append("${nfn(undervote, width)}|")
+                }
+            }
+            appendLine()
+        }
+
+        fun undervotes(): Map<Int, Int> {  // contest -> undervote
+            val undervote = voteTotals.map { (id, cands) ->
+                val sum = cands.map { it.value }.sum()
+                val info = infos[id]!!
+                Pair(id, ncards * info.voteForN - sum)
+            }
+            return undervote.toMap().toSortedMap()
+        }
+    }
+}

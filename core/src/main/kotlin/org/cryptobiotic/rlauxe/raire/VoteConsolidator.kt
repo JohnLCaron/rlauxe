@@ -18,6 +18,8 @@ import kotlin.collections.getOrPut
 class VoteConsolidator {
     private val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
 
+    fun nvotes() = votes.size
+
     fun addVote(pref: IntArray) {
             val key = HashableIntArray(pref)
             votes[key] = votes.getOrPut(key) { 0 } + 1

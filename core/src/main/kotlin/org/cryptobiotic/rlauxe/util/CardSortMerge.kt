@@ -75,9 +75,10 @@ class SortMerge(
         val cardSorter = CardSorter(workingDirectory, prng, maxChunk, pools = pools)
 
         //// reading CvrExport and sorted chunks
-        val cardIter: Iterator<CvrExport> = cvrExportCsvIterator(cvrExportCsv)
-        while (cardIter.hasNext()) {
-            cardSorter.add(cardIter.next())
+        cvrExportCsvIterator(cvrExportCsv).use { cardIter ->
+            while (cardIter.hasNext()) {
+                cardSorter.add(cardIter.next())
+            }
         }
         cardSorter.writeSortedChunk()
         println("writeSortedChunk took $stopwatch")
@@ -160,7 +161,7 @@ class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWrite
         cards.clear()
     }
 
-    class NextUp(val nextIter: Iterator<AuditableCard>) {
+    class NextUp(val nextIter: CloseableIterator<AuditableCard>) {
         var currentCard: AuditableCard? = null
         var sampleNumber = Long.MAX_VALUE
 
@@ -175,6 +176,7 @@ class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWrite
             } else {
                 currentCard = null
                 sampleNumber = Long.MAX_VALUE
+                nextIter.close()
             }
         }
     }

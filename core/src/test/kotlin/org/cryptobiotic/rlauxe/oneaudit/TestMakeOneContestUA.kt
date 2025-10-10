@@ -4,21 +4,19 @@ import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundToClosest
-import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.math.abs
 import kotlin.test.Test
 
 
-class TestMakeTestContestOA {
+class TestMakeOneContestUA {
     val Nc = 50000
 
     @Test
     fun testAllAreCvrs() {
         val margin = .02
-        val (contestOA, ballotPools, testCvrs) = makeOneContestUA(margin, Nc, cvrPercent = 1.0, undervotePercent = 0.0, phantomPercent = 0.0)
+        val (contestOA, ballotPools, testCvrs) = makeOneContestUA(margin, Nc, cvrFraction = 1.0, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         assertEquals(Nc, contestOA.Nc)
         val contest = contestOA.contest as Contest
@@ -35,7 +33,7 @@ class TestMakeTestContestOA {
     fun testHalfAreCvrs() {
         val margin = .02
         val cvrPercent = 0.5
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = 0.0, phantomPercent = 0.0)
+        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
@@ -45,7 +43,7 @@ class TestMakeTestContestOA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = 0.10, phantomPercent = 0.0)
+        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.10, phantomFraction = 0.0)
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
 
@@ -54,7 +52,7 @@ class TestMakeTestContestOA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = 0.0, phantomPercent = 0.03)
+        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.0, phantomFraction = 0.03)
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
 
@@ -63,7 +61,7 @@ class TestMakeTestContestOA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = 0.10, phantomPercent = 0.03)
+        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.10, phantomFraction = 0.03)
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
 
@@ -78,7 +76,7 @@ class TestMakeTestContestOA {
             cvrPercents.forEach { cvrPercent ->
                 println("======================================================================================================")
                 println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
-                val (contestOA, ballotPools, testCvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
+                val (contestOA, ballotPools, testCvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
                 checkBasics(contestOA, ballotPools, margin, cvrPercent)
                 checkAgainstCvrs(contestOA, ballotPools, testCvrs, cvrPercent, undervotePercent, phantomPercent)
             }

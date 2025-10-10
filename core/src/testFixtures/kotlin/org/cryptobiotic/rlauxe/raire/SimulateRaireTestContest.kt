@@ -17,8 +17,10 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
-/** Simulation of Raire Contest. TODO only in test. maybe move to testFixtures? */
-fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true): Pair<RaireContestUnderAudit, List<Cvr>> {
+// Simulation of Raire Contest; pass in the parameters and simulate the cvrs; then vall raire library to generate the assertions
+fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
+: Pair<RaireContestUnderAudit, List<Cvr>> {
+
     repeat(11) {
         val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
         if (result != null) return result

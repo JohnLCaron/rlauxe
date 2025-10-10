@@ -6,10 +6,12 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -33,7 +35,7 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
-    override fun sortedCards() = Iterable { auditableCards() }
+    override fun sortedCards() = CloseableIterable { auditableCards() }
 
     // same pairs over all contests (!)
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
@@ -65,7 +67,7 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
         return sampledCvrs.map{ it.cvr() }
     }
 
-    private fun auditableCards(): Iterator<AuditableCard> = readCardsCsvIterator(cardFile)
+    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(cardFile)
 
     //// MvrManagerTest
     // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"

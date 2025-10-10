@@ -28,27 +28,7 @@ class OAIrvContestUA(
         }
     }
 
-    override fun recountMargin(): Double {
-        try {
-            val pctDefault = -1.0
-            val rcontest = (contest as RaireContest)
-            if (rcontest.roundsPaths.isEmpty()) return pctDefault
-            val rounds = rcontest.roundsPaths.first().rounds // common case is only one
-            if (rounds.isEmpty()) return pctDefault
-
-            // find the latest round with two candidates
-            var latestRound : IrvRound? = null
-            rounds.forEach{ if (it.count.size == 2) latestRound = it}
-            if (latestRound == null) return pctDefault
-
-            val winner = latestRound.count.maxBy { it.value }
-            val loser = latestRound.count.minBy { it.value }
-            return (winner.value - loser.value) / (winner.value.toDouble())
-        } catch (e : Throwable) {
-            logger.error(e) { "recountMargin for contest ${contest.id}" }
-            return -1.0
-        }
-    }
+    override fun recountMargin() = (contest as RaireContest).recountMargin()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

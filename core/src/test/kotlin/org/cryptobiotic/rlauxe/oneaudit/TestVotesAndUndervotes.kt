@@ -71,6 +71,36 @@ class TestVotesAndUndervotes {
                 require(checkEquivilentVotes(vunders.candVotesSorted, tv))
         }
 
+        assertEquals("VotesAndUndervotes(undervotes=51, voteForN=1, votes={0=200, 1=123, 2=17} candidateIds=[0, 1, 2])", contestVotes[0].toString())
+        assertEquals(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.votesAndUndervotes())
+
+        assertEquals("VotesAndUndervotes(undervotes=51, voteForN=1, votes={1=123, 0=71, 2=3} candidateIds=[1, 0, 2])", contestVotes[1].toString())
+        assertEquals(mapOf(0 to 71, 1 to 123, 2 to 3, 3 to 51), contestVotes[1]!!.votesAndUndervotes())
+    }
+
+    @Test
+    fun testMakeVunderCvrsN2() {
+        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        val candVotes0 = mapOf(0 to 200, 1 to 123, 2 to 17)
+        contestVotes[0] = VotesAndUndervotes(candVotes0, 51, 2)
+
+        val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
+        contestVotes[1] = VotesAndUndervotes(candVotes1, 51, 1)
+
+        val cvrs = makeVunderCvrs(contestVotes, null)
+
+        // check
+        val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+        contestVotes.forEach { (contestId, vunders) ->
+            val tv = tabVotes[contestId] ?: emptyMap()
+            println("contestId=${contestId}")
+            println("  tabVotes=${tv}")
+            println("  vunders= ${vunders.candVotesSorted}")
+            require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+        }
+
+        assertEquals("VotesAndUndervotes(undervotes=51, voteForN=2, votes={0=200, 1=123, 2=17} candidateIds=[0, 1, 2])", contestVotes[0].toString())
+        assertEquals(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.votesAndUndervotes())
     }
 
     @Test
@@ -95,6 +125,32 @@ class TestVotesAndUndervotes {
             assertEquals(contest.Nc, tab.ncards)
             assertEquals(contest.undervotes + contest.Np(), tab.undervotes)
             assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
+        }
+    }
+
+    @Test
+    fun testMakeContestsWithUndervotesAndPhantomsN2() {
+        val candVotes = mutableListOf<Map<Int, Int>>()
+        candVotes.add(mapOf(0 to 200, 1 to 123, 2 to 17))
+        candVotes.add(mapOf(0 to 71, 1 to 123, 2 to 0, 3 to 77, 4 to 99))
+        candVotes.add(mapOf(0 to 102, 1 to 111))
+
+        val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(candVotes,
+            listOf(15, 123, 3), listOf(2, 7, 0), voteForNs = listOf(1, 2, 1))
+
+        val contestMap = contests.associate { Pair(it.id, it) }
+        val infos = contests.associate { Pair(it.id, it.info) }
+        val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
+
+        // check
+        contestTabs.forEach { (id, tab) ->
+            println("contestTab=${tab}")
+            val contest = contestMap[id]!!
+            println("contest=${contest}")
+            assertEquals(contest.Nc, tab.ncards)
+            assertEquals(contest.undervotes + contest.Np() * contest.info.voteForN, tab.undervotes)
+            assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
+            println()
         }
     }
 

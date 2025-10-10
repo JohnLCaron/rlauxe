@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
+import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.audit.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.test.Test
@@ -38,9 +40,10 @@ class TestRaireContest {
     }
 
     @Test
-    fun testRaireContestUnderAudit() {
-        val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=111, ncands=3, minMargin=.04, quiet = true)
-        rcontestUA.makeClcaAssertionsFromReportedMargin()
+    fun testSimulateRaireTestContest() {
+        val contestId=111
+        val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true)
+        rcontestUA.makeClcaAssertionsFromReportedMargin() // why do we have to call this, why doesnt simulateRaireTestContest add these ??
 
         assertEquals(rcontestUA, rcontestUA)
         assertEquals(rcontestUA.hashCode(), rcontestUA.hashCode())
@@ -54,6 +57,23 @@ class TestRaireContest {
         println(rcontestUA.show())
         assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25 Nu=250"), rcontestUA.show())
         assertEquals(-1.0, rcontestUA.recountMargin(), doublePrecision)
+    }
+
+    @Test
+    fun testMakeRaireContestUA() {
+        val contestId=111
+        val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true)
+        rcontestUA.makeClcaAssertionsFromReportedMargin()
+
+        val info = rcontestUA.contest.info()
+        val contestTab = tabulateCvrs(rcvrs.iterator(), mapOf(info.id to info))
+        val tab = contestTab[info.id]!!
+        assertTrue(tab.irvVotes.nvotes() > 0)
+
+        val rc = makeRaireContestUA(info, contestTab[info.id]!!, rcontestUA.Nc)
+
+        assertTrue(rc.recountMargin() > 0.0)
+        assertTrue(rc.recountMargin() < 1.0)
     }
 
 

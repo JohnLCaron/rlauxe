@@ -10,12 +10,13 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolsFromBallotPools
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
-import org.cryptobiotic.rlauxe.persist.csv.CardPoolsFromBallotPools
 import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -26,7 +27,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val auditConfig: AuditConfig
     val contests: List<ContestUnderAudit>
     val infos: Map<Int, ContestInfo>
-    val cards: Iterable<AuditableCard>
+    val cards: CloseableIterable<AuditableCard>
     val ballotPools: List<BallotPool>
 
     init {
@@ -45,18 +46,18 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     }
 
     fun verify() = buildString {
-        val contestSummary = verifyCvrs(contests, CvrIteratorAdapter(cards.iterator()), ballotPools, infos)
+        val contestSummary = verifyCvrs(contests, CvrIteratorCloser(cards.iterator()), ballotPools, infos)
         append(contestSummary.results)
         // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contests, contestSummary))
-        appendLine(verifyAssortAvg(contests, CvrIteratorAdapter(cards.iterator())))
+        appendLine(verifyAssortAvg(contests, CvrIteratorCloser(cards.iterator())))
     }
 
     fun verifyContest(contest: ContestUnderAudit) = buildString {
         val contest1 = listOf(contest)
-        val contestSummary = verifyCvrs(contest1, CvrIteratorAdapter(cards.iterator()), ballotPools, infos)
+        val contestSummary = verifyCvrs(contest1, CvrIteratorCloser(cards.iterator()), ballotPools, infos)
         append(contestSummary.results)
         // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contest1, contestSummary))
-        appendLine(verifyAssortAvg(contest1, CvrIteratorAdapter(cards.iterator())))
+        appendLine(verifyAssortAvg(contest1, CvrIteratorCloser(cards.iterator())))
     }
 }
 

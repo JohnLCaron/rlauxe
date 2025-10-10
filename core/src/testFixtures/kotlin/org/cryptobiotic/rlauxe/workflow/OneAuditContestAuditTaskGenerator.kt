@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 
 // mvrsFuzzPct=fuzzPct, nsimEst = nsimEst
 class OneAuditContestAuditTaskGenerator(
@@ -24,7 +25,13 @@ class OneAuditContestAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
 
-        val (contestOA, _, oaCvrs) = makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
+        val (contestOA, _, oaCvrs) = makeOneContestUA(
+            margin,
+            Nc,
+            cvrFraction = cvrPercent,
+            undervoteFraction = underVotePct,
+            phantomFraction = phantomPct
+        )
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = OneAudit(auditConfig=auditConfig, listOf(contestOA),
@@ -62,7 +69,14 @@ class OneAuditSingleRoundAuditTaskGenerator(
         )
 
         val (contestOA, _, oaCvrs) =
-            makeOneContestUA(margin, Nc, cvrPercent = cvrPercent, undervotePercent = underVotePct, phantomPercent=phantomPct)
+            makeOneContestUA(
+                margin,
+                Nc,
+                cvrFraction = cvrPercent,
+                undervoteFraction = underVotePct,
+                phantomFraction = phantomPct
+            )
+
         val oaMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(oaCvrs, Nc, p2flips, p1flips)
         } else {

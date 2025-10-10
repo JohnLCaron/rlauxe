@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Prng
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit
@@ -97,9 +98,18 @@ data class AuditableCard (
     }
 }
 
-class CvrIteratorAdapter(val cardIterator: Iterator<AuditableCard>) : Iterator<Cvr> {
+class CvrIteratorAdapter(val cardIterator: Iterator<AuditableCard>) : CloseableIterator<Cvr> {
     override fun hasNext() = cardIterator.hasNext()
     override fun next() = cardIterator.next().cvr()
+    override fun close() {}
+}
+
+class CvrIteratorCloser(val cardIterator: CloseableIterator<AuditableCard>) : CloseableIterator<Cvr> {
+    override fun hasNext() = cardIterator.hasNext()
+    override fun next() = cardIterator.next().cvr()
+    override fun close() {
+        cardIterator.close()
+    }
 }
 
 // convert cvrs into AuditableCard sorted by prn

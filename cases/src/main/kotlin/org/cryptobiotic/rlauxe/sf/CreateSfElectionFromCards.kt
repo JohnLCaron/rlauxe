@@ -174,13 +174,14 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 
 fun makeContestTabulations(cvrExportCsv: String, infoMap: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
-    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
 
-    while (cvrIter.hasNext()) {
-        val cvrExport: CvrExport = cvrIter.next()
-        cvrExport.votes.forEach { (contestId, cands) ->
-            val contestTab = contestTabs.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
-            contestTab.addVotes(cands)
+    cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
+        while (cvrIter.hasNext()) {
+            val cvrExport: CvrExport = cvrIter.next()
+            cvrExport.votes.forEach { (contestId, cands) ->
+                val contestTab = contestTabs.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
+                contestTab.addVotes(cands)
+            }
         }
     }
     return contestTabs
@@ -191,22 +192,22 @@ fun makeContestVotesFromCrvExport(cvrExportCsv: String): Map<Int, ContestVotes> 
     val contestVotes = mutableMapOf<Int, ContestVotes>()
 
     var count = 0
-    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
-
-    while (cvrIter.hasNext()) {
-        val cvrExport: CvrExport = cvrIter.next()
-        cvrExport.votes.forEach { (contestId, choiceIds) ->
-            val contestVote = contestVotes.getOrPut(contestId) { ContestVotes(contestId) }
-            contestVote.countBallots++  // each cvr is a cast ballot
-            choiceIds.forEach {
-                val nvotes = contestVote.votes[it] ?: 0
-                contestVote.votes[it] = nvotes + 1
-            }
-        }
-        count++
-        if (count % 10000 == 0) print("$count ")
-        if (count % 100000 == 0) println()
-    }
+   cvrExportCsvIterator(cvrExportCsv). use { cvrIter ->
+       while (cvrIter.hasNext()) {
+           val cvrExport: CvrExport = cvrIter.next()
+           cvrExport.votes.forEach { (contestId, choiceIds) ->
+               val contestVote = contestVotes.getOrPut(contestId) { ContestVotes(contestId) }
+               contestVote.countBallots++  // each cvr is a cast ballot
+               choiceIds.forEach {
+                   val nvotes = contestVote.votes[it] ?: 0
+                   contestVote.votes[it] = nvotes + 1
+               }
+           }
+           count++
+           if (count % 10000 == 0) print("$count ")
+           if (count % 100000 == 0) println()
+       }
+   }
     return contestVotes
 }
 

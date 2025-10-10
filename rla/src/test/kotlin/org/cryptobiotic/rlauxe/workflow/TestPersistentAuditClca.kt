@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Path
@@ -54,7 +55,7 @@ class TestPersistentWorkflowClca {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, clcaWorkflow.contestsUA())
-        checkContestsWithCvrs(clcaWorkflow.contestsUA(), CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvFile())))
+        checkContestsWithCvrs(clcaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())))
 
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")
@@ -87,7 +88,7 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxAuditIF, auditDir: 
         writeSamplePrnsJsonFile(auditRound.samplePrns, publish.samplePrnsFile(roundIdx))
 
         // fetch the corresponding testMvrs, add them to the audit record
-        val sampledMvrs =  findSamples(auditRound.samplePrns, testMvrsUA.iterator())
+        val sampledMvrs =  findSamples(auditRound.samplePrns, Closer(testMvrsUA.iterator()))
         val auditRecord = AuditRecord.readFrom(auditDir)
         auditRecord.enterMvrs(sampledMvrs)
 

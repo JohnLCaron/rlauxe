@@ -10,7 +10,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class TestRaireJson {
-    val filename = "/home/stormy/rla/persist/test/TestRaireAssertion.json"
 
     // data class RaireContestJson(
     //    val info: ContestInfoJson,
@@ -51,6 +50,9 @@ class TestRaireJson {
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
+        val tcontest = target.contest as RaireContest
+        val rcontest = roundtrip.contest as RaireContest
+        assertTrue(tcontest.roundsPaths.equals(rcontest.roundsPaths))
     }
 
     @Test
@@ -85,7 +87,6 @@ class TestRaireJson {
     }
 }
 
-
 fun makeRaireUA(): RaireContestUnderAudit {
     val info = ContestInfo(
         name = "AvB",
@@ -93,7 +94,13 @@ fun makeRaireUA(): RaireContestUnderAudit {
         choiceFunction = SocialChoiceFunction.IRV,
         candidateNames = listToMap("A", "B", "C", "D"),
     )
-    val contest = RaireContest(info, listOf(1), 42, 33, undervotes=1)
+    val contest = RaireContest(info, listOf(2), 42, 33, undervotes=1)
+
+    val round1 =  IrvRound(mapOf(0 to 42, 1 to 99, 2 to 1032)) // data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes for one round
+    val round2 =  IrvRound(mapOf(1 to 99, 2 to 1032))
+    val irvWinner = IrvWinners(done = true, winners = setOf(2)) // data class IrvWinners(val done:Boolean = false, val winners: Set<Int>
+    val irp = IrvRoundsPath(listOf(round1, round2), irvWinner)
+    contest.roundsPaths.add(irp)
 
     val assert1 = RaireAssertion(1, 0, 0.0,42, RaireAssertionType.winner_only)
     val assert2 = RaireAssertion(1, 2, 0.0,422, RaireAssertionType.irv_elimination,

@@ -116,25 +116,28 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
 // candsv: candidate votes for each contest
 // undervotes: undervotes for each contest
 // phantoms: phantoms for each contest
-fun makeContestsWithUndervotesAndPhantoms(candsv: List<Map<Int, Int>>, undervotes: List<Int>, phantoms: List<Int>): Pair<List<Contest>, List<Cvr>> {
+// voteForNs: voteForN for each contest, default is 1
+fun makeContestsWithUndervotesAndPhantoms(
+    candsv: List<Map<Int, Int>>, undervotes: List<Int>, phantoms: List<Int>, voteForNs: List<Int>? = null)
+: Pair<List<Contest>, List<Cvr>> {
     val candsMap = candsv.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
     val phantomMap = phantoms.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
 
     val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
-    candsv.forEachIndexed { idx: Int, cands: Map<Int, Int> ->
-        contestVotes[idx] = VotesAndUndervotes(cands, undervotes[idx], 1)
+    candsv.forEachIndexed { idx: Int, cands: Map<Int, Int> ->  // use the idx as the Id
+        val voteForN = if (voteForNs == null) 1 else voteForNs[idx]
+        contestVotes[idx] = VotesAndUndervotes(cands, undervotes[idx], voteForN = voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVotes, null)
 
     // make the infos
     val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
-    val infos = tabVotes.mapValues { (id, cands) ->
+    val infos = tabVotes.keys.associate { id ->
         val orgCands = candsMap[id]!!
-        val candidateNames =  orgCands.keys.associate { "cand$it" to it }
-        // val candidateNames = scandidateMap.keys.associate { "candidate$it" to it },
-
-        ContestInfo("contest$id", id, candidateNames, SocialChoiceFunction.PLURALITY)
+        val candidateNames = orgCands.keys.associate { "cand$it" to it }
+        val voteForN = if (voteForNs == null) 1 else voteForNs[id]
+        Pair(id, ContestInfo("contest$id", id, candidateNames, SocialChoiceFunction.PLURALITY, voteForN = voteForN))
     }
 
     // make the contests

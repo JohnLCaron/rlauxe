@@ -16,7 +16,8 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 private val quiet = true
 private val logger = KotlinLogging.logger("MakeRaireContest")
 
-// gets RaireAssertions from raire-java libray
+// make RaireContestUnderAudit from ContestTabulation; get RaireAssertions from raire-java libray
+// note ivrRoundsPaths are filled in
 fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int): RaireContestUnderAudit {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes

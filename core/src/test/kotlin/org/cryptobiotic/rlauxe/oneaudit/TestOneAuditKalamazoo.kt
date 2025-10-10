@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.verifier.verifyBAssortAvg
 import org.cryptobiotic.rlauxe.verifier.verifyCvrs
-import org.cryptobiotic.rlauxe.workflow.makeTestMvrs
 import kotlin.Int
 import kotlin.test.Test
 

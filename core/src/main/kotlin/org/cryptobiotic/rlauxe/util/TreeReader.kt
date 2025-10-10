@@ -9,14 +9,15 @@ private val show = false
 // arbitrary depth of directory tree
 class TreePathIterator(topDir: String,
                        val fileFilter: (Path) -> Boolean,
-): Iterator<Path> {
+): CloseableIterator<Path> {
     var topDirectory = DirectoryIterator(Path.of(topDir))
 
     override fun hasNext(): Boolean = topDirectory.hasNext()
     override fun next(): Path = topDirectory.next()
+    override fun close() {}
 
     // a directory with directories or files (not both)
-    inner class DirectoryIterator(dirPath: Path) : Iterator<Path> {
+    inner class DirectoryIterator(dirPath: Path) : CloseableIterator<Path> {
         val holdsFiles: Boolean
         val pathIterator: Iterator<Path>
         var subdirectory: DirectoryIterator? = null
@@ -24,6 +25,7 @@ class TreePathIterator(topDir: String,
         init {
             val dirs = mutableListOf<Path>()
             val files = mutableListOf<Path>()
+            // TODO redo to stream rather than hold a list
             Files.newDirectoryStream(dirPath).use { stream ->
                 for (path in stream) {
                     if (Files.isDirectory(path)) {
@@ -51,6 +53,8 @@ class TreePathIterator(topDir: String,
             if (holdsFiles) return pathIterator.next()
             return subdirectory!!.next()
         }
+
+        override fun close() {}
     }
 }
 
@@ -59,8 +63,8 @@ class TreePathIterator(topDir: String,
 class TreeReaderIterator <T> (
     topDir: String,
     val fileFilter: (Path) -> Boolean,
-    val reader: (Path) -> Iterator<T>
-): Iterator<T> {
+    val reader: (Path) -> CloseableIterator<T>
+): CloseableIterator<T> {
     val paths = TreePathIterator(topDir, fileFilter)
     var base: BaseIterator? = null
     var path: Path? = null
@@ -89,10 +93,13 @@ class TreeReaderIterator <T> (
         return BaseIterator(path!!)
     }
 
-    inner class BaseIterator(val path: Path) : Iterator<T> {
+    override fun close() {}
+
+    inner class BaseIterator(val path: Path) : CloseableIterator<T> {
         val tIterator = reader(path)
         override fun hasNext(): Boolean = tIterator.hasNext()
         override fun next(): T = tIterator.next()
+        override fun close() { tIterator.close() }
     }
 }
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -306,6 +307,7 @@ open class ContestUnderAudit(
         return assertions
     }
 
+    // TODO replace with use margin
     fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
         cvrs.filter { it.hasContest(id) }.forEach { cvr ->
@@ -316,6 +318,7 @@ open class ContestUnderAudit(
         return makeClcaAssertions(assertionMap)
     }
 
+    // TODO replace with use margin
     fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
@@ -438,9 +441,10 @@ open class ContestUnderAudit(
 
 }
 
+// TODO replace with use margin
 // add ClcaAssertions for multiple Contests from one iteration over the Cvrs
 // The Cvrs must have the undervotes recorded
-fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, show: Boolean = false) {
+fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>) {
     val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
     contestsUA.forEach { contestUA ->
         contestUA.pollingAssertions.forEach { assertion ->
@@ -448,17 +452,16 @@ fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: Iterator<Cvr>, 
         }
     }
 
-    cvrs.forEach { cvr ->
-        assertionMap.map { (assertion, welford) ->
-            if (cvr.hasContest(assertion.info.id)) {
-                welford.update(assertion.assorter.assort(cvr, usePhantoms = false))
+    cvrs.use { cvrIter ->
+        while (cvrIter.hasNext()) {
+            val cvr = cvrIter.next()
+            assertionMap.map { (assertion, welford) ->
+                if (cvr.hasContest(assertion.info.id)) {
+                    welford.update(assertion.assorter.assort(cvr, usePhantoms = false))
+                }
             }
         }
     }
-    if (show) {
-        assertionMap.forEach { (assert, welford) -> println("contest $assert : ${welford.mean}") }
-    }
-
     contestsUA.forEach { it.makeClcaAssertions(assertionMap) }
 }
 

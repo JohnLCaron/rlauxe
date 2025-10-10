@@ -6,9 +6,10 @@ import kotlin.random.Random
 // This is a way to create test Cvrs that match known vote totals and undervotes for a contest
 class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
     val candVotesSorted: Map<Int, Int> = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
-    val votes: IntArray = candVotesSorted.map { it.value }.toIntArray()
     private val candidateIds = candVotesSorted.keys.toList()
 
+    // use to pick candidates
+    val votes: IntArray = candVotesSorted.map { it.value }.toIntArray()
     var undervotesUsed = 0
     var cand0 = 0
     var finishedVotes = false
@@ -96,11 +97,11 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
     }
 
     override fun toString() = buildString {
-        append("VotesAndUndervotes(undervotes=$undervotes, voteForN=$voteForN, votes=${votes.contentToString()} candidateIds=$candidateIds)")
+        append("VotesAndUndervotes(undervotes=$undervotes, voteForN=$voteForN, votes=${candVotesSorted} candidateIds=$candidateIds)")
     }
 
     fun votesAndUndervotes(): Map<Int, Int> {
-        return (candVotesSorted.map { Pair(it.key, it.value)} + Pair(votes.size, undervotes)).toMap().toSortedMap()
+        return (candVotesSorted.map { Pair(it.key, it.value)} + Pair(candVotesSorted.size, undervotes)).toMap().toSortedMap()
     }
 }
 

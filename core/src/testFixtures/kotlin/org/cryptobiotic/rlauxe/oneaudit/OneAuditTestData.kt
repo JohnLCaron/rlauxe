@@ -1,9 +1,6 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.BallotPool
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 
@@ -15,11 +12,11 @@ import kotlin.Int
 fun makeOneContestUA(
     margin: Double,
     Nc: Int,
-    cvrPercent: Double,
-    undervotePercent: Double,
-    phantomPercent: Double,
+    cvrFraction: Double,
+    undervoteFraction: Double,
+    phantomFraction: Double,
 ): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
-    val nvotes = roundToClosest(Nc * (1.0 - undervotePercent - phantomPercent))
+    val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
     // margin = (w - l) / Nc ; nvotes = w + l
     // margin * Nc + l = w
     // margin * Nc + nvotes - w = w
@@ -27,7 +24,7 @@ fun makeOneContestUA(
     // (margin * Nc + nvotes)/2 = w
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    return makeOneContestUA(winner, loser, cvrPercent, undervotePercent, phantomPercent)
+    return makeOneContestUA(winner, loser, cvrFraction, undervoteFraction, phantomFraction)
 }
 
 // two contest, specified total votes
@@ -36,12 +33,12 @@ fun makeOneContestUA(
 fun makeOneContestUA(
     winnerVotes: Int,
     loserVotes: Int,
-    cvrPercent: Double,
-    undervotePercent: Double,
-    phantomPercent: Double,
+    cvrFraction: Double,
+    undervoteFraction: Double,
+    phantomFraction: Double,
     contestId: Int = 0,
 ): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
-    require(cvrPercent > 0.0)
+    require(cvrFraction > 0.0)
 
     // the candidates
     val info = ContestInfo(
@@ -57,18 +54,18 @@ fun makeOneContestUA(
     val nvotes = winnerVotes + loserVotes
     // nvotes = Nc * (1.0 - undervotePercent - phantomPercent)
     // Nc = nvotes / (1.0 - undervotePercent - phantomPercent)
-    val Nc = roundToClosest(nvotes / (1.0 - undervotePercent - phantomPercent))
-    val Np = roundToClosest(Nc * phantomPercent)
+    val Nc = roundToClosest(nvotes / (1.0 - undervoteFraction - phantomFraction))
+    val Np = roundToClosest(Nc * phantomFraction)
     val Ncast = Nc - Np
 
-    val cvrSize = roundToClosest(Ncast * cvrPercent)
+    val cvrSize = roundToClosest(Ncast * cvrFraction)
     val noCvrSize = Ncast - cvrSize
     require(cvrSize + noCvrSize == Ncast)
 
     // reported results for the two strata
-    val nvotesCvr = nvotes * cvrPercent
+    val nvotesCvr = nvotes * cvrFraction
 
-    val winnerCvr = roundToClosest(winnerVotes * cvrPercent)
+    val winnerCvr = roundToClosest(winnerVotes * cvrFraction)
     val loserCvr = roundToClosest(nvotesCvr - winnerCvr)
 
     val winnerPool = winnerVotes - winnerCvr
@@ -79,8 +76,8 @@ fun makeOneContestUA(
     val votesCvrSum = cvrVotes.values.sum()
     val votesPoolSum = votesNoCvr.values.sum()
 
-    val undervotes = undervotePercent * Nc
-    val cvrUndervotes = roundToClosest(undervotes * cvrPercent)
+    val undervotes = undervoteFraction * Nc
+    val cvrUndervotes = roundToClosest(undervotes * cvrFraction)
     val poolUnderVotes = roundToClosest(undervotes - cvrUndervotes)
 
     val poolNcards = votesPoolSum + poolUnderVotes

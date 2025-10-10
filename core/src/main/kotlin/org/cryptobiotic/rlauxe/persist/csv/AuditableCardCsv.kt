@@ -4,6 +4,8 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 import java.nio.file.Files
@@ -98,18 +100,18 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     return AuditableCard(desc, index, sampleNum, phantom, contests, votes, poolId)
 }
 
-class AuditableCardCsvReader(publisher: Publisher): Iterable<AuditableCard> {
+class AuditableCardCsvReader(publisher: Publisher): CloseableIterable<AuditableCard> {
     val filename: String = if (Files.exists(Path(publisher.cardsCsvZipFile()))) publisher.cardsCsvZipFile()
       else if (Files.exists(Path(publisher.cardsCsvFile()))) publisher.cardsCsvFile()
       else throw RuntimeException("CardsCsvFile does not exist in directory ${publisher.auditDir}")
 
-    override fun iterator(): Iterator<AuditableCard> {
+    override fun iterator(): CloseableIterator<AuditableCard> {
         return readCardsCsvIterator(filename)
     }
 }
 
-class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): Iterable<AuditableCard> {
-    override fun iterator(): Iterator<AuditableCard> {
+class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): CloseableIterable<AuditableCard> {
+    override fun iterator(): CloseableIterator<AuditableCard> {
         val iter = readCardsCsvIterator(filename)
         repeat(skip) { if (iter.hasNext()) (iter.next()) }
         return iter
@@ -129,7 +131,7 @@ fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
     return pools
 }
 
-fun readCardsCsvIterator(filename: String): Iterator<AuditableCard> {
+fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {
     return if (filename.endsWith("zip")) {
         val reader = ZipReader(filename)
         val input = reader.inputStream()
@@ -139,7 +141,7 @@ fun readCardsCsvIterator(filename: String): Iterator<AuditableCard> {
     }
 }
 
-class IteratorCardsCsvStream(input: InputStream): Iterator<AuditableCard> {
+class IteratorCardsCsvStream(input: InputStream): CloseableIterator<AuditableCard> {
     val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1"))
     var nextLine: String? = reader.readLine() // get rid of header line
 
@@ -154,13 +156,13 @@ class IteratorCardsCsvStream(input: InputStream): Iterator<AuditableCard> {
         return readAuditableCardCsv(nextLine!!)
     }
 
-    fun close() {
+    override fun close() {
         logger.info{"read $countLines lines"}
         reader.close()
     }
 }
 
-class IteratorCardsCsvFile(filename: String): Iterator<AuditableCard> {
+class IteratorCardsCsvFile(filename: String): CloseableIterator<AuditableCard> {
     val reader: BufferedReader = File(filename).bufferedReader()
     var nextLine: String? = reader.readLine() // get rid of header line
 
@@ -175,7 +177,7 @@ class IteratorCardsCsvFile(filename: String): Iterator<AuditableCard> {
         return readAuditableCardCsv(nextLine!!)
     }
 
-    fun close() {
+    override fun close() {
         logger.info{"read $countLines lines"}
         reader.close()
     }

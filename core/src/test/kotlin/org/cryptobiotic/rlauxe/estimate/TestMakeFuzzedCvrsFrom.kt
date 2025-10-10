@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.math.max
@@ -211,7 +211,7 @@ class TestMakeFuzzedCvrsFrom {
             val welfordFromFuzz = Welford()
             margins.forEach { margin ->
                 // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-                val (contestOA, _, cvrs) = makeOneContestUA(margin, Nc, cvrPercent = .70, undervotePercent = .01, phantomPercent = .01) // TODO no skew
+                val (contestOA, _, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = .70, undervoteFraction = .01, phantomFraction = .01) // TODO no skew
                 val ncands = contestOA.ncandidates
                 val contest = contestOA.contest as Contest
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")

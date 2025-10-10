@@ -32,7 +32,7 @@ open class BoulderElectionOA(
     quiet: Boolean = true,
 ): BoulderElection(export, sovo, quiet) {
 
-    val cardPools: List<CardPool> = convertRedactedToCardPool2() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
+    val cardPools: List<CardPool> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
     val oaContests: Map<Int, OneAuditContestInfo> = makeOAContest().associate { it.info.id to it}
 
     init {
@@ -49,11 +49,11 @@ open class BoulderElectionOA(
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
     }
 
-    private fun convertRedactedToCardPool2(): List<CardPool> {
+    private fun convertRedactedToCardPool(): List<CardPool> {
         return export.redacted.mapIndexed { redactedIdx, redacted: RedactedGroup ->
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
-            val useContestVotes =  if (redacted.ballotType.startsWith("06")) {
+            val useContestVotes = if (redacted.ballotType.startsWith("06")) {
                 redacted.contestVotes.filter{ (key, value) -> key != 12 }
             } else redacted.contestVotes
 

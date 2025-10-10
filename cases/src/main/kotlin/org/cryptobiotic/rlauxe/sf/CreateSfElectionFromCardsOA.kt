@@ -132,14 +132,15 @@ fun createCardPools(
     // make the card pools
     var count = 0
     val cardPools: MutableMap<String, CardPoolFromCvrs> = mutableMapOf()
-    val cvrIter = cvrExportCsvIterator(cvrExportCsv)
-    while (cvrIter.hasNext()) {
-        val cvrExport: CvrExport = cvrIter.next()
-        val pool = cardPools.getOrPut(cvrExport.poolKey() ) {
-            CardPoolFromCvrs(cvrExport.poolKey(), cardPools.size + 1, contestInfos)
+    cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
+        while (cvrIter.hasNext()) {
+            val cvrExport: CvrExport = cvrIter.next()
+            val pool = cardPools.getOrPut(cvrExport.poolKey()) {
+                CardPoolFromCvrs(cvrExport.poolKey(), cardPools.size + 1, contestInfos)
+            }
+            pool.accumulateVotes(cvrExport.toCvr())
+            count++
         }
-        pool.accumulateVotes(cvrExport.toCvr())
-        count++
     }
     println("$count cvrs")
 

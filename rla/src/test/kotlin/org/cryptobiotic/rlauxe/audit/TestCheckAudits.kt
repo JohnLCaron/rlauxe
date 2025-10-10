@@ -32,11 +32,11 @@ class TestCheckAudits {
 
         val publisher = Publisher(auditDir)
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
-        val state = checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cardIter))
+        val state = checkContestsWithCvrs(contestsUA, CvrIteratorCloser(cardIter))
         println(state)
         Assertions.assertTrue(!state.contains("***"))
 
-        val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(CvrIteratorAdapter(cardIter)).toSortedMap()
+        val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(CvrIteratorCloser(cardIter)).toSortedMap()
         tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
     }
 

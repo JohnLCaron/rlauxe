@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -28,7 +30,7 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
-    cvrs: Iterable<Cvr>,
+    cvrs: CloseableIterable<Cvr>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
@@ -36,7 +38,7 @@ fun estimateSampleSizes(
     // create the estimation tasks
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
-        tasks.addAll(makeEstimationTasks(auditConfig, contestRound, auditRound.roundIdx, cvrs))
+        tasks.addAll(makeEstimationTasks(auditConfig, contestRound, auditRound.roundIdx, CloseableIterable { cvrs.iterator() }))
     }
 
     // run tasks concurrently
@@ -88,7 +90,7 @@ fun makeEstimationTasks(
     auditConfig: AuditConfig,
     contestRound: ContestRound,
     roundIdx: Int,
-    cvrs: Iterable<Cvr>,
+    cvrIterable: CloseableIterable<Cvr>,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
     val tasks = mutableListOf<EstimateSampleSizeTask>()
@@ -97,25 +99,28 @@ fun makeEstimationTasks(
 
     // make the cvrs once for all the assertions for this contest
     val contest = contestRound.contestUA.contest
-    val cvrs: Iterable<Cvr> = when (auditConfig.auditType) {
+    val useCvrIterable: CloseableIterable<Cvr> = when (auditConfig.auditType) {
         AuditType.CLCA -> {
             // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             if (contest.isIrv()) {
-                SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
+                val cvrs = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
+                CloseableIterable { cvrs.iterator() } // I guess cvrs gets captured by the closure
             } else {
-                ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+                val cvrs = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+                CloseableIterable { cvrs.iterator() }
             }
         }
         AuditType.POLLING -> {
             // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             // TODO what about supermajority?
-            ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+            val cvrs = ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+            CloseableIterable { cvrs.iterator() }
         }
         AuditType.ONEAUDIT -> {
             // use the actual cvrs, including their sort order, and assume no errors. and repeat = 1
             // val contestOA = (contestRound.contestUA as OAContestUnderAudit).contest
             // makeTestMvrsScaled(contestOA, auditConfig.sampleLimit)
-            cvrs
+            cvrIterable
         }
     }
 
@@ -143,7 +148,7 @@ fun makeEstimationTasks(
                         roundIdx,
                         auditConfig,
                         contestRound,
-                        cvrs,
+                        useCvrIterable,
                         assertionRound,
                         startingTestStatistic,
                         prevSampleSize,
@@ -161,7 +166,7 @@ class EstimateSampleSizeTask(
     val roundIdx: Int,
     val auditConfig: AuditConfig,
     val contest: ContestRound,
-    val cvrs: Iterable<Cvr>,
+    val cvrsIterable: CloseableIterable<Cvr>,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double,
     val prevSampleSize: Int,
@@ -179,7 +184,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     auditConfig,
                     contest.contestUA,
-                    cvrs as List<Cvr>,
+                    cvrsIterable as List<Cvr>, // yechh
                     assertionRound,
                     startingTestStatistic
                 )
@@ -188,7 +193,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     auditConfig,
                     contest.contestUA.contest,
-                    cvrs as List<Cvr>,
+                    cvrsIterable as List<Cvr>, // yechh
                     assertionRound,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -198,7 +203,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     auditConfig,
                     contest.contestUA as OAContestUnderAudit,
-                    cvrs,
+                    cvrsIterable.iterator(),
                     assertionRound,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -436,7 +441,7 @@ fun simulateSampleSizeOneAuditAssorter(
     roundIdx: Int,
     auditConfig: AuditConfig,
     contestUA: OAContestUnderAudit,
-    cvrs: Iterable<Cvr>,
+    cvrs: CloseableIterator<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -444,7 +449,7 @@ fun simulateSampleSizeOneAuditAssorter(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
     val oaConfig = auditConfig.oaConfig
-    var fuzzPct = 0.0
+    val fuzzPct = 0.0
 
     // TODO without the pools, you dont get the variance...
 
@@ -455,7 +460,7 @@ fun simulateSampleSizeOneAuditAssorter(
             contestUA.Nc,
             cassertion.cassorter,
             auditConfig.sampleLimit,
-            cvrs.iterator(),
+            cvrs,
         )
 
     val strategy = auditConfig.oaConfig.strategy
@@ -502,6 +507,7 @@ fun simulateSampleSizeOneAuditAssorter(
             moreParameters
         )
     }
+    cvrs.close()
 
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,

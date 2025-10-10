@@ -114,7 +114,7 @@ class TestSfElectionOA {
         val sortedCards = "$topDir/audit/sortedCards.csv"
 
         val countingContestsFromSortedCards = mutableMapOf<Int, ContestCount>()
-        val scardIter = CvrIteratorAdapter(readCardsCsvIterator(sortedCards))
+        val scardIter = CvrIteratorCloser(readCardsCsvIterator(sortedCards))
         while (scardIter.hasNext()) {
             val cvr = scardIter.next()
             cvr.votes.keys.forEach { contestId ->

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.workflow.makeOneContestUA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,9 +43,9 @@ class TestOAShangrla {
         val (contestUA, pools, testCvrs) = makeOneContestUA(
             margin,
             Nc,
-            cvrPercent = 0.33,
-            undervotePercent = 0.0,
-            phantomPercent = 0.0
+            cvrFraction = 0.33,
+            undervoteFraction = 0.0,
+            phantomFraction = 0.0
         )
 
 

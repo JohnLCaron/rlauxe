@@ -323,25 +323,6 @@ fun writeAuditRoundJsonFile(AuditRound: AuditRound, filename: String) {
 
 fun readAuditRoundJsonFile(
     auditRoundFile: String,
-    contestsFile: String,
-    samplesFile: String,
-    mvrsForRoundFile: String?,
-): Result<AuditRound, ErrorMessages> {
-    val contestsResult = readContestsJsonFile(contestsFile)
-    if (contestsResult is Err) return contestsResult
-    val contests = contestsResult.unwrap()
-
-    val sampleResult = readSamplePrnsJsonFile(samplesFile)
-    if (sampleResult is Err) return sampleResult
-    val samples = sampleResult.unwrap()
-
-    val sampledBorc = if (mvrsForRoundFile != null) readAuditableCardCsvFile(mvrsForRoundFile) else emptyList()
-
-    return readAuditRoundJsonFile(auditRoundFile, contests, samples, sampledBorc)
-}
-
-fun readAuditRoundJsonFile(
-    auditRoundFile: String,
     contests: List<ContestUnderAudit>,
     sampledIndices: List<Long>,
     sampledBorc: List<AuditableCard>,

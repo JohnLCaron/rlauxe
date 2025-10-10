@@ -40,7 +40,7 @@ interface CardPoolIF {
     val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contest -> assorter -> average in the pool
     val poolId: Int
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
-    // fun ncards() : Int // total number of cards in the pool, including undervotes
+    fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
 }
 
@@ -48,6 +48,7 @@ class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: R
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun regVotes() = mapOf(contestId to regVotes)
     override fun contains(contestId: Int) = contestId == this.contestId
+    override fun ncards() = regVotes.ncards()
 
     fun toBallotPools(): List<BallotPool> {
         return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
@@ -85,7 +86,7 @@ class CardPool(
     override fun regVotes(): Map<Int, RegVotes> {
         return voteTotals.mapValues { (_, votes) -> RegVotesImpl(votes, ncards()) }
     }
-    fun ncards() = maxMinCardsNeeded + adjustCards
+    override fun ncards() = maxMinCardsNeeded + adjustCards
 
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!contains(contestId)) throw RuntimeException("NO CONTEST")
@@ -136,6 +137,19 @@ class CardPool(
             BallotPool(poolName, poolId, contestId, ncards(), candCount)
         }
     }
+
+    companion object {
+        fun showVotes(contestIds: List<Int>, cardPools: List<CardPool>, width:Int = 4) {
+            println("votes, undervotes")
+            print("${trunc("poolName", 9)}:")
+            contestIds.forEach {  print("${nfn(it, width)}|") }
+            println()
+
+            cardPools.forEach {
+                println(it.showVotes(contestIds, width))
+            }
+        }
+    }
 }
 
 // When the pools have complete CVRS.
@@ -151,7 +165,7 @@ open class CardPoolFromCvrs(
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun contains(contestId: Int) = contestTabs.contains(contestId)
     override fun regVotes() = contestTabs.filter { !it.value.isIrv }
-    // override fun ncards() = totalCards
+    override fun ncards() = totalCards
 
     // this is when you have CVRs. (sfoa, sfoans)
     open fun accumulateVotes(cvr : Cvr) {
@@ -176,7 +190,21 @@ open class CardPoolFromCvrs(
         return bpools
     }
 
-    // sfoans needs to add undervotes
+    // every cvr has to have every contest in the pool
+    fun addUndervotes(cvr: Cvr): Cvr {
+        var wasAmended = false
+        val votesM= cvr.votes.toMutableMap()
+        val needContests = this.contestTabs.keys
+        needContests.forEach { contestId ->
+            if (!votesM.containsKey(contestId)) {
+                votesM[contestId] = IntArray(0)
+                wasAmended = true
+                addUndervote(contestId)
+            }
+        }
+        return if (!wasAmended) cvr else cvr.copy(votes = votesM)
+    }
+
     fun addUndervote(contestId: Int) {
         val contestTab = contestTabs[contestId]!!
         contestTab.undervotes++
@@ -188,6 +216,22 @@ open class CardPoolFromCvrs(
         this.contestTabs.forEach { (contestId, poolContestTab) ->
             val contestSum = sumTab.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
             contestSum.sum(poolContestTab)
+        }
+    }
+
+    companion object {
+        // poolId -> CardPoolIF
+        fun makeCardPools(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, CardPoolFromCvrs> {
+            val cardPools: MutableMap<Int, CardPoolFromCvrs> = mutableMapOf()
+            cvrs.forEach { cvr ->
+                if (cvr.poolId != null) {
+                    val pool = cardPools.getOrPut(cvr.poolId) {
+                        CardPoolFromCvrs( "pool${cvr.poolId}", cvr.poolId, infos)
+                    }
+                    pool.accumulateVotes(cvr)
+                }
+            }
+           return cardPools
         }
     }
 }

@@ -4,8 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -29,7 +31,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
-    override fun sortedCards() = Iterable { auditableCards() }
+    override fun sortedCards() = CloseableIterable{ auditableCards() }
 
     // same pairs over all contests (!)
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
@@ -66,5 +68,5 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))
     }
 
-    private fun auditableCards(): Iterator<AuditableCard> = readCardsCsvIterator(cardFile)
+    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(cardFile)
 }

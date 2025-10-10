@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
@@ -19,7 +21,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
-    override fun sortedCards() = sortedCards
+    override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
         if (mvrsRound.isEmpty()) {
@@ -27,7 +29,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
         }
 
         val sampleNumbers = mvrsRound.map { it.prn }
-        val sampledCvrs = findSamples(sampleNumbers, sortedCards.iterator())
+        val sampledCvrs = findSamples(sampleNumbers, Closer(sortedCards.iterator()))
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsRound.size)
@@ -42,7 +44,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 
     // MvrManagerTest
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        val sampledMvrs = findSamples(sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
+        val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator()))
         require(sampledMvrs.size == sampleNumbers.size)
 
         // debugging sanity check
@@ -72,7 +74,7 @@ class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
-    override fun sortedCards() = sortedCards
+    override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
     override fun makeMvrsForRound(): List<Cvr> {
         val sampledCvrs = if (mvrsRound.isEmpty())
@@ -85,7 +87,7 @@ class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<
 
     //MvrManagerTest
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        val sampledMvrs = findSamples(sampleNumbers, mvrsUA.iterator()) // TODO use IteratorCvrsCsvFile?
+        val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator())) // TODO use IteratorCvrsCsvFile?
         require(sampledMvrs.size == sampleNumbers.size)
 
         // debugging sanity check

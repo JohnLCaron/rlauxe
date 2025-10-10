@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -23,7 +24,13 @@ class TestPersistentOneAudit {
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000
-        val (contestOA, _, testCvrs) = makeOneContestUA(N+100, N-100, cvrPercent = .95, undervotePercent=.0, phantomPercent = .0)
+        val (contestOA, _, testCvrs) = makeOneContestUA(
+            N + 100,
+            N - 100,
+            cvrFraction = .95,
+            undervoteFraction = .0,
+            phantomFraction = .0
+        )
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testMvrs = testCvrs
@@ -43,7 +50,7 @@ class TestPersistentOneAudit {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, oaWorkflow.contestsUA())
-        checkContestsWithCvrs(oaWorkflow.contestsUA(), CvrIteratorAdapter(readCardsCsvIterator(publisher.cardsCsvFile())))
+        checkContestsWithCvrs(oaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())))
 
         writeContestsJsonFile(oaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

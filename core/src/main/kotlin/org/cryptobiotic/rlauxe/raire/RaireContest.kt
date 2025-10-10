@@ -45,6 +45,27 @@ data class RaireContest(
     override fun winnerNames() = winnerNames
     override fun winners() = winners
     override fun losers() = losers
+
+    fun recountMargin(): Double {
+        try {
+            val pctDefault = -1.0
+            if (roundsPaths.isEmpty()) return pctDefault
+            val rounds = roundsPaths.first().rounds // common case is only one
+            if (rounds.isEmpty()) return pctDefault
+
+            // find the latest round with two candidates
+            var latestRound : IrvRound? = null
+            rounds.forEach{ if (it.count.size == 2) latestRound = it}
+            if (latestRound == null) return pctDefault
+
+            val winner = latestRound.count.maxBy { it.value }
+            val loser = latestRound.count.minBy { it.value }
+            return (winner.value - loser.value) / (winner.value.toDouble())
+        } catch (e : Throwable) {
+            logger.error(e) { "recountMargin for RaireContest ${id}" }
+            return -1.0
+        }
+    }
 }
 
 class RaireContestUnderAudit(
@@ -66,27 +87,7 @@ class RaireContestUnderAudit(
         }
     }
 
-    override fun recountMargin(): Double {
-        try {
-            val pctDefault = -1.0
-            val rcontest = (contest as RaireContest)
-            if (rcontest.roundsPaths.isEmpty()) return pctDefault
-            val rounds = rcontest.roundsPaths.first().rounds // common case is only one
-            if (rounds.isEmpty()) return pctDefault
-
-            // find the latest round with two candidates
-            var latestRound : IrvRound? = null
-            rounds.forEach{ if (it.count.size == 2) latestRound = it}
-            if (latestRound == null) return pctDefault
-
-            val winner = latestRound.count.maxBy { it.value }
-            val loser = latestRound.count.minBy { it.value }
-            return (winner.value - loser.value) / (winner.value.toDouble())
-        } catch (e : Throwable) {
-            logger.error(e) { "recountMargin for contest ${contest.id}" }
-            return -1.0
-        }
-    }
+    override fun recountMargin() = (contest as RaireContest).recountMargin()
 
     override fun showCandidates() = buildString {
         val roundsPaths = (contest as RaireContest).roundsPaths

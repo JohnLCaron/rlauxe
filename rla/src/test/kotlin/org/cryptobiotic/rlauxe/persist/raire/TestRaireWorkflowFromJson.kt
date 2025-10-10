@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.raire
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import java.util.concurrent.TimeUnit
@@ -48,12 +50,12 @@ class TestRaireWorkflowFromJson {
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
         val workflow = ClcaAudit(auditConfig, emptyList(), raireResults.contests, ballotCards)
 
-        runComparisonWorkflowR(workflow, ballotCards.sortedCards, nassertions)
+        runComparisonWorkflowR(workflow, Closer(ballotCards.sortedCards.iterator()), nassertions)
     }
 
 }
 
-fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<AuditableCard>, nassertions: Int) {
+fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: CloseableIterator<AuditableCard>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var done = false
@@ -65,7 +67,7 @@ fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: Iterable<AuditableCa
                 "took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
         // TODO addMvrs ?
-        val sampledMvrus = findSamples(currRound.samplePrns, sortedMvrs.iterator()) // TODO use IteratorCvrsCsvFile?
+        val sampledMvrus = findSamples(currRound.samplePrns, sortedMvrs) // TODO use IteratorCvrsCsvFile?
         done = workflow.runAuditRound(currRound)
         println("runAudit ${currRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
     }

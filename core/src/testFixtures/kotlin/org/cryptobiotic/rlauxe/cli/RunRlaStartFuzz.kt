@@ -91,7 +91,6 @@ object RunRlaStartFuzz {
         addRaireCandidates: Int,
     ): Int {
         println("Start startTestElectionClca")
-        // require(topdir.startsWith("/home/stormy/temp"))
         // clearDirectory(Path.of(topdir))
 
         val publisher = Publisher(auditDir)

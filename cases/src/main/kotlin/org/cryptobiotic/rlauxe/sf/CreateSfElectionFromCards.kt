@@ -102,9 +102,8 @@ fun createSfElectionFromCvrExport(
 
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
     val allContests = (contestsUA + irvContests).filter { it.preAuditStatus == TestH0Status.InProgress && !auditConfig.skipContests.contains(it.id) }
-
-    // make all the clca assertions in one go
-    addClcaAssertions(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)))
+    // addClcaAssertions(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)))
+    allContests.forEach { it.addClcaAssertionsFromReportedMargin() }
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contestsUA)

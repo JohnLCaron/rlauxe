@@ -108,7 +108,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
 
         val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
@@ -142,7 +142,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
 
         val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
@@ -171,7 +171,7 @@ class TestAssertions {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         //val exception = assertFailsWith<RuntimeException> {
-            val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertions(cvrs)
+            val contestUA = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
         //}
         //println(exception)
         //assertNotNull(exception.message)

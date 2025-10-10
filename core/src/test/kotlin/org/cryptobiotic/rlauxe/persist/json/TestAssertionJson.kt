@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
@@ -23,14 +24,14 @@ class TestAssertionJson {
     @Test
     fun testClcaAssertionRoundtrip() {
         val assertion = makeAssertion()
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, .52, false, true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, true)
         val target = ClcaAssertion(assertion.info, cassorter)
         // val fakeContest = Contest(target.info, emptyMap(), 0, 0)
 
         val json = target.publishJson()
         val roundtrip = json.import(assertion.info)
         assertNotNull(roundtrip)
-        assertTrue(roundtrip.equals(target))
+        assertEquals(roundtrip, target)
     }
 
     fun makeAssertion(): Assertion {
@@ -87,6 +88,6 @@ class TestAssertionJson {
         val json = target.publishIFJson()
         val roundtrip = json.import(target.info)
         assertNotNull(roundtrip)
-        assertTrue(roundtrip.equals(target))
+        assertEquals(roundtrip, target)
     }
 }

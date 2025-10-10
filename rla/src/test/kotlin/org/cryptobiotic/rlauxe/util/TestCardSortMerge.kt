@@ -6,11 +6,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestCardSortMerge {
+    val tempDir = kotlin.io.path.createTempDirectory()
 
     @Test
     fun testCardSortMerge() {
         val topDir = "/home/stormy/rla/cases/sf2024"
-        val tempDir = "/home/stormy/rla/cases/temp"
         SortMerge("$topDir/audit",
             "$topDir/cvrExport.csv",
             "$tempDir/sortChunkTest",
@@ -24,9 +24,8 @@ class TestCardSortMerge {
     }
 
     @Test
-    fun testCardSortMerge2() {
+    fun testCardSortMergeRun2() {
         val topDir = "/home/stormy/rla/cases/sf2024"
-        val tempDir = "/home/stormy/rla/cases/temp"
         val cvrIter = cvrExportCsvIterator("$topDir/cvrExport.csv")
         SortMerge("$topDir/audit",
             "dummy",

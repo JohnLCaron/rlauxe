@@ -26,7 +26,7 @@ class ClcaAudit(
         contestsUA = regularContests + raireContests
 
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertionsFromReportedMargin()
+            contest.addClcaAssertionsFromReportedMargin()
         }
 
         /* TODO only check regular contests ??

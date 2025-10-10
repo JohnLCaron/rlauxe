@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
-import kotlin.toString
 
 class TestComparisonSamplerWithRaire {
 
@@ -27,7 +26,7 @@ class TestComparisonSamplerWithRaire {
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()
 
-        contestUA.makeClcaAssertionsFromReportedMargin()
+        contestUA.addClcaAssertionsFromReportedMargin()
 
         contestUA.clcaAssertions.forEach { assert ->
             run(cvrs, contestUA, assert.cassorter)

@@ -30,7 +30,7 @@ class TestReadRaireBallotsCsv {
         tabulateRaireMargins(contestsUA, cvrs)
 
         contestsUA.forEach { contestUA ->
-            contestUA.makeClcaAssertionsFromReportedMargin()
+            contestUA.addClcaAssertionsFromReportedMargin()
         }
         val cassertions = contestsUA.first().clcaAssertions
         assertTrue(cassertions.isNotEmpty())
@@ -129,7 +129,7 @@ fun tabulateRaireMargins(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr
                 assertTrue(margin > 0)
                 rassertion.marginInVotes = margin
             }
-            rcontest.makeClcaAssertionsFromReportedMargin()
+            rcontest.addClcaAssertionsFromReportedMargin()
         }
     }
 }

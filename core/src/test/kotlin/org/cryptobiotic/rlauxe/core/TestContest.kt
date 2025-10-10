@@ -195,7 +195,7 @@ class TestContest {
 
         assertTrue(contest.percent(1) < info.minFraction!!)
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
         println("minAssert = ${contestUAc.minAssertion()}")
     }
@@ -251,7 +251,7 @@ class TestContest {
         assertTrue(contest.percent(1) >= info.minFraction!!)
         assertTrue(contest.percent(2) < info.minFraction!!)
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
         println("minAssert = ${contestUAc.minAssertion()}")
     }
@@ -262,12 +262,12 @@ class TestContest {
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=209)
 
         val contestUAp = ContestUnderAudit(contest, isComparison = false)
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
+        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
 
         assertNotEquals(contestUAp, contestUAc)
         assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
 
-        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
+        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
         assertEquals(contestUAc2, contestUAc)
         assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
         assertEquals(contestUAc2.toString(), contestUAc.toString())
@@ -310,7 +310,7 @@ class TestContest {
 
         val contestUAc = ContestUnderAudit(contest, isComparison = false)
         val mess4 = assertFailsWith<RuntimeException> {
-            contestUAc.makeClcaAssertionsFromReportedMargin()
+            contestUAc.addClcaAssertionsFromReportedMargin()
         }.message
         assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess4)
     }

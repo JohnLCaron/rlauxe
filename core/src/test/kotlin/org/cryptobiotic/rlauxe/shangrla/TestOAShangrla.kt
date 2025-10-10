@@ -123,7 +123,7 @@ class TestOAShangrla {
 
         val expect = """OneAuditClcaAssorter for contest ContestOA (0)
   assorter= winner=0 loser=1 reportedMargin=0.6572 reportedMean=0.8286
-  cvrAssortMargin=0.6572 noerror=0.7447125409591897 upperBound=1.4894250819183794 assortValueFromCvrs=null
+  cvrAssortMargin=0.6572 noerror=0.7447125409591897 upperBound=1.4894250819183794
 """
         assertEquals(expect, cassorter.toString())
     }

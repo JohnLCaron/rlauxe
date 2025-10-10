@@ -265,10 +265,10 @@ open class ContestUnderAudit(
         if (contest is Contest) { // || (contest is OneAuditContest && (contest.contest is Contest))) {
             pollingAssertions = makePollingAssertions()
         }
-        // So Raire has to add its own asserttions
+        // Raire has to add its own assertions
     }
 
-    // TODO rename primitive assertions ??
+    // TODO rename to primitive assertions ??
     private fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes
@@ -307,7 +307,7 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    // TODO replace with use margin
+    /* TODO replace with use margin
     fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
         val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
         cvrs.filter { it.hasContest(id) }.forEach { cvr ->
@@ -318,7 +318,6 @@ open class ContestUnderAudit(
         return makeClcaAssertions(assertionMap)
     }
 
-    // TODO replace with use margin
     fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
@@ -328,22 +327,22 @@ open class ContestUnderAudit(
                 ClcaAssertion(contest.info(), clcaAssorter)
             }
         return this
-    }
+    } */
 
     // This is more robust than averaging cvrs, since cvrs have to be complete and accurate.
     // OTOH, need complete and accurate CardLocation Manifest anyway!!
-    fun makeClcaAssertionsFromReportedMargin(): ContestUnderAudit {
+    fun addClcaAssertionsFromReportedMargin(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
         this.clcaAssertions = pollingAssertions.map { assertion ->
-            val clcaAssorter = makeClcaAssorter(assertion, null)
+            val clcaAssorter = makeClcaAssorter(assertion)
             ClcaAssertion(contest.info(), clcaAssorter)
         }
         return this
     }
 
-    open fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, assortValueFromCvrs, hasStyle=hasStyle)
+    open fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
+        return ClcaAssorter(contest.info(), assertion.assorter, hasStyle=hasStyle)
     }
 
     fun assertions(): List<Assertion> {
@@ -441,7 +440,7 @@ open class ContestUnderAudit(
 
 }
 
-// TODO replace with use margin
+/* TODO replace with use margin
 // add ClcaAssertions for multiple Contests from one iteration over the Cvrs
 // The Cvrs must have the undervotes recorded
 fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>) {
@@ -463,5 +462,5 @@ fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterat
         }
     }
     contestsUA.forEach { it.makeClcaAssertions(assertionMap) }
-}
+} */
 

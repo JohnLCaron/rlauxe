@@ -54,7 +54,7 @@ class OneAuditClcaAssorter(
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
     hasStyle: Boolean = true,
     val poolAverages: AssortAvgsInPools,
-) : ClcaAssorter(info, assorter, null, hasStyle = hasStyle) {
+) : ClcaAssorter(info, assorter, hasStyle = hasStyle) {
 
     // B(bi, ci)
     override fun bassort(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
@@ -104,7 +104,7 @@ class OneAuditClcaAssorter(
     override fun toString() = buildString {
         appendLine("OneAuditClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        appendLine("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound assortValueFromCvrs=$assortAverageFromCvrs")
+        appendLine("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound")
     }
 
     override fun equals(other: Any?): Boolean {

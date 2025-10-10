@@ -57,8 +57,8 @@ class SfSingleRoundAuditTask(
                     ClcaNoErrorIterator(
                         contestUA.id,
                         contestUA.Nc,
+                        cassertion.cassorter,
                         mvrManager.sortedCvrs().iterator(),
-                        cassertion.cassorter
                     )
 
                 val runner = AuditClcaAssertion()

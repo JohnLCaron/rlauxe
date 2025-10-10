@@ -36,10 +36,13 @@ interface RlauxAuditIF {
         val stopwatch = Stopwatch()
 
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
+        val cvrIterator = if (auditConfig().auditType != AuditType.ONEAUDIT) null else
+            mvrManager().sortedCvrs().iterator()
+
         estimateSampleSizes(
             auditConfig(),
             auditRound,
-            mvrManager().sortedCvrs(),
+            cvrIterator = cvrIterator,
             // nthreads=1,
         )
         logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}

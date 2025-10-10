@@ -153,8 +153,9 @@ class TestSfElectionOAnoStyles {
             ClcaNoErrorIterator(
                 contest18.id,
                 contest18.Nc,
-                mvrManager.sortedCvrs().iterator(),
-                minAssertion.cassorter)
+                minAssertion.cassorter,
+                cvrIterator = mvrManager.sortedCvrs().iterator(),
+                )
 
         if (show) println("  run assertion ${assertionRound.assertion} reported Margin= ${mean2margin(minAssertion.cassorter.assorter.reportedMargin())}")
 

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
@@ -44,6 +43,10 @@ class TestContestTabulation {
         val tabTrunc: Map<Int, ContestTabulation> = tabulateCvrs(cvrsTrunc.iterator(), infos)
         assertNotEquals(tabTrunc, contestTabs)
         assertNotEquals(tabTrunc.hashCode(), contestTabs.hashCode())
+
+        val contestTabs2: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
+        assertEquals(contestTabs2, contestTabs)
+        assertEquals(contestTabs2.hashCode(), contestTabs.hashCode())
     }
 
 }

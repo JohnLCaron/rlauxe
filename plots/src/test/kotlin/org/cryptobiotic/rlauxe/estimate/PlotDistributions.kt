@@ -80,11 +80,14 @@ class PlotDistributions {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
+        val cvrIterator = if (auditConfig.auditType != AuditType.ONEAUDIT) null else
+            ballotCards.sortedCvrs().iterator()
+
         // just want the sample estimation stuff
         return estimateSampleSizes(
             auditConfig,
             auditRound,
-            ballotCards.sortedCvrs()
+            cvrIterator = cvrIterator
         )
     }
 

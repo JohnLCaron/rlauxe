@@ -74,6 +74,11 @@ class TestRaireContest {
 
         assertTrue(rc.recountMargin() > 0.0)
         assertTrue(rc.recountMargin() < 1.0)
+
+        rc.rassertions.forEach {
+            print(it.show())
+            println(" remaining = ${it.remaining(info.candidateIds)}")
+        }
     }
 
 

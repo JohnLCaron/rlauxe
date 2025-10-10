@@ -36,7 +36,7 @@ data class IrvWinners(val done:Boolean = false, val winners: Set<Int> = emptySet
     }
 }
 
-/** The IRV elimination algorithm. */
+/** The IRV elimination algorithm. TODO test more */
 class IrvCount(val votes: Array<Vote>, val candidates: List<Int>) {
     val rootPath = EliminationPath(1, emptyList(), candidates.toSet(), votes)
 

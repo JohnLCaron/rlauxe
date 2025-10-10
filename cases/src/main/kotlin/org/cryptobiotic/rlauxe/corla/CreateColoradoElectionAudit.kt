@@ -68,14 +68,14 @@ fun createColoradoElectionFromDetailXmlAndPrecincts(
 
     val contestsUA = contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
 
-    // note that here, the cvrs dont have to be sorted
+    /* note that here, the cvrs dont have to be sorted
     val precinctCvrReader = TreeReaderIterator(
         "$topDir/$cvrExportDir/",
         fileFilter = { true },
         reader = { path -> cvrExportCsvIterator(path.toString()) }
-    )
+    ) */
     // make all the clca assertions in one go
-    addClcaAssertions(contestsUA, CvrExportAdapter(precinctCvrReader))
+    contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
 
     // these checks may modify the contest status
     checkContestsCorrectlyFormed(auditConfig, contestsUA)

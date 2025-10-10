@@ -19,7 +19,7 @@ class TestClcaFuzzSampler {
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it) }
         val cvrs = test.makeCvrsFromContests()
         contestsUA.forEach { contest ->
-            contest.makeClcaAssertionsFromReportedMargin()
+            contest.addClcaAssertionsFromReportedMargin()
         }
         println("total ncvrs = ${cvrs.size}\n")
         val contests = contestsUA.map { ContestRound(it, 1) }

@@ -38,7 +38,7 @@ class CompareAlphaPaper {
             val pollingAssertion = contestUA.pollingAssertions.first()
 
             val contestUAc = ContestUnderAudit(contest, isComparison = true, hasStyle = true)
-            contestUAc.makeClcaAssertionsFromReportedMargin()
+            contestUAc.addClcaAssertionsFromReportedMargin()
             val compareAssertion = contestUAc.clcaAssertions.first()
 
             for (eta in etas) {

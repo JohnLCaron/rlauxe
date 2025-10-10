@@ -21,7 +21,7 @@ class TestAuditRound {
         val testCvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
 
-        contestsUAs.forEach { it.makeClcaAssertionsFromReportedMargin() }
+        contestsUAs.forEach { it.addClcaAssertionsFromReportedMargin() }
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 

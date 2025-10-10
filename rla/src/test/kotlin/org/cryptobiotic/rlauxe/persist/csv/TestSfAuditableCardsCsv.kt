@@ -3,16 +3,16 @@ package org.cryptobiotic.rlauxe.persist.csv
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.junit.jupiter.api.Assertions.assertTrue
 
-class TestAuditableCardsCsv {
+class TestSfAuditableCardsCsv {
+    val tempDir = kotlin.io.path.createTempDirectory()
 
     @Test
-    fun testSf2024Poa() {
+    fun testAuditableCardCsvFile() {
         val filenameIn = "/home/stormy/rla/cases/sf2024Poa/cards.csv"
         val original = readAuditableCardCsvFile(filenameIn)
-        val filenameOut = "/home/stormy/rla/tests/scratch/sfCards.csv"
+        val filenameOut = "$tempDir/sfCards.csv"
 
         writeAuditableCardCsvFile(original, filenameOut)
         val roundtrip = readAuditableCardCsvFile(filenameOut)
@@ -20,9 +20,9 @@ class TestAuditableCardsCsv {
     }
 
     @Test // slow
-    fun testSf2024() {
+    fun testCvrExportCsvFile() {
         val filenameIn = "/home/stormy/rla/cases/sf2024/cvrExport.csv"
-        val filenameOut = "/home/stormy/rla/scratch/cvrExport.csv"
+        val filenameOut = "$tempDir/cvrExport.csv"
         writeCvrExportCsvFile(IteratorCvrExportFile(filenameIn), filenameOut)
         assertTrue(areIteratorsEqual(IteratorCvrExportFile(filenameIn), IteratorCvrExportFile(filenameOut)))
     }

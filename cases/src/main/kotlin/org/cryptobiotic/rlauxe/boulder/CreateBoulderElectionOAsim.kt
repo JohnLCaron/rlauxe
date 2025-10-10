@@ -179,7 +179,7 @@ fun createBoulderElectionOAsim(
     // form contests
     val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
     if (clca) {
-        addClcaAssertions(contestsUA, CvrIteratorAdapter(cards.iterator()))
+        contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
     } else {
         addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associateBy { it.poolId })
     }

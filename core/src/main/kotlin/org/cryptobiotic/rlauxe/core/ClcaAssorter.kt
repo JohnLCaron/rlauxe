@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger("ClcaAssorter")
+
 /** See SHANGRLA Section 3.2.
  * Let bi denote the ith ballot, and let ci denote the cast-vote record for the ith ballot.
  * Let A denote an assorter, which maps votes into [0, u], where u is an upper bound (eg 1, 1/2f).
@@ -26,7 +30,6 @@ package org.cryptobiotic.rlauxe.core
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val assortAverageFromCvrs: Double?,    // Ā(c) = average assort value measured from CVRs
     val hasStyle: Boolean = true,
     val check: Boolean = true,
 ) {
@@ -51,14 +54,7 @@ open class ClcaAssorter(
         // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7) above
         upperBound = 2.0 * noerror // upper bound of clca assorter;
 
-        // TODO
-        val reportedAssortAvg = if (assortAverageFromCvrs != null) assortAverageFromCvrs else assorter.reportedMean()
-        /* if (cvrAssortAvg <= 0.5) {
-            println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($cvrAssortAvg) must be > .5")
-        }
-        if (noerror <= 0.5)
-            println("*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: noerror ($noerror) must be > .5" )
-         */
+        val reportedAssortAvg = assorter.reportedMean()
         if (check) { // TODO suspend checking for some tests that expect to fail
             require(reportedAssortAvg > 0.5) {
                 "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"
@@ -66,7 +62,6 @@ open class ClcaAssorter(
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
         }
-        // println(" noerror = $noerror")
     }
 
     fun id() = info.id
@@ -119,9 +114,10 @@ open class ClcaAssorter(
         //            raise ValueError(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
-        if (hasStyle and !cvr.hasContest(info.id)) {
-            // TODO log error
-            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+        if (hasStyle and !cvr.hasContest(info.id)) { // TODO SHANGRLA throws exception
+            logger.error { "use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})" }
+            return 0.0
+            // throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
         //        If use_style, then if the CVR contains the contest but the MVR does
@@ -159,7 +155,6 @@ open class ClcaAssorter(
 
         other as ClcaAssorter
 
-        if (assortAverageFromCvrs != other.assortAverageFromCvrs) return false
         if (hasStyle != other.hasStyle) return false
         if (info != other.info) return false
         if (assorter != other.assorter) return false
@@ -168,7 +163,7 @@ open class ClcaAssorter(
     }
 
     override fun hashCode(): Int {
-        var result = assortAverageFromCvrs?.hashCode() ?: 0
+        var result = 0
         result = 31 * result + hasStyle.hashCode()
         result = 31 * result + info.hashCode()
         result = 31 * result + assorter.hashCode()
@@ -182,5 +177,4 @@ open class ClcaAssorter(
     }
 
     fun shortName() = assorter.shortName()
-    fun winLose() = assorter.winLose()
 }

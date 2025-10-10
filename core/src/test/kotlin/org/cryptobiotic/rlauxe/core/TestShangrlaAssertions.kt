@@ -193,7 +193,7 @@ class TestShangrlaAssertions {
         //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
         //                        + 1)/2), upper_bound=1))
         val aliceVsBob = PluralityAssorter.makeWithVotes(plur_con_test, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob, aliceVsBob.reportedMean() )
+        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob )
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0
@@ -237,18 +237,8 @@ class TestShangrlaAssertions {
         assertEquals(1.0, cassorter.overstatementError(wrongContestMvr, cvr0, hasStyle = true))
         assertEquals(0.5, cassorter.overstatementError(wrongContestMvr, cvr0, hasStyle = false))
 
-        //
-        //        try:
-        //            tst = aVb.assorter.overstatement(mvrs[3], cvrs[3], use_style=True)
-        //            raise AssertionError('aVb is not contained in the mvr or cvr')
-        //        except ValueError:
-        //            pass
-        //        assert aVb.assorter.overstatement(mvrs[3], cvrs[3], use_style=False) == 0
-        val mess = assertFailsWith<RuntimeException>{
-            cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
-        }.message
-        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
         assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
+        assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true))
 
         //
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=True) == 1/2
@@ -300,7 +290,7 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1, reportedMargin = 0.2)
-        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, null)
+        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror
         assertEquals(0.0, aliceVsBob.overstatementError(aliceMvr, aliceMvr, hasStyle = true)) // 1
@@ -308,12 +298,8 @@ class TestShangrlaAssertions {
         assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, candyMvr, hasStyle = true))
         assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, undervoteMvr, hasStyle = true))
 
-        // the overstatemnt is 0, but i think assort needs to be 1/2, not noerror
         assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        val mess = assertFailsWith<RuntimeException>{
-            aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
-        }.message
-        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true))
 
         assertEquals(1.0, aliceVsBob.overstatementError(bobMvr, aliceMvr, hasStyle = true)) // 2
         assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, candyMvr, hasStyle = true))
@@ -368,19 +354,16 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality_assort() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1, reportedMargin = 0.2)
-        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, null)
+        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror
         assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, aliceMvr, hasStyle = true)) // 1
         assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, bobMvr, hasStyle = true))
         assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, candyMvr, hasStyle = true))
 
-        // this is surprising. why whould you get credit for a ballot not containing the contest? expected 1/2
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        val mess = assertFailsWith<RuntimeException>{
-            aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = true)
-        }.message
-        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        // TODO this is surprising. why whould you get credit for a ballot not containing the contest? expected 1/2
+        assertEquals(0.5, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = false))
+        assertEquals(0.0, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = true))
 
         assertEquals(0.0 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, aliceMvr, hasStyle = true)) // 2
         assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, candyMvr, hasStyle = true))
@@ -437,7 +420,7 @@ class TestShangrlaAssertions {
         //                        + 1)/2), upper_bound=1/(2 * self.con_test.share_to_win))
         //        aVb.margin=0.2
         var aliceVsBob = SuperMajorityAssorter(sm_con_test.info, winner = 0, sm_con_test.info.minFraction!!, reportedMargin = 0.2)
-        var cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, null)
+        var cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob)
 
         assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
         assertEquals(cassorter.noerror, cassorter.bassort(mvr1, cvr1, hasStyle = true))
@@ -452,7 +435,7 @@ class TestShangrlaAssertions {
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=True) == 2/1.7
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=False) == 2/1.7
         aliceVsBob = SuperMajorityAssorter(sm_con_test.info, winner = 0, sm_con_test.info.minFraction!!, reportedMargin = 0.3)
-        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, null)
+        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob)
         assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
         assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = true))
         assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = false))
@@ -466,7 +449,7 @@ class TestShangrlaAssertions {
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=True) == 0.5/1.9
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=False) == 0.5/1.9
         aliceVsBob = SuperMajorityAssorter(sm_con_test.info, winner = 0, sm_con_test.info.minFraction!!, reportedMargin = 0.1)
-        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, null)
+        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob)
         // assertEquals(1/1.9, cassorter.noerror)
 
         //assertEquals(cassorter.noerror, cassorter.bassort(wrongContestMvr, cvr0, hasStyle = true))

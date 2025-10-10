@@ -24,7 +24,7 @@ class TestClcaAttackSamplers {
         println("testComparisonWithErrors N=$N cvrMean=$cvrMean meanDiff=$meanDiff")
         repeat(11) {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
-            val contest = makeContestUAfromCvrs(info, cvrs).makeClcaAssertionsFromReportedMargin()
+            val contest = makeContestUAfromCvrs(info, cvrs).addClcaAssertionsFromReportedMargin()
             val cassorter = contest.clcaAssertions.first().cassorter
             assertEquals(.02, cassorter.assorter().reportedMargin(), doublePrecision)
             assertEquals(0.5050505050505051, cassorter.noerror(), doublePrecision)
@@ -64,7 +64,7 @@ class TestClcaAttackSamplers {
         val reportedAvg = margin2mean(reportedMargin)
         val cvrs = makeCvrsByExactMean(N, reportedAvg)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest).makeClcaAssertionsFromReportedMargin()
+        val contestUA = ContestUnderAudit(contest).addClcaAssertionsFromReportedMargin()
         val cassorter = contestUA.clcaAssertions.first().cassorter
 
         val meanDiff = .01
@@ -93,7 +93,7 @@ class TestClcaAttackSamplers {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
-                val contestUA = ContestUnderAudit(contest).makeClcaAssertionsFromReportedMargin()
+                val contestUA = ContestUnderAudit(contest).addClcaAssertionsFromReportedMargin()
                 val cassorter = contestUA.clcaAssertions.first().cassorter
 
                 val sampler = ClcaAttackSampler(cvrs, cassorter, p2)
@@ -124,7 +124,7 @@ class TestClcaAttackSamplers {
                     val theta = margin2mean(margin)
                     val cvrs = makeCvrsByExactMean(N, theta)
                     val contest = makeContestsFromCvrs(cvrs).first()
-                    val contestUA = ContestUnderAudit(contest).makeClcaAssertionsFromReportedMargin()
+                    val contestUA = ContestUnderAudit(contest).addClcaAssertionsFromReportedMargin()
                     val cassorter = contestUA.clcaAssertions.first().cassorter
 
                     val sampler = ClcaAttackSampler(

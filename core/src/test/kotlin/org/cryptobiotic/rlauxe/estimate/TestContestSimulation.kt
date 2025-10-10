@@ -128,7 +128,7 @@ class TestContestSimulation {
 
                 // speculative if this is really what happens
                 val contest = sim.contest
-                val contestUA = ContestUnderAudit(contest, isComparison = true).makeClcaAssertionsFromReportedMargin()
+                val contestUA = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
                 val cassertion: ClcaAssertion = contestUA.minClcaAssertion()!!
                 val cassorter = cassertion.cassorter
                 val orgMargin = cassorter.calcClcaAssorterMargin(testPairs)

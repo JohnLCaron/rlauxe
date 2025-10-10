@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.audit.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.doublePrecision
@@ -43,7 +42,7 @@ class TestRaireContest {
     fun testSimulateRaireTestContest() {
         val contestId=111
         val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true)
-        rcontestUA.makeClcaAssertionsFromReportedMargin() // why do we have to call this, why doesnt simulateRaireTestContest add these ??
+        rcontestUA.addClcaAssertionsFromReportedMargin() // why do we have to call this, why doesnt simulateRaireTestContest add these ??
 
         assertEquals(rcontestUA, rcontestUA)
         assertEquals(rcontestUA.hashCode(), rcontestUA.hashCode())
@@ -63,7 +62,7 @@ class TestRaireContest {
     fun testMakeRaireContestUA() {
         val contestId=111
         val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true)
-        rcontestUA.makeClcaAssertionsFromReportedMargin()
+        rcontestUA.addClcaAssertionsFromReportedMargin()
 
         val info = rcontestUA.contest.info()
         val contestTab = tabulateCvrs(rcvrs.iterator(), mapOf(info.id to info))
@@ -79,7 +78,11 @@ class TestRaireContest {
             print(it.show())
             println(" remaining = ${it.remaining(info.candidateIds)}")
         }
-    }
 
+        rc.addClcaAssertionsFromReportedMargin()
+        rc.clcaAssertions.forEach {
+            print(it.show())
+        }
+    }
 
 }

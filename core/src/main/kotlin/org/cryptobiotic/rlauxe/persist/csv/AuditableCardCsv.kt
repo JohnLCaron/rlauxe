@@ -66,12 +66,9 @@ class AuditableCardCsvWriter(filename: String) {
 
 /////////////////////////////////////////////////////////
 
-
 fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
-    if (ttokens.size < 8)
-        println("wft ${ttokens.size}")
 
     var idx = 0
     val desc = ttokens[idx++]

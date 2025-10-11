@@ -11,11 +11,11 @@ import kotlin.test.assertNotNull
 class TestContestJson {
 
     @Test
-    fun testReadContests() {
-        val filename = "/home/stormy/rla/cases/sf2024/audit/contests.json"
+    fun testReadContestsJsonFile() {
+        val filename = "src/test/data/contests.json"
         val contestsResults = readContestsJsonFile(filename)
         val contests = if (contestsResults is Ok) contestsResults.unwrap()
-        else throw RuntimeException("Cannot read contests from ${filename} err = $contestsResults")
+            else throw RuntimeException("Cannot read contests from ${filename} err = $contestsResults")
         contests.forEach{
             println(" $it")
         }

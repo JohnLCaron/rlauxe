@@ -238,7 +238,10 @@ class TestShangrlaAssertions {
         assertEquals(0.5, cassorter.overstatementError(wrongContestMvr, cvr0, hasStyle = false))
 
         assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true))
+        val mess = assertFailsWith<RuntimeException>{
+            cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
+        }.message
+        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
 
         //
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=True) == 1/2
@@ -361,9 +364,13 @@ class TestShangrlaAssertions {
         assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, bobMvr, hasStyle = true))
         assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, candyMvr, hasStyle = true))
 
-        // TODO this is surprising. why whould you get credit for a ballot not containing the contest? expected 1/2
-        assertEquals(0.5, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = true))
+        // You have cvrs but use_style = false, which must mean that undervotes werent recorded. Now we examine an mvr
+        // that doesnt have that contest on it, and neither does the cvr. Seems like you should just skip it? meaning 1/2, not noerror.
+        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = false))
+        val mess = assertFailsWith<RuntimeException>{
+            aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = true)
+        }.message
+        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
 
         assertEquals(0.0 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, aliceMvr, hasStyle = true)) // 2
         assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, candyMvr, hasStyle = true))

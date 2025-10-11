@@ -11,7 +11,6 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestAuditConfigJson {
-    val filename = "/home/stormy/rla/tests/scratch/TestAuditConfig.json"
 
     @Test
     fun testRoundtrip() {
@@ -56,12 +55,17 @@ class TestAuditConfigJson {
     }
 
     fun testRoundtripIO(target: AuditConfig) {
+        val scratchFile = kotlin.io.path.createTempFile().toFile()
+
         val target = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L)
-        writeAuditConfigJsonFile(target, filename)
-        val result = readAuditConfigJsonFile(filename)
+        writeAuditConfigJsonFile(target, scratchFile.toString())
+
+        val result = readAuditConfigJsonFile(scratchFile.toString())
         assertTrue(result is Ok)
         val roundtrip = result.unwrap()
         assertEquals(roundtrip, target)
-        assertTrue(roundtrip.equals(target))
+        assertEquals(roundtrip, target)
+
+        scratchFile.delete()
     }
 }

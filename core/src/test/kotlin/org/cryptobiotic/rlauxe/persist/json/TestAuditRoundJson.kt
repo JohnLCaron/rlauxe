@@ -66,7 +66,6 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripIO() {
-        val filename = "/home/stormy/rla/tests/scratch/TestAuditStateJson.json"
 
         val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false)}
@@ -93,18 +92,22 @@ class TestAuditRoundJson {
             nmvrs = 129182,
             auditorWantNewMvrs = 2223,
             )
-        writeAuditRoundJsonFile(target, filename)
-        val result = readAuditRoundJsonFile(filename, contestsUAs, target.samplePrns, emptyList())
+
+        val scratchFile = kotlin.io.path.createTempFile().toFile()
+
+        writeAuditRoundJsonFile(target, scratchFile.toString())
+        val result = readAuditRoundJsonFile(scratchFile.toString(), contestsUAs, target.samplePrns, emptyList())
         assertTrue(result is Ok)
         val roundtrip = result.unwrap()
         check(target, roundtrip)
         assertTrue(roundtrip.equals(target))
         assertEquals(roundtrip, target)
+
+        scratchFile.delete()
     }
 
     @Test
     fun testRoundtripWithRounds() {
-        val filename = "/home/stormy/rla/tests/scratch/TestAuditStateJson2.json"
 
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
@@ -144,18 +147,21 @@ class TestAuditRoundJson {
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
-        writeAuditRoundJsonFile(target, filename)
-        val result = readAuditRoundJsonFile(filename, clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
+        val scratchFile = kotlin.io.path.createTempFile().toFile()
+
+        writeAuditRoundJsonFile(target, scratchFile.toString())
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
         if (result is Err) println("result = $result")
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
         assertEquals(roundtripIO, target)
+
+        scratchFile.delete()
     }
 
     @Test
     fun testRoundtripWithRaire() {
-        val filename = "/home/stormy/rla/tests/scratch/TestAuditStateJson3.json"
 
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
@@ -198,12 +204,16 @@ class TestAuditRoundJson {
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
-        writeAuditRoundJsonFile(target, filename)
-        val result = readAuditRoundJsonFile(filename, clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
+        val scratchFile = kotlin.io.path.createTempFile().toFile()
+
+        writeAuditRoundJsonFile(target, scratchFile.toString())
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
         assertTrue(result is Ok)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
         assertEquals(roundtripIO, target)
+
+        scratchFile.delete()
     }
 }
 

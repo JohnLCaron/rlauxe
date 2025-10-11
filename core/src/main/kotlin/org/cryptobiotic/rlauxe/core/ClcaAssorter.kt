@@ -95,7 +95,30 @@ open class ClcaAssorter(
         return tau * noerror   // Bi eq (7)
     }
 
+
+    // see Audit.py Assertion.overstatement_assorter()
+    //         assorter that corresponds to normalized overstatement error for an assertion
+    //
+    //        If `use_style == True`, then if the CVR contains the contest but the MVR does not,
+    //        that is considered to be an overstatement, because the ballot is presumed to contain
+    //        the contest.
+    //
+    //        If `use_style == False`, then if the CVR contains the contest but the MVR does not,
+    //        the MVR is considered to be a non-vote in the contest.
+    //
+    // see Audit.py Assorter.overstatement()
     //    overstatement error for a CVR compared to the human reading of the ballot.
+    //        If use_style, then if the CVR contains the contest but the MVR does
+    //        not, treat the MVR as having a vote for the loser (assort()=0)
+    //
+    //        If not use_style, then if the CVR contains the contest but the MVR does not,
+    //        the MVR is considered to be a non-vote in the contest (assort()=1/2).
+    //
+    //        Phantom CVRs and MVRs are treated specially:
+    //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
+    //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every
+    //            contest.
+    //
     //    the overstatement error ωi for CVR i is at most the value the assorter assigned to CVR i.
     //
     //     ωi ≡ A(ci) − A(bi) ≤ A(ci) ≤ upper              ≡   overstatement error (SHANGRLA eq 2, p 9)
@@ -103,9 +126,11 @@ open class ClcaAssorter(
     //      ci is the cast-vote record for the ith ballot
     //      A() is the assorter function
     //
-    //        Phantom CVRs and MVRs are treated specially:
-    //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
-    //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
+    // assort in [0, .5, u], u > .5, so overstatementError = cvr_assort - mvr_assort is in
+    //      [-1, -.5, 0, .5, 1] (u == 1)
+    //      [-u, -.5, .5-u, 0, u-.5, .5, u] (SM, u in [.5, 1])
+    //      [-u, .5-u, -.5, 0, .5, u-.5, u] (SM, u > 1)
+
     fun overstatementError(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
 
 
@@ -116,17 +141,18 @@ open class ClcaAssorter(
         //            )
         if (hasStyle and !cvr.hasContest(info.id)) { // TODO SHANGRLA throws exception
             logger.error { "use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})" }
-            return 0.0
-            // throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
         //        If use_style, then if the CVR contains the contest but the MVR does
         //        not, treat the MVR as having a vote for the loser (assort()=0)
-        //
+
+        //        # assort the MVR
         //        mvr_assort = (
         //            0
         //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
         //            else self.assort(mvr)
+        //
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
             else this.assorter.assort(mvr, usePhantoms = false)
 
@@ -136,14 +162,12 @@ open class ClcaAssorter(
         //        # assort the CVR
         //        cvr_assort = (
         //            self.tally_pool_means[cvr.tally_pool]
-        //            if cvr.pool and self.tally_pool_means is not None
-        //            else int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
+        //            if
+        //                cvr.pool and self.tally_pool_means is not None
+        //            else
+        //                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )
-
-        // assort in [0, .5, u], u > .5, so overstatementError in
-        //      [-1, -.5, 0, .5, 1] (plurality)
-        //      [-u, -.5, .5-u, 0, u-.5, .5, u] (SM, u in [.5, 1])
-        //      [-u, .5-u, -.5, 0, .5, u-.5, u] (SM, u > 1)
+        //        return cvr_assort - mvr_assort
 
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
@@ -178,3 +202,47 @@ open class ClcaAssorter(
 
     fun shortName() = assorter.shortName()
 }
+
+/*
+ margin = (Sum(w) - Sum(l)) / Nc
+dmargin = (Sum(w) - Sum(l)) / Nb
+     Nb = Nc + Nu
+
+   1. assorter = (w - l + 1)/2 = (w-l)/2 + 1/2
+
+    sum = Sum_Nb((w - l + 1)/2)
+        = Sum_Nc((w - l + 1)/2) + Sum_Nu(1/2)
+        = (Sum_Nc(w) - Sum_Nc(l) + Sum_Nc(1))/2 + Nu/2
+        = (Sum_Nc(w) - Sum_Nc(l)) / 2 + Nc/2 + Nu/2
+        = (Sum_Nc(w) - Sum_Nc(l)) / 2 + Nb/2
+ sum/Nb = (Sum_Nc(w) - Sum_Nc(l)) / 2 / Nb + 1/2
+
+ mean2margin(mean) = 2.0 * mean - 1.0 = (Sum_Nc(w) - Sum_Nc(l))/Nb + 1 - 1
+        = (Sum_Nc(w) - Sum_Nc(l))/Nb
+        = diluted margin
+
+  Note that (Sum_Nc(w) - Sum_Nc(l)) = (Sum_Nb(w) - Sum_Nb(l)), since Nc have all the votes.
+
+  2. cassorter = (1.0 - overstatement) * noerror; overstatement = cvr_assort - mvr_assort
+          Sum / noerror  = Sum(1.0) - Sum(cvr_assort) + Sum(mvr_assort)
+          Sum / noerror  = Nb - Sum_c((w - l)/2 - Sum(1/2) + Sum_m((w - l)/2) + Sum(1/2)
+          Sum / noerror  = Nb - Sum_c(w - l)/2 + Sum_m(w - l)/2
+          Sum / noerror / Nb  = 1 - Sum_c(w - l)/2*Nb + Sum_m(w - l)/2*Nb
+          Avg / noerror  = 1 - Sum_c(w - l)/2*Nb + Sum_m(w - l)/2*Nb
+          Avg / noerror  = 1 - Avg_c(w - l)/2 + Avg_m(w - l)/2
+          Avg / noerror  = 1 + (Avg_m(w - l)/2 + 1/2) - (Avg_c(w - l)/2 + 1/2)
+
+mean = (Avg(w - l)/2 + 1/2)
+margin = (Avg_c(w - l)/2 + 1/2)
+
+ mean2margin(mean)/noerror  = 2.0 * mean - 1.0 = 2*(1 - Sum_c(w - l)/2*Nb + Sum_m(w - l)/2*Nb) - 1
+                        = 2 - Sum_c(w - l)/Nb + Sum_m(w - l)/Nb - 1
+                        = 1 - Sum_c(w - l)/Nb + Sum_m(w - l)/Nb
+                        = 1 + dmargin_m - dmargin_c
+                        = (1 + dmargin_m) - (1 + dmargin_c) + 1
+
+margin2mean(margin) = (margin + 1) / 2
+mean2margin(mean) = 2.0 * mean - 1.0
+
+
+ */

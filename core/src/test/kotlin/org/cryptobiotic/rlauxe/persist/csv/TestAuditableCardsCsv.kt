@@ -56,11 +56,13 @@ class TestAuditableCardsCsv {
             AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456), listOf(intArrayOf(1,2,3), intArrayOf(), intArrayOf(1,2,3,4,5,6,7,8,9,0), intArrayOf(23498724)), null),
         )
 
-        val filenameOut = "/home/stormy/rla/tests/scratch/writeAuditableCardCsvFile.csv"
-        writeAuditableCardCsvFile(target, filenameOut)
+        val scratchFile = kotlin.io.path.createTempFile().toFile()
+        writeAuditableCardCsvFile(target, scratchFile.toString())
 
-        val roundtrip = readAuditableCardCsvFile(filenameOut)
+        val roundtrip = readAuditableCardCsvFile(scratchFile.toString())
         assertEquals(target, roundtrip)
+
+        scratchFile.delete()
     }
 
 }

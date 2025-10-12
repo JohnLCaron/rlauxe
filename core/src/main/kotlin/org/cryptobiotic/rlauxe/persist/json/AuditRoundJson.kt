@@ -137,6 +137,8 @@ fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     val assertionMap = contestUA.assertions().associateBy { it.assorter.desc() }
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
+        if (ref == null)
+            println("wtf")
         it.import( ref!! )
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)

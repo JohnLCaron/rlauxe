@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.util
 import java.nio.file.Files
 import java.nio.file.Path
 
-private val show = false
-
 // read all files in topdir (depth first), iterator pattern.
 // arbitrary depth of directory tree
 class TreePathIterator(topDir: String,
@@ -14,7 +12,7 @@ class TreePathIterator(topDir: String,
 
     override fun hasNext(): Boolean = topDirectory.hasNext()
     override fun next(): Path = topDirectory.next()
-    override fun close() {}
+    override fun close() { topDirectory.close() }
 
     // a directory with directories or files (not both)
     inner class DirectoryIterator(dirPath: Path) : CloseableIterator<Path> {
@@ -88,7 +86,11 @@ class TreeReaderIterator <T> (
     }
 
     fun getNextBaseIterator() : BaseIterator? {
-        if (!paths.hasNext()) return null
+        if (base != null) base!!.close()
+        if (!paths.hasNext()) {
+            paths.close()
+            return null
+        }
         path = paths.next()
         return BaseIterator(path!!)
     }

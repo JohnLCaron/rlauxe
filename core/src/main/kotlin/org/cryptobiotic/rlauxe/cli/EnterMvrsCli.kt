@@ -32,7 +32,6 @@ object EnterMvrsCli {
     }
 }
 
-
 fun enterMvrs(inputDir: String, mvrFile: String): Boolean {
     if (notExists(Path.of(inputDir))) {
         println("EnterMvrsCli Audit Directory $inputDir does not exist")

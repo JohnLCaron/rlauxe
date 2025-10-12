@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
 
 private val debug = false
@@ -25,6 +26,7 @@ fun sampleCheckLimits(
     previousSamples: Set<Long>,
     quiet: Boolean
 ) {
+    val stopwatch = Stopwatch()
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
@@ -37,7 +39,7 @@ fun sampleCheckLimits(
         // find the contest with the largest estimation size eligible for removal, remove it
         val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
         val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
-        logger.warn{" ***too many samples, remove contest ${maxContest.id} with status FailMaxSamplesAllowed"}
+        logger.warn{" ***too many samples= ${maxEstimation}, remove contest ${maxContest.id} with status FailMaxSamplesAllowed"}
 
         /// remove maxContest from the audit
         // information we want in the persisted record
@@ -45,6 +47,7 @@ fun sampleCheckLimits(
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
         contestsNotDone.remove(maxContest)
     }
+    logger.info{" sample() success on ${auditRound.contestRounds.count { !it.done }} contests: ready to audit; took ${stopwatch}"}
 }
 
 /** Choose what cards to sample */

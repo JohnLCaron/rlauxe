@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
 
-// This is a way to create test Cvrs that match known vote totals and undervotes for a contest
+// This is a way to create test Cvrs that match known vote totals and undervotes for one contest
 class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
     val candVotesSorted: Map<Int, Int> = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
     private val candidateIds = candVotesSorted.keys.toList()
@@ -107,15 +107,14 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
 
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
-fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolId: Int?): List<Cvr> {
+fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolName: String, poolId: Int?, ): List<Cvr> {
     val rcvrs = mutableListOf<Cvr>()
 
     var count = 1
     var usedOne = true
     while (usedOne) {
         usedOne = false
-        val cvrId = if (poolId == null) "ballot${count}"
-                             else "pool${poolId}-${count}"
+        val cvrId = "${poolName}-${count}"
         val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
         contestVotes.entries.forEach { (contestId, vunders) ->
             if (vunders.isNotEmpty()) {
@@ -130,6 +129,6 @@ fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolId: Int?): Li
         count++
     }
 
-    rcvrs.shuffle()
+    rcvrs.shuffle() // TODO need?
     return rcvrs
 }

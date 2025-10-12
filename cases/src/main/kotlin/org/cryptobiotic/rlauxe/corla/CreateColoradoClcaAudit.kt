@@ -15,13 +15,13 @@ import org.cryptobiotic.rlauxe.sf.sortedCardsFile
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 
-private val logger = KotlinLogging.logger("createColoradoElection")
+private val logger = KotlinLogging.logger("createColoradoClcaAudit")
 private val showMissingCandidates = false
 val cvrExportDir = "cvrexport"
 
 // making vote counts from the electionDetailXml
 // making cards (cvrs) from the precinct results
-fun createColoradoElectionFromDetailXmlAndPrecincts(
+fun createColoradoClcaAudit(
     topDir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
@@ -94,10 +94,10 @@ fun createColoradoElectionFromDetailXmlAndPrecincts(
     println("took = $stopwatch")
 }
 
-val quiet = false
+private val quiet = false
 
 private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<Contest> {
-    val roundContestMap = roundContests.associateBy { contestNameCleanup(it.contestName) }
+    val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
     val contests = mutableListOf<Contest>()
 
     electionDetailXml.contests.forEachIndexed { detailIdx, detailContest ->
@@ -117,10 +117,10 @@ private fun makeContests(electionDetailXml: ElectionDetailXml, roundContests: Li
 
         // all we need ContestRoundCsv is for Nc; TODO or Nc = roundContest.ballotCardCount?
         val totalVotes = candidateVotes.map { it.value }.sum()
-        var useNc = roundContest?.contestBallotCardCount ?: candidateVotes.map { it.value }.sum()
+        var useNc = roundContest?.contestBallotCardCount ?: totalVotes
         if (useNc < totalVotes ) {
-            println("*** Contest $contestName has $totalVotes total votes, but contestBallotCardCount is ${roundContest!!.contestBallotCardCount} - using ballotCardCount = ${roundContest!!.ballotCardCount}")
-            useNc = roundContest!!.ballotCardCount
+            println("*** Contest $contestName has $totalVotes total votes, but contestBallotCardCount is ${roundContest!!.contestBallotCardCount} - use totalVotes}")
+            useNc = totalVotes // roundContest!!.ballotCardCount
         } // buggers
 
         val info = ContestInfo(
@@ -188,6 +188,7 @@ private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Cont
         }
     }
 
+    // TODO use VunderVotes
     // make cvrs until we exhaust the votes
     // Assume that the cvr has all of the contests on it, even if theres no vote in the contest
     val rcvrs = mutableListOf<CvrExport>()

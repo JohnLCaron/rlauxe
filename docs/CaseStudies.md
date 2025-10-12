@@ -1,5 +1,5 @@
 # Case Studies
-_last changed 10/08/2025_
+_last changed 10/10/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -101,13 +101,11 @@ This allows us to test the two approaches.
 
 ## Colorado RLA (CORLA) 2024
 
-* 3,241,120 ballot cast (Colorado 2024 General Election). 
+* 3,241,120 ballot cast (Colorado 2024 General Election) in 3199 precincts.
 * 260 contests, no IRV.
-* CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_. We use the published precinct  level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests.
+* CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_. 
 * CORLA does an RLA, so they do have access to the CVRs. A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they are "privately available".
-
 * The _detail.xls_ file has summary by contest broken out by county, in a multipage excel file. _detail.xml_ has same info in xml file
-
 * The _round1/contest.csv_ file has a summary of each round; we use these fields from it to make the contest:
 ````
   contest_name
@@ -123,11 +121,8 @@ This allows us to test the two approaches.
 
 Note that this gives us the number of samples estimated for each audit round, from the CORLA "super simple" algorithm. We can compare these estimates with the CORLA software's estimates (estimates can be seen in Rlauxe Viewer _AuditRoundsTable_).
 
-* There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests >= 260. So we restrict our attention to those 260 contests.
+There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests \>= 260. So we restrict our attention to those 260 contests.
 
-* createColoradoElectionFromDetailXmlAndPrecincts: contestRound, electionDetailXml, precinctResults -> precinctCvrs -> CvrExport.csv
-
-* createCorla2024sortedCards: use CardSortMerge to convert to AuditableCard, assign prn, sort and write sortedCards (900 Mb, 120 Mb zipped)
 
 The file data/2024audit/_targetedContests.xlsx_ shows contests selected for audit, eg:
 
@@ -150,6 +145,24 @@ contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,
 Presidential Electors,state_wide_contest,in_progress,1,4746866,3239722,"""Kamala D. Harris / Tim Walz""",350348,0.03000000,0,0,0,0,0,0,0,1.03905000,0,99,99
 ````
 Not exactly consistent, eg 1728159 - 1377441 = 350718 != 350348, but close enough for now (we can only do a simulation since we dont have the real CVRs).
+
+### simulated CVRs for CLCA audit
+
+We use the published precinct level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests, so we cant handle
+  IRV contests.
+
+* createColoradoClcaAudit: contestRound, electionDetailXml, precinctResults -> precinctCvrs -> CvrExport.csv
+* createCorla2024sortedCards: use CardSortMerge to convert to AuditableCard, assign prn, sort and write sortedCards (900 Mb, 120 Mb zipped)
+
+### precinct pools for OneAudit audit
+
+We could also run a OneAudit with the precinct as the pools. 
+
+* Assume that the contest list constitutes the ballot style for that batch. They do record when Candidate total votes = 0.
+* We have Nc from contestRound.contestBallotCardCount
+* Do we have the number of cards for each precinct? No, not in createColoradoElectionFromDetailXmlAndPrecincts. 
+* Add undervotes to minimize phantoms.
+
 
 ### Next Steps
 

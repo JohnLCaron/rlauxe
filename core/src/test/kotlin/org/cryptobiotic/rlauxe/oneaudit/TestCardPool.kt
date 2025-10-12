@@ -69,7 +69,7 @@ class TestCardPool {
             contestVotes[contestUA.id] = VotesAndUndervotes(candVotes, underVotes, voteForN)
         }
 
-        val cvrs = makeVunderCvrs(contestVotes, poolId = 42)
+        val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
         val cardPools = CardPoolFromCvrs.makeCardPools(cvrs.iterator(), infos)
@@ -100,12 +100,12 @@ class TestCardPool {
             contestVotes[contestUA.id] = VotesAndUndervotes(candVotes, underVotes, voteForN)
         }
 
-        val cvrs = makeVunderCvrs(contestVotes, poolId = 42)
+        val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
         val votes = cvrTabs.mapValues { it.value.votes }
 
-        val cardPool = CardPool("pool42", 42, votes, infos)
-        CardPool.showVotes(contestVotes.keys.toList(), listOf(cardPool), width=6)
+        val cardPool = CardPoolWithBallotStyle("pool42", 42, votes, infos)
+        CardPoolWithBallotStyle.showVotes(contestVotes.keys.toList(), listOf(cardPool), width=6)
     }
 }

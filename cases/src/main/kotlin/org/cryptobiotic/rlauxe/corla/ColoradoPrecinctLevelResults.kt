@@ -18,6 +18,10 @@ data class ColoradoPrecinctLevelResults(
     val contestChoices = mutableMapOf<String, MutableList<ContestChoice>>() // contestName -> choices
 
     override fun toString() = buildString {
+        append("ColoradoPrecinctLevelResults(county='$county', precinct='$precinct')")
+    }
+
+    fun show() = buildString {
         appendLine("ColoradoPrecinctLevelResults(county='$county', precinct='$precinct')")
         contestChoices.forEach {
             appendLine("   '${it.key}':")

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.audit.RegVotes
 import org.cryptobiotic.rlauxe.audit.RegVotesImpl
@@ -8,16 +9,19 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.max
+import kotlin.random.Random
 
 
 private val logger = KotlinLogging.logger("CardPool")
@@ -37,13 +41,14 @@ class AssortAvg() {
 }
 
 interface CardPoolIF {
-    val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contest -> assorter -> average in the pool
     val poolId: Int
+    val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
 }
 
+// single contest, for testing
 class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun regVotes() = mapOf(contestId to regVotes)
@@ -57,14 +62,13 @@ class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: R
 
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
-class CardPool(
-    poolNameIn: String,
+class CardPoolWithBallotStyle(
+    val poolName: String,
     override val poolId: Int,
-    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes from redacted group // TODO use ContestTabulation ??
+    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
     val infos: Map<Int, ContestInfo>, // all infos
 ) : CardPoolIF
 {
-    val poolName = cleanCsvString(poolNameIn)
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
     private var adjustCards = 0
@@ -74,10 +78,10 @@ class CardPool(
 
     init {
         voteTotals.forEach { (contestId, candidateCounts) ->
-            val redVotesSum = candidateCounts.map { it.value }.sum()
+            val voteSum = candidateCounts.map { it.value }.sum()
             val info = infos[contestId]!!
             // need at least this many cards would you need for this contest?
-            minCardsNeeded[contestId] = roundUp(redVotesSum.toDouble() / info.voteForN)
+            minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
         }
         maxMinCardsNeeded = minCardsNeeded.values.max()
     }
@@ -127,9 +131,16 @@ class CardPool(
         val undervote = voteTotals.map { (id, cands) ->
             val sum = cands.map { it.value }.sum()
             val info = infos[id]!!
-            Pair(id, maxMinCardsNeeded * info.voteForN - sum)
+            Pair(id, ncards() * info.voteForN - sum)
         }
         return undervote.toMap().toSortedMap()
+    }
+
+    fun undervoteForContest(contestId: Int): Int {
+        val votesForContest = voteTotals[contestId] ?: return 0
+        val sum = votesForContest.map { it.value }.sum()
+        val info = infos[contestId]!!
+        return ncards() * info.voteForN - sum
     }
 
     fun toBallotPools(): List<BallotPool> {
@@ -139,7 +150,7 @@ class CardPool(
     }
 
     companion object {
-        fun showVotes(contestIds: List<Int>, cardPools: List<CardPool>, width:Int = 4) {
+        fun showVotes(contestIds: List<Int>, cardPools: List<CardPoolWithBallotStyle>, width:Int = 4) {
             println("votes, undervotes")
             print("${trunc("poolName", 9)}:")
             contestIds.forEach {  print("${nfn(it, width)}|") }
@@ -236,7 +247,7 @@ open class CardPoolFromCvrs(
     }
 }
 
-// there are no cvrs, use reportedMargin to set the pool assorter averages.  can only use for non-IRV contests
+// use reportedMargin to set the pool assorter averages. can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
     oaContests: List<OAContestUnderAudit>,
     cardPools: Map<Int, CardPoolIF>
@@ -250,8 +261,10 @@ fun addOAClcaAssortersFromMargin(
             cardPools.values.forEach { cardPool ->
                 if (cardPool.contains(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
-                    val poolMargin = assertion.assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
-                    assortAverages[cardPool.poolId] = margin2mean(poolMargin)
+                    if (regVotes.ncards() > 0) {
+                        val poolMargin = assertion.assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
+                        assortAverages[cardPool.poolId] = margin2mean(poolMargin)
+                    }
                 }
             }
             val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAverages = AssortAvgsInPools(assortAverages))
@@ -261,77 +274,91 @@ fun addOAClcaAssortersFromMargin(
     }
 }
 
+//////////////////////////////////////////////////////////////////
 
-/* add pool assort averages to the OneAuditClcaAssorters
-fun addOAClcaAssortersFromCvrs(
-    oaContests: List<OAContestUnderAudit>,
-    cardIter: Iterator<Cvr>,
-    cardPools: Map<Int, CardPoolIF> // poolId -> CardPoolIF
-) {
-    // sum all the assorters values in one pass across all the cvrs. works for both Irvs and Reg.
-    while (cardIter.hasNext()) {
-        val card: Cvr = cardIter.next()
-        if (card.poolId == null) continue
+interface OneAuditContestIF {
+    val contestId: Int
+    fun poolTotalCards(): Int // total cards in all pools for this contest
+    fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
+    fun adjustPoolInfo(cardPools: List<CardPoolIF>)
+}
 
-        val assortAvg = cardPools[card.poolId]!!.assortAvg
-        oaContests.forEach { contest ->
-            if (card.hasContest(contest.id)) { // TODO assumes has_styles = true
-                val avg = assortAvg.getOrPut(contest.id) { mutableMapOf() }
-                contest.pollingAssertions.forEach { assertion ->
-                    val passorter = assertion.assorter
-                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
-                    assortAvg.ncards++
-                    assortAvg.totalAssort += passorter.assort(card, usePhantoms = false)
-                }
+fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<CardPoolWithBallotStyle>) {
+    val contestId = oaContest.contestId
+    val poolCards = oaContest.poolTotalCards()
+    val expectedCards = oaContest.expectedPoolNCards()
+    val diff = expectedCards - poolCards
+
+    var used = 0
+    val allocDiffPool = mutableMapOf<Int, Int>()
+    cardPools.forEach { pool ->
+        val minCardsNeeded = pool.minCardsNeeded[contestId]
+        if (minCardsNeeded != null) {
+            // distribute cards as proportion of totalVotes
+            val allocDiff = roundToClosest(diff * (pool.maxMinCardsNeeded / poolCards.toDouble()))
+            used += allocDiff
+            allocDiffPool[pool.poolId] = allocDiff
+        }
+    }
+
+    // adjust some pool so sum undervotes = redUndervotes
+    if (used < diff) {
+        val keys = allocDiffPool.keys.toList()
+        while (used < diff) {
+            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
+            val prev = allocDiffPool[chooseOne]!!
+            allocDiffPool[chooseOne] = prev + 1
+            used++
+        }
+    }
+    if (used > diff) {
+        val keys = allocDiffPool.keys.toList()
+        while (used > diff) {
+            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
+            val prev = allocDiffPool[chooseOne]!!
+            if (prev > 0) {
+                allocDiffPool[chooseOne] = prev - 1
+                used--
             }
         }
     }
 
-    // create the clcaAssertions and add poolAverages to them
-    oaContests.forEach { oaContest ->
-        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
-            val poolAvgMap = mutableMapOf<Int, Double>() // poolId -> average assort value
-            cardPools.values.forEach { cardPool ->
-                val contestAA = cardPool.assortAvg[oaContest.id]
-                if (contestAA != null) {
-                    val assortAvg = contestAA[assertion.assorter]
-                    if (assortAvg != null) {
-                        poolAvgMap[cardPool.poolId] = assortAvg.avg()
-                    } else {
-                        logger.warn { "cardPool ${cardPool.poolId} missing assertion ${assertion.assorter}" }
-                    }
-                }
-            }
-            val poolAvgs = AssortAvgsInPools(poolAvgMap)
-            val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAvgs)
-            ClcaAssertion(assertion.info, clcaAssorter)
-        }
-        oaContest.clcaAssertions = clcaAssertions
+    // check
+    require(allocDiffPool.values.sum() == diff)
+
+    // adjust
+    val cardPoolMap = cardPools.associateBy { it.poolId }
+    allocDiffPool.forEach { (poolId, adjust) ->
+        cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
     }
+}
 
-    // compare the pool's assortAverage with the value computed from the contestTabulation (non-IRV only)
-    cardPools.values.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes) ->
-            val avg = cardPool.assortAvg[contestId]
-            if (avg != null) {
-                avg.forEach { (assorter, assortAvg) ->
-                    // calculated margin based on winner/loser counts in the pool
-                    val calcReportedMargin = assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
-                    val calcReportedMean = margin2mean(calcReportedMargin)
-                    // average assort value in the pool
-                    val cvrAssortAverage = assortAvg.avg()
+// for a real audit, there are no votes
+fun createSortedCardsFromPools(cvrs: List<Cvr>, pools: List<CardPoolWithBallotStyle>, seed: Long) : List<AuditableCard> {
+    val prng = Prng(seed)
+    val cards = mutableListOf<AuditableCard>()
+    var idx = 0
+    cvrs.forEach { cards.add(AuditableCard.fromCvr(it, idx++, prng.next())) }
 
-                    if (!doubleIsClose(calcReportedMean, cvrAssortAverage)) {
-                        println("pool ${cardPool.poolId} means not agree for contest $contestId assorter $assorter ")
-                        println("     calcReportedMean= ${calcReportedMean} cvrAssortAverage= $cvrAssortAverage ")
-                        println("     ${assortAvg} regVotes= $regVotes ")
-                        println()
-                    }
-                }
-            }
+    // add the pool votes
+    pools.forEach { pool ->
+        val ncards = pool.ncards()
+        val cleanName = cleanCsvString(pool.poolName)
+        repeat(ncards) { poolIndex ->
+            cards.add(
+                AuditableCard(
+                    location = "pool${cleanName} card ${poolIndex + 1}",
+                    index = idx++,
+                    prn = prng.next(),
+                    phantom = false,
+                    contests = pool.contests(),
+                    votes = null,
+                    poolId = pool.poolId
+                )
+            )
         }
     }
 
-} */
-
-
+    // or use external memory sort
+    return cards.sortedBy { it.prn }
+}

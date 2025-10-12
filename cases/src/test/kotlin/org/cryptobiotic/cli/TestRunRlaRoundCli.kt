@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.cli
+package org.cryptobiotic.cli
 
+import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import kotlin.test.Test
 
 // use this to run a round, but not as a test

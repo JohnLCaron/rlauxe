@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
@@ -21,7 +22,7 @@ val cvrExportDir = "cvrexport"
 
 // making vote counts from the electionDetailXml
 // making cards (cvrs) from the precinct results
-fun createColoradoClcaAudit(
+fun createColoradoClcaAuditOld(
     topDir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
@@ -237,12 +238,16 @@ private fun makeCvrs(precinct: ColoradoPrecinctLevelResults, contests: List<Cont
 fun createCorla2024sortedCards(topDir: String) {
     val auditDir = "$topDir/audit"
 
+    val publisher = Publisher(auditDir)
+    val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+    val seed = auditConfig.seed
+
     val precinctCvrReader = TreeReaderIterator(
         "$topDir/$cvrExportDir/",
         fileFilter = { true },
         reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
 
-    SortMerge(auditDir, "unused", "$topDir/sortChunks", "$auditDir/${sortedCardsFile}", null).run2(precinctCvrReader)
+    SortMerge("$topDir/sortChunks", "$auditDir/${sortedCardsFile}", seed).run2(precinctCvrReader)
     createZipFile("$auditDir/$sortedCardsFile", delete = false)
 }

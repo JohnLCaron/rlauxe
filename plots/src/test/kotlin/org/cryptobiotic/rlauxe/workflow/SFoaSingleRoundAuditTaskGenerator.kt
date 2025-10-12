@@ -150,17 +150,3 @@ class SfoaSingleRoundAuditTaskContest18(
         )
     }
 }
-
-
-////////////////////////////////////////////////////////
-
-const val sortedCardsFile = "sortedCards.csv"
-fun createSortedCards(topDir: String, auditDir: String, cvrExportCsv: String, zip: Boolean = true, ballotPoolFile: String?) {
-    val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
-    val pools = ballotPools?.poolNameToId()
-
-    SortMerge(auditDir, cvrExportCsv, "$topDir/sortChunks", "$auditDir/$sortedCardsFile", pools = pools).run()
-    if (zip) {
-        createZipFile("$auditDir/$sortedCardsFile", delete = false)
-    }
-}

@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.cli
+package org.cryptobiotic.cli
 
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import kotlin.test.Test
 
 class TestRunVerifyContests {

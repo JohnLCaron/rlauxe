@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.cli
+package org.cryptobiotic.cli
 
+import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import java.nio.file.Path
 import kotlin.test.Test

@@ -11,12 +11,15 @@ import org.cryptobiotic.rlauxe.raire.IrvCount
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.raire.showIrvCountResult
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class TestMakeRaireContest {
 
     @Test
     fun showIrvCounts() {
+        val stopwatch = Stopwatch()
+
         val topDir = "/home/stormy/rla/cases/sf2024"
         val publisher = Publisher("$topDir/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
@@ -37,7 +40,7 @@ class TestMakeRaireContest {
             irvCounters.forEach { it.addCvr(cvrIter.next())}
             count++
         }
-        println("processed $count cvrs")
+        println("processed $count cvrs $stopwatch") // TODO takes 1 min, should we save the VC?
 
         irvCounters.forEach { counter ->
             println("${counter.rcontest}")
@@ -45,6 +48,8 @@ class TestMakeRaireContest {
             val irvCount = IrvCount(cvotes, counter.rcontest.info.candidateIds)
             showIrvCount(counter.rcontest, irvCount)
         }
+
+        println("that took $stopwatch")
     }
 }
 

@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.Sampler
 import kotlin.math.max
 import kotlin.random.Random
 
 private val show = true
+private val logger = KotlinLogging.logger("ClcaSimulation")
 
 /** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
  * Specific to a contest. Only used for estimating the sample size.
@@ -18,7 +20,6 @@ class ClcaSimulation(
 ): Sampler {
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
-    val Nc = contest.Nc()
     val isIRV = contest.isIrv()
     val mvrs: List<Cvr>
     val cvrs: List<Cvr>
@@ -42,11 +43,11 @@ class ClcaSimulation(
         val ccvrs = mutableListOf<Cvr>()
         ccvrs.addAll(rcvrs)
 
-        flippedVotesP1o = flipP1o(mmvrs, needToChange = (Nc * errorRates.p1o).toInt())
-        flippedVotesP2o = flipP2o(mmvrs, needToChange = (Nc * errorRates.p2o).toInt())
-        flippedVotesP2u = flipP2u(mmvrs, needToChange = (Nc * errorRates.p2u).toInt())
-        flippedVotesP1u = if (isIRV) flipP1uIRV(mmvrs, needToChange = (Nc * errorRates.p1u).toInt()) else
-                          flipP1uP(mmvrs, ccvrs, needToChange = (Nc * errorRates.p1u).toInt())
+        flippedVotesP1o = flipP1o(mmvrs, needToChange = (maxSamples * errorRates.p1o).toInt())
+        flippedVotesP2o = flipP2o(mmvrs, needToChange = (maxSamples * errorRates.p2o).toInt())
+        flippedVotesP2u = flipP2u(mmvrs, needToChange = (maxSamples * errorRates.p2u).toInt())
+        flippedVotesP1u = if (isIRV) flipP1uIRV(mmvrs, needToChange = (maxSamples * errorRates.p1u).toInt()) else
+                          flipP1uP(mmvrs, ccvrs, needToChange = (maxSamples * errorRates.p1u).toInt())
 
         mvrs = mmvrs.toList()
         cvrs = ccvrs.toList()
@@ -123,7 +124,7 @@ class ClcaSimulation(
         }
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flipP2o could only flip $changed, wanted $needToChange")
+            logger.warn { "contest ${contest.id} flipP2o could only flip $changed, wanted $needToChange"}
         // require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
@@ -163,7 +164,7 @@ class ClcaSimulation(
 
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flipP2u could only flip $changed, wanted $needToChange")
+            logger.warn {"contest ${contest.id} flipP2u could only flip $changed, wanted $needToChange"}
         // require(checkAvotes == startingAvotes - needToChange)
         return changed
     }
@@ -202,7 +203,7 @@ class ClcaSimulation(
         }
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 1.0 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flipP1o could only flip $changed, wanted $needToChange")
+            logger.warn { "contest ${contest.id} flipP1o could only flip $changed, wanted $needToChange"}
         // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
@@ -236,7 +237,7 @@ class ClcaSimulation(
         }
         val checkAvotes = mcvrs.filter { cassorter.assorter().assort(it) == 0.5 }.count()
         if (checkAvotes != startingAvotes - needToChange)
-            println("flipP1uIRV could only flip $changed, wanted $needToChange")
+            logger.warn {"contest ${contest.id} flipP1uIRV could only flip $changed, wanted $needToChange"}
         // require(checkAvotes == startingAvotes - needToChange)
 
         return changed
@@ -270,7 +271,7 @@ class ClcaSimulation(
         }
         val checkAvotes = cvrs.count { cassorter.assorter().assort(it) == 1.0 }
         if (checkAvotes != startingAvotes - needToChange)
-            println("flipP1uP could only flip $changed, wanted $needToChange")
+            logger.warn {"contest ${contest.id} flipP1uP could only flip $changed, wanted $needToChange"}
        // require(checkAvotes == startingAvotes - needToChange)
 
         return changed

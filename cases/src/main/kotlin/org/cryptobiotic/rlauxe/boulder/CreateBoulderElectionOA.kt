@@ -16,10 +16,8 @@ import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.map
 import kotlin.collections.set
-import kotlin.collections.sortedBy
 import kotlin.io.path.Path
 import kotlin.math.max
-import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
 
@@ -28,28 +26,28 @@ private val logger = KotlinLogging.logger("BoulderElectionOA")
 open class BoulderElectionOA(
     export: DominionCvrExportCsv,
     sovo: BoulderStatementOfVotes,
-    clca: Boolean = false,
     quiet: Boolean = true,
 ): BoulderElection(export, sovo, quiet) {
 
-    val cardPools: List<CardPool> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val oaContests: Map<Int, OneAuditContestInfo> = makeOAContest().associate { it.info.id to it}
+    val cardPools: List<CardPoolWithBallotStyle> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
+    val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
 
     init {
-        val cardPoolMap = cardPools.associateBy { it.poolId }
+        // val cardPoolMap = cardPools.associateBy { it.poolId }
+        oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
 
         // first do contest 0, since it has the fewest undervotes
         val oaContest0 = oaContests[0]!!
-        distributeRedactedNcardsDiff(oaContest0, cardPoolMap)
+        distributeExpectedOvervotes(oaContest0, cardPools)
 
         // card B
         val oaContest63 = oaContests[63]!!
-        distributeRedactedNcardsDiff(oaContest63, cardPoolMap)
+        distributeExpectedOvervotes(oaContest63, cardPools)
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
     }
 
-    private fun convertRedactedToCardPool(): List<CardPool> {
+    private fun convertRedactedToCardPool(): List<CardPoolWithBallotStyle> {
         return export.redacted.mapIndexed { redactedIdx, redacted: RedactedGroup ->
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
@@ -57,87 +55,24 @@ open class BoulderElectionOA(
                 redacted.contestVotes.filter{ (key, value) -> key != 12 }
             } else redacted.contestVotes
 
-            CardPool(redacted.ballotType, redactedIdx, useContestVotes.toMap(), infoMap)
+            CardPoolWithBallotStyle(cleanCsvString(redacted.ballotType), redactedIdx, useContestVotes.toMap(), infoMap)
         }
     }
 
-    fun makeOAContest(): List<OneAuditContestInfo> {
+    fun makeOAContests(): List<OneAuditContestBoulder> {
         val countCvrVotes = countCvrVotes()
         val countRedactedVotes = countRedactedVotes()
 
-        val oa2Contests = mutableListOf<OneAuditContestInfo>()
+        val oa2Contests = mutableListOf<OneAuditContestBoulder>()
         infoList.forEach { info ->
             val sovoContest = sovo.contests.find { it.contestTitle == info.name }
             if (sovoContest != null) {
-                oa2Contests.add( OneAuditContestInfo(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!, cardPools))
+                oa2Contests.add( OneAuditContestBoulder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!))
             }
             else logger.warn{"*** cant find contest '${info.name}' in BoulderStatementOfVotes"}
         }
 
         return oa2Contests
-    }
-
-    // distribute diff to pools proportionate to pool.maxMinCardsNeeded
-    fun distributeRedactedNcardsDiff() {
-        val cardPoolMap = cardPools.associateBy { it.poolId }
-
-        // first do contest 0, since it has the fewest undervotes
-        val oaContest0 = oaContests[0]!!
-        distributeRedactedNcardsDiff(oaContest0, cardPoolMap)
-
-        oaContests.forEach { (contestId, oaContest) ->
-            distributeRedactedNcardsDiff(oaContest, cardPoolMap)
-        }
-    }
-
-    // for one contest, distribute overvotes amongst the pools
-    fun distributeRedactedNcardsDiff(oaContest: OneAuditContestInfo, cardPoolMap: Map<Int, CardPool>) {
-        val contestId = oaContest.info.id
-        val poolCards = oaContest.poolTotalCards()
-        val totalCards = oaContest.redNcards
-        val diff = totalCards - poolCards
-
-        var used = 0
-        val allocDiffPool = mutableMapOf<Int, Int>()
-        cardPools.forEach { pool ->
-            val minCardsNeeded = pool.minCardsNeeded[contestId]
-            if (minCardsNeeded != null) {
-                // distribute cards as proportion of totalVotes
-                val allocDiff = roundToClosest(diff * (pool.maxMinCardsNeeded / poolCards.toDouble()))
-                used += allocDiff
-                allocDiffPool[pool.poolId] = allocDiff
-            }
-        }
-
-        // adjust some pool so sum undervotes = redUndervotes
-        if (used < diff) {
-            val keys = allocDiffPool.keys.toList()
-            while (used < diff) {
-                val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
-                val prev = allocDiffPool[chooseOne]!!
-                allocDiffPool[chooseOne] = prev + 1
-                used++
-            }
-        }
-        if (used > diff) {
-            val keys = allocDiffPool.keys.toList()
-            while (used > diff) {
-                val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
-                val prev = allocDiffPool[chooseOne]!!
-                if (prev > 0) {
-                    allocDiffPool[chooseOne] = prev - 1
-                    used--
-                }
-            }
-        }
-
-        // check
-        require(allocDiffPool.values.sum() == diff)
-
-        // adjust
-        allocDiffPool.forEach { (poolId, adjust) ->
-            cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
-        }
     }
 
     open fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit> {
@@ -193,7 +128,7 @@ fun createBoulderElectionOA(
 
     // write cards TODO add phantoms
 
-    val cards = createSortedCards(election.cvrs, election.cardPools, auditConfig.seed)
+    val cards = createSortedCardsFromPools(election.cvrs, election.cardPools, auditConfig.seed)
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
@@ -209,38 +144,3 @@ fun createBoulderElectionOA(
     logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
     logger.info{"took = $stopwatch\n"}
 }
-
-fun createSortedCards(cvrs: List<Cvr>, pools: List<CardPool>, seed: Long) : List<AuditableCard> {
-    val prng = Prng(seed)
-    val cards = mutableListOf<AuditableCard>()
-    var idx = 0
-    cvrs.forEach { cards.add(AuditableCard.fromCvr(it, idx++, prng.next())) }
-    // add the redacted votes
-    pools.forEach { pool ->
-        val ncards = pool.ncards()
-        val cleanName = cleanCsvString(pool.poolName)
-        repeat(ncards) { poolIndex ->
-            //     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-            //    val index: Int,  // index into the original, canonical list of cards
-            //    val prn: Long,   // psuedo random number
-            //    val phantom: Boolean,
-            //    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
-            //    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, rankeballotPools=ballotPools, cleand first to last
-            //    val poolId: Int?, // for OneAudit
-            cards.add(
-                AuditableCard(
-                    location = "pool${cleanName} card ${poolIndex + 1}",
-                    index = idx++,
-                    prn = prng.next(),
-                    phantom = false,
-                    contests = pool.contests(),
-                    votes = null,
-                    poolId = pool.poolId
-                )
-            )
-        }
-    }
-
-    return cards.sortedBy { it.prn }
-}
-

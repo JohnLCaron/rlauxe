@@ -59,7 +59,7 @@ class TestVotesAndUndervotes {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         contestVotes[1] = VotesAndUndervotes(candVotes1, 51, 1)
 
-        val cvrs = makeVunderCvrs(contestVotes, null)
+        val cvrs = makeVunderCvrs(contestVotes, "poolName", null)
 
         // check
         val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
@@ -87,7 +87,7 @@ class TestVotesAndUndervotes {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         contestVotes[1] = VotesAndUndervotes(candVotes1, 51, 1)
 
-        val cvrs = makeVunderCvrs(contestVotes, null)
+        val cvrs = makeVunderCvrs(contestVotes, "poolName", null)
 
         // check
         val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())

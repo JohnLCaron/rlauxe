@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
 
-class TestCreateColoradoElectionAudit {
+class TestCreateColoradoAudits {
 
     @Test
     fun testReadColoradoElectionDetail() {
@@ -20,29 +20,40 @@ class TestCreateColoradoElectionAudit {
     // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)
     // and precinctFile for cvrs
     @Test
-    fun createElectionFromDetailXmlAndPrecincts() {
-        val topDir = "/home/stormy/rla/cases/corla"
-        val tabulateFile = "src/test/data/2024audit/tabulate.csv"
+    fun createColoradoClcaAudit() {
+        val topdir = "/home/stormy/rla/cases/corla/clca"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElectionFromDetailXmlAndPrecincts(topDir, detailXmlFile, contestRoundFile, precinctFile, clear=false)
+        createColoradoClcaAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=false)
 
-        createCorla2024sortedCards("/home/stormy/rla/cases/corla")
+        // create sorted cards, assumes auditDir/auditConfig already exists
+        createCorla2024sortedCards(topdir)
 
         // other tests depend on this one
         // testTreeReader()
         // makeCountySampleLists()
     }
 
-    // create sorted cards, assumes auditDir/auditConfig already exists
-    // do this after createElectionFromDetailXmlAndPrecincts
-    // TODO add phantoms here
+    @Test
+    fun testCreateColoradoOneAudit() {
+        val auditDir = "/home/stormy/rla/cases/corla/oneaudit"
+        val detailXmlFile = "src/test/data/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-    // @Test
-    fun createCorla2024sortedCards() {
-        createCorla2024sortedCards("/home/stormy/rla/cases/corla")
+        createColoradoOneAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
+    }
+
+    @Test
+    fun testCreateColoradoClca() {
+        val auditDir = "/home/stormy/rla/cases/corla/clca"
+        val detailXmlFile = "src/test/data/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        createColoradoOneAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
     }
 
     @Test

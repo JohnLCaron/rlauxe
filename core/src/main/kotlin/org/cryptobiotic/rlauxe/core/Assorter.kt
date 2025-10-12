@@ -58,7 +58,7 @@ interface AssorterIF {
     fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int): Double {
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
-        return (winnerVotes - loserVotes) / Nc.toDouble()
+        return if (Nc == 0) 0.0 else (winnerVotes - loserVotes) / Nc.toDouble()
     }
 
     fun shortName() = "winner/loser:${winner()}/${loser()}"

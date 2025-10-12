@@ -4,11 +4,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 
-// margin = (winner - loser) / Nc
-// (winner - loser) = margin * Nc
-// (winner + loser) = nvotes
-// 2 * winner = margin * Nc + nvotes
-// winner = (margin * Nc + nvotes) / 2
 fun makeOneContestUA(
     margin: Double,
     Nc: Int,
@@ -17,11 +12,6 @@ fun makeOneContestUA(
     phantomFraction: Double,
 ): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
     val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
-    // margin = (w - l) / Nc ; nvotes = w + l
-    // margin * Nc + l = w
-    // margin * Nc + nvotes - w = w
-    // margin * Nc + nvotes = 2w
-    // (margin * Nc + nvotes)/2 = w
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
     return makeOneContestUA(winner, loser, cvrFraction, undervoteFraction, phantomFraction)
@@ -131,14 +121,14 @@ fun makeTestMvrs(
     // add the regular cvrs
     if (cvrNcards > 0) {
         val vunderCvrs = VotesAndUndervotes(cvrVotes, cvrUndervotes, info.voteForN)
-        val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), poolId = null)
+        val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), "regular", poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
 
     // add the pooled cvrs
     pools.forEach { pool ->
         val vunderPool = pool.votesAndUndervotes(info.voteForN)
-        val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), poolId = pool.poolId)
+        val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.name, poolId = pool.poolId)
         cvrs.addAll(poolCvrs)
     }
 

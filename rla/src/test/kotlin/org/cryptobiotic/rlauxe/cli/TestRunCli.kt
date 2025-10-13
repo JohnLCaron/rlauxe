@@ -1,12 +1,17 @@
 package org.cryptobiotic.rlauxe.cli
 
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
 import kotlin.test.Test
 
+@OptIn(ExperimentalPathApi::class)
 class TestRunCli {
 
     @Test
     fun testCliRoundClca() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundClca"
+        val topPath = createTempDirectory()
+        val topdir = topPath.toString()
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -28,13 +33,16 @@ class TestRunCli {
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
         println(status)
+
+        topPath.deleteRecursively()
     }
 
     @Test
     fun testCliRoundPolling() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundPolling"
+        val topPath = createTempDirectory()
+        val topdir = topPath.toString()
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -52,13 +60,16 @@ class TestRunCli {
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
         println(status)
+
+        topPath.deleteRecursively()
     }
 
     @Test
     fun testCliRoundRaire() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundRaire"
+        val topPath = createTempDirectory()
+        val topdir = topPath.toString()
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -82,8 +93,9 @@ class TestRunCli {
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
         println(status)
-    }
 
+        topPath.deleteRecursively()
+    }
 }

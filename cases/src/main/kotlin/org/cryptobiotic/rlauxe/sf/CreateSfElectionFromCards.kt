@@ -151,12 +151,14 @@ fun makeContestInfos(contestManifest: ContestManifest, candidateManifest: Candid
             candidateManifest.List.filter { it.ContestId == contestM.Id }.associate { candidateM: CandidateM ->
                 Pair(candidateM.Description, candidateM.Id)
             }
+        val isIrv = (contestM.NumOfRanks > 0)
         ContestInfo(
             contestM.Description,
             contestM.Id,
             candidateNames,
-            if (contestM.NumOfRanks == 0) SocialChoiceFunction.PLURALITY else SocialChoiceFunction.IRV,
-            contestM.VoteFor
+            if (!isIrv) SocialChoiceFunction.PLURALITY else SocialChoiceFunction.IRV,
+            if (!isIrv) contestM.VoteFor else 1,
+            if (!isIrv) contestM.VoteFor else candidateNames.size,
         )
     }
 }

@@ -38,6 +38,7 @@ class TestCsvReading {
         return !iterator1.hasNext() && !iterator2.hasNext()
     }
 
+    /*
     @Test
     fun testMakeCardPoolsFromAuditRecord() {
         val topDir = "/home/stormy/rla/cases/boulder24oa/audit"
@@ -45,6 +46,6 @@ class TestCsvReading {
 
         val cardPools = makeCardPoolsFromAuditRecord(auditRecord)
         println(cardPools.showPoolVotes())
-    }
+    } */
 
 }

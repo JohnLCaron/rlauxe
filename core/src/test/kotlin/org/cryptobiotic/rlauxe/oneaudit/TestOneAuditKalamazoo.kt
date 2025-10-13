@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.verifier.verifyBAssortAvg
-import org.cryptobiotic.rlauxe.verifier.verifyCvrs
+import org.cryptobiotic.rlauxe.verifier.verifyCards
 import kotlin.Int
 import kotlin.test.Test
 
@@ -29,8 +29,8 @@ class TestOneAuditKalamazoo {
         //    show: Boolean = false
         //): ContestSummary {
         val infos = mapOf( info.id to info )
-        val summ =  verifyCvrs(listOf(contestUA), cvrs.iterator(), ballotPools, infos, show = true)
-        println(summ.results)
+        //val summ =  verifyCards(listOf(contestUA), cvrs.iterator(), ballotPools, infos, show = true)
+        //println(summ.results)
 
         val status = verifyBAssortAvg(listOf(contestUA), cvrs.iterator(), show = true)
         println(status)

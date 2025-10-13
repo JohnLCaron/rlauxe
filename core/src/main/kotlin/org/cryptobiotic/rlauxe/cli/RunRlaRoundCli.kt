@@ -78,7 +78,7 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
             return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
         }
 
-        logger.info { "runRound complete = $complete" }
+        logger.info { "runRound $roundIdx complete = $complete" }
         return null
 
     } catch (t: Throwable) {

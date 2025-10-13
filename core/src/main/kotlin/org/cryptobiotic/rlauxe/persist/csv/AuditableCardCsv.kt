@@ -156,7 +156,6 @@ class IteratorCardsCsvStream(input: InputStream): CloseableIterator<AuditableCar
     }
 
     override fun close() {
-        logger.info{"read $countLines lines"}
         reader.close()
     }
 }
@@ -177,7 +176,6 @@ class IteratorCardsCsvFile(filename: String): CloseableIterator<AuditableCard> {
     }
 
     override fun close() {
-        logger.info{"read $countLines lines"}
         reader.close()
     }
 }

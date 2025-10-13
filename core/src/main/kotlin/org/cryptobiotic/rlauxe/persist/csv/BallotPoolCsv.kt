@@ -2,9 +2,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolsFromBallotPools
-import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.Publisher
 import java.io.*
 import java.nio.file.Files
 import kotlin.collections.component1
@@ -82,8 +79,9 @@ fun List<BallotPool>.poolNameToId(): Map<String, Int> {
     return pools
 }
 
+/*
 fun makeCardPoolsFromAuditRecord(auditRecord: AuditRecord): CardPoolsFromBallotPools {
     val publisher = Publisher(auditRecord.location)
     val ballotPools: List<BallotPool> = readBallotPoolCsvFile(publisher.ballotPoolsFile())
     return CardPoolsFromBallotPools(ballotPools, auditRecord.contests.associate { it.id to it.contest.info() })
-}
+} */

@@ -10,19 +10,19 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolsFromBallotPools
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.text.appendLine
 
+// only for CLCA
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
     val auditConfig: AuditConfig
     val contests: List<ContestUnderAudit>
@@ -45,122 +45,147 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         ballotPools = readBallotPoolCsvFile(publisher.ballotPoolsFile())
     }
 
-    fun verify() = buildString {
-        val contestSummary = verifyCvrs(contests, CvrIteratorCloser(cards.iterator()), ballotPools, infos)
-        append(contestSummary.results)
+    fun verify(): VerifyResults {
+        val result = VerifyResults()
+        result.messes.add("RunVerifyContests on $auditRecordLocation ")
+        val contestSummary = verifyCards(auditConfig.isClca, contests, cards.iterator(), ballotPools, infos, result, show = show)
         // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contests, contestSummary))
-        appendLine(verifyAssortAvg(contests, CvrIteratorCloser(cards.iterator())))
+        verifyAssortAvg(contests, cards.iterator(), result, show = show)
+        return result
     }
 
-    fun verifyContest(contest: ContestUnderAudit) = buildString {
+    fun verifyContest(contest: ContestUnderAudit): VerifyResults {
+        val result = VerifyResults()
+        result.messes.add("RunVerifyContests on $auditRecordLocation ")
+        result.messes.add(contest.toString())
         val contest1 = listOf(contest)
-        val contestSummary = verifyCvrs(contest1, CvrIteratorCloser(cards.iterator()), ballotPools, infos)
-        append(contestSummary.results)
+        val contestSummary = verifyCards(auditConfig.isClca, contest1, cards.iterator(), ballotPools, infos, result, show = show)
         // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contest1, contestSummary))
-        appendLine(verifyAssortAvg(contest1, CvrIteratorCloser(cards.iterator())))
+        verifyAssortAvg(contest1, cards.iterator(), result, show = show)
+        return result
     }
 }
 
+class VerifyResults() {
+    val errors = mutableListOf<String>()
+    val messes = mutableListOf<String>()
+    fun fail() = errors.isNotEmpty()
+
+    constructor(error: String): this() {
+        this.errors.add(error)
+    }
+
+    override fun toString() = buildString {
+        if (fail()) {
+            appendLine("Errors")
+            errors.forEach { appendLine(it) }
+            appendLine("Messages")
+        }
+        messes.forEach { appendLine(it) }
+    }
+}
 
 data class ContestSummary(
     val allVotes: Map<Int, ContestTabulation>,
     val cardPoolVotes: Map<Int, ContestTabulation>,
     val nonPoolTabs: Map<Int, ContestTabulation>,
-    val results: String
 )
 
-fun verifyCvrs(
+fun verifyCards(
+    isClca: Boolean,
     contests: List<ContestUnderAudit>,
-    cardIter: Iterator<Cvr>,
+    cards: CloseableIterator<AuditableCard>,
     ballotPools: List<BallotPool>,
     infos: Map<Int, ContestInfo>,
+    result: VerifyResults,
     show: Boolean = false
 ): ContestSummary {
     val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
     val nonpoolCvrVotes = mutableMapOf<Int, ContestTabulation>()
 
-    while (cardIter.hasNext()) {
-        val card = cardIter.next()
-        card.votes.forEach { (contestId, cands) ->
-            val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-            allTab.addVotes(cands)
-            if (card.poolId == null) {
-                val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                nonpoolCvrTab.addVotes(cands)
+    var count = 0
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            count++
+            card.contests.forEachIndexed { idx, contestId ->
+                val cands = if (card.votes != null) card.votes[idx] else intArrayOf()
+                val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                allTab.addVotes(cands)
+                if (card.poolId == null) {
+                    val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                    nonpoolCvrTab.addVotes(cands)
+                }
             }
         }
     }
+    result.messes.add("  VerifyCards on $count cards from AuditableCardCsvReader; ${ballotPools.size} ballotPools")
+    //println("contest1 allCvrVotes = ${allCvrVotes[1]}")
+    //println("contest1 nonpoolCvrVotes = ${nonpoolCvrVotes[1]}")
 
     val cardPoolVotes = mutableMapOf<Int, ContestTabulation>()
-    val allVotes = if (ballotPools.isEmpty()) {
+    val allVotes = if (isClca) {
         allCvrVotes
     } else {
-        // use the cardPools to tabulate contests
-        val cardPools = CardPoolsFromBallotPools(ballotPools, infos)
-
-        cardPools.cardPoolMap.values.forEach { cardPool ->
-            cardPool.voteTotals.forEach { (contestId, cands) ->
-                val poolTab = cardPoolVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                cands.forEach { (candId, nvotes) -> poolTab.addVote(candId, nvotes) }
-                poolTab.ncards += cardPool.ncards
-                poolTab.undervotes += cardPool.undervotes()[contestId]!!
-            }
+        val poolSums = infos.mapValues { ContestTabulation(it.value) }
+        ballotPools.forEach { ballotPool ->
+            val poolSum = poolSums[ballotPool.contestId]!!
+            ballotPool.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
+            poolSum.ncards += ballotPool.ncards
+            poolSum.undervotes += ballotPool.ncards * (infos[ballotPool.contestId]?.voteForN ?: 1) - ballotPool.votes.map { it.value }.sum()
         }
 
         val sumVotes = mutableMapOf<Int, ContestTabulation>()
         sumVotes.sumContestTabulations(nonpoolCvrVotes)
-        sumVotes.sumContestTabulations(cardPoolVotes)
+        sumVotes.sumContestTabulations(poolSums)
         sumVotes
     }
 
-    val results = buildString {
-        var allOk = true
+    var allOk = true
 
-        // check contest.Ncast == contestTab.ncards
-        // and contestUA.Nu != contestTab.undervotes
-        contests.forEach { contestUA ->
-            val contestTab = allVotes[contestUA.id]
-            if (contestTab == null) {
-                appendLine("*** contest ${contestUA.id} not found in tabulated Cvrs")
+    contests.forEach { contestUA ->
+        val contestTab = allVotes[contestUA.id]
+        if (contestTab == null) {
+            result.errors.add("  *** contest ${contestUA.id} not found in tabulated Cvrs")
+            allOk = false
+
+        } else {
+            if (contestUA.Nc != contestTab.ncards) {
+                result.errors.add("  *** contest ${contestUA.id} Nc ${contestUA.Nc} disagree with cvrs = ${contestTab.ncards}")
                 allOk = false
-
-            } else {
-                val Ncast = contestUA.Nc - contestUA.Np
-                if (Ncast != contestTab.ncards) {
-                    appendLine("*** contest ${contestUA.id} ncards ${Ncast} disagree with cvrs = ${contestTab.ncards}")
-                    allOk = false
-                }
-                if (contestUA.Nu != contestTab.undervotes) {
-                    appendLine("*** contest ${contestUA.id} undervotes ${contestUA.Nu} disagree with cvrs = ${contestTab.undervotes}")
-                    allOk = false
-                }
+            }
+            // cvr phantoms look like undervotes. Cant calculate from BallotPools.
+            val expectedUndervotes = contestUA.Nu + contestUA.Np * contestUA.contest.info().voteForN
+            if ((!contestUA.isIrv || isClca) && (expectedUndervotes != contestTab.undervotes)) {
+                result.errors.add("  *** contest ${contestUA.id} expectedUndervotes ${expectedUndervotes} disagree with cvrs = ${contestTab.undervotes}")
+                allOk = false
             }
         }
-        if (show && allOk) appendLine("\ncontest.Ncast == contestTab.ncards for all contests\n")
-
-        // check contest.votes == cvrTab.votes (non-IRV)
-        // TODO move to CheckAudits?
-        contests.filter { it.preAuditStatus == TestH0Status.InProgress && !it.isIrv }.forEach { contestUA ->
-            val contestVotes = contestUA.contest.votes()!!
-            val contestTab = allVotes[contestUA.id]
-            if (contestTab == null) {
-                appendLine("*** contest ${contestUA.id} not found in tabulated Cvrs")
-                allOk = false
-            } else {
-                if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
-                    appendLine("*** contest ${contestUA.id} votes disagree with cvrs = $contestTab")
-                    appendLine("  contestVotes = $contestVotes")
-                    appendLine("  tabulation   = ${contestTab.votes}")
-                    allOk = false
-                } else {
-                    if (show) appendLine("contest ${contestUA.id} contest.votes matches cvrTabulation")
-                }
-            }
-        }
-        appendLine("verifyCvrs allOk = $allOk\n")
     }
+    if (show && allOk) result.messes.add("  contest.Ncast == contestTab.ncards for all contests\n")
 
-    return ContestSummary(allVotes, cardPoolVotes, nonpoolCvrVotes, results)
+    // check contest.votes == cvrTab.votes (non-IRV)
+    // TODO move to CheckAudits?
+    contests.filter { it.preAuditStatus == TestH0Status.InProgress && !it.isIrv }.forEach { contestUA ->
+        val contestVotes = contestUA.contest.votes()!!
+        val contestTab = allVotes[contestUA.id]
+        if (contestTab == null) {
+            result.errors.add("  *** contest ${contestUA.id} not found in tabulated Cvrs")
+            allOk = false
+        } else {
+            if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
+                result.errors.add("  *** contest ${contestUA.id} votes disagree with cvrs = $contestTab")
+                result.errors.add("    contestVotes = $contestVotes")
+                result.errors.add("    tabulation   = ${contestTab.votes}")
+                allOk = false
+            } else {
+                if (show) result.messes.add("  contest ${contestUA.id} contest.votes matches cvrTabulation")
+            }
+        }
+    }
+    result.messes.add("  verifyCvrs allOk = $allOk")
+
+    return ContestSummary(allVotes, cardPoolVotes, nonpoolCvrVotes)
 }
 
 // problem is that the cvrs dont have the votes on them, which is what passort needs to assort.
@@ -171,45 +196,52 @@ fun verifyCvrs(
 
 fun verifyAssortAvg(
     contests: List<ContestUnderAudit>,
-    cardIter: Iterator<Cvr>,
+    cards: CloseableIterator<AuditableCard>,
+    result: VerifyResults,
     show: Boolean = false
-) = buildString {
+): VerifyResults {
     var allOk = true
 
-    // sum all the assorters values in one pass across all the cvrs, including Pools
+    // sum all the assorter values in one pass across all the cvrs, including Pools
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
-    while (cardIter.hasNext()) {
-        val card: Cvr = cardIter.next()
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
 
-        contests.forEach { contest ->
-            val avg = assortAvg.getOrPut(contest.id) { mutableMapOf() }
-            contest.pollingAssertions.forEach { assertion ->
-                val passorter = assertion.assorter
-                val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
-                if (card.hasContest(contest.id)) {
-                    assortAvg.ncards++
-                    assortAvg.totalAssort += passorter.assort(card, usePhantoms = false) // TODO usePhantoms correct ??
+            contests.forEach { contest ->
+                val avg = assortAvg.getOrPut(contest.id) { mutableMapOf() }
+                contest.pollingAssertions.forEach { assertion ->
+                    val passorter = assertion.assorter
+                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
+                    if (card.hasContest(contest.id)) {
+                        assortAvg.ncards++
+                        assortAvg.totalAssort += passorter.assort(
+                            card.cvr(),
+                            usePhantoms = false
+                        )
+                    }
                 }
             }
         }
     }
 
-    // compare the assortAverage with the contest's reportedMargin which is what passorter used.
+    // compare the assortAverage with the contest's reportedMargin in passorter.
     contests.forEach { contest ->
         val contestAssortAvg = assortAvg[contest.id]!!
         contest.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = contestAssortAvg[passorter]!!
             if (!doubleIsClose(passorter.reportedMargin(), assortAvg.margin())) {
-                appendLine("**** margin does not agree for contest ${contest.id} assorter '$passorter'")
-                appendLine("     reportedMean= ${passorter.reportedMean()} cvrs.assortAvg= ${assortAvg.avg()} ")
+                result.errors.add("  **** margin does not agree for contest ${contest.id} assorter '$passorter'")
+                result.errors.add("     reportedMean= ${passorter.reportedMean()} cvrs.assortAvg= ${assortAvg.avg()} ")
                 allOk = false
             } else {
-                if (show) appendLine("  margin agrees with assort avg ${assortAvg.margin()} for contest ${contest.id} assorter '$passorter'")
+                if (show) result.messes.add("  margin agrees with assort avg ${assortAvg.margin()} for contest ${contest.id} assorter '$passorter'")
             }
         }
     }
-    appendLine("verifyAllAssortAvg allOk = $allOk")
+    result.messes.add("  verifyAllAssortAvg allOk = $allOk")
+    return result
 }
 
 /*
@@ -234,8 +266,9 @@ within pooli:
 fun verifyBAssortAvg(
     contests: List<ContestUnderAudit>,
     cardIter: Iterator<Cvr>,
+    result: VerifyResults,
     show: Boolean = false,
-) = buildString {
+): VerifyResults {
     var allOk = true
 
     // sum all the assorters values in one pass across all the cvrs, including Pools
@@ -263,10 +296,11 @@ fun verifyBAssortAvg(
         contest.clcaAssertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = contestAssortAvg[passorter]!!
-            println("  assortAvg ${assortAvg.avg()} for contest ${contest.id} assorter '$passorter'")
+            result.messes.add("  assortAvg ${assortAvg.avg()} for contest ${contest.id} assorter '$passorter'")
             require(doubleIsClose(1.0, assortAvg.avg()))
         }
     }
+    return result
 }
 
     /* specialized debugging, use pool 20

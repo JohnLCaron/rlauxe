@@ -50,11 +50,12 @@ fun createSfElectionFromCvrExportOA(
     val publisher = Publisher(auditDir) // creates auditDir
 
     val (contestNcs, contestInfos) = makeContestInfos(castVoteRecordZip, contestManifestFilename, candidateManifestFile)
+    val infos = contestInfos.associateBy { it.id }
 
     // pass 1 through cvrs, make card pools, including unpooled
     val (cardPools: Map<Int, CardPoolFromCvrs>, contestTabSums) = createCardPools(
         auditDir,
-        contestInfos.associateBy { it.id },
+        infos,
         castVoteRecordZip,
         contestManifestFilename,
         cvrExportCsv,
@@ -68,8 +69,19 @@ fun createSfElectionFromCvrExportOA(
     logger.info{" ${cardPools.size} cardPools, ${poolCards} cards to ${publisher.ballotPoolsFile()}"}
 
     // make contests based on cardPool tabulations
-    val unpooled = cardPools.values.find { it.poolName == unpooled }!!
-    val allContests =  makeAllOneAuditContests(contestTabSums, contestNcs, unpooled).sortedBy { it.id }
+    val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
+
+    /* println("^^^ contest1 allPool = ${contestTabSums[1]}")
+    println("^^^ contest1 unpooledtab = ${unpooledPool.contestTabs[1]}")
+    val poolSum = ContestTabulation(infos[1]!!)
+    ballotPools.filter { it.contestId == 1}.forEach {
+        it.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
+        poolSum.ncards += it.ncards
+        poolSum.undervotes += it.ncards - it.votes.map { it.value }.sum()
+    }
+    println("^^^ contest1 pooledtab = ${poolSum}") */
+
+    val allContests =  makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
@@ -132,6 +144,7 @@ fun createCardPools(
     // make the card pools
     var count = 0
     val cardPools: MutableMap<String, CardPoolFromCvrs> = mutableMapOf()
+    val contestTabs = mutableMapOf<Int, ContestTabulation>()
     cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
         while (cvrIter.hasNext()) {
             val cvrExport: CvrExport = cvrIter.next()
@@ -140,11 +153,17 @@ fun createCardPools(
             }
             pool.accumulateVotes(cvrExport.toCvr())
             count++
+
+            cvrExport.votes.forEach { (id, cands) ->
+                val contestTab = contestTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!! ) }
+                contestTab.addVotes(cands)
+            }
         }
     }
     println("$count cvrs")
+    println("^^^ contest1 cvrTab = ${contestTabs[1]}")
 
-    // write the ballot pool file. read back in createSortedCards to mark the pooled cvrs
+    // write the ballot pool file; read back in by createSortedCards to mark the pooled cvrs
     val poolFilename = "$auditDir/$ballotPoolsFile"
     logger.info{" writing to $poolFilename with ${cardPools.size} pools"}
     val poutputStream = FileOutputStream(poolFilename)

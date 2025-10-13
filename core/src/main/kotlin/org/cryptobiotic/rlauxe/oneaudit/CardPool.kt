@@ -254,7 +254,7 @@ fun addOAClcaAssortersFromMargin(
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
-    oaContests.forEach { oaContest ->
+    oaContests.filter { !it.isIrv}. forEach { oaContest ->
         val contestId = oaContest.id
         val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value

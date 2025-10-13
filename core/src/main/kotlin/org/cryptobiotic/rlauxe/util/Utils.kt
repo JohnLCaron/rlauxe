@@ -60,16 +60,6 @@ fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
 fun MutableMap<String, Int>.mergeReduceS(others: List<Map<String, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }
 
-fun sumContestVotes(contestVotes: Map<Int, Map<Int, Int>>, summond: MutableMap<Int, MutableMap<Int, Int>>) {
-    contestVotes.forEach { (contestId, candVotes) ->
-        val contestSum = summond.getOrPut(contestId) { mutableMapOf() }
-        candVotes.forEach { (cand, vote) ->
-            val candVotes = contestSum.getOrPut(cand)  { 0 }
-            contestSum[cand] = candVotes + vote
-        }
-    }
-}
-
 fun <T : Enum<T>> enumValueOf(name: String, entries: EnumEntries<T>): T? {
     for (status in entries) {
         if (status.name.lowercase() == name.lowercase()) return status

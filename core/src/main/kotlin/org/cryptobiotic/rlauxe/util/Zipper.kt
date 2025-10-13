@@ -81,6 +81,7 @@ class ZipReaderTour(zipFile: String, val silent: Boolean = true, val sortPaths: 
     }
 }
 
+// TODO files only. not directories
 fun createZipFile(filename: String, delete: Boolean = false): File {
     val file = File(filename)
     val outputZipFile = File(filename + ".zip")

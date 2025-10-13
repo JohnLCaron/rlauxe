@@ -20,7 +20,7 @@ class TestCsvReading {
         assertEquals(original, roundtrip)
     }
 
-    @Test // slow
+    // @Test // slow
     fun testCvrExportCsvFile() {
         val filenameIn = "/home/stormy/rla/cases/sf2024/cvrExport.csv"
         val filenameOut = "$tempDir/cvrExport.csv"

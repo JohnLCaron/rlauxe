@@ -67,7 +67,12 @@ fun createSortedCards(topDir: String, auditDir: String, cvrExportCsv: String, zi
     val ballotPools = if (ballotPoolFile != null) readBallotPoolCsvFile(ballotPoolFile) else null
     val pools = ballotPools?.poolNameToId() // all we need is to know what the id is for each pool, so we can assign
     val working = workingDir ?: "$topDir/sortChunks"
-    SortMerge(auditDir, cvrExportCsv, workingDir = working, "$auditDir/$sortedCardsFile", pools = pools).run()
+
+    val publisher = Publisher(auditDir)
+    val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+    val seed = auditConfig.seed
+
+    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = seed, pools = pools).run(cvrExportCsv)
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }

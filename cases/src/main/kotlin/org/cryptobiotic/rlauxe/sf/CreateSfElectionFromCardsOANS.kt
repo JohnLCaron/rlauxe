@@ -82,7 +82,8 @@ fun createSfElectionFromCvrExportOANS(
     // we write the sortedCards here while we have the amended CvrExports in memory
     val poolNameToId = readBallotPoolCsvFile("$auditDir/$ballotPoolsFile").poolNameToId()
     val working = workingDir ?: "$topDir/sortChunks"
-    SortMerge(auditDir, "unused", working, "$auditDir/$sortedCardsFile", pools = poolNameToId).run2(cardPoolList.iterator())
+
+    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = auditConfig.seed, pools = poolNameToId).run(cvrExportCsv)
 
     println("took = $stopwatch")
 }

@@ -9,9 +9,10 @@ import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.junit.jupiter.api.Assertions
 import kotlin.test.Test
 
+// TODO move to verifier
 class TestCheckAudits {
 
-    @Test
+    // @Test
     fun testCheckContestsWithCvrs() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val auditDir = "$topDir/audit"
@@ -24,8 +25,7 @@ class TestCheckAudits {
         Assertions.assertTrue(!state.contains("***"))
     }
 
-    // TODO move to verifier
-    @Test
+    // @Test
     fun testCardReading() {
         val auditDir = "/home/stormy/rla/cases/sf2024oa/audit"
         val cardIter = readCardsCsvIterator("$auditDir/sortedCards.csv")

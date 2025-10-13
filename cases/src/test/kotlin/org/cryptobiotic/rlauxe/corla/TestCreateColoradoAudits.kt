@@ -17,16 +17,15 @@ class TestCreateColoradoAudits {
         println("  number of contests = ${electionResultXml.contests.size}")
     }
 
-    // use detailXmlFile for contests and votes, and round1/contests.csv (Nc)
-    // and precinctFile for cvrs
+    // make data to test TreeReader
     @Test
-    fun createColoradoClcaAudit() {
-        val topdir = "/home/stormy/rla/cases/corla/clca"
+    fun createColoradoClcaAuditOld() {
+        val topdir = "/home/stormy/rla/cases/corla/old"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoClcaAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=false)
+        createColoradoClcaAuditOld(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=false)
 
         // create sorted cards, assumes auditDir/auditConfig already exists
         createCorla2024sortedCards(topdir)

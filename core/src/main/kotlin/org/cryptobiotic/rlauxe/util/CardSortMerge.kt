@@ -1,78 +1,58 @@
 package org.cryptobiotic.rlauxe.util
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.*
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import java.nio.file.*
 
-private val maxChunk = 100000
+private val maxChunkDefault = 100000
+
+// was
+// class SortMerge(
+//    val auditDir: String,
+//    val cvrExportCsv: String, // open with cvrExportCsvIterator; contains CvrExport objects
+//    val workingDir: String,
+//    val outputFile: String,
+//    val pools: Map<String, Int>?) {
 
 // from Iterator<CvrExport>, convert to AuditableCard, assign prn, sort and write sortedCards.
-// assume auditConfig is already in the auditDir
 class SortMerge(
-    val auditDir: String,
-    val cvrExportCsv: String, // open with cvrExportCsvIterator; contains CvrExport objects
-    val workingDir: String,
+    val scratchDirectory: String,
     val outputFile: String,
-    val pools: Map<String, Int>?) {
+    val seed: Long,
+    val pools: Map<String, Int>? = null,
+    val maxChunk: Int = maxChunkDefault) {
 
-    fun run() {
+    // cvrExportCsv: open with cvrExportCsvIterator; contains CvrExport objects
+    fun run(cvrExportCsv: String) {
         // out of memory sort by sampleNum()
-        sortCards(auditDir, cvrExportCsv, workingDir, pools = pools)
-        mergeCards(auditDir, workingDir, outputFile)
+        sortCards(cvrExportCsv, scratchDirectory, seed, pools = pools)
+        mergeCards(scratchDirectory, outputFile)
     }
 
-    fun run2(cardIter: Iterator<CvrExport>) {
+    fun run2(cardIter: CloseableIterator<CvrExport>) {
         // out of memory sort by sampleNum()
-        sortCards2(auditDir, cardIter, workingDir, pools = pools)
-        mergeCards(auditDir, workingDir, outputFile)
+        sortCards2(cardIter, scratchDirectory, seed, pools = pools)
+        mergeCards(scratchDirectory, outputFile)
     }
 
-    fun sortCards2(
-        auditDir: String,
-        cardIter: Iterator<CvrExport>,
-        workingDirectory: String,
-        pools: Map<String, Int>?
-    ) {
-        val stopwatch = Stopwatch()
-        val publisher = Publisher(auditDir)
-        val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-
-        clearDirectory(Path.of(workingDirectory))
-        validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
-
-        val prng = Prng(auditConfig.seed)
-        val cardSorter = CardSorter(workingDirectory, prng, maxChunk, pools = pools)
-
-        //// reading CvrExport and sorted chunks
-        while (cardIter.hasNext()) {
-            cardSorter.add(cardIter.next())
-        }
-        cardSorter.writeSortedChunk()
-        println("writeSortedChunk took $stopwatch")
-    }
 
     // out of memory sorting
     fun sortCards(
-        auditDir: String,
         cvrExportCsv: String, // may be zipped or not
-        workingDirectory: String,
+        scratchDirectory: String,
+        seed: Long,
         pools: Map<String, Int>?
     ) {
         val stopwatch = Stopwatch()
-        val publisher = Publisher(auditDir)
-        val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
 
-        clearDirectory(Path.of(workingDirectory))
-        validateOutputDir(Path.of(workingDirectory), ErrorMessages("sortCards"))
+        clearDirectory(Path.of(scratchDirectory))
+        validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
 
-        val prng = Prng(auditConfig.seed)
-        val cardSorter = CardSorter(workingDirectory, prng, maxChunk, pools = pools)
+        val prng = Prng(seed)
+        val cardSorter = CardSorter(scratchDirectory, prng, maxChunk, pools = pools)
 
         //// reading CvrExport and sorted chunks
         cvrExportCsvIterator(cvrExportCsv).use { cardIter ->
@@ -84,10 +64,31 @@ class SortMerge(
         println("writeSortedChunk took $stopwatch")
     }
 
+    fun sortCards2(
+        cardIter: CloseableIterator<CvrExport>,
+        scratchDirectory: String,
+        seed: Long,
+        pools: Map<String, Int>?
+    ) {
+        val stopwatch = Stopwatch()
+
+        clearDirectory(Path.of(scratchDirectory))
+        validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
+
+        val prng = Prng(seed)
+        val cardSorter = CardSorter(scratchDirectory, prng, maxChunk, pools = pools)
+
+        //// reading CvrExport and sorted chunks
+        while (cardIter.hasNext()) {
+            cardSorter.add(cardIter.next())
+        }
+        cardSorter.writeSortedChunk()
+        println("writeSortedChunk took $stopwatch")
+    }
+
     fun mergeCards(
-        auditDir: String,
         workingDirectory: String,
-        outputFile: String = "$auditDir/sortedCards.csv",
+        outputFile: String,
     ) {
         val stopwatch = Stopwatch()
 
@@ -100,7 +101,7 @@ class SortMerge(
                 paths.add(path.toString())
             }
         }
-        val merger = CardMerger(paths, writer)
+        val merger = CardMerger(paths, writer, maxChunk)
         merger.merge()
         println("mergeSortedChunk took $stopwatch")
     }
@@ -135,7 +136,7 @@ class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int, val
     }
 }
 
-class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWriter) {
+class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWriter, val maxChunk: Int) {
     val nextUps = chunkFilenames.map { NextUp(IteratorCardsCsvFile(it)) }
     val cards = mutableListOf<AuditableCard>()
     var total = 0
@@ -143,7 +144,6 @@ class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWrite
     fun merge() {
         var moar = true
         while (moar) {
-            val nextUppers = nextUps.map { it.sampleNumber }
             val nextUp = nextUps.minBy { it.sampleNumber }
             cards.add ( nextUp.currentCard!! )
             nextUp.pop()

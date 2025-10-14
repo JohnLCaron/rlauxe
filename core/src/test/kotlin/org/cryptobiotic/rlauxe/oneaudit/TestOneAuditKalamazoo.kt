@@ -32,8 +32,8 @@ class TestOneAuditKalamazoo {
         //val summ =  verifyCards(listOf(contestUA), cvrs.iterator(), ballotPools, infos, show = true)
         //println(summ.results)
 
-        val status = verifyBAssortAvg(listOf(contestUA), cvrs.iterator(), show = true)
-        println(status)
+        //val status = verifyBAssortAvg(listOf(contestUA), cvrs.iterator(), show = true)
+       // println(status)
 
         /*
         val minAllAssertion = contestUA.minAssertion()

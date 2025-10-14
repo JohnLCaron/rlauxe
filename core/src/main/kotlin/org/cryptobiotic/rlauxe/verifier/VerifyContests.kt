@@ -50,7 +50,11 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         result.messes.add("RunVerifyContests on $auditRecordLocation ")
         val contestSummary = verifyCards(auditConfig.isClca, contests, cards.iterator(), ballotPools, infos, result, show = show)
         // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contests, contestSummary))
-        verifyAssortAvg(contests, cards.iterator(), result, show = show)
+        if (auditConfig.isClca || contestSummary.poolsAgree) {
+            verifyAssortAvg(contests, cards.iterator(), result, show = show)
+        } else {
+            result.messes.add("  Cant run verifyAssortAvg because cvrPools dont contain votes")
+        }
         return result
     }
 
@@ -61,7 +65,11 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         val contest1 = listOf(contest)
         val contestSummary = verifyCards(auditConfig.isClca, contest1, cards.iterator(), ballotPools, infos, result, show = show)
         // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contest1, contestSummary))
-        verifyAssortAvg(contest1, cards.iterator(), result, show = show)
+        if (auditConfig.isClca || contestSummary.poolsAgree) {
+            verifyAssortAvg(contest1, cards.iterator(), result, show = show)
+        } else {
+            result.messes.add("  Cant run verifyAssortAvg because cvrPools dont contain votes")
+        }
         return result
     }
 }
@@ -89,6 +97,7 @@ data class ContestSummary(
     val allVotes: Map<Int, ContestTabulation>,
     val cardPoolVotes: Map<Int, ContestTabulation>,
     val nonPoolTabs: Map<Int, ContestTabulation>,
+    val poolsAgree: Boolean
 )
 
 fun verifyCards(
@@ -102,6 +111,7 @@ fun verifyCards(
 ): ContestSummary {
     val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
     val nonpoolCvrVotes = mutableMapOf<Int, ContestTabulation>()
+    val poolCvrVotes = mutableMapOf<Int, ContestTabulation>()
 
     var count = 0
     cards.use { cardIter ->
@@ -115,6 +125,9 @@ fun verifyCards(
                 if (card.poolId == null) {
                     val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                     nonpoolCvrTab.addVotes(cands)
+                } else {
+                    val poolCvrTab = poolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                    poolCvrTab.addVotes(cands)
                 }
             }
         }
@@ -123,7 +136,7 @@ fun verifyCards(
     //println("contest1 allCvrVotes = ${allCvrVotes[1]}")
     //println("contest1 nonpoolCvrVotes = ${nonpoolCvrVotes[1]}")
 
-    val cardPoolVotes = mutableMapOf<Int, ContestTabulation>()
+    var poolsAgree = false
     val allVotes = if (isClca) {
         allCvrVotes
     } else {
@@ -134,6 +147,7 @@ fun verifyCards(
             poolSum.ncards += ballotPool.ncards
             poolSum.undervotes += ballotPool.ncards * (infos[ballotPool.contestId]?.voteForN ?: 1) - ballotPool.votes.map { it.value }.sum()
         }
+        poolsAgree = (poolSums == poolCvrVotes)
 
         val sumVotes = mutableMapOf<Int, ContestTabulation>()
         sumVotes.sumContestTabulations(nonpoolCvrVotes)
@@ -185,15 +199,11 @@ fun verifyCards(
     }
     result.messes.add("  verifyCvrs allOk = $allOk")
 
-    return ContestSummary(allVotes, cardPoolVotes, nonpoolCvrVotes)
+    return ContestSummary(allVotes, poolCvrVotes, nonpoolCvrVotes, poolsAgree)
 }
 
-// problem is that the cvrs dont have the votes on them, which is what passort needs to assort.
-// so should just use addOAClcaAssortersFromMargin. But how to test this?
-/*
-  sum(bassort(mvr, cvr).
- */
-
+// problem is that the cvrs dont always have the votes on them, which is what passort needs to assort.
+// how to detect ??
 fun verifyAssortAvg(
     contests: List<ContestUnderAudit>,
     cards: CloseableIterator<AuditableCard>,

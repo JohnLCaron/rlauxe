@@ -61,7 +61,7 @@ is used to make the CardLocationManifest (aka Ballot Manifest), especially when 
 * 1,603,908 cvrs
 * 53 contests, 11 IRV
 * 4224 pools with 216286 cards (13.5%), using SHANGRLA grouping. 
-* Many pools have only a few cards, so this may be problematic.
+* Many pools have only a few cards, which may be problematic.
 
 ````
 The election produced 1,603,908 CVRs, of which 216,286 were for cards

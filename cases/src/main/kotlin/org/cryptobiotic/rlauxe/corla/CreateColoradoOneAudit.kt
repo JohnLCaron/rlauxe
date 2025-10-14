@@ -4,6 +4,7 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
@@ -276,21 +277,23 @@ fun createColoradoOneAudit(
     writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
     logger.info{ "write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}" }
 
-    // write cards TODO add phantoms
+    val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
+    addOAClcaAssortersFromMargin(contestsUA, election.cardPools.associate { it.poolId to it })
+
+    // write cards
     val poolCvrs = election.makeCvrsFromPools(true)
+    val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+    val allCvrs =  poolCvrs + phantoms
 
     // this is what you would use in a test audit, write the votes so can be used as test mvrs
-    val cards =  createSortedCards(poolCvrs, auditConfig.seed)
+    val cards =  createSortedCards(allCvrs, auditConfig.seed)
 
     // this is what you would use in a real audit, doesnt write the votes
-    // val cards = createSortedCardsFromPools(emptyList(), election.cardPools, auditConfig.seed)
+    // val cards = createSortedCardsFromPools(emptyList(), allCvrs, auditConfig.seed)
 
     writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
     createZipFile(publisher.cardsCsvFile(), delete = false)
     logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
-
-    val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
-    addOAClcaAssortersFromMargin(contestsUA, election.cardPools.associate { it.poolId to it })
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
 

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.CardLocation
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 
 // TODO deal with use_styles
@@ -114,7 +115,7 @@ fun makePhantomCvrs(
 
 // cvrs for multiple contests
 fun makePhantomCvrs(
-    contests: List<Contest>,
+    contests: List<ContestIF>,
     prefix: String = "phantom-",
 ): List<Cvr> {
 

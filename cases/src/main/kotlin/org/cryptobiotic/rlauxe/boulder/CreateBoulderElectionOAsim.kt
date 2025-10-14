@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
@@ -21,7 +22,6 @@ import kotlin.math.max
 private val logger = KotlinLogging.logger("BoulderElectionOAsim")
 
 // UseOneAudit, redacted ballots are in pools. simulate CVRS out of redacted votes for use as the MVRs.
-// USe the CVRS to set the pool averages with addOAClcaAssortersFromCvrs()
 class BoulderElectionOAsim(
     export: DominionCvrExportCsv,
     sovo: BoulderStatementOfVotes,
@@ -30,7 +30,7 @@ class BoulderElectionOAsim(
 ): BoulderElectionOA(export, sovo, quiet)
 {
     val redactedCvrs = makeRedactedCvrs()
-    val allCvrs = cvrs + redactedCvrs // TODO could be CvrExport ??
+    val allCvrs = cvrs + redactedCvrs
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
@@ -167,10 +167,6 @@ fun createBoulderElectionOAsim(
     }
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
-    val cards = createSortedCards(election.allCvrs, auditConfig.seed)
-    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
-
     // write ballot pools
     val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
     writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
@@ -183,6 +179,14 @@ fun createBoulderElectionOAsim(
     } else {
         addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associateBy { it.poolId })
     }
+
+    val phantoms = makePhantomCvrs(contestsUA.map { it.contest} )
+    val allCvrs =  election.allCvrs + phantoms
+
+    val cards = createSortedCards(allCvrs, auditConfig.seed)
+    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
+    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
+
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
     checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = false)

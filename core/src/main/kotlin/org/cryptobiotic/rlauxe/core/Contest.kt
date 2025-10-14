@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
@@ -386,7 +384,7 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votesAndUndervotes() else emptyMap()
-        appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction votesAndUndervotes=${votes}")
+        appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction voteForN=${contest.info().voteForN} votesAndUndervotes=${votes}")
         appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu")
         append(showCandidates())
     }

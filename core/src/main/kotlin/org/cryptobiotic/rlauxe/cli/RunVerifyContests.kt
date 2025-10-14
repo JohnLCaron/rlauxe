@@ -5,7 +5,9 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verifier.VerifyContests
+import org.cryptobiotic.rlauxe.verifier.VerifyResults
 
 /** Run election record verification CLI. */
 object RunVerifyContests {
@@ -30,17 +32,18 @@ object RunVerifyContests {
         ).default(false)
 
         parser.parse(args)
-        print("RunVerifyContests on $inputDir ")
-        if (contestId != null) println("for contest $contestId") else println()
+        val stopwatch = Stopwatch()
+
         val results = runVerifyContests(inputDir, contestId, show)
+        println("that took $stopwatch")
         println(results)
     }
 
-    fun runVerifyContests(inputDir: String, contestId: Int?, show: Boolean): String {
+    fun runVerifyContests(inputDir: String, contestId: Int?, show: Boolean): VerifyResults {
         val verifier = VerifyContests(inputDir, show)
         if (contestId != null) {
             val wantContest = verifier.contests.find { it.id == contestId }
-            if (wantContest == null) return ("Cant find contest with id $contestId")
+            if (wantContest == null) return VerifyResults("Cant find contest with id $contestId")
             return verifier.verifyContest(wantContest)
         }
         return verifier.verify()

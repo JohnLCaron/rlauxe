@@ -8,7 +8,7 @@ import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.verifier.VerifyAuditRecord
 
 /** Run election record verification CLI. */
-object RunVerifier {
+object RunVerifyAuditRecord {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -31,10 +31,10 @@ object RunVerifier {
 
         parser.parse(args)
         println("RunVerifier on $inputDir")
-        runVerifier(inputDir, nthreads, showTime)
+        runVerifyAuditRecord(inputDir, nthreads, showTime)
     }
 
-    fun runVerifier(inputDir: String, nthreads: Int, showTime: Boolean = false): String {
+    fun runVerifyAuditRecord(inputDir: String, nthreads: Int = 11, showTime: Boolean = false): String {
         val verifier = VerifyAuditRecord(inputDir)
         return verifier.verify()
     }

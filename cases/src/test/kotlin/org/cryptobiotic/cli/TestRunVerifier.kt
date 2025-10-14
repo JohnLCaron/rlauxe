@@ -1,6 +1,6 @@
 package org.cryptobiotic.cli
 
-import org.cryptobiotic.rlauxe.cli.RunVerifier
+import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
 import kotlin.test.Test
 
 class TestRunVerifier {
@@ -8,7 +8,7 @@ class TestRunVerifier {
     @Test
     fun testClcaVerify() {
         val topdir = "/home/stormy/rla/cases/sf2024/audit"
-        RunVerifier.main(
+        RunVerifyAuditRecord.main(
             arrayOf(
                 "-in", topdir
             )

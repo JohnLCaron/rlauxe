@@ -18,7 +18,7 @@ abstract class BoulderElection(
     val sovo: BoulderStatementOfVotes,
     val quiet: Boolean = true)
 {
-    val cvrs: List<Cvr> = export.cvrs.map { it.convert() } // could use export.cvrs instead of converting ??
+    val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
 
@@ -139,7 +139,7 @@ abstract class BoulderElection(
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
                 val info = infoMap[contestId]
 
-                // TODO
+                // TODO approx
                 tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // wrong, dont use
             }
         }
@@ -246,26 +246,7 @@ fun CastVoteRecord.convert(): Cvr {
     return cvrb.build()
 }
 
-fun parseContestName(name: String) : Pair<String, Int> {
-    if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
 
-    val tokens = name.split("(Vote For=")
-    require(tokens.size == 2) { "unexpected contest name $name" }
-    val namet = tokens[0].trim()
-    val ncand = tokens[1].substringBefore(")").toInt()
-    return Pair(namet, ncand)
-}
-
-// City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)
-fun parseIrvContestName(name: String) : Pair<String, Int> {
-    if (!name.contains("(Number of positions=")) return Pair(name.trim(), 1)
-
-    val tokens = name.split("(Number of positions=")
-    require(tokens.size == 2) { "unexpected contest name $name" }
-    val namet = tokens[0].trim()
-    val ncand = tokens[1].substringBefore(",").toInt()
-    return Pair(namet, ncand)
-}
 
 ////////////////////////////////////////////////////////////////////
 

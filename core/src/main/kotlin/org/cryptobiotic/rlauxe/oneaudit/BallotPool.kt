@@ -1,25 +1,10 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
-import org.cryptobiotic.rlauxe.audit.RegVotes
-import org.cryptobiotic.rlauxe.audit.RegVotesImpl
-import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
-import org.cryptobiotic.rlauxe.util.cleanCsvString
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.util.trunc
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.math.max
 
 
 private val logger = KotlinLogging.logger("CardPool")
@@ -80,7 +65,7 @@ fun addOAClcaAssortersFromMargin(
 }
 
 /////////////////////////////////////////////////
-
+/*
 class CardPoolsFromBallotPools(
     val ballotPools: List<BallotPool>,
     val infos: Map<Int, ContestInfo>) {
@@ -95,6 +80,7 @@ class CardPoolsFromBallotPools(
         }
         cardPoolMap = reaggs.mapValues { (poolId, ballotPools) ->
             val voteTotals = ballotPools.associate { Pair(it.contestId, it.votes) }
+            // TODO assumes that ncards is the same for all ballot pools
             CardPoolFromBallotPools(ballotPools[0].name, poolId, voteTotals, ballotPools[0].ncards)
         }
     }
@@ -162,4 +148,5 @@ class CardPoolsFromBallotPools(
             return undervote.toMap().toSortedMap()
         }
     }
-}
+} */
+

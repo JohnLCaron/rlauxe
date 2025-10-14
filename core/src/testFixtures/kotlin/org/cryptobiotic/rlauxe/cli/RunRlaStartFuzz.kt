@@ -13,10 +13,12 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.io.path.Path
 import kotlin.math.min
 
 /**
@@ -76,8 +78,8 @@ object RunRlaStartFuzz {
         parser.parse(args)
         println("RunRlaStartFuzz on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
                 " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates")
-        val retval = if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
-        else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards)
+        if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+            else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
     }
 
     fun startTestElectionClca(
@@ -91,7 +93,7 @@ object RunRlaStartFuzz {
         addRaireCandidates: Int,
     ): Int {
         println("Start startTestElectionClca")
-        // clearDirectory(Path.of(topdir))
+        clearDirectory(Path(auditDir))
 
         val publisher = Publisher(auditDir)
         val auditConfig = AuditConfig(
@@ -109,15 +111,12 @@ object RunRlaStartFuzz {
 
         val testData =
             MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
-
-        val contests: List<Contest> = testData.contests
         println("$testData")
-        contests.forEach { println("  $it") }
-        println()
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         // TODO add raire cvrs here
         var testCvrs = testData.makeCvrsFromContests()
+        println("ncvrs = ${testCvrs.size}")
 
         val raireContests = mutableListOf<RaireContestUnderAudit>()
         if (addRaire) {
@@ -126,23 +125,29 @@ object RunRlaStartFuzz {
             testCvrs = testCvrs + rcvrs
         }
 
-        // TODO are these randomized?
+        val contests: List<Contest> = testData.contests
         val allContests = contests + raireContests.map { it.contest }
+
+        allContests.forEach { println("  $it") }
+        println()
+
+        // TODO are these randomized?
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
                     // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                     else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
+        println("nmvrs = ${testMvrs.size}")
 
         // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
         // save the sorted cards
         val mvrManager = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
         writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile()) // TODO wrap in Result ??
-        println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
+        println("   write ${mvrManager.sortedCards.size} sortedCards to ${publisher.cardsCsvFile()}")
 
         // save the sorted testMvrs
         val mvrFile = "$auditDir/private/testMvrs.csv"
         validateOutputDirOfFile(mvrFile)
         writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
-        println("   writeMvrsJsonFile ${mvrFile}")
+        println("   write ${mvrManager.sortedCards.size} testMvrs to ${mvrFile}")
 
         val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, mvrManager)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
@@ -164,7 +169,11 @@ object RunRlaStartFuzz {
         fuzzMvrsPct: Double,
         pctPhantoms: Double?,
         ncards: Int,
+        ncontests: Int = 11,
     ): Int {
+        println("Start startTestElectionPolling")
+        clearDirectory(Path(auditDir))
+
         val publisher = Publisher(auditDir)
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
@@ -174,7 +183,7 @@ object RunRlaStartFuzz {
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
-        val testData = MultiContestTestData(11, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+        val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowPolling $testData")

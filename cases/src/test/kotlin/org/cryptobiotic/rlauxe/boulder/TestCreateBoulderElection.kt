@@ -39,6 +39,16 @@ class TestCreateBoulderElection {
     }
 
     @Test
+    fun createBoulder24oanew() {
+        createBoulderElectionOAnew(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            topdir = "/home/stormy/rla/cases/boulder24oanew",
+            clear = true,
+        )
+    }
+
+    @Test
     fun createBoulder24oasim() { // simulate CVRs
         createBoulderElectionOAsim(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
@@ -57,6 +67,15 @@ class TestCreateBoulderElection {
             auditDir = "/home/stormy/rla/cases/boulder24clca",
             clca=true,
             clear = true,
+        )
+    }
+
+    @Test
+    fun createBoulder24clcanew() { // simulate CVRs
+        createBoulderElectionClcaNew(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            topdir = "/home/stormy/rla/cases/boulder24clcanew",
         )
     }
 

@@ -16,21 +16,24 @@ import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.CreateAudit
 import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOAsim")
 
 // Use OneAudit, redacted ballots are in pools. simulate CVRS out of redacted votes for use as the MVRs.
-class BoulderElectionOAsim(
+class BoulderElectionClcaNew(
     export: DominionCvrExportCsv,
     sovo: BoulderStatementOfVotes,
     val clca: Boolean = true,
     quiet: Boolean = true,
-): BoulderElectionOA(export, sovo, quiet)
+): BoulderElectionOAnew(export, sovo, quiet)
 {
     val redactedCvrs = makeRedactedCvrs()
     val allCvrs = cvrs + redactedCvrs
+
+    override fun makeCvrs() = this.allCvrs
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
@@ -119,8 +122,36 @@ class BoulderElectionOAsim(
 }
 
 ////////////////////////////////////////////////////////////////////
-// Create a OneAudit where pools are from the redacted cvrs
-fun createBoulderElectionOAsim(
+fun createBoulderElectionClcaNew(
+    cvrExportFile: String,
+    sovoFile: String,
+    topdir: String,
+    riskLimit: Double = 0.03,
+    minRecountMargin: Double = .005,
+    auditConfigIn: AuditConfig? = null,
+    clear: Boolean = true)
+{
+    val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
+    val sovo = readBoulderStatementOfVotes(sovoFile, variation)
+    val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+
+    val election = BoulderElectionClcaNew(export, sovo, clca = true)
+
+    val auditConfig = if (auditConfigIn != null) auditConfigIn
+    else
+        AuditConfig(
+            AuditType.CLCA,
+            hasStyles = true,
+            riskLimit = riskLimit,
+            sampleLimit = 20000,
+            minRecountMargin = minRecountMargin,
+            nsimEst = 10,
+            clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
+        )
+    CreateAudit("boulder", topdir, auditConfig, clear = clear, election)
+}
+
+fun createBoulderElectionClcaOld(
     cvrExportFile: String,
     sovoFile: String,
     auditDir: String,

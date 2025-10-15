@@ -75,12 +75,13 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 
 // TODO use VerifyContests instead. problem here is whether the ballot pools have to be added or not.
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>,
-                          ballotPools: List<BallotPool> = emptyList(), show: Boolean = false) = buildString {
+                          ballotPools: List<BallotPool>?, show: Boolean = false) = buildString {
 
     val infos = contestsUA.associate { it.id to it.contest.info() }
     val allVotes = mutableMapOf<Int, ContestTabulation>()
     allVotes.sumContestTabulations(tabulateCvrs(cvrs, infos))
-    allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), infos))
+    if (ballotPools != null)
+        allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), infos))
 
     if (show) {
         appendLine("tabulateCvrs")

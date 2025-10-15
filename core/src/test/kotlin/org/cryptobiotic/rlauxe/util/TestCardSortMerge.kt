@@ -68,7 +68,7 @@ class TestCardSortMerge {
             seed = Random.Default.nextLong(),
             pools = null,
             maxChunk = 100,
-        ).run2(cvrIter)
+        ).run2(cvrIter, emptyList())
 
         val cardIter = readCardsCsvIterator(outputFile)
         var count = 0

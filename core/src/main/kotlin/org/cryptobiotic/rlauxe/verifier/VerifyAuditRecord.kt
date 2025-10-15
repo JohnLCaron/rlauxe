@@ -10,22 +10,24 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         auditRecord = AuditRecord.readFrom(auditRecordLocation)
     }
 
-    fun verify() = buildString {
-        appendLine("verify auditRecord in ${auditRecordLocation}")
-        auditRecord.rounds.forEach { append(verify(it)) }
+    fun verify(): VerifyResults {
+        val result = VerifyResults()
+        result.messes.add("VerifyAuditRecord on $auditRecordLocation ")
+        auditRecord.rounds.forEach { verify(it, result) }
+        return result
     }
 
-    fun verify(round: AuditRound) = buildString {
-        appendLine(" verify round = ${round.roundIdx}")
-        round.contestRounds.forEach { append(verify(it)) }
+    fun verify(round: AuditRound, result: VerifyResults) {
+        result.messes.add(" verify round = ${round.roundIdx}")
+        round.contestRounds.forEach { verify(it, result) }
     }
 
-    fun verify(contest: ContestRound) = buildString {
-        appendLine("  verify contest = ${contest.id}")
+    fun verify(contest: ContestRound, result: VerifyResults) {
+        result.messes.add("  verify contest = ${contest.id}")
         val minAssertion = contest.minAssertion()
         requireNotNull(minAssertion) {"    minAssertion = $minAssertion"}
 
-        contest.assertionRounds.forEach { append(verify(it)) }
+        contest.assertionRounds.forEach { verify(it, result) }
 
         val contestUA = contest.contestUA
         contest.assertionRounds.forEach { assertionRound ->
@@ -33,21 +35,21 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         }
     }
 
-    fun verify(assertion: AssertionRound) = buildString {
+    fun verify(assertion: AssertionRound, result: VerifyResults) {
         if (assertion.prevAuditResult != null) {
-            verify(assertion.prevAuditResult!!)
+            verify(assertion.prevAuditResult!!, result)
         }
         if (assertion.estimationResult != null) {
-            verify(assertion.estimationResult!!)
+            verify(assertion.estimationResult!!, result)
         }
         if (assertion.auditResult != null) {
-            verify(assertion.auditResult!!)
+            verify(assertion.auditResult!!, result)
         }
     }
 
-    fun verify(auditResult: AuditRoundResult) = buildString {
+    fun verify(auditResult: AuditRoundResult, result: VerifyResults) {
     }
 
-    fun verify(estResult: EstimationRoundResult) = buildString {
+    fun verify(estResult: EstimationRoundResult, result: VerifyResults) {
     }
 }

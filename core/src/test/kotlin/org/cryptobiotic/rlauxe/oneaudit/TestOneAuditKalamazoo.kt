@@ -109,7 +109,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Bal
     val poolVotes = candidateVotes.map { (name, votes) ->
         Pair( info.candidateNames[name]!!, votes[1])}.toMap()
     val regVotes = RegVotesImpl(poolVotes, stratumSizes[1])
-    val cardPool = CardPoolImpl(1, info.id, regVotes)
+    val cardPool = CardPoolImpl("kali", 1, info.id, regVotes)
 
     val contestUA = OAContestUnderAudit(contest)
     addOAClcaAssortersFromMargin(listOf(contestUA), mapOf(1 to cardPool))

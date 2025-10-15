@@ -87,7 +87,7 @@ fun createColoradoClcaAuditOld(
         fileFilter = { true },
         reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
-    checkContestsWithCvrs(contestsUA, CvrExportAdapter(precinctCvrReader2))
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(precinctCvrReader2), ballotPools = null)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")
@@ -248,6 +248,6 @@ fun createCorla2024sortedCards(topDir: String) {
         reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
 
-    SortMerge("$topDir/sortChunks", "$auditDir/${sortedCardsFile}", seed).run2(precinctCvrReader)
+    SortMerge("$topDir/sortChunks", "$auditDir/${sortedCardsFile}", seed).run2(precinctCvrReader, emptyList())
     createZipFile("$auditDir/$sortedCardsFile", delete = false)
 }

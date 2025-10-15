@@ -41,21 +41,26 @@ class AssortAvg() {
 }
 
 interface CardPoolIF {
+    val poolName: String
     val poolId: Int
     val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
+    fun toBallotPools(): List<BallotPool>
+    fun contests(): IntArray
 }
 
 // single contest, for testing
-class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
+class CardPoolImpl(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun regVotes() = mapOf(contestId to regVotes)
     override fun contains(contestId: Int) = contestId == this.contestId
     override fun ncards() = regVotes.ncards()
 
-    fun toBallotPools(): List<BallotPool> {
+    override fun contests() = intArrayOf(contestId)
+
+    override fun toBallotPools(): List<BallotPool> {
         return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
     }
 }
@@ -63,7 +68,7 @@ class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: R
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
 class CardPoolWithBallotStyle(
-    val poolName: String,
+    override val poolName: String,
     override val poolId: Int,
     val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
     val infos: Map<Int, ContestInfo>, // all infos
@@ -97,7 +102,7 @@ class CardPoolWithBallotStyle(
         adjustCards = max( adjust, adjustCards)
     }
 
-    fun contests() = (voteTotals.map { it.key }).toSortedSet().toIntArray()
+    override fun contests() = (voteTotals.map { it.key }).toSortedSet().toIntArray()
 
     fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(poolName, 9)}:")
@@ -143,7 +148,7 @@ class CardPoolWithBallotStyle(
         return ncards() * info.voteForN - sum
     }
 
-    fun toBallotPools(): List<BallotPool> {
+    override fun toBallotPools(): List<BallotPool> {
         return voteTotals.map { (contestId, candCount) ->
             BallotPool(poolName, poolId, contestId, ncards(), candCount)
         }
@@ -165,7 +170,7 @@ class CardPoolWithBallotStyle(
 
 // When the pools have complete CVRS.
 open class CardPoolFromCvrs(
-    val poolName: String,
+    override val poolName: String,
     override val poolId: Int,
     val infos: Map<Int, ContestInfo>) : CardPoolIF
 {
@@ -191,7 +196,9 @@ open class CardPoolFromCvrs(
         totalCards++
     }
 
-    fun toBallotPools(): List<BallotPool> {
+    override fun contests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
+
+    override fun toBallotPools(): List<BallotPool> {
         val bpools = mutableListOf<BallotPool>()
         contestTabs.forEach { contestId, contestCount ->
             if (contestCount.ncards > 0) {
@@ -331,34 +338,4 @@ fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<Ca
     allocDiffPool.forEach { (poolId, adjust) ->
         cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
     }
-}
-
-// for a real audit, there are no votes
-fun createSortedCardsFromPools(cvrs: List<Cvr>, pools: List<CardPoolWithBallotStyle>, seed: Long) : List<AuditableCard> {
-    val prng = Prng(seed)
-    val cards = mutableListOf<AuditableCard>()
-    var idx = 0
-    cvrs.forEach { cards.add(AuditableCard.fromCvr(it, idx++, prng.next())) }
-
-    // add the pool votes
-    pools.forEach { pool ->
-        val ncards = pool.ncards()
-        val cleanName = cleanCsvString(pool.poolName)
-        repeat(ncards) { poolIndex ->
-            cards.add(
-                AuditableCard(
-                    location = "pool${cleanName} card ${poolIndex + 1}",
-                    index = idx++,
-                    prn = prng.next(),
-                    phantom = false,
-                    contests = pool.contests(),
-                    votes = null,
-                    poolId = pool.poolId
-                )
-            )
-        }
-    }
-
-    // or use external memory sort
-    return cards.sortedBy { it.prn }
 }

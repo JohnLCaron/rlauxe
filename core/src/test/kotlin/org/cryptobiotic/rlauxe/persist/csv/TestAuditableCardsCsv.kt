@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.util.createZipFile
 
 class TestAuditableCardsCsv {
 
@@ -62,6 +63,26 @@ class TestAuditableCardsCsv {
         val roundtrip = readAuditableCardCsvFile(scratchFile.toString())
         assertEquals(target, roundtrip)
 
+        readCardsCsvIterator(scratchFile.toString()).use { cardIter ->
+            var count = 0
+            while (cardIter.hasNext()) {
+                val roundtrip = cardIter.next()
+                assertEquals(target[count], roundtrip)
+                count++
+            }
+        }
+
+        val zipFile = createZipFile(scratchFile.toString(), delete = true)
+        readCardsCsvIterator(zipFile.toString()).use { cardIter ->
+            var count = 0
+            while (cardIter.hasNext()) {
+                val roundtrip = cardIter.next()
+                assertEquals(target[count], roundtrip)
+                count++
+            }
+        }
+
+        zipFile.delete()
         scratchFile.delete()
     }
 

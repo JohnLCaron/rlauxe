@@ -112,7 +112,7 @@ fun createSfElectionFromCvrExport(
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), show = true)
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), ballotPools = null)
 
     val publisher = Publisher(auditDir)
     writeContestsJsonFile(allContests, publisher.contestsFile())

@@ -29,9 +29,7 @@ fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     append("${card.location}, ${card.index}, ${card.prn}, ${card.phantom}, ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
     append("${card.contests.joinToString(" ")}, ")
-    if (card.votes != null) {
-        card.votes!!.forEach { candidates -> append("${candidates.joinToString(" ")}, ")}
-    }
+    card.votes!!.forEach { candidates -> append("${candidates.joinToString(" ")}, ")}
     appendLine()
 }
 
@@ -59,7 +57,6 @@ class AuditableCardCsvWriter(filename: String) {
     }
 
     fun close() {
-        logger.info{ "wrote $countCards cards"}
         writer.close()
     }
 }

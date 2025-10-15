@@ -56,6 +56,26 @@ class TestCreateColoradoAudits {
     }
 
     @Test
+    fun testCreateColoradoOneAuditNew() {
+        val auditDir = "/home/stormy/rla/cases/corla/oneauditnew"
+        val detailXmlFile = "src/test/data/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        createColoradoOneAuditNew(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
+    }
+
+    @Test
+    fun testCreateColoradoClcaNew() {
+        val auditDir = "/home/stormy/rla/cases/corla/clcanew"
+        val detailXmlFile = "src/test/data/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        createColoradoOneAuditNew(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
+    }
+
+    @Test
     fun testPrecinctTree() {
         val cvrsDir = "/home/stormy/rla/cases/corla/$cvrExportDir"
         val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }

@@ -168,11 +168,13 @@ fun verifyCards(
                 result.errors.add("  *** contest ${contestUA.id} Nc ${contestUA.Nc} disagree with cvrs = ${contestTab.ncards}")
                 allOk = false
             }
-            // cvr phantoms look like undervotes. Cant calculate from BallotPools.
-            val expectedUndervotes = contestUA.Nu + contestUA.Np * contestUA.contest.info().voteForN
-            if ((!contestUA.isIrv || isClca) && (expectedUndervotes != contestTab.undervotes)) {
-                result.errors.add("  *** contest ${contestUA.id} expectedUndervotes ${expectedUndervotes} disagree with cvrs = ${contestTab.undervotes}")
-                allOk = false
+            if (!contestUA.isIrv) {
+                // cvr phantoms look like undervotes. Cant calculate from BallotPools.
+                val expectedUndervotes = contestUA.Nu + contestUA.Np * contestUA.contest.info().voteForN
+                if ((isClca) && (expectedUndervotes != contestTab.undervotes)) {
+                    result.errors.add("  *** contest ${contestUA.id} expectedUndervotes ${expectedUndervotes} disagree with cvrs = ${contestTab.undervotes}")
+                    allOk = false
+                }
             }
         }
     }

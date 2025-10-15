@@ -223,7 +223,7 @@ fun createBoulderElectionOA(
     logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
 
     val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
-    addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associate { it.poolId to it })
+    addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools)
 
     val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
     val allCvrs =  election.cvrs + phantoms

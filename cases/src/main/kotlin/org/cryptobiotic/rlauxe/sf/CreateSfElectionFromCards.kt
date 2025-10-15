@@ -72,7 +72,7 @@ fun createSortedCards(topDir: String, auditDir: String, cvrExportCsv: String, zi
     val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
     val seed = auditConfig.seed
 
-    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = seed, pools = pools).run(cvrExportCsv)
+    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = seed, poolNameToId = pools).run(cvrExportCsv)
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }

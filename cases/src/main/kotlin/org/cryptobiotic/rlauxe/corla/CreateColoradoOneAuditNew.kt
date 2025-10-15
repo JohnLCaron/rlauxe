@@ -202,6 +202,6 @@ fun createColoradoOneAuditNew(
         )
     }
 
-    CreateAudit("corla", auditDir, auditConfig, clear = clear, election)
+    CreateAudit("corla", auditDir, auditConfig, election, clear = clear)
 }
 

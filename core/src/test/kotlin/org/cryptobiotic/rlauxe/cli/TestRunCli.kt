@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.persist.clearDirectory
+import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -85,6 +87,7 @@ class TestRunCli {
     fun testCliRoundRaire() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -113,8 +116,7 @@ class TestRunCli {
         val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
         println(results)
 
-
-        topPath.deleteRecursively()
+        //topPath.deleteRecursively()
         if (results.fail()) fail()
         if (resultsvc.fail()) fail()
     }
@@ -123,11 +125,13 @@ class TestRunCli {
     fun testCliOneAudit() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
-        RunRlaStartFuzz.main(
+        // val topdir = "/home/stormy/rla/persist/testRlaOA"
+
+        RunRlaStartOneAudit.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
-                "-fuzzMvrs", ".0123",
+                "-fuzzMvrs", "0.001",
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addRaireContest",
@@ -135,22 +139,22 @@ class TestRunCli {
             )
         )
 
+        val auditDir = "$topdir/audit"
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(topdir, null, false)
+        val resultsvc = RunVerifyContests.runVerifyContests(auditDir, null, false)
         println()
         print(resultsvc)
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditDir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
         println(results)
-
 
         topPath.deleteRecursively()
         if (results.fail()) fail()

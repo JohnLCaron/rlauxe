@@ -4,24 +4,20 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CvrIteratorAdapter
 import org.cryptobiotic.rlauxe.audit.checkContestsCorrectlyFormed
-import org.cryptobiotic.rlauxe.audit.checkContestsWithCvrs
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
-import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.poolNameToId
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Prng
@@ -41,7 +37,7 @@ interface ElectionIF {
     fun hasCvrExport() : Boolean
 }
 
-class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig, clear: Boolean = true, election: ElectionIF) {
+class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig, election: ElectionIF, clear: Boolean = true) {
     private val logger = KotlinLogging.logger("CreateAudit-$name")
 
     val auditDir = "$topdir/audit"
@@ -56,17 +52,17 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
         logger.info{"writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $auditConfig"}
         isOA = auditConfig.auditType == AuditType.ONEAUDIT
 
-        val cardPools = if (isOA) election.makeCardPools() else emptyList()
-        val ballotPools =  if (isOA) {
-            val pools = cardPools.map { it.toBallotPools() }.flatten()
-            writeBallotPoolCsvFile(pools, publisher.ballotPoolsFile())
-            logger.info { "write ${cardPools.size} cardPools, ${pools.size} ballotPools to ${publisher.ballotPoolsFile()}" }
+        val cardPools = if (isOA) {
+            val pools = election.makeCardPools()
+            writeCardPoolsJsonFile(pools, publisher.cardPoolsFile())
+            logger.info { "write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
             pools
         } else null
+        val poolNameToId = if (cardPools == null) null else cardPools.associate { it.poolName to it.poolId }
 
         val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
         if (isOA) {
-            addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, cardPools.associate { it.poolId to it })
+            addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, cardPools!!)
         } else {
             contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
         }
@@ -79,12 +75,12 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
             createZipFile(publisher.cardsCsvFile(), delete = false)
             logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
-            val state = checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools=ballotPools, show = false)
-            logger.info { state }
+            //val state = checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), cardPoolsFile=cardPoolsFile, show = false)
+            //logger.info { state }
 
         } else {
             // fun writeSortedCardsExternalSort(scratchDirectory: String, auditDir: String, cardIter: CloseableIterator<CvrExport>, seed: Long, ballotPools: List<BallotPool>?) {
-            writeSortedCardsExternalSort(topdir=topdir, election.cvrExport(), phantoms, auditConfig.seed, ballotPools)
+            writeSortedCardsExternalSort(topdir=topdir, election.cvrExport(), phantoms, auditConfig.seed, poolNameToId)
         }
 
         // corla
@@ -137,10 +133,8 @@ fun createSortedCardsFromPools(cvrs: List<Cvr>, seed: Long, pools: List<CardPool
     return cards.sortedBy { it.prn }
 }
 
-fun writeSortedCardsExternalSort(topdir: String, cardIter: CloseableIterator<CvrExport>, phantoms: List<Cvr>, seed: Long, ballotPools: List<BallotPool>?) {
+fun writeSortedCardsExternalSort(topdir: String, cardIter: CloseableIterator<CvrExport>, phantoms: List<Cvr>, seed: Long, poolNameToId: Map<String, Int>?) {
     val publisher = Publisher("$topdir/audit")
-    val pools = ballotPools?.poolNameToId() // all we need is to know what the id is for each pool, so we can assign
-
-    SortMerge(scratchDirectory = "$topdir/sortChunks", publisher.cardsCsvFile(), seed = seed, pools = pools).run2(cardIter, phantoms)
+    SortMerge(scratchDirectory = "$topdir/sortChunks", publisher.cardsCsvFile(), seed = seed, poolNameToId = poolNameToId).run2(cardIter, phantoms)
     createZipFile(publisher.cardsCsvFile(), delete = false)
 }

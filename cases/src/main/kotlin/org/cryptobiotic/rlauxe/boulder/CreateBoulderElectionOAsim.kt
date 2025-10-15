@@ -177,7 +177,7 @@ fun createBoulderElectionOAsim(
     if (clca) {
         contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
     } else {
-        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associateBy { it.poolId })
+        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools)
     }
 
     val phantoms = makePhantomCvrs(contestsUA.map { it.contest} )

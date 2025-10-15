@@ -205,5 +205,5 @@ fun createBoulderElectionOAnew(
         AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
         oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
     )
-    CreateAudit("boulder", topdir, auditConfig, clear = clear, election)
+    CreateAudit("boulder", topdir, auditConfig, election, clear = clear)
 }

@@ -148,7 +148,7 @@ fun createBoulderElectionClcaNew(
             nsimEst = 10,
             clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
         )
-    CreateAudit("boulder", topdir, auditConfig, clear = clear, election)
+    CreateAudit("boulder", topdir, auditConfig, election, clear = clear)
 }
 
 fun createBoulderElectionClcaOld(
@@ -208,7 +208,7 @@ fun createBoulderElectionClcaOld(
     if (clca) {
         contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
     } else {
-        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associateBy { it.poolId })
+        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools)
     }
 
     val phantoms = makePhantomCvrs(contestsUA.map { it.contest} )

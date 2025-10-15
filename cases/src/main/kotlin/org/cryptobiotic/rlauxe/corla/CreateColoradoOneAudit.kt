@@ -278,7 +278,7 @@ fun createColoradoOneAudit(
     logger.info{ "write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}" }
 
     val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
-    addOAClcaAssortersFromMargin(contestsUA, election.cardPools.associate { it.poolId to it })
+    addOAClcaAssortersFromMargin(contestsUA, election.cardPools)
 
     // write cards
     val poolCvrs = election.makeCvrsFromPools(true)

@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.audit.RegVotes
 import org.cryptobiotic.rlauxe.audit.RegVotesImpl
@@ -9,8 +8,6 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
@@ -51,20 +48,6 @@ interface CardPoolIF {
     fun contests(): IntArray
 }
 
-// single contest, for testing
-class CardPoolImpl(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
-    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
-    override fun regVotes() = mapOf(contestId to regVotes)
-    override fun contains(contestId: Int) = contestId == this.contestId
-    override fun ncards() = regVotes.ncards()
-
-    override fun contests() = intArrayOf(contestId)
-
-    override fun toBallotPools(): List<BallotPool> {
-        return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
-    }
-}
-
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
 class CardPoolWithBallotStyle(
@@ -76,7 +59,7 @@ class CardPoolWithBallotStyle(
 {
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
-    private var adjustCards = 0
+    var adjustCards = 0
 
     // a convenient place to keep this, used in addOAClcaAssortersFromCvrs()
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
@@ -257,7 +240,7 @@ open class CardPoolFromCvrs(
 // use reportedMargin to set the pool assorter averages. can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
     oaContests: List<OAContestUnderAudit>,
-    cardPools: Map<Int, CardPoolIF>
+    cardPools: List<CardPoolIF> // poolId -> pool
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
@@ -265,7 +248,7 @@ fun addOAClcaAssortersFromMargin(
         val contestId = oaContest.id
         val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
-            cardPools.values.forEach { cardPool ->
+            cardPools.forEach { cardPool ->
                 if (cardPool.contains(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
                     if (regVotes.ncards() > 0) {

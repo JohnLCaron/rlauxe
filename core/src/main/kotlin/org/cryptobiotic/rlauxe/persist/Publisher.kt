@@ -32,6 +32,7 @@ class Publisher(val auditDir: String) {
     fun cardsCsvFile() = "$auditDir/sortedCards.csv"
     fun cardsCsvZipFile() = "$auditDir/sortedCards.csv.zip"
     fun ballotPoolsFile() = "$auditDir/ballotPools.csv"
+    fun cardPoolsFile() = "$auditDir/cardPools.json"
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$auditDir/round$round"

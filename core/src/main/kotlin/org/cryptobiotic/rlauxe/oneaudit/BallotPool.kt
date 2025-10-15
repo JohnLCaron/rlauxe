@@ -1,7 +1,10 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.audit.tabulateBallotPools
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.collections.forEach
@@ -62,6 +65,26 @@ fun addOAClcaAssortersFromMargin(
         }
         oaUA.clcaAssertions = clcaAssertions
     }
+}
+
+fun List<BallotPool>.toCardPools(infos: Map<Int, ContestInfo>) : List<CardPoolIF> {
+    val reaggs = mutableMapOf<Int, MutableList<BallotPool>>()
+    this.forEach { pool ->
+        val reagg = reaggs.getOrPut(pool.poolId) { mutableListOf() }
+        reagg.add(pool)
+    }
+
+    val cardPoolMap = reaggs.mapValues { (poolId, ballotPools) ->
+        val contestTabs = tabulateBallotPools(ballotPools.iterator(), infos) // contestId - contestTab
+        val voteTotals = contestTabs.mapValues { it.value.votes }
+
+        // TODO assumes that ncards is the same for all ballot pools. wont be true for CardPoolFromCvrs
+        //   might be easier to just serialize CardPool instead of BallotPool
+        CardPoolWithBallotStyle(ballotPools[0].name, poolId, voteTotals, infos)
+    }
+
+    println(cardPoolMap)
+    return cardPoolMap.map { it.value }
 }
 
 /////////////////////////////////////////////////

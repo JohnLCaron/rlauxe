@@ -136,5 +136,5 @@ fun createSfElectionOAnew(
         cvrExportCsv,
     )
 
-    CreateAudit("sf2024", topdir, auditConfig, clear = true, election)
+    CreateAudit("sf2024", topdir, auditConfig, election)
 }

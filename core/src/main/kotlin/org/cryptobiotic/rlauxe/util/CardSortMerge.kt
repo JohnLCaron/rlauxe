@@ -25,19 +25,19 @@ class SortMerge(
     val scratchDirectory: String,
     val outputFile: String,
     val seed: Long,
-    val pools: Map<String, Int>? = null,
+    val poolNameToId: Map<String, Int>? = null,
     val maxChunk: Int = maxChunkDefault) {
 
     // cvrExportCsv: open with cvrExportCsvIterator; contains CvrExport objects
     fun run(cvrExportCsv: String) {
         // out of memory sort by sampleNum()
-        sortCards(cvrExportCsv, scratchDirectory, seed, pools = pools)
+        sortCards(cvrExportCsv, scratchDirectory, seed, pools = poolNameToId)
         mergeCards(scratchDirectory, outputFile)
     }
 
     fun run2(cardIter: CloseableIterator<CvrExport>, cvrs: List<Cvr>) {
         // out of memory sort by sampleNum()
-        sortCards2(cardIter, cvrs, scratchDirectory, seed, pools = pools)
+        sortCards2(cardIter, cvrs, scratchDirectory, seed, pools = poolNameToId)
         mergeCards(scratchDirectory, outputFile)
     }
 

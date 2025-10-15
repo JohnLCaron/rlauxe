@@ -28,7 +28,7 @@ class TestCardSortMerge {
             "$tempDir/testSortMergeRun",
             outputFile = outputFile,
             seed = Random.Default.nextLong(),
-            pools = null,
+            poolNameToId = null,
             maxChunk = 100,
             ).run(cvrExportFile)
 
@@ -45,7 +45,7 @@ class TestCardSortMerge {
             "$tempDir/testSortMergeRunZip",
             outputFile = outputFile,
             seed = Random.Default.nextLong(),
-            pools = null,
+            poolNameToId = null,
             maxChunk = 100,
         ).run("${cvrExportFile}.zip")
 
@@ -66,7 +66,7 @@ class TestCardSortMerge {
             "$tempDir/testSortMergeRun2",
             outputFile = outputFile,
             seed = Random.Default.nextLong(),
-            pools = null,
+            poolNameToId = null,
             maxChunk = 100,
         ).run2(cvrIter, emptyList())
 

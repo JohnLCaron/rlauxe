@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.persist.clearDirectory
+import java.nio.file.Path
+import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.test.Test
 import kotlin.test.fail
@@ -94,6 +97,76 @@ class TestRunCli {
         println("============================================================")
         val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
         println(status)
+    }
+
+    @Test
+    fun testRlaOA() {
+        val topdir = "/home/stormy/rla/persist/testRlaOA"
+        val auditDir = "$topdir/audit"
+        clearDirectory(Path.of(topdir))
+
+        RunRlaStartOneAudit.main(
+            arrayOf(
+                "-in", topdir,
+                "-minMargin", "0.01",
+                "-fuzzMvrs", "0.001",
+                "-ncards", "10000",
+                "-ncontests", "10",
+                "--addRaireContest",
+                "--addRaireCandidates", "5",
+            )
+        )
+
+        println("============================================================")
+        RunVerifyContests.main(arrayOf("-in", auditDir))
+
+        println("============================================================")
+        var done = false
+        while (!done) {
+            val lastRound = runRound(inputDir = auditDir, useTest = false, quiet = true)
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        }
+
+        println("============================================================")
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditDir)
+        println(status)
+    }
+
+    @Test
+    fun testCliOneAudit() {
+        val topdir = "/home/stormy/rla/persist/testRlaOA"
+
+        RunRlaStartOneAudit.main(
+            arrayOf(
+                "-in", topdir,
+                "-minMargin", "0.01",
+                "-fuzzMvrs", "0.001",
+                "-ncards", "10000",
+                "-ncontests", "10",
+                "--addRaireContest",
+                "--addRaireCandidates", "5",
+            )
+        )
+
+        val auditDir = "$topdir/audit"
+        println("============================================================")
+        val resultsvc = RunVerifyContests.runVerifyContests(auditDir, null, false)
+        println()
+        print(resultsvc)
+
+        println("============================================================")
+        var done = false
+        while (!done) {
+            val lastRound = runRound(inputDir = auditDir, useTest = false, quiet = true)
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        }
+
+        println("============================================================")
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
+        println(results)
+
+        if (results.fail()) fail()
+        if (resultsvc.fail()) fail()
     }
 
 }

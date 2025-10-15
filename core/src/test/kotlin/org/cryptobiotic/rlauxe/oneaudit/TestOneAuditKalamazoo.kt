@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.RegVotes
 import org.cryptobiotic.rlauxe.audit.RegVotesImpl
+import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -112,7 +114,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Bal
     val cardPool = CardPoolImpl("kali", 1, info.id, regVotes)
 
     val contestUA = OAContestUnderAudit(contest)
-    addOAClcaAssortersFromMargin(listOf(contestUA), mapOf(1 to cardPool))
+    addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool))
 
     // reported results for the two strata
     val cvrVotes = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
@@ -128,4 +130,18 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Bal
     val ballotPools = cardPool.toBallotPools()
     val cvrs = makeTestMvrs(contestUA, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, ballotPools)
     return Triple(contestUA, ballotPools, cvrs)
+}
+
+// single contest, for testing
+class CardPoolImpl(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
+    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    override fun regVotes() = mapOf(contestId to regVotes)
+    override fun contains(contestId: Int) = contestId == this.contestId
+    override fun ncards() = regVotes.ncards()
+
+    override fun contests() = intArrayOf(contestId)
+
+    override fun toBallotPools(): List<BallotPool> {
+        return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
+    }
 }

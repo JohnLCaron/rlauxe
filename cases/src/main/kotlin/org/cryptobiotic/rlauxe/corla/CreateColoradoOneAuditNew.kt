@@ -4,25 +4,14 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.ElectionIF
+import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.mapValues
-import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
@@ -33,7 +22,7 @@ class ColoradoOneAuditNew (
     contestRoundFile: String,
     precinctFile: String,
     val isClca: Boolean,
-): ElectionIF {
+): CreateElectionIF {
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
@@ -155,7 +144,8 @@ class ColoradoOneAuditNew (
         return regContests
     }
 
-    override fun makeCvrs(): List<Cvr> {
+    // TODO phantoms etc
+    override fun allCvrs(): List<Cvr> {
         val oaContestMap = oaContests.associateBy { it.info.id }
 
         val rcvrs = mutableListOf<Cvr>()
@@ -175,6 +165,7 @@ class ColoradoOneAuditNew (
 
     override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
     override fun hasCvrExport() = false
+    override fun testMvrs() = null // TODO
 }
 
 ////////////////////////////////////////////////////////////////////

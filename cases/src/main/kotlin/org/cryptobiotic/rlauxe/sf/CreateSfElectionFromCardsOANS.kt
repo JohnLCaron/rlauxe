@@ -71,7 +71,7 @@ fun createSfElectionFromCvrExportOANS(
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, allContests)
-    val state = checkContestsWithCvrs(allContests, CvrExportAdapter(cardPoolList.iterator()), ballotPools = null)
+    val state = checkContestsWithCvrs(allContests, CvrExportAdapter(cardPoolList.iterator()), cardPools = null)
     logger.info{state}
 
     writeContestsJsonFile(allContests, publisher.contestsFile())

@@ -87,7 +87,7 @@ fun createColoradoClcaAuditOld(
         fileFilter = { true },
         reader = { path -> cvrExportCsvIterator(path.toString()) }
     )
-    checkContestsWithCvrs(contestsUA, CvrExportAdapter(precinctCvrReader2), ballotPools = null)
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(precinctCvrReader2), cardPools = null)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     println("   writeContestsJsonFile ${publisher.contestsFile()}")

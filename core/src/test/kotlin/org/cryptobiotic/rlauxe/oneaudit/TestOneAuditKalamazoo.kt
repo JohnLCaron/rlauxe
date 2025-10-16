@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.verifier.verifyBAssortAvg
 import org.cryptobiotic.rlauxe.verifier.verifyCards
 import kotlin.Int
@@ -72,7 +73,7 @@ class TestOneAuditKalamazoo {
 }
 
 // from oa_polling.ipynb
-fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
+fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
 
     // the candidates
     val info = ContestInfo(
@@ -127,9 +128,8 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Bal
     //    cvrVotes:Map<Int, Int>,
     //    cvrUndervotes: Int,
     //    pools: List<BallotPool>): List<Cvr> {
-    val ballotPools = cardPool.toBallotPools()
-    val cvrs = makeTestMvrs(contestUA, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, ballotPools)
-    return Triple(contestUA, ballotPools, cvrs)
+    val cvrs = makeTestMvrs(contestUA, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, listOf(cardPool))
+    return Triple(contestUA, listOf(cardPool), cvrs)
 }
 
 // single contest, for testing
@@ -143,5 +143,10 @@ class CardPoolImpl(override val poolName: String, override val poolId: Int, val 
 
     override fun toBallotPools(): List<BallotPool> {
         return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
+    }
+
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val poolUndervotes = ncards() - regVotes.votes.values.sum()
+        return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
     }
 }

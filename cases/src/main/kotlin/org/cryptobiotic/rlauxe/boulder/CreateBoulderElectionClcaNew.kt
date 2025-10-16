@@ -33,7 +33,9 @@ class BoulderElectionClcaNew(
     val redactedCvrs = makeRedactedCvrs()
     val allCvrs = cvrs + redactedCvrs
 
-    override fun makeCvrs() = this.allCvrs
+    // TODO phantoms etc
+    override fun allCvrs() = this.allCvrs
+    override fun testMvrs() = null // TODO
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
@@ -220,7 +222,7 @@ fun createBoulderElectionClcaOld(
 
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools = null)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), cardPools = null)
     checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())

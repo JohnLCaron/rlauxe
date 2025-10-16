@@ -1,7 +1,7 @@
 package org.cryptobiotic.cli
 
 import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
-import org.cryptobiotic.rlauxe.cli.RunRlaStartOneAudit
+import org.cryptobiotic.rlauxe.cli.RunRlaCreateOneAudit
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import java.nio.file.Path
 import kotlin.test.Test
@@ -61,7 +61,7 @@ class TestRunRlaStartFuzz {
         val topdir = "/home/stormy/rla/persist/testRlaOA"
         clearDirectory(Path.of(topdir))
 
-        RunRlaStartOneAudit.main(
+        RunRlaCreateOneAudit.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",

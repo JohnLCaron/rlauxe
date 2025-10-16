@@ -10,9 +10,8 @@ import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.csv.*
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.ElectionIF
+import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -27,7 +26,7 @@ class CreateSfElectionOAnew(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-): ElectionIF {
+): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
 
@@ -109,11 +108,12 @@ class CreateSfElectionOAnew(
     override fun makeCardPools() = cardPoolsNotUnpooled
     override fun makeContestsUA(hasStyles: Boolean) = contestsOA
 
-    override fun makeCvrs() = emptyList<Cvr>()
+    override fun allCvrs() = emptyList<Cvr>()
 
     override fun cvrExport() = cvrExportCsvIterator(cvrExportCsv)
 
     override fun hasCvrExport() = true
+    override fun testMvrs() = null // TODO
 }
 
 fun createSfElectionOAnew(

@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
@@ -46,6 +47,7 @@ interface CardPoolIF {
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
     fun toBallotPools(): List<BallotPool>
     fun contests(): IntArray
+    fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
 }
 
 // When the pools do not have CVRS, but just pool vote count totals.
@@ -59,7 +61,7 @@ class CardPoolWithBallotStyle(
 {
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
-    var adjustCards = 0
+    var adjustCards = 0 // TODO simply relationship with undervotes
 
     // a convenient place to keep this, used in addOAClcaAssortersFromCvrs()
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
@@ -131,11 +133,22 @@ class CardPoolWithBallotStyle(
         return ncards() * info.voteForN - sum
     }
 
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val poolUndervotes = undervoteForContest(contestId)
+        val votesForContest = voteTotals[contestId]!!
+        return VotesAndUndervotes(votesForContest, poolUndervotes, infos[contestId]!!.voteForN)
+    }
+
     override fun toBallotPools(): List<BallotPool> {
         return voteTotals.map { (contestId, candCount) ->
             BallotPool(poolName, poolId, contestId, ncards(), candCount)
         }
     }
+
+    override fun toString(): String {
+        return "CardPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
+    }
+
 
     companion object {
         fun showVotes(contestIds: List<Int>, cardPools: List<CardPoolWithBallotStyle>, width:Int = 4) {
@@ -189,6 +202,11 @@ open class CardPoolFromCvrs(
             }
         }
         return bpools
+    }
+
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val contestTab = contestTabs[contestId]!!
+        return contestTab.votesAndUndervotes() // good reason for carsPool to always have contestTabs?
     }
 
     // every cvr has to have every contest in the pool

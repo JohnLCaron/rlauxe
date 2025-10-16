@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.cli
 
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -116,7 +114,7 @@ class TestRunCli {
         val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
         println(results)
 
-        //topPath.deleteRecursively()
+        topPath.deleteRecursively()
         if (results.fail()) fail()
         if (resultsvc.fail()) fail()
     }
@@ -127,7 +125,7 @@ class TestRunCli {
         val topdir = topPath.toString()
         // val topdir = "/home/stormy/rla/persist/testRlaOA"
 
-        RunRlaStartOneAudit.main(
+        RunRlaCreateOneAudit.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",

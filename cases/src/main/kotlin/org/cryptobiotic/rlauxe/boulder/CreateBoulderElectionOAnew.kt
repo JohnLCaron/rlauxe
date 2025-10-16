@@ -7,24 +7,15 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.ElectionIF
+import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.collections.get
 import kotlin.collections.map
 import kotlin.collections.set
-import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
@@ -35,7 +26,7 @@ open class BoulderElectionOAnew(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val quiet: Boolean = true,
-): ElectionIF {
+): CreateElectionIF {
     val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -179,9 +170,11 @@ open class BoulderElectionOAnew(
         return regContests
     }
 
-    override fun makeCvrs() = this.cvrs
+    // TODO phantoms etc
+    override fun allCvrs() = this.cvrs
     override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
     override fun hasCvrExport() = false
+    override fun testMvrs() = null
 }
 
 ////////////////////////////////////////////////////////////////////

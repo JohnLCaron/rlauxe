@@ -233,7 +233,7 @@ fun createBoulderElectionOA(
     logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools=ballotPools, show = false)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), cardPools=election.cardPools, show = false)
     checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
 
     // write contests

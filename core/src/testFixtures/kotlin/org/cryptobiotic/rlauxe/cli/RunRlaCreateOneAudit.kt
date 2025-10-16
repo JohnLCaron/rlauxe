@@ -6,34 +6,23 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
-import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
-import org.cryptobiotic.rlauxe.oneaudit.toCardPools
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.Path
-import kotlin.math.min
 
-object RunRlaStartOneAudit {
+object RunRlaCreateOneAudit {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val parser = ArgParser("RunRlaStartOneAudit")
+        val parser = ArgParser("RunRlaCreateOneAudit")
         val inputDir by parser.option(
             ArgType.String,
             shortName = "in",
@@ -77,7 +66,7 @@ object RunRlaStartOneAudit {
 
         parser.parse(args)
         println(
-            "RunRlaStartOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
+            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
                     " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates"
         )
         startTestElectionOneAudit(
@@ -102,7 +91,6 @@ object RunRlaStartOneAudit {
         addRaire: Boolean,
         addRaireCandidates: Int,
     ) {
-        println("Start TestElectionOneAudit")
         val auditDir = "$topdir/audit"
         clearDirectory(Path(auditDir))
 
@@ -136,11 +124,12 @@ object RunRlaStartOneAudit {
         ncontests: Int,
         addRaire: Boolean,
         addRaireCandidates: Int,
-    ): ElectionIF {
-        val workflow: OneAudit
+    ): CreateElectionIF {
+        // val workflow: OneAudit
         val contestsUA = mutableListOf<OAContestUnderAudit>()
         val allCardPools = mutableListOf<CardPoolIF>()
-        var allCvrs: List<Cvr>
+        val allCvrs: List<Cvr>
+        val testMvrs: List<Cvr>
 
         init {
             // fun makeOneContestUA(
@@ -150,20 +139,19 @@ object RunRlaStartOneAudit {
             //    undervoteFraction: Double,
             //    phantomFraction: Double,
             //): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
-            val (contestOA, ballotPools, testCvrs) = makeOneContestUA(
+            val (contestOA, cardPools, testCvrs) = makeOneContestUA(
                 margin = minMargin,
                 Nc = ncards,
                 cvrFraction = .95,
                 undervoteFraction = .01,
                 phantomFraction = pctPhantoms ?: 0.0
             )
+
             // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-            println("ncvrs = ${testCvrs.size}")
-            allCvrs = testCvrs
+            // includes the pools votes
 
             contestsUA.add(contestOA)
             val infos = mapOf(contestOA.contest.info().id to contestOA.contest.info())
-            val cardPools = ballotPools.toCardPools(infos)
             allCardPools.addAll(cardPools)
 
             /*
@@ -179,48 +167,60 @@ object RunRlaStartOneAudit {
                 allCvrs = testCvrs + rcvrs
             } */
 
+            val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+            allCvrs = testCvrs + phantoms
+
+            val cvrTabs = tabulateCvrs(allCvrs.iterator(), infos)
+            println("allCvrs = ${cvrTabs}")
+
             val allContests = contestsUA.map { it.contest }
+            println("contests")
             allContests.forEach { println("  $it") }
             println()
 
-            // TODO are these randomized?
-            val testMvrs = if (fuzzMvrs == 0.0) testCvrs
+            testMvrs = if (fuzzMvrs == 0.0) allCvrs
                 // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-                else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
+                else makeFuzzedCvrsFrom(allContests, allCvrs, fuzzMvrs)
             println("nmvrs = ${testMvrs.size} fuzzed at ${fuzzMvrs}")
+
+            val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
+            println("testMvrs = ${mvrTabs}")
+            println()
 
             // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
             // save the sorted cards
 
-            val mvrManager = MvrManagerOneAuditForTesting(testCvrs, testMvrs, auditConfig.seed)
-            // writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile())
-            // println("   write ${mvrManager.sortedCards.size} sortedCards to ${publisher.cardsCsvFile()}")
+            /* val publisher = Publisher(auditDir)
+            //val mvrManager = MvrManagerOneAuditForTesting(allCvrs, testMvrs, auditConfig.seed)
+            //writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile())
+            //println("   write ${mvrManager.sortedCards.size} sortedCards to ${publisher.cardsCsvFile()}")
 
             // save the sorted testMvrs
-            val mvrFile = "$auditDir/private/testMvrs.csv"
-            validateOutputDirOfFile(mvrFile)
-            writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
-            println("   write ${mvrManager.sortedCards.size} testMvrs to ${mvrFile}")
+            //val mvrFile = "$auditDir/private/testMvrs.csv"
+            //validateOutputDirOfFile(mvrFile)
+            //writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
+            //println("   write ${mvrManager.sortedCards.size} testMvrs to ${mvrFile}")
 
             workflow = OneAudit(auditConfig, contestsUA, mvrManager=mvrManager)
             //writeContestsJsonFile(workflow.contestsUA(), publisher.contestsFile())
             //println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
             // get the first round of samples wanted, write them to round1 subdir
-            val publisher = Publisher(auditDir)
             val auditRound = runChooseSamples(workflow, publisher)
             writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
+            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}") */
         }
-
         override fun makeCardPools() = allCardPools
 
         override fun makeContestsUA(hasStyles: Boolean) = contestsUA
 
-        override fun makeCvrs() = allCvrs
+        override fun allCvrs() = allCvrs
 
         override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
 
         override fun hasCvrExport() = false
+
+        override fun testMvrs() = testMvrs
+
     }
 }

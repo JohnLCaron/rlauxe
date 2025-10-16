@@ -38,6 +38,12 @@ fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 
+fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int, winner: Int, loser: Int): Double {
+    val winnerVotes = useVotes[winner] ?: 0
+    val loserVotes = useVotes[loser] ?: 0
+    return if (Nc == 0) 0.0 else (winnerVotes - loserVotes) / Nc.toDouble()
+}
+
 fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
@@ -52,7 +58,6 @@ fun Double.sigfig(minSigfigs: Int = 4): String {
     val df = "%.${minSigfigs}G".format(this)
     return if (df.startsWith("0.")) df.substring(1) else df
 }
-
 
 fun MutableMap<Int, Int>.mergeReduce(others: List<Map<Int, Int>>) =
     others.forEach { other -> other.forEach { merge(it.key, it.value) { a, b -> a + b } } }

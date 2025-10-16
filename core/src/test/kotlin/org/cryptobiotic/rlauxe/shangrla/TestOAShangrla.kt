@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.util.calcReportedMargin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -79,7 +80,8 @@ class TestOAShangrla {
 
         val pool = pools[0]
         println("pool=${pool}")
-        val poolMargin = pool.calcReportedMargin(0, 1)
+        val vunder = pool.votesAndUndervotes(contestUA.id)
+        val poolMargin = calcReportedMargin(vunder.candVotesSorted, pool.ncards(), 0,1)
         assertEquals(margin, poolMargin, .001)
 
         // for pooled assort from pool with avg Ā(g)

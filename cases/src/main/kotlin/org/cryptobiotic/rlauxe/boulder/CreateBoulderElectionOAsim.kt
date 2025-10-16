@@ -189,7 +189,7 @@ fun createBoulderElectionOAsim(
 
 
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools = null)
+    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), cardPools = null)
     checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
 
     writeContestsJsonFile(contestsUA, publisher.contestsFile())

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.BallotPool
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -75,13 +75,13 @@ fun checkWinners(contestUA: ContestUnderAudit, ) {
 
 // TODO use VerifyContests instead. problem here is whether the ballot pools have to be added or not.
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>,
-                          ballotPools: List<BallotPool>?, show: Boolean = false) = buildString {
+                          cardPools: List<CardPoolIF>?, show: Boolean = false) = buildString {
 
     val infos = contestsUA.associate { it.id to it.contest.info() }
     val allVotes = mutableMapOf<Int, ContestTabulation>()
     allVotes.sumContestTabulations(tabulateCvrs(cvrs, infos))
-    if (ballotPools != null)
-        allVotes.sumContestTabulations(tabulateBallotPools(ballotPools.iterator(), infos))
+    if (cardPools != null)
+        allVotes.sumContestTabulations(tabulateCardPools(cardPools.iterator(), infos))
 
     if (show) {
         appendLine("tabulateCvrs")

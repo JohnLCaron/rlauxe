@@ -10,7 +10,7 @@ fun makeOneContestUA(
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
+): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
     val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
@@ -27,7 +27,7 @@ fun makeOneContestUA(
     undervoteFraction: Double,
     phantomFraction: Double,
     contestId: Int = 0,
-): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
+): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
     require(cvrFraction > 0.0)
 
     // the candidates
@@ -71,16 +71,14 @@ fun makeOneContestUA(
     val poolUnderVotes = roundToClosest(undervotes - cvrUndervotes)
 
     val poolNcards = votesPoolSum + poolUnderVotes
-    val pools = listOf(
-        // data class BallotPool(val name: String, val id: Int, val contest:Int, val ncards: Int, val votes: Map<Int, Int>) {
-        BallotPool(
+    val pool = CardPoolWithBallotStyle(
             "noCvr",
             1, // poolId
-            contestId, // contestId
-            ncards = poolNcards,
-            votes = votesNoCvr,
+            voteTotals = mapOf(contestId to votesNoCvr),
+            infos = mapOf(contestId to info),
         )
-    )
+    pool.adjustCards = poolUnderVotes
+    val pools = listOf(pool)
 
     val expectNc = noCvrSize + cvrSize + Np
     if (expectNc != Nc) {
@@ -92,7 +90,7 @@ fun makeOneContestUA(
         println("fail2")
     }
 
-    val expectNc3 = pools.sumOf { it.ncards } + cvrNc + Np
+    val expectNc3 = pools.sumOf { it.ncards() } + cvrNc + Np
     if (expectNc3 != Nc) {
         println("fail3")
     }
@@ -112,7 +110,7 @@ fun makeTestMvrs(
     cvrNcards: Int,
     cvrVotes:Map<Int, Int>,
     cvrUndervotes: Int,
-    pools: List<BallotPool>): List<Cvr> {
+    pools: List<CardPoolIF>): List<Cvr> {
 
     val oaContest = oaContestUA.contest
     val cvrs = mutableListOf<Cvr>()
@@ -127,9 +125,11 @@ fun makeTestMvrs(
 
     // add the pooled cvrs
     pools.forEach { pool ->
-        val vunderPool = pool.votesAndUndervotes(info.voteForN)
-        val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.name, poolId = pool.poolId)
-        cvrs.addAll(poolCvrs)
+        pool.contests().forEach { contestId ->
+            val vunderPool = pool.votesAndUndervotes(contestId)
+            val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
+            cvrs.addAll(poolCvrs)
+        }
     }
 
     // add phantoms
@@ -140,7 +140,7 @@ fun makeTestMvrs(
     if (oaContest.Nc() != cvrs.size) {
         println("oaContest.Nc() != cvrs.size")
     }
-    // require(oaContest.Nc() == cvrs.size) TODO
+    require(oaContest.Nc() == cvrs.size)
     cvrs.shuffle()
     return cvrs
 }

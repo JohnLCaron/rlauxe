@@ -151,7 +151,7 @@ class TestSfElectionOA {
         val rlauxAudit = PersistentAudit(auditDir, true)
         val contestRounds = rlauxAudit.contestsUA().map { ContestRound(it, 1) }
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir)))
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir).cardsCsvFile()))
         val cvrPairs = mvrManager.makeCvrPairsForRound() // TODO use iterator, not List
         val runner = OneAuditAssertionAuditor()
 

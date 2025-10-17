@@ -35,7 +35,7 @@ object RunVerifyContests {
         val stopwatch = Stopwatch()
 
         val results = runVerifyContests(inputDir, contestId, show)
-        println("that took $stopwatch")
+        println("RunVerifyContests took $stopwatch")
         println(results)
     }
 

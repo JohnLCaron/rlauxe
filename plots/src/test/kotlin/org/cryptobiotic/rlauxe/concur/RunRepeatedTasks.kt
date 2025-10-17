@@ -57,7 +57,7 @@ class RunRepeatedTasks {
             // wait for all calculations to be done
             joinAll(*calcJobs.toTypedArray())
         }
-        println("that took ${stopwatch.tookPer(tasks.size, "task")}")
+        println("RunRepeatedTasks took ${stopwatch.tookPer(tasks.size, "task")}")
         return calculations
     }
 

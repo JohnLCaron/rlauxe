@@ -72,15 +72,6 @@ class TestVerifyUseCases {
     }
 
     @Test
-    fun testRunVerifyBoulder24oa() {
-        val auditdir = "/home/stormy/rla/cases/boulder24oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
-        println()
-        print(results)
-        if (results.fail()) fail()
-    }
-
-    @Test
     fun testRunVerifyBoulder24oanew() {
         val auditdir = "/home/stormy/rla/cases/boulder24oanew/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
@@ -90,7 +81,7 @@ class TestVerifyUseCases {
     }
 
     @Test
-    fun testRunVerifyBoulderClcaNew() {
+    fun testRunVerifyBoulderClcanew() {
         val auditdir = "/home/stormy/rla/cases/boulder24clcanew/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()

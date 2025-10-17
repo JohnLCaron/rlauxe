@@ -114,7 +114,7 @@ class TestSfElectionOAnoStyles {
         val rlauxAudit = PersistentAudit(auditDir, true)
         val contestRounds = rlauxAudit.contestsUA().map { ContestRound(it, 1) }
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir)))
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir).cardsCsvFile()))
         val cvrPairs = mvrManager.makeCvrPairsForRound() // TODO use iterator, not List
         val runner = OneAuditAssertionAuditor()
 
@@ -148,7 +148,7 @@ class TestSfElectionOAnoStyles {
         val minAssertion = contest18.minClcaAssertion()!!
         val assertionRound = AssertionRound(minAssertion, 1, null)
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir)))
+        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir).cardsCsvFile()))
         val sampler =
             ClcaNoErrorIterator(
                 contest18.id,

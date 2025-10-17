@@ -98,7 +98,7 @@ class TestBoulderUndervotes {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
-        val election2 = BoulderElectionOAnew(export, sovo)
+        val election2 = BoulderElectionOAnew(export, sovo, isClca=false)
         println()
         election2.oaContests.forEach { (id, oa) ->
             println(BoulderContestVotes.header)
@@ -118,7 +118,7 @@ class TestBoulderUndervotes {
 
         println("votes, undervotes")
 
-        val election2 = BoulderElectionOAnew(export, sovo)
+        val election2 = BoulderElectionOAnew(export, sovo, isClca=false)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPools)
     }
@@ -159,7 +159,7 @@ class TestBoulderUndervotes {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = BoulderElectionOAnew(export, sovo)
+        val election2 = BoulderElectionOAnew(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -228,7 +228,7 @@ class TestBoulderUndervotes {
         )
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election2 = BoulderElectionOAnew(export, sovo)
+        val election2 = BoulderElectionOAnew(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -302,7 +302,7 @@ class TestBoulderUndervotes {
         )
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election2 = BoulderElectionOAnew(export, sovo)
+        val election2 = BoulderElectionOAnew(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 

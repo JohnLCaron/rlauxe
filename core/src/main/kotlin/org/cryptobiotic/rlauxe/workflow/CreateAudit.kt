@@ -43,7 +43,6 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
 
     val auditDir = auditdir ?: "$topdir/audit"
     val stopwatch = Stopwatch()
-    val isOA : Boolean
 
     init {
         if (clear) clearDirectory(Path(auditDir))
@@ -51,9 +50,8 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
         val publisher = Publisher(auditDir)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
         logger.info{"writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $auditConfig"}
-        isOA = auditConfig.auditType == AuditType.ONEAUDIT
 
-        val cardPools = if (isOA) {
+        val cardPools = if (auditConfig.isOA) {
             val pools = election.makeCardPools()
             writeCardPoolsJsonFile(pools, publisher.cardPoolsFile())
             logger.info { "write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
@@ -62,14 +60,15 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
         val poolNameToId = if (cardPools == null) null else cardPools.associate { it.poolName to it.poolId }
 
         val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
-        if (isOA) {
+        if (auditConfig.isOA) {
             addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, cardPools!!)
         } else {
             contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
         }
 
         if (!election.hasCvrExport()) {
-            val sortedCards = createSortedCardsAllCvrs(election.allCvrs(), auditConfig.seed)
+            val allCvrs = election.allCvrs()
+            val sortedCards = createSortedCardsAllCvrs(allCvrs, auditConfig.seed)
             writeAuditableCardCsvFile(sortedCards, publisher.cardsCsvFile())
             createZipFile(publisher.cardsCsvFile(), delete = false)
             logger.info{"write ${sortedCards.size} cvrs to ${publisher.cardsCsvFile()}"}
@@ -77,6 +76,9 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
             // save the sorted testMvrs if they exist
             val testMvrs = election.testMvrs()
             if (testMvrs != null) {
+                if (testMvrs.size != sortedCards.size)
+                    println("why")
+
                 val mvrCards = sortedCards.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }
                 val mvrFile = publisher.testMvrsFile()
                 validateOutputDirOfFile(mvrFile)
@@ -106,7 +108,6 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
         // write contests
         writeContestsJsonFile(contestsUA, publisher.contestsFile())
         logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
-        logger.info{"took = $stopwatch\n"}
     }
 }
 
@@ -138,8 +139,8 @@ fun createSortedCardsFromPools(cvrs: List<Cvr>, seed: Long, pools: List<CardPool
     return cards.sortedBy { it.prn }
 }
 
-// The cvrs dont have votes associated with them
-fun createCvrsFromPools(pools: List<CardPoolWithBallotStyle>) : List<Cvr> {
+// The pooled cvrs dont have votes associated with them
+fun createCvrsFromPools(pools: List<CardPoolIF>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
 
     pools.forEach { pool ->
@@ -155,7 +156,8 @@ fun createCvrsFromPools(pools: List<CardPoolWithBallotStyle>) : List<Cvr> {
             )
         }
     }
-
+    val totalRedactedBallots = pools.sumOf { it.ncards() }
+    require(cvrs.size == totalRedactedBallots)
     return cvrs
 }
 

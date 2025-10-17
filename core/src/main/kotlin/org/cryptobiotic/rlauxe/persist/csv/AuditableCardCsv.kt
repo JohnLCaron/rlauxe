@@ -97,13 +97,13 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     return AuditableCard(desc, index, sampleNum, phantom, contests, votes, poolId)
 }
 
-class AuditableCardCsvReader(publisher: Publisher): CloseableIterable<AuditableCard> {
-    val filename: String = if (Files.exists(Path(publisher.cardsCsvZipFile()))) publisher.cardsCsvZipFile()
-      else if (Files.exists(Path(publisher.cardsCsvFile()))) publisher.cardsCsvFile()
-      else throw RuntimeException("CardsCsvFile does not exist in directory ${publisher.auditDir}")
+class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {
+    val useFilename: String = if (Files.exists(Path("$filename.zip"))) "$filename.zip"
+    else if (Files.exists(Path(filename))) filename
+    else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
     override fun iterator(): CloseableIterator<AuditableCard> {
-        return readCardsCsvIterator(filename)
+        return readCardsCsvIterator(useFilename)
     }
 }
 
@@ -129,7 +129,11 @@ fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
 }
 
 fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {
-    return if (filename.endsWith("zip")) {
+    val useFilename: String = if (Files.exists(Path("$filename.zip"))) "$filename.zip"
+    else if (Files.exists(Path(filename))) filename
+    else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
+
+    return if (useFilename.endsWith("zip")) {
         val reader = ZipReader(filename)
         val input = reader.inputStream()
         IteratorCardsCsvStream(input)

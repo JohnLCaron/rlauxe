@@ -49,7 +49,7 @@ class TestMakeRaireContest {
             showIrvCount(counter.rcontest, irvCount)
         }
 
-        println("that took $stopwatch")
+        println("showIrvCounts took $stopwatch")
     }
 }
 

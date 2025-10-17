@@ -8,53 +8,54 @@ All audits require a ballot manifest that has a complete list of physical ballot
 Rlauxe represents this as a list of _AuditableCards_, or _cards_ for short. Each card has a location which allows the
 auditor to locate the physical ballot. The ordered list of cards is committed to (publically recorded) before the random seed is
 chosen. After the random seed is selected, the PRG (pseudo random generator) assigns a prn (pseudo random number) to each card in canonical order.
-Rlauxe sorts the cards by prn and stores them in sortedCrds.csv. 
+Rlauxe sorts the cards by prn and stores them in _sortedCrds.csv_. 
 
-In Rlauxe, at a minimum, each card has a location, its index in the canonical order, and its prn. Optionally it may contain the list 
+In Rlauxe, at a minimum each card has a location, an index in the canonical order, and a prn. Optionally it may contain the list 
 of contests that are on the CVR, and optionally it may contain the list of candidate votes for each contest on the CVR. If the list of contests
-is complete, we may do an "audit with styles". If the card contains the votes, this constitutes the CVR, and we may do a CLCA audit.
+is complete, we may do an "audit with style". If the card contains the candidate votes, this constitutes the CVR, and we may do a CLCA audit.
 
 A real election requires human auditors to manually retrieve physical ballots and create MVRs (manual vote records). 
 This is done in rounds; the number of ballots needed is estimated based on the contests' reported margins. 
-At each round, the MVRS are typically entered into a spreadsheet, and the results are exported to a csv (comma separated value) file,
+At each round, the MVRS are typically entered into a spreadsheet, and the results are exported
 and copied into the Audit Record for processing.
 
 For testing, we simulate the MVRs and place them into auditDir/private/testMvrs.csv. For a real audit, we might still use simulated
 MVRs for estimating sample sizes, but obviously we would only use real MVRs for the actual audit.
 
-Each audit type has specialized processing:
+Each audit type has specialized processing for creating the AuditableCards and the test Mvrs:
 
-1. CLCA audit: we have the full set of CVRs. We can optionally fuzz the CVRS to simulate a desired error rate, and use those fuzzed CVRS
-   as the test MVRs.
+1. **CLCA audit**: we have the full set of CVRs which we use to generate the AuditableCards. 
+   We can optionally fuzz the CVRS to simulate a desired error rate, and use those fuzzed CVRS as the test MVRs.
 
-2. OneAudit CardPools: we have some CVRs and some card pools. For each card pool, we create simulated CVRs that exactly match the card pool 
-   vote count, ncards and undervotes. We combine the two types of CVRS (with option fuzzing), to use as the test MVRs.
+2. **OneAudit Pools**: we have some CVRs and some pooled data. For each pool, we create simulated CVRs that exactly match the pool 
+   vote count, ncards and undervotes. We combine the two types of CVRS (with optional fuzzing), to use as the test MVRs.
 
-   * **CardPoolWithBallotStyle**: Each card pool has a given Ballot Style, meaning that each card in the pool has the same 
-     list of contests on the ballot. The card has complete contest list but no votes. This allows us to run a OneAudit with styles=true. 
-     This is currently the situation for Boulder County (see below).
+   * **CardPoolWithBallotStyle**: Each pool has a given Ballot Style, meaning that each card in the pool has the same 
+     list of contests on the ballot. The AuditableCard then has a complete contest list but no votes. This allows us to run a OneAudit with styles=true. 
+     This is currently the situation for Boulder County (see below). IRV contests cannot be audited unless VoteConsolidations
+     are given for each pool, along with the vote counts.
 
    * **CardPoolFromCvrs**: Each card pool has a complete set of CVRs which can be matched to the physical ballots. For privacy reasons,
      the actual vote on each card cannot be published. The card has a complete contest list but the votes are redacted. 
      This allows us to run a OneAudit with styles=true. We can use the pooled CVRs for the test MVRs, since these are not published.
 
-3. OneAudit unmatched CVRs: Each card pool has a complete set of CVRs, but the CVRS in the pools cannot be matched to the
-   physical ballots. The physical ballots are kept in an ordered "pile".  The card location is the name of the pool and the
-   index into the pile. This is currently the situation for SanFrancisco County (see below), where each precinct generates CVRs but does not 
-   associate them with the physical ballot. We can use OneAudit rather than Polling, which is better if the number of unmatched
+3. **OneAudit unmatched CVRs**: Each card pool has a complete set of CVRs, but the CVRS in the pools cannot be matched to the
+   physical ballots. The physical ballots are kept in some kind of ordered "pile".  The card location is the name of the pool and the
+   index into the pile (or equivilent). This is currently the situation for SanFrancisco County (see below), where each precinct generates CVRs but does not 
+   associate them with the physical ballot. We can use OneAudit rather than Polling, which performs better when the number of unmatched
    cards is not too high.
 
-   * **CardPoolNoBallotStyle**: The cards in each pool may have different BallotStyles. For each pool, scan the CVRs for that pool
-     and form the union of the contests. This union is the psuedo ballot style for the pool, and is added to the list of contests on the card. 
+   * **CardPoolNoBallotStyle**: The cards in each pool may have different Ballot Style. For each pool, scan the CVRs for that pool
+     and form the union of the contests. This union is the psuedo ballot style for the pool, and is added to the list of contests on the AuditableCard. 
      Scan the CVRS again and for each contest,
      count the number of cards that do not have that contest. Add that count to the contest maximum number of cards (Nc) and 
      adjust the margin accordingly. This allows us to run a OneAudit with styles=true, with the adjusted margins.
-     We can use the pooled CVRs as the test MVRs
+     We can use the pooled CVRs as the test MVRs.
 
-   * **CardPoolWithBallotStyle**: If the cards in each pool all have the same BallotStyles, the above algorithm reduces to running
+   * **CardPoolWithBallotStyle**: If the cards in each pool all have the same Ballot Style, the above algorithm reduces to running
      OneAudit with styles=true, where the margin adjustment is zero.
    
-4. Polling audit: we create simulated CVRs that exactly match the reported vote count, ncards and undervotes to use as the test MVRs.
+4. **Polling audit**: we create simulated CVRs that exactly match the reported vote count, ncards and undervotes to use as the test MVRs.
 
 
 ## AuditRecord

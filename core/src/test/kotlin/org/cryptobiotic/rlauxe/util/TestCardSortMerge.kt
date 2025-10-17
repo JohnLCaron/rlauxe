@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrExportFile
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
@@ -13,7 +13,6 @@ import kotlin.test.assertEquals
 class TestCardSortMerge {
     val tempDir = createTempDirectory()
     val cvrExportFile = "src/test/data/cvrExport.csv"
-    val cvrExportTree = "src/test/data/cvrexport"
 
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
@@ -30,7 +29,8 @@ class TestCardSortMerge {
             seed = Random.Default.nextLong(),
             poolNameToId = null,
             maxChunk = 100,
-            ).run(cvrExportFile)
+            showPoolVotes = true,
+            ).run(cvrExportCsvIterator(cvrExportFile), emptyList())
 
         val cardIter = readCardsCsvIterator(outputFile)
         var count = 0
@@ -47,33 +47,13 @@ class TestCardSortMerge {
             seed = Random.Default.nextLong(),
             poolNameToId = null,
             maxChunk = 100,
-        ).run("${cvrExportFile}.zip")
+            showPoolVotes = false,
+            ).run(cvrExportCsvIterator("${cvrExportFile}.zip"), emptyList())
 
         val cardIter = readCardsCsvIterator(outputFile)
         var count = 0
         cardIter.forEach { count++ }
         assertEquals(1377, count)
-    }
-
-    @Test
-    fun testSortMergeRun2() {
-        val outputFile = "$tempDir/testSortMergeRun2/testSortMergeRun2.csv"
-        val cvrIter = TreeReaderIterator(cvrExportTree,
-            fileFilter = { it.toString().endsWith(".csv") },
-            reader = {  path -> IteratorCvrExportFile(path.toString()) },
-        )
-        SortMerge(
-            "$tempDir/testSortMergeRun2",
-            outputFile = outputFile,
-            seed = Random.Default.nextLong(),
-            poolNameToId = null,
-            maxChunk = 100,
-        ).run2(cvrIter, emptyList())
-
-        val cardIter = readCardsCsvIterator(outputFile)
-        var count = 0
-        cardIter.forEach { count++ }
-        assertEquals(4252, count)
     }
 
 }

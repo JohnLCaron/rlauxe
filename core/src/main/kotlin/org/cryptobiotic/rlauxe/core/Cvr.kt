@@ -88,7 +88,7 @@ data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArra
     }
 
     fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
-        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ] // TODO not general
         return Cvr(id, votes, phantom, poolId)
     }
 

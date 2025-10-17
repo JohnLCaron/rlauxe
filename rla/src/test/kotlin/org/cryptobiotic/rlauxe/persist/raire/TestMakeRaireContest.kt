@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.IrvCount
@@ -34,7 +34,7 @@ class TestMakeRaireContest {
         }
 
         val cvrCsv = "$topDir/cvrExport.csv"
-        val cvrIter = CvrExportAdapter(cvrExportCsvIterator(cvrCsv))
+        val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv))
         var count = 0
         while (cvrIter.hasNext()) {
             irvCounters.forEach { it.addCvr(cvrIter.next())}

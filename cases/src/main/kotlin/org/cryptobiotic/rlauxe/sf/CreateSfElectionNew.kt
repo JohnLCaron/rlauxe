@@ -2,14 +2,21 @@ package org.cryptobiotic.rlauxe.sf
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.csv.*
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
 import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
 import kotlin.Boolean
@@ -25,7 +32,7 @@ class CreateSfElection(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-    val isClca: Boolean
+    val isClca: Boolean,
 ): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
@@ -39,7 +46,7 @@ class CreateSfElection(
         val infos = contestInfos.associateBy { it.id }
 
         // pass 1 through cvrs, make card pools, including unpooled
-        val (cardPoolMap: Map<Int, CardPoolFromCvrs>, contestTabSums) = createCardPools(
+        val (cardPoolMap: List<CardPoolFromCvrs>, contestTabSums) = createCardPools(
             infos,
             castVoteRecordZip,
             contestManifestFilename,
@@ -47,10 +54,10 @@ class CreateSfElection(
         )
 
         // write ballot pools, but not unpooled
-        cardPoolsNotUnpooled = cardPoolMap.values.filter { it.poolName != unpooled }
+        cardPoolsNotUnpooled = cardPoolMap.filter { it.poolName != unpooled }
 
         // make contests based on cardPool tabulations
-        val unpooledPool = cardPoolMap.values.find { it.poolName == unpooled }!!
+        val unpooledPool = cardPoolMap.find { it.poolName == unpooled }!!
         contestsOA = makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
     }
 
@@ -60,7 +67,7 @@ class CreateSfElection(
         castVoteRecordZip: String,
         contestManifestFilename: String,
         cvrExportCsv: String,
-    ): Pair<Map<Int, CardPoolFromCvrs>, Map<Int, ContestTabulation>> {
+    ): Pair<List<CardPoolFromCvrs>, Map<Int, ContestTabulation>> {
 
         val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
         println("IRV contests = ${contestManifest.irvContests}")
@@ -77,7 +84,7 @@ class CreateSfElection(
                 pool.accumulateVotes(cvrExport.toCvr())
 
                 cvrExport.votes.forEach { (id, cands) ->
-                    val contestTab = contestTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!! ) }
+                    val contestTab = contestTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!!) }
                     contestTab.addVotes(cands)
                 }
             }
@@ -86,35 +93,61 @@ class CreateSfElection(
         //// because the unpooled is in a pool, the sum of pools are all the votes
         val sortedPools = cardPools.toSortedMap()
         val contestTabSums = mutableMapOf<Int, ContestTabulation>()
-        sortedPools.forEach { (_, pool : CardPoolFromCvrs) ->
-            pool.sum( contestTabSums)
+        sortedPools.forEach { (_, pool: CardPoolFromCvrs) ->
+            pool.addTo(contestTabSums)
         }
 
         val staxContests = StaxReader().read("src/test/data/SF2024/summary.xml")
         println("staxContests")
         contestTabSums.toSortedMap().forEach { (id, contestTab) ->
             val contestName = contestManifest.contests[id]!!.Description
-            val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName}!!
+            val staxContest: StaxReader.StaxContest = staxContests.find { it.id == contestName }!!
             if (staxContest.ncards() != contestTab.ncards) {
-                logger.warn{"staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${contestTab.ncards} "}
+                logger.warn { "staxContest $contestName ($id) has ncards = ${staxContest.ncards()} not equal to cvr summary = ${contestTab.ncards} " }
                 // assertEquals(staxContest.blanks(), contest.blanks)
             }
             println("  $contestName ($id) has stax ncards = ${staxContest.ncards()}, cvr ncards = ${contestTab.ncards}")
         }
 
-        return Pair(cardPools.values.associateBy { it.poolId }, contestTabSums)
+        return Pair(cardPools.values.toList(), contestTabSums)
     }
 
-    override fun makeCardPools() = cardPoolsNotUnpooled
-    override fun makeContestsUA() = contestsOA
+    override fun cardPools() = cardPoolsNotUnpooled
+    override fun contestsUA() = contestsOA
 
-    override fun allCvrs() = emptyList<Cvr>()
+    override fun allCvrs() = null
+    override fun testMvrs() = null
 
-    override fun cvrExport() = cvrExportCsvIterator(cvrExportCsv)
-
-    override fun hasCvrExport() = true
-    override fun testMvrs() = null // TODO
+    override fun cvrExport() = CloseableIterable { cvrExportCsvIterator(cvrExportCsv) }
 }
+
+
+fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, unpooled: CardPoolFromCvrs): List<OAContestUnderAudit> {
+    val contestsUAs = mutableListOf<OAContestUnderAudit>()
+    contestTabSums.map { (contestId, contestSumTab)  ->
+        val info = contestSumTab.info
+        val unpooledTab: ContestTabulation = unpooled.contestTabs[contestId]!!
+
+        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
+        if (useNc > 0) {
+            val contestOA: OAContestUnderAudit = if (!contestSumTab.isIrv) {
+                val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
+                OAContestUnderAudit(contest)
+            } else {
+                val rau : RaireContestUnderAudit = makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
+                OAIrvContestUA(rau.contest as RaireContest,  true, rau.rassertions)
+            }
+            // annotate with the pool %
+            val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards
+            val poolPct = (100 - unpooledPct).toInt()
+            contestOA.contest.info().metadata["PoolPct"] = poolPct
+            contestsUAs.add(contestOA)
+        }
+    }
+    return contestsUAs
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 fun createSfElection(
     topdir: String,
@@ -125,6 +158,7 @@ fun createSfElection(
     auditConfigIn: AuditConfig? = null,
     isClca : Boolean,
 ) {
+    val stopwatch = Stopwatch()
     val auditConfig = when {
         (auditConfigIn != null) -> auditConfigIn
         isClca -> AuditConfig(
@@ -142,8 +176,10 @@ fun createSfElection(
         contestManifestFilename,
         candidateManifestFile,
         cvrExportCsv,
-        isClca = isClca
+        isClca = isClca,
     )
 
     CreateAudit("sf2024", topdir, auditConfig, election)
+    println("createSfElection took $stopwatch")
+
 }

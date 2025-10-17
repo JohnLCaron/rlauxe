@@ -210,17 +210,12 @@ object RunRlaCreateOneAudit {
             writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
             println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}") */
         }
-        override fun makeCardPools() = allCardPools
-
-        override fun makeContestsUA() = contestsUA
+        override fun cardPools() = allCardPools
+        override fun contestsUA() = contestsUA
 
         override fun allCvrs() = allCvrs
-
-        override fun cvrExport() = null
-
-        override fun hasCvrExport() = false
-
         override fun testMvrs() = testMvrs
 
+        override fun cvrExport() = null
     }
 }

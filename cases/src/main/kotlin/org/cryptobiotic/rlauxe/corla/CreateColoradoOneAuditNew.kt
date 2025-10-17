@@ -154,8 +154,8 @@ class ColoradoOneAuditNew (
         return regContests
     }
 
-    override fun makeCardPools() = cardPools
-    override fun makeContestsUA() = contestsUA
+    override fun cardPools() = cardPools
+    override fun contestsUA() = contestsUA
 
         // TODO phantoms etc
     fun makeCvrs(): List<Cvr> {
@@ -190,7 +190,6 @@ class ColoradoOneAuditNew (
     }
 
     override fun cvrExport() = null
-    override fun hasCvrExport() = false
 }
 
 class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDetailContest, val contestRound: ContestRoundCsv): OneAuditContestIF {

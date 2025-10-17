@@ -103,7 +103,7 @@ fun CvrExport.toCsv() = buildString {
     appendLine()
 }
 
-class CvrExportAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
+class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
     override fun hasNext() = cvrExportIterator.hasNext()
     override fun next() = cvrExportIterator.next().toCvr(pools=pools)
     override fun close() {

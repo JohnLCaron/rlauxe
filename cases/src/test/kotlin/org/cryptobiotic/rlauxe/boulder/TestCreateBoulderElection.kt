@@ -40,20 +40,21 @@ class TestCreateBoulderElection {
 
     @Test
     fun createBoulder24oanew() {
-        createBoulderElectionOAnew(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = "/home/stormy/rla/cases/boulder24oanew",
-            clear = true,
+            isClca = false,
         )
     }
 
     @Test
     fun createBoulder24clcanew() { // simulate CVRs
-        createBoulderElectionClcaNew(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = "/home/stormy/rla/cases/boulder24clcanew",
+            isClca = true,
         )
     }
 
@@ -89,11 +90,12 @@ class TestCreateBoulderElection {
         repeat(10) { run ->
             val auditDir = "$topdir/audit$run"
 
-            createBoulderElectionOAnew(
+            createBoulderElection(
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 topdir = topdir,
                 auditDir = auditDir,
+                isClca = false,
             )
         }
         runBoulderOArepeat()

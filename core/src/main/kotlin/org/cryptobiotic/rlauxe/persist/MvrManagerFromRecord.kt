@@ -20,14 +20,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
 
     init {
         val publisher = Publisher(auditDir)
-        cardFile = if (Files.exists(Path.of(publisher.cardsCsvZipFile()))) {
-            publisher.cardsCsvZipFile()
-        } else if (Files.exists(Path.of(publisher.cardsCsvFile()))) {
-            publisher.cardsCsvFile()
-        } else {
-            logger.error{ "No cvr file found in $auditDir" }
-            throw IllegalArgumentException("No cvr file found in $auditDir")
-        }
+        cardFile = publisher.cardsCsvFile()
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???

@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
+import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
@@ -28,6 +29,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val contests: List<ContestUnderAudit>
     val infos: Map<Int, ContestInfo>
     val cards: CloseableIterable<AuditableCard>
+    val mvrs: CloseableIterable<AuditableCard>?
     val cardPools: List<CardPoolIF>?
 
     init {
@@ -40,39 +42,34 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
 
         infos = contests.associate { it.id to it.contest.info() }
-        cards = AuditableCardCsvReader(publisher)
+        cards = AuditableCardCsvReader(publisher.cardsCsvFile())
+        mvrs = if (existsOrZip(publisher.testMvrsFile())) AuditableCardCsvReader(publisher.testMvrsFile()) else null
 
-        cardPools = if (auditConfig.isOA) readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
-                    else null
+        cardPools = if (auditConfig.isOA) readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap() else null
     }
 
-    fun verify(): VerifyResults {
+    fun verify() = verify(contests)
+    fun verifyContest(contest: ContestUnderAudit) = verify(listOf(contest))
+
+    fun verify(contests: List<ContestUnderAudit>): VerifyResults {
         val result = VerifyResults()
         result.messes.add("RunVerifyContests on $auditRecordLocation ")
 
-        val contestSummary = verifyCards(auditConfig, contests, cards, cardPools, infos, result, show = show)
-        // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contests, contestSummary))
-        if (contestSummary != null && (auditConfig.isClca || contestSummary.poolsAgree)) {
+        verifyCardCounts(auditConfig, contests, cards, infos, result, show = show)
+        if (auditConfig.isClca) {
+            verifyCardsWithPools(auditConfig, contests, cards, cardPools, infos, result, show = show)
             verifyAssortAvg(contests, cards.iterator(), result, show = show)
         } else {
-            result.messes.add("  Cant run verifyAssortAvg because cvrPools dont contain votes")
+            result.messes.add("  Cant run verifyCardsWithPools and verifyAssortAvg because cvrPools dont contain votes")
         }
-        return result
-    }
 
-    fun verifyContest(contest: ContestUnderAudit): VerifyResults {
-        val result = VerifyResults()
-        result.messes.add("RunVerifyContests on $auditRecordLocation ")
-        result.messes.add(contest.toString())
-
-        val contest1 = listOf(contest)
-        val contestSummary = verifyCards(auditConfig, contest1, cards, cardPools, infos, result, show = show)
-        // if (ballotPools.isNotEmpty()) appendLine(verifyBallotPools(contest1, contestSummary))
-        if (contestSummary != null && (auditConfig.isClca || contestSummary.poolsAgree)) {
-            verifyAssortAvg(contest1, cards.iterator(), result, show = show)
-        } else {
-            result.messes.add("  Cant run verifyAssortAvg because cvrPools dont contain votes")
+        if (mvrs != null) {
+            result.messes.add("---RunVerifyContests on testMvrs")
+            verifyCardCounts(auditConfig, contests, cards, infos, result, show = show)
+            verifyCardsWithPools(auditConfig, contests, mvrs, cardPools, infos, result, show = show)
+            verifyAssortAvg(contests, mvrs.iterator(), result, show = show)
         }
+
         return result
     }
 }
@@ -103,7 +100,74 @@ data class ContestSummary(
     val poolsAgree: Boolean
 )
 
-fun verifyCards(
+fun verifyCardCounts(
+    auditConfig: AuditConfig,
+    contests: List<ContestUnderAudit>,
+    cards: CloseableIterable<AuditableCard>,
+    infos: Map<Int, ContestInfo>,
+    result: VerifyResults,
+    show: Boolean = false
+) {
+    if (auditConfig.isPolling) {
+        result.messes.add("Cant verifyCards on Polling Audit")
+        return
+    }
+    val allCardVotes = mutableMapOf<Int, ContestTabulation>()
+    val nonpoolCvrVotes = mutableMapOf<Int, ContestTabulation>()
+    val poolCvrVotes = mutableMapOf<Int, ContestTabulation>()
+
+    var count = 0
+    cards.iterator().use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            count++
+            card.contests.forEachIndexed { idx, contestId ->
+                val cands = if (card.votes != null) card.votes[idx] else intArrayOf()
+                val allTab = allCardVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                allTab.addVotes(cands)
+                if (card.poolId == null) {
+                    val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                    nonpoolCvrTab.addVotes(cands)
+                } else {
+                    val poolCvrTab = poolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                    poolCvrTab.addVotes(cands)
+                }
+            }
+        }
+    }
+    result.messes.add("  VerifyCards on $count cards from AuditableCardCsvReader")
+
+    val cardTabs = tabulateAuditableCards(cards.iterator(), infos)
+    result.messes.add("   cardTabs = ${cardTabs}")
+    result.messes.add("allCardVotes = ${allCardVotes}")
+
+    var allOk = true
+    contests.forEach { contestUA ->
+        val contestTab = allCardVotes[contestUA.id]
+        if (contestTab == null) {
+            result.errors.add("  *** contest ${contestUA.id} not found in tabulated Cvrs")
+            allOk = false
+
+        } else {
+            if (contestUA.Nc != contestTab.ncards) {
+                result.errors.add("  *** contest ${contestUA.id} Nc ${contestUA.Nc} disagree with cvrs = ${contestTab.ncards}")
+                allOk = false
+            }
+            if (!contestUA.isIrv) {
+                // cvr phantoms look like undervotes. Cant calculate from BallotPools.
+                val expectedUndervotes = contestUA.Nu + contestUA.Np * contestUA.contest.info().voteForN
+                if ((auditConfig.isClca) && (expectedUndervotes != contestTab.undervotes)) {
+                    result.errors.add("  *** contest ${contestUA.id} expectedUndervotes ${expectedUndervotes} disagree with cvrs = ${contestTab.undervotes}")
+                    allOk = false
+                }
+            }
+        }
+    }
+    if (show && allOk) result.messes.add("  contest.Ncast == contestTab.ncards for all contests\n")
+}
+
+
+fun verifyCardsWithPools(
     auditConfig: AuditConfig,
     contests: List<ContestUnderAudit>,
     cards: CloseableIterable<AuditableCard>,
@@ -119,6 +183,15 @@ fun verifyCards(
     val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
     val nonpoolCvrVotes = mutableMapOf<Int, ContestTabulation>()
     val poolCvrVotes = mutableMapOf<Int, ContestTabulation>()
+
+    /*
+    val poolTab =  tabulateCardPools(cardPools.iterator(), infos)
+    val cvrTab = tabulateCvrs(redactedCvrs.iterator(), infos)
+    println("poolTab = $poolTab")
+    println(" cvrTab = $cvrTab")
+    require ( poolTab == cvrTab)
+
+     */
 
     var count = 0
     cards.iterator().use { cardIter ->
@@ -141,12 +214,6 @@ fun verifyCards(
     }
     result.messes.add("  VerifyCards on $count cards from AuditableCardCsvReader; ${cardPools?.size} cardPools")
 
-    val cardTabs = tabulateAuditableCards(cards.iterator(), infos)
-    println("   cardTabs = ${cardTabs}")
-    println("allCvrVotes = ${allCvrVotes}")
-
-    //println("contest1 nonpoolCvrVotes = ${nonpoolCvrVotes[1]}")
-
     var poolsAgree = false
     val allVotes = if (auditConfig.isClca) {
         allCvrVotes
@@ -162,10 +229,10 @@ fun verifyCards(
             }
         }
         poolsAgree = (poolSums == poolCvrVotes)
-        println("poolsAgree = (poolSums == poolCvrVotes) = $poolsAgree")
+        result.messes.add("poolsAgree = (poolSums == poolCvrVotes) = $poolsAgree")
         if (!poolsAgree) {
-            println("    poolSums = ${poolSums}")
-            println("poolCvrVotes = ${poolCvrVotes}")
+            result.messes.add("    poolSums = ${poolSums}")
+            result.messes.add("poolCvrVotes = ${poolCvrVotes}")
         }
 
         val sumVotes = mutableMapOf<Int, ContestTabulation>()
@@ -173,7 +240,7 @@ fun verifyCards(
         sumVotes.sumContestTabulations(poolSums)
         sumVotes
     }
-    println("(allVotes == allCvrVotes) = ${allVotes == allCvrVotes}")
+    result.messes.add("(allVotes == allCvrVotes) = ${allVotes == allCvrVotes}")
 
     var allOk = true
     contests.forEach { contestUA ->

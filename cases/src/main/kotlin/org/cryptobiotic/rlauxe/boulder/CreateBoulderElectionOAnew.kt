@@ -7,10 +7,12 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
 import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
+import org.cryptobiotic.rlauxe.workflow.createCvrsFromPools
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -20,23 +22,27 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
 
-// Use OneAudit, redacted ballots are in pools.
+// Use OneAudit; redacted ballots are in pools.
 // No redacted CVRs. Cant do IRV.
 // specific to 2025 election. TODO: generalize
 open class BoulderElectionOAnew(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
+    val isClca: Boolean,
+    val hasStyles: Boolean = true,
     val quiet: Boolean = true,
 ): CreateElectionIF {
-    val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
+    val exportCvrs: List<Cvr> = export.cvrs.map { it.convert() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
 
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
     val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
+    val contestsUA : List<ContestUnderAudit>
 
     val cardPools: List<CardPoolWithBallotStyle> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
+    val redactedCvrs: List<Cvr>
 
     init {
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
@@ -46,11 +52,14 @@ open class BoulderElectionOAnew(
         distributeExpectedOvervotes(oaContest0, cardPools)
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
 
-        // contest 0 has fewest undervotes for card Bs
+        // contest 63 has fewest undervotes for card Bs
         val oaContest63 = oaContests[63]!!
         distributeExpectedOvervotes(oaContest63, cardPools)
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
 
+        contestsUA = makeUAContests(hasStyles)
+
+        redactedCvrs = makeRedactedCvrs()
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
     }
@@ -101,6 +110,76 @@ open class BoulderElectionOAnew(
 
             CardPoolWithBallotStyle(cleanCsvString(redacted.ballotType), redactedIdx, useContestVotes.toMap(), infoMap)
         }
+    }
+
+    fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
+        val rcvrs = mutableListOf<Cvr>()
+        cardPools.forEach { cardPool ->
+            rcvrs.addAll(makeRedactedCvrs(cardPool, show))
+        }
+
+        val infos = oaContests.mapValues { it.value.info }
+        val rcvrTabs = tabulateCvrs(rcvrs.iterator(), infos).toSortedMap()
+        rcvrTabs.forEach { contestId, contestTab ->
+            val oaContest: OneAuditContestBoulder = oaContests[contestId]!!
+            val redUndervotes = oaContest.redUndervotes
+            if (show) {
+                println("contestId=${contestId}")
+                println("  redacted= ${oaContest.red.votes}")
+                println("  contestTab=${contestTab.votes.toSortedMap()}")
+                println("  oaContest.undervotes= ${redUndervotes} == contestTab.undervotes = ${contestTab.undervotes}")
+                println()
+            }
+            require(checkEquivilentVotes(oaContest.red.votes, contestTab.votes))
+            // if (voteForN[contestId] == 1) require(redUndervotes == contestTab.undervotes) // TODO
+        }
+
+        return rcvrs
+    }
+
+    // the redacted Cvrs simulate the real CVRS that are in the pools, for testing and estimation
+    // for a real OneAudit, only the pool averages are used. CLCA can only be used for testing, not for a real audit.
+    private fun makeRedactedCvrs(cardPool: CardPoolWithBallotStyle, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
+
+        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        cardPool.voteTotals.forEach { (contestId, candVotes) ->
+            val oaContest: OneAuditContestBoulder = oaContests[contestId]!!
+            val sumVotes = candVotes.map { it.value }.sum()
+            val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
+            contestVotes[contestId] = VotesAndUndervotes(candVotes, underVotes, oaContest.info.voteForN)
+        }
+
+        val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = cardPool.poolId) // TODO test
+        if (cardPool.ncards() != cvrs.size)
+            logger.error{"cardPool.ncards ${cardPool.ncards()} cvrsize = ${cvrs.size}"}
+
+        // check
+        val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+        contestVotes.forEach { (contestId, vunders) ->
+            val tv = tabVotes[contestId] ?: emptyMap()
+            if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+                println("  contestId=${contestId}")
+                println("  tabVotes=${tv}")
+                println("  vunders= ${vunders.candVotesSorted}")
+                require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+            }
+        }
+
+        val infos = oaContests.mapValues { it.value.info }
+        val cvrTab = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
+        cvrTab.forEach { contestId, contestTab ->
+            val oaContest: OneAuditContestBoulder = oaContests[contestId]!!
+            if (show) {
+                println("contestId=${contestId} group=${cardPool.poolName}")
+                println("  redacted= ${contestTab.votes[contestId]}")
+                println("  oaContest.undervotes= ${oaContest.redVotes} == ${contestTab.undervotes}")
+                println("  contestTab=$contestTab")
+                println()
+            }
+            require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!, contestTab.votes))
+        }
+
+        return cvrs
     }
 
     fun makeOAContests(): List<OneAuditContestBoulder> {
@@ -159,7 +238,7 @@ open class BoulderElectionOAnew(
 
     override fun makeCardPools() = cardPools
 
-    override fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit> {
+    fun makeUAContests(hasStyles: Boolean): List<ContestUnderAudit> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
         val regContests = infoList.filter { !it.isIrv }.map { info ->
@@ -169,22 +248,37 @@ open class BoulderElectionOAnew(
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            OAContestUnderAudit(contest, hasStyles)
+            if (isClca) ContestUnderAudit(contest, hasStyles) else OAContestUnderAudit(contest, hasStyles)
         }
 
         return regContests
     }
 
-    // TODO phantoms etc
-    override fun allCvrs() = this.cvrs
+    override fun makeContestsUA(hasStyles: Boolean) = contestsUA
+
+    override fun allCvrs(): List<Cvr> {
+        val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
+
+        if (redactedCvrs.size != poolCvrs.size)
+            println("why")
+        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+        println("allCvrs ${this.exportCvrs.size} + ${poolCvrs.size} + ${phantoms.size}")
+        return this.exportCvrs + poolCvrs + phantoms
+    }
+
     override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
     override fun hasCvrExport() = false
-    override fun testMvrs() = null
+
+    override fun testMvrs(): List<Cvr> {
+        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+        println("testMvrs ${this.exportCvrs.size} + ${redactedCvrs.size} + ${phantoms.size}")
+        return this.exportCvrs + redactedCvrs + phantoms
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
 // Create a OneAudit where pools are from the redacted cvrs, use pool vote totals for assort average
-fun createBoulderElectionOAnew(
+fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
     topdir: String,
@@ -192,19 +286,34 @@ fun createBoulderElectionOAnew(
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
+    isClca: Boolean,
     clear: Boolean = true)
 {
+    val stopwatch = Stopwatch()
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val election = BoulderElectionOAnew(export, sovo)
+    val auditConfig = if (auditConfigIn != null) auditConfigIn
+        else if (isClca)
+            AuditConfig(
+                AuditType.CLCA,
+                hasStyles = true,
+                riskLimit = riskLimit,
+                sampleLimit = 20000,
+                minRecountMargin = minRecountMargin,
+                nsimEst = 10,
+                clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
+            )
+        else AuditConfig(
+            AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+        )
 
-    val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
-        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
-    )
+    val election = BoulderElectionOAnew(export, sovo, isClca = isClca)
+
     CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
+    println("createBoulderElectionOAnew took $stopwatch")
 }
 
 fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {

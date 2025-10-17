@@ -19,8 +19,7 @@ import kotlin.collections.forEach
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOA")
 
-// use the contestManifest and candidateManifest to create the contestInfo, both regular and IRV.
-// Use "CvrExport" CSV file to tally the votes and create the assertions.
+// Compare CLCA, OneAudit with styles, and OneAudit without styles on the SanFrancisco 2024 General Election.
 class CreateSfElectionOAnew(
     castVoteRecordZip: String,
     contestManifestFilename: String,

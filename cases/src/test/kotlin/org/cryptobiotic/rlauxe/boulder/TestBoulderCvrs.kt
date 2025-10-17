@@ -38,7 +38,7 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = BoulderElectionOAnew(export, sovo)
+        val maker = BoulderElectionOAnew(export, sovo, isClca=true)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -91,7 +91,7 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val electionSimCvrs = BoulderElectionClcaNew(export, sovo)
+        val electionSimCvrs = BoulderElectionOAnew(export, sovo, isClca = true)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

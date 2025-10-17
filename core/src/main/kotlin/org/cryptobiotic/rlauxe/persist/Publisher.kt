@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("Publisher")
 
@@ -30,7 +31,6 @@ class Publisher(val auditDir: String) {
     fun auditConfigFile() = "$auditDir/auditConfig.json"
     fun contestsFile() = "$auditDir/contests.json"
     fun cardsCsvFile() = "$auditDir/sortedCards.csv"
-    fun cardsCsvZipFile() = "$auditDir/sortedCards.csv.zip"
     fun ballotPoolsFile() = "$auditDir/ballotPools.csv"
     fun cardPoolsFile() = "$auditDir/cardPools.json"
     fun testMvrsFile() = "$auditDir/private/testMvrs.csv"
@@ -98,4 +98,8 @@ fun validateOutputDir(dirPath: Path, errs: ErrorMessages? = null): ErrorMessages
 fun validateOutputDirOfFile(filename: String) {
     val parentDir = Path.of(filename).parent
     validateOutputDir(parentDir, ErrorMessages("validateOutputDirOfFile"))
+}
+
+fun existsOrZip(filename: String) : Boolean {
+    return (Files.exists(Path("$filename.zip"))) || (Files.exists(Path(filename)))
 }

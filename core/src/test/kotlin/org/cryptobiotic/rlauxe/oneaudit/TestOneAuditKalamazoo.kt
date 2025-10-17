@@ -8,8 +8,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
-import org.cryptobiotic.rlauxe.verifier.verifyBAssortAvg
-import org.cryptobiotic.rlauxe.verifier.verifyCards
 import kotlin.Int
 import kotlin.test.Test
 

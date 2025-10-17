@@ -78,5 +78,5 @@ fun runComparisonWorkflowR(workflow: ClcaAudit, sortedMvrs: CloseableIterator<Au
         workflow.showResults(rounds.last().sampledIndices.size)
     } */
 
-    println("that took ${stopwatch.tookPer(nassertions, "Assertions")}")
+    println("runComparisonWorkflowR took ${stopwatch.tookPer(nassertions, "Assertions")}")
 }

@@ -17,9 +17,9 @@ class TestBoulderElectionOneAudit {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
-        val election = BoulderElectionClcaNew(export, sovo)
+        val election = BoulderElectionOAnew(export, sovo, isClca=true)
         val infos = election.oaContests.mapValues { it.value.info }
-        val allTab = tabulateCvrs(election.allCvrs.iterator(), infos).toSortedMap()
+        val allTab = tabulateCvrs(election.allCvrs().iterator(), infos).toSortedMap()
 
         election.oaContests.forEach { (contestId, oaContest) ->
             oaContest.checkCvrs(allTab[contestId]!!)

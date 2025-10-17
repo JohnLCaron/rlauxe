@@ -33,11 +33,11 @@ Each audit type has specialized processing for creating the AuditableCards and t
    * **CardPoolWithBallotStyle**: Each pool has a given Ballot Style, meaning that each card in the pool has the same 
      list of contests on the ballot. The AuditableCard then has a complete contest list but no votes. This allows us to run a OneAudit with styles=true. 
      This is currently the situation for Boulder County (see below). IRV contests cannot be audited unless VoteConsolidations
-     are given for each pool, along with the vote counts.
+     are given. 
 
    * **CardPoolFromCvrs**: Each card pool has a complete set of CVRs which can be matched to the physical ballots. For privacy reasons,
      the actual vote on each card cannot be published. The card has a complete contest list but the votes are redacted. 
-     This allows us to run a OneAudit with styles=true. We can use the pooled CVRs for the test MVRs, since these are not published.
+     This allows us to run a OneAudit with styles=true. We can use the CVRs for the test MVRs, since these are not published.
 
 3. **OneAudit unmatched CVRs**: Each card pool has a complete set of CVRs, but the CVRS in the pools cannot be matched to the
    physical ballots. The physical ballots are kept in some kind of ordered "pile".  The card location is the name of the pool and the
@@ -259,14 +259,12 @@ _createBoulderElection_: BoulderStatementOfVotes, 2024-Boulder-County-General-Re
 * The StatementOfVotes gives us enough information to calculate Nc.
 * We estimate the undervotes and pool counts as explained below, and adjust the contest Nc to be consistest with the ballot manifest.
 
-**createBoulderElectionOA** assumes that each pool has a single CardStyle, allowing us to use style based sampling. This also 
-constrains the way that undervotes are added to the pools. In this case we need to know the number of cards in each batch. We dont,
-so we approximate it, and adjust Nc. (see _TestBoulderUndervotes.kt_ and _OneAuditContest.kt_ for details).
+**createBoulderElection(isClca = false)** create a OneAudit by assuming that each pool has a single CardStyle, which allows us to 
+use style based sampling. This constrains the way that undervotes are added to the pools. We need to know the number of cards in each batch. We dont,
+so we approximate it, and adjust Nc. 
 
-**createBoulderElectionOAsim** extends createBoulderElectionOA.
-We create simulated cvrs by making random choices until the cvr sums equal the given batch totals, including undervotes.
-This allows us to characterize the pool variances. With the parameter **clca** set to true, we create a CLCA audit with those
-simulated CVRS, in order to compare OneAudit to CLCA for this use case.
+**createBoulderElection(isClca = true)** creates a CLCA by simulating cvrs in each pool and adding to the regular cvrs.
+This allows us to characterize the pool variances.
 
 Its not possible to run an IRV audit with redacted CVRs. There are lines called "RCV Redacted & Randomly Sorted", but they dont make much sense so far. To do IRV with OneAudit you need to create VoteConsolidator for each pool from the real cvrs.
 
